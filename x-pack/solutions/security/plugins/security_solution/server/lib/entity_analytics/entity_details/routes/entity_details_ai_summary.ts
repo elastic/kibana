@@ -103,8 +103,23 @@ export const entityDetailsAiSummaryRoute = ({
           });
 
           // Write via the internal ES client so the user's own metadata index write
-          // privilege is not required. Generation is fully backend-produced; the user
-          // cannot supply arbitrary content through this route.
+          // privilege is not required (access-control point from the design thread: a user
+          // who can trigger generation should be able to persist, regardless of their
+          // metadata-index write privilege). The summary is model-generated via the
+          // assistant inference call and relayed here through the client; `generated_by` is
+          // derived server-side (not trusted from the body) and item counts are capped
+          // below. Reaching this route already requires the entity-analytics feature
+          // privilege + Enterprise license.
+          //
+          // TODO(follow-up): move generation fully server-side so the content never
+          // round-trips through the client. Today the LLM call runs client-side
+          // (`inference.output` in the flyout hook) — an inherited pattern from the original
+          // Entity Highlights feature (PR #236222 / #245532), not this feature. It stayed
+          // client-side because it reuses the assistant's anonymization/replacements context,
+          // which lives on the client; relocating that de-anonymization flow to the server is
+          // the bulk of the work (server-side inference is otherwise the norm across Security
+          // AI — Attack Discovery, Defend Insights, SIEM migrations). Doing so would let us
+          // drop the client-supplied `highlights`/`recommendedActions` body entirely.
           const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
           const metadataClient = entityStore.createEntityMetadataClient(internalEsClient, spaceId);
 
