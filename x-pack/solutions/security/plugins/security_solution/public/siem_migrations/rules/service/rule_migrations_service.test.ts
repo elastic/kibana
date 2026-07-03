@@ -246,7 +246,9 @@ describe('SiemRulesMigrationsService', () => {
     });
 
     it('should delete the migration when QRadar rule upload fails', async () => {
-      const rules = { xml: ['<rule>...</rule>'] } as unknown as CreateQRadarRuleMigrationRulesRequestBody;
+      const rules = {
+        xml: ['<rule>...</rule>'],
+      } as unknown as CreateQRadarRuleMigrationRulesRequestBody;
       const uploadError = new Error('Invalid QRadar rule data');
       mockCreateRuleMigration.mockResolvedValueOnce({ migration_id: 'mig-1' });
       mockAddRulesToQRadarMigration.mockRejectedValueOnce(uploadError);
