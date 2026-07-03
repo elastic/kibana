@@ -7,8 +7,6 @@
 
 import React from 'react';
 import {
-  EuiAccordion,
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -19,163 +17,12 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { InvestigationHypothesis, InvestigationState } from '@kbn/significant-events-schema';
-import type { InvestigationOutputProps, InvestigationStatus } from './types';
-
-type Header =
-  | { spinner: true; title: string }
-  | { spinner: false; icon: string; color: 'success' | 'danger' | 'warning'; title: string };
-
-const getRunningHeadline = (state: InvestigationState | undefined): string => {
-  const hypotheses = state?.hypotheses ?? [];
-  if (hypotheses.length === 0) {
-    return i18n.translate('xpack.investigationOutput.gatheringEvidenceTitle', {
-      defaultMessage: 'Gathering evidence',
-    });
-  }
-  const hasInvestigating = hypotheses.some((h) => h.status === 'investigating');
-  if (hasInvestigating) {
-    return i18n.translate('xpack.investigationOutput.evaluatingHypothesesTitle', {
-      defaultMessage: 'Evaluating {count} {count, plural, one {hypothesis} other {hypotheses}}',
-      values: { count: hypotheses.length },
-    });
-  }
-  return i18n.translate('xpack.investigationOutput.concludingTitle', {
-    defaultMessage: 'Concluding',
-  });
-};
-
-const getHeader = (status: InvestigationStatus, state?: InvestigationState): Header => {
-  switch (status) {
-    case 'running':
-      return { spinner: true, title: getRunningHeadline(state) };
-    case 'loading':
-      return {
-        spinner: true,
-        title: i18n.translate('xpack.investigationOutput.loadingResultTitle', {
-          defaultMessage: 'Loading investigation result…',
-        }),
-      };
-    case 'failed':
-      return {
-        spinner: false,
-        icon: 'errorFilled',
-        color: 'danger',
-        title: i18n.translate('xpack.investigationOutput.failedStatusTitle', {
-          defaultMessage: 'Investigation failed',
-        }),
-      };
-    case 'unavailable':
-      return {
-        spinner: false,
-        icon: 'warning',
-        color: 'warning',
-        title: i18n.translate('xpack.investigationOutput.unavailableStatusTitle', {
-          defaultMessage: 'Investigation result unavailable',
-        }),
-      };
-    case 'complete':
-      return {
-        spinner: false,
-        icon: 'checkInCircleFilled',
-        color: 'success',
-        title: i18n.translate('xpack.investigationOutput.successStatusTitle', {
-          defaultMessage: 'Investigation complete',
-        }),
-      };
-  }
-};
-
-/** Builds the markdown shown for the final result: the agent's own `conclusion` markdown
- * (already containing its own `## Conclusion` / `## Next Steps` sections), followed by a
- * `## Gaps Found` section when the agent reported any. */
-const buildFinalResultsMarkdown = (state: InvestigationState): string | undefined => {
-  const sections: string[] = [];
-
-  if (state.conclusion) {
-    sections.push(state.conclusion);
-  }
-
-  if (state.gaps_found && state.gaps_found.length > 0) {
-    const gapsTitle = i18n.translate('xpack.investigationOutput.gapsFoundTitle', {
-      defaultMessage: 'Gaps found',
-    });
-    sections.push([`## ${gapsTitle}`, ...state.gaps_found.map((gap) => `- ${gap}`)].join('\n'));
-  }
-
-  return sections.length > 0 ? sections.join('\n\n') : undefined;
-};
-
-const HYPOTHESIS_STATUS_ICON: Record<InvestigationHypothesis['status'], string> = {
-  investigating: 'clock',
-  dismissed: 'dashedCircle',
-  confirmed: 'checkCircle',
-};
-
-const HypothesisRow: React.FC<{ hypothesis: InvestigationHypothesis }> = ({ hypothesis }) => {
-  const { candidate, confidence, status, reason } = hypothesis;
-  const accordionId = useGeneratedHtmlId({ prefix: 'investigationHypothesis' });
-
-  return (
-    <EuiAccordion
-      id={accordionId}
-      data-test-subj="investigationOutputHypothesis"
-      paddingSize="s"
-      buttonContent={
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            {status === 'investigating' ? (
-              <EuiLoadingSpinner size="s" />
-            ) : (
-              <EuiIcon
-                type={HYPOTHESIS_STATUS_ICON[status]}
-                color="text"
-                data-test-subj={`investigationOutputHypothesisStatus-${status}`}
-                aria-hidden={true}
-              />
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <EuiText size="xs" color="text">
-              <strong>
-                {i18n.translate('xpack.investigationOutput.hypothesis', {
-                  defaultMessage: 'Hypothesis:',
-                })}
-              </strong>{' '}
-              <span>{candidate}</span>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-      extraAction={
-        <EuiBadge
-          color={status === 'confirmed' ? 'success' : 'hollow'}
-          data-test-subj="investigationOutputConfidenceBadge"
-        >
-          <FormattedMessage
-            id="xpack.investigationOutput.hypothesisConfidenceBadgeLabel"
-            defaultMessage="{confidence, number, percent}"
-            values={{ confidence }}
-          />
-        </EuiBadge>
-      }
-    >
-      <EuiText size="xs" color="subdued">
-        <p>
-          {reason ??
-            i18n.translate('xpack.investigationOutput.noReasonRecordedDescription', {
-              defaultMessage: 'No reasoning recorded yet.',
-            })}
-        </p>
-      </EuiText>
-    </EuiAccordion>
-  );
-};
+import type { InvestigationOutputProps } from './types';
+import { HypothesisRow } from './hypothesis_row';
+import { buildHeader, buildFinalResultsMarkdown } from './utils';
 
 /**
  * Renders the summary and output of an investigation (a root-cause-analysis run by an AI
@@ -191,7 +38,7 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
 }) => {
   const hypotheses = state?.hypotheses ?? [];
   const finalResultsMarkdown = state ? buildFinalResultsMarkdown(state) : undefined;
-  const header = getHeader(status, state);
+  const header = buildHeader(status, state);
   const { euiTheme } = useEuiTheme();
 
   return (
