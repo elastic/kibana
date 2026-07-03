@@ -18,6 +18,7 @@ import {
   IP_ADDRESS_MAX_LENGTH,
   IPS_MAX_SIZE,
   LABEL_MAX_LENGTH,
+  SUB_TYPE_MAX_LENGTH,
   TIMESTAMP_STRING_MAX_LENGTH,
 } from '../graph/v1';
 
@@ -30,7 +31,7 @@ export const entityItemSchema = schema.object({
   timestamp: schema.maybe(schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH })),
   name: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
   type: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
-  subType: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
+  subType: schema.maybe(schema.string({ maxLength: SUB_TYPE_MAX_LENGTH })),
   ecsParentField: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
   // Risk score is not currently populated but will be in a future iteration
   risk: schema.maybe(schema.number()),

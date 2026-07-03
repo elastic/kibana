@@ -98,9 +98,18 @@ export const INDEX_NAME_MAX_LENGTH = 255;
 // schemas (`ISO_TIMESTAMP_MAX_LENGTH`).
 export const TIMESTAMP_STRING_MAX_LENGTH = 64;
 
-// Enum-like display strings (entity type, sub_type, icon name) whose longest
-// member is well under 64 characters; 64 gives generous headroom.
+// Enum-like display strings (entity type, icon name, ECS field name) drawn from
+// a fixed, code-defined set whose longest member is well under 64 characters;
+// 64 gives generous headroom.
 export const ENUM_LIKE_MAX_LENGTH = 64;
+
+// Entity sub_type is populated from entity-store ES data and, unlike `type`, is
+// not restricted to a code-defined set: generic/third-party entities carry
+// vendor-defined values (e.g. multi-level cloud resource types such as
+// `Microsoft.Network/networkManagers/connectivityConfigurations`) that can
+// exceed 64 characters. 256 comfortably fits the longest known resource types
+// without rejecting legitimate server output.
+export const SUB_TYPE_MAX_LENGTH = 256;
 
 // Free-text display strings (entity name, rule name, label, tag). Generous
 // ceiling that comfortably fits all realistic values.
@@ -216,7 +225,7 @@ export const DOCUMENT_TYPE_ENTITY = 'entity' as const;
 export const entitySchema = schema.object({
   name: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
   type: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
-  sub_type: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
+  sub_type: schema.maybe(schema.string({ maxLength: SUB_TYPE_MAX_LENGTH })),
   engine_type: schema.maybe(
     schema.oneOf([
       schema.literal('host'),
