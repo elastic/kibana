@@ -47,9 +47,9 @@ export const buildGuardedToolContent = ({
     const preview = truncateTokens(stringified, maxTokens);
     const message = isExcludedFromFilestore(toolId)
       ? `Output too large (~${totalTokens} tokens) and has been truncated for this response; the full result is not recoverable via the virtual filesystem for this tool.\nPreview (first ${maxTokens} tokens):\n${preview}`
-      : `Output too large (~${totalTokens} tokens). Full output saved to: ${getToolCallEntryAbsolutePath(
+      : `Output too large (~${totalTokens} tokens). The full, untruncated result was saved to the virtual filesystem under ${getToolCallEntryAbsolutePath(
           getToolCallDirPath({ toolId, toolCallId })
-        )}\nPreview (first ${maxTokens} tokens):\n${preview}`;
+        )} — use the \`list_files\` tool on that directory and \`read_file\` on the result file(s) to recover it.\nPreview (first ${maxTokens} tokens):\n${preview}`;
 
     return JSON.stringify({ results: [createOtherResult({ content: message })] });
   } catch {

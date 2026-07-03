@@ -51,7 +51,9 @@ describe('buildGuardedToolContent', () => {
     );
     expect(message).toContain('Output too large');
     expect(message).toContain('tokens');
-    expect(message).toContain(`Full output saved to: ${expectedPath}`);
+    expect(message).toContain(expectedPath);
+    expect(message).toContain('`list_files`');
+    expect(message).toContain('`read_file`');
     expect(message).toContain('Preview (first 100 tokens):');
   });
 
@@ -111,7 +113,8 @@ describe('buildGuardedToolContent', () => {
     const parsed = JSON.parse(content) as { results: ToolResult[] };
     const message = (parsed.results[0].data as { content: string }).content;
     expect(message).toContain('not recoverable via the virtual filesystem');
-    expect(message).not.toContain('Full output saved to');
+    expect(message).not.toContain('list_files');
+    expect(message).not.toContain('read_file');
   });
 
   it('preview text is capped at maxTokens tokens worth of the stringified results', () => {
