@@ -200,6 +200,10 @@ export const SEVERITY_LOW = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.severityLow',
   { defaultMessage: 'Low' }
 );
+export const SEVERITY_WARNING = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.severityWarning',
+  { defaultMessage: 'Warning' }
+);
 export const SEVERITY_INFO = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.severityInfo',
   { defaultMessage: 'Info' }

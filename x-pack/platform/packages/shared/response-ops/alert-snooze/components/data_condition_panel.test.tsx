@@ -13,6 +13,7 @@ import {
   ALERT_SEVERITY_HIGH,
   ALERT_SEVERITY_MEDIUM,
   ALERT_SEVERITY_LOW,
+  ALERT_SEVERITY_WARNING,
   ALERT_SEVERITY_INFO,
 } from '@kbn/rule-data-utils';
 import { EuiFieldText } from '@elastic/eui';
@@ -315,7 +316,7 @@ describe('DataConditionPanel', () => {
   });
 
   describe('severity_equals dropdown', () => {
-    it('lists only the five primary severity levels in highest → lowest order', () => {
+    it('lists the supported severity levels in highest → lowest order', () => {
       render(
         <DataConditionPanel
           entry={createEntry({ type: DataConditionType.SEVERITY_EQUALS, value: undefined })}
@@ -335,6 +336,7 @@ describe('DataConditionPanel', () => {
         ALERT_SEVERITY_HIGH,
         ALERT_SEVERITY_MEDIUM,
         ALERT_SEVERITY_LOW,
+        ALERT_SEVERITY_WARNING,
         ALERT_SEVERITY_INFO,
       ]);
     });

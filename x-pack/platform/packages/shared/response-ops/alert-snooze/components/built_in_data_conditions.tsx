@@ -12,6 +12,7 @@ import {
   ALERT_SEVERITY_HIGH,
   ALERT_SEVERITY_MEDIUM,
   ALERT_SEVERITY_LOW,
+  ALERT_SEVERITY_WARNING,
   ALERT_SEVERITY_INFO,
 } from '@kbn/rule-data-utils';
 import {
@@ -28,6 +29,7 @@ const SEVERITY_LABELS: Record<AlertSeverityLevel, string> = {
   high: i18n.SEVERITY_HIGH,
   medium: i18n.SEVERITY_MEDIUM,
   low: i18n.SEVERITY_LOW,
+  warning: i18n.SEVERITY_WARNING,
   info: i18n.SEVERITY_INFO,
 };
 
@@ -37,6 +39,7 @@ const SEVERITY_COLORS: Record<AlertSeverityLevel, string> = {
   high: 'warning',
   medium: 'success',
   low: 'primary',
+  warning: 'accent',
   info: 'default',
 };
 
@@ -45,6 +48,7 @@ const SEVERITY_DROPDOWN_VALUES: readonly AlertSeverityLevel[] = [
   ALERT_SEVERITY_HIGH,
   ALERT_SEVERITY_MEDIUM,
   ALERT_SEVERITY_LOW,
+  ALERT_SEVERITY_WARNING,
   ALERT_SEVERITY_INFO,
 ];
 const SEVERITY_OPTIONS = SEVERITY_DROPDOWN_VALUES.map((value) => ({
