@@ -164,8 +164,8 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ## Outcome comment
 
-In **every** run, finish by posting exactly one concise comment (1–2 sentences, no preamble, no sign-off) on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output. Lead with `@${{ env.REQUESTED_BY }}` (see "Requester mention"), then the outcome. Match the case:
+In **every** run, finish by posting exactly one short comment (one sentence, no preamble, no sign-off) on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output. State the outcome first, then append `cc @${{ env.REQUESTED_BY }}` at the very end (see "Requester mention"). Do **not** open with the handle — `@user Opened a draft…` reads as if the user opened the PR. Match the case:
 
-- **PR opened**: `Opened a draft fix PR (linked to this issue) that <one clause on the change>.` The PR carries `Fixes #${{ env.ISSUE_NUMBER }}`, so don't include a URL.
+- **PR opened**: `Opened a draft fix PR that <one clause on the change>.` The PR carries `Fixes #${{ env.ISSUE_NUMBER }}`, so don't include a URL.
 - **Existing PR already covers it**: `A fix is already in progress in #<number>, so I didn't open a duplicate.`
-- **No PR opened**: `No fix PR: <one-sentence reason>.` — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified from the available evidence.
+- **No PR opened**: `No fix PR: <one-sentence reason>.` — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified.
