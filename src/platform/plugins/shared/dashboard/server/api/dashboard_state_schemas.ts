@@ -280,7 +280,7 @@ export function getDashboardStateSchema(
         schema.boolean({
           meta: {
             description:
-              'When `true`, ES|QL panels use approximate execution for faster, estimated results.',
+              'When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.',
           },
         })
       ),
