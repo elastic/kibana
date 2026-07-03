@@ -10,6 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import {
   sendGetAgentlessPolicy,
   sendGetPackageInfoByKeyForRq,
+  sendGetSettings,
   useGetOnePackagePolicyQuery,
 } from '../../../../hooks';
 import type { PackagePolicy } from '../../../../types';
@@ -36,10 +37,13 @@ export function useCopyPackagePolicyData(
     ['copyAgentlessPolicy', packagePolicyId],
     async () => {
       const { item: agentlessPolicy } = await sendGetAgentlessPolicy(packagePolicyId);
+      // Resolve prerelease from settings
+      const { data: settings } = await sendGetSettings();
+      const prerelease = Boolean(settings?.item.prerelease_integrations_enabled);
       const packageInfo = await sendGetPackageInfoByKeyForRq(
         agentlessPolicy.package.name,
         agentlessPolicy.package.version,
-        { prerelease: true, full: true }
+        { prerelease, full: true }
       );
 
       // `agentlessPolicyToPackagePolicy` already carries the id through; the copy helper strips it
