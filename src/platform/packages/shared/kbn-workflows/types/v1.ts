@@ -27,6 +27,8 @@ export enum ExecutionStatus {
   WAITING_FOR_INPUT = 'waiting_for_input',
   WAITING_FOR_CHILD = 'waiting_for_child',
   RUNNING = 'running',
+  /** Persisted concurrency backlog - does not count toward concurrency max until promoted to pending + scheduled */
+  QUEUED = 'queued',
 
   // Done
   COMPLETED = 'completed',
@@ -47,6 +49,16 @@ export const TerminalExecutionStatuses: readonly ExecutionStatus[] = [
 ] as const;
 
 export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.PENDING,
+  ExecutionStatus.WAITING,
+  ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
+  ExecutionStatus.RUNNING,
+  ExecutionStatus.QUEUED,
+] as const;
+
+/** Workflow executions occupying a concurrency slot (excludes queued backlog). */
+export const ConcurrencySlotOccupyingExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.PENDING,
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,
@@ -121,6 +133,7 @@ export interface EsWorkflowExecution {
   workflowId: string;
   managed?: boolean;
   managedBy?: string | null;
+  billable?: boolean | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
   isTestRun: boolean;
@@ -323,6 +336,7 @@ export const EsWorkflowSchema = z.object({
   enabled: z.boolean(),
   managed: z.boolean().optional(),
   managedBy: z.string().nullable().optional(),
+  billable: z.boolean().nullable().optional(),
   originManagedWorkflowId: z.string().nullable().optional(),
   managedVersion: z.number().nullable().optional(),
   tags: z.array(z.string()),
@@ -488,6 +502,7 @@ export interface WorkflowExecutionEngineModel
     | 'yaml'
     | 'managed'
     | 'managedBy'
+    | 'billable'
     | 'originManagedWorkflowId'
     | 'managedVersion'
     | 'version'
@@ -562,7 +577,7 @@ export type CompletionFn = () => Promise<
   Array<{ label: string; value: string; detail?: string; documentation?: string }>
 >;
 
-export type StepStabilityLevel = 'stable' | 'beta' | 'tech_preview';
+export type StabilityLevel = 'stable' | 'beta' | 'tech_preview';
 
 export interface BaseConnectorContract {
   type: string;
@@ -575,7 +590,7 @@ export interface BaseConnectorContract {
   /** Documentation URL for this API endpoint */
   documentation?: string | null;
   /** API stability level derived from the OpenAPI `x-state` field */
-  stability?: StepStabilityLevel;
+  stability?: StabilityLevel;
   /** Deprecation metadata for this step type. */
   deprecation?: StepDeprecationInfo;
   examples?: ConnectorExamples;
@@ -837,6 +852,7 @@ export interface WorkflowsSearchParams {
   sortField?: WorkflowSortField;
   sortOrder?: 'asc' | 'desc';
   managed?: 'all' | 'managed' | 'unmanaged';
+  visibilityContext?: string[];
 }
 
 export interface RequestOptions {

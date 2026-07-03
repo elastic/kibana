@@ -18,8 +18,8 @@ import type {
 } from '../types';
 import { isAlertConditionStepId } from '../types';
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
-import type { ComposeFormValues } from '../compose_form_types';
-import { getBreachQuery } from '../compose_form_types';
+import type { FormValues } from '../../../form/types';
+import { getBreachQuery } from '../../../form/utils/query_helpers';
 import { getEsqlSummaryState } from './esql_query_summary_section';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
@@ -45,6 +45,7 @@ interface Props {
   isEditing: boolean;
   ruleId?: string;
   builderType?: string;
+  onManualSplit?: () => void;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -59,6 +60,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         dispatch={props.dispatch}
         services={props.services}
         isEditing={props.isEditing}
+        onManualSplit={props.onManualSplit}
       />
     ),
     validate: (methods, s) => {
@@ -177,8 +179,9 @@ export const ComposeDiscoverForm = ({
   isEditing,
   ruleId,
   builderType,
+  onManualSplit,
 }: Props) => {
-  const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
+  const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const { steps, renderCustomRecovery } = useMemo(
     () => getSteps(isAlert, builderType),
     [isAlert, builderType]
@@ -194,6 +197,7 @@ export const ComposeDiscoverForm = ({
     isEditing,
     ruleId,
     renderCustomRecovery,
+    onManualSplit,
   });
 
   if (!isAlertConditionStep) {
@@ -205,7 +209,7 @@ export const ComposeDiscoverForm = ({
       <ModeSelect
         value={isAlert ? 'alert' : 'signal'}
         onChange={onKindChange}
-        disabled={(!builderType && !state.queryCommitted) || isEditing}
+        disabled={(!builderType && !state.queryCommitted) || isEditing || state.childOpen}
         compressed
         data-test-subj="composeDiscoverModeSelect"
       />

@@ -61,7 +61,8 @@ const getBrowserZipInput = (zipUrl?: string) => ({
   ],
 });
 
-apiTest.describe('UptimeIntegrationDeprecation', { tag: '@local-stateful-classic' }, () => {
+// Failing: https://github.com/elastic/kibana/issues/276248
+apiTest.describe.skip('UptimeIntegrationDeprecation', { tag: '@local-stateful-classic' }, () => {
   let adminCredentials: RoleApiCredentials;
   let agentPolicyId: string;
 

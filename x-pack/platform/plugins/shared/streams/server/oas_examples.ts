@@ -15,7 +15,8 @@
  * it immediately without any additional tooling or CI step.
  */
 
-import type { SignificantEventsGetResponse, StreamQuery, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import type { QueryOccurrencesResponse, StreamQuery } from '@kbn/significant-events-schema';
 
 // ---------------------------------------------------------------------------
 // PUT /api/streams/{name}  –  wired stream
@@ -364,11 +365,11 @@ export const listStreamQueriesResponse: { queries: StreamQuery[] } = {
 };
 
 // ---------------------------------------------------------------------------
-// GET /api/streams/{name}/significant_events  –  significant events response
+// GET /api/streams/{name}/significant_events  –  query occurrences response
 // ---------------------------------------------------------------------------
 
-export const getSignificantEventsResponse: SignificantEventsGetResponse = {
-  significant_events: [
+export const getQueryOccurrencesResponse: QueryOccurrencesResponse = {
+  queries: [
     {
       id: 'error-count-by-host',
       title: 'Error count by host',

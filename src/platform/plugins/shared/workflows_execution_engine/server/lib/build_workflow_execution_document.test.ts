@@ -92,4 +92,21 @@ describe('buildWorkflowExecutionDocument', () => {
     });
     expect(workflowExecution.id).toBeDefined();
   });
+
+  it('copies managed workflow billable metadata', () => {
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      workflow: {
+        ...baseWorkflow,
+        managed: true,
+        billable: true,
+      },
+      workflowVersioningEnabled: false,
+    });
+
+    expect(workflowExecution).toMatchObject({
+      managed: true,
+      billable: true,
+    });
+  });
 });

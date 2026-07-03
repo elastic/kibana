@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { EMPTY, delay, mergeMap, of } from 'rxjs';
+import { EMPTY, delay, distinctUntilChanged, mergeMap, of } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle, debounce } from 'lodash';
 
@@ -67,6 +67,7 @@ import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
+import { EsqlApproximationToggle } from './esql_approximation_toggle';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
 import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
@@ -258,6 +259,15 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * the flag is disabled, the legacy picker is always used.
    */
   enableDateRangePicker?: boolean;
+  /**
+   * When provided, renders the ES|QL approximate execution toggle (bolt icon) before the date picker.
+   */
+  esqlApproximation?: {
+    isApproximate: boolean;
+    onChange: (isApproximate: boolean) => void;
+    additionalText?: string;
+    disabled?: boolean;
+  };
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -388,11 +398,25 @@ export const QueryBarTopRow = React.memo(
       http,
       dataViews,
       application,
+      featureFlags,
     } = kibana.services;
 
+    const isDateRangePickerFeatureFlagEnabled$ = useMemo(
+      () =>
+        enableDateRangePicker && featureFlags
+          ? featureFlags
+              .getBooleanValue$(DATE_RANGE_PICKER_FEATURE_FLAG, true)
+              .pipe(distinctUntilChanged())
+          : of(true),
+      [enableDateRangePicker, featureFlags]
+    );
+    const isDateRangePickerFeatureFlagEnabled = useObservable(
+      isDateRangePickerFeatureFlagEnabled$,
+      true
+    );
+
     const shouldUseLegacyTimePicker =
-      !enableDateRangePicker ||
-      !kibana.services.featureFlags?.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true);
+      !enableDateRangePicker || !isDateRangePickerFeatureFlagEnabled;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
     const shouldRenderESQLUi = Boolean(showQueryInput && isQueryLangSelected);
@@ -1041,6 +1065,14 @@ export const QueryBarTopRow = React.memo(
               {shouldRenderESQLUi ? (
                 <>
                   {shouldRenderUpdateButton() ? button : null}
+                  {props.esqlApproximation && (
+                    <EsqlApproximationToggle
+                      isApproximate={props.esqlApproximation.isApproximate}
+                      onChange={props.esqlApproximation.onChange}
+                      additionalText={props.esqlApproximation.additionalText}
+                      disabled={props.esqlApproximation.disabled}
+                    />
+                  )}
                   {shouldRenderDatePicker() ? renderDatePicker() : null}
                 </>
               ) : (
@@ -1300,6 +1332,14 @@ export const QueryBarTopRow = React.memo(
                 {renderQueryInput()}
                 {props.renderQueryInputAppend?.()}
                 {shouldShowDatePickerAsBadge() && props.filterBar}
+                {props.esqlApproximation && (
+                  <EsqlApproximationToggle
+                    isApproximate={props.esqlApproximation.isApproximate}
+                    onChange={props.esqlApproximation.onChange}
+                    additionalText={props.esqlApproximation.additionalText}
+                    disabled={props.esqlApproximation.disabled}
+                  />
+                )}
                 {renderDatePickerWithUpdateBtn()}
               </EuiFlexGroup>
               {!shouldShowDatePickerAsBadge() && props.filterBar}
