@@ -39,4 +39,27 @@ describe('usePollingAgentCount', () => {
 
     expect(result.current.enrolledAgentIds).toEqual(['agent-1']);
   });
+
+  it('includes an enrolled_at lower bound in the kuery by default', async () => {
+    renderHook(() => usePollingAgentCount('policy-1', { pollImmediately: true }));
+
+    await act(async () => {});
+
+    expect(mockSendGetAgents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kuery: expect.stringContaining('enrolled_at >= now-10m'),
+      })
+    );
+  });
+
+  it('omits the enrolled_at lower bound when noLowerTimeLimit is true', async () => {
+    renderHook(() =>
+      usePollingAgentCount('policy-1', { noLowerTimeLimit: true, pollImmediately: true })
+    );
+
+    await act(async () => {});
+
+    const { kuery } = mockSendGetAgents.mock.calls[0][0];
+    expect(kuery).not.toContain('enrolled_at >=');
+  });
 });
