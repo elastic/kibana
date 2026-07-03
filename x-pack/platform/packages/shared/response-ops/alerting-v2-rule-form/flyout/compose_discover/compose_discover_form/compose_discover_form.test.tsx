@@ -63,7 +63,10 @@ const mockFindByIds = jest.fn(async (ids: string[]) =>
 );
 
 const mockFindDashboardsService = jest.fn(async () => ({
-  search: jest.fn(async () => ({ total: 0, dashboards: [] })),
+  search: jest.fn(async () => ({
+    data: [],
+    meta: { page: 1, per_page: 100, total: 0 },
+  })),
   findById: jest.fn(),
   findByIds: mockFindByIds,
   findByTitle: jest.fn(),
@@ -422,9 +425,15 @@ describe('shell shared fields', () => {
     expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
   });
 
-  it('enables ModeSelect in create mode when query is committed', () => {
-    renderShell({ step: 0, queryCommitted: true });
+  it('enables ModeSelect in create mode when query is committed and sandbox is closed', () => {
+    renderShell({ step: 0, queryCommitted: true, childOpen: false });
 
     expect(screen.getByTestId('composeDiscoverModeSelect')).not.toBeDisabled();
+  });
+
+  it('disables ModeSelect when sandbox is open', () => {
+    renderShell({ step: 0, queryCommitted: true, childOpen: true });
+
+    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
   });
 });
