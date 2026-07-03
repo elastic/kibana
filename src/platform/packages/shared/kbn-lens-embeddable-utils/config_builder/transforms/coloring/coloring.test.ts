@@ -189,8 +189,6 @@ describe('Color util transforms', () => {
             progression: 'fixed',
             reverse: false,
             rangeType: 'percent',
-            stops: [],
-            colorStops: [],
             continuity: 'above',
             steps: DEFAULT_COLOR_STEPS,
             maxSteps: DEFAULT_COLOR_STEPS,
@@ -272,8 +270,6 @@ describe('Color util transforms', () => {
             progression: 'fixed',
             reverse: false,
             rangeType: 'percent',
-            stops: [],
-            colorStops: [],
             // open above: last step has no upper bound
             continuity: 'above',
             steps: 3,
@@ -328,8 +324,6 @@ describe('Color util transforms', () => {
             progression: 'fixed',
             reverse: false,
             rangeType: 'percent', // default range type for named palettes
-            stops: [],
-            colorStops: [],
             continuity: 'above',
             steps: 4, // the number of bands defined as argument
             maxSteps: DEFAULT_COLOR_STEPS,
