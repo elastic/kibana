@@ -98,12 +98,11 @@ import { useLazyStepExecutionFetcher } from '../lib/execution_context/use_lazy_s
 import { setStabilityBadgeThemeContext } from '../lib/get_stability_note';
 import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_yaml_hover_provider';
 import {
+  BuiltInStepMonacoHandler,
   ElasticsearchMonacoConnectorHandler,
-  FlowControlMonacoStepHandler,
   GenericMonacoConnectorHandler,
   HttpMonacoConnectorStepHandler,
   KibanaMonacoConnectorHandler,
-  WorkflowExecuteMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import { CustomMonacoStepHandler } from '../lib/monaco_connectors/custom_monaco_step_handler';
 import {
@@ -460,11 +459,8 @@ export const WorkflowYAMLEditor = ({
         });
         registerMonacoConnectorHandler(kibanaHandler);
 
-        const workflowExecuteHandler = new WorkflowExecuteMonacoConnectorHandler();
-        registerMonacoConnectorHandler(workflowExecuteHandler);
-
-        const flowControlHandler = new FlowControlMonacoStepHandler();
-        registerMonacoConnectorHandler(flowControlHandler);
+        const builtInStepHandler = new BuiltInStepMonacoHandler();
+        registerMonacoConnectorHandler(builtInStepHandler);
 
         const customHandler = new CustomMonacoStepHandler();
         registerMonacoConnectorHandler(customHandler);

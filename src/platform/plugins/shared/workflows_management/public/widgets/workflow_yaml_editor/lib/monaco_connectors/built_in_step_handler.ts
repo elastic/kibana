@@ -7,20 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/code-editor';
+import type { monaco } from '@kbn/monaco';
 import { getBuiltInStepDefinition, getBuiltInStepStability } from '@kbn/workflows';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
 
-const FLOW_CONTROL_STEP_TYPES = ['wait', 'waitForInput'] as const;
-
-export class FlowControlMonacoStepHandler extends BaseMonacoConnectorHandler {
+/**
+ * Hover handler for every built-in workflow step (wait, waitForInput, workflow.execute,
+ * workflow.executeAsync, workflow.fail, workflow.output, parallel, merge, if, foreach, …).
+ *
+ * Content comes straight from the step definition in `@kbn/workflows` — a single
+ * source of truth shared with the schema, autocomplete, and other consumers.
+ */
+export class BuiltInStepMonacoHandler extends BaseMonacoConnectorHandler {
   constructor() {
-    super('FlowControlMonacoStepHandler', 80, ['wait']);
+    // Priority 80 matches the previous per-family handlers.
+    // canHandle() decides membership, so the prefix list is intentionally empty.
+    super('BuiltInStepMonacoHandler', 80, ['']);
   }
 
   canHandle(connectorType: string): boolean {
-    return (FLOW_CONTROL_STEP_TYPES as readonly string[]).includes(connectorType);
+    return getBuiltInStepDefinition(connectorType) !== undefined;
   }
 
   async generateHoverContent(context: HoverContext): Promise<monaco.IMarkdownString | null> {
@@ -35,25 +42,16 @@ export class FlowControlMonacoStepHandler extends BaseMonacoConnectorHandler {
     }
 
     const example = stepDefinition.documentation?.examples?.[0];
-    const parameterLines =
-      connectorType === 'waitForInput'
-        ? [
-            '- `message` _(optional)_ — Message displayed to the user when waiting for input',
-            '- `schema` _(optional)_ — JSON Schema describing the expected input payload',
-          ]
-        : ['- `duration` _(required)_ — Duration to wait, e.g. `"5s"`, `"1m"`, `"2h"`'];
-
-    const content = this.prependStabilityBadgeToContent(getBuiltInStepStability(connectorType), [
+    const bodyLines = [
       `**Step**: \`${connectorType}\``,
       '',
       `**${stepDefinition.label}** — ${stepDefinition.description}`,
-      '',
-      '**Parameters:**',
-      ...parameterLines,
       ...(example ? ['', '**Example:**', '', '```yaml', example, '```'] : []),
-    ]);
+    ];
 
-    return this.createMarkdownContent(content);
+    return this.createMarkdownContent(
+      this.prependStabilityBadgeToContent(getBuiltInStepStability(connectorType), bodyLines)
+    );
   }
 
   getExamples(connectorType: string): ConnectorExamples | null {

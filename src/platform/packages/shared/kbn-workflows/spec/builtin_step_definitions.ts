@@ -13,6 +13,8 @@ import {
   DataSetStepInputSchema,
   ForEachStepConfigSchema,
   IfStepConfigSchema,
+  MergeStepConfigSchema,
+  ParallelStepConfigSchema,
   SwitchStepConfigSchema,
   WaitForInputStepInputSchema,
   WaitStepInputSchema,
@@ -285,6 +287,100 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     workflow-id: "child_workflow"
     inputs:
       alertId: "{{ workflow.event.id }}"`,
+      ],
+    },
+  },
+  {
+    id: 'workflow.output',
+    label: 'Set Workflow Output',
+    description:
+      'Terminate the workflow and return the given values as its output. Runs no further steps',
+    category: StepCategory.FlowControl,
+    inputSchema: z.record(z.string(), z.any()),
+    outputSchema: EmptyObjectSchema,
+    documentation: {
+      examples: [
+        `- name: return_result
+  type: workflow.output
+  with:
+    status: "ok"
+    payload: "{{ steps.previous.output }}"`,
+      ],
+    },
+  },
+  {
+    id: 'workflow.fail',
+    label: 'Fail Workflow',
+    description:
+      'Terminate the workflow with a failed status and an optional reason. Runs no further steps',
+    category: StepCategory.FlowControl,
+    inputSchema: z
+      .object({
+        message: z.string().optional(),
+        reason: z.string().optional(),
+      })
+      .optional(),
+    outputSchema: EmptyObjectSchema,
+    documentation: {
+      examples: [
+        `- name: fail_on_bad_status
+  type: workflow.fail
+  if: "steps.check.output.status != 'ok'"
+  with:
+    reason: "Upstream check reported a non-ok status"`,
+      ],
+    },
+  },
+  {
+    id: 'parallel',
+    label: 'Parallel',
+    description:
+      'Run multiple named branches of steps concurrently. Results become available once every branch completes',
+    category: StepCategory.FlowControl,
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    configSchema: ParallelStepConfigSchema,
+    documentation: {
+      examples: [
+        `- name: fan_out
+  type: parallel
+  branches:
+    - name: enrich_user
+      steps:
+        - name: get_user
+          type: http
+          with:
+            url: https://api.example.com/user
+    - name: enrich_host
+      steps:
+        - name: get_host
+          type: http
+          with:
+            url: https://api.example.com/host`,
+      ],
+    },
+  },
+  {
+    id: 'merge',
+    label: 'Merge',
+    description:
+      'Wait for the referenced parallel branches or steps to finish, then run the given steps once with their combined results',
+    category: StepCategory.FlowControl,
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    configSchema: MergeStepConfigSchema,
+    documentation: {
+      examples: [
+        `- name: combine
+  type: merge
+  sources:
+    - enrich_user
+    - enrich_host
+  steps:
+    - name: log_combined
+      type: console
+      with:
+        message: "user={{ steps.get_user.output }} host={{ steps.get_host.output }}"`,
       ],
     },
   },
