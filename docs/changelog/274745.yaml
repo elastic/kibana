@@ -6,5 +6,5 @@ products:
   target: 2026-07-02
 areas:
 - Search and data
-title: Add region policy management for Inference Preferences
-description: "Adds server-side support for managing Elastic Inference Service region policies, enabling geographical restrictions for AI inference requests in Inference Preferences."
+title: Add region policy management for inference preferences
+description: "Adds server-side support for managing Elastic Inference Service region policies, enabling geographical restrictions for AI inference requests in inference preferences."
