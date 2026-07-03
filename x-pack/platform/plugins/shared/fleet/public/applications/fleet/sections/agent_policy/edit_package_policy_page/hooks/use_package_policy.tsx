@@ -73,6 +73,12 @@ async function isPreleaseEnabled() {
   return Boolean(settings?.item.prerelease_integrations_enabled);
 }
 
+// Normalizes an unknown catch value into the `{ error }` shape callers expect. Keeps `statusCode`
+// when the throw already carried it (real API conflicts still hit the 409 branch in `onSubmit`)
+// rather than unsoundly casting to `RequestError` and fabricating that shape for a plain throw.
+const toRequestError = (error: unknown): RequestError =>
+  error instanceof Error ? error : new Error(String(error));
+
 export function usePackagePolicyWithRelatedData(
   packagePolicyId: string,
   options: {
@@ -118,26 +124,26 @@ export function usePackagePolicyWithRelatedData(
 
   const savePackagePolicy = async (packagePolicyOverride?: Partial<PackagePolicy>) => {
     setFormState('LOADING');
-    const {
-      policy: { elasticsearch, ...restPackagePolicy },
-    } = await prepareInputPackagePolicyDataset(
-      omit(
-        {
-          ...packagePolicy,
-          ...(packagePolicyOverride ?? {}),
-        },
-        'spaceIds'
-      )
-    );
+    // Wrap the whole save  so *every* failure resolves to the `{ data, error }` shape `onSubmit` expects.
+    try {
+      const {
+        policy: { elasticsearch, ...restPackagePolicy },
+      } = await prepareInputPackagePolicyDataset(
+        omit(
+          {
+            ...packagePolicy,
+            ...(packagePolicyOverride ?? {}),
+          },
+          'spaceIds'
+        )
+      );
 
-    // Agentless policies are updated through the agentless API (full-replace PUT), never the
-    // package-policy API. `sendUpdateAgentlessPolicy` throws on failure, so normalize the result
-    // into the `{ data, error }` shape the caller (`onSubmit`) expects from the package-policy path.
-    if (isAgentlessPolicy) {
-      const { enableVarGroups } = ExperimentalFeaturesService.get();
-      const varGroups =
-        enableVarGroups && packageInfo?.var_groups ? packageInfo.var_groups : undefined;
-      try {
+      // Agentless policies are updated through the agentless API (full-replace PUT), never the
+      // package-policy API.
+      if (isAgentlessPolicy) {
+        const { enableVarGroups } = ExperimentalFeaturesService.get();
+        const varGroups =
+          enableVarGroups && packageInfo?.var_groups ? packageInfo.var_groups : undefined;
         const { item } = await sendUpdateAgentlessPolicy(
           packagePolicyId,
           // Pass `packageInfo` so the write-side input/stream allow-check matches the read path
@@ -147,19 +153,17 @@ export function usePackagePolicyWithRelatedData(
         );
         setFormState('SUBMITTED');
         return { data: { item }, error: null };
-      } catch (error) {
-        setFormState('SUBMITTED');
-        // `sendRequestForRq` rejects with a `RequestError`; keep the shape aligned with the
-        // package-policy path so callers can read `error.statusCode` (e.g. 409 conflict handling).
-        return { data: undefined, error: error as RequestError };
       }
+
+      const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
+
+      setFormState('SUBMITTED');
+
+      return result;
+    } catch (error) {
+      setFormState('SUBMITTED');
+      return { data: undefined, error: toRequestError(error) };
     }
-
-    const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
-
-    setFormState('SUBMITTED');
-
-    return result;
   };
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(

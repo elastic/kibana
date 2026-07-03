@@ -745,6 +745,28 @@ describe('usePackagePolicy - agentless', () => {
     expect(saveResult).toEqual({ data: undefined, error: requestError });
   });
 
+  it('normalizes a non-RequestError save throw without fabricating a statusCode', async () => {
+    // A mapping/validation failure (e.g. from `toNewAgentlessPolicy`) surfaces as a plain Error
+    // with no `statusCode`. It must still resolve to the `{ data, error }` shape — not reject —
+    // and must not pretend to be a 409 conflict.
+    const mappingError = new Error('bad mapping');
+    jest.mocked(sendUpdateAgentlessPolicy).mockRejectedValue(mappingError);
+
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('agentless-1', { isAgentless: true })
+    );
+    await waitFor(() => expect(result.current.packagePolicy?.name).toBe('agentless-1'));
+
+    let saveResult: any;
+    await act(async () => {
+      saveResult = await result.current.savePackagePolicy();
+    });
+
+    expect(saveResult).toEqual({ data: undefined, error: mappingError });
+    expect((saveResult.error as { statusCode?: number }).statusCode).toBeUndefined();
+  });
+
   it('ignores a superseded agentless response after switching to the legacy mode', async () => {
     // Hold the agentless GET open so it resolves *after* we switch back to the legacy
     // (package-policy) mode. The stale response must not clobber the legacy load.
