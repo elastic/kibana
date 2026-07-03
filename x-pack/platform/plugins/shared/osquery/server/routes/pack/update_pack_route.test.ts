@@ -1771,4 +1771,146 @@ describe('updatePackRoute', () => {
       expect(reused.schedule_id).not.toBe(renamed.schedule_id);
     });
   });
+
+  // A concurrent modification of the Fleet package policy surfaces as a Boom
+  // 409 from packagePolicyService.update. The pack SO write already succeeded,
+  // so the route must map that specific failure to `response.conflict` (retry
+  // guidance) — and rethrow any OTHER failure so it isn't silently downgraded.
+  describe('Fleet package-policy update failure handling', () => {
+    // Reuses the enable-flip + policy_ids-omitted harness (the branch that
+    // calls packagePolicyService.update), varying only the update rejection.
+    const setupWithPackagePolicyUpdate = (packagePolicyUpdate: jest.Mock) => {
+      const currentSO = {
+        ...basePackSO,
+        references: [{ id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' }],
+        attributes: {
+          ...basePackSO.attributes,
+          enabled: false,
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+        },
+      };
+      const updatedSO = {
+        ...currentSO,
+        attributes: { ...currentSO.attributes, enabled: true },
+      };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [
+          {
+            id: 'package-policy-1',
+            policy_ids: ['policy-1'],
+            package: { name: 'osquery_manager', version: '1.0.0' },
+            inputs: [
+              {
+                type: 'osquery',
+                streams: [],
+                config: {
+                  osquery: {
+                    value: {
+                      packs: {
+                        'default--my-pack': {
+                          shard: 100,
+                          pack_id: 'pack-id',
+                          default_native_schedule: { interval: 60 },
+                          queries: {},
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([{ id: 'policy-1', name: 'policy-1' }]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+    };
+
+    it('maps a Boom 409 conflict from packagePolicyService.update to response.conflict', async () => {
+      const packagePolicyUpdate = jest
+        .fn()
+        .mockRejectedValue(Object.assign(new Error('Conflict'), { output: { statusCode: 409 } }));
+      setupWithPackagePolicyUpdate(packagePolicyUpdate);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { enabled: true },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+      // The pack SO write already succeeded → surface a retryable conflict.
+      expect(mockResponse.conflict).toHaveBeenCalledTimes(1);
+      // Not swallowed into a 200 nor thrown as a 500.
+      expect(mockResponse.ok).not.toHaveBeenCalled();
+      const conflictArg = mockResponse.conflict.mock.calls[0][0] as { body: { message: string } };
+      expect(conflictArg.body.message).toMatch(/modified concurrently|retry/i);
+    });
+
+    it('rethrows a generic (non-409) packagePolicyService.update failure — not downgraded', async () => {
+      const packagePolicyUpdate = jest.fn().mockRejectedValue(new Error('boom-generic'));
+      setupWithPackagePolicyUpdate(packagePolicyUpdate);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { enabled: true },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      // A non-conflict error must propagate out of the handler, not be mapped
+      // to conflict or swallowed into a success response.
+      await expect(
+        routeHandler(buildMockContext() as any, mockRequest, mockResponse)
+      ).rejects.toThrow('boom-generic');
+
+      expect(mockResponse.conflict).not.toHaveBeenCalled();
+      expect(mockResponse.ok).not.toHaveBeenCalled();
+    });
+  });
 });

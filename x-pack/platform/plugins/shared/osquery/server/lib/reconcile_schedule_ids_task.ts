@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-// Task Manager registration for the schedule-id reconciler: schedules a
-// one-shot on every start(), re-arming with backoff on failure instead of
-// running as a recurring task.
+// Task Manager registration for the reconciler: a one-shot scheduled on every
+// start(), re-arming with backoff on failure rather than running recurring.
 
-import type { Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { OsqueryAppContextService } from './osquery_app_context_services';
+import { reconcileScheduleIdsToWire } from './reconcile_schedule_ids_to_wire';
 
-// Persisted Task Manager task-type id. Kept historically named
-// `backfillScheduleIds` so existing scheduled tasks are not orphaned across an
-// upgrade, even though the task now reconciles rather than backfills.
+// Historically named `backfillScheduleIds`; kept so existing scheduled tasks
+// aren't orphaned on upgrade (the task now reconciles, not backfills).
 export const RECONCILE_TASK_TYPE = 'osquery:backfillScheduleIds';
 
 // Base retry delay: long enough for a concurrent policy write (likely 409
@@ -62,6 +63,47 @@ export const buildReconcileRunResult = (
   };
 };
 
+/**
+ * Body of the Task Manager `run()` closure, extracted so the glue can be unit
+ * tested independently of plugin wiring: runs one reconcile pass and maps the
+ * outcome to a run-result via {@link buildReconcileRunResult}.
+ *
+ * Throws when `coreStart` is missing (Core not started yet) — Task Manager
+ * converts that to a FailedRunResult and re-attempts, which is correct: the
+ * pass simply hasn't got its dependencies yet.
+ */
+export const runReconcileTask = async ({
+  coreStart,
+  osqueryContext,
+  logger,
+  abortController,
+  isRruleFeatureEnabled,
+  taskState,
+  now = new Date(),
+}: {
+  coreStart: CoreStart | null;
+  osqueryContext: OsqueryAppContextService;
+  logger: Logger;
+  abortController?: AbortController;
+  isRruleFeatureEnabled: boolean;
+  taskState?: ReconcileTaskState;
+  now?: Date;
+}) => {
+  if (!coreStart) {
+    throw new Error('Core not started');
+  }
+
+  const { hadFailures } = await reconcileScheduleIdsToWire({
+    coreStart,
+    osqueryContext,
+    logger,
+    abortController,
+    isRruleFeatureEnabled,
+  });
+
+  return buildReconcileRunResult(hadFailures, now, taskState);
+};
+
 // Clears a legacy recurring task doc, then ensures the one-shot is
 // scheduled; never throws.
 export const scheduleReconcileTask = async (
@@ -75,14 +117,25 @@ export const scheduleReconcileTask = async (
 
   try {
     let existingTask;
+    let getFailedNonNotFound = false;
     try {
       existingTask = await taskManager.get(RECONCILE_TASK_TYPE);
     } catch (err) {
-      existingTask = undefined;
+      // not-found → no prior task. Any OTHER get failure must NOT be read as
+      // "no task", or a stale recurring doc keeps running on its old interval —
+      // so force removeIfExists (idempotent) before re-scheduling.
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        existingTask = undefined;
+      } else {
+        getFailedNonNotFound = true;
+        logger.warn(
+          `reconcileScheduleIdsToWire: could not read existing task, forcing cleanup: ${err.message}`
+        );
+      }
     }
 
     const hasLegacyRecurringSchedule = existingTask?.schedule?.interval != null;
-    if (hasLegacyRecurringSchedule) {
+    if (hasLegacyRecurringSchedule || getFailedNonNotFound) {
       await taskManager.removeIfExists(RECONCILE_TASK_TYPE);
     }
 

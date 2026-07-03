@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   convertSOQueriesToPack,
   convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
+  fetchAllPackagePolicies,
   validatePackScheduleFields,
   validateRruleConfig,
   isValidRfc3339,
@@ -16,6 +19,7 @@ import {
   stripPerQueryRruleFields,
   stripPriorModePerQueryFields,
   resolvePreservedQueries,
+  START_DATE_EPOCH_FALLBACK,
 } from './utils';
 
 const getTestQueries = (additionalFields?: Record<string, unknown>, packName = 'default') => ({
@@ -300,6 +304,38 @@ describe('Pack utils', () => {
         { isRruleFeatureEnabled: true }
       );
       expect(out.queries.q1.start_date).toBe('2026-06-18T11:37:48.355Z');
+    });
+
+    // The V4 backfill stamps START_DATE_EPOCH_FALLBACK on docs lacking
+    // created_at. That meaningless 1970 value must not be projected onto the
+    // interval-mode wire — the wire builder suppresses exactly this sentinel.
+    test('interval mode — epoch-fallback start_date suppressed, real start_date emitted', () => {
+      const out = convertSOQueriesToPackConfig(
+        [
+          {
+            id: 'epoch',
+            name: 'epoch',
+            query: 'SELECT 1',
+            interval: 3600,
+            schedule_id: 'sid-epoch',
+            start_date: START_DATE_EPOCH_FALLBACK,
+          },
+          {
+            id: 'real',
+            name: 'real',
+            query: 'SELECT 2',
+            interval: 3600,
+            schedule_id: 'sid-real',
+            start_date: '2026-06-18T11:37:48.355Z',
+          },
+        ],
+        { isRruleFeatureEnabled: true }
+      );
+
+      // The epoch sentinel is stripped from the wire.
+      expect(out.queries.epoch).not.toHaveProperty('start_date');
+      // A genuine start_date on a sibling still reaches the wire.
+      expect(out.queries.real.start_date).toBe('2026-06-18T11:37:48.355Z');
     });
 
     // The wire gate enforces this even if the SO already has RRULE state.
@@ -1401,5 +1437,53 @@ describe('resolvePreservedQueries', () => {
     );
     expect(result.q2).toEqual({ schedule_id: 'S1', start_date: 'd1' });
     expect(result.q1).toBeUndefined();
+  });
+});
+
+describe('fetchAllPackagePolicies (shared keyset drain for create/delete/update/reconciler)', () => {
+  const soClient = {} as SavedObjectsClientContract;
+
+  const serviceYielding = (batches: unknown[][]) =>
+    ({
+      fetchAllItems: jest.fn().mockImplementation(async function* asyncGenerator() {
+        for (const batch of batches) {
+          yield batch;
+        }
+      }),
+    } as unknown as PackagePolicyClient);
+
+  it('drains ALL batches (not just the first ≤1000 offset page)', async () => {
+    const service = serviceYielding([[{ id: 'pp-1' }, { id: 'pp-2' }], [{ id: 'pp-3' }]]);
+
+    const result = await fetchAllPackagePolicies(service, soClient);
+
+    // A policy on the second page must survive — the offset-capped
+    // list({ perPage: 1000 }) pattern this replaces would have dropped it.
+    expect(result.map((p) => p.id)).toEqual(['pp-1', 'pp-2', 'pp-3']);
+  });
+
+  it('returns an empty array when the service is undefined', async () => {
+    expect(await fetchAllPackagePolicies(undefined, soClient)).toEqual([]);
+  });
+
+  it('scopes the drain with the default osquery kuery', async () => {
+    const service = serviceYielding([[]]);
+
+    await fetchAllPackagePolicies(service, soClient);
+
+    expect(service.fetchAllItems).toHaveBeenCalledWith(
+      soClient,
+      expect.objectContaining({
+        kuery: expect.stringContaining('package.name:osquery_manager'),
+      })
+    );
+  });
+
+  it('forwards a caller-supplied kuery unchanged', async () => {
+    const service = serviceYielding([[]]);
+
+    await fetchAllPackagePolicies(service, soClient, 'custom-kuery');
+
+    expect(service.fetchAllItems).toHaveBeenCalledWith(soClient, { kuery: 'custom-kuery' });
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
   RECONCILE_TASK_TYPE,
@@ -14,8 +15,15 @@ import {
   buildReconcileTaskSchedule,
   buildReconcileRunResult,
   computeBackoffDelayMs,
+  runReconcileTask,
   scheduleReconcileTask,
 } from './reconcile_schedule_ids_task';
+import { reconcileScheduleIdsToWire } from './reconcile_schedule_ids_to_wire';
+
+jest.mock('./reconcile_schedule_ids_to_wire');
+const reconcileScheduleIdsToWireMock = reconcileScheduleIdsToWire as jest.MockedFunction<
+  typeof reconcileScheduleIdsToWire
+>;
 
 describe('buildReconcileTaskSchedule (one-shot reconcile task registration)', () => {
   it('schedules the reconcile task as a one-shot run (runAt set, no recurring interval)', () => {
@@ -140,11 +148,47 @@ describe('scheduleReconcileTask (conditional-remove startup contract)', () => {
 
   it('fresh install (no existing doc / 404) → schedules without removing', async () => {
     const taskManager = taskManagerMock.createStart();
-    taskManager.get.mockRejectedValue(new Error('Saved object [task/...] not found'));
+    // taskManager.get delegates to the SO repository, which throws a genuine
+    // SO not-found error on a missing doc — so the guard must recognise it.
+    taskManager.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('task', RECONCILE_TASK_TYPE)
+    );
 
     await scheduleReconcileTask(taskManager, logger, now);
 
     expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+    const scheduled = taskManager.ensureScheduled.mock.calls[0][0];
+    expect(scheduled.runAt).toBe(now);
+    expect(scheduled).not.toHaveProperty('schedule');
+  });
+
+  it('transient (non-not-found) get failure → forces removeIfExists and warns before scheduling', async () => {
+    // A genuine SO not-found means "no prior task" (handled above). Any OTHER
+    // get failure (transient/network) must NOT be treated as "no task": the
+    // guard forces a removeIfExists so a stale RECURRING doc can't survive, and
+    // logs a warning explaining the forced cleanup.
+    const taskManager = taskManagerMock.createStart();
+    const callOrder: string[] = [];
+    taskManager.get.mockRejectedValue(new Error('transient network blip'));
+    taskManager.removeIfExists.mockImplementation(async () => {
+      callOrder.push('removeIfExists');
+    });
+    taskManager.ensureScheduled.mockImplementation(async () => {
+      callOrder.push('ensureScheduled');
+
+      return buildReconcileTaskSchedule(now) as never;
+    });
+
+    await scheduleReconcileTask(taskManager, logger, now);
+
+    // Forced cleanup runs before scheduling, even though `get` threw.
+    expect(callOrder).toEqual(['removeIfExists', 'ensureScheduled']);
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith(RECONCILE_TASK_TYPE);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'could not read existing task, forcing cleanup: transient network blip'
+      )
+    );
     const scheduled = taskManager.ensureScheduled.mock.calls[0][0];
     expect(scheduled.runAt).toBe(now);
     expect(scheduled).not.toHaveProperty('schedule');
@@ -181,5 +225,74 @@ describe('scheduleReconcileTask (conditional-remove startup contract)', () => {
   it('is a no-op when taskManager is undefined', async () => {
     await expect(scheduleReconcileTask(undefined, logger, now)).resolves.toBeUndefined();
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+});
+
+describe('runReconcileTask (Task Manager run() glue)', () => {
+  const logger = loggingSystemMock.createLogger();
+  const now = new Date('2026-06-25T00:00:00.000Z');
+  const coreStart = {} as Parameters<typeof runReconcileTask>[0]['coreStart'];
+  const osqueryContext = {} as Parameters<typeof runReconcileTask>[0]['osqueryContext'];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    reconcileScheduleIdsToWireMock.mockResolvedValue({ hadFailures: false });
+  });
+
+  it('throws when coreStart is missing (Core not started)', async () => {
+    await expect(
+      runReconcileTask({
+        coreStart: null,
+        osqueryContext,
+        logger,
+        isRruleFeatureEnabled: false,
+      })
+    ).rejects.toThrow('Core not started');
+    expect(reconcileScheduleIdsToWireMock).not.toHaveBeenCalled();
+  });
+
+  it('forwards taskState into buildReconcileRunResult on a failed pass (backoff re-arm)', async () => {
+    reconcileScheduleIdsToWireMock.mockResolvedValue({ hadFailures: true });
+
+    const result = await runReconcileTask({
+      coreStart,
+      osqueryContext,
+      logger,
+      isRruleFeatureEnabled: false,
+      taskState: { retryAttempts: 2 },
+      now,
+    });
+
+    // priorAttempts=2 → increments to 3, and re-arms via runAt (backoff).
+    expect(result).toEqual(buildReconcileRunResult(true, now, { retryAttempts: 2 }));
+    expect(result.state.retryAttempts).toBe(3);
+    expect(result).toHaveProperty('runAt');
+  });
+
+  it('returns the clean-pass result when there were no failures', async () => {
+    const result = await runReconcileTask({
+      coreStart,
+      osqueryContext,
+      logger,
+      isRruleFeatureEnabled: false,
+      taskState: { retryAttempts: 5 },
+      now,
+    });
+
+    expect(result).toEqual({ state: { completed: true, retryAttempts: 0 } });
+  });
+
+  it('forwards the rrule flag through to the reconciler', async () => {
+    await runReconcileTask({
+      coreStart,
+      osqueryContext,
+      logger,
+      isRruleFeatureEnabled: true,
+      now,
+    });
+
+    expect(reconcileScheduleIdsToWireMock).toHaveBeenCalledWith(
+      expect.objectContaining({ isRruleFeatureEnabled: true })
+    );
   });
 });

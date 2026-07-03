@@ -86,7 +86,7 @@ export const packQueryRecordPartialRt = t.record(
     t.partial({
       ...basePackQueryFields,
       // Existing stored id — lets a rename edit preserve the query's schedule_id.
-      id: t.string,
+      id: boundedString(256),
       rrule_schedule: rruleScheduleConfigPartialRt,
     }),
   ])

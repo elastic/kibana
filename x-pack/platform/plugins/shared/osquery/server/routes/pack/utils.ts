@@ -25,7 +25,11 @@ import {
 } from 'lodash';
 import moment from 'moment-timezone';
 import { satisfies } from 'semver';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { Shard } from '../../../common/utils/converters';
 import { DEFAULT_PLATFORM } from '../../../common/constants';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
@@ -39,6 +43,10 @@ import {
   sumCompoundSeconds,
 } from '../../../common/utils/splay_utils';
 import { safeDerivePeriodSeconds } from '../../../common/utils/rrule_period';
+
+// V4 backfill's start_date fallback when a pack SO lacks `created_at`.
+// The wire builder suppresses this sentinel from interval-mode queries.
+export const START_DATE_EPOCH_FALLBACK = '1970-01-01T00:00:00.000Z';
 
 export interface PackQueryInput {
   /**
@@ -131,6 +139,8 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
   );
 
 // Single source of truth for the stored-query key: id when present, else array index.
+// The `query.id` truthiness check intentionally treats an empty-string id as
+// ABSENT (a malformed '' id must fall back to the index/key, not be honored).
 export const deriveEffectiveQueryKey = (
   query: { id?: string },
   indexOrKey: string | number
@@ -191,6 +201,9 @@ export const resolvePreservedQueries = (
   };
 
   // Pass 1: queries matching by the client-supplied `id` (explicit rename intent).
+  // Insertion order is the tie-break: the first claimant of a stored row wins,
+  // and `claim` consumes each stored row at most once, so a crafted/duplicate
+  // `id` cannot make two queries collapse onto the same schedule_id.
   const byId = Object.entries(outgoingQueries).reduce<Record<string, PreservableQueryFields>>(
     (acc, [queryKey, queryData]) => claim(acc, queryKey, queryData.id),
     {}
@@ -373,18 +386,20 @@ export const convertSOQueriesToPackConfig = (
         }
       }
 
-      // Suppress legacy top-level start_date for rrule-mode queries — otherwise
-      // osquerybeat honours the stale value instead of the user-chosen override.
+      // Suppress start_date for rrule-mode (osquerybeat would honour the stale
+      // value over the override) and the V4 epoch-fallback (avoid a bogus 1970
+      // on interval packs that never had one).
       const startDateField =
         isRruleFeatureEnabled && (packMode === 'rrule' || querySchedType === 'rrule')
           ? {}
-          : legacyStartDate !== undefined
+          : legacyStartDate !== undefined && legacyStartDate !== START_DATE_EPOCH_FALLBACK
           ? { start_date: legacyStartDate }
           : {};
 
       queriesOut[index] = omitBy(
         {
           ...rest,
+          // Emitted flag-independent: it's a stable results-join key, not an rrule field.
           schedule_id: scheduleId,
           ...startDateField,
           ...scheduleFields,
@@ -718,6 +733,28 @@ export const removePackFromPolicy = (
 };
 
 export const makePackKey = (packName: string, spaceId: string) => `${spaceId}--${packName}`;
+
+/**
+ * Drain ALL osquery package policies via keyset `fetchAllItems`. Shared by the
+ * create/delete/update routes and the reconciler; replaces the offset-capped
+ * `list({ perPage: 1000 })` that silently dropped policies past the first 1000.
+ */
+export const fetchAllPackagePolicies = async (
+  packagePolicyService: PackagePolicyClient | undefined,
+  soClient: SavedObjectsClientContract,
+  kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`
+): Promise<PackagePolicy[]> => {
+  const packagePolicies: PackagePolicy[] = [];
+  if (!packagePolicyService) {
+    return packagePolicies;
+  }
+
+  for await (const policyBatch of await packagePolicyService.fetchAllItems(soClient, { kuery })) {
+    packagePolicies.push(...policyBatch);
+  }
+
+  return packagePolicies;
+};
 
 // policyIds is required and explicit; callers resolve "preserve current
 // attachments" upstream. An empty array here detaches from every policy.

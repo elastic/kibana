@@ -9,7 +9,7 @@ import type {
   SavedObjectModelDataBackfillFn,
   SavedObjectsModelDataBackfillChange,
 } from '@kbn/core-saved-objects-server';
-import { reconcileScheduleIdsToWire } from './backfill_schedule_ids';
+import { reconcileScheduleIdsToWire } from './reconcile_schedule_ids_to_wire';
 import { packSavedObjectModelVersion4 } from './saved_query/saved_object_model_versions';
 
 // Version-agnostic: V4 mints deterministic UUIDv5 schedule_ids (was v4), and
@@ -34,12 +34,16 @@ const createMockScopedClient = () => ({
   bulkGet: jest.fn().mockResolvedValue({ saved_objects: [] }),
 });
 
+// Accepts a single find result (yielded as one PIT batch) OR an explicit list
+// of batches (each an array of saved_objects), so tests can exercise a
+// multi-page pack finder.
 const createMockCoreStart = (
   findResult: unknown = { saved_objects: [], total: 0 },
-  scopedClient?: ReturnType<typeof createMockScopedClient>
+  scopedClient?: ReturnType<typeof createMockScopedClient>,
+  findBatches?: unknown[][]
 ) => {
   const sc = scopedClient ?? createMockScopedClient();
-  const findResultBatch = (findResult as { saved_objects: unknown[] }).saved_objects;
+  const batches = findBatches ?? [(findResult as { saved_objects: unknown[] }).saved_objects ?? []];
 
   return {
     core: {
@@ -48,7 +52,9 @@ const createMockCoreStart = (
           createPointInTimeFinder: jest.fn().mockReturnValue({
             close: jest.fn().mockResolvedValue(undefined),
             find: async function* asyncGenerator() {
-              yield { saved_objects: findResultBatch };
+              for (const batch of batches) {
+                yield { saved_objects: batch };
+              }
             },
           }),
         }),
@@ -63,10 +69,19 @@ const createMockCoreStart = (
   };
 };
 
-// One batch is enough to exercise the drain loop.
+// Yields the drain as one batch (the common case).
 const mockFetchAllItems = (items: unknown[]) =>
   jest.fn().mockImplementation(async function* asyncGenerator() {
     yield items;
+  });
+
+// Yields the drain across multiple batches so the target policy can arrive on
+// a later page — the fetchAllItems consumer must drain ALL pages.
+const mockFetchAllItemsBatches = (batches: unknown[][]) =>
+  jest.fn().mockImplementation(async function* asyncGenerator() {
+    for (const batch of batches) {
+      yield batch;
+    }
   });
 
 const createMockOsqueryContext = (packagePolicyService?: unknown) =>
@@ -590,6 +605,186 @@ describe('reconcileScheduleIdsToWire', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       'reconcileScheduleIdsToWire: reconcile finished with partial failures, will retry'
     );
+  });
+
+  // The outer setup try/catch converts a pre-loop throw (client acquisition /
+  // pack PIT paging / per-space policy drain) into a run result with
+  // hadFailures rather than propagating: a thrown result becomes a Task Manager
+  // FailedRunResult and the one-shot task is permanently removed after
+  // maxAttempts. It must resolve to the normal run-result shape and log at error.
+  test('setup failure (pack PIT finder throws) → resolves hadFailures, does NOT throw, logs error', async () => {
+    const scopedClient = createMockScopedClient();
+    const logger = createMockLogger();
+
+    // Build a coreStart whose pack PIT finder throws from .find().
+    const coreStart = {
+      savedObjects: {
+        createInternalRepository: jest.fn().mockReturnValue({
+          createPointInTimeFinder: jest.fn().mockReturnValue({
+            close: jest.fn().mockResolvedValue(undefined),
+            find: () => {
+              throw new Error('pack PIT find failed');
+            },
+          }),
+        }),
+        getScopedClient: jest.fn().mockReturnValue(scopedClient),
+      },
+      http: {},
+      elasticsearch: { client: { asInternalUser: {} } },
+    } as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['coreStart'];
+
+    const resultPromise = reconcileScheduleIdsToWire({
+      coreStart,
+      osqueryContext: createMockOsqueryContext(),
+      logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+    });
+
+    // Must resolve (not reject) with the retryable run-result shape.
+    await expect(resultPromise).resolves.toEqual({ hadFailures: true });
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('setup failed, will retry: pack PIT find failed')
+    );
+  });
+
+  describe('pagination — multi-batch pack finder and multi-batch policy drain', () => {
+    test('reconciles a pack that arrives on the SECOND pack-finder page', async () => {
+      const scopedClient = createMockScopedClient();
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      // Two osquery policies, one per pack, drained in one fetchAllItems batch.
+      const packagePolicyList = mockFetchAllItems([
+        buildPackagePolicy(),
+        buildPackagePolicy('default--second-pack', 'pack-2'),
+      ]);
+
+      const firstPageSO = buildEnabledPackFindResult().saved_objects;
+      const secondPageSO = [
+        {
+          id: 'pack-2',
+          namespaces: ['default'],
+          references: [{ id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' }],
+          attributes: {
+            name: 'second-pack',
+            enabled: true,
+            queries: [
+              { id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1', schedule_id: 'sched-p2' },
+            ],
+          },
+        },
+      ];
+
+      // Two PIT pages: the second-page pack must still be reconciled.
+      const { core } = createMockCoreStart(undefined, scopedClient, [firstPageSO, secondPageSO]);
+      const osqueryContext = createMockOsqueryContext({
+        fetchAllItems: packagePolicyList,
+        update: packagePolicyUpdate,
+      });
+      const logger = createMockLogger();
+
+      const result = await reconcileScheduleIdsToWire({
+        coreStart: core,
+        osqueryContext,
+        logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+      });
+
+      expect(result).toEqual({ hadFailures: false });
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(2);
+      const writtenKeys = packagePolicyUpdate.mock.calls.flatMap((call) =>
+        Object.keys(call[3].inputs[0].config.osquery.value.packs)
+      );
+      expect(writtenKeys).toContain('default--second-pack');
+    });
+
+    test('reconciles a pack whose target policy arrives on the SECOND fetchAllItems batch', async () => {
+      const scopedClient = createMockScopedClient();
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      // The matching policy is only on page 2 of the policy drain.
+      const unrelatedPolicy = buildPackagePolicy('default--unrelated', 'pack-x');
+      const packagePolicyList = mockFetchAllItemsBatches([
+        [unrelatedPolicy],
+        [buildPackagePolicy()],
+      ]);
+
+      const { core } = createMockCoreStart(buildEnabledPackFindResult(), scopedClient);
+      const osqueryContext = createMockOsqueryContext({
+        fetchAllItems: packagePolicyList,
+        update: packagePolicyUpdate,
+      });
+      const logger = createMockLogger();
+
+      const result = await reconcileScheduleIdsToWire({
+        coreStart: core,
+        osqueryContext,
+        logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+      });
+
+      expect(result).toEqual({ hadFailures: false });
+      // The pack was found on the second policy batch and written.
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+      const packBlock =
+        packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs[
+          'default--reconcile-pack'
+        ];
+      expect(packBlock.queries.q1.schedule_id).toBe('sched-q1');
+    });
+  });
+
+  describe('abort signal granularity', () => {
+    test('stops mid-space when aborted before a later pack (per-pack check, not per-space)', async () => {
+      const scopedClient = createMockScopedClient();
+      // Abort fires after the first pack's write, before the second pack in the
+      // SAME (default) space is processed.
+      const abortController = new AbortController();
+      const packagePolicyUpdate = jest.fn().mockImplementation(async () => {
+        abortController.abort();
+
+        return {};
+      });
+
+      const packagePolicyList = mockFetchAllItems([
+        buildPackagePolicy(),
+        buildPackagePolicy('default--second-pack', 'pack-2'),
+      ]);
+
+      const twoPacksFindResult = {
+        saved_objects: [
+          ...buildEnabledPackFindResult().saved_objects,
+          {
+            id: 'pack-2',
+            namespaces: ['default'],
+            references: [{ id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' }],
+            attributes: {
+              name: 'second-pack',
+              enabled: true,
+              queries: [
+                { id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1', schedule_id: 'sched-p2' },
+              ],
+            },
+          },
+        ],
+        total: 2,
+      };
+
+      const { core } = createMockCoreStart(twoPacksFindResult, scopedClient);
+      const osqueryContext = createMockOsqueryContext({
+        fetchAllItems: packagePolicyList,
+        update: packagePolicyUpdate,
+      });
+      const logger = createMockLogger();
+
+      const result = await reconcileScheduleIdsToWire({
+        coreStart: core,
+        osqueryContext,
+        logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+        abortController,
+      });
+
+      expect(result).toEqual({ hadFailures: true });
+      // Only the first pack wrote before the abort short-circuited the loop.
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('aborted by task manager, will retry remaining packs')
+      );
+    });
   });
 
   describe('isRruleFeatureEnabled flag — Fleet wire fields on reconcile', () => {

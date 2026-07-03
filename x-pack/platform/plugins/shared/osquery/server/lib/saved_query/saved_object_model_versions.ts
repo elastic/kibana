@@ -11,14 +11,20 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import { v5 as uuidv5 } from 'uuid';
 import { savedQuerySchemaV2, packSchemaV2, packSchemaV3, packSchemaV4 } from './schemas';
-import { deriveEffectiveQueryKey } from '../../routes/pack/utils';
+import { deriveEffectiveQueryKey, START_DATE_EPOCH_FALLBACK } from '../../routes/pack/utils';
 
-// Domain prefix for the UUIDv5 name. Must never change once V4 has shipped.
+interface BackfillableQuery {
+  id?: string;
+  schedule_id?: string;
+  start_date?: string;
+  [key: string]: unknown;
+}
+
+// packSchemaV1 allows queries as either shape, so the backfill must mint onto both.
+type BackfillableQueries = BackfillableQuery[] | Record<string, BackfillableQuery>;
+
+// Must never change once V4 has shipped (feeds the deterministic UUIDv5).
 const SCHEDULE_ID_NAME_PREFIX = 'osquery-schedule:';
-
-// Deterministic `start_date` fallback (never `new Date()`) for a pack SO
-// missing `created_at`.
-const START_DATE_EPOCH_FALLBACK = '1970-01-01T00:00:00.000Z';
 
 export const savedQueryModelVersion1: SavedObjectsModelVersion = {
   changes: [
@@ -94,48 +100,77 @@ export const packSavedObjectModelVersion3: SavedObjectsModelVersion = {
   ],
   schemas: {
     forwardCompatibility: packSchemaV3.extends({}, { unknowns: 'ignore' }),
-    // 'create' schema is required for new model versions (enables rollback support).
+    // Required for rollback support.
     create: packSchemaV3.extends({}, { unknowns: 'allow' }),
   },
 };
 
 /**
  * V4 backfills `schedule_id`/`start_date`/`id` onto pack queries lacking them.
- *
- * Must be DETERMINISTIC: data_backfill also runs on the read path (get/find of
- * an un-reindexed doc, no write-back), so `uuidv4()`/`new Date()` would mint
- * different values on every read and across nodes, severing the schedule_id
- * history join. Both fields derive from stable per-doc inputs (UUIDv5 of
- * soId+queryKey; `created_at`). Existing values are preserved as-is.
+ * MUST be deterministic: data_backfill also runs on the read path (no write-back),
+ * so `uuidv4()`/`new Date()` would drift across reads/nodes and sever the
+ * schedule_id history join. Existing values are preserved as-is.
  */
 const backfillScheduleIdFn: SavedObjectModelDataBackfillFn<
-  { queries?: Array<{ id?: string; schedule_id?: string; start_date?: string }> },
-  { queries?: Array<{ id?: string; schedule_id?: string; start_date?: string }> }
-> = ({ id: soId, attributes, created_at: createdAt }) => {
+  { queries?: BackfillableQueries; created_at?: string },
+  { queries?: BackfillableQueries }
+> = ({ id: soId, attributes, created_at: envelopeCreatedAt }) => {
   const queries = attributes.queries;
-  // No-ops on empty/missing queries array.
-  if (!queries?.length) {
+  if (
+    queries == null ||
+    (Array.isArray(queries) ? !queries.length : !Object.keys(queries).length)
+  ) {
     return { attributes: {} };
   }
 
-  const defaultStartDate = createdAt ?? START_DATE_EPOCH_FALLBACK;
+  // Anchor to the pack's OWN `attributes.created_at`, not the envelope
+  // created_at — on the migrate path the envelope reflects migration time, not
+  // original creation, which would mint a non-deterministic start_date.
+  const defaultStartDate = attributes.created_at ?? envelopeCreatedAt ?? START_DATE_EPOCH_FALLBACK;
 
-  return {
-    attributes: {
-      queries: queries.map((query, index) => {
-        const effectiveKey = deriveEffectiveQueryKey(query, index);
+  const usedKeys = new Set<string>();
 
-        return {
-          ...query,
-          id: effectiveKey,
-          schedule_id:
-            query.schedule_id ??
-            uuidv5(`${SCHEDULE_ID_NAME_PREFIX}${soId}:${effectiveKey}`, uuidv5.URL),
-          start_date: query.start_date ?? defaultStartDate,
-        };
-      }),
-    },
+  const backfillOne = (
+    query: BackfillableQuery,
+    indexOrKey: string | number
+  ): BackfillableQuery => {
+    // `query.id` when present, else the array index / map key. Index-derived
+    // keys are only stable if the collection isn't reordered before reindex;
+    // API-origin packs always carry a stable id, so that's import-only.
+    let effectiveKey = deriveEffectiveQueryKey(query, indexOrKey);
+
+    // Disambiguate a derived-key collision (degenerate import docs only) so two
+    // rows can't share one id/schedule_id.
+    if (usedKeys.has(effectiveKey)) {
+      effectiveKey = `${effectiveKey}#${String(indexOrKey)}`;
+    }
+
+    usedKeys.add(effectiveKey);
+
+    // Empty-string schedule_id is malformed → treat as absent and mint.
+    const existingScheduleId = query.schedule_id ? query.schedule_id : undefined;
+
+    return {
+      ...query,
+      id: effectiveKey,
+      schedule_id:
+        existingScheduleId ??
+        uuidv5(`${SCHEDULE_ID_NAME_PREFIX}${soId}:${effectiveKey}`, uuidv5.URL),
+      start_date: query.start_date ?? defaultStartDate,
+    };
   };
+
+  // Return the patch in the SAME shape it was received.
+  if (Array.isArray(queries)) {
+    return { attributes: { queries: queries.map((query, index) => backfillOne(query, index)) } };
+  }
+
+  const backfilledRecord: Record<string, BackfillableQuery> = {};
+  for (const [key, query] of Object.entries(queries)) {
+    backfilledRecord[key] = backfillOne(query, key);
+  }
+
+  return { attributes: { queries: backfilledRecord } };
 };
 
 export const packSavedObjectModelVersion4: SavedObjectsModelVersion = {

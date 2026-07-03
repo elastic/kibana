@@ -269,7 +269,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           ...restPayload,
           policy_ids: policies ?? [],
           // On edit, round-trip each query's id so the server preserves schedule_id.
-          queries: convertSOQueriesToPack(payloadQueries, editMode),
+          queries: convertSOQueriesToPack(payloadQueries, { includeId: editMode }),
           shards: getShards() ?? {},
           ...scheduleFields,
         };

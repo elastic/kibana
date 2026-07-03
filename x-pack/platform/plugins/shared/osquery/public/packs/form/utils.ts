@@ -36,9 +36,16 @@ export const convertPackQueriesToSO = (queries: Record<string, Omit<PackQueryFor
     [] as PackQueryFormData[]
   );
 
-// includeId=true (edit-save) sends each query's originalId so the server
-// matches renamed queries to their stored row and preserves schedule_id.
-export const convertSOQueriesToPack = (queries: PackQueryFormData[], includeId = false) =>
+export interface ConvertSOQueriesToPackOptions {
+  // includeId (edit-save) sends each query's originalId so the server matches
+  // renamed queries to their stored row and preserves schedule_id.
+  includeId?: boolean;
+}
+
+export const convertSOQueriesToPack = (
+  queries: PackQueryFormData[],
+  { includeId = false }: ConvertSOQueriesToPackOptions = {}
+) =>
   reduce(
     queries,
     (acc, { id: queryId, originalId, ...query }) => {

@@ -23,10 +23,7 @@ import {
 } from 'lodash';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '@kbn/fleet-plugin/common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -37,7 +34,6 @@ import type {
 } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { RRuleScheduleConfig } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -47,6 +43,7 @@ import {
   convertSOQueriesToPack,
   convertPackQueriesToSO,
   convertSOQueriesToPackConfig,
+  fetchAllPackagePolicies,
   getInitialPolicies,
   findMatchingShards,
   policyHasPack,
@@ -276,17 +273,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         // Drain ALL policies via keyset `fetchAllItems`; an offset-capped
         // `list({ perPage: 1000 })` would drop the pack from policies past 1000.
-        const packagePolicies: PackagePolicy[] = [];
-        if (packagePolicyService) {
-          for await (const policyBatch of await packagePolicyService.fetchAllItems(
-            spaceScopedClient,
-            {
-              kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-            }
-          )) {
-            packagePolicies.push(...policyBatch);
-          }
-        }
+        const packagePolicies = await fetchAllPackagePolicies(
+          packagePolicyService,
+          spaceScopedClient
+        );
 
         const currentPackagePolicies = filter(packagePolicies, (packagePolicy) =>
           policyHasPack(packagePolicy, currentPackSO.attributes.name, spaceId)
@@ -445,12 +435,98 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           return response.ok({ body: { data: buildResponseData() } });
         }
 
-        if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
-          if (enabled) {
-            const policyIds = policy_ids || !isEmpty(shards) ? policiesList : currentAgentPolicyIds;
+        // The pack SO (source of truth) is already committed. These Fleet writes
+        // only project it onto the wire, so a concurrent-write 409 → response.conflict
+        // (client retries; reconciler also repairs). Other errors propagate.
+        try {
+          if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
+            if (enabled) {
+              const policyIds =
+                policy_ids || !isEmpty(shards) ? policiesList : currentAgentPolicyIds;
+
+              await Promise.all(
+                policyIds.map((agentPolicyId) => {
+                  const packagePolicy = packagePolicies.find((policy) =>
+                    policy.policy_ids.includes(agentPolicyId)
+                  );
+                  if (packagePolicy) {
+                    return packagePolicyService?.update(
+                      spaceScopedClient,
+                      esClient,
+                      packagePolicy.id,
+                      produce<PackagePolicy>(packagePolicy, (draft) => {
+                        unset(draft, 'id');
+                        if (!has(draft, 'inputs[0].streams')) {
+                          set(draft, 'inputs[0].streams', []);
+                        }
+
+                        const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
+                        removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
+                        set(
+                          draft,
+                          `inputs[0].config.osquery.value.packs.${pk}`,
+                          buildFleetPackBlock(agentPolicyId)
+                        );
+
+                        return draft;
+                      })
+                    );
+                  }
+                })
+              );
+            } else {
+              await Promise.all(
+                currentAgentPolicyIds.map((agentPolicyId) => {
+                  const packagePolicy = currentPackagePolicies.find((policy) =>
+                    policy.policy_ids.includes(agentPolicyId)
+                  );
+                  if (!packagePolicy) return;
+
+                  return packagePolicyService?.update(
+                    spaceScopedClient,
+                    esClient,
+                    packagePolicy.id,
+                    produce<PackagePolicy>(packagePolicy, (draft) => {
+                      unset(draft, 'id');
+                      removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+
+                      return draft;
+                    })
+                  );
+                })
+              );
+            }
+          } else {
+            // Diff current vs. target policy ids into remove/keep/add buckets.
+            const agentPolicyIdsToRemove = uniq(difference(currentAgentPolicyIds, policiesList));
+            const agentPolicyIdsToUpdate = uniq(
+              difference(currentAgentPolicyIds, agentPolicyIdsToRemove)
+            );
+            const agentPolicyIdsToAdd = uniq(difference(policiesList, currentAgentPolicyIds));
 
             await Promise.all(
-              policyIds.map((agentPolicyId) => {
+              agentPolicyIdsToRemove.map((agentPolicyId) => {
+                const packagePolicy = currentPackagePolicies.find((policy) =>
+                  policy.policy_ids.includes(agentPolicyId)
+                );
+                if (packagePolicy) {
+                  return packagePolicyService?.update(
+                    spaceScopedClient,
+                    esClient,
+                    packagePolicy.id,
+                    produce<PackagePolicy>(packagePolicy, (draft) => {
+                      unset(draft, 'id');
+                      removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+
+                      return draft;
+                    })
+                  );
+                }
+              })
+            );
+
+            await Promise.all(
+              agentPolicyIdsToUpdate.map((agentPolicyId) => {
                 const packagePolicy = packagePolicies.find((policy) =>
                   policy.policy_ids.includes(agentPolicyId)
                 );
@@ -461,8 +537,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     packagePolicy.id,
                     produce<PackagePolicy>(packagePolicy, (draft) => {
                       unset(draft, 'id');
-                      if (!has(draft, 'inputs[0].streams')) {
-                        set(draft, 'inputs[0].streams', []);
+                      if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
+                        removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
                       }
 
                       const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
@@ -479,118 +555,52 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 }
               })
             );
-          } else {
+
             await Promise.all(
-              currentAgentPolicyIds.map((agentPolicyId) => {
-                const packagePolicy = currentPackagePolicies.find((policy) =>
+              agentPolicyIdsToAdd.map((agentPolicyId) => {
+                const packagePolicy = packagePolicies.find((policy) =>
                   policy.policy_ids.includes(agentPolicyId)
                 );
-                if (!packagePolicy) return;
 
-                return packagePolicyService?.update(
-                  spaceScopedClient,
-                  esClient,
-                  packagePolicy.id,
-                  produce<PackagePolicy>(packagePolicy, (draft) => {
-                    unset(draft, 'id');
-                    removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+                if (packagePolicy) {
+                  return packagePolicyService?.update(
+                    spaceScopedClient,
+                    esClient,
+                    packagePolicy.id,
+                    produce<PackagePolicy>(packagePolicy, (draft) => {
+                      unset(draft, 'id');
+                      if (!(draft.inputs.length && draft.inputs[0].streams.length)) {
+                        set(draft, 'inputs[0].streams', []);
+                      }
 
-                    return draft;
-                  })
-                );
+                      const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
+                      set(
+                        draft,
+                        `inputs[0].config.osquery.value.packs.${pk}`,
+                        buildFleetPackBlock(agentPolicyId)
+                      );
+
+                      return draft;
+                    })
+                  );
+                }
               })
             );
           }
-        } else {
-          // Diff current vs. target policy ids into remove/keep/add buckets.
-          const agentPolicyIdsToRemove = uniq(difference(currentAgentPolicyIds, policiesList));
-          const agentPolicyIdsToUpdate = uniq(
-            difference(currentAgentPolicyIds, agentPolicyIdsToRemove)
-          );
-          const agentPolicyIdsToAdd = uniq(difference(policiesList, currentAgentPolicyIds));
+        } catch (err) {
+          const conflictStatus =
+            (err as { output?: { statusCode?: number } }).output?.statusCode === 409 ||
+            SavedObjectsErrorHelpers.isConflictError(err);
+          if (conflictStatus) {
+            return response.conflict({
+              body: {
+                message:
+                  'The pack was saved, but its Fleet package policy was modified concurrently and could not be updated. Please retry the request.',
+              },
+            });
+          }
 
-          await Promise.all(
-            agentPolicyIdsToRemove.map((agentPolicyId) => {
-              const packagePolicy = currentPackagePolicies.find((policy) =>
-                policy.policy_ids.includes(agentPolicyId)
-              );
-              if (packagePolicy) {
-                return packagePolicyService?.update(
-                  spaceScopedClient,
-                  esClient,
-                  packagePolicy.id,
-                  produce<PackagePolicy>(packagePolicy, (draft) => {
-                    unset(draft, 'id');
-                    removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
-
-                    return draft;
-                  })
-                );
-              }
-            })
-          );
-
-          await Promise.all(
-            agentPolicyIdsToUpdate.map((agentPolicyId) => {
-              const packagePolicy = packagePolicies.find((policy) =>
-                policy.policy_ids.includes(agentPolicyId)
-              );
-              if (packagePolicy) {
-                return packagePolicyService?.update(
-                  spaceScopedClient,
-                  esClient,
-                  packagePolicy.id,
-                  produce<PackagePolicy>(packagePolicy, (draft) => {
-                    unset(draft, 'id');
-                    if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
-                      removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
-                    }
-
-                    const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
-                    removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
-                    set(
-                      draft,
-                      `inputs[0].config.osquery.value.packs.${pk}`,
-                      buildFleetPackBlock(agentPolicyId)
-                    );
-
-                    return draft;
-                  })
-                );
-              }
-            })
-          );
-
-          await Promise.all(
-            agentPolicyIdsToAdd.map((agentPolicyId) => {
-              const packagePolicy = packagePolicies.find((policy) =>
-                policy.policy_ids.includes(agentPolicyId)
-              );
-
-              if (packagePolicy) {
-                return packagePolicyService?.update(
-                  spaceScopedClient,
-                  esClient,
-                  packagePolicy.id,
-                  produce<PackagePolicy>(packagePolicy, (draft) => {
-                    unset(draft, 'id');
-                    if (!(draft.inputs.length && draft.inputs[0].streams.length)) {
-                      set(draft, 'inputs[0].streams', []);
-                    }
-
-                    const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
-                    set(
-                      draft,
-                      `inputs[0].config.osquery.value.packs.${pk}`,
-                      buildFleetPackBlock(agentPolicyId)
-                    );
-
-                    return draft;
-                  })
-                );
-              }
-            })
-          );
+          throw err;
         }
 
         return response.ok({

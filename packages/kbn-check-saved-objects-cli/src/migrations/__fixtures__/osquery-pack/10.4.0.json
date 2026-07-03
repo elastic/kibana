@@ -5,7 +5,7 @@
       "description": "A test pack",
       "queries": [
         {
-          "id": "query1",
+          "id": "uptime",
           "query": "select * from processes;",
           "interval": 3600,
           "timeout": 300,
@@ -26,7 +26,7 @@
       "description": "A test pack",
       "queries": [
         {
-          "id": "query1",
+          "id": "uptime",
           "query": "select * from processes;",
           "interval": 3600,
           "timeout": 300,

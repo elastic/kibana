@@ -29,7 +29,9 @@ describe('pack form serializer (public) — convertSOQueriesToPack', () => {
   it('edit payload round-trips the stored id (originalId) as the identity claim', () => {
     const result = convertSOQueriesToPack(
       [makeQuery({ id: 'processes', originalId: 'processes' })],
-      true
+      {
+        includeId: true,
+      }
     );
 
     expect(Object.keys(result)).toEqual(['processes']);
@@ -40,17 +42,16 @@ describe('pack form serializer (public) — convertSOQueriesToPack', () => {
 
   it('edit payload: a RENAMED query carries its ORIGINAL id, not the new name', () => {
     // originalId still holds the stored id after a rename; the server matches on it.
-    const result = convertSOQueriesToPack(
-      [makeQuery({ id: 'renamed', originalId: 'processes' })],
-      true
-    );
+    const result = convertSOQueriesToPack([makeQuery({ id: 'renamed', originalId: 'processes' })], {
+      includeId: true,
+    });
 
     expect(Object.keys(result)).toEqual(['renamed']);
     expect(result.renamed).toMatchObject({ id: 'processes' });
   });
 
   it('edit payload: a brand-new query (no originalId) falls back to the map key', () => {
-    const result = convertSOQueriesToPack([makeQuery({ id: 'brand_new' })], true);
+    const result = convertSOQueriesToPack([makeQuery({ id: 'brand_new' })], { includeId: true });
 
     expect(result.brand_new).toMatchObject({ id: 'brand_new' });
   });
@@ -64,7 +65,7 @@ describe('pack form serializer (public) — convertSOQueriesToPack', () => {
 
     // Simulate a UI rename: id changes, originalId is preserved (as queries_field does).
     const renamed = [{ ...asArray[0], id: 'renamed' }];
-    const backToRecord = convertSOQueriesToPack(renamed, true);
+    const backToRecord = convertSOQueriesToPack(renamed, { includeId: true });
     expect(Object.keys(backToRecord)).toEqual(['renamed']);
     expect(backToRecord.renamed).toMatchObject({ id: 'processes' });
   });
