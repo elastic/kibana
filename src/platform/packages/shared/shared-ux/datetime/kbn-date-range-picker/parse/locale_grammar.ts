@@ -213,6 +213,15 @@ export interface CompiledGrammar {
   namedRangeAliases: Record<string, string>;
   /** Every recognised "now" literal (English + locale). */
   nowKeywords: string[];
+  /**
+   * Every natural-language word this grammar recognises — unit aliases,
+   * duration/instant template words, and "now" keywords — lowercased. A
+   * fragment containing one of these words but failing every phrase template
+   * is a FAILED PHRASE, not an absolute date; `parse_text.ts` uses this to
+   * keep the forgiving absolute-date fallback from misreading such fragments
+   * (e.g. "5 minutes to spare" would otherwise parse as May 1).
+   */
+  vocabulary: ReadonlySet<string>;
 }
 
 /** Escapes regex metacharacters in `input` so it can be embedded verbatim in a pattern. */
@@ -399,6 +408,14 @@ function compileMergedGrammar(locale: LocaleGrammar | undefined): CompiledGramma
     .map(buildDelimiterPattern)
     .filter((p): p is RegExp => p !== null);
 
+  const vocabulary = new Set([
+    ...Object.keys(unitAliases).map((alias) => alias.toLowerCase()),
+    ...nowKeywords,
+    ...[...concatPast, ...concatFuture, ...instantPast, ...instantFuture].flatMap(
+      extractTemplateWords
+    ),
+  ]);
+
   return {
     shorthandRegex: new RegExp(`^(now)?([+-]?)(\\d+)(${unitPattern})(\\/[smhdwMy])?$`),
     durationPast: concatPast.map(compileTemplate),
@@ -411,6 +428,7 @@ function compileMergedGrammar(locale: LocaleGrammar | undefined): CompiledGramma
     namedRanges,
     namedRangeAliases,
     nowKeywords,
+    vocabulary,
   };
 }
 

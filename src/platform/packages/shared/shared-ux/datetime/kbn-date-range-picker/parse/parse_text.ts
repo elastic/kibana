@@ -308,12 +308,26 @@ function instantToDateString(
   // These aren't caught by the shorthand regex which expects a count.
   if (/^now\/[smhdwMy]$/.test(trimmed)) return trimmed;
 
+  // Natural-language vocabulary (a unit word, direction word, or instant
+  // marker) that reached this point is a failed PHRASE, not an absolute
+  // date — reject it rather than let the forgiving absolute-date fallback
+  // misread it ("5 minutes to spare" would otherwise parse as May 1).
+  if (containsGrammarVocabulary(trimmed, compiled)) return null;
+
   // Absolute date / ISO fallback — normalize to ISO so that
   // timeRange.start/end and onChange always emit ISO or dateMath strings.
   const absoluteDate = dateStringToDate(trimmed, formats);
   if (absoluteDate !== null) return absoluteDate.toISOString();
 
   return null;
+}
+
+/** True when any standalone word of `text` is part of the grammar's natural language. */
+function containsGrammarVocabulary(text: string, compiled: CompiledGrammar): boolean {
+  return text
+    .toLowerCase()
+    .split(/[^\p{L}\p{M}\p{N}]+/u)
+    .some((word) => word !== '' && compiled.vocabulary.has(word));
 }
 
 /**

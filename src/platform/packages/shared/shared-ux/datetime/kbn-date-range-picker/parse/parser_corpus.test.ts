@@ -468,14 +468,22 @@ describe('parser corpus: textToTimeRange (English)', () => {
         note:
           'template shape with a mistyped unit — the unit word is matched leniently for ' +
           'part-level navigation, but the DURATION interpretation still rejects it ' +
-          '(units are validated after matching); the pre-existing forgiving absolute-date ' +
-          'fallback picks up the digits instead',
-        expected: {
-          end: 'now',
-          type: [DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW],
-          isNaturalLanguage: false,
-          startOffset: null,
-        },
+          '(units are validated after matching), and the direction word marks the text ' +
+          'as a failed phrase, blocking the forgiving absolute-date fallback',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '5 minutes to spare',
+        note:
+          'natural-language vocabulary that matches no phrase template is a failed ' +
+          'phrase — without the vocabulary check the forgiving absolute-date fallback ' +
+          'would read the digits as a month and produce May 1',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '5 minutes',
+        note: 'bare "{count} {unit}" has no direction — ambiguous, so invalid',
+        expected: { isInvalid: true },
       },
       {
         input: 'now to now-7d',
