@@ -95,6 +95,31 @@ describe('findUserActions', () => {
       expect(clientArgs.services.userActionService.finder.find).not.toHaveBeenCalled();
     });
 
+    it('fetches undecoded results and only decodes the returned page', async () => {
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'world', page: 1, perPage: 1 } },
+        client,
+        clientArgs
+      );
+
+      expect(clientArgs.services.userActionService.finder.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({ decode: false })
+      );
+      expect(clientArgs.services.userActionService.finder.decodeUserActions).toHaveBeenCalledTimes(
+        1
+      );
+      // only the single paginated result is decoded, not both matches
+      expect(clientArgs.services.userActionService.finder.decodeUserActions).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.anything()])
+      );
+      expect(
+        (clientArgs.services.userActionService.finder.decodeUserActions as jest.Mock).mock
+          .calls[0][0]
+      ).toHaveLength(1);
+      expect(result.total).toBe(2);
+      expect(result.userActions).toHaveLength(1);
+    });
+
     it('filters user actions by search term in payload', async () => {
       const result = await find(
         { caseId: 'test-case', params: { search: 'Hello' } },

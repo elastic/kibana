@@ -122,6 +122,7 @@ const createUserActionFinderServiceMock = (): CaseUserActionFinderServiceMock =>
     find: jest.fn(),
     findAll: jest.fn(),
     findStatusChanges: jest.fn(),
+    decodeUserActions: jest.fn((userActions) => userActions),
   };
 
   return service as unknown as CaseUserActionFinderServiceMock;

@@ -235,6 +235,36 @@ describe('UserActionsService: Finder', () => {
 
       expect(res).toHaveLength(4);
       expect(close).toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Reached the limit of 4 user actions')
+      );
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('case id: 1'));
+    });
+
+    it('does not warn when the limit is not reached', async () => {
+      const userAction = createUserActionSO();
+      const soFindRes = createSOFindResponse([createUserActionFindSO(userAction)]);
+      mockFinder(soFindRes);
+
+      await finder.findAll({ caseId: '1', limit: 10 });
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('skips decoding when decode is false, allowing otherwise-invalid attributes through', async () => {
+      const invalidUserAction = createUserActionSO({
+        type: 'title',
+        payload: {},
+      });
+      mockFinder(createSOFindResponse([createUserActionFindSO(invalidUserAction)]));
+
+      await expect(finder.findAll({ caseId: '1' })).rejects.toThrow();
+
+      mockFinder(createSOFindResponse([createUserActionFindSO(invalidUserAction)]));
+
+      const res = await finder.findAll({ caseId: '1', decode: false });
+      expect(res).toHaveLength(1);
+      expect(res[0].attributes).toEqual(expect.objectContaining({ type: 'title', payload: {} }));
     });
 
     it('does not cap results when no limit is provided', async () => {
@@ -294,6 +324,28 @@ describe('UserActionsService: Finder', () => {
       const commentId = res[0].attributes.comment_id;
 
       expect(commentId).toBe(null);
+    });
+  });
+
+  describe('decodeUserActions', () => {
+    it('decodes valid attributes', async () => {
+      const userAction = createUserActionSO();
+      mockFinder(createSOFindResponse([createUserActionFindSO(userAction)]));
+      const [undecoded] = await finder.findAll({ caseId: '1', decode: false });
+
+      const [res] = finder.decodeUserActions([undecoded]);
+
+      expect(res.attributes).toEqual(
+        expect.objectContaining({ type: 'title', payload: { title: 'a new title' } })
+      );
+    });
+
+    it('throws when attributes are invalid', async () => {
+      const invalidUserAction = createUserActionSO({ type: 'title', payload: {} });
+      mockFinder(createSOFindResponse([createUserActionFindSO(invalidUserAction)]));
+      const [undecoded] = await finder.findAll({ caseId: '1', decode: false });
+
+      expect(() => finder.decodeUserActions([undecoded])).toThrow();
     });
   });
 

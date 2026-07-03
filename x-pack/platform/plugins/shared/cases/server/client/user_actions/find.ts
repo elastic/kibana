@@ -110,11 +110,19 @@ const findWithSearch = async ({
 }: FindWithSearchParams): Promise<UserActionFindResponse> => {
   const { page, perPage, ...findAllParams } = queryParams;
 
+  /**
+   * `matchesSearch` only reads `type`, `payload`, and `created_by` off the raw
+   * (transformed but undecoded) attributes, so we skip `decodeOrThrow` here and
+   * only decode the page of results we actually return. Otherwise we'd pay the
+   * io-ts decode cost for every user action in the case just to discard most of
+   * them during filtering/pagination.
+   */
   const allUserActions = await userActionService.finder.findAll({
     caseId,
     ...findAllParams,
     filter: authorizationFilter,
     limit: MAX_USER_ACTIONS_FOR_SEARCH,
+    decode: false,
   });
 
   ensureSavedObjectsAreAuthorized(
@@ -126,7 +134,9 @@ const findWithSearch = async ({
   const currentPage = page ?? DEFAULT_PAGE;
   const currentPerPage = perPage ?? DEFAULT_PER_PAGE;
   const start = (currentPage - 1) * currentPerPage;
-  const paged = filtered.slice(start, start + currentPerPage);
+  const paged = userActionService.finder.decodeUserActions(
+    filtered.slice(start, start + currentPerPage)
+  );
 
   const res = {
     userActions: paged.map(formatSavedObject),

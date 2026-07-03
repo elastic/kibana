@@ -99,7 +99,14 @@ export class UserActionFinder {
    * `limit` bounds how many user actions are collected before the PIT is closed,
    * to avoid unbounded memory/CPU usage for cases with very large activity logs
    * (see `MAX_USER_ACTIONS_FOR_SEARCH`). Callers that pass a `limit` should be
-   * aware that any user actions beyond it will not be considered.
+   * aware that any user actions beyond it will not be considered; a warning is
+   * logged whenever the cap is actually hit so truncation isn't silent.
+   *
+   * `decode` (defaults to `true`) controls whether each attribute is validated
+   * with `decodeOrThrow` as it's collected. Callers that only need a subset of
+   * the results (e.g. after filtering + pagination) can pass `decode: false` and
+   * call `decodeUserActions` themselves on just that subset, avoiding paying the
+   * io-ts decode cost for records that end up discarded.
    */
   public async findAll({
     caseId,
@@ -108,9 +115,11 @@ export class UserActionFinder {
     filter,
     author,
     limit,
-  }: Omit<FindOptions, 'page' | 'perPage' | 'search'> & { limit?: number }): Promise<
-    UserActionSavedObjectTransformed[]
-  > {
+    decode,
+  }: Omit<FindOptions, 'page' | 'perPage' | 'search'> & {
+    limit?: number;
+    decode?: boolean;
+  }): Promise<UserActionSavedObjectTransformed[]> {
     try {
       this.context.log.debug(`Attempting to find all user actions for case id: ${caseId}`);
 
@@ -129,12 +138,27 @@ export class UserActionFinder {
           filter: finalFilter,
           perPage: MAX_DOCS_PER_PAGE,
         },
-        limit
+        { limit, decode, caseId }
       );
     } catch (error) {
       this.context.log.error(`Error finding all user actions for case id: ${caseId}: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * Validates the attributes of user actions that were previously collected with
+   * `decode: false`. Kept separate from `findAll` so callers can filter/paginate
+   * an undecoded result set first and only pay the decode cost for what they
+   * actually return.
+   */
+  public decodeUserActions(
+    userActions: UserActionSavedObjectTransformed[]
+  ): UserActionSavedObjectTransformed[] {
+    return userActions.map((so) => ({
+      ...so,
+      attributes: decodeOrThrow(UserActionTransformedAttributesRt)(so.attributes),
+    }));
   }
 
   private static buildFilter(types: FindOptions['types'] = []) {
@@ -295,7 +319,7 @@ export class UserActionFinder {
 
   private async collectFromPIT(
     options: SavedObjectsCreatePointInTimeFinderOptions,
-    limit?: number
+    { limit, decode = true, caseId }: { limit?: number; decode?: boolean; caseId?: string } = {}
   ): Promise<UserActionSavedObjectTransformed[]> {
     const finder =
       this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<UserActionPersistedAttributes>(
@@ -303,6 +327,7 @@ export class UserActionFinder {
       );
 
     let results: UserActionSavedObjectTransformed[] = [];
+    let hitLimit = false;
 
     for await (const batch of finder.find()) {
       results = results.concat(
@@ -310,7 +335,9 @@ export class UserActionFinder {
           const res = transformToExternalModel(so);
           return {
             ...res,
-            attributes: decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes),
+            attributes: decode
+              ? decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes)
+              : (res.attributes as UserActionTransformedAttributes),
           };
         })
       );
@@ -319,9 +346,18 @@ export class UserActionFinder {
         // Stop pulling further pages once we've hit the cap. The PIT must be
         // explicitly closed here since we're breaking out before the finder's
         // generator naturally drains and auto-closes it.
+        hitLimit = true;
         await finder.close();
         break;
       }
+    }
+
+    if (hitLimit) {
+      this.context.log.warn(
+        `Reached the limit of ${limit} user actions while collecting user actions${
+          caseId ? ` for case id: ${caseId}` : ''
+        }. Results were truncated and may not reflect the case's full activity log.`
+      );
     }
 
     return limit != null ? results.slice(0, limit) : results;
