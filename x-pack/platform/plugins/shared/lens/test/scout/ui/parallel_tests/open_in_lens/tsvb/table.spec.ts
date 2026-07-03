@@ -172,7 +172,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
 
     // Open the metric dimension editor and verify converted palette color stops
     await dimensions.locator('nth=0').click();
-    await lens.openPalettePanel();
+    await lens.openPalettePanelFlyout();
     const colorStops = await lens.getPaletteColorStops(3);
     expect(colorStops[0].stop).toBe('10');
     expect(colorStops[0].color).toBeDefined();
@@ -180,7 +180,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     expect(colorStops[1].color).toBeDefined();
     expect(colorStops[2].stop).toBe('');
     expect(colorStops[2].color).toBeUndefined();
-    await lens.closePalettePanel();
+    await lens.closePalettePanelFlyout();
     await lens.closeDimensionEditorPanel();
   });
 

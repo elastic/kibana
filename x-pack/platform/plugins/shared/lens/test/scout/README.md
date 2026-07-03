@@ -24,7 +24,7 @@ node scripts/playwright test --project local --grep @local-stateful-classic --co
 
 The TSVB Open in Lens Scout tests verify that TSVB panels convert correctly to Lens.
 
-The non-dashboard TSVB conversion specs focus on conversion logic. The following dashboard persistence flows are tracked separately in `ui/parallel_tests/open_in_lens/tsvb/tsvb_dashboard_open_in_lens.spec.ts`:
+The non-dashboard TSVB conversion specs focus on conversion logic. The following dashboard persistence flows are tracked separately in `ui/parallel_tests/open_in_lens/tsvb/convert_from_dashboard.spec.ts`:
 
 - Save and return to dashboard: does the converted panel persist after saving?
 - Replace in dashboard: does the converted Lens panel replace the original TSVB panel?

@@ -195,7 +195,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.statefu
       ]);
 
     await dimensions[0].click();
-    await lens.openPalettePanel();
+    await lens.openPalettePanelFlyout();
     const colorStops = await lens.getPaletteColorStops();
     expect(colorStops).toStrictEqual([
       { color: 'rgba(0, 104, 55, 1)', stop: '12000000000' },

@@ -9,10 +9,10 @@ import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData, createOpenInLensSuiteSetup } from '../../../fixtures';
 
-spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
-    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.TSVB.GAUGE,
-    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.TSVB.GAUGE,
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.TSVB.METRIC,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.TSVB.METRIC,
   });
 
   spaceTest.beforeAll(openInLensSuite.beforeAll);
@@ -29,7 +29,7 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
     await spaceTest.step('unsupported metric has no Convert to Lens action', async () => {
       const hasAction = await dashboard.panelHasAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Gauge - Unsupported metric'
+        'Metric - Unsupported metric'
       );
       expect(hasAction).toBe(false);
     });
@@ -37,73 +37,75 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
     await spaceTest.step('invalid panel has no Convert to Lens action', async () => {
       const hasAction = await dashboard.panelHasAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Gauge - Invalid panel'
+        'Metric - Invalid panel'
       );
       expect(hasAction).toBe(false);
     });
 
-    await spaceTest.step('basic gauge has Convert to Lens action', async () => {
+    await spaceTest.step('basic metric has Convert to Lens action', async () => {
       const hasAction = await dashboard.panelHasAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Gauge - Basic'
+        'Metric - Basic'
       );
       expect(hasAction).toBe(true);
     });
   });
 
-  spaceTest('should convert basic gauge to Lens', async ({ page, pageObjects }) => {
+  spaceTest('should convert basic metric to Lens', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-      'Gauge - Basic'
+      'Metric - Basic'
     );
     await expect(page.testSubj.locator('mtrVis')).toBeVisible();
-
-    const metricValue = page.testSubj.locator('mtrVis').getByText('Count of records');
-    await expect(metricValue).toBeVisible();
+    await expect(page.testSubj.locator('mtrVis').getByText('Count of records')).toBeVisible();
   });
 
-  spaceTest('should convert gauge with metric params', async ({ page, pageObjects }) => {
+  spaceTest('should convert static value', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-      'Gauge - Value count'
+      'Metric - Static value'
     );
     await expect(page.testSubj.locator('mtrVis')).toBeVisible();
-
     const dimensions = page.testSubj.locator('lns-dimensionTrigger');
-    await expect(dimensions).toHaveCount(2);
+    await expect(dimensions).toHaveCount(1);
+    await expect(dimensions.getByText('10')).toBeVisible();
+  });
+
+  spaceTest('should convert metric agg with params', async ({ page, pageObjects }) => {
+    const { dashboard } = pageObjects;
+    await dashboard.clickPanelAction(
+      testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
+      'Metric - Agg with params'
+    );
+    await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+    const dimensions = page.testSubj.locator('lns-dimensionTrigger');
+    await expect(dimensions).toHaveCount(1);
     await expect(dimensions.getByText('Count of bytes')).toBeVisible();
-    await expect(dimensions.getByText('overall_max(count(bytes))')).toBeVisible();
   });
 
   spaceTest('should convert color ranges', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-      'Gauge - Color ranges'
+      'Metric - Color ranges'
     );
     await expect(page.testSubj.locator('mtrVis')).toBeVisible();
-
     const dimensions = page.testSubj.locator('lns-dimensionTrigger');
-    await expect(dimensions).toHaveCount(3);
+    await expect(dimensions).toHaveCount(1);
 
-    // Open the primary metric dimension editor and verify converted palette color stops
+    // Open the metric dimension editor and verify converted palette color stops
     await dimensions.locator('nth=0').click();
-    await lens.openPalettePanel();
-    const colorStops = await lens.getPaletteColorStops(4);
-    // First entry: default series color with no minimum
-    expect(colorStops[0].stop).toBe('');
+    await lens.openPalettePanelFlyout();
+    const colorStops = await lens.getPaletteColorStops(2);
+    // Converted color rule from TSVB background_color_rules
+    expect(colorStops[0].stop).toBe('10');
     expect(colorStops[0].color).toBeDefined();
-    // Converted color rules from the TSVB gauge_color_rules
-    expect(colorStops[1].stop).toBe('10');
-    expect(colorStops[1].color).toBeDefined();
-    expect(colorStops[2].stop).toBe('100');
-    expect(colorStops[2].color).toBeDefined();
     // Sentinel (end-of-range marker)
-    expect(colorStops[3].stop).toBe('');
-    expect(colorStops[3].color).toBeUndefined();
-    await lens.closePalettePanel();
+    expect(colorStops[1].stop).toBe('');
+    expect(colorStops[1].color).toBeUndefined();
+    await lens.closePalettePanelFlyout();
     await lens.closeDimensionEditorPanel();
   });
 
@@ -113,7 +115,7 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
       const { dashboard } = pageObjects;
       await dashboard.clickPanelAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Gauge - Ignore global filters series'
+        'Metric - Ignore global filters series'
       );
       await expect(page.testSubj.locator('mtrVis')).toBeVisible();
       await expect(page.testSubj.locator('lnsChangeIndexPatternIgnoringFilters')).toBeVisible();
@@ -126,7 +128,7 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
       const { dashboard } = pageObjects;
       await dashboard.clickPanelAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Gauge - Ignore global filters panel'
+        'Metric - Ignore global filters panel'
       );
       await expect(page.testSubj.locator('mtrVis')).toBeVisible();
       await expect(page.testSubj.locator('lnsChangeIndexPatternIgnoringFilters')).toBeVisible();
