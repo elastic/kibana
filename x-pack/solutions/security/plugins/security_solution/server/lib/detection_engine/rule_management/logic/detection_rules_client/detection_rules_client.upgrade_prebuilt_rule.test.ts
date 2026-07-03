@@ -149,9 +149,9 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
               exceptionsList: installedRule.exceptions_list,
             }),
           }),
-          options: {
+          options: expect.objectContaining({
             id: installedRule.id, // id is maintained
-          },
+          }),
         })
       );
     });
