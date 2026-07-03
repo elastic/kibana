@@ -171,9 +171,10 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
         }
 
         // create the migration
-        const { migration_id: migrationId } = await api.createRuleMigration({
+        const { migration_id } = await api.createRuleMigration({
           name: migrationName,
         });
+        migrationId = migration_id;
         const { count } = await this.addSentinelRulesToMigration(migrationId, rules);
         this.telemetry.reportSetupMigrationCreated({ migrationId, count, vendor });
 
