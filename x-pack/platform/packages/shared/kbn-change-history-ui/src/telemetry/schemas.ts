@@ -9,6 +9,7 @@ import type { RootSchema } from '@kbn/core/public';
 import {
   ChangeHistoryTelemetryEventTypes,
   type ReportChangeHistoryChangeSelectedActionParams,
+  type ReportChangeHistoryDiffChangeNavigatedActionParams,
   type ReportChangeHistoryDiffViewedActionParams,
   type ReportChangeHistoryFilterAppliedActionParams,
   type ReportChangeHistoryOpenedActionParams,
@@ -115,14 +116,15 @@ const diffViewedSchema: RootSchema<ReportChangeHistoryDiffViewedActionParams> = 
     type: 'keyword',
     _meta: {
       description:
-        'Compare baseline: vs_current (selected vs live) or vs_previous (selected vs prior row)',
+        'Compare baseline: vs_previous (selected vs prior row) or vs_row (selected vs row action target)',
       optional: false,
     },
   },
   versionDistance: {
     type: 'integer',
     _meta: {
-      description: 'Absolute difference between baseline and target sequences when both present',
+      description:
+        'Absolute difference between baseline and target `metadata.version` when both are present (consumer convention)',
       optional: true,
     },
   },
@@ -133,10 +135,10 @@ const diffViewedSchema: RootSchema<ReportChangeHistoryDiffViewedActionParams> = 
       optional: true,
     },
   },
-  hasSemanticSummary: {
+  hasChangesSummaryTooltip: {
     type: 'boolean',
     _meta: {
-      description: 'Whether a structure-aware diff summary is shown',
+      description: 'Whether the host renders a change-summary tooltip for the compared target row',
       optional: true,
     },
   },
@@ -202,11 +204,24 @@ const restoreFailedSchema: RootSchema<ReportChangeHistoryRestoreFailedActionPara
   },
 };
 
+const diffChangeNavigatedSchema: RootSchema<ReportChangeHistoryDiffChangeNavigatedActionParams> = {
+  ...eventNameSchema,
+  ...scopeSchema,
+  navigationSource: {
+    type: 'keyword',
+    _meta: {
+      description: 'Navigation control used to move between diff changes',
+      optional: false,
+    },
+  },
+};
+
 export const changeHistoryTelemetryEventSchemas = {
   [ChangeHistoryTelemetryEventTypes.Opened]: openedSchema,
   [ChangeHistoryTelemetryEventTypes.ChangeSelected]: changeSelectedSchema,
   [ChangeHistoryTelemetryEventTypes.FilterApplied]: filterAppliedSchema,
   [ChangeHistoryTelemetryEventTypes.DiffViewed]: diffViewedSchema,
+  [ChangeHistoryTelemetryEventTypes.DiffChangeNavigated]: diffChangeNavigatedSchema,
   [ChangeHistoryTelemetryEventTypes.RestoreConfirmed]: restoreConfirmedSchema,
   [ChangeHistoryTelemetryEventTypes.RestoreCompleted]: restoreCompletedSchema,
   [ChangeHistoryTelemetryEventTypes.RestoreFailed]: restoreFailedSchema,
