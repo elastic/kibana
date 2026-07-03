@@ -50,6 +50,7 @@ The 'skill' parameter accepts the skill name, the full path of the skill's folde
   schema,
   tags: ['skills'],
   summarizeToolReturn: preserveResults,
+  maxResultTokens: Infinity,
   handler: async ({ skill: skillInput }, ctx) => {
     const { skills, toolProvider, toolManager, request, logger, runContext } = ctx;
 

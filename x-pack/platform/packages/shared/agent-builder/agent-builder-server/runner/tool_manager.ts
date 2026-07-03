@@ -54,6 +54,13 @@ export interface ToolManager {
   setEventEmitter(eventEmitter: AgentEventEmitterFn): void;
 
   /**
+   * Sets the token budget used by the tool-result length guardrail for tools that
+   * don't define their own `maxResultTokens` override. Should be called once per run
+   * before adding tools; defaults to `DEFAULT_MAX_TOOL_RESULT_TOKENS` if never called.
+   */
+  setMaxToolResultTokens(maxTokens: number): void;
+
+  /**
    * Adds tools to the tool manager.
    * Supports both executable tools and browser API tools.
    * @param input - The tool input configuration (executable or browser)

@@ -122,6 +122,7 @@ export const createBashTool = ({
     type: ToolType.builtin,
     schema,
     tags: ['bash'],
+    maxResultTokens: Infinity,
     handler: async ({ command }) => {
       const result = await bashService.exec(command);
       return { results: [createOtherResult(result)] };

@@ -30,4 +30,10 @@ describe('bash tool', () => {
       exit_code: 0,
     });
   });
+
+  it('is exempt from the tool-result length guardrail', () => {
+    const bashService = { exec: jest.fn() } as unknown as IBashService;
+    const tool = createBashTool({ bashService });
+    expect(tool.maxResultTokens).toBe(Infinity);
+  });
 });
