@@ -96,16 +96,11 @@ export const useAllSources = ({
       // Render preloaded sources immediately, then append federated datasets when they
       // arrive, since preloaded sources come from the autocomplete cache and don't include them.
       setAllSources(preloadedSources);
-      setIsLoading(true);
-      fetchDatasets()
-        .then((datasets) => {
-          if (isMountedRef.current && isEffectActive) {
-            setAllSources(mergeSources(preloadedSources, datasets));
-          }
-        })
-        .finally(() => {
-          if (isMountedRef.current && isEffectActive) setIsLoading(false);
-        });
+      fetchDatasets().then((datasets) => {
+        if (isMountedRef.current && isEffectActive) {
+          setAllSources(mergeSources(preloadedSources, datasets));
+        }
+      });
       return () => {
         isEffectActive = false;
       };
