@@ -209,5 +209,18 @@ describe('ExpressionRow', () => {
       expect(wrapper.text()).toContain('Alert');
       expect(wrapper.text()).toContain('Warning');
     });
+
+    it('does not auto-open the popover when mounting with an already-configured warning threshold', async () => {
+      // e.g. opening the edit flyout for an existing rule that already has a
+      // warning threshold — only a fresh click on "Add warning threshold"
+      // should force the popover open, not every render of an existing one.
+      const { wrapper } = await setup({
+        ...baseExpression,
+        warningComparator: COMPARATORS.GREATER_THAN,
+        warningThreshold: [0.25],
+      });
+
+      expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]').exists()).toBe(false);
+    });
   });
 });

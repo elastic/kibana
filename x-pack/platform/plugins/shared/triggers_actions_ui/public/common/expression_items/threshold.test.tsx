@@ -201,4 +201,21 @@ describe('threshold expression', () => {
 
     expect(screen.getByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
   });
+
+  it('renders a badge inside the closed expression, next to the value', () => {
+    renderWithIntl(
+      <ThresholdExpression
+        thresholdComparator={'>'}
+        threshold={[10]}
+        errors={{ threshold0: [], threshold1: [] }}
+        onChangeSelectedThreshold={jest.fn()}
+        onChangeSelectedThresholdComparator={jest.fn()}
+        badge={<span data-test-subj="myBadge">Warning</span>}
+      />
+    );
+
+    const button = screen.getByTestId('thresholdPopover');
+    expect(button).toHaveTextContent('Is above 10Warning');
+    expect(screen.getByTestId('myBadge')).toBeInTheDocument();
+  });
 });

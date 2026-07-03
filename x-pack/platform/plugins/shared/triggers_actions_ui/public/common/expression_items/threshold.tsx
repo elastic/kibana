@@ -52,6 +52,12 @@ export interface ThresholdExpressionProps {
   // the user straight to filling it in rather than leaving it looking like
   // an unexplained invalid state. Only affects the initial render.
   initialPopoverOpen?: boolean;
+  // Rendered immediately after the threshold value, inside the same
+  // expression button. Must not contain interactive elements (buttons,
+  // links) — EuiExpression renders as a native <button>, so anything
+  // clickable nested inside it is invalid HTML and won't get its own click
+  // handling; put a bare label/icon here, not controls.
+  badge?: React.ReactNode;
 }
 
 export const ThresholdExpression = ({
@@ -65,6 +71,7 @@ export const ThresholdExpression = ({
   popupPosition,
   unit = '',
   initialPopoverOpen = false,
+  badge,
 }: ThresholdExpressionProps) => {
   const comparators = customComparators ?? builtInComparators;
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(initialPopoverOpen);
@@ -101,7 +108,11 @@ export const ThresholdExpression = ({
           data-test-subj="thresholdPopover"
           description={comparators[comparator].text}
           value={
-            (threshold || []).slice(0, numRequiredThresholds).join(` ${andThresholdText} `) + unit
+            <>
+              {(threshold || []).slice(0, numRequiredThresholds).join(` ${andThresholdText} `) +
+                unit}
+              {badge}
+            </>
           }
           isActive={Boolean(
             alertThresholdPopoverOpen ||
