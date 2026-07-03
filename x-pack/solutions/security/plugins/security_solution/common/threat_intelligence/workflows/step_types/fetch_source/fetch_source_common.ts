@@ -76,12 +76,13 @@ export const fetchSourceInputSchema = z.object({
  * `op_type: create` writes from the workflow succeed against
  * `dynamic: 'strict'`.
  *
- * Adapter-only fields (anything not yet populated until the
- * `nl_extraction_behavioral` workflow runs) are intentionally omitted:
- * `extracted.*`, `geography.*`, `feedback.*`, `rank_score`,
- * `corroborated_rank_score`. Setting them at ingestion time would either
- * pollute the index with `extraction_method: 'pending'` rows that
- * already look "extracted", or fail the strict mapping.
+ * Most `extracted.*` fields are populated by the `nl_extraction_behavioral`
+ * workflow, not at ingest time — omitting `geography.*`, `feedback.*`,
+ * `rank_score`, `corroborated_rank_score` here prevents ingestion-time writes
+ * from touching those slots. Exception: `extracted.iocs` MAY be seeded at
+ * ingest by structured adapters (e.g. STIX indicator SDOs via `parseStixPattern`).
+ * When seeded, the doc carries `provenance.extraction_method: 'stix'` — an honest
+ * flag (not fake-pending) that tells nl-extraction to skip it (Slice D).
  */
 export const normalizedReportSchema = z.object({
   '@timestamp': z.string().describe('ISO-8601 ingestion wall-clock'),
@@ -102,6 +103,22 @@ export const normalizedReportSchema = z.object({
     body_text: z.string(),
     body_html: z.string().optional(),
     language: z.string().default('en'),
+    /**
+     * Structured external references from the upstream item (e.g. STIX
+     * `external_references`). Not flattened into body_text — kept structured
+     * so a future router can mine these URLs to discover primary sources.
+     * Absent on adapters that don't produce structured references.
+     */
+    external_references: z
+      .array(
+        z.object({
+          source_name: z.string(),
+          url: z.string().optional(),
+          external_id: z.string().optional(),
+          description: z.string().optional(),
+        })
+      )
+      .optional(),
   }),
   severity: z.object({
     level: z.enum(SEVERITY_LEVELS),
@@ -110,14 +127,19 @@ export const normalizedReportSchema = z.object({
   provenance: z.object({
     ingested_at: z.string(),
     /**
-     * Always `'pending'` at ingestion time. The
-     * `nl_extraction_behavioral` workflow finds rows by this exact
-     * filter, runs IOC + behavioral extraction against them, and then
-     * stamps the row's `provenance.extraction_method` to the actual
-     * extractor name (e.g. `'regex+llm'`). Any other value here would
-     * silently exclude the report from extraction.
+     * `'pending'` — needs nl-extraction (all non-structured adapters).
+     * `'stix'`    — already structured at ingest via parseStixPattern;
+     *               nl-extraction skips this doc (Slice D).
+     * Any other value silently excludes the report from extraction.
      */
-    extraction_method: z.literal('pending'),
+    extraction_method: z.enum(['pending', 'stix']),
+    /**
+     * ISO-8601 wall-clock of the extraction run. Set by structured adapters
+     * at ingest (STIX indicator path) OR stamped later by nl-extraction.
+     * The `ioc_indicator_sync` task keys its scan off this field — a STIX
+     * partner doc MUST set it to be picked up by the sync task.
+     */
+    extracted_at: z.string().optional(),
     /**
      * Optional pointer back to the upstream item. `index` is a free-form
      * descriptor of the upstream container ("rss:feed", "stix:bundle",
@@ -132,6 +154,28 @@ export const normalizedReportSchema = z.object({
       })
       .optional(),
   }),
+  /**
+   * IOCs seeded at ingest by structured adapters. Only present when
+   * `provenance.extraction_method` is `'stix'` (or a future structured
+   * adapter). The array mirrors the `ExtractedIoc` shape from
+   * `services/extract_iocs.ts`; plain z.string() is used for enum fields
+   * since extract_iocs already validates them upstream.
+   */
+  extracted: z
+    .object({
+      iocs: z.array(
+        z.object({
+          type: z.string(),
+          value: z.string(),
+          defanged: z.string().optional(),
+          tier: z.string(),
+          tier_heuristic: z.string(),
+          tier_basis: z.string(),
+          port: z.number().optional(),
+        })
+      ),
+    })
+    .optional(),
 });
 
 export type NormalizedReport = z.infer<typeof normalizedReportSchema>;

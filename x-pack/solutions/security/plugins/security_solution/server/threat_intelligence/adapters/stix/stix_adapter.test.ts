@@ -7,6 +7,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { stixAdapter } from './stix_adapter';
+import { normalizedReportSchema } from '../../../../../common/threat_intelligence/workflows/step_types/fetch_source/fetch_source_common';
 import type { AdapterRunContext, SourceHit } from '../types';
 
 const URL = 'https://stix.example/bundle.json';
@@ -71,10 +72,14 @@ describe('stixAdapter', () => {
       source: { type: 'stix', adapter_id: 'stix:stix:vendor', url: URL },
       content: { title: 'IOC: bad domain' },
       provenance: {
-        extraction_method: 'pending',
+        // parseable stix pattern → structured partner doc; nl-extraction skips it
+        extraction_method: 'stix',
+        extracted_at: NOW.toISOString(),
         source_doc_ref: { index: 'stix:bundle', id: 'indicator--1' },
       },
     });
+    expect(reports[0].extracted?.iocs).toHaveLength(1);
+    expect(reports[0].extracted?.iocs[0]).toMatchObject({ type: 'domain', value: 'bad.example' });
     expect(reports[0].content.body_text).toContain(
       "Pattern (stix): [domain-name:value = 'bad.example']"
     );
@@ -112,5 +117,191 @@ describe('stixAdapter', () => {
     );
     const reports = await stixAdapter.run(buildSource(), buildContext(fetchMock));
     expect(reports).toEqual([]);
+  });
+
+  it('indicator SDO with parseable pattern → extraction_method:stix, extracted_at set, extracted.iocs populated, body_text still present', async () => {
+    const fetchMock = jest.fn().mockResolvedValue(
+      okJson({
+        type: 'bundle',
+        id: 'bundle--2',
+        objects: [
+          {
+            type: 'indicator',
+            id: 'indicator--2',
+            name: 'Malicious IP',
+            description: 'Known C2 server.',
+            modified: '2026-05-15T00:00:00Z',
+            pattern: "[ipv4-addr:value = '1.2.3.4']",
+            pattern_type: 'stix',
+          },
+        ],
+      })
+    );
+    const reports = await stixAdapter.run(buildSource(), buildContext(fetchMock));
+    expect(reports).toHaveLength(1);
+    const [report] = reports;
+    expect(report.provenance.extraction_method).toBe('stix');
+    expect(report.provenance.extracted_at).toBe(NOW.toISOString());
+    expect(report.extracted?.iocs).toHaveLength(1);
+    expect(report.extracted?.iocs[0]).toMatchObject({ type: 'ip', value: '1.2.3.4', tier: 'contextual' });
+    expect(report.content.body_text).toContain('Known C2 server');
+  });
+
+  it('indicator SDO with unparseable pattern (yara dialect) → falls back to extraction_method:pending, no extracted', async () => {
+    const fetchMock = jest.fn().mockResolvedValue(
+      okJson({
+        type: 'bundle',
+        id: 'bundle--3',
+        objects: [
+          {
+            type: 'indicator',
+            id: 'indicator--3',
+            name: 'YARA rule',
+            description: 'Detects malware via YARA.',
+            modified: '2026-05-15T00:00:00Z',
+            pattern: 'rule malware { strings: $a = "bad" condition: $a }',
+            pattern_type: 'yara',
+          },
+        ],
+      })
+    );
+    const reports = await stixAdapter.run(buildSource(), buildContext(fetchMock));
+    expect(reports).toHaveLength(1);
+    const [report] = reports;
+    expect(report.provenance.extraction_method).toBe('pending');
+    expect(report.provenance.extracted_at).toBeUndefined();
+    expect(report.extracted).toBeUndefined();
+  });
+
+  it('indicator SDO with IN-list pattern (no = literal) → falls back to pending', async () => {
+    const fetchMock = jest.fn().mockResolvedValue(
+      okJson({
+        type: 'bundle',
+        id: 'bundle--4',
+        objects: [
+          {
+            type: 'indicator',
+            id: 'indicator--4',
+            name: 'IN list',
+            description: 'Multiple IPs.',
+            modified: '2026-05-15T00:00:00Z',
+            pattern: "[ipv4-addr:value IN ('1.2.3.4', '5.6.7.8')]",
+            pattern_type: 'stix',
+          },
+        ],
+      })
+    );
+    const reports = await stixAdapter.run(buildSource(), buildContext(fetchMock));
+    expect(reports).toHaveLength(1);
+    const [report] = reports;
+    expect(report.provenance.extraction_method).toBe('pending');
+    expect(report.extracted).toBeUndefined();
+  });
+
+  it('indicator SDO with external_references → content.external_references structured and correct', async () => {
+    const fetchMock = jest.fn().mockResolvedValue(
+      okJson({
+        type: 'bundle',
+        id: 'bundle--5',
+        objects: [
+          {
+            type: 'indicator',
+            id: 'indicator--5',
+            name: 'Ref indicator',
+            description: 'Has references.',
+            modified: '2026-05-15T00:00:00Z',
+            pattern: "[domain-name:value = 'evil.example']",
+            pattern_type: 'stix',
+            external_references: [
+              { source_name: 'mitre', external_id: 'T1234', url: 'https://attack.mitre.org/T1234' },
+              { source_name: 'nvd', description: 'CVE notes' },
+              { not_a_source_name: 'should be dropped' },
+            ],
+          },
+        ],
+      })
+    );
+    const reports = await stixAdapter.run(buildSource(), buildContext(fetchMock));
+    expect(reports).toHaveLength(1);
+    const refs = reports[0].content.external_references;
+    expect(refs).toHaveLength(2);
+    expect(refs![0]).toEqual({ source_name: 'mitre', external_id: 'T1234', url: 'https://attack.mitre.org/T1234' });
+    expect(refs![1]).toEqual({ source_name: 'nvd', description: 'CVE notes' });
+  });
+
+  it('non-indicator SDO (malware) → unchanged shape: pending, no extracted, no external_references', async () => {
+    const fetchMock = jest.fn().mockResolvedValue(
+      okJson({
+        type: 'bundle',
+        id: 'bundle--6',
+        objects: [
+          {
+            type: 'malware',
+            id: 'malware--1',
+            name: 'BadBot',
+            description: 'A RAT.',
+            modified: '2026-05-15T00:00:00Z',
+          },
+        ],
+      })
+    );
+    const reports = await stixAdapter.run(buildSource(), buildContext(fetchMock));
+    expect(reports).toHaveLength(1);
+    const [report] = reports;
+    expect(report.provenance.extraction_method).toBe('pending');
+    expect(report.provenance.extracted_at).toBeUndefined();
+    expect(report.extracted).toBeUndefined();
+    expect(report.content.external_references).toBeUndefined();
+  });
+
+  it('report without external_references → field absent on non-indicator SDO', async () => {
+    const fetchMock = jest.fn().mockResolvedValue(
+      okJson({
+        type: 'bundle',
+        id: 'bundle--7',
+        objects: [
+          {
+            type: 'threat-actor',
+            id: 'threat-actor--2',
+            name: 'NoRefs',
+            description: 'No external refs.',
+            created: '2026-05-10T00:00:00Z',
+          },
+        ],
+      })
+    );
+    const reports = await stixAdapter.run(buildSource(), buildContext(fetchMock));
+    expect(reports[0].content.external_references).toBeUndefined();
+  });
+
+  it('normalizedReportSchema parses both a legacy pending report and a new stix report (back-compat)', () => {
+    const pendingReport = {
+      '@timestamp': '2026-05-16T12:00:00.000Z',
+      content_fingerprint: 'abc123',
+      space_id: '*',
+      source: { type: 'stix' as const, name: 'Test', url: 'https://example.com', adapter_id: 'stix:test' },
+      content: { title: 'Test', body_text: 'body', language: 'en' },
+      severity: { level: 'low' as const, score: 1 },
+      provenance: {
+        ingested_at: '2026-05-16T12:00:00.000Z',
+        extraction_method: 'pending' as const,
+        source_doc_ref: { index: 'stix:bundle', id: 'indicator--1' },
+      },
+    };
+    expect(() => normalizedReportSchema.parse(pendingReport)).not.toThrow();
+
+    const stixReport = {
+      ...pendingReport,
+      provenance: {
+        ingested_at: '2026-05-16T12:00:00.000Z',
+        extraction_method: 'stix' as const,
+        extracted_at: '2026-05-16T12:00:00.000Z',
+        source_doc_ref: { index: 'stix:bundle', id: 'indicator--1' },
+      },
+      extracted: {
+        iocs: [{ type: 'ip', value: '1.2.3.4', tier: 'contextual', tier_heuristic: 'contextual', tier_basis: 'stix_pattern' }],
+      },
+    };
+    expect(() => normalizedReportSchema.parse(stixReport)).not.toThrow();
   });
 });

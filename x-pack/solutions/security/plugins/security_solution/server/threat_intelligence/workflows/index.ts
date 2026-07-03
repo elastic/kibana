@@ -14,6 +14,14 @@ import HIT_PROVENANCE_BACKFILL_YAML from './hit_provenance_backfill.yaml';
 import NL_EXTRACTION_BEHAVIORAL_YAML from './nl_extraction_behavioral.yaml';
 import SOURCE_INGESTION_YAML from './source_ingestion.yaml';
 
+// Retry configuration for the startup-race window. workflowsManagement's
+// internal startServices() promise resolves once all plugin starts complete,
+// but the validation service may still be initialising connectors when our
+// start() fires. Five attempts with exponential backoff (1s, 2s, 4s, 8s)
+// covers a ~15 s window — enough to outlast any realistic boot lag.
+const INSTALL_MAX_ATTEMPTS = 5;
+const INSTALL_BASE_DELAY_MS = 1_000;
+
 const DEFAULT_SPACE_ID = 'default';
 
 // A minimal fake KibanaRequest used for background operations that have no
@@ -68,10 +76,12 @@ export const BUILTIN_WORKFLOWS = [
  * Workflows Management plugin. Built-ins live in the default space so they
  * are visible to operators from any space's Workflows UI.
  *
- * Best-effort: failures are logged and swallowed. Threat intelligence ships
- * other ways to populate `.kibana-threat-reports-*` (the manual
- * `ingest_report` route, operator-installed sources), so the dashboard is
- * not 100% dependent on the workflows being installed.
+ * Retries up to INSTALL_MAX_ATTEMPTS times with exponential backoff to handle
+ * the startup-race window where workflowsManagement's validation service may
+ * not be fully ready when security_solution's start() fires.
+ *
+ * Partial failures (created.length < BUILTIN_WORKFLOWS.length) are treated as
+ * errors, not warnings, so silent missing workflows cannot recur.
  *
  * Caller is expected to invoke this only when the optional
  * `workflowsManagement` plugin is present; the function takes the setup
@@ -81,9 +91,12 @@ export const BUILTIN_WORKFLOWS = [
 export const installBuiltinWorkflows = async ({
   workflowsManagement,
   logger,
+  _delayFn = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
 }: {
   workflowsManagement: WorkflowsServerPluginSetup;
   logger: Logger;
+  /** Injected only in tests to avoid real timers. */
+  _delayFn?: (ms: number) => Promise<void>;
 }): Promise<void> => {
   const log = logger.get('install-builtin-workflows');
 
@@ -94,21 +107,45 @@ export const installBuiltinWorkflows = async ({
   // be empty, also yielding 'system'. This matches the standard Kibana pattern
   // used by entity-analytics background tasks (see risk_score/tasks/helpers.ts).
   const systemRequest = buildSystemRequest();
-  const { created, failed } = await workflowsManagement.management.bulkCreateWorkflows(
-    BUILTIN_WORKFLOWS.map((wf) => ({
-      id: wf.id,
-      yaml: wf.yaml,
-    })),
-    DEFAULT_SPACE_ID,
-    systemRequest,
-    { overwrite: true }
-  );
+  const payload = BUILTIN_WORKFLOWS.map((wf) => ({ id: wf.id, yaml: wf.yaml }));
 
-  for (const result of created) {
-    log.debug(`Built-in workflow ${result.id} created/updated`);
-  }
+  for (let attempt = 1; attempt <= INSTALL_MAX_ATTEMPTS; attempt++) {
+    const { created, failed } = await workflowsManagement.management.bulkCreateWorkflows(
+      payload,
+      DEFAULT_SPACE_ID,
+      systemRequest,
+      { overwrite: true }
+    );
 
-  for (const failure of failed) {
-    log.warn(`Failed to ensure built-in workflow ${failure.id}: ${failure.error}`);
+    for (const result of created) {
+      log.debug(`Built-in workflow ${result.id} created/updated`);
+    }
+
+    const missingIds = BUILTIN_WORKFLOWS.map((wf) => wf.id).filter(
+      (id) => !created.some((c) => c.id === id)
+    );
+
+    if (missingIds.length === 0) {
+      // All registered successfully.
+      return;
+    }
+
+    for (const failure of failed) {
+      log.error(
+        `Built-in workflow ${failure.id} failed to register (attempt ${attempt}/${INSTALL_MAX_ATTEMPTS}): ${failure.error}`
+      );
+    }
+
+    if (attempt < INSTALL_MAX_ATTEMPTS) {
+      const delayMs = INSTALL_BASE_DELAY_MS * Math.pow(2, attempt - 1);
+      log.warn(
+        `${missingIds.length} built-in workflow(s) not registered after attempt ${attempt}; retrying in ${delayMs}ms. Missing: ${missingIds.join(', ')}`
+      );
+      await _delayFn(delayMs);
+    } else {
+      log.error(
+        `Built-in workflow registration failed after ${INSTALL_MAX_ATTEMPTS} attempts. Missing: ${missingIds.join(', ')}. The threat intelligence dashboard will not run autonomously until workflows are manually re-registered or Kibana is restarted.`
+      );
+    }
   }
 };

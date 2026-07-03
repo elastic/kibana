@@ -153,6 +153,17 @@ import {
  *   Without this mapping, strict dynamic mapping rejected any IOC with a port field.
  *   A `migrateExistingIocPortMapping` call patches pre-v17 backing indices at startup.
  *
+ * v18: adds `content.external_references` (nested) — structured citations captured from
+ *   STIX SDOs (ExternalReference array on SDO.external_references). Each entry has:
+ *   - `source_name`  (keyword) — e.g. "mitre-attack", "cve".
+ *   - `url`          (keyword) — canonical citation URL; exact-match target for source-discovery.
+ *   - `external_id`  (keyword) — e.g. "T1059.001", "CVE-2024-12345".
+ *   - `description`  (text, index:false) — prose reference note; stored but not searched.
+ *   Typed as `nested` so per-entry field associations are preserved for future multi-field
+ *   queries (e.g. "docs where MITRE cited url X"). Consumed as cross-links (report↔report)
+ *   and as the source-discovery seed queue by the self-watering router.
+ *   A `migrateExistingExternalReferencesMapping` call patches pre-v18 backing indices at startup.
+ *
  * v16: adds `extracted.gate.*` (7 fields) — the relevance/provenance gate verdict block.
  *   Note: `primary_links` is deferred — no consumer until Slice-5 link-chasing.
  *   A `migrateExistingGateMappings` call patches pre-v16 backing indices at startup.
@@ -182,7 +193,7 @@ import {
  * template PUT or rollover). `bootstrap_threat_intelligence` logs an error at
  * startup if the endpoint is absent so operators catch the gap before data flows.
  */
-const TEMPLATE_VERSION = 17;
+const TEMPLATE_VERSION = 18;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -258,6 +269,18 @@ const threatReportsTemplate = {
             body_text_bm25: { type: 'text' as const },
             body_html: { type: 'text' as const, index: false },
             language: { type: 'keyword' as const },
+            // Structured citations from STIX SDOs (external_references array). Nested so
+            // per-entry field associations survive multi-field queries (e.g. source_name +
+            // url). description is stored but not searched (prose reference note).
+            external_references: {
+              type: 'nested' as const,
+              properties: {
+                source_name: { type: 'keyword' as const },
+                url: { type: 'keyword' as const },
+                external_id: { type: 'keyword' as const },
+                description: { type: 'text' as const, index: false as const },
+              },
+            },
           },
         },
         severity: {
@@ -1068,6 +1091,81 @@ const migrateExistingGateMappings = async (
   }
 };
 
+/**
+ * Patches the `content.external_references` nested field onto any existing
+ * `.ds-.kibana-threat-reports-*` backing indices created before the v18 template.
+ * The v18 template adds this field automatically to new rollovers; pre-existing
+ * backing indices keep their original mapping until explicitly updated.
+ *
+ * Safe to re-run on every plugin start: PUT mapping is idempotent for additive
+ * nested fields. Without this, writes to pre-v18 indices fail with
+ * `strict_dynamic_mapping_exception` because `dynamic: 'strict'` rejects
+ * unknown fields under `content`.
+ */
+const migrateExistingExternalReferencesMapping = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('external-references-mapping-migration');
+
+  let backingIndices: string[];
+  try {
+    const streamInfo = await esClient.indices.getDataStream(
+      { name: THREAT_REPORTS_DATA_STREAM },
+      { ignore: [404] }
+    );
+    backingIndices = (streamInfo.data_streams ?? []).flatMap((ds) =>
+      (ds.indices ?? []).map((i) => i.index_name)
+    );
+  } catch (err) {
+    log.debug(
+      `external-references-mapping-migration: data stream not found — skipping (${(err as Error).message})`
+    );
+    return;
+  }
+
+  for (const indexName of backingIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const contentProps = (
+        indexMappings?.mappings?.properties as
+          | Record<string, { properties?: Record<string, unknown> }>
+          | undefined
+      )?.content?.properties;
+
+      if (!contentProps?.external_references) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            content: {
+              properties: {
+                external_references: {
+                  type: 'nested',
+                  properties: {
+                    source_name: { type: 'keyword' },
+                    url: { type: 'keyword' },
+                    external_id: { type: 'keyword' },
+                    description: { type: 'text', index: false },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(`Migrated external_references mapping on ${indexName} (v18 backfill)`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate external_references mapping on ${indexName}: ${(err as Error).message}. ` +
+          `The content.external_references field will be rejected by dynamic: strict until the ` +
+          `mapping is updated manually.`
+      );
+    }
+  }
+};
+
 const ensureCompanionIndex = async (
   esClient: ElasticsearchClient,
   indexName: string,
@@ -1148,6 +1246,8 @@ export const installIndexTemplates = async ({
   await migrateExistingGateMappings(esClient, log);
   // Patch ioc port field onto any pre-v17 backing indices. Safe to re-run.
   await migrateExistingIocPortMapping(esClient, log);
+  // Patch content.external_references nested field onto any pre-v18 backing indices. Safe to re-run.
+  await migrateExistingExternalReferencesMapping(esClient, log);
 
   log.info('Threat intelligence index templates installed');
 };

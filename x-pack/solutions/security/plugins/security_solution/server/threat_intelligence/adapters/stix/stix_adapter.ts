@@ -12,6 +12,7 @@ import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../severity';
 import { buildReportContent, collapseWhitespace, truncate } from '../text';
 import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from '../types';
 import { composeStixBody, composeStixTitle, splitStixBundle } from './split_bundle';
+import { parseStixPattern } from './parse_pattern';
 
 const TITLE_MAX_LENGTH = 280;
 const BODY_TEXT_MAX_LENGTH = 32_000;
@@ -73,6 +74,65 @@ export const stixAdapter: FetchAdapter = {
       // while a re-fetch of the unchanged SDO collapses.
       const versionStamp = object.modified ?? object.created ?? '';
       const fingerprint = buildFingerprint([url, object.id, versionStamp]);
+
+      // Capture external_references defensively — each entry must have a string source_name.
+      const rawRefs = Array.isArray(object.external_references) ? object.external_references : [];
+      const externalReferences = rawRefs
+        .filter((r): r is Record<string, unknown> => r !== null && typeof r === 'object')
+        .flatMap((r) => {
+          if (typeof r.source_name !== 'string') return [];
+          return [
+            {
+              source_name: r.source_name,
+              ...(typeof r.url === 'string' ? { url: r.url } : {}),
+              ...(typeof r.external_id === 'string' ? { external_id: r.external_id } : {}),
+              ...(typeof r.description === 'string' ? { description: r.description } : {}),
+            },
+          ];
+        });
+
+      // Branch: indicator SDOs get parsed IOCs seeded at ingest; all others fall through
+      // to the standard pending-extraction path.
+      let provenance: NormalizedReport['provenance'];
+      let extracted: NormalizedReport['extracted'];
+
+      if (object.type === 'indicator') {
+        const iocs = parseStixPattern(
+          typeof object.pattern === 'string' ? object.pattern : '',
+          typeof object.pattern_type === 'string' ? object.pattern_type : undefined
+        );
+        if (iocs.length > 0) {
+          // Parseable indicator pattern → structured "partner doc": skip nl-extraction.
+          provenance = {
+            ingested_at: ingestedAt,
+            extraction_method: 'stix',
+            extracted_at: ingestedAt,
+            source_doc_ref: { index: SOURCE_DOC_REF_INDEX, id: object.id },
+          };
+          extracted = { iocs };
+        } else {
+          // unparseable indicator pattern → fall back to article path rather than emit
+          // an empty structured doc.
+          provenance = {
+            ingested_at: ingestedAt,
+            extraction_method: 'pending',
+            source_doc_ref: { index: SOURCE_DOC_REF_INDEX, id: object.id },
+          };
+        }
+      } else {
+        provenance = {
+          ingested_at: ingestedAt,
+          extraction_method: 'pending',
+          source_doc_ref: { index: SOURCE_DOC_REF_INDEX, id: object.id },
+        };
+      }
+
+      const baseContent = buildReportContent({
+        title: truncate(title, TITLE_MAX_LENGTH),
+        bodyText,
+        language: 'en',
+      });
+
       reports.push({
         '@timestamp': ingestedAt,
         content_fingerprint: fingerprint,
@@ -83,23 +143,16 @@ export const stixAdapter: FetchAdapter = {
           url,
           adapter_id: adapterId,
         },
-        content: buildReportContent({
-          title: truncate(title, TITLE_MAX_LENGTH),
-          bodyText,
-          language: 'en',
-        }),
+        content:
+          externalReferences.length > 0
+            ? { ...baseContent, external_references: externalReferences }
+            : baseContent,
         severity: {
           level: DEFAULT_SEVERITY_LEVEL,
           score: DEFAULT_SEVERITY_SCORE,
         },
-        provenance: {
-          ingested_at: ingestedAt,
-          extraction_method: 'pending',
-          source_doc_ref: {
-            index: SOURCE_DOC_REF_INDEX,
-            id: object.id,
-          },
-        },
+        provenance,
+        ...(extracted !== undefined ? { extracted } : {}),
       });
     }
     return reports;
