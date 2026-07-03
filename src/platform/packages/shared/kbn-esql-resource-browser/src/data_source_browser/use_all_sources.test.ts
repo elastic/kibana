@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { useAllSources } from './use_all_sources';
 import type { ESQLSourceResult, EsqlDatasetsResult } from '@kbn/esql-types';
@@ -76,7 +76,9 @@ describe('useAllSources', () => {
     const getDatasets = jest.fn().mockResolvedValue(mockDataset);
     const params = makeParams({
       isTimeseries: true,
-      getTimeseriesIndices: jest.fn().mockResolvedValue({ indices: [{ name: 'ts-idx', mode: 'time_series', aliases: [] }] }),
+      getTimeseriesIndices: jest
+        .fn()
+        .mockResolvedValue({ indices: [{ name: 'ts-idx', mode: 'time_series', aliases: [] }] }),
       getDatasets,
     });
     const { result } = renderHook(() => useAllSources(params));

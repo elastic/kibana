@@ -119,10 +119,7 @@ export const useAllSources = ({
           const normalized = normalizeTimeseriesIndices(result);
           if (isMountedRef.current && isEffectActive) setAllSources(normalized);
         } else {
-          const [fetched, datasets] = await Promise.all([
-            getSources?.() ?? [],
-            fetchDatasets(),
-          ]);
+          const [fetched, datasets] = await Promise.all([getSources?.() ?? [], fetchDatasets()]);
           if (isMountedRef.current && isEffectActive) {
             setAllSources(mergeSources(fetched, datasets));
           }
