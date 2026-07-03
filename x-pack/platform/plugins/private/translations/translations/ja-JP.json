@@ -12727,7 +12727,6 @@
     "xpack.apm.home.serviceGroups.tooltip.activeAlertsExplanation": "アクティブアラート",
     "xpack.apm.home.serviceLogsTabLabel": "ログ",
     "xpack.apm.home.serviceMapTabLabel": "サービスマップ",
-    "xpack.apm.home.servicesTable.tooltip.activeAlertsExplanation": "アクティブアラート",
     "xpack.apm.home.sloMenu.createAvailabilitySlo": "APM可用性SLOを作成",
     "xpack.apm.home.sloMenu.createLatencySlo": "APMレイテンシSLOを作成",
     "xpack.apm.home.sloMenu.manageSlos": "SLOを管理",

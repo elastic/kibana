@@ -12668,7 +12668,6 @@
     "xpack.apm.home.serviceGroups.tooltip.activeAlertsExplanation": "Alertes actives",
     "xpack.apm.home.serviceLogsTabLabel": "Logs",
     "xpack.apm.home.serviceMapTabLabel": "Carte des services",
-    "xpack.apm.home.servicesTable.tooltip.activeAlertsExplanation": "Alertes actives",
     "xpack.apm.home.sloMenu.createAvailabilitySlo": "Créer un SLO de disponibilité APM",
     "xpack.apm.home.sloMenu.createLatencySlo": "Créer un SLO de latence APM",
     "xpack.apm.home.sloMenu.manageSlos": "Gérer les SLO",
