@@ -66,6 +66,14 @@ const baseWorkflowExecutionSchema: RootSchema<{
   outputTokensUsed?: number;
   cachedTokensUsed?: number;
   totalTokensUsed?: number;
+  aiStepsUsage?: Array<{
+    stepId: string;
+    connectorId?: string;
+    inputTokens: number;
+    outputTokens: number;
+    cachedTokens: number;
+    totalTokens: number;
+  }>;
 }> = {
   workflowExecutionId: {
     type: 'keyword',
@@ -209,6 +217,21 @@ const baseWorkflowExecutionSchema: RootSchema<{
     _meta: {
       description:
         'Total LLM tokens used by token-reporting steps in this execution. This is inputTokensUsed + outputTokensUsed.',
+      optional: true,
+    },
+  },
+  aiStepsUsage: {
+    type: 'array',
+    items: {
+      type: 'pass_through',
+      _meta: {
+        description:
+          'Per-step LLM usage entry: stepId, connectorId (optional), and inputTokens/outputTokens/cachedTokens/totalTokens.',
+      },
+    },
+    _meta: {
+      description:
+        'Per-step LLM usage broken down by step and resolved connector, in finish order. Complements the *TokensUsed totals. Omitted when no step reported usage.',
       optional: true,
     },
   },

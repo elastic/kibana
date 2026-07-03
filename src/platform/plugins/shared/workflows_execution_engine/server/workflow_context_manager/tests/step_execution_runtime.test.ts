@@ -124,6 +124,7 @@ describe('StepExecutionRuntime', () => {
       setLastFailedStepContext: jest.fn(),
       getLastFailedStepContext: jest.fn(),
       accumulateUsage: jest.fn(),
+      recordStepUsage: jest.fn(),
     } as unknown as WorkflowExecutionState;
 
     workflowExecutionGraph = {
@@ -387,7 +388,7 @@ describe('StepExecutionRuntime', () => {
           (stepExecutionId) => {
             if (stepExecutionId === 'fake_step_execution_id') {
               return {
-                stepId: 'node1',
+                stepId: 'fakeStepId1',
                 startedAt: '2025-08-05T00:00:00.000Z',
                 output: { success: true, data: {} },
                 error: undefined,
@@ -448,6 +449,44 @@ describe('StepExecutionRuntime', () => {
         });
       });
 
+      it('records a per-step usage entry keyed by step id and reported connector', () => {
+        underTest.finishStep({
+          message: 'hello',
+          metadata: {
+            usage: {
+              connectorId: '.openai-gpt-5.2',
+              inputTokens: 100,
+              outputTokens: 50,
+              cachedTokens: 25,
+              totalTokens: 150,
+            },
+          },
+        });
+
+        expect(workflowExecutionState.recordStepUsage).toHaveBeenCalledWith({
+          stepId: 'fakeStepId1',
+          connectorId: '.openai-gpt-5.2',
+          inputTokens: 100,
+          outputTokens: 50,
+          cachedTokens: 25,
+          totalTokens: 150,
+        });
+      });
+
+      it('records a per-step usage entry without a connector when none is reported', () => {
+        underTest.finishStep({
+          message: 'hello',
+          metadata: { usage: { inputTokens: 100, outputTokens: 50, totalTokens: 150 } },
+        });
+
+        expect(workflowExecutionState.recordStepUsage).toHaveBeenCalledWith({
+          stepId: 'fakeStepId1',
+          inputTokens: 100,
+          outputTokens: 50,
+          totalTokens: 150,
+        });
+      });
+
       it('should not tag usage on steps that do not report it', () => {
         underTest.finishStep({ message: 'hello' });
 
@@ -455,6 +494,7 @@ describe('StepExecutionRuntime', () => {
           expect.not.objectContaining({ usage: expect.anything() })
         );
         expect(workflowExecutionState.accumulateUsage).toHaveBeenCalledWith(undefined);
+        expect(workflowExecutionState.recordStepUsage).not.toHaveBeenCalled();
       });
 
       it('should log successful step execution', () => {

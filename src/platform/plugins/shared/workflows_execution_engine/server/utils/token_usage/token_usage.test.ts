@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extractTokenUsage, sumTokenUsage } from './token_usage';
+import { extractConnectorId, extractTokenUsage, sumTokenUsage } from './token_usage';
 
 describe('extractTokenUsage', () => {
   it('extracts usage from output.metadata.usage', () => {
@@ -59,6 +59,33 @@ describe('extractTokenUsage', () => {
     ],
   ])('returns undefined for %s', (_label, output) => {
     expect(extractTokenUsage(output)).toBeUndefined();
+  });
+});
+
+describe('extractConnectorId', () => {
+  it('reads the connector id from output.metadata.usage.connectorId', () => {
+    expect(
+      extractConnectorId({
+        metadata: { usage: { connectorId: '.openai-gpt-5.2', inputTokens: 100, outputTokens: 50 } },
+      })
+    ).toBe('.openai-gpt-5.2');
+  });
+
+  it('returns undefined when usage is present but carries no connector', () => {
+    expect(
+      extractConnectorId({ metadata: { usage: { inputTokens: 100, outputTokens: 50 } } })
+    ).toBeUndefined();
+  });
+
+  it.each([
+    ['null output', null],
+    ['primitive output', 'a string'],
+    ['no metadata', { message: 'hi' }],
+    ['metadata without usage', { metadata: {} }],
+    ['empty connectorId', { metadata: { usage: { connectorId: '' } } }],
+    ['non-string connectorId', { metadata: { usage: { connectorId: 123 } } }],
+  ])('returns undefined for %s', (_label, output) => {
+    expect(extractConnectorId(output)).toBeUndefined();
   });
 });
 

@@ -885,6 +885,16 @@ export const WorkflowTokenUsageSchema = z.object({
   totalTokens: z.number().describe('Sum of input and output tokens.'),
 });
 
+// Token usage attributed to a single step, adding the step id and its resolved
+// connector to the aggregate token shape.
+export const WorkflowStepTokenUsageSchema = WorkflowTokenUsageSchema.extend({
+  stepId: z.string().describe('Id of the step that produced this usage.'),
+  connectorId: z
+    .string()
+    .optional()
+    .describe('Id of the LLM connector the step resolved to, when reported by the model.'),
+});
+
 export const WorkflowExecutionContextSchema = z.object({
   id: z.string(),
   isTestRun: z.boolean(),

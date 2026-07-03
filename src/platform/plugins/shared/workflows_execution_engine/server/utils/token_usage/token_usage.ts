@@ -88,6 +88,28 @@ export const sumTokenUsage = (
   };
 };
 
+/**
+ * Reads the LLM connector id a step reported under
+ * `output.metadata.usage.connectorId`. Separate from `extractTokenUsage`
+ * because a connector belongs to the per-step breakdown, not the summed
+ * aggregate. Returns `undefined` when the step reported no connector.
+ */
+export const extractConnectorId = (output: unknown): string | undefined => {
+  if (output == null || typeof output !== 'object') {
+    return undefined;
+  }
+  const metadata = (output as { metadata?: unknown }).metadata;
+  if (metadata == null || typeof metadata !== 'object') {
+    return undefined;
+  }
+  const usage = (metadata as { usage?: unknown }).usage;
+  if (usage == null || typeof usage !== 'object') {
+    return undefined;
+  }
+  const connectorId = (usage as { connectorId?: unknown }).connectorId;
+  return typeof connectorId === 'string' && connectorId.length > 0 ? connectorId : undefined;
+};
+
 const toFiniteNumber = (value: unknown): number | undefined => {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 };

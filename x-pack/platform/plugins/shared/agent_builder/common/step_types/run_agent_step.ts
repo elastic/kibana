@@ -98,6 +98,10 @@ export const OutputSchema = z.object({
   metadata: z
     .object({
       usage: z.object({
+        connectorId: z
+          .string()
+          .optional()
+          .describe('Id of the LLM connector used for this step, when reported by the model.'),
         inputTokens: z.number().describe('Total input tokens consumed across all LLM rounds.'),
         outputTokens: z.number().describe('Total output tokens produced across all LLM rounds.'),
         cachedTokens: z

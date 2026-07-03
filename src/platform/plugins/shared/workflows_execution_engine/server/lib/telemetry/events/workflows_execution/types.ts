@@ -96,6 +96,19 @@ export interface BaseWorkflowExecutionTelemetryParams {
    * This is inputTokensUsed + outputTokensUsed.
    */
   totalTokensUsed?: number;
+  /**
+   * Per-step counterpart to the `*TokensUsed` totals above: one entry per
+   * token-reporting step, carrying its resolved connector. Omitted when no step
+   * reported usage.
+   */
+  aiStepsUsage?: Array<{
+    stepId: string;
+    connectorId?: string;
+    inputTokens: number;
+    outputTokens: number;
+    cachedTokens: number;
+    totalTokens: number;
+  }>;
 }
 
 /** Output size statistics derived from WorkflowExecutionState. */

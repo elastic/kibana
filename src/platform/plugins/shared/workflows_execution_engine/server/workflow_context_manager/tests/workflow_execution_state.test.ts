@@ -1216,4 +1216,69 @@ describe('WorkflowExecutionState', () => {
       expect(underTest.getWorkflowExecution().usage).toBeUndefined();
     });
   });
+
+  describe('recordStepUsage', () => {
+    it('appends each step as a distinct entry in finish order, even on the same connector', () => {
+      // Two steps sharing a connector must not be merged — that is the reason
+      // this list exists alongside the summed `usage`.
+      underTest.recordStepUsage({
+        stepId: 'run_investigator_agent',
+        connectorId: '.openai-gpt-5.2',
+        inputTokens: 100,
+        outputTokens: 50,
+        totalTokens: 150,
+      });
+      underTest.recordStepUsage({
+        stepId: 'run_judge_agent',
+        connectorId: '.openai-gpt-5.2',
+        inputTokens: 200,
+        outputTokens: 80,
+        totalTokens: 280,
+      });
+
+      expect(underTest.getWorkflowExecution().stepUsage).toEqual([
+        {
+          stepId: 'run_investigator_agent',
+          connectorId: '.openai-gpt-5.2',
+          inputTokens: 100,
+          outputTokens: 50,
+          totalTokens: 150,
+        },
+        {
+          stepId: 'run_judge_agent',
+          connectorId: '.openai-gpt-5.2',
+          inputTokens: 200,
+          outputTokens: 80,
+          totalTokens: 280,
+        },
+      ]);
+    });
+
+    it('persists the per-step breakdown on the next workflow-doc flush', async () => {
+      underTest.recordStepUsage({
+        stepId: 'run_investigator_agent',
+        connectorId: '.openai-gpt-5.2',
+        inputTokens: 100,
+        outputTokens: 50,
+        totalTokens: 150,
+      });
+      await underTest.flushWorkflowDoc();
+
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-execution-id',
+          stepUsage: [
+            {
+              stepId: 'run_investigator_agent',
+              connectorId: '.openai-gpt-5.2',
+              inputTokens: 100,
+              outputTokens: 50,
+              totalTokens: 150,
+            },
+          ],
+        }),
+        {}
+      );
+    });
+  });
 });

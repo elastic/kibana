@@ -491,6 +491,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       const res = await step.handler(createContext({ input: { message: 'hi' } }));
 
       expect(res.output?.metadata?.usage).toEqual({
+        connectorId: 'c',
         inputTokens: 100,
         outputTokens: 50,
         cachedTokens: 20,
@@ -543,6 +544,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(res.output?.message).toBe('intermediate');
       // Usage should be the sum across all rounds
       expect(res.output?.metadata?.usage).toEqual({
+        connectorId: 'c',
         inputTokens: 500,
         outputTokens: 200,
         cachedTokens: 120,
@@ -573,6 +575,33 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         cachedTokens: 0,
         totalTokens: 0,
       });
+    });
+
+    it("does not tag a connector when the round reports the 'unknown' sentinel", async () => {
+      // A round that made no LLM call reports connector_id: 'unknown'
+      // (see add_round_complete_event.ts); it must not surface as a connector.
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 0,
+              input_tokens: 10,
+              output_tokens: 5,
+            },
+          },
+        },
+      });
+
+      const execution = createExecutionMock(events$);
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(createContext({ input: { message: 'hi' } }));
+
+      expect(res.output?.metadata?.usage).not.toHaveProperty('connectorId');
     });
 
     it('preserves partial token counts when the event stream errors mid-execution', async () => {
@@ -606,8 +635,10 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       const res = await step.handler(createContext({ input: { message: 'hi' } }));
 
       expect(res.error).toBeInstanceOf(Error);
-      // Partial token counts are preserved in the output despite the error
+      // Partial token counts (and the resolved connector) are preserved in the
+      // output despite the error.
       expect(res.output?.metadata?.usage).toEqual({
+        connectorId: 'c',
         inputTokens: 150,
         outputTokens: 60,
         cachedTokens: 30,
