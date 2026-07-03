@@ -155,7 +155,7 @@ export class NavigationCustomizationService {
       );
 
       // Captured after mountModal is called synchronously by openCustomizeNavigationModal.
-      let closeModal: () => void = () => { };
+      let closeModal: () => void = () => {};
 
       openCustomizeNavigationModal({
         items,
