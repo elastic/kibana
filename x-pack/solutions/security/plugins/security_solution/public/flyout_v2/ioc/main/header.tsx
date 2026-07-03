@@ -22,7 +22,7 @@ import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { getIndicatorFieldAndValue } from '../../../threat_intelligence/modules/indicators/utils/field_value';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import { RawIndicatorFieldId } from '../../../../common/threat_intelligence/types/indicator';
-import type { RightPanelTabType, RightPanelPaths } from './tabs';
+import type { TabType, TabId } from './tabs';
 import { flyoutHeaderBlockStyles } from '../../shared/components/flyout_header_block';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 import { Timestamp } from '../../shared/components/timestamp';
@@ -42,15 +42,15 @@ export interface HeaderProps {
   /**
    * Id of the tab selected in the parent component to display its content
    */
-  selectedTabId?: RightPanelPaths;
+  selectedTabId?: TabId;
   /**
    * Callback to set the selected tab id in the parent component
    */
-  setSelectedTabId?: (selected: RightPanelPaths) => void;
+  setSelectedTabId?: (selected: TabId) => void;
   /**
    * Tabs to display in the header
    */
-  tabs?: RightPanelTabType[];
+  tabs?: TabType[];
   /**
    * Renderer for cell actions
    */
@@ -70,7 +70,7 @@ const highLevelFields = [
 export const Header: FC<HeaderProps> = memo(
   ({ indicator, selectedTabId, setSelectedTabId, tabs, renderCellActions }) => {
     const onSelectedTabChanged = useCallback(
-      (id: RightPanelPaths) => (setSelectedTabId ? setSelectedTabId(id) : () => {}),
+      (id: TabId) => (setSelectedTabId ? setSelectedTabId(id) : () => {}),
       [setSelectedTabId]
     );
 

@@ -9,9 +9,9 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { Content } from './content';
 import { IOC_DETAILS_BODY_TEST_ID } from './test_ids';
-import type { RightPanelTabType } from './tabs';
+import type { TabType } from './tabs';
 
-const mockTabs: RightPanelTabType[] = [
+const mockTabs: TabType[] = [
   {
     id: 'overview',
     name: <>{'Overview'}</>,

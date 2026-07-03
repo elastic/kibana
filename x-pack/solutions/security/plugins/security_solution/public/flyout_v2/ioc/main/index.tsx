@@ -16,8 +16,9 @@ import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
-import { useTabs } from './hooks/use_tabs';
-import { getTabsDisplayed } from './tabs';
+import { useTabs } from '../../shared/hooks/use_tabs';
+import { getTabsDisplayed, validTabIds, type TabId } from './tabs';
+import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
 
 /**
  * Styles applied to the EuiFlyoutBody so the JSON tab's Monaco editor
@@ -53,7 +54,10 @@ export const IOCDetails: FC<IOCDetailsProps> = memo(({ hit, renderCellActions })
     [hit]
   );
 
-  const { selectedTabId, setSelectedTabId } = useTabs({});
+  const { selectedTabId, setSelectedTabId } = useTabs<TabId>({
+    validTabIds,
+    storageKey: FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS,
+  });
 
   const onViewAllFieldsInTable = useCallback(() => {
     setSelectedTabId('table');

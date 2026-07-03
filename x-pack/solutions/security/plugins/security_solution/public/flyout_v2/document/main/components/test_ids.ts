@@ -9,6 +9,11 @@ import { PREFIX } from '../../../../flyout/shared/test_ids';
 
 export const FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID = `${PREFIX}MissingAlertsPrivilege` as const;
 
+/* Tabs */
+
+export const OVERVIEW_TAB_TEST_ID = `${PREFIX}OverviewTab` as const;
+export const JSON_TAB_TEST_ID = `${PREFIX}JsonTab` as const;
+
 /* Header */
 
 export const TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
