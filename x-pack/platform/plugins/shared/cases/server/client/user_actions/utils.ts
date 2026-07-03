@@ -10,7 +10,11 @@ import type {
   CaseUserActionDeprecatedResponse,
   CaseUserActionsDeprecatedResponse,
 } from '../../../common/types/api';
-import type { UserActionAttributes, UserActions } from '../../../common/types/domain';
+import type {
+  UserActionAttributes,
+  UserActions,
+  UserActionType,
+} from '../../../common/types/domain';
 import { UserActionTypes } from '../../../common/types/domain';
 import type { UserActionTransformedAttributes } from '../../common/types/user_actions';
 
@@ -62,73 +66,74 @@ const extractCustomFieldValues = (customFields: unknown): string[] => {
     .map((cf) => cf.value);
 };
 
+type SearchableContentExtractor = (payload: Record<string, unknown>) => string[];
+
+const extractField =
+  (field: string): SearchableContentExtractor =>
+  (payload) => {
+    const text = asString(payload[field]);
+    return text ? [text] : [];
+  };
+
+const extractArrayField =
+  (field: string): SearchableContentExtractor =>
+  (payload) =>
+    asStringArray(payload[field]);
+
+const extractCommentContent: SearchableContentExtractor = (payload) => {
+  const comment = payload.comment as Record<string, unknown> | undefined;
+  const text = asString(comment?.comment);
+  return text ? [text] : [];
+};
+
+const extractCustomFields: SearchableContentExtractor = (payload) =>
+  extractCustomFieldValues(payload.customFields);
+
+const extractAssignees: SearchableContentExtractor = (payload) =>
+  extractAssigneeUids(payload.assignees);
+
+const extractExtendedFields: SearchableContentExtractor = (payload) => {
+  const extendedFields = payload.extended_fields;
+  return extendedFields != null && typeof extendedFields === 'object'
+    ? asStringArray(Object.values(extendedFields))
+    : [];
+};
+
+const combineExtractors =
+  (...extractors: SearchableContentExtractor[]): SearchableContentExtractor =>
+  (payload) =>
+    extractors.flatMap((extractor) => extractor(payload));
+
+/**
+ * Maps a user action type to the function that pulls its free-text-searchable
+ * content out of the payload. Types not present here (e.g. `connector`,
+ * `pushed`, `settings`, `status`, `observables`, `template`) either carry no
+ * meaningful free text or only reference IDs, so they're excluded from search.
+ */
+const SEARCHABLE_CONTENT_EXTRACTORS: Partial<Record<UserActionType, SearchableContentExtractor>> = {
+  [UserActionTypes.comment]: extractCommentContent,
+  [UserActionTypes.title]: extractField('title'),
+  [UserActionTypes.description]: extractField('description'),
+  [UserActionTypes.tags]: extractArrayField('tags'),
+  [UserActionTypes.category]: extractField('category'),
+  [UserActionTypes.severity]: extractField('severity'),
+  [UserActionTypes.assignees]: extractAssignees,
+  [UserActionTypes.customFields]: extractCustomFields,
+  [UserActionTypes.extended_fields]: extractExtendedFields,
+  [UserActionTypes.create_case]: combineExtractors(
+    extractField('title'),
+    extractField('description'),
+    extractField('severity'),
+    extractArrayField('tags'),
+    extractCustomFields,
+    extractAssignees
+  ),
+};
+
 export const getSearchableContent = (attributes: UserActionTransformedAttributes): string[] => {
   const payload = attributes.payload as Record<string, unknown>;
-  const texts: string[] = [];
-
-  switch (attributes.type) {
-    case UserActionTypes.comment: {
-      const comment = payload.comment as Record<string, unknown> | undefined;
-      const text = asString(comment?.comment);
-      if (text) texts.push(text);
-      break;
-    }
-    case UserActionTypes.title: {
-      const text = asString(payload.title);
-      if (text) texts.push(text);
-      break;
-    }
-    case UserActionTypes.description: {
-      const text = asString(payload.description);
-      if (text) texts.push(text);
-      break;
-    }
-    case UserActionTypes.tags: {
-      texts.push(...asStringArray(payload.tags));
-      break;
-    }
-    case UserActionTypes.category: {
-      const text = asString(payload.category);
-      if (text) texts.push(text);
-      break;
-    }
-    case UserActionTypes.severity: {
-      const text = asString(payload.severity);
-      if (text) texts.push(text);
-      break;
-    }
-    case UserActionTypes.assignees: {
-      texts.push(...extractAssigneeUids(payload.assignees));
-      break;
-    }
-    case UserActionTypes.customFields: {
-      texts.push(...extractCustomFieldValues(payload.customFields));
-      break;
-    }
-    case UserActionTypes.extended_fields: {
-      const extendedFields = payload.extended_fields;
-      if (extendedFields != null && typeof extendedFields === 'object') {
-        texts.push(...asStringArray(Object.values(extendedFields)));
-      }
-      break;
-    }
-    case UserActionTypes.create_case: {
-      const title = asString(payload.title);
-      const description = asString(payload.description);
-      const severity = asString(payload.severity);
-      if (title) texts.push(title);
-      if (description) texts.push(description);
-      if (severity) texts.push(severity);
-      texts.push(...asStringArray(payload.tags));
-      texts.push(...extractCustomFieldValues(payload.customFields));
-      texts.push(...extractAssigneeUids(payload.assignees));
-      break;
-    }
-    default:
-      break;
-  }
-
-  return texts;
+  const extractor = SEARCHABLE_CONTENT_EXTRACTORS[attributes.type];
+  return extractor ? extractor(payload) : [];
 };
 
 export const matchesSearch = (
