@@ -90,21 +90,16 @@ const changePointScanRoute = createServerRoute({
     );
     const durationMs = Date.now() - startedAt;
 
-    // Fire-and-forget: telemetry must never affect the route response.
-    try {
-      telemetry.trackSignificantEventsDetectionScan({
-        took_ms: took ?? 0,
-        duration_ms: durationMs,
-        rules_scanned: aggregations.by_rule.buckets.length,
-        alerting_engine: sigEventsContext.alertingV2Active ? 'v2' : 'v1',
-        alerts_source_index: sigEventsContext.alertsReader.index,
-        lookback: params.body.lookback,
-        bucket_interval: params.body.bucketInterval,
-        space_id: spaceId,
-      });
-    } catch {
-      // ignore telemetry failures
-    }
+    telemetry.trackSignificantEventsDetectionScan({
+      took_ms: took ?? 0,
+      duration_ms: durationMs,
+      rules_scanned: aggregations.by_rule.buckets.length,
+      alerting_engine: sigEventsContext.alertingV2Active ? 'v2' : 'v1',
+      alerts_source_index: sigEventsContext.alertsReader.index,
+      lookback: params.body.lookback,
+      bucket_interval: params.body.bucketInterval,
+      space_id: spaceId,
+    });
 
     return { alertIndex: sigEventsContext.alertsReader.index, aggregations };
   },
