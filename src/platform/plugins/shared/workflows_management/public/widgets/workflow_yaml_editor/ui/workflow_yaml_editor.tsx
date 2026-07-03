@@ -153,17 +153,11 @@ export interface WorkflowYAMLEditorProps {
   onStepRun: (params: { stepId: string; actionType: string }) => void;
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
   /**
-   * When true, the Monaco editor body and assist/agent toolbar are hidden via
-   * CSS but kept mounted so YAML validation continues to run.
-   * The validation accordion is hidden in graph view.
+   * When false, the editor is obscured by a peer layer (graph view). Used to
+   * gate the highlighted-step scroll effect and skip accordion render work
+   * while hidden. Defaults to true.
    */
-  hideEditorBody?: boolean;
-  /**
-   * Optional alternate body rendered in place of the Monaco editor when
-   * `hideEditorBody` is true. Lives in the same flex column as the validation
-   * accordion so the accordion stays pinned at the bottom.
-   */
-  bodyOverride?: React.ReactNode;
+  isActive?: boolean;
   /**
    * Optional ref the parent can use to open the actions menu popover from
    * outside the editor (e.g. a header shortcut).
@@ -187,8 +181,7 @@ export const WorkflowYAMLEditor = ({
   highlightDiff = false,
   onStepRun,
   editorRef: parentEditorRef,
-  hideEditorBody = false,
-  bodyOverride,
+  isActive = true,
   openActionsRef,
   onToggleEditorMode,
   hideEditorTools = false,
@@ -607,14 +600,14 @@ export const WorkflowYAMLEditor = ({
 
   // Scroll the editor to the highlighted step whenever:
   //   • highlightedStepId changes (new step selected from the graph flyout), OR
-  //   • hideEditorBody transitions true→false (YAML view becomes visible, e.g.
+  //   • isActive transitions false→true (YAML view becomes visible, e.g.
   //     "Open in YAML editor" clicked for the same step that was already
-  //     highlighted — Redux deduplicates the dispatch, so only the hideEditorBody
+  //     highlighted — Redux deduplicates the dispatch, so only the isActive
   //     change triggers the re-run in that case).
   // workflowLookup is intentionally read via ref to avoid re-running on every
   // keystroke while a step is highlighted.
   useEffect(() => {
-    if (!highlightedStepId || !isEditorMounted || hideEditorBody) {
+    if (!highlightedStepId || !isEditorMounted || !isActive) {
       return;
     }
     const currentWorkflowLookup = workflowLookupRef.current;
@@ -632,7 +625,7 @@ export const WorkflowYAMLEditor = ({
       // setPosition to avoid the cursor-hijack issue (M7).
       dispatch(setCursorPosition({ lineNumber: lineStart, column: 1 }));
     }
-  }, [dispatch, isEditorMounted, highlightedStepId, hideEditorBody]);
+  }, [dispatch, isEditorMounted, highlightedStepId, isActive]);
 
   // Actions
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
@@ -890,7 +883,7 @@ export const WorkflowYAMLEditor = ({
       {/* Floating Elasticsearch step actions — anchored to the focused
           step's line in the Monaco editor, so they're meaningless (and
           visually orphaned) when the graph view replaces the editor body. */}
-      {!hideEditorBody && (
+      {isActive && (
         <div
           css={styles.stepActionsContainer}
           style={positionStyles ?? {}}
@@ -900,10 +893,7 @@ export const WorkflowYAMLEditor = ({
         </div>
       )}
       {(isAgentBuilderAvailable || isDevelopment) && !isReadOnlyYaml ? (
-        <div
-          css={styles.agentBuilderSectionCss}
-          style={hideEditorBody ? { display: 'none' } : undefined}
-        >
+        <div css={styles.agentBuilderSectionCss} style={isActive ? undefined : { display: 'none' }}>
           <WorkflowYamlEditorAssistActions
             isAgentBuilderAvailable={isAgentBuilderAvailable}
             isDevelopment={isDevelopment}
@@ -915,64 +905,23 @@ export const WorkflowYAMLEditor = ({
           />
         </div>
       ) : null}
-      {/*
-       * Both the YAML editor and the alternate body (graph view) are layered
-       * inside a single relative container so we can cross-fade between
-       * them without remounting Monaco.
-       */}
       <div
-        css={css({
-          flex: '1 1 0',
-          minHeight: 0,
-          position: 'relative',
-          overflow: 'hidden',
-        })}
+        css={[styles.editorContainer, css({ flex: '1 1 0', minHeight: 0 })]}
+        className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
       >
-        <div
-          css={[
-            styles.editorContainer,
-            css({
-              position: 'absolute',
-              inset: 0,
-              opacity: hideEditorBody ? 0 : 1,
-              pointerEvents: hideEditorBody ? 'none' : 'auto',
-              transform: hideEditorBody ? 'scale(0.985)' : 'scale(1)',
-              transition: 'opacity 220ms ease, transform 220ms ease',
-            }),
-          ]}
-          className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
-          aria-hidden={hideEditorBody || undefined}
-        >
-          <YamlEditor
-            editorDidMount={handleEditorDidMount}
-            editorWillUnmount={handleEditorWillUnmount}
-            onChange={onChange}
-            onSyncStateChange={onSyncStateChange}
-            options={options}
-            schemas={schemas}
-            value={workflowYaml}
-            enableFindAction={true}
-            dataTestSubj="workflowYamlEditor"
-          />
-        </div>
-        {bodyOverride && (
-          <div
-            data-test-subj="workflowYamlEditorBodyPlaceholder"
-            css={css({
-              position: 'absolute',
-              inset: 0,
-              opacity: hideEditorBody ? 1 : 0,
-              pointerEvents: hideEditorBody ? 'auto' : 'none',
-              transform: hideEditorBody ? 'scale(1)' : 'scale(1.015)',
-              transition: 'opacity 220ms ease, transform 220ms ease',
-            })}
-            aria-hidden={!hideEditorBody || undefined}
-          >
-            {bodyOverride}
-          </div>
-        )}
+        <YamlEditor
+          editorDidMount={handleEditorDidMount}
+          editorWillUnmount={handleEditorWillUnmount}
+          onChange={onChange}
+          onSyncStateChange={onSyncStateChange}
+          options={options}
+          schemas={schemas}
+          value={workflowYaml}
+          enableFindAction={true}
+          dataTestSubj="workflowYamlEditor"
+        />
       </div>
-      {!hideEditorBody && (
+      {isActive && (
         <div css={styles.validationErrorsContainer}>
           <WorkflowYamlValidationAccordion
             isMounted={isEditorMounted}

@@ -62,9 +62,13 @@ export const createStepInfo = (overrides: Partial<StepInfo> = {}): StepInfo => (
  * ]);
  * ```
  */
-export const createWorkflowLookup = (steps: StepInfo[]): WorkflowLookup => ({
+export const createWorkflowLookup = (
+  steps: StepInfo[],
+  { triggersLineStart }: { triggersLineStart?: number } = {}
+): WorkflowLookup => ({
   steps: steps.reduce<Record<string, StepInfo>>((acc, step) => {
     acc[step.stepId] = step;
     return acc;
   }, {}),
+  triggersLineStart,
 });
