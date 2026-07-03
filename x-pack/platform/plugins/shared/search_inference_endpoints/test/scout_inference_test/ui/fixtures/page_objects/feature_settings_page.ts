@@ -189,6 +189,6 @@ export class FeatureSettingsPage {
 
   /** Picks a connector by visible name in the Global model combobox. */
   public async selectGlobalModel(name: string): Promise<void> {
-    await this.page.components.comboBox('globalModelComboBox').searchAndSelect(name);
+    await this.page.components.comboBox('globalModelComboBox').setSelectedOptions([name]);
   }
 }

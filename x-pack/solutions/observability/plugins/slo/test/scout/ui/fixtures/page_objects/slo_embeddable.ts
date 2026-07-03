@@ -50,13 +50,13 @@ export class SLOEmbeddable {
   /** Selects an SLO definition by name in the configuration flyout. */
   async selectDefinition(name: string) {
     // Definitions are fetched server-side via onSearchChange; type to surface the match.
-    await this.page.components.comboBox('sloDefinitionSelector').searchAndSelect(name);
+    await this.page.components.comboBox('sloDefinitionSelector').setSelectedOptions([name]);
   }
 
   /** Selects an SLO instance by name in the configuration flyout. */
   async selectInstance(name: string) {
     // Instances are fetched server-side via async/onSearchChange; type to surface the match.
-    await this.page.components.comboBox('sloInstanceSelector').searchAndSelect(name);
+    await this.page.components.comboBox('sloInstanceSelector').setSelectedOptions([name]);
   }
 
   /** Switches the configuration flyout to "Grouped SLOs" mode. */

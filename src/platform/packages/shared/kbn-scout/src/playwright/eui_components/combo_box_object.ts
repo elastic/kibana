@@ -16,24 +16,18 @@ const INPUT_WRAPPER_TEST_SUBJ = 'comboBoxInput';
 const SEARCH_INPUT_TEST_SUBJ = 'comboBoxSearchInput';
 
 /**
- * Kibana-specific extension of {@link EuiComboBoxObject}.
+ * Kibana-specific extension of {@link EuiComboBoxObject}. Interim, until the
+ * published helper can drive these cases itself — then delete this class; call
+ * sites use the same method names, so they won't change.
  *
- * The published `EuiComboBoxObject` deliberately exposes only the minimal,
- * configuration-agnostic surface — `setSelectedOptions` / `getSelectedOptions` /
- * `clear` — which covers the vast majority of Kibana combo-box tests (pick an
- * existing option, read the selection, clear it). **Prefer those.**
- *
- * This subclass adds the few interactions the minimal helper intentionally does
- * not cover, for cases that genuinely need them (see the per-test migration
- * analysis):
- * - {@link createOptions} — free-text creation via `onCreateOption` (e.g. rule
- *   tags, custom field names, date-format strings: values that cannot pre-exist).
- * - {@link searchAndSelect} — type a term to surface a server-side / virtualized
- *   suggestion, then select it (the option is not in the DOM until you type).
- * - {@link getAvailableOptions} — read the available (unselected) dropdown
- *   options, for tests that assert on the option list itself.
- *
- * The interaction bodies are ported from the prior `EuiComboBoxWrapper` logic.
+ * - Overrides {@link setSelectedOptions} to **type-to-filter, then select by
+ *   accessible name**. The base implementation never types (it matches an
+ *   unfiltered `getByTitle`), so it times out on the many Kibana combo boxes whose
+ *   options are filterable / virtualized / async — the option is not in the DOM
+ *   until you type. Kept as the same method name on purpose: when this behavior
+ *   lands in the EUI helper, deleting this override needs no test changes.
+ * - Adds {@link createOptions} — free-text creation via `onCreateOption`.
+ * - Adds {@link getAvailableOptions} — read the available dropdown options.
  */
 export class KbnComboBoxObject extends EuiComboBoxObject {
   private get inputWrapper(): Locator {
@@ -74,58 +68,48 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
   }
 
   /**
-   * Type `value` to filter the options, then select the matching one.
+   * Smart replacement for the base {@link EuiComboBoxObject.setSelectedOptions}:
+   * type each label to filter, then select the option matched by its **accessible
+   * name**.
    *
-   * Use this for the many Kibana combo boxes whose option list is **filterable,
-   * virtualized, or backed by a suggestions API** — the option is not rendered
-   * in the DOM until the search term is typed, so the base
-   * {@link setSelectedOptions} (which never types) times out looking for it.
-   *
-   * Selection matches the option by its **accessible name**. While filtering, EUI
-   * middle-truncates the visible option text (`EuiTextTruncate`, e.g. `by…es`) and
-   * drops the option `title`, but the accessible name keeps the full label — so
-   * `getByRole('option', { name })` resolves reliably where a text/title match
-   * would not. Because it is a poll, it also waits out async / server-side
-   * filtering (it only passes once the real match renders, never a stale
-   * pre-filter suggestion). A single match is clicked; a keyboard fallback
-   * (`ArrowDown` + `Enter`) handles duplicate labels. When `create` is set, the
-   * typed value is committed directly via `onCreateOption` (Enter).
+   * Why override: while filtering, EUI middle-truncates the visible option text
+   * (`EuiTextTruncate`, e.g. `by…es`) and drops the option `title`, but the
+   * accessible name keeps the full label — so `getByRole('option', { name })`
+   * resolves reliably where a text/title match would not. Being a poll, it also
+   * waits out async / server-side filtering (it only passes once the real match
+   * renders, never a stale pre-filter suggestion). A single match is clicked; a
+   * keyboard fallback (`ArrowDown` + `Enter`) handles duplicate labels. Pass
+   * `create` for `onCreateOption` combos to commit the typed value directly.
    */
-  async searchAndSelect(
-    value: string,
+  async setSelectedOptions(
+    labels: string[],
     { create = false, timeout = 10_000 }: { create?: boolean; timeout?: number } = {}
   ): Promise<void> {
-    await this.inputWrapper.click();
-    await this.searchField.fill(value);
+    for (const label of labels) {
+      await this.inputWrapper.click();
+      await this.searchField.fill(label);
 
-    if (create) {
-      // The combo accepts custom values (onCreateOption). Commit the typed value
-      // directly — EUI selects an exact match or creates it. This must NOT fall
-      // through to the keyboard path below: on an async combo the pre-filter
-      // (stale) options are still present right after typing, so ArrowDown+Enter
-      // would select a wrong, stale suggestion instead of the typed value.
-      await this.searchField.press('Enter');
+      if (create) {
+        // onCreateOption combo — commit the typed value directly. Do NOT fall
+        // through to selection: on an async combo the pre-filter (stale) options
+        // are still present right after typing, so we'd select a wrong suggestion.
+        await this.searchField.press('Enter');
+        await this.searchField.blur();
+        continue;
+      }
+
+      const option = this.optionsList().getByRole('option', { name: label });
+      await expect.poll(() => option.count(), { timeout }).toBeGreaterThan(0);
+      if ((await option.count()) === 1) {
+        await option.click();
+      } else {
+        // Duplicate label / multiple substring matches — keyboard-select the
+        // highlighted match; avoids the nth-methods banned in kbn-scout.
+        await this.searchField.press('ArrowDown');
+        await this.searchField.press('Enter');
+      }
       await this.searchField.blur();
-      return;
     }
-
-    // Match the option by its accessible name. EUI keeps the full label accessible
-    // even when the visible text is middle-truncated while filtering, and exact:false
-    // tolerates a trailing type badge (e.g. a Lens field "bytes Number"). Crucially,
-    // waiting for the NAMED option also waits out async / server-side filtering: the
-    // poll only passes once the real match renders, so we never keyboard-select a
-    // stale pre-filter suggestion.
-    const option = this.optionsList().getByRole('option', { name: value });
-    await expect.poll(() => option.count(), { timeout }).toBeGreaterThan(0);
-    if ((await option.count()) === 1) {
-      await option.click();
-    } else {
-      // Multiple substring matches (or a duplicate label) — keyboard-select the
-      // highlighted (first filtered) match; avoids the nth-methods banned in kbn-scout.
-      await this.searchField.press('ArrowDown');
-      await this.searchField.press('Enter');
-    }
-    await this.searchField.blur();
   }
 
   /**

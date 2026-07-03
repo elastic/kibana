@@ -223,7 +223,7 @@ export class LensApp {
   }
 
   private async selectField(field: string) {
-    await this.page.components.comboBox('indexPattern-dimension-field').searchAndSelect(field);
+    await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
   }
 
   private async openChartSwitchPopover() {

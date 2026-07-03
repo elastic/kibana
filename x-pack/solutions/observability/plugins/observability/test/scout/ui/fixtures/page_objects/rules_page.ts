@@ -626,7 +626,7 @@ export class RulesPage {
     await this.aggregationTypeSelect.selectOption('avg');
     await this.page.components
       .comboBox(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.AGGREGATION_FIELD)
-      .searchAndSelect(field);
+      .setSelectedOptions([field]);
     await this.closeMetricPopover();
   }
 
@@ -703,7 +703,7 @@ export class RulesPage {
   async setGroupBy(field: string) {
     await this.page.components
       .comboBox(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.GROUP_BY)
-      .searchAndSelect(field);
+      .setSelectedOptions([field]);
   }
 
   // Rule Status Dropdown methods

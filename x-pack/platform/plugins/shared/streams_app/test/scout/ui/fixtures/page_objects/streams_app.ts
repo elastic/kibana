@@ -726,7 +726,7 @@ export class StreamsApp {
   }
 
   async selectProcessorType(value: string) {
-    await this.processorTypeComboBox.searchAndSelect(value);
+    await this.processorTypeComboBox.setSelectedOptions([value]);
   }
 
   async fillProcessorFieldInput(value: string, options?: { isCustomValue: boolean }) {
@@ -734,7 +734,7 @@ export class StreamsApp {
     if (isCustomValue) {
       return await this.processorFieldComboBox.createOptions([value]);
     }
-    await this.processorFieldComboBox.searchAndSelect(value);
+    await this.processorFieldComboBox.setSelectedOptions([value]);
   }
 
   async fillGrokPatternInput(value: string) {

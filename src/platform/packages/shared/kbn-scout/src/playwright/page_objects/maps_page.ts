@@ -88,7 +88,7 @@ export class MapsPage {
     await this.layerAddForm.waitFor({ state: 'visible' });
     await this.documentsItem.click();
     const comboBox = this.page.components.comboBox('mapGeoIndexPatternSelect');
-    await comboBox.searchAndSelect(documentSelector);
+    await comboBox.setSelectedOptions([documentSelector]);
     await this.importFileButton.click();
     await this.waitForRenderComplete();
     await this.saveAndReturnButton.click();

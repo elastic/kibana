@@ -329,7 +329,7 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('testConnectorTab');
 
     await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
-    await page.components.comboBox('tines-storySelector').searchAndSelect(MOCK_STORY.name);
+    await page.components.comboBox('tines-storySelector').setSelectedOptions([MOCK_STORY.name]);
 
     await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
   });
@@ -348,9 +348,9 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     const webhookCombo = page.components.comboBox('tines-webhookSelector');
 
     await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
-    await storyCombo.searchAndSelect(MOCK_STORY.name);
+    await storyCombo.setSelectedOptions([MOCK_STORY.name]);
     await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
-    await webhookCombo.searchAndSelect(MOCK_WEBHOOK.name);
+    await webhookCombo.setSelectedOptions([MOCK_WEBHOOK.name]);
     expect(await webhookCombo.getSelectedOptions()).toContain(MOCK_WEBHOOK.name);
 
     // Clear the story — the webhook selector should be disabled and emptied.
@@ -372,9 +372,9 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('testConnectorTab');
 
     await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
-    await page.components.comboBox('tines-storySelector').searchAndSelect(MOCK_STORY.name);
+    await page.components.comboBox('tines-storySelector').setSelectedOptions([MOCK_STORY.name]);
     await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
-    await page.components.comboBox('tines-webhookSelector').searchAndSelect(MOCK_WEBHOOK.name);
+    await page.components.comboBox('tines-webhookSelector').setSelectedOptions([MOCK_WEBHOOK.name]);
 
     // Story + webhook are filled but JSON body is still empty.
     await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
@@ -391,9 +391,9 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('testConnectorTab');
 
     await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
-    await page.components.comboBox('tines-storySelector').searchAndSelect(MOCK_STORY.name);
+    await page.components.comboBox('tines-storySelector').setSelectedOptions([MOCK_STORY.name]);
     await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
-    await page.components.comboBox('tines-webhookSelector').searchAndSelect(MOCK_WEBHOOK.name);
+    await page.components.comboBox('tines-webhookSelector').setSelectedOptions([MOCK_WEBHOOK.name]);
     await setTinesJsonBody(page, { hello: 'tines' });
 
     await expect(page.testSubj.locator('executeActionButton')).toBeEnabled();

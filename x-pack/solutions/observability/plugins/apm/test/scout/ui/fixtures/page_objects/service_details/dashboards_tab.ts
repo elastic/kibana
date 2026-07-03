@@ -50,7 +50,7 @@ export class DashboardsTab extends ServiceDetailsTab {
       .getByTestId('apmSelectServiceDashboard')
       .getByTestId('comboBoxSearchInput');
     await expect(comboBoxInput).toBeEnabled({ timeout: EXTENDED_TIMEOUT });
-    await this.dashboardComboBox.searchAndSelect(dashboardTitle);
+    await this.dashboardComboBox.setSelectedOptions([dashboardTitle]);
     await this.page.getByTestId('apmSelectDashboardButton').click();
   }
 

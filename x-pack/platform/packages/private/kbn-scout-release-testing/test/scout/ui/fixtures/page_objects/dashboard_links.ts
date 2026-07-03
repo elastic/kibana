@@ -194,7 +194,7 @@ export class DashboardLinks {
     await this.dashboardLinkRadioBtn.locator('label[for="dashboardLink"]').click();
 
     // Set destination via combo box
-    await this.dashboardLinkComboBox.searchAndSelect(destination);
+    await this.dashboardLinkComboBox.setSelectedOptions([destination]);
 
     if (linkLabel) {
       await this.linkEditorLabelInput.fill(linkLabel);
