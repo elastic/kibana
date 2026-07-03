@@ -253,14 +253,18 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             },
           ]
         : []),
-      {
-        id: 'settings',
-        name: i18n.translate('xpack.fleet.agentDetails.subTabs.settingsTab', {
-          defaultMessage: 'Settings',
-        }),
-        href: getHref('agent_details_settings', { agentId, tabId: 'settings' }),
-        isSelected: tabId === 'settings',
-      },
+      ...(!isCollector
+        ? [
+            {
+              id: 'settings',
+              name: i18n.translate('xpack.fleet.agentDetails.subTabs.settingsTab', {
+                defaultMessage: 'Settings',
+              }),
+              href: getHref('agent_details_settings', { agentId, tabId: 'settings' }),
+              isSelected: tabId === 'settings',
+            },
+          ]
+        : []),
     ];
   }, [getHref, agentId, tabId, isCollector]);
 
