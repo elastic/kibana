@@ -15,7 +15,6 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
-import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export interface PluginSetupDependencies {
@@ -29,7 +28,6 @@ export interface PluginStartDependencies {
   agentContextLayer: AgentContextLayerPluginStart;
   actions: ActionsPluginStart;
   llmTasks?: LlmTasksPluginStart;
-  cases?: CasesServerStart;
   spaces?: SpacesPluginStart;
 }
 
