@@ -16,7 +16,7 @@ import {
   SIGEVENTS_TRIAGE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { parse } from 'yaml';
-import { createSignificantEventsScheduledDiscoveryWorkflowService } from './significant_events_scheduled_discovery_workflow';
+import { createSignificantEventsScheduledWorkflowsService } from './significant_events_scheduled_workflows';
 
 interface ParsedWorkflowStep {
   name: string;
@@ -25,6 +25,7 @@ interface ParsedWorkflowStep {
   if?: string;
   condition?: string;
   'max-iterations'?: number;
+  'iteration-timeout'?: string;
   with?: Record<string, unknown>;
   steps?: ParsedWorkflowStep[];
 }
@@ -145,10 +146,14 @@ describe('scheduled Significant Events managed workflows', () => {
     const drainLoop = findStep(parsed.steps, 'run_review_until_drained');
     expect(drainLoop?.type).toBe('while');
     expect(drainLoop?.['max-iterations']).toBe(6);
-    // The loop must re-check both children every pass, or a child that errors
-    // out (rather than just reporting no remaining work) could spin forever.
+    // Each pass is bounded by its own timeout (discovery 20m + triage 30m worst
+    // case) rather than a single workflow-level timeout.
+    expect(drainLoop?.['iteration-timeout']).toBe('50m');
+    // The loop re-runs only while a child still reports queued work. A child
+    // error is deliberately NOT a continue condition, so the first failing pass
+    // bails out of the loop instead of spinning until max-iterations.
     expect(drainLoop?.condition).toBe(
-      '${{ steps.discover.error != null or steps.triage.error != null or steps.discover.output.hasRemaining == true or steps.triage.output.hasRemaining == true }}'
+      '${{ steps.discover.output.hasRemaining == true or steps.triage.output.hasRemaining == true }}'
     );
 
     const discover = findStep(drainLoop?.steps ?? [], 'discover');
@@ -192,12 +197,12 @@ describe('scheduled Significant Events managed workflows', () => {
   );
 });
 
-describe('SignificantEventsScheduledDiscoveryWorkflowService', () => {
+describe('SignificantEventsScheduledWorkflowsService', () => {
   it('lazily installs and enables per-space scheduled workflows', async () => {
     const managementApi = createMockManagementApi();
     const managedWorkflowsClient = createMockManagedWorkflowsClient();
     const request = httpServerMock.createKibanaRequest();
-    const service = createSignificantEventsScheduledDiscoveryWorkflowService({
+    const service = createSignificantEventsScheduledWorkflowsService({
       logger: loggerMock.create(),
       managementApi: managementApi as never,
       getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
@@ -251,7 +256,7 @@ describe('SignificantEventsScheduledDiscoveryWorkflowService', () => {
       getWorkflow: jest.fn().mockResolvedValue({ enabled: true }),
     });
     const managedWorkflowsClient = createMockManagedWorkflowsClient();
-    const service = createSignificantEventsScheduledDiscoveryWorkflowService({
+    const service = createSignificantEventsScheduledWorkflowsService({
       logger: loggerMock.create(),
       managementApi: managementApi as never,
       getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
@@ -285,7 +290,7 @@ describe('SignificantEventsScheduledDiscoveryWorkflowService', () => {
     });
     const managedWorkflowsClient = createMockManagedWorkflowsClient();
     const request = httpServerMock.createKibanaRequest();
-    const service = createSignificantEventsScheduledDiscoveryWorkflowService({
+    const service = createSignificantEventsScheduledWorkflowsService({
       logger: loggerMock.create(),
       managementApi: managementApi as never,
       getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
