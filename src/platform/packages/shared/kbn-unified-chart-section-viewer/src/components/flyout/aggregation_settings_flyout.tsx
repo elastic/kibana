@@ -58,7 +58,7 @@ const buildSimpleAggregationItems = (
   onSelect: (option: SimpleAggregation) => void
 ): EuiListGroupItemProps[] =>
   SIMPLE_AGGREGATION_OPTIONS.map((option) => ({
-    id: option,
+    id: `${dataTestSubjPrefix}-${option}`,
     label: option.toUpperCase(),
     isActive: option === selected,
     'aria-pressed': option === selected,
@@ -71,7 +71,7 @@ const buildHistogramPercentileItems = (
   onSelect: (option: HistogramPercentile) => void
 ): EuiListGroupItemProps[] =>
   HISTOGRAM_PERCENTILE_OPTIONS.map((option) => ({
-    id: option,
+    id: `metricsExperienceAggregationSettingsHistogramOption-${option}`,
     label: option.toUpperCase(),
     isActive: option === selected,
     'aria-pressed': option === selected,
