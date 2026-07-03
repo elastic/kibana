@@ -18,10 +18,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import type {
-  ListPolicyExecutionHistoryResponse,
-  PolicyExecutionHistoryItem,
-} from '@kbn/alerting-v2-schemas';
+import type { ListPolicyExecutionHistoryResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEvent } from '../../../../../../server/resources/datastreams/alert_events';
 import {
   apiTest,
