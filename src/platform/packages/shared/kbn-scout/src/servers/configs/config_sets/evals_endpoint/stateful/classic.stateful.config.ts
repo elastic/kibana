@@ -23,10 +23,13 @@ export const servers: ScoutServerConfig = {
       ])}`,
       '--xpack.fleet.packages.0.name=endpoint',
       '--xpack.fleet.packages.0.version=latest',
-      // Agent Builder inference/tool spans (load_skill, execute_tool) — required for L1 Skill Invoked evaluators.
-      '--xpack.agentBuilder.tracing.send_to_self=true',
-      '--xpack.agentBuilder.tracing.scheduledDelay=50',
-      '--xpack.agentBuilder.tracing.exporters=[{"url":"http://localhost:4318/v1/traces"}]',
+      // Agent Builder inference/tool spans (load_skill, filestore.read of SKILL.md) reach ES for the
+      // L1 "Skill Invoked" evaluator via the inherited `evals_tracing` platform wiring: telemetry.tracing
+      // is enabled there, and register_tracing.ts always attaches an ElasticsearchOtlpExporter plus a
+      // GlobalBridgeProcessor into the platform pipeline, so agent spans nest under the incoming HTTP
+      // request trace and share its trace.id. Do NOT re-add `xpack.agentBuilder.tracing.exporters` here:
+      // configuring a dedicated agent-builder exporter forks agent spans into a separate root trace,
+      // detaching them from the HTTP trace the evaluator queries (Skill Invoked -> 0).
     ],
   },
 };
