@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
+import { chunk, pick } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { SkipRuleInstallReason } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -111,8 +111,8 @@ export const performRuleInstallationHandler = async (
       ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 
-    for (let i = 0; i < ruleInstallQueue.length; i += PREBUILT_RULES_BULK_CREATE_BATCH_SIZE) {
-      const batch = ruleInstallQueue.slice(i, i + PREBUILT_RULES_BULK_CREATE_BATCH_SIZE);
+    const installBatches = chunk(ruleInstallQueue, PREBUILT_RULES_BULK_CREATE_BATCH_SIZE);
+    for (const batch of installBatches) {
       const { assets: ruleAssets } = await ruleAssetsClient.fetchAssetsByVersion(batch);
       const { results, errors } = await detectionRulesClient.bulkCreatePrebuiltRules({
         rules: ruleAssets,
