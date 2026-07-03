@@ -13,7 +13,6 @@ import type { AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import {
   getApmMlDetectorLabel,
@@ -103,23 +102,10 @@ interface AnomaliesBadgeProps {
    * It is ignored if the score is undefined, in which case the badge is always non-interactive.
    */
   navigationProps?: AnomaliesBadgeNavigationProps;
-  /**
-   * If true, clicking the badge will navigate to the service overview page via an onClick handler instead of a plain anchor href.
-   * It is ignored if `navigationProps` is not provided or if the score is undefined.
-   */
-  navigateOnClick?: boolean;
 }
 
-export function AnomaliesBadge({
-  score,
-  detectorType,
-  navigationProps,
-  navigateOnClick,
-}: AnomaliesBadgeProps) {
+export function AnomaliesBadge({ score, detectorType, navigationProps }: AnomaliesBadgeProps) {
   const apmRouter = useApmRouter();
-
-  const apmPluginContext = useApmPluginContext();
-  const navigateToUrl = apmPluginContext?.core?.application?.navigateToUrl;
 
   const severity = getSeverity(score);
   const text = formatLabelWithScore(getI18nLabel(severity), score);
@@ -141,13 +127,6 @@ export function AnomaliesBadge({
         )
       : undefined;
 
-  const onClick =
-    href && navigateOnClick && !!navigateToUrl
-      ? (e: React.MouseEvent | React.KeyboardEvent) => {
-          navigateToUrl(href);
-        }
-      : undefined;
-
   const tooltipContent =
     score === undefined
       ? i18n.translate('xpack.apm.anomaliesBadge.tooltip.unknown', {
@@ -163,11 +142,7 @@ export function AnomaliesBadge({
           values: { score: score.toFixed(2) },
         });
 
-  const roleProps = onClick
-    ? { onClick, onClickAriaLabel: text }
-    : href
-    ? { href }
-    : { role: 'img', 'aria-label': text };
+  const roleProps = href ? { href } : { role: 'img', 'aria-label': text };
 
   return (
     <EuiToolTip position="bottom" content={tooltipContent}>
