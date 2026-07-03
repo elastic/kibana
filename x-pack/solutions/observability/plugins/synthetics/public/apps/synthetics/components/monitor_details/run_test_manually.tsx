@@ -57,7 +57,9 @@ export const RunTestManuallyContextItem = ({
         data-test-subj="syntheticsRunTestManuallyButton"
         color="success"
         disabled
-        toolTipContent={isHeartbeat ? NOT_AVAILABLE_FOR_HEARTBEAT : NOT_AVAILABLE_FOR_REMOTE_MONITORS}
+        toolTipContent={
+          isHeartbeat ? NOT_AVAILABLE_FOR_HEARTBEAT : NOT_AVAILABLE_FOR_REMOTE_MONITORS
+        }
       >
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>

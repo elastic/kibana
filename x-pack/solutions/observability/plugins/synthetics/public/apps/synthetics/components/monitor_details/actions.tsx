@@ -50,7 +50,11 @@ export function Actions() {
     >
       <EuiContextMenuPanel
         items={[
-          <EditMonitorContextItem key="edit-monitor" isRemote={isRemote} isHeartbeat={isHeartbeat} />,
+          <EditMonitorContextItem
+            key="edit-monitor"
+            isRemote={isRemote}
+            isHeartbeat={isHeartbeat}
+          />,
           <RefreshContextItem key="refresh-monitor" />,
           <RunTestManuallyContextItem
             key="run-test-manually"
