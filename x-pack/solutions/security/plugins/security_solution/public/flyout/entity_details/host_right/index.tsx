@@ -27,7 +27,7 @@ import { buildHostNamesFilter, type RiskSeverity } from '../../../../common/sear
 import { useUiSetting, useKibana } from '../../../common/lib/kibana';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { Footer } from '../../../flyout_v2/entity/host/main/footer';
-import { Content } from '../../../flyout_v2/entity/host/main/content';
+import { OverviewTab } from '../../../flyout_v2/entity/host/main/tabs/overview_tab';
 import { Header } from '../../../flyout_v2/entity/host/main/header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
@@ -341,7 +341,7 @@ export const HostPanel = memo(function HostPanel({
         {tabs && selectedTabId === TABLE_TAB_ID && observedHost.entityRecord ? (
           <EntityStoreTableTab entityRecord={observedHost.entityRecord} />
         ) : (
-          <Content
+          <OverviewTab
             identityFields={documentEntityIdentifiers}
             observedHost={observedHost}
             riskScoreState={effectiveRiskScoreState}

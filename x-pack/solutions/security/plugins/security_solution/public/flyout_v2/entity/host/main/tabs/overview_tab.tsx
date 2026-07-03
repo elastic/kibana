@@ -7,31 +7,34 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { Entity } from '../../../../../common/api/entity_analytics';
-import { ObservedDataSection } from './components/observed_data_section';
-import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
-import { useAnomalyPrivileges } from '../../../../entity_analytics/api/hooks/use_anomaly_privileges';
-import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
-import { EntityHighlightsAccordion } from '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
-import { EntityInsight } from '../../../../cloud_security_posture/components/entity_insight';
-import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
-import { FlyoutRiskSummary } from '../../../../entity_analytics/components/risk_summary_flyout/risk_summary';
-import type { RiskScoreState } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import type { EntityRiskScoresState } from '../../../../entity_analytics/api/hooks/use_entity_risk_scores';
-import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
-import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
-import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
-import type { ObservedEntityData } from '../../../../flyout/entity_details/shared/components/observed_entity/types';
-import type { EntityRiskScore, HostItem } from '../../../../../common/search_strategy';
-import { VisualizationsSection } from '../../../../flyout/entity_details/shared/components/right/visualizations_section';
-import { ResolutionSection } from '../../../../entity_analytics/components/entity_resolution/resolution_section';
-import { AnomaliesSection } from '../../../../entity_analytics/components/anomalies/anomalies_section';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import type { Entity } from '../../../../../../common/api/entity_analytics';
+import { ObservedDataSection } from '../components/observed_data_section';
+import { useAnomalyOverview } from '../../../../../entity_analytics/api/hooks/use_anomaly_overview';
+import { useAnomalyPrivileges } from '../../../../../entity_analytics/api/hooks/use_anomaly_privileges';
+import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
+import { EntityHighlightsAccordion } from '../../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
+import { EntityInsight } from '../../../../../cloud_security_posture/components/entity_insight';
+import { AssetCriticalityAccordion } from '../../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import { FlyoutRiskSummary } from '../../../../../entity_analytics/components/risk_summary_flyout/risk_summary';
+import type { RiskScoreState } from '../../../../../entity_analytics/api/hooks/use_risk_score';
+import type { EntityRiskScoresState } from '../../../../../entity_analytics/api/hooks/use_entity_risk_scores';
+import {
+  EntityIdentifierFields,
+  EntityType,
+} from '../../../../../../common/entity_analytics/types';
+import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '../constants';
+import type { EntityDetailsPath } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { IdentityFields } from '../../../../../flyout/document_details/shared/utils';
+import type { ObservedEntityData } from '../../../../../flyout/entity_details/shared/components/observed_entity/types';
+import type { EntityRiskScore, HostItem } from '../../../../../../common/search_strategy';
+import { VisualizationsSection } from '../../../../../flyout/entity_details/shared/components/right/visualizations_section';
+import { ResolutionSection } from '../../../../../entity_analytics/components/entity_resolution/resolution_section';
+import { AnomaliesSection } from '../../../../../entity_analytics/components/anomalies/anomalies_section';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
-export interface ContentProps {
+export interface OverviewTabProps {
   /** Observed host data (anomalies excluded). */
   observedHost: ObservedHostData;
   /** Current risk score state for the host. */
@@ -72,7 +75,7 @@ export interface ContentProps {
 /**
  * Host details flyout content section.
  */
-export const Content = ({
+export const OverviewTab = ({
   identityFields,
   observedHost,
   riskScoreState,
@@ -88,7 +91,7 @@ export const Content = ({
   entityStoreEntityId,
   prefetchedResolutionRisk,
   enableGraphAndResolutionNavigation = true,
-}: ContentProps) => {
+}: OverviewTabProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
   const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
   const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);

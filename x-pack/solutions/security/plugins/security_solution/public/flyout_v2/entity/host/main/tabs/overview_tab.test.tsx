@@ -7,49 +7,52 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
-import { RESOLUTION_SECTION_TEST_ID } from '../../../../entity_analytics/components/entity_resolution/test_ids';
-import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
-import { Content } from './content';
-import { mockHostEntityRiskScores } from '../../../../flyout/entity_details/mocks';
+import { TestProviders } from '../../../../../common/mock';
+import { RESOLUTION_SECTION_TEST_ID } from '../../../../../entity_analytics/components/entity_resolution/test_ids';
+import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
+import { OverviewTab } from './overview_tab';
+import { mockHostEntityRiskScores } from '../../../../../flyout/entity_details/mocks';
 
 const mockResolutionSection = jest.fn((_props: { openDetailsPanel?: unknown }) => (
   <div data-test-subj="securitySolutionFlyoutResolutionSection" />
 ));
 const mockVisualizationsSection = jest.fn((_props: { openDetailsPanel?: unknown }) => null);
 
-jest.mock('../../../../entity_analytics/components/entity_resolution/resolution_section', () => ({
-  ResolutionSection: (props: { openDetailsPanel?: unknown }) => mockResolutionSection(props),
-}));
-jest.mock('../../../../common/hooks/use_has_entity_resolution_license', () => ({
+jest.mock(
+  '../../../../../entity_analytics/components/entity_resolution/resolution_section',
+  () => ({
+    ResolutionSection: (props: { openDetailsPanel?: unknown }) => mockResolutionSection(props),
+  })
+);
+jest.mock('../../../../../common/hooks/use_has_entity_resolution_license', () => ({
   useHasEntityResolutionLicense: jest.fn(() => false),
 }));
-jest.mock('../../../../entity_analytics/components/risk_summary_flyout/risk_summary', () => ({
+jest.mock('../../../../../entity_analytics/components/risk_summary_flyout/risk_summary', () => ({
   FlyoutRiskSummary: () => null,
 }));
 jest.mock(
-  '../../../../flyout/entity_details/shared/components/right/visualizations_section',
+  '../../../../../flyout/entity_details/shared/components/right/visualizations_section',
   () => ({
     VisualizationsSection: (props: { openDetailsPanel?: unknown }) =>
       mockVisualizationsSection(props),
   })
 );
 jest.mock(
-  '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector',
+  '../../../../../entity_analytics/components/asset_criticality/asset_criticality_selector',
   () => ({
     AssetCriticalityAccordion: () => null,
   })
 );
 jest.mock(
-  '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights',
+  '../../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights',
   () => ({
     EntityHighlightsAccordion: () => null,
   })
 );
-jest.mock('../../../../cloud_security_posture/components/entity_insight', () => ({
+jest.mock('../../../../../cloud_security_posture/components/entity_insight', () => ({
   EntityInsight: () => null,
 }));
-jest.mock('./components/observed_data_section', () => ({
+jest.mock('../components/observed_data_section', () => ({
   ObservedDataSection: () => null,
 }));
 
@@ -67,24 +70,24 @@ const defaultProps = {
   entityStoreEntityId: 'host:host-1@okta',
 };
 
-describe('Content — resolution license gating', () => {
+describe('OverviewTab — resolution license gating', () => {
   beforeEach(() => {
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
   });
 
   it('does not render ResolutionSection when license is inactive', () => {
-    render(<Content {...defaultProps} />, { wrapper: TestProviders });
+    render(<OverviewTab {...defaultProps} />, { wrapper: TestProviders });
     expect(screen.queryByTestId(RESOLUTION_SECTION_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('renders ResolutionSection when license is active and entityStoreEntityId is set', () => {
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
-    render(<Content {...defaultProps} />, { wrapper: TestProviders });
+    render(<OverviewTab {...defaultProps} />, { wrapper: TestProviders });
     expect(screen.getByTestId(RESOLUTION_SECTION_TEST_ID)).toBeInTheDocument();
   });
 });
 
-describe('Content — graph/resolution navigation gating', () => {
+describe('OverviewTab — graph/resolution navigation gating', () => {
   const openDetailsPanel = jest.fn();
 
   beforeEach(() => {
@@ -93,7 +96,7 @@ describe('Content — graph/resolution navigation gating', () => {
   });
 
   it('forwards openDetailsPanel to the graph and resolution sections by default', () => {
-    render(<Content {...defaultProps} openDetailsPanel={openDetailsPanel} />, {
+    render(<OverviewTab {...defaultProps} openDetailsPanel={openDetailsPanel} />, {
       wrapper: TestProviders,
     });
     expect(mockVisualizationsSection).toHaveBeenLastCalledWith(
@@ -106,7 +109,7 @@ describe('Content — graph/resolution navigation gating', () => {
 
   it('withholds openDetailsPanel from the graph and resolution sections when navigation is disabled', () => {
     render(
-      <Content
+      <OverviewTab
         {...defaultProps}
         openDetailsPanel={openDetailsPanel}
         enableGraphAndResolutionNavigation={false}

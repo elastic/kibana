@@ -9,16 +9,16 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { JsonTab } from '../../shared/tabs/json_tab';
-import { TableTab } from '../../shared/tabs/table_tab';
-import { cellActionRenderer } from '../../shared/components/cell_actions';
-import { OverviewTab } from './tabs/overview_tab';
+import { JsonTab } from '../../../shared/tabs/json_tab';
+import { TableTab } from '../../../shared/tabs/table_tab';
+import { cellActionRenderer } from '../../../shared/components/cell_actions';
+import { OverviewTab } from './overview_tab';
 import {
   ATTACK_FLYOUT_V2_PREFIX,
   HEADER_JSON_TAB_TEST_ID,
   HEADER_OVERVIEW_TAB_TEST_ID,
   HEADER_TABLE_TAB_TEST_ID,
-} from './constants/test_ids';
+} from '../constants/test_ids';
 
 export type TabId = 'overview' | 'table' | 'json';
 

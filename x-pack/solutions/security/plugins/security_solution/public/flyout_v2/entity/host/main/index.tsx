@@ -41,8 +41,9 @@ import { MisconfigurationInsights } from '../tools/misconfiguration_insights';
 import { VulnerabilityInsights } from '../tools/vulnerability_insights';
 import { AlertsInsights } from '../tools/alerts_insights';
 import { Header } from './header';
-import { Content } from './content';
+import { OverviewTab, type OverviewTabProps } from './tabs/overview_tab';
 import { Footer } from './footer';
+import { getTabsDisplayed } from './tabs';
 import { useObservedHost } from './hooks/use_observed_host';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
@@ -60,12 +61,8 @@ import {
   type IdentityFields,
 } from '../../../../flyout/document_details/shared/utils';
 import { HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
-import {
-  useEntityPanelTabs,
-  TABLE_TAB_ID,
-} from '../../../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
+import { useEntityPanelTabs } from '../../../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
 import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
-import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
 
 export interface HostProps {
@@ -251,17 +248,11 @@ export const Host: FC<HostProps> = memo(function Host({
   const noEntityInStore =
     entityStoreV2Enabled && !entityFromStoreResult.isLoading && !observedHost.entityRecord;
 
-  const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
-    entityRecord: observedHost.entityRecord ?? null,
-  });
-
-  const tabsNode = tabs ? (
-    <EntityPanelHeaderTabs
-      tabs={tabs}
-      selectedTabId={selectedTabId}
-      setSelectedTabId={setSelectedTabId}
-    />
-  ) : undefined;
+  const {
+    tabs: entityPanelTabs,
+    selectedTabId,
+    setSelectedTabId,
+  } = useEntityPanelTabs({ entityRecord: observedHost.entityRecord ?? null });
 
   const onShowHost = useCallback(() => {
     overlays.openSystemFlyout(
@@ -352,6 +343,69 @@ export const Host: FC<HostProps> = memo(function Host({
         'Unknown') as RiskSeverity)
     : undefined;
 
+  const overviewTabProps = useMemo<OverviewTabProps>(
+    () => ({
+      identityFields: documentEntityIdentifiers,
+      observedHost,
+      riskScoreState: effectiveRiskScoreState,
+      entityRiskScores,
+      contextID: safeContextID,
+      scopeId,
+      openDetailsPanel,
+      recalculatingScore,
+      onAssetCriticalityChange: onAssetCriticalityChanged,
+      isPreviewMode: false,
+      entityRecord: entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined,
+      skipRiskAndCriticality: noEntityInStore,
+      entityStoreEntityId,
+      // The v2 flyout does not yet wire up the graph view / resolution group tabs, so hide their
+      // navigation here. v1 HostPanel and the agent-builder canvas keep it (default).
+      // TODO: remove this (and `enableGraphAndResolutionNavigation` in content.tsx) once
+      // `openDetailsPanel` handles the GRAPH_VIEW and RESOLUTION_GROUP tabs in this flyout.
+      enableGraphAndResolutionNavigation: false,
+    }),
+    [
+      documentEntityIdentifiers,
+      observedHost,
+      effectiveRiskScoreState,
+      entityRiskScores,
+      safeContextID,
+      scopeId,
+      openDetailsPanel,
+      recalculatingScore,
+      onAssetCriticalityChanged,
+      entityStoreV2Enabled,
+      noEntityInStore,
+      entityStoreEntityId,
+    ]
+  );
+
+  const tabs = useMemo(
+    () =>
+      entityPanelTabs
+        ? getTabsDisplayed({
+            entityPanelTabs,
+            entityStoreRecord: observedHost.entityRecord ?? null,
+            overviewTabProps,
+          })
+        : null,
+    [entityPanelTabs, observedHost.entityRecord, overviewTabProps]
+  );
+
+  const tabsNode = tabs ? (
+    <EntityPanelHeaderTabs
+      tabs={tabs}
+      selectedTabId={selectedTabId}
+      setSelectedTabId={setSelectedTabId}
+    />
+  ) : undefined;
+
+  const selectedTabContent = tabs ? (
+    tabs.find((tab) => tab.id === selectedTabId)?.content
+  ) : (
+    <OverviewTab {...overviewTabProps} />
+  );
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -374,30 +428,7 @@ export const Host: FC<HostProps> = memo(function Host({
         )}
         {tabsNode}
         {tabs && <EuiSpacer size="l" />}
-        {tabs && selectedTabId === TABLE_TAB_ID && observedHost.entityRecord ? (
-          <EntityStoreTableTab entityRecord={observedHost.entityRecord} />
-        ) : (
-          <Content
-            identityFields={documentEntityIdentifiers}
-            observedHost={observedHost}
-            riskScoreState={effectiveRiskScoreState}
-            entityRiskScores={entityRiskScores}
-            contextID={safeContextID}
-            scopeId={scopeId}
-            openDetailsPanel={openDetailsPanel}
-            recalculatingScore={recalculatingScore}
-            onAssetCriticalityChange={onAssetCriticalityChanged}
-            isPreviewMode={false}
-            entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
-            skipRiskAndCriticality={noEntityInStore}
-            entityStoreEntityId={entityStoreEntityId}
-            // The v2 flyout does not yet wire up the graph view / resolution group tabs, so hide
-            // their navigation here. v1 HostPanel and the agent-builder canvas keep it (default).
-            // TODO: remove this prop (and `enableGraphAndResolutionNavigation` in content.tsx) once
-            // `openDetailsPanel` handles the GRAPH_VIEW and RESOLUTION_GROUP tabs in this flyout.
-            enableGraphAndResolutionNavigation={false}
-          />
-        )}
+        {selectedTabContent}
       </EuiFlyoutBody>
       {assetInventoryEnabled && (
         <EuiFlyoutFooter>

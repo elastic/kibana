@@ -8,16 +8,16 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
-import type { CellActionRenderer } from '../../shared/components/cell_actions';
-import { JsonTab } from '../../shared/tabs/json_tab';
-import { OverviewTab } from './tabs/overview_tab';
-import { TableTab } from './tabs/table_tab';
+import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
+import type { CellActionRenderer } from '../../../shared/components/cell_actions';
+import { JsonTab } from '../../../shared/tabs/json_tab';
+import { OverviewTab } from './overview_tab';
+import { TableTab } from './table_tab';
 import {
   IOC_DETAILS_OVERVIEW_TAB_TEST_ID,
   IOC_DETAILS_TABLE_TAB_TEST_ID,
   IOC_DETAILS_JSON_TAB_TEST_ID,
-} from './test_ids';
+} from '../test_ids';
 
 export type TabId = 'overview' | 'table' | 'json';
 

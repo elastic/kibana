@@ -31,7 +31,7 @@ import {
   type RiskStats,
 } from '../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../common/lib/kibana';
-import { Content as HostPanelContent } from '../../flyout_v2/entity/host/main/content';
+import { OverviewTab as HostPanelContent } from '../../flyout_v2/entity/host/main/tabs/overview_tab';
 import { Header as HostPanelHeader } from '../../flyout_v2/entity/host/main/header';
 import { useObservedHost } from '../../flyout_v2/entity/host/main/hooks/use_observed_host';
 import { EntityType } from '../../../common/entity_analytics/types';

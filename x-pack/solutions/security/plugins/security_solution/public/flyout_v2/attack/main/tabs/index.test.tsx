@@ -8,22 +8,22 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { getTabsDisplayed, validTabIds } from './tabs';
+import { getTabsDisplayed, validTabIds } from '.';
 import {
   HEADER_JSON_TAB_TEST_ID,
   HEADER_OVERVIEW_TAB_TEST_ID,
   HEADER_TABLE_TAB_TEST_ID,
-} from './constants/test_ids';
+} from '../constants/test_ids';
 
-jest.mock('./tabs/overview_tab', () => ({
+jest.mock('./overview_tab', () => ({
   OverviewTab: () => <div data-test-subj="overview-content" />,
 }));
 
-jest.mock('../../shared/tabs/table_tab', () => ({
+jest.mock('../../../shared/tabs/table_tab', () => ({
   TableTab: () => <div data-test-subj="table-content" />,
 }));
 
-jest.mock('../../shared/tabs/json_tab', () => ({
+jest.mock('../../../shared/tabs/json_tab', () => ({
   JsonTab: () => <div data-test-subj="json-content" />,
 }));
 
