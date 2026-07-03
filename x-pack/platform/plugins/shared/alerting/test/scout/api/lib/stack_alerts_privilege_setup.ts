@@ -105,13 +105,6 @@ export const setupStackAlertsPrivilegeTests = async (
   const adminSessionHeaders = { ...COMMON_HEADERS, ...cookieHeader };
   await waitForSuccessfulEventLogEntry(apiClient, enabledRuleId!, adminSessionHeaders);
 
-  // .es-query with groupBy: 'all' always uses this instance id (see constants.ts).
-  const muteResponse = await apiClient.post(
-    `api/alerting/rule/${enabledRuleId!}/alert/${ES_QUERY_DEFAULT_INSTANCE_ID_ENCODED}/_mute?validate_alerts_existence=true`,
-    { headers: { ...COMMON_HEADERS, ...adminCreds.apiKeyHeader } }
-  );
-  expect(muteResponse).toHaveStatusCode(204);
-
   let realAlertId: string | undefined;
   let realAlertIndex: string | undefined;
   const pollIntervalMs = 2000;
@@ -148,6 +141,14 @@ export const setupStackAlertsPrivilegeTests = async (
   }
   expect(realAlertId, 'expected an alert to be generated for the enabled rule').toBeDefined();
   expect(realAlertIndex, 'expected an alert index for the enabled rule').toBeDefined();
+
+  // .es-query with groupBy: 'all' always uses this instance id (see constants.ts).
+  // Mute only after the alert is indexed — validate_alerts_existence=true searches the alert index.
+  const muteResponse = await apiClient.post(
+    `api/alerting/rule/${enabledRuleId!}/alert/${ES_QUERY_DEFAULT_INSTANCE_ID_ENCODED}/_mute?validate_alerts_existence=true`,
+    { headers: { ...COMMON_HEADERS, ...adminCreds.apiKeyHeader } }
+  );
+  expect(muteResponse).toHaveStatusCode(204);
 
   return {
     adminCreds,
