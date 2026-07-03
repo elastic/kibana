@@ -26,6 +26,10 @@ export const BULK_GET_PROFILES_ERROR = i18n.translate(
   }
 );
 
+export const LOAD_MORE = i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.loadMore', {
+  defaultMessage: 'Load more actions',
+});
+
 /** --- Timeline (shared labels) --- */
 export const SYSTEM_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.timeline.systemLabel',
@@ -34,75 +38,80 @@ export const SYSTEM_LABEL = i18n.translate(
   }
 );
 
-/** --- Timeline (state-change comments) --- */
-export const EPISODE_STARTED = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.timeline.episodeStarted',
+/** --- Timeline (state-change sentences) --- */
+export const STARTED_EPISODE_AS = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timeline.startedEpisodeAs',
   {
-    defaultMessage: 'Episode started',
+    defaultMessage: 'started the episode as',
   }
 );
 
-export const STATUS_CHANGED = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.timeline.statusChanged',
+export const CHANGED_STATUS_TO = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timeline.changedStatusTo',
   {
-    defaultMessage: 'Episode status changed',
+    defaultMessage: 'changed the status to',
   }
 );
 
-export const SEVERITY_SET = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.timeline.severitySet',
+export const SET_SEVERITY_TO = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timeline.setSeverityTo',
   {
-    defaultMessage: 'Episode severity set',
+    defaultMessage: 'set the severity to',
   }
 );
 
-export const SEVERITY_CHANGED = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.timeline.severityChanged',
+export const CHANGED_SEVERITY_TO = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timeline.changedSeverityTo',
   {
-    defaultMessage: 'Episode severity changed',
+    defaultMessage: 'changed the severity to',
   }
 );
 
 export const getAfterNEventsLabel = (count: number, prevStatus: string): string =>
   i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.afterNEvents', {
-    defaultMessage: 'After {count} {prevStatus} {count, plural, one {event} other {events}}',
+    defaultMessage: 'after {count} {prevStatus} {count, plural, one {event} other {events}}',
     values: { count, prevStatus },
   });
 
-/** --- Timeline (action comments) --- */
+/** --- Timeline (action sentences) --- */
 export const ACTION_LABELS: Record<string, string> = {
   ack: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.ack', {
-    defaultMessage: 'acknowledged',
+    defaultMessage: 'acknowledged the episode',
   }),
   unack: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.unack', {
-    defaultMessage: 'unacknowledged',
+    defaultMessage: 'unacknowledged the episode',
   }),
   snooze: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.snooze', {
-    defaultMessage: 'snoozed',
+    defaultMessage: 'snoozed the episode',
   }),
   unsnooze: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.unsnooze', {
-    defaultMessage: 'unsnoozed',
+    defaultMessage: 'unsnoozed the episode',
   }),
   deactivate: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.deactivate', {
-    defaultMessage: 'resolved',
+    defaultMessage: 'resolved the episode',
   }),
   activate: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.activate', {
-    defaultMessage: 're-opened',
+    defaultMessage: 're-opened the episode',
   }),
   tag: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.tag', {
-    defaultMessage: 'updated tags',
+    defaultMessage: 'updated the tags',
   }),
   assign: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.assign', {
-    defaultMessage: 'updated assignee',
+    defaultMessage: 'updated the assignee',
   }),
 };
 
-// Preposition joining the action verb to the timestamp shown by EuiComment,
-// kept separate so translators can reorder it relative to the verb.
-export const ACTION_ON_LABEL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.timeline.actionOnLabel',
+export const ASSIGNED_TO = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timeline.assignedTo',
   {
-    defaultMessage: 'on',
+    defaultMessage: 'assigned the episode to',
+  }
+);
+
+export const REMOVED_ASSIGNEE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timeline.removedAssignee',
+  {
+    defaultMessage: 'removed the assignee',
   }
 );
 
@@ -121,14 +130,7 @@ export const STATUS_LABELS: Record<string, string> = {
   }),
 };
 
-/** --- Timeline (action body) --- */
-export const SHOW_FULL_EVENT = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.timeline.showFullEvent',
-  {
-    defaultMessage: 'Show full event',
-  }
-);
-
+/** --- Timeline (action event details) --- */
 export const SNOOZED_INDEFINITELY = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.timeline.snoozedIndefinitely',
   {

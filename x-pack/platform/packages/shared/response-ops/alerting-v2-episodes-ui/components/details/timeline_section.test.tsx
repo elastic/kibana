@@ -6,25 +6,22 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { EpisodeStateTransitionRow } from '../../queries/episode_state_transitions_query';
-import type { EpisodeSeverityTransitionRow } from '../../queries/episode_severity_transitions_query';
+import type { EpisodeEventRow } from '../../queries/episode_events_query';
 import type { EpisodeActionHistoryEntry } from '../../queries/episode_actions_history_query';
-import { useFetchEpisodeStateTransitionsQuery } from '../../hooks/use_fetch_episode_state_transitions_query';
-import { useFetchEpisodeSeverityTransitionsQuery } from '../../hooks/use_fetch_episode_severity_transitions_query';
+import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeActionsHistoryQuery } from '../../hooks/use_fetch_episode_actions_history_query';
 import { useBulkGetProfiles } from '../../hooks/use_bulk_get_profiles';
 import { AlertEpisodeTimelineSection } from './timeline_section';
 
-jest.mock('../../hooks/use_fetch_episode_state_transitions_query');
-jest.mock('../../hooks/use_fetch_episode_severity_transitions_query');
+jest.mock('../../hooks/use_fetch_episode_events_query');
 jest.mock('../../hooks/use_fetch_episode_actions_history_query');
 jest.mock('../../hooks/use_bulk_get_profiles');
 
-const mockUseFetchStateTransitions = jest.mocked(useFetchEpisodeStateTransitionsQuery);
-const mockUseFetchSeverityTransitions = jest.mocked(useFetchEpisodeSeverityTransitionsQuery);
+const mockUseFetchEvents = jest.mocked(useFetchEpisodeEventsQuery);
 const mockUseFetchActionsHistory = jest.mocked(useFetchEpisodeActionsHistoryQuery);
 const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfiles);
 
@@ -34,26 +31,24 @@ const mockServices = {
   userProfile: {} as never,
 };
 
-const makeRow = (status: string, ts: string): EpisodeStateTransitionRow => ({
+const makeRow = (status: string, ts: string, severity: string | null = null): EpisodeEventRow => ({
   '@timestamp': ts,
-  'episode.status': status as EpisodeStateTransitionRow['episode.status'],
-  event_count: 1,
+  'episode.id': 'ep-1',
+  'episode.status': status as EpisodeEventRow['episode.status'],
+  'rule.id': 'rule-1',
+  group_hash: 'hash-1',
+  severity,
 });
 
+// pending -> (severity set to "high") -> active: 2 state-change entries + 1 severity-change entry.
 const mockEventRows = [
   makeRow(ALERT_EPISODE_STATUS.PENDING, '2024-01-01T00:00:00.000Z'),
-  makeRow(ALERT_EPISODE_STATUS.ACTIVE, '2024-01-01T00:01:00.000Z'),
-];
-
-const mockSeverityRows: EpisodeSeverityTransitionRow[] = [
-  {
-    '@timestamp': '2024-01-01T00:00:30.000Z',
-    severity: 'high',
-    event_count: 1,
-  },
+  makeRow(ALERT_EPISODE_STATUS.PENDING, '2024-01-01T00:00:30.000Z', 'high'),
+  makeRow(ALERT_EPISODE_STATUS.ACTIVE, '2024-01-01T00:01:00.000Z', 'high'),
 ];
 
 const mockAction: EpisodeActionHistoryEntry = {
+  _id: 'action-1',
   '@timestamp': '2024-01-01T00:01:30.000Z',
   action_type: 'ack',
   actor: 'user-uid-1',
@@ -68,26 +63,39 @@ const mockAction: EpisodeActionHistoryEntry = {
 const renderSection = () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <QueryClientProvider client={client}>
-      <AlertEpisodeTimelineSection episodeId="ep-1" groupHash="hash-1" services={mockServices} />
-    </QueryClientProvider>
+    <I18nProvider>
+      <QueryClientProvider client={client}>
+        <AlertEpisodeTimelineSection episodeId="ep-1" groupHash="hash-1" services={mockServices} />
+      </QueryClientProvider>
+    </I18nProvider>
   );
 };
 
-const mockStateTransitions = (eventRows: EpisodeStateTransitionRow[], isLoading = false) =>
-  mockUseFetchStateTransitions.mockReturnValue({ data: eventRows, isLoading } as never);
+const mockEvents = (eventRows: EpisodeEventRow[], isLoading = false) =>
+  mockUseFetchEvents.mockReturnValue({ data: eventRows, isLoading } as never);
 
-const mockSeverityTransitions = (eventRows: EpisodeSeverityTransitionRow[], isLoading = false) =>
-  mockUseFetchSeverityTransitions.mockReturnValue({ data: eventRows, isLoading } as never);
-
-const mockActions = (actions: EpisodeActionHistoryEntry[], isLoading = false) =>
-  mockUseFetchActionsHistory.mockReturnValue({ data: actions, isLoading } as never);
+const mockActions = (
+  actions: EpisodeActionHistoryEntry[],
+  isLoading = false,
+  overrides: {
+    hasNextPage?: boolean;
+    isFetchingNextPage?: boolean;
+    fetchNextPage?: () => void;
+  } = {}
+) =>
+  mockUseFetchActionsHistory.mockReturnValue({
+    entries: actions,
+    isLoading,
+    fetchNextPage: jest.fn(),
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    ...overrides,
+  } as never);
 
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseBulkGetProfiles.mockReturnValue({ data: [], isLoading: false } as never);
-  mockStateTransitions(mockEventRows);
-  mockSeverityTransitions(mockSeverityRows);
+  mockEvents(mockEventRows);
   mockActions([]);
 });
 
@@ -98,29 +106,20 @@ describe('AlertEpisodeTimelineSection', () => {
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('shows a spinner while loading state transitions', () => {
-    mockStateTransitions(mockEventRows, true);
-    renderSection();
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-  });
-
-  it('shows a spinner while loading severity transitions', () => {
-    mockSeverityTransitions(mockSeverityRows, true);
+  it('shows a spinner while loading events', () => {
+    mockEvents(mockEventRows, true);
     renderSection();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('shows empty prompt when there are no events and no actions', () => {
-    mockStateTransitions([]);
-    mockSeverityTransitions([]);
+    mockEvents([]);
     mockActions([]);
     renderSection();
     expect(screen.getByTestId('alertingV2TimelineSectionEmpty')).toBeInTheDocument();
   });
 
   it('renders one EuiComment per merged entry, newest first', () => {
-    mockStateTransitions(mockEventRows);
-    mockSeverityTransitions(mockSeverityRows);
     mockActions([mockAction]);
     renderSection();
     // 2 state-change entries + 1 severity-change entry + 1 action entry = 4 comments
@@ -129,39 +128,59 @@ describe('AlertEpisodeTimelineSection', () => {
     expect(comments[0]).toHaveAttribute('data-timestamp', '2024-01-01T00:01:30.000Z');
   });
 
-  it('shows "Episode started" text for the initial state entry', () => {
-    mockStateTransitions([makeRow(ALERT_EPISODE_STATUS.PENDING, '2024-01-01T00:00:00.000Z')]);
+  it('shows "started the episode as" text for the initial state entry', () => {
+    mockEvents([makeRow(ALERT_EPISODE_STATUS.PENDING, '2024-01-01T00:00:00.000Z')]);
     mockActions([]);
     renderSection();
-    expect(screen.getByText(/Episode started/i)).toBeInTheDocument();
+    expect(screen.getByText(/started the episode as/i)).toBeInTheDocument();
   });
 
-  it('shows "Episode status changed" text for subsequent transitions', () => {
-    mockStateTransitions(mockEventRows);
+  it('shows "changed the status to" text for subsequent transitions', () => {
     mockActions([]);
     renderSection();
-    expect(screen.getByText(/Episode status changed/i)).toBeInTheDocument();
+    expect(screen.getByText(/changed the status to/i)).toBeInTheDocument();
   });
 
-  it('shows "Episode severity set" text for the initial severity entry', () => {
-    mockStateTransitions([]);
-    mockSeverityTransitions(mockSeverityRows);
+  it('shows "set the severity to" text for the initial severity entry', () => {
     mockActions([]);
     renderSection();
-    expect(screen.getByText(/Episode severity set/i)).toBeInTheDocument();
+    expect(screen.getByText(/set the severity to/i)).toBeInTheDocument();
   });
 
   it('shows the action label for action entries', () => {
-    mockStateTransitions([]);
+    mockEvents([]);
     mockActions([mockAction]);
     renderSection();
-    expect(screen.getByText('acknowledged on')).toBeInTheDocument();
+    expect(screen.getByText('acknowledged the episode')).toBeInTheDocument();
   });
 
   it('falls back to "system" username when actor is null', () => {
-    mockStateTransitions([]);
+    mockEvents([]);
     mockActions([{ ...mockAction, actor: null }]);
     renderSection();
     expect(screen.getAllByText('system').length).toBeGreaterThan(0);
+  });
+
+  it('hides the load-more button when there are no more action pages', () => {
+    mockEvents([]);
+    mockActions([mockAction], false, { hasNextPage: false });
+    renderSection();
+    expect(screen.queryByTestId('alertingV2TimelineLoadMore')).not.toBeInTheDocument();
+  });
+
+  it('calls fetchNextPage when the load-more button is clicked', () => {
+    const fetchNextPage = jest.fn();
+    mockEvents([]);
+    mockActions([mockAction], false, { hasNextPage: true, fetchNextPage });
+    renderSection();
+    fireEvent.click(screen.getByTestId('alertingV2TimelineLoadMore'));
+    expect(fetchNextPage).toHaveBeenCalled();
+  });
+
+  it('disables the load-more button while fetching the next page', () => {
+    mockEvents([]);
+    mockActions([mockAction], false, { hasNextPage: true, isFetchingNextPage: true });
+    renderSection();
+    expect(screen.getByTestId('alertingV2TimelineLoadMore')).toBeDisabled();
   });
 });

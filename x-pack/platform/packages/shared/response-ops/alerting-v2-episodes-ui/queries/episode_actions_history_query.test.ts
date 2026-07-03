@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { buildEpisodeActionsHistoryQuery } from './episode_actions_history_query';
+import {
+  buildEpisodeActionsHistoryQuery,
+  DEFAULT_ACTIONS_HISTORY_PAGE_SIZE,
+} from './episode_actions_history_query';
 
 describe('buildEpisodeActionsHistoryQuery', () => {
-  it('filters by episode id and group hash, covers all action types, sorts newest-first, and limits to 200', () => {
+  it('filters by episode id and group hash, covers all action types, sorts newest-first, and defaults the page size', () => {
     const queryString = buildEpisodeActionsHistoryQuery('default', 'ep-1', 'hash-1').print('basic');
     expect(queryString).toContain('"ep-1"');
     expect(queryString).toContain('"hash-1"');
@@ -17,7 +20,9 @@ describe('buildEpisodeActionsHistoryQuery', () => {
     );
     expect(queryString).toContain('@timestamp');
     expect(queryString).toContain('DESC');
-    expect(queryString).toContain('LIMIT 200');
+    expect(queryString).toContain(`LIMIT ${DEFAULT_ACTIONS_HISTORY_PAGE_SIZE}`);
+    expect(queryString).toContain('METADATA _id');
+    expect(queryString).not.toContain('@timestamp <=');
   });
 
   it('uses a different space id when provided', () => {
@@ -25,5 +30,19 @@ describe('buildEpisodeActionsHistoryQuery', () => {
       'basic'
     );
     expect(queryString).toContain('"my-space"');
+  });
+
+  it('adds a keyset cursor filter when a "before" timestamp is provided', () => {
+    const queryString = buildEpisodeActionsHistoryQuery('default', 'ep-1', 'hash-1', {
+      before: '2024-01-01T00:00:00.000Z',
+    }).print('basic');
+    expect(queryString).toContain('@timestamp <= "2024-01-01T00:00:00.000Z"');
+  });
+
+  it('uses a custom page size when provided', () => {
+    const queryString = buildEpisodeActionsHistoryQuery('default', 'ep-1', 'hash-1', {
+      limit: 50,
+    }).print('basic');
+    expect(queryString).toContain('LIMIT 50');
   });
 });

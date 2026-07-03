@@ -8,8 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { useFetchEpisodeStateTransitionsQuery } from '../../hooks/use_fetch_episode_state_transitions_query';
-import { useFetchEpisodeSeverityTransitionsQuery } from '../../hooks/use_fetch_episode_severity_transitions_query';
+import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeActionsHistoryQuery } from '../../hooks/use_fetch_episode_actions_history_query';
 import { useBulkGetProfiles } from '../../hooks/use_bulk_get_profiles';
 import type { AlertEpisodeDetailsServices } from './types';
@@ -32,27 +31,24 @@ export const AlertEpisodeTimelineSection = ({
   groupHash,
   services,
 }: AlertEpisodeTimelineSectionProps) => {
-  const { data: stateTransitionRows = [], isLoading: isLoadingStateTransitions } =
-    useFetchEpisodeStateTransitionsQuery({
-      episodeId,
-      services,
-    });
+  const { data: eventRows = [], isLoading: isLoadingEventRows } = useFetchEpisodeEventsQuery({
+    episodeId,
+    services,
+  });
 
-  const { data: severityTransitionRows = [], isLoading: isLoadingSeverityTransitions } =
-    useFetchEpisodeSeverityTransitionsQuery({
-      episodeId,
-      services,
-    });
+  const {
+    entries: actionEntries,
+    isLoading: isLoadingActionEntries,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useFetchEpisodeActionsHistoryQuery({
+    episodeId,
+    groupHash,
+    services,
+  });
 
-  const { data: actionEntries = [], isLoading: isLoadingActionEntries } =
-    useFetchEpisodeActionsHistoryQuery({
-      episodeId,
-      groupHash,
-      services,
-    });
-
-  const isLoading =
-    isLoadingStateTransitions || isLoadingSeverityTransitions || isLoadingActionEntries;
+  const isLoading = isLoadingEventRows || isLoadingActionEntries;
 
   const actorUids = useMemo(
     () => [
@@ -83,15 +79,9 @@ export const AlertEpisodeTimelineSection = ({
     return map;
   }, [profiles]);
 
-  const stateChangeEntries = useMemo(
-    () => deriveStateChangeEntries(stateTransitionRows),
-    [stateTransitionRows]
-  );
+  const stateChangeEntries = useMemo(() => deriveStateChangeEntries(eventRows), [eventRows]);
 
-  const severityChangeEntries = useMemo(
-    () => deriveSeverityChangeEntries(severityTransitionRows),
-    [severityTransitionRows]
-  );
+  const severityChangeEntries = useMemo(() => deriveSeverityChangeEntries(eventRows), [eventRows]);
 
   const mergedEntries = useMemo(
     () => mergeTimelineEntries(stateChangeEntries, severityChangeEntries, actionEntries),
@@ -119,5 +109,13 @@ export const AlertEpisodeTimelineSection = ({
     );
   }
 
-  return <AlertEpisodeTimeline entries={mergedEntries} profilesMap={profilesMap} />;
+  return (
+    <AlertEpisodeTimeline
+      entries={mergedEntries}
+      profilesMap={profilesMap}
+      onLoadMore={fetchNextPage}
+      hasMore={hasNextPage}
+      isLoadingMore={isFetchingNextPage}
+    />
+  );
 };

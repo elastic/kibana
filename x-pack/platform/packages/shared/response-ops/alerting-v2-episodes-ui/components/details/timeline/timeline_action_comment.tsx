@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { EuiAvatar, EuiComment } from '@elastic/eui';
+import { EuiAvatar, EuiComment, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
 import type { EpisodeActionHistoryEntry } from '../../../queries/episode_actions_history_query';
-import { ACTION_ICON, formatTimestamp } from './entries';
-import { AlertEpisodeTimelineActionBody } from './timeline_action_body';
+import { ACTION_ICON } from './entries';
+import { AlertEpisodeTimelineActionEvent } from './timeline_action_event';
+import { AlertEpisodeTimelineRelativeTimestamp } from './timeline_relative_timestamp';
 import * as i18n from './translations';
 
 export interface AlertEpisodeTimelineActionCommentProps {
@@ -28,29 +29,39 @@ export const AlertEpisodeTimelineActionComment = ({
   const assigneeProfile = entry.assignee_uid ? profilesMap.get(entry.assignee_uid) : undefined;
   const displayName =
     profile?.user.full_name ?? profile?.user.username ?? entry.actor ?? i18n.SYSTEM_LABEL;
-  const timelineAvatar: React.ReactElement = profile ? (
-    <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
+  const username = profile ? (
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      responsive={false}
+      data-test-subj="alertingV2TimelineActorAvatar"
+    >
+      <EuiFlexItem grow={false}>
+        <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <strong>{displayName}</strong>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   ) : (
-    <EuiAvatar
-      size="s"
-      name={entry.action_type}
-      iconType={(ACTION_ICON[entry.action_type] as IconType | undefined) ?? 'bell'}
-      color="subdued"
-    />
+    displayName
   );
 
   return (
     <EuiComment
       data-test-subj="alertingV2TimelineEntry"
       data-timestamp={entry['@timestamp']}
-      username={displayName}
-      timestamp={formatTimestamp(entry['@timestamp'])}
-      event={`${i18n.ACTION_LABELS[entry.action_type] ?? entry.action_type} ${
-        i18n.ACTION_ON_LABEL
-      }`}
-      timelineAvatar={timelineAvatar}
-    >
-      <AlertEpisodeTimelineActionBody entry={entry} assigneeProfile={assigneeProfile} />
-    </EuiComment>
+      username={username}
+      timestamp={<AlertEpisodeTimelineRelativeTimestamp timestamp={entry['@timestamp']} />}
+      event={<AlertEpisodeTimelineActionEvent entry={entry} assigneeProfile={assigneeProfile} />}
+      timelineAvatar={
+        <EuiAvatar
+          size="s"
+          name={entry.action_type}
+          iconType={(ACTION_ICON[entry.action_type] as IconType | undefined) ?? 'bell'}
+          color="subdued"
+        />
+      }
+    />
   );
 };

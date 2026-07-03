@@ -23,6 +23,7 @@ const makeRow = (status: string, ts: string): EpisodeEventRow => ({
 });
 
 const makeAction = (ts: string): EpisodeActionHistoryEntry => ({
+  _id: `action-${ts}`,
   '@timestamp': ts,
   action_type: 'ack',
   actor: 'user-uid-1',
@@ -130,6 +131,23 @@ describe('deriveStateChangeEntries', () => {
       prevEventCount: 1,
     });
   });
+
+  it('correctly handles a non-contiguous return to a prior status (flapping)', () => {
+    const rows = [
+      makeRow(ALERT_EPISODE_STATUS.ACTIVE, '2024-01-01T00:00:00.000Z'),
+      makeRow(ALERT_EPISODE_STATUS.RECOVERING, '2024-01-01T00:01:00.000Z'),
+      makeRow(ALERT_EPISODE_STATUS.ACTIVE, '2024-01-01T00:02:00.000Z'),
+    ];
+
+    const entries = deriveStateChangeEntries(rows);
+
+    expect(entries).toHaveLength(3);
+    expect(entries[2]).toMatchObject({
+      newStatus: ALERT_EPISODE_STATUS.ACTIVE,
+      prevStatus: ALERT_EPISODE_STATUS.RECOVERING,
+      prevEventCount: 1,
+    });
+  });
 });
 
 describe('mergeTimelineEntries', () => {
@@ -226,5 +244,20 @@ describe('deriveSeverityChangeEntries', () => {
 
     expect(entries).toHaveLength(1);
     expect(entries[0]).toMatchObject({ newSeverity: 'critical' });
+  });
+
+  it('correctly handles a non-contiguous return to a prior severity (flapping)', () => {
+    const entries = deriveSeverityChangeEntries([
+      makeSeverityRow('low', '2024-01-01T00:00:00.000Z'),
+      makeSeverityRow('high', '2024-01-01T00:01:00.000Z'),
+      makeSeverityRow('low', '2024-01-01T00:02:00.000Z'),
+    ]);
+
+    expect(entries).toHaveLength(3);
+    expect(entries[2]).toMatchObject({
+      newSeverity: 'low',
+      prevSeverity: 'high',
+      prevEventCount: 1,
+    });
   });
 });
