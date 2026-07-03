@@ -214,6 +214,11 @@ export function usePackagePolicyWithRelatedData(
 
   // Load the package policy and related data
   useEffect(() => {
+    // Guards against a race with the agentless loader below (both share `packagePolicy`/
+    // `packageInfo`/loading state and both re-run on `options.isAgentless`). On dep change or
+    // unmount the cleanup flips `ignore`, so a superseded/late-resolving request from this run
+    // never overwrites state committed by the newer run.
+    let ignore = false;
     const getData = async () => {
       // Agentless policies are loaded by the dedicated effect below, through the agentless API.
       if (options.isAgentless) {
@@ -231,6 +236,10 @@ export function usePackagePolicyWithRelatedData(
           throw packagePolicyError;
         }
 
+        if (ignore) {
+          return;
+        }
+
         // Detect an agentless policy that was opened without the `isAgentless` hint, so the save
         // routes through the agentless API rather than the package-policy API.
         if (packagePolicyData?.item?.supports_agentless) {
@@ -246,6 +255,10 @@ export function usePackagePolicyWithRelatedData(
             throw agentPolicyError;
           }
 
+          if (ignore) {
+            return;
+          }
+
           setAgentPolicies(data?.items ?? []);
         }
 
@@ -254,6 +267,10 @@ export function usePackagePolicyWithRelatedData(
 
         if (upgradePackagePolicyDryRunError) {
           throw upgradePackagePolicyDryRunError;
+        }
+
+        if (ignore) {
+          return;
         }
 
         const hasUpgrade = upgradePackagePolicyDryRunData
@@ -380,6 +397,10 @@ export function usePackagePolicyWithRelatedData(
               { prerelease, full: true }
             );
 
+            if (ignore) {
+              return;
+            }
+
             if (packageData?.item && yaml) {
               setPackageInfo(packageData.item);
 
@@ -399,11 +420,18 @@ export function usePackagePolicyWithRelatedData(
           }
         }
       } catch (e) {
-        setLoadingError(e);
+        if (!ignore) {
+          setLoadingError(e);
+        }
       }
-      setIsLoadingData(false);
+      if (!ignore) {
+        setIsLoadingData(false);
+      }
     };
     getData();
+    return () => {
+      ignore = true;
+    };
   }, [packagePolicyId, options.forceUpgrade, options.isAgentless, yaml]);
 
   // Load the agentless policy through the agentless API. Deliberately skips the agent-policy bulk
@@ -417,6 +445,9 @@ export function usePackagePolicyWithRelatedData(
     if (!options.isAgentless || !yaml) {
       return;
     }
+    // See the legacy loader above: this flag lets the cleanup discard a superseded/late response
+    // so it can't clobber the state written by the newer run (or the other loader).
+    let ignore = false;
     const getAgentlessData = async () => {
       setIsLoadingData(true);
       setLoadingError(undefined);
@@ -431,6 +462,10 @@ export function usePackagePolicyWithRelatedData(
           agentlessPolicy.package.version,
           { prerelease, full: true }
         );
+
+        if (ignore) {
+          return;
+        }
 
         if (packageData?.item && yaml) {
           const hydratedPackagePolicy = agentlessPolicyToPackagePolicy(
@@ -462,11 +497,18 @@ export function usePackagePolicyWithRelatedData(
           setFormState(validationHasErrors(newValidationResults) ? 'INVALID' : 'VALID');
         }
       } catch (e) {
-        setLoadingError(e);
+        if (!ignore) {
+          setLoadingError(e);
+        }
       }
-      setIsLoadingData(false);
+      if (!ignore) {
+        setIsLoadingData(false);
+      }
     };
     getAgentlessData();
+    return () => {
+      ignore = true;
+    };
   }, [packagePolicyId, options.isAgentless, yaml]);
 
   // Re-run validation when yaml loads (getData may have run before yaml was available)

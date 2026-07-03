@@ -742,4 +742,41 @@ describe('usePackagePolicy - agentless', () => {
 
     expect(saveResult).toEqual({ data: undefined, error: requestError });
   });
+
+  it('ignores a superseded agentless response after switching to the legacy mode', async () => {
+    // Hold the agentless GET open so it resolves *after* we switch back to the legacy
+    // (package-policy) mode. The stale response must not clobber the legacy load.
+    let resolveAgentless: (value: unknown) => void = () => {};
+    jest.mocked(sendGetAgentlessPolicy).mockReturnValue(
+      new Promise((resolve) => {
+        resolveAgentless = resolve;
+      }) as any
+    );
+
+    let isAgentless = true;
+    const renderer = createFleetTestRendererMock();
+    const { result, rerender } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('package-policy-1', { isAgentless })
+    );
+
+    // Make sure the agentless loader is actually in flight before we switch modes.
+    await waitFor(() => expect(sendGetAgentlessPolicy).toHaveBeenCalledWith('package-policy-1'));
+
+    // Switch to the legacy path; its loader commits the package-policy `nginx-1`.
+    await act(async () => {
+      isAgentless = false;
+      rerender();
+    });
+    await waitFor(() => expect(result.current.packagePolicy?.name).toBe('nginx-1'));
+
+    // Now let the stale agentless GET resolve. Without the cleanup guard it would hydrate the
+    // form from `agentlessPolicy` and overwrite `packagePolicy` with `agentless-1`.
+    await act(async () => {
+      resolveAgentless({ item: agentlessPolicy });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    // The superseded agentless response is discarded — the legacy load still wins.
+    expect(result.current.packagePolicy?.name).toBe('nginx-1');
+  });
 });
