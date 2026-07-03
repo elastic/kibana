@@ -49,7 +49,7 @@ describe('UserActionsService: Finder', () => {
     mockPointInTimeFinder(unsecuredSavedObjectsClient)(soFindRes);
 
   const decodingTests: Array<
-    [keyof UserActionFinder, (soFindRes: SavedObjectsFindResponse) => void]
+    ['find' | 'findAll' | 'findStatusChanges', (soFindRes: SavedObjectsFindResponse) => void]
   > = [
     ['find', mockFind],
     ['findAll', mockFinder],
