@@ -26,16 +26,16 @@ export const QUERY_FIELDS_USAGE_FIELD_NAMES = 'fieldNames';
 export const FIELD_USAGE_FILTER_OPERATION = 'filterOperation';
 
 /**
- * Query performance events i.e. when Discover fetches all data, fetches more data, or fetches request-only data
+ * Query performance events i.e. when Discover fetches data from Elasticsearch
  */
-export const DISCOVER_QUERY_PERFORMANCE_EVENT_TYPE = 'discover_query_performance';
-export const DISCOVER_QUERY_PERFORMANCE_EVENT_NAME = 'eventName';
-export const DISCOVER_QUERY_PERFORMANCE_DURATION = 'duration';
-export const DISCOVER_QUERY_PERFORMANCE_QUERY_RANGE_SECONDS = 'queryRangeSeconds';
-export const DISCOVER_QUERY_PERFORMANCE_PHRASE_QUERY_COUNT = 'phraseQueryCount';
-export const DISCOVER_QUERY_PERFORMANCE_MULTI_MATCH_TYPES = 'multiMatchTypes';
-export const DISCOVER_QUERY_PERFORMANCE_FETCH_TYPE = 'fetchType';
-export const DISCOVER_QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND = 'querySourceCommand';
+export const QUERY_PERFORMANCE_EVENT_TYPE = 'discover_query_performance';
+export const QUERY_PERFORMANCE_EVENT_NAME = 'eventName';
+export const QUERY_PERFORMANCE_DURATION = 'duration';
+export const QUERY_PERFORMANCE_QUERY_RANGE_SECONDS = 'queryRangeSeconds';
+export const QUERY_PERFORMANCE_PHRASE_QUERY_COUNT = 'phraseQueryCount';
+export const QUERY_PERFORMANCE_MULTI_MATCH_TYPES = 'multiMatchTypes';
+export const QUERY_PERFORMANCE_FETCH_TYPE = 'fetchType';
+export const QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND = 'querySourceCommand';
 
 /**
  * Contextual profile resolved event i.e. when a different contextual profile is resolved at root, data source, or document level
@@ -126,34 +126,34 @@ export const registerDiscoverEBTManagerAnalytics = (
   });
 
   core.analytics.registerEventType({
-    eventType: DISCOVER_QUERY_PERFORMANCE_EVENT_TYPE,
+    eventType: QUERY_PERFORMANCE_EVENT_TYPE,
     schema: {
-      [DISCOVER_QUERY_PERFORMANCE_EVENT_NAME]: {
+      [QUERY_PERFORMANCE_EVENT_NAME]: {
         type: 'keyword',
         _meta: {
           description:
             'The name of the query performance event that is tracked i.e. discoverFetchAll, discoverFetchMore',
         },
       },
-      [DISCOVER_QUERY_PERFORMANCE_DURATION]: {
+      [QUERY_PERFORMANCE_DURATION]: {
         type: 'integer',
         _meta: {
           description: 'The event duration in milliseconds',
         },
       },
-      [DISCOVER_QUERY_PERFORMANCE_QUERY_RANGE_SECONDS]: {
+      [QUERY_PERFORMANCE_QUERY_RANGE_SECONDS]: {
         type: 'long',
         _meta: {
           description: 'The query time range in seconds',
         },
       },
-      [DISCOVER_QUERY_PERFORMANCE_PHRASE_QUERY_COUNT]: {
+      [QUERY_PERFORMANCE_PHRASE_QUERY_COUNT]: {
         type: 'integer',
         _meta: {
           description: 'The number of phrase queries found in the Elasticsearch requests',
         },
       },
-      [DISCOVER_QUERY_PERFORMANCE_MULTI_MATCH_TYPES]: {
+      [QUERY_PERFORMANCE_MULTI_MATCH_TYPES]: {
         type: 'array',
         items: {
           type: 'keyword',
@@ -165,13 +165,13 @@ export const registerDiscoverEBTManagerAnalytics = (
           description: 'Multi-match query types found in the Elasticsearch requests',
         },
       },
-      [DISCOVER_QUERY_PERFORMANCE_FETCH_TYPE]: {
+      [QUERY_PERFORMANCE_FETCH_TYPE]: {
         type: 'keyword',
         _meta: {
           description: 'The fetch implementation used for the query request',
         },
       },
-      [DISCOVER_QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND]: {
+      [QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND]: {
         type: 'keyword',
         _meta: {
           description: 'The ES|QL source command used by the query i.e. FROM, TS, PROMQL',
