@@ -10,6 +10,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { ServiceBadges } from './service_badges';
+import type { ServiceAnomalyScoreResponse } from '../../../../../server/routes/services/get_services/get_service_anomaly_score_for_service';
 
 const mockNavigateToUrl = jest.fn();
 const mockUseApmPluginContext = jest.fn();
@@ -57,9 +58,9 @@ function setupContext({ canReadSlos = true }: { canReadSlos?: boolean } = {}) {
 
 function setupBadgesData({
   alertsCount,
-  anomalyScore,
-}: { alertsCount?: number; anomalyScore?: number } = {}) {
-  mockUseServiceBadgesData.mockReturnValue({ alertsCount, anomalyScore });
+  anomalyData,
+}: { alertsCount?: number; anomalyData?: ServiceAnomalyScoreResponse } = {}) {
+  mockUseServiceBadgesData.mockReturnValue({ alertsCount, anomalyData });
 }
 
 function renderBadges({ service = baseNodeData }: { service?: ServiceNodeData } = {}) {
@@ -154,7 +155,7 @@ describe('ServiceBadges', () => {
   describe('anomaly badge', () => {
     it('shows the anomaly badge when the hook returns a score', () => {
       setupContext();
-      setupBadgesData({ anomalyScore: 75 });
+      setupBadgesData({ anomalyData: { anomalyScore: 75, anomalyEnvironment: 'production' } });
       renderBadges();
 
       expect(screen.getByTestId('serviceFlyoutAnomaliesBadge')).toBeInTheDocument();
@@ -162,7 +163,7 @@ describe('ServiceBadges', () => {
 
     it('hides the anomaly badge when the hook returns no score', () => {
       setupContext();
-      setupBadgesData({ anomalyScore: undefined });
+      setupBadgesData({ anomalyData: undefined });
       renderBadges();
 
       expect(screen.queryByTestId('serviceFlyoutAnomaliesBadge')).not.toBeInTheDocument();
