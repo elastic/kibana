@@ -1055,6 +1055,23 @@ describe('TemplatesMigrationTaskManager', () => {
         expect.anything()
       );
     });
+
+    it('scans without a sortField so the PIT applies the unique _shard_doc tiebreaker', async () => {
+      // Guards against a search_after skip bug: sorting by a non-unique field (e.g. created_at)
+      // drops the _shard_doc tiebreaker, so cases sharing the boundary value would be skipped.
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      routeConfigureAndCases(configSO, [{ saved_objects: [], total: 0, pit_id: 'pit-1' }]);
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
+      expect(caseFind?.[0]).toEqual(
+        expect.objectContaining({ pit: expect.objectContaining({ id: 'pit-1' }) })
+      );
+      expect(caseFind?.[0]).not.toHaveProperty('sortField');
+      expect(caseFind?.[0]).not.toHaveProperty('sortOrder');
+    });
   });
 
   describe('telemetry counters', () => {

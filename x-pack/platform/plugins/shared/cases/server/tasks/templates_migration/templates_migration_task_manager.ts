@@ -699,13 +699,18 @@ export class TemplatesMigrationTaskManager {
 
     // Fetches one page, transparently reopening the PIT once if a resumed one has expired. Restarting
     // the scan is safe because the backfill only fills missing keys (already-done cases are skipped).
+    //
+    // No `sortField` is passed on purpose. The SO repository only appends the unique `_shard_doc`
+    // tiebreaker for a PIT search when no sort field is given (see getSortingParams). Sorting by a
+    // non-unique field such as `created_at` would leave `search_after` without a tiebreaker, so any
+    // cases sharing the last page's `created_at` (common for bulk-imported cases) would be skipped —
+    // permanently, once the space is flagged. `_shard_doc` is unique per doc, stable within the PIT,
+    // and the recommended (fastest) ordering for a full PIT scan.
     const fetchPage = async () => {
       const findPage = () =>
         repo.find<CasePersistedAttributes>({
           type: CASE_SAVED_OBJECT,
           perPage: CASE_BACKFILL_PAGE_SIZE,
-          sortField: 'created_at',
-          sortOrder: 'asc',
           pit: { id: cursor.pitId, keepAlive: CASE_BACKFILL_PIT_KEEP_ALIVE },
           ...(cursor.searchAfter ? { searchAfter: cursor.searchAfter } : {}),
           filter,
