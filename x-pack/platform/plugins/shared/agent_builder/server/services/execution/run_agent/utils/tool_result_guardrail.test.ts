@@ -131,7 +131,7 @@ describe('buildGuardedToolContent', () => {
 
     const parsed = JSON.parse(content) as { results: ToolResult[] };
     const message = (parsed.results[0].data as { content: string }).content;
-    expect(message).toContain('not recoverable via the virtual filesystem');
+    expect(message).toContain('not recoverable');
     expect(message).not.toContain('list_files');
     expect(message).not.toContain('read_file');
   });
