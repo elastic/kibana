@@ -13,6 +13,7 @@
 
 import type { DeepPartial } from '@kbn/utility-types';
 
+import { ControlValuesSource } from '@kbn/controls-constants';
 import type { DashboardState } from './types';
 import type { DashboardCreateResponseBody } from './create';
 import type { DashboardReadResponseBody } from './read';
@@ -711,6 +712,7 @@ const dashboardCreateRequestExamples = {
             title: 'Response code',
             data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
             field_name: 'response.keyword',
+            values_source: ControlValuesSource.FIELD,
             use_global_filters: true,
             ignore_validations: false,
             exclude: false,
@@ -1229,7 +1231,7 @@ const dashboardSearchResponseExamples = {
     description:
       'Paginated list of dashboard summaries. Each item includes the ID, a subset of dashboard state fields (`title`, `time_range` if set), and metadata. Full panel content is not included - use the GET endpoint to retrieve a specific dashboard.\n',
     value: {
-      dashboards: [
+      data: [
         {
           id: '3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b',
           data: {
@@ -1259,8 +1261,11 @@ const dashboardSearchResponseExamples = {
           },
         },
       ],
-      page: 1,
-      total: 2,
+      meta: {
+        page: 1,
+        per_page: 20,
+        total: 2,
+      },
     } satisfies DashboardSearchResponseBody,
   },
 };

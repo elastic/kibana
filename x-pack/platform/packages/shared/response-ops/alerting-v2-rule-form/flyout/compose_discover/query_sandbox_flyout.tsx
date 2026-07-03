@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/code-editor';
-import type { RuleQuery } from './compose_form_types';
-import { getBreachQuery } from './compose_form_types';
+import type { RuleQuery } from '../../form/types';
+import { getBreachQuery, getRecoverQuery } from '../../form/utils/query_helpers';
 import type { QueryTab } from './types';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
@@ -63,6 +63,9 @@ export interface QuerySandboxFlyoutProps {
   timeField: string;
   /** Absent → time field selector is read-only. */
   onTimeFieldChange?: (tf: string) => void;
+  /** When provided, resolution is owned by the parent and passed through to QuerySandbox. */
+  timeFieldOptions?: Array<{ value: string; text: string }>;
+  isTimeFieldResolved?: boolean;
   /** Preview date range. Never resets on close — caller owns persistence. */
   dateRange: { dateStart: string; dateEnd: string };
   /** Always required — date range is always interactive. */
@@ -70,6 +73,11 @@ export interface QuerySandboxFlyoutProps {
   /** When provided an Apply button is shown. No-args: caller already holds current state. */
   onApply?: () => void;
   onClose: () => void;
+  /**
+   * Optional help text rendered above the editor — passed through to `QuerySandbox`.
+   * Callers are responsible for content and styling (e.g. wrapping in `<EuiText>`).
+   */
+  helpText?: React.ReactNode;
   title?: string;
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
@@ -85,10 +93,13 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   onTabChange,
   timeField,
   onTimeFieldChange,
+  timeFieldOptions,
+  isTimeFieldResolved,
   dateRange,
   onDateRangeChange,
   onApply,
   onClose,
+  helpText,
   onAlertEditorMount,
   onRecoveryEditorMount,
   title = i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.defaultTitle', {
@@ -136,9 +147,33 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     [query, queryFields, onQueryChange]
   );
 
-  const activeQuery = query.format === 'composed' ? getBreachQuery(query) : query.breach.query;
+  // Run whichever pipeline the active tab represents. Unified mode (no tabs)
+  // has no per-tab concept — always run the full breach query.
+  const activeQuery = (() => {
+    if (!tabs?.length) return getBreachQuery(query);
+    switch (activeTab) {
+      case 'base':
+        return queryFields.base;
+      case 'recovery':
+        return getRecoverQuery(query);
+      default:
+        return getBreachQuery(query);
+    }
+  })();
 
-  const handleQueryChange = useCallback((v: string) => updateQuery({ breach: v }), [updateQuery]);
+  /*
+   * Unified composed mode: the editor holds the whole pipeline, so write it to
+   * `base` with an empty `segment` and `getBreachQuery` returns it verbatim.
+   * Writing to `segment` would re-join base + segment and duplicate lines; the
+   * heuristic split runs on Apply, not here.
+   */
+  const handleQueryChange = useCallback(
+    (v: string) =>
+      query.format === 'composed'
+        ? updateQuery({ base: v, breach: '' })
+        : updateQuery({ breach: v }),
+    [query.format, updateQuery]
+  );
 
   const tabProps: QuerySandboxProps['tabProps'] = useMemo(() => {
     if (!tabs?.length) return undefined;
@@ -187,9 +222,12 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           onQueryChange={isReadOnly ? undefined : handleQueryChange}
           timeField={timeField}
           onTimeFieldChange={onTimeFieldChange}
+          timeFieldOptions={timeFieldOptions}
+          isTimeFieldResolved={isTimeFieldResolved}
           dateRange={dateRange}
           onDateRangeChange={onDateRangeChange}
           autoRun
+          helpText={helpText}
           tabProps={tabProps}
         />
       </EuiFlyoutBody>
