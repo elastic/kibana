@@ -19,6 +19,7 @@ import type {
   StreamsAgentToolEventStatusUpdateProps,
   StreamsAgentToolEventInvestigationAttachProps,
   StreamsCodeAnalysisGroundingProps,
+  StreamsSignificantEventsDetectionScanProps,
   StreamsOnboardingScheduledProps,
 } from './types';
 
@@ -533,6 +534,61 @@ const streamsSignificantEventsDiscoveryTriggeredSchema = {
   },
 };
 
+const streamsSignificantEventsDetectionScanSchema: RootSchema<StreamsSignificantEventsDetectionScanProps> =
+  {
+    took_ms: {
+      type: 'long',
+      _meta: {
+        description:
+          'ES `took` (ms) reported by the alerts-source search for the change-point scan',
+      },
+    },
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description:
+          'Wall-clock duration (ms) of the change-point scan read, including transport and parsing',
+      },
+    },
+    rules_scanned: {
+      type: 'long',
+      _meta: {
+        description: 'Number of distinct rules covered by the change-point scan',
+      },
+    },
+    alerting_engine: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Resolved alerting engine backing the read: `v2` reads `.rule-events`, `v1` reads `.alerts-*`',
+      },
+    },
+    alerts_source_index: {
+      type: 'keyword',
+      _meta: {
+        description: 'The alerts-source index that was read (e.g. `.rule-events`)',
+      },
+    },
+    lookback: {
+      type: 'keyword',
+      _meta: {
+        description: 'The scan lookback window (e.g. `now-30m`)',
+      },
+    },
+    bucket_interval: {
+      type: 'keyword',
+      _meta: {
+        description: 'The change-point bucket interval (e.g. `30s`)',
+      },
+    },
+    space_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The Kibana space in which the scan ran',
+      },
+    },
+  };
+
 const streamsOnboardingScheduledSchema: RootSchema<StreamsOnboardingScheduledProps> = {
   stream_name: {
     type: 'keyword',
@@ -616,5 +672,6 @@ export {
   streamsAgentToolEventInvestigationAttachSchema,
   streamsCodeAnalysisGroundingSchema,
   streamsSignificantEventsDiscoveryTriggeredSchema,
+  streamsSignificantEventsDetectionScanSchema,
   streamsOnboardingScheduledSchema,
 };

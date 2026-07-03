@@ -417,6 +417,25 @@ describe('DateRangePickerControl', () => {
     });
   });
 
+  describe('readOnly prop', () => {
+    it('disables the control button but keeps the tooltip available', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} readOnly />);
+
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).toBeDisabled();
+
+      fireEvent.mouseOver(button);
+      expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    });
+
+    it('does not enter editing mode when readOnly', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} readOnly />);
+
+      fireEvent.click(screen.getByTestId('dateRangePickerControlButton'));
+      expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
+    });
+  });
+
   describe('controlled mode (value prop)', () => {
     const controlledDefaults = {
       settings: { roundRelativeTime: false },
@@ -759,6 +778,30 @@ describe('DateRangePickerControl', () => {
       fireEvent.keyDown(screen.getByTestId('dateRangePickerInput'), { key: 'Escape' });
 
       await waitForPopoverClose();
+    });
+
+    it('remains interactive when readOnly is true, unlike the control button', () => {
+      const onSettingsChange = jest.fn();
+
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          onRefresh={onRefresh}
+          settings={{ ...autoRefreshSettings }}
+          onSettingsChange={onSettingsChange}
+          readOnly
+        />
+      );
+
+      expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
+
+      fireEvent.click(screen.getByTestId('dateRangePickerAutoRefreshButton'));
+
+      expect(onSettingsChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          autoRefresh: expect.objectContaining({ isPaused: true }),
+        })
+      );
     });
 
     it('calls `onRefresh` on each interval while `settings.autoRefresh` is active', () => {
