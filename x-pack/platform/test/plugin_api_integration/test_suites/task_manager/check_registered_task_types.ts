@@ -223,6 +223,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:setup',
         'fleet:setup:upgrade_managed_package_policies',
         'fleet:sync-integrations-task',
+        'fleet:sync_ilm_policy',
         'fleet:sync_namespace_templates',
         'fleet:unenroll-inactive-agents-task',
         'fleet:unenroll_action:retry',

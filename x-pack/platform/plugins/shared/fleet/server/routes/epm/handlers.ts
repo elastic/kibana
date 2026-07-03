@@ -386,6 +386,18 @@ export const updatePackageHandler: FleetRequestHandler<
     ];
     if (requestedIlmPolicies.length > 0) {
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      // Enforce the manage_ilm privilege on the write path. Without this the privilege
+      // gate would be UI-only: the route is authorized with integration-install privileges
+      // and syncIlmPolicy runs as the Fleet internal user, so a caller lacking manage_ilm
+      // could otherwise assign an ILM policy to every backing index by calling the API directly.
+      const { has_all_requested: hasManageIlm } = await esClient.security.hasPrivileges({
+        cluster: ['manage_ilm'],
+      });
+      if (!hasManageIlm) {
+        throw new FleetUnauthorizedError(
+          'The manage_ilm cluster privilege is required to assign an ILM policy.'
+        );
+      }
       const existingLifecycles = await esClient.ilm.getLifecycle();
       const missing = requestedIlmPolicies.filter((ilmPolicy) => !existingLifecycles[ilmPolicy]);
       if (missing.length > 0) {
@@ -414,12 +426,11 @@ export const updatePackageHandler: FleetRequestHandler<
     });
   }
 
-  for (const { namespace, ilmPolicy } of ilmPolicyChanges) {
+  for (const { namespace } of ilmPolicyChanges) {
     await scheduleSyncIlmPolicyTask(getTaskManagerStart(), {
       spaceId,
       packageName: pkgName,
       namespace,
-      ilmPolicy,
     });
   }
 

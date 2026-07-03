@@ -104,23 +104,23 @@ export async function updatePackage(
   if (newNamespaceCustomizationSettings) {
     const oldSettings = installedPackage.attributes.namespace_customization_settings ?? {};
 
-    // Namespaces already scheduled for ILM clearing (e.g. from the opt-out path above)
+    // Namespaces already scheduled for ILM clearing (e.g. from the opt-out path above).
     const alreadyScheduled = new Set(ilmPolicyChanges.map((c) => c.namespace));
 
-    // Namespaces present in old settings but absent from the new payload — clear their ILM policy
-    for (const [namespace, oldNsSettings] of Object.entries(oldSettings)) {
-      if (
-        !(namespace in newNamespaceCustomizationSettings) &&
-        oldNsSettings.ilm_policy &&
-        !alreadyScheduled.has(namespace)
-      ) {
-        ilmPolicyChanges.push({ namespace, ilmPolicy: undefined });
+    // The stored settings are fully replaced, so diff against the union of old and new
+    // namespaces: a namespace omitted from the payload (or whose ilm_policy is removed)
+    // must also emit a clear change so its Fleet-managed component templates are torn down
+    // and the SO / cluster state don't diverge.
+    const allNamespaces = new Set([
+      ...Object.keys(oldSettings),
+      ...Object.keys(newNamespaceCustomizationSettings),
+    ]);
+    for (const namespace of allNamespaces) {
+      if (alreadyScheduled.has(namespace)) {
+        continue;
       }
-    }
-
-    for (const [namespace, newNsSettings] of Object.entries(newNamespaceCustomizationSettings)) {
       const oldIlmPolicy = oldSettings[namespace]?.ilm_policy;
-      const newIlmPolicy = newNsSettings.ilm_policy;
+      const newIlmPolicy = newNamespaceCustomizationSettings[namespace]?.ilm_policy;
       if (oldIlmPolicy !== newIlmPolicy) {
         ilmPolicyChanges.push({ namespace, ilmPolicy: newIlmPolicy });
       }

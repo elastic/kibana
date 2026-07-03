@@ -1,45 +1,72 @@
 {
   "10.10.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.10.0 and 10.11.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "name": "system",
+      "version": "1.54.0",
+      "internal": false,
+      "keep_policies_up_to_date": true,
+      "verification_status": "verified",
+      "install_started_at": "2026-01-01T00:00:00.000Z",
+      "install_version": "1.54.0",
+      "install_status": "installed",
+      "install_source": "registry",
+      "dependencies": [
+        {
+          "name": "dep_package",
+          "version": "1.0.0"
+        }
+      ],
+      "installed_es": [
+        {
+          "id": "logs-system.syslog-1.54.0",
+          "type": "index_template"
+        }
+      ],
+      "installed_kibana": [],
+      "installed_kibana_space_id": "default",
+      "previous_version": "1.53.0",
+      "is_dependency_of": [
+        {
+          "name": "parent",
+          "version": "1.0.0"
+        }
+      ],
+      "installed_as_dependency": true
     }
   ],
   "10.11.0": [
     {
-      "name": "string",
-      "version": "string",
-      "internal": "boolean?",
-      "keep_policies_up_to_date": "boolean?",
-      "es_index_patterns": "any?",
-      "verification_status": "string",
-      "verification_key_id": "string?",
-      "installed_es": "array?",
-      "latest_install_failed_attempts": "any?",
-      "latest_executed_state": "any?",
-      "installed_kibana": "any?",
-      "installed_kibana_space_id": "string?",
-      "package_assets": "any?",
-      "additional_spaces_installed_kibana": "any?",
-      "install_started_at": "string",
-      "install_version": "string",
-      "install_status": "string",
-      "install_source": "string",
-      "install_format_schema_version": "string?",
-      "experimental_data_stream_features": "array?",
-      "previous_version": "string?",
-      "pending_upgrade_review": "any?",
-      "dependencies": "array?",
-      "is_dependency_of": "array?",
-      "installed_as_dependency": "boolean?",
-      "namespace_customization_enabled_for": "array?",
-      "previous_dependency_versions": "array?|null",
-      "namespace_customization_settings": "record?"
+      "name": "system",
+      "version": "1.54.0",
+      "internal": false,
+      "keep_policies_up_to_date": true,
+      "verification_status": "verified",
+      "install_started_at": "2026-01-01T00:00:00.000Z",
+      "install_version": "1.54.0",
+      "install_status": "installed",
+      "install_source": "registry",
+      "dependencies": [
+        {
+          "name": "dep_package",
+          "version": "1.0.0"
+        }
+      ],
+      "installed_es": [
+        {
+          "id": "logs-system.syslog-1.54.0",
+          "type": "index_template"
+        }
+      ],
+      "installed_kibana": [],
+      "installed_kibana_space_id": "default",
+      "previous_version": "1.53.0",
+      "is_dependency_of": [
+        {
+          "name": "parent",
+          "version": "1.0.0"
+        }
+      ],
+      "installed_as_dependency": true
     }
   ]
 }

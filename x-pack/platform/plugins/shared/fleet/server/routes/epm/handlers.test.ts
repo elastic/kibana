@@ -110,12 +110,14 @@ describe('rollback package handler', () => {
 
 describe('updatePackageHandler — ILM policy validation', () => {
   const getLifecycle = jest.fn();
+  const hasPrivileges = jest.fn();
   const updateContext = {
     core: Promise.resolve({
       elasticsearch: {
         client: {
           asCurrentUser: {
             ilm: { getLifecycle },
+            security: { hasPrivileges },
           },
         },
       },
@@ -141,6 +143,7 @@ describe('updatePackageHandler — ILM policy validation', () => {
     (getAllowedNamespacePrefixesForSpace as jest.Mock).mockResolvedValue(null);
     (isNamespaceAllowedByPrefixes as jest.Mock).mockReturnValue(true);
     (appContextService.getTaskManagerStart as jest.Mock).mockReturnValue({});
+    hasPrivileges.mockResolvedValue({ has_all_requested: true });
   });
 
   const buildRequest = (settings: Record<string, { ilm_policy?: string }>) =>
@@ -148,6 +151,21 @@ describe('updatePackageHandler — ILM policy validation', () => {
       params: { pkgName: 'nginx' },
       body: { namespace_customization_settings: settings },
     } as any);
+
+  it('rejects the request when the caller lacks the manage_ilm privilege', async () => {
+    hasPrivileges.mockResolvedValue({ has_all_requested: false });
+
+    await expect(
+      updatePackageHandler(
+        updateContext,
+        buildRequest({ production: { ilm_policy: 'existing-policy' } }),
+        updateResponse
+      )
+    ).rejects.toThrow(FleetUnauthorizedError);
+
+    expect(getLifecycle).not.toHaveBeenCalled();
+    expect(updatePackage).not.toHaveBeenCalled();
+  });
 
   it('rejects an ILM policy that does not exist', async () => {
     getLifecycle.mockResolvedValue({ 'existing-policy': {} });
@@ -176,9 +194,10 @@ describe('updatePackageHandler — ILM policy validation', () => {
     expect(updateResponse.ok).toHaveBeenCalled();
   });
 
-  it('does not query ILM when clearing a policy (ilm_policy undefined)', async () => {
+  it('does not query manage_ilm or ILM when clearing a policy (ilm_policy undefined)', async () => {
     await updatePackageHandler(updateContext, buildRequest({ production: {} }), updateResponse);
 
+    expect(hasPrivileges).not.toHaveBeenCalled();
     expect(getLifecycle).not.toHaveBeenCalled();
     expect(updatePackage).toHaveBeenCalled();
   });

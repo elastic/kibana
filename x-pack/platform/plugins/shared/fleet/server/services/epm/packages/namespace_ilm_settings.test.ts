@@ -238,12 +238,14 @@ describe('syncIlmPolicy — set', () => {
     expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'logs-nginx.access@namespace.production',
+        _meta: expect.objectContaining({ managed_by: 'fleet', managed: true }),
         template: expect.objectContaining({
           settings: expect.objectContaining({
             'index.lifecycle.name': 'my-policy',
           }),
         }),
-      })
+      }),
+      expect.anything()
     );
   });
 

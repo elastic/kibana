@@ -9,10 +9,9 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { v4 as uuidv4 } from 'uuid';
 
 import { appContextService } from '../services';
-import { syncIlmPolicy } from '../services/epm/packages';
+import { getInstallation, syncIlmPolicy } from '../services/epm/packages';
 
 const TASK_TYPE = 'fleet:sync_ilm_policy';
 
@@ -20,7 +19,6 @@ export interface SyncIlmPolicyTaskParams {
   spaceId: string;
   packageName: string;
   namespace: string;
-  ilmPolicy: string | undefined;
 }
 
 export function registerSyncIlmPolicyTask(taskManagerSetup: TaskManagerSetupContract) {
@@ -30,19 +28,30 @@ export function registerSyncIlmPolicyTask(taskManagerSetup: TaskManagerSetupCont
       timeout: '15m',
       maxAttempts: 3,
       createTaskRunner: ({ taskInstance, abortController }) => {
-        const { spaceId, packageName, namespace, ilmPolicy } =
-          taskInstance.params as SyncIlmPolicyTaskParams;
+        const { spaceId, packageName, namespace } = taskInstance.params as SyncIlmPolicyTaskParams;
         return {
           async run() {
             const logger = appContextService.getLogger();
+
+            const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+            const esClient = appContextService.getInternalUserESClient();
+
+            // Read the desired ILM policy from the Installation SO at run time rather than
+            // relying on the value captured when the task was scheduled. This makes the task
+            // idempotent and order-independent: with a deterministic task id, concurrent edits
+            // dedupe to a single task that always converges to the latest persisted state.
+            const installation = await getInstallation({
+              savedObjectsClient: soClient,
+              pkgName: packageName,
+            });
+            const ilmPolicy =
+              installation?.namespace_customization_settings?.[namespace]?.ilm_policy;
+
             logger.debug(
               `[syncIlmPolicyTask] Running for package ${packageName}, namespace ${namespace} in space ${spaceId}: ilmPolicy=${
                 ilmPolicy ?? '(clear)'
               }`
             );
-
-            const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
-            const esClient = appContextService.getInternalUserESClient();
 
             try {
               await syncIlmPolicy({
@@ -73,8 +82,12 @@ export async function scheduleSyncIlmPolicyTask(
   taskManagerStart: TaskManagerStartContract,
   params: SyncIlmPolicyTaskParams
 ) {
+  const { spaceId, packageName, namespace } = params;
+  // Deterministic id keyed by (spaceId, packageName, namespace) so repeated edits dedupe to a
+  // single scheduled task instead of enqueuing independent tasks that could apply out of order.
+  // The task reads the desired policy from the SO at run time, so the latest state always wins.
   await taskManagerStart.ensureScheduled({
-    id: `${TASK_TYPE}:${uuidv4()}`,
+    id: `${TASK_TYPE}:${spaceId}:${packageName}:${namespace}`,
     scope: ['fleet'],
     params,
     taskType: TASK_TYPE,

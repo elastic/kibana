@@ -791,10 +791,15 @@ export const UpdatePackageRequestSchema = {
       ),
       namespace_customization_settings: schema.maybe(
         schema.recordOf(
-          schema.string(),
-          schema.object({
-            ilm_policy: schema.maybe(schema.string()),
-          }),
+          schema.string({ maxLength: 100 }),
+          // `unknowns: 'allow'` keeps this forward-compatible: future namespace-scoped settings
+          // can be accepted without breaking older clients/nodes.
+          schema.object(
+            {
+              ilm_policy: schema.maybe(schema.string({ maxLength: 1024 })),
+            },
+            { unknowns: 'allow' }
+          ),
           {
             meta: {
               description:

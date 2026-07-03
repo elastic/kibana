@@ -360,18 +360,31 @@ async function deleteNamespaceTemplatesForPackage({
     return [];
   }
 
-  // Also delete any Fleet-managed ILM component templates that share the same names.
-  // These exist only for (data stream, namespace) pairs where an ILM policy was assigned,
-  // so a 404 is expected and silently ignored.
-  await deleteComponentTemplates(esClient, deleted);
-
   const freshInstallation = await getInstallation({
     savedObjectsClient: soClient,
     pkgName: packageName,
   });
+
+  // Also delete the Fleet-managed ILM component templates that share these names, but only the
+  // ones Fleet actually tracks in installed_es. The ILM component template shares its name with
+  // the namespace index template, and a component template of the same name could have been
+  // created by a user or another system — deleting purely by derived name would remove those too.
+  const trackedComponentTemplates = new Set(
+    (freshInstallation?.installed_es ?? [])
+      .filter((asset) => asset.type === ElasticsearchAssetType.componentTemplate)
+      .map((asset) => asset.id)
+  );
+  const componentTemplatesToDelete = deleted.filter((name) => trackedComponentTemplates.has(name));
+  if (componentTemplatesToDelete.length > 0) {
+    await deleteComponentTemplates(esClient, componentTemplatesToDelete);
+  }
+
   const assetsToRemove = [
     ...deleted.map((id) => ({ id, type: ElasticsearchAssetType.indexTemplate })),
-    ...deleted.map((id) => ({ id, type: ElasticsearchAssetType.componentTemplate })),
+    ...componentTemplatesToDelete.map((id) => ({
+      id,
+      type: ElasticsearchAssetType.componentTemplate,
+    })),
   ];
   await updateEsAssetReferences(soClient, packageName, freshInstallation?.installed_es ?? [], {
     assetsToRemove,

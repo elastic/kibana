@@ -17,6 +17,7 @@ import {
   generateNamespaceTemplateName,
 } from '../elasticsearch/template/template';
 import { deleteComponentTemplates } from '../elasticsearch/template/remove';
+import { getESAssetMetadata } from '../elasticsearch/meta';
 import { retryTransientEsErrors } from '../elasticsearch/retry';
 import {
   getRegistryDataStreamAssetBaseName,
@@ -239,17 +240,22 @@ async function syncSetIlmPolicy({
       const templateName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
       const nsTemplateName = generateNamespaceTemplateName(templateName, namespace);
 
-      // Create or update the ILM component template
+      // Create or update the ILM component template. Tag it with Fleet metadata so it can be
+      // safely identified as Fleet-owned during auditing and cleanup.
       await retryTransientEsErrors(
         () =>
-          esClient.cluster.putComponentTemplate({
-            name: nsTemplateName,
-            template: {
-              settings: {
-                'index.lifecycle.name': ilmPolicy,
+          esClient.cluster.putComponentTemplate(
+            {
+              name: nsTemplateName,
+              _meta: getESAssetMetadata({ packageName }),
+              template: {
+                settings: {
+                  'index.lifecycle.name': ilmPolicy,
+                },
               },
             },
-          }),
+            { signal: abortController?.signal }
+          ),
         { logger }
       );
       logger.debug(`[syncIlmPolicy] Created/updated ILM component template ${nsTemplateName}`);
@@ -283,11 +289,14 @@ async function syncSetIlmPolicy({
         } = nsIndexTemplate as IndexTemplate;
         await retryTransientEsErrors(
           () =>
-            esClient.indices.putIndexTemplate({
-              name: nsTemplateName,
-              ...templateBody,
-              composed_of: patchedComposedOf,
-            }),
+            esClient.indices.putIndexTemplate(
+              {
+                name: nsTemplateName,
+                ...templateBody,
+                composed_of: patchedComposedOf,
+              },
+              { signal: abortController?.signal }
+            ),
           { logger }
         );
       }
@@ -401,11 +410,14 @@ async function syncClearIlmPolicy({
           } = nsIndexTemplate as IndexTemplate;
           await retryTransientEsErrors(
             () =>
-              esClient.indices.putIndexTemplate({
-                name: nsTemplateName,
-                ...templateBody,
-                composed_of: patchedComposedOf,
-              }),
+              esClient.indices.putIndexTemplate(
+                {
+                  name: nsTemplateName,
+                  ...templateBody,
+                  composed_of: patchedComposedOf,
+                },
+                { signal: abortController?.signal }
+              ),
             { logger }
           );
           patchedIndexTemplates.push({
@@ -478,13 +490,18 @@ export async function handleIlmSettingsRestoreAfterPackageInstall({
     return;
   }
 
-  for (const [namespace, { ilm_policy: ilmPolicy }] of namespacesWithIlm) {
-    await syncIlmPolicy({
-      soClient,
-      esClient,
-      packageName,
-      namespace,
-      ilmPolicy,
-    });
-  }
+  // Restore each namespace's ILM policy with bounded concurrency so packages with many
+  // configured namespaces don't serialize install/upgrade time.
+  await pMap(
+    namespacesWithIlm,
+    ([namespace, { ilm_policy: ilmPolicy }]) =>
+      syncIlmPolicy({
+        soClient,
+        esClient,
+        packageName,
+        namespace,
+        ilmPolicy,
+      }),
+    { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
+  );
 }
