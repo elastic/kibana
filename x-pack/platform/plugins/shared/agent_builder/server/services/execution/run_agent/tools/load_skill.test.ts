@@ -51,7 +51,7 @@ describe('load_skill tool', () => {
     expect(tool.id).toBe('load_skill');
     expect(isInternalTool(tool.id)).toBe(true);
     expect(isExcludedFromFilestore(tool.id)).toBe(true);
-    expect(tool.maxResultTokens).toBe(Infinity);
+    expect(tool.maxResultTokens).toBe(100_000);
   });
 
   it('returns content + metadata for a unique-by-name skill', async () => {
