@@ -65,7 +65,7 @@ const createHandlerParams = ({
       globalUiSettingsClient,
     }),
     server: {},
-    significantEventsScheduledDiscoveryWorkflowService: scheduledWorkflowService,
+    significantEventsScheduledWorkflowsService: scheduledWorkflowService,
     getSpaceId: jest.fn().mockResolvedValue('space-a'),
     logger: { warn: jest.fn() },
     telemetry: {

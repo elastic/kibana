@@ -89,7 +89,7 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     getScopedClients,
     server,
     continuousKiOnboardingWorkflowService,
-    significantEventsScheduledDiscoveryWorkflowService,
+    significantEventsScheduledWorkflowsService,
     getSpaceId,
     logger,
   }): Promise<{ success: true }> => {
@@ -104,7 +104,7 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    if (scheduledDiscovery && !significantEventsScheduledDiscoveryWorkflowService) {
+    if (scheduledDiscovery && !significantEventsScheduledWorkflowsService) {
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
@@ -233,7 +233,7 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
         );
 
       if (scheduledEnabledChanged || (nextScheduledEnabled && scheduledConfigChanged)) {
-        const workflowService = significantEventsScheduledDiscoveryWorkflowService;
+        const workflowService = significantEventsScheduledWorkflowsService;
         if (!workflowService) {
           throw new FeatureNotEnabledError('Workflows management is not available');
         }

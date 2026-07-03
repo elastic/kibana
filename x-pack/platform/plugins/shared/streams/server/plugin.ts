@@ -79,9 +79,9 @@ import {
   type ContinuousKiOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
 import {
-  createSignificantEventsScheduledDiscoveryWorkflowService,
-  type SignificantEventsScheduledDiscoveryWorkflowService,
-} from './lib/workflows/significant_events_scheduled_discovery_workflow';
+  createSignificantEventsScheduledWorkflowsService,
+  type SignificantEventsScheduledWorkflowsService,
+} from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 import { isInvestigationEnabled } from './lib/investigations/is_investigation_enabled';
@@ -330,8 +330,8 @@ export class StreamsPlugin
     }
 
     let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
-    let significantEventsScheduledDiscoveryWorkflowService:
-      | SignificantEventsScheduledDiscoveryWorkflowService
+    let significantEventsScheduledWorkflowsService:
+      | SignificantEventsScheduledWorkflowsService
       | undefined;
 
     if (plugins.workflowsManagement && streamsKIsOnboardingClient) {
@@ -345,8 +345,8 @@ export class StreamsPlugin
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(STREAMS_MANAGED_WORKFLOW_OWNER);
 
     if (plugins.workflowsManagement && plugins.workflowsExtensions) {
-      significantEventsScheduledDiscoveryWorkflowService =
-        createSignificantEventsScheduledDiscoveryWorkflowService({
+      significantEventsScheduledWorkflowsService = createSignificantEventsScheduledWorkflowsService(
+        {
           logger: this.logger,
           managementApi: plugins.workflowsManagement.management,
           getManagedWorkflowsClient: async () => {
@@ -358,7 +358,8 @@ export class StreamsPlugin
               STREAMS_MANAGED_WORKFLOW_OWNER
             );
           },
-        });
+        }
+      );
     }
 
     taskService.registerTasks({
@@ -436,7 +437,7 @@ export class StreamsPlugin
         patternExtractionService: this.patternExtractionService,
         getScopedClients: this.streamsGetScopedClients,
         continuousKiOnboardingWorkflowService,
-        significantEventsScheduledDiscoveryWorkflowService,
+        significantEventsScheduledWorkflowsService,
         workflowClients,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
