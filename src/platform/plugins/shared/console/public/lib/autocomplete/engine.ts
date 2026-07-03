@@ -13,6 +13,7 @@ import type {
   AutocompleteComponent,
   AutocompleteTermDefinition,
 } from './components/autocomplete_component';
+import { ConstantComponent } from './components/constant_component';
 import type { AutoCompleteContext, ResultTerm } from './types';
 import { asArray } from '../utils/array_utils';
 
@@ -70,19 +71,26 @@ export class WalkingState {
   contextExtensionList: Array<Record<string, unknown>>;
   depth: number;
   priority: number | undefined;
+  // Number of path segments matched literally (via a ConstantComponent). Used to
+  // prefer the most specific endpoint when several patterns match the same path,
+  // e.g. `_connector/_sync_job` should match the literal `_sync_job` endpoint
+  // rather than the `_connector/{connector_id}` parameter endpoint.
+  specificity: number;
 
   constructor(
     parentName: string | undefined,
     components: AutocompleteComponent[],
     contextExtensionList: Array<Record<string, unknown>>,
     depth?: number,
-    priority?: number
+    priority?: number,
+    specificity?: number
   ) {
     this.parentName = parentName;
     this.components = components;
     this.contextExtensionList = contextExtensionList;
     this.depth = depth || 0;
     this.priority = priority;
+    this.specificity = specificity || 0;
   }
 }
 
@@ -129,8 +137,10 @@ export function walkTokenPath(
           }
         }
 
+        const specificity = ws.specificity + (component instanceof ConstantComponent ? 1 : 0);
+
         nextWalkingStates.push(
-          new WalkingState(component.name, next, extensionList, ws.depth + 1, priority)
+          new WalkingState(component.name, next, extensionList, ws.depth + 1, priority, specificity)
         );
       }
     });
@@ -184,9 +194,13 @@ export function populateContext(
   // apply what values were set so far to context, selecting the deepest on which sets the context
   if (walkStates.length !== 0) {
     let wsToUse;
-    walkStates = _.sortBy(walkStates, function (ws) {
-      return _.isNumber(ws.priority) ? ws.priority : Number.MAX_VALUE;
-    });
+    // Sort by explicit priority first (lower wins), then prefer the most specific
+    // path (more literally-matched segments) so a concrete endpoint is chosen over
+    // a competing parameter pattern regardless of endpoint registration order.
+    walkStates = _.sortBy(walkStates, [
+      (ws: WalkingState) => (_.isNumber(ws.priority) ? ws.priority : Number.MAX_VALUE),
+      (ws: WalkingState) => -ws.specificity,
+    ]);
     wsToUse = _.find(walkStates, function (ws) {
       return _.isEmpty(ws.components);
     });
