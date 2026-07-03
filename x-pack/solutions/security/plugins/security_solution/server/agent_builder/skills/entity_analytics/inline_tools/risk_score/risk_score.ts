@@ -26,16 +26,23 @@ import { escapeEsqlString } from '../common';
 
 const DEFAULT_LIMIT = 10;
 
+// Entity identifiers (hostnames, usernames, service names) follow the ES _id limit
+const ENTITY_ID_MAX_LENGTH = 256;
+// Interval format: "{value}{unit}" e.g. "1000M"; generous bound for any valid value
+const INTERVAL_MAX_LENGTH = 20;
+
 export const riskScoreStaticSchema = z.object({
   entityType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
   entityId: z
     .string()
+    .max(ENTITY_ID_MAX_LENGTH)
     .describe(
       'The identifier of the entity to retrieve the risk score for. If not provided, the tool will query for the riskiest entities'
     )
     .optional(),
   interval: z
     .string()
+    .max(INTERVAL_MAX_LENGTH)
     .regex(
       /^\d+[smhdwM]$/,
       `Intervals should follow {value}{unit} where unit is one of s,m,h,d,w,M`

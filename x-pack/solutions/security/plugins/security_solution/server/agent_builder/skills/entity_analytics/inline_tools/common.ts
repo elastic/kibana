@@ -14,11 +14,20 @@ import type { EntityAnalyticsRoutesDeps } from '../../../../lib/entity_analytics
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 
+// Free-text prompt or context passed from the LLM as a tool argument; generous bound for a full question
+const PROMPT_MAX_LENGTH = 4096;
+// Additional context extracted from prior chat messages (e.g. an ES|QL filter); same generous bound
+const QUERY_CONTEXT_MAX_LENGTH = 4096;
+
 export const entityAnalyticsCommonSchema = z.object({
   entityType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
-  prompt: z.string().describe('The prompt or question that calling this tool will help to answer.'),
+  prompt: z
+    .string()
+    .max(PROMPT_MAX_LENGTH)
+    .describe('The prompt or question that calling this tool will help to answer.'),
   queryExtraContext: z
     .string()
+    .max(QUERY_CONTEXT_MAX_LENGTH)
     .describe('Information from previous chat messages like an ESQL filter that should be used.'),
 });
 

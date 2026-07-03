@@ -23,6 +23,9 @@ import { escapeEsqlString } from '../common';
 
 const DEFAULT_LIMIT = 10;
 
+// Entity identifiers (hostnames, usernames, service names) follow the ES _id limit
+const ENTITY_ID_MAX_LENGTH = 256;
+
 /**
  * TODO - asset criticality is moving fully to the entity store v2 so this tool can be removed in favor of
  * the entity store tool
@@ -35,6 +38,7 @@ export const assetCriticalityStaticSchema = z.object({
   entityType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
   entityId: z
     .string()
+    .max(ENTITY_ID_MAX_LENGTH)
     .describe('The identifier of the entity to retrieve the asset criticality for')
     .optional(),
   limit: z

@@ -7,6 +7,11 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
+// ISO 8601 timestamps are at most 30 chars; generous upper bound for any well-formed timestamp
+const ISO_TIMESTAMP_MAX_LENGTH = 64;
+// Kibana namespace follows Elasticsearch index name limits; 1024 is comfortably generous
+const NAMESPACE_MAX_LENGTH = 1024;
+
 /**
  * WARNING: Do not modify the existing versioned schema(s) below, instead define a new version (ex: 2, 3, 4).
  * This is required to support zero-downtime upgrades and rollbacks. See https://github.com/elastic/kibana/issues/155764.
@@ -22,8 +27,8 @@ export const stateSchemaByVersion = {
       namespace: typeof state.namespace === 'string' ? state.namespace : 'default',
     }),
     schema: schema.object({
-      lastExecutionTimestamp: schema.maybe(schema.string()),
-      namespace: schema.string(),
+      lastExecutionTimestamp: schema.maybe(schema.string({ maxLength: ISO_TIMESTAMP_MAX_LENGTH })),
+      namespace: schema.string({ maxLength: NAMESPACE_MAX_LENGTH }),
       runs: schema.number(),
     }),
   },

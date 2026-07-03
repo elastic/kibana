@@ -30,8 +30,11 @@ import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_e
 import { ENTITY_STORE_API_CALL_EVENT } from '../../../../telemetry/event_based/events';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
+// Elasticsearch field names (including dot-notation paths) are bounded by 255 bytes
+const ENTITY_FIELD_NAME_MAX_LENGTH = 255;
+
 /** Permissive body schema so we validate in the handler with the schema that matches entityType (union order would otherwise reject valid host/user bodies). */
-const UpsertBodyPermissive = z.record(z.string(), z.unknown());
+const UpsertBodyPermissive = z.record(z.string().max(ENTITY_FIELD_NAME_MAX_LENGTH), z.unknown());
 
 const ENTITY_TYPE_SCHEMAS: Record<
   'host' | 'user' | 'service' | 'generic',

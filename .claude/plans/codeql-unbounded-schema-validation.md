@@ -45,11 +45,11 @@ in the flagged schemas. This is hardening — PRs are `backport:skip`, `release_
 - [x] Validate (targeted — fast): `node scripts/eslint --fix <changed files>`, `node scripts/type_check --project x-pack/solutions/security/plugins/kubernetes_security/tsconfig.json`, and `node scripts/type_check --project x-pack/solutions/security/plugins/cloud_defend/tsconfig.json`. Run `node scripts/jest` on any co-located `*.test.ts` you touched. Fix all errors before marking done.
 
 ### Task 5: Bound security_solution entity analytics schemas (config-schema + zod)
-- [ ] Bound config-schema strings/arrays in `plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/snapshot/state.ts`, `tasks/health/state.ts`, `tasks/field_retention_enrichment/state.ts`, `tasks/data_view_refresh/state.ts`
-- [ ] Bound the config-schema request schema in `plugins/security_solution/server/lib/entity_analytics/entity_store/routes/entity_crud/upsert_entity.ts`
-- [ ] Add `.max(N)` to every `z.string()` / `z.array()` in the zod tool schemas `plugins/security_solution/server/agent_builder/skills/entity_analytics/inline_tools/risk_score/risk_score.ts`, `inline_tools/asset_criticality/asset_criticality.ts`, `inline_tools/common.ts`
-- [ ] Add a justifying comment for each new ceiling; use named `const`s. State schema values are internal — size them to comfortably fit real task state
-- [ ] Validate (targeted — fast): `node scripts/eslint --fix <changed files>` and `node scripts/type_check --project x-pack/solutions/security/plugins/security_solution/tsconfig.json`. Run `node scripts/jest` on any co-located `*.test.ts` you touched. Fix all errors before marking done.
+- [x] Bound config-schema strings/arrays in `plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/snapshot/state.ts`, `tasks/health/state.ts`, `tasks/field_retention_enrichment/state.ts`, `tasks/data_view_refresh/state.ts`
+- [x] Bound the config-schema request schema in `plugins/security_solution/server/lib/entity_analytics/entity_store/routes/entity_crud/upsert_entity.ts`
+- [x] Add `.max(N)` to every `z.string()` / `z.array()` in the zod tool schemas `plugins/security_solution/server/agent_builder/skills/entity_analytics/inline_tools/risk_score/risk_score.ts`, `inline_tools/asset_criticality/asset_criticality.ts`, `inline_tools/common.ts`
+- [x] Add a justifying comment for each new ceiling; use named `const`s. State schema values are internal — size them to comfortably fit real task state
+- [x] Validate (targeted — fast): `node scripts/eslint --fix <changed files>` and `node scripts/type_check --project x-pack/solutions/security/plugins/security_solution/tsconfig.json`. Run `node scripts/jest` on any co-located `*.test.ts` you touched. Fix all errors before marking done.
 
 ### Task 6: Final validation
 - [ ] Run `node scripts/check --scope branch` and fix all failures (catches cross-task regressions the per-task checks can't see)
