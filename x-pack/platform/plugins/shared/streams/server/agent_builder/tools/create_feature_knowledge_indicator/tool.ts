@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   BuiltinToolDefinition,
@@ -24,7 +24,7 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 
 export const STREAMS_CREATE_FEATURE_KNOWLEDGE_INDICATOR_TOOL_ID =
-  platformStreamsSigEventsTools.createFeatureKnowledgeIndicator;
+  platformSignificantEventsTools.createFeatureKnowledgeIndicator;
 
 const createFeatureKISchema = baseFeatureSchema.extend({
   expires_at: z.iso
