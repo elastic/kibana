@@ -428,13 +428,10 @@ export class LensApp {
   /** Reads the selected donut hole size from the style settings flyout. */
   async getDonutHoleSize(): Promise<string> {
     await this.openStyleSettingsFlyout();
-    const comboBox = new EuiComboBoxWrapper(this.page, 'lnsEmptySizeRatioOption');
-    const selectedOptions = await comboBox.getSelectedMultiOptions();
-    if (selectedOptions.length > 0) {
-      return selectedOptions[0];
-    }
-
-    return comboBox.getSelectedValue();
+    const selectedOptions = await this.page.components
+      .comboBox('lnsEmptySizeRatioOption')
+      .getSelectedOptions();
+    return selectedOptions[0] ?? '';
   }
 
   /**
