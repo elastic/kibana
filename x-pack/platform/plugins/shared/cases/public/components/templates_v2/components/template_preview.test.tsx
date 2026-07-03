@@ -15,6 +15,10 @@ jest.mock('../field_types/field_renderer', () => ({
   TemplateFieldRenderer: jest.fn(() => <div data-test-subj="template-field-renderer" />),
 }));
 
+jest.mock('../../cases_context/use_cases_context', () => ({
+  useCasesContext: () => ({ owner: ['securitySolution'] }),
+}));
+
 describe('CreateTemplatePreview', () => {
   const renderPreview = (definition: string) => {
     const Wrapper = () => {

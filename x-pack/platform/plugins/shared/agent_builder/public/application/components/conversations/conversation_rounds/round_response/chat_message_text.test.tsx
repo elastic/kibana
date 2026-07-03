@@ -88,7 +88,12 @@ function createStartDependencies() {
     cloud: {},
     share: {},
     uiActions: {},
-  } as AgentBuilderStartDependencies;
+    unifiedSearch: {
+      ui: {
+        SearchBar: () => null,
+      },
+    },
+  } as unknown as AgentBuilderStartDependencies;
 }
 
 function getAST(markdown: string) {
@@ -112,27 +117,30 @@ describe('chat_message_text', () => {
       isEmbeddedContext: false,
       browserApiTools: undefined,
       conversationActions: {
-        removeNewConversationQuery: jest.fn(),
         invalidateConversation: jest.fn(),
         addOptimisticRound: jest.fn(),
         removeOptimisticRound: jest.fn(),
-        setAgentId: jest.fn(),
         addReasoningStep: jest.fn(),
         addToolCall: jest.fn(),
         setToolCallProgress: jest.fn(),
         setToolCallResult: jest.fn(),
         setAssistantMessage: jest.fn(),
         addAssistantMessageChunk: jest.fn(),
+        clearAssistantMessage: jest.fn(),
         onConversationCreated: jest.fn(),
         deleteConversation: jest.fn(),
         renameConversation: jest.fn(),
         setTimeToFirstToken: jest.fn(),
         addPendingPrompt: jest.fn(),
         clearPendingPrompts: jest.fn(),
+        setAskUserQuestionAnswers: jest.fn(),
         clearLastRoundResponse: jest.fn(),
         addBackgroundExecutionCompleteStep: jest.fn(),
         addCompactionStep: jest.fn(),
         setCompactionStepComplete: jest.fn(),
+        addOrUpdateTodosStep: jest.fn(),
+        setAttachments: jest.fn(),
+        onRoundComplete: jest.fn(),
       },
     });
   });

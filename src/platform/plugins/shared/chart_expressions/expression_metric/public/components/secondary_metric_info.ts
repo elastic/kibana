@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 
 import type { DimensionsVisParam, MetricVisParam } from '../../common';
@@ -119,7 +119,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
 function getValueToShow(
   value: string,
   deltaValue: number,
-  formatter: FieldFormatConvertFunction | undefined,
+  formatter: TextContextTypeConvert | undefined,
   compareToPrimary: boolean
 ) {
   if (!compareToPrimary) {
@@ -164,7 +164,7 @@ function getDynamicColorInfo(
   trendConfig: TrendConfig,
   rawValue: number | undefined,
   safeFormattedValue: string,
-  metricFormatter: FieldFormatConvertFunction | undefined,
+  metricFormatter: TextContextTypeConvert | undefined,
   label: string
 ): SecondaryMetricInfo {
   const deltaFactor = trendConfig.compareToPrimary ? -1 : 1;

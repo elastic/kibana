@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-exploration-team'
   sourceRoot: src/platform/packages/shared/kbn-saved-search-component
 dependsOn:
+  - '@kbn/core-execution-context-common'
   - '@kbn/embeddable-plugin'
   - '@kbn/shared-ux-utility'
   - '@kbn/discover-utils'

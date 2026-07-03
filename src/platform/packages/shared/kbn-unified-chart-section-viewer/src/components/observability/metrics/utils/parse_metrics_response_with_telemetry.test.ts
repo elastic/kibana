@@ -28,7 +28,7 @@ describe('parseMetricsWithTelemetry', () => {
     const response: MetricsESQLResponse[] = [
       {
         metric_name: 'my.metric',
-        data_stream: 'my-index',
+        index_name: 'my-index',
         unit: null,
         metric_type: 'gauge',
         field_type: ES_FIELD_TYPES.DOUBLE,
@@ -40,7 +40,7 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'my.metric',
-          dataStream: 'my-index',
+          indexName: 'my-index',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: [null],
@@ -54,19 +54,20 @@ describe('parseMetricsWithTelemetry', () => {
         metrics_by_type: { gauge: 1 },
         units: { none: 1 },
         multi_value_counts: {
-          data_streams: 0,
+          index_names: 0,
           field_types: 0,
           metric_types: 0,
+          units: 0,
         },
       },
     });
   });
 
-  it('returns one metric when data_stream is a single string', () => {
+  it('returns one metric when index_name is a single string', () => {
     const response: MetricsESQLResponse[] = [
       {
         metric_name: 'cpu.usage',
-        data_stream: 'my-index',
+        index_name: 'my-index',
         unit: ['percent'],
         metric_type: 'gauge',
         field_type: ES_FIELD_TYPES.DOUBLE,
@@ -78,7 +79,7 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'cpu.usage',
-          dataStream: 'my-index',
+          indexName: 'my-index',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
@@ -92,19 +93,20 @@ describe('parseMetricsWithTelemetry', () => {
         metrics_by_type: { gauge: 1 },
         units: { percent: 1 },
         multi_value_counts: {
-          data_streams: 0,
+          index_names: 0,
           field_types: 0,
           metric_types: 0,
+          units: 0,
         },
       },
     });
   });
 
-  it('returns two metrics when data_stream is an array of two', () => {
+  it('returns two metrics when index_name is an array of two', () => {
     const response: MetricsESQLResponse[] = [
       {
         metric_name: 'cpu.usage',
-        data_stream: ['stream-a', 'stream-b'],
+        index_name: ['stream-a', 'stream-b'],
         unit: ['percent'],
         metric_type: 'gauge',
         field_type: ES_FIELD_TYPES.DOUBLE,
@@ -116,7 +118,7 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'cpu.usage',
-          dataStream: 'stream-a',
+          indexName: 'stream-a',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
@@ -124,7 +126,7 @@ describe('parseMetricsWithTelemetry', () => {
         },
         {
           metricName: 'cpu.usage',
-          dataStream: 'stream-b',
+          indexName: 'stream-b',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
@@ -138,19 +140,48 @@ describe('parseMetricsWithTelemetry', () => {
         metrics_by_type: { gauge: 1 },
         units: { percent: 1 },
         multi_value_counts: {
-          data_streams: 1,
+          index_names: 1,
           field_types: 0,
           metric_types: 0,
+          units: 0,
         },
       },
     });
+  });
+
+  it('falls back to the legacy `data_stream` column when `index_name` is absent', () => {
+    // The ES|QL `METRICS_INFO` response still returns a column literally named
+    // `data_stream`. The TS surface exposes it as `index_name`, but the parser
+    // accepts either at runtime so the rename can land independently of any
+    // ES-side column rename.
+    const response = [
+      {
+        metric_name: 'cpu.usage',
+        data_stream: 'my-index',
+        unit: ['percent'],
+        metric_type: 'gauge',
+        field_type: ES_FIELD_TYPES.DOUBLE,
+        dimension_fields: ['host.name'],
+      },
+    ] as unknown as MetricsESQLResponse[];
+    const result = parseMetricsWithTelemetry(response);
+    expect(result.metricItems).toEqual([
+      {
+        metricName: 'cpu.usage',
+        indexName: 'my-index',
+        metricTypes: ['gauge'],
+        fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+        units: ['percent'],
+        dimensionFields: [{ name: 'host.name' }],
+      },
+    ]);
   });
 
   it('normalises single string metric_type, field_type and dimension_fields to one-element arrays', () => {
     const response: MetricsESQLResponse[] = [
       {
         metric_name: 'my.metric',
-        data_stream: 'my-index',
+        index_name: 'my-index',
         unit: ['bytes'],
         metric_type: 'gauge',
         field_type: ES_FIELD_TYPES.DOUBLE,
@@ -162,7 +193,7 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'my.metric',
-          dataStream: 'my-index',
+          indexName: 'my-index',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['bytes'],
@@ -176,9 +207,10 @@ describe('parseMetricsWithTelemetry', () => {
         metrics_by_type: { gauge: 1 },
         units: { bytes: 1 },
         multi_value_counts: {
-          data_streams: 0,
+          index_names: 0,
           field_types: 0,
           metric_types: 0,
+          units: 0,
         },
       },
     });
@@ -188,7 +220,7 @@ describe('parseMetricsWithTelemetry', () => {
     const response: MetricsESQLResponse[] = [
       {
         metric_name: 'my.metric',
-        data_stream: 'my-index',
+        index_name: 'my-index',
         unit: ['bytes'],
         metric_type: ['gauge', 'counter'],
         field_type: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
@@ -200,7 +232,7 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'my.metric',
-          dataStream: 'my-index',
+          indexName: 'my-index',
           metricTypes: ['gauge', 'counter'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
           units: ['bytes'],
@@ -214,19 +246,41 @@ describe('parseMetricsWithTelemetry', () => {
         metrics_by_type: { gauge: 1, counter: 1 },
         units: { bytes: 1 },
         multi_value_counts: {
-          data_streams: 0,
+          index_names: 0,
           field_types: 1,
           metric_types: 1,
+          units: 0,
         },
       },
     });
+  });
+
+  it('increments multi_value_counts.units when unit has more than one value', () => {
+    const response: MetricsESQLResponse[] = [
+      {
+        metric_name: 'cpu.usage',
+        index_name: 'my-index',
+        unit: ['bytes', 'percent'],
+        metric_type: 'gauge',
+        field_type: ES_FIELD_TYPES.DOUBLE,
+        dimension_fields: ['host.name'],
+      },
+    ];
+    const result = parseMetricsWithTelemetry(response);
+    expect(result.telemetry.multi_value_counts).toEqual({
+      index_names: 0,
+      field_types: 0,
+      metric_types: 0,
+      units: 1,
+    });
+    expect(result.telemetry.units).toEqual({ bytes: 1, percent: 1 });
   });
 
   it('returns allDimensions as union of all dimension_fields across rows with no duplicates', () => {
     const response: MetricsESQLResponse[] = [
       {
         metric_name: 'metric.a',
-        data_stream: 'ds-1',
+        index_name: 'ds-1',
         unit: ['percent'],
         metric_type: 'gauge',
         field_type: ES_FIELD_TYPES.DOUBLE,
@@ -234,7 +288,7 @@ describe('parseMetricsWithTelemetry', () => {
       },
       {
         metric_name: 'metric.b',
-        data_stream: 'ds-2',
+        index_name: 'ds-2',
         unit: ['bytes'],
         metric_type: 'counter',
         field_type: ES_FIELD_TYPES.LONG,
@@ -242,7 +296,7 @@ describe('parseMetricsWithTelemetry', () => {
       },
       {
         metric_name: 'metric.b',
-        data_stream: 'ds-2',
+        index_name: 'ds-2',
         unit: ['bytes'],
         metric_type: 'counter',
         field_type: ES_FIELD_TYPES.LONG,
@@ -250,7 +304,7 @@ describe('parseMetricsWithTelemetry', () => {
       },
       {
         metric_name: 'unsupported.row',
-        data_stream: 'ds-unsupported',
+        index_name: 'ds-unsupported',
         unit: ['bytes'],
         metric_type: 'summary' as unknown as MetricsESQLResponse['metric_type'],
         field_type: ES_FIELD_TYPES.DOUBLE,
@@ -270,9 +324,10 @@ describe('parseMetricsWithTelemetry', () => {
       metrics_by_type: { gauge: 1, counter: 2, summary: 1 },
       units: { percent: 1, bytes: 3 },
       multi_value_counts: {
-        data_streams: 0,
+        index_names: 0,
         field_types: 0,
         metric_types: 0,
+        units: 0,
       },
     });
     const totalNumberOfMetrics = sum(Object.values(result.telemetry.metrics_by_type));
@@ -284,7 +339,7 @@ describe('parseMetricsWithTelemetry', () => {
       const response: MetricsESQLResponse[] = [
         {
           metric_name: 'cpu.usage',
-          data_stream: 'my-index',
+          index_name: 'my-index',
           unit: ['percent'],
           metric_type: 'gauge',
           field_type: ES_FIELD_TYPES.DOUBLE,
@@ -300,7 +355,7 @@ describe('parseMetricsWithTelemetry', () => {
       const response: MetricsESQLResponse[] = [
         {
           metric_name: 'cpu.usage',
-          data_stream: 'my-index',
+          index_name: 'my-index',
           unit: ['percent'],
           metric_type: 'gauge',
           field_type: ES_FIELD_TYPES.DOUBLE,
@@ -316,7 +371,7 @@ describe('parseMetricsWithTelemetry', () => {
       const response: MetricsESQLResponse[] = [
         {
           metric_name: 'cpu.usage',
-          data_stream: 'my-index',
+          index_name: 'my-index',
           unit: ['percent'],
           metric_type: 'gauge',
           field_type: ES_FIELD_TYPES.DOUBLE,
@@ -332,7 +387,7 @@ describe('parseMetricsWithTelemetry', () => {
       const response: MetricsESQLResponse[] = [
         {
           metric_name: 'cpu.usage',
-          data_stream: 'my-index',
+          index_name: 'my-index',
           unit: ['percent'],
           metric_type: 'gauge',
           field_type: ES_FIELD_TYPES.DOUBLE,
@@ -357,7 +412,7 @@ describe('parseMetricsWithTelemetry', () => {
       const response: MetricsESQLResponse[] = [
         {
           metric_name: 'cpu.usage',
-          data_stream: 'my-index',
+          index_name: 'my-index',
           unit: ['percent'],
           metric_type: 'gauge',
           field_type: ES_FIELD_TYPES.DOUBLE,
@@ -390,7 +445,7 @@ describe('parseMetricsWithTelemetry', () => {
       const response: MetricsESQLResponse[] = [
         {
           metric_name: 'cpu.usage',
-          data_stream: 'my-index',
+          index_name: 'my-index',
           unit: ['percent'],
           metric_type: 'gauge',
           field_type: ES_FIELD_TYPES.DOUBLE,
@@ -412,7 +467,7 @@ describe('parseMetricsWithTelemetry', () => {
       const response: MetricsESQLResponse[] = [
         {
           metric_name: 'cpu.usage',
-          data_stream: 'my-index',
+          index_name: 'my-index',
           unit: ['percent'],
           metric_type: 'gauge',
           field_type: ES_FIELD_TYPES.DOUBLE,
@@ -434,7 +489,7 @@ describe('parseMetricsWithTelemetry', () => {
       const response: MetricsESQLResponse[] = [
         {
           metric_name: 'metric.a',
-          data_stream: 'ds-1',
+          index_name: 'ds-1',
           unit: ['percent'],
           metric_type: 'gauge',
           field_type: ES_FIELD_TYPES.DOUBLE,
@@ -442,7 +497,7 @@ describe('parseMetricsWithTelemetry', () => {
         },
         {
           metric_name: 'metric.b',
-          data_stream: 'ds-2',
+          index_name: 'ds-2',
           unit: ['bytes'],
           metric_type: 'counter',
           field_type: ES_FIELD_TYPES.LONG,

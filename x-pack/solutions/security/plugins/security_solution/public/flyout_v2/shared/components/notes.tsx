@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -31,7 +32,7 @@ import {
   selectNotesByDocumentId,
 } from '../../../notes/store/notes.slice';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { AlertHeaderBlock } from './alert_header_block';
+import { FlyoutHeaderBlock } from './flyout_header_block';
 import {
   NOTES_ADD_NOTE_BUTTON_TEST_ID,
   NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID,
@@ -143,22 +144,24 @@ export const Notes = memo(({ documentId, onShowNotes, disabled = false }: NotesP
 
   const addNoteButtonIcon = useMemo(
     () => (
-      <EuiButtonIcon
-        onClick={onShowNotes}
-        iconType="plusInCircle"
-        disabled={cannotAddNotes}
-        css={css`
-          margin-left: ${euiTheme.size.xs};
-        `}
-        aria-label={ADD_NOTE_BUTTON}
-        data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
-      />
+      <EuiToolTip content={ADD_NOTE_BUTTON} disableScreenReaderOutput>
+        <EuiButtonIcon
+          onClick={onShowNotes}
+          iconType="plusInCircle"
+          disabled={cannotAddNotes}
+          css={css`
+            margin-left: ${euiTheme.size.xs};
+          `}
+          aria-label={ADD_NOTE_BUTTON}
+          data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
+        />
+      </EuiToolTip>
     ),
     [euiTheme.size.xs, cannotAddNotes, onShowNotes]
   );
 
   return (
-    <AlertHeaderBlock
+    <FlyoutHeaderBlock
       gutterSize="xs"
       hasBorder
       title={
@@ -193,7 +196,7 @@ export const Notes = memo(({ documentId, onShowNotes, disabled = false }: NotesP
           )}
         </>
       )}
-    </AlertHeaderBlock>
+    </FlyoutHeaderBlock>
   );
 });
 

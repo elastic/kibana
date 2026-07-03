@@ -133,11 +133,6 @@ export function initializeEditApi(
         setDisabledActionIds: noop,
       };
 
-  if (isTextBasedLanguage(initialState)) {
-    // do not expose the drilldown action for ES|QL
-    setDisabledActionIds(disabledActionIds$?.getValue()?.concat(['OPEN_FLYOUT_ADD_DRILLDOWN']));
-  }
-
   /**
    * Inline editing section
    */
@@ -274,13 +269,13 @@ export function initializeEditApi(
         : async (attributes) => {
             let appliedAttributes = attributes;
             if (attributes.visualizationType === 'lnsXY') {
-              const updatedVizState = await saveUpdatedLinkedAnnotationsToLibrary(
+              const updatedVisState = await saveUpdatedLinkedAnnotationsToLibrary(
                 attributes.state.visualization,
                 startDependencies.eventAnnotationService
               );
               appliedAttributes = {
                 ...attributes,
-                state: { ...attributes.state, visualization: updatedVizState },
+                state: { ...attributes.state, visualization: updatedVisState },
               };
             }
             internalApi.updateEditingState(false);

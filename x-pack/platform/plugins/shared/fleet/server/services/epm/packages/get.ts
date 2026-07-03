@@ -11,9 +11,11 @@ import type { MMRegExp } from 'minimatch';
 import { minimatch } from 'minimatch';
 import type {
   ElasticsearchClient,
+  SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
@@ -42,6 +44,7 @@ import type {
   PackagePolicyAssetsMap,
   PackageKnowledgeBase,
   RegistryPolicyIntegrationTemplate,
+  ArchiveIterator,
 } from '../../../../common/types';
 
 import {
@@ -270,6 +273,7 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
       version,
       status: installStatus,
       dataStreams,
+      rolledBack: integrationSavedObject.attributes.rolled_back,
     };
   });
 
@@ -709,9 +713,11 @@ export async function getPackageDependencies(
   );
 }
 
-interface PackageResponse {
+export interface PackageResponse {
   paths: string[];
   packageInfo: ArchivePackage | RegistryPackage;
+  assetsMap?: AssetsMap;
+  archiveIterator?: ArchiveIterator;
 }
 type GetPackageResponse = PackageResponse | undefined;
 
@@ -767,6 +773,10 @@ export async function getPackageFromSource(options: {
         // in the unlikely event its missing from cache, storage, and never installed from registry
       }
     }
+    if (!res && pkgInstallSource === 'bundled') {
+      res = await Registry.getBundledArchive(pkgName, pkgVersion);
+      logger.debug(`retrieved bundled package ${pkgName}-${pkgVersion} from bundled archive`);
+    }
   } else {
     try {
       res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
@@ -786,6 +796,8 @@ export async function getPackageFromSource(options: {
   return {
     paths: res.paths,
     packageInfo: res.packageInfo,
+    assetsMap: res.assetsMap,
+    archiveIterator: res.archiveIterator,
   };
 }
 
@@ -825,7 +837,9 @@ async function getInstallationObjects(options: {
     pkgNames.map((pkgName) => ({ id: pkgName, type: PACKAGES_SAVED_OBJECT_TYPE }))
   );
 
-  const installations = res.saved_objects.filter((so) => so?.attributes);
+  const installations = res.saved_objects.filter(
+    (so): so is SavedObject<Installation> => !isSavedObjectErrorResult(so)
+  );
 
   for (const installation of installations) {
     auditLoggingService.writeCustomSoAuditLog({

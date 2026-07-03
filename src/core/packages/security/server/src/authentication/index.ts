@@ -19,6 +19,8 @@ export type {
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   CreateCrossClusterAPIKeyParams,
   GrantAPIKeyResult,
+  CloneAPIKeyParams,
+  CloneAPIKeyResult,
   NativeAPIKeysType,
   NativeAPIKeysWithContextType,
   UpdateAPIKeyParams,

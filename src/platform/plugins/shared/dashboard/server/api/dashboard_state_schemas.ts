@@ -12,11 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
-/**
- * Currently, controls are the only pinnable panels. However, if we intend to make this extendable, we should instead
- * get the pinned panel schema from a pinned panel registry **independent** from controls
- */
-import { getControlsGroupSchema as getPinnedPanelsSchema } from '@kbn/controls-schemas';
+import { getControlsGroupSchema } from '@kbn/controls-schemas';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
@@ -25,8 +21,10 @@ import {
   DEFAULT_PANEL_WIDTH,
   DEFAULT_DASHBOARD_OPTIONS,
 } from '../../common/constants';
+import { isDashboardSection } from '../../common';
+import type { DashboardPanel, DashboardSection } from './types';
 
-const MAX_PANELS = 100;
+const MAX_PANELS = 1000;
 
 export const panelGridSchema = schema.object(
   {
@@ -58,7 +56,7 @@ export const panelGridSchema = schema.object(
   }
 );
 
-export function getPanelSchema(isDashboardAppRequest: boolean) {
+export function getPanelSchema() {
   const basePanelProps = {
     grid: panelGridSchema,
     id: schema.maybe(
@@ -68,22 +66,8 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
     ),
   };
 
-  // looser route validation for dashboard application requests
-  // TODO remove when all embeddables register schemas
-  if (isDashboardAppRequest) {
-    return schema.object({
-      ...basePanelProps,
-      type: schema.string(),
-      config: schema.object(
-        {},
-        {
-          unknowns: 'allow',
-        }
-      ),
-    });
-  }
-
   const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
+
   const panelSchemas = Object.entries(embeddableSchemas)
     // sort to ensure consistent order in OAS documenation
     .sort(([aType, { title: aTitle }], [bType, { title: bTitle }]) => aTitle.localeCompare(bTitle))
@@ -121,7 +105,7 @@ const sectionGridSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units.' } }),
 });
 
-export function getSectionSchema(isDashboardAppRequest: boolean) {
+export function getSectionSchema() {
   return schema.object(
     {
       title: schema.string({
@@ -135,7 +119,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
         defaultValue: false,
       }),
       grid: sectionGridSchema,
-      panels: schema.arrayOf(getPanelSchema(isDashboardAppRequest), {
+      panels: schema.arrayOf(getPanelSchema(), {
         meta: { description: 'The panels that belong to the section.' },
         defaultValue: [],
         maxSize: MAX_PANELS,
@@ -154,6 +138,23 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
       },
     }
   );
+}
+
+export function getPinnedPanelsSchema(
+  isDashboardAppRequest: boolean = false,
+  isReadRequest: boolean = false
+) {
+  return isDashboardAppRequest && isReadRequest // looser route validation for dashboard application read requests
+    ? (schema.arrayOf(
+        schema.object(
+          {},
+          {
+            unknowns: 'allow',
+          }
+        ),
+        { maxSize: Number.MAX_SAFE_INTEGER }
+      ) as unknown as ReturnType<typeof getControlsGroupSchema>) // keeps derived types happy
+    : getControlsGroupSchema();
 }
 
 export const optionsSchema = schema.object(
@@ -230,16 +231,19 @@ export const accessControlSchema = schema.maybe(
   )
 );
 
-export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
+export function getDashboardStateSchema(
+  isDashboardAppRequest: boolean,
+  isReadRequest: boolean = false
+) {
   return schema.object(
     {
-      pinned_panels: getPinnedPanelsSchema(),
+      pinned_panels: getPinnedPanelsSchema(isDashboardAppRequest, isReadRequest),
       description: schema.maybe(
         schema.string({ meta: { description: 'A short description of the dashboard.' } })
       ),
       filters: schema.maybe(
         schema.arrayOf(asCodeFilterSchema, {
-          maxSize: 500,
+          maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : 500,
           meta: {
             description: 'Filters applied across all panels, including pinned panels.',
           },
@@ -247,13 +251,17 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
       ),
       options: optionsSchema,
       panels: schema.arrayOf(
-        schema.oneOf([
-          getPanelSchema(isDashboardAppRequest),
-          getSectionSchema(isDashboardAppRequest),
-        ]),
+        isDashboardAppRequest // looser route validation for dashboard application requests
+          ? (schema.object(
+              {},
+              {
+                unknowns: 'allow',
+              }
+            ) as unknown as ReturnType<typeof getPanelSchema>) // keeps derived types happy
+          : schema.oneOf([getPanelSchema(), getSectionSchema()]),
         {
           defaultValue: [],
-          maxSize: MAX_PANELS,
+          maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : MAX_PANELS,
           meta: {
             description:
               'Panels and sections in the dashboard. Each entry is either a panel (with a `type` and `config`) or a collapsible section (with a `title`, `collapsed` state, and nested `panels`).',
@@ -272,18 +280,42 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
       refresh_interval: schema.maybe(refreshIntervalSchema),
       tags: schema.maybe(
         schema.arrayOf(schema.string(), {
-          maxSize: 100,
+          maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : 100,
           meta: { description: 'Tag IDs to associate with this dashboard.' },
         })
       ),
       time_range: schema.maybe(timeRangeSchema),
-      title: schema.string({ meta: { description: 'A human-readable title for the dashboard.' } }),
+      title: schema.string({
+        minLength: 1,
+        meta: { description: 'A human-readable title for the dashboard.' },
+      }),
       access_control: accessControlSchema,
     },
     {
       meta: {
         id: isDashboardAppRequest ? 'kbn-dashboard-app-data' : 'kbn-dashboard-data',
       },
+      validate: (dashboardState) => {
+        if (isDashboardAppRequest) return;
+        const panelCount = countPanels(dashboardState.panels);
+        const allPanelCount = panelCount + (dashboardState.pinned_panels?.length ?? 0);
+        return allPanelCount > MAX_PANELS
+          ? `Dashboard contains ${allPanelCount} panels, pinned panels, and sections, which exceeds the maximum of ${MAX_PANELS}.`
+          : undefined;
+      },
     }
   );
+}
+
+function countPanels(panels: Array<DashboardPanel | DashboardSection>): number {
+  let count = 0;
+  for (const panel of panels) {
+    if (isDashboardSection(panel)) {
+      count++; // count the section itself as a panel
+      count += countPanels(panel.panels);
+    } else {
+      count++;
+    }
+  }
+  return count;
 }

@@ -9,19 +9,19 @@
 
 import { euiMarkdownLinkValidator, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiCanAddNewPanel,
   apiCanFocusPanel,
   apiIsPresentationContainer,
-  initializeUnsavedChanges,
+  initializeStateApi,
   getViewModeSubject,
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type {
   MarkdownEmbeddableState,
@@ -34,7 +34,7 @@ import { resolveRelativeLinksPlugin } from './plugins/resolve_relative_links';
 import { MarkdownEditor } from './components/markdown_editor';
 import { MarkdownEditorPreviewSwitch } from './components/markdown_editor_preview_switch';
 import { MarkdownRenderer } from './components/markdown_renderer';
-import { checkForDuplicateTitle } from './markdown_client/duplicate_title_check';
+import { hasLibraryItemWithTitle } from './markdown_client/has_library_item_with_title';
 import { markdownClient } from './markdown_client/markdown_client';
 import type { MarkdownSettingsState } from '../server/embeddable/schemas';
 
@@ -43,7 +43,7 @@ const flexCss = css({
   flex: '1 1 100%',
 });
 
-export const markdownEmbeddableFactory: EmbeddableFactory<
+export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
   MarkdownEmbeddableState,
   MarkdownEditorApi
 > = {
@@ -90,9 +90,6 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       };
     };
 
-    const serializeState = () =>
-      isByReference ? serializeByReference(libraryId) : serializeByValue();
-
     const resetEditingState = () => {
       isEditing$.next(false);
       overrideHoverActions$.next(false);
@@ -102,15 +99,21 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       }
     };
 
-    const unsavedChangesApi = initializeUnsavedChanges<MarkdownEmbeddableState>({
+    const stateApi = initializeStateApi<MarkdownEmbeddableState>({
       uuid,
       parentApi,
-      serializeState,
+      serializeState: () => (isByReference ? serializeByReference(libraryId) : serializeByValue()),
       anyStateChange$: merge(
         titleManager.anyStateChange$,
-        content$.pipe(map(() => undefined)),
-        settings$.pipe(map(() => undefined))
-      ).pipe(map(() => undefined)),
+        content$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
+        settings$.pipe(
+          skip(1),
+          map(() => undefined)
+        )
+      ),
       getComparators: () => {
         return {
           ...titleComparators,
@@ -119,23 +122,22 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
           ref_id: 'skip',
         };
       },
-      onReset: (lastSaved) => {
-        titleManager.reinitializeState(lastSaved);
+      applySerializedState: (nextState) => {
+        titleManager.reinitializeState(nextState);
         // There are no unsaved changes to reset for
         // by reference 'content' or 'settings' since they are saved on apply.
         if (!isByReference) {
-          content$.next((initialState as MarkdownByValueState).content);
-          settings$.next((initialState as MarkdownByValueState).settings);
+          content$.next((nextState as MarkdownByValueState).content);
+          settings$.next((nextState as MarkdownByValueState).settings);
         }
       },
     });
 
     const api = finalizeApi({
-      ...unsavedChangesApi,
+      ...stateApi,
       ...titleManager.api,
       defaultTitle$,
       defaultDescription$,
-      serializeState,
       onEdit: async ({ isNewPanel = false } = {}) => {
         if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
         isEditing$.next(true);
@@ -173,19 +175,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       getSerializedStateByReference: serializeByReference,
       canLinkToLibrary: async () => !isByReference,
       canUnlinkFromLibrary: async () => isByReference,
-      checkForDuplicateTitle: async (
-        newTitle: string,
-        isTitleDuplicateConfirmed: boolean,
-        onTitleDuplicate: () => void
-      ) => {
-        await checkForDuplicateTitle({
-          title: newTitle,
-          copyOnSave: false,
-          lastSavedTitle: '',
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        });
-      },
+      hasLibraryItemWithTitle,
     });
 
     return {

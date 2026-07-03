@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { PassThrough, Readable } from 'stream';
-import { pipeline } from 'stream/promises';
 import type { EsqlQueryRequest, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
-import { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
+import type { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import type { ExecutionContext } from '../../execution_context';
-import type { CancellationScope } from '../../execution_context/cancellation_scope';
 import { createExecutionContext, isRuleExecutionCancellationError } from '../../execution_context';
 
 export interface ExecuteQueryParams {
@@ -91,27 +88,24 @@ export class QueryService implements QueryServiceContract {
       message: () => `QueryService: Executing streaming query`,
     });
 
+    let reader: AsyncRecordBatchStreamReader | undefined;
+
     try {
       context.throwIfAborted();
 
-      const response = await this.esClient.esql.query(
-        {
-          query,
-          drop_null_columns: false,
-          filter,
-          params,
-          format: 'arrow',
-        },
-        { asStream: true, signal: context.signal }
-      );
+      reader = await this.esClient.helpers
+        .esql(
+          {
+            query,
+            drop_null_columns: false,
+            filter,
+            params,
+          },
+          { signal: context.signal }
+        )
+        .toArrowReader();
 
-      if (this.isReadable(response)) {
-        yield* this.parseArrowStream<T>(response, context);
-      } else {
-        // Fall back to object rows to keep the stream contract stable.
-        context.throwIfAborted();
-        yield this.toRows<T>(response as EsqlQueryResponse);
-      }
+      yield* this.iterateReader<T>(reader, context);
 
       this.logger.debug({
         message: `QueryService: Streaming query completed successfully`,
@@ -130,37 +124,15 @@ export class QueryService implements QueryServiceContract {
       }
 
       throw error;
+    } finally {
+      await this.closeReader(reader);
     }
   }
 
-  private async *parseArrowStream<T>(
-    response: Readable,
+  private async *iterateReader<T>(
+    reader: AsyncRecordBatchStreamReader,
     context: ExecutionContext
   ): AsyncIterable<T[]> {
-    let reader: AsyncRecordBatchStreamReader;
-    const scope = context.createScope();
-    const passthrough = new PassThrough();
-    const streamPipeline = pipeline(response, passthrough, { signal: context.signal });
-
-    scope.add(() => {
-      passthrough.destroy();
-    });
-
-    try {
-      context.throwIfAborted();
-      reader = await AsyncRecordBatchStreamReader.from(Readable.from(passthrough));
-    } catch (error) {
-      // ES returns JSON instead of Arrow format when there's an error
-      // Apache Arrow will fail to parse it, so we throw a more descriptive error
-      throw this.buildParseError(error);
-    }
-
-    scope.add(async () => {
-      if (!reader.closed) {
-        await reader.cancel();
-      }
-    });
-
     try {
       for await (const batch of reader) {
         context.throwIfAborted();
@@ -173,53 +145,32 @@ export class QueryService implements QueryServiceContract {
         yield rows;
       }
     } catch (error) {
-      // ES may return JSON error response instead of Arrow format
-      // which causes parsing errors during iteration
+      if (isRuleExecutionCancellationError(error)) {
+        throw error;
+      }
+
+      // Arrow parse failures during iteration (e.g. truncated stream).
+      // The initial server-error case is already handled by the helper.
       throw this.buildParseError(error);
-    } finally {
-      await this.cleanupStream({ scope, streamPipeline, context });
     }
   }
 
-  /**
-   * Disposes scoped resources and awaits the stream pipeline to ensure
-   * the underlying HTTP response is fully closed and no unhandled
-   * promise rejections are left behind.
-   */
-  private async cleanupStream({
-    scope,
-    streamPipeline,
-    context,
-  }: {
-    scope: CancellationScope;
-    streamPipeline: Promise<void>;
-    context: ExecutionContext;
-  }): Promise<void> {
+  private async closeReader(reader: AsyncRecordBatchStreamReader | undefined): Promise<void> {
+    if (!reader || reader.closed) {
+      return;
+    }
+
     try {
-      await scope.disposeAll();
-      /*
-       * Await the pipeline promise to prevent unhandled rejections and
-       * ensure the underlying HTTP response stream is fully closed.
-       */
-      await streamPipeline;
-    } catch (error) {
-      /*
-       * Swallow pipeline cancellation errors: the primary error/abort reason
-       * is already propagated through the stream iteration above.
-       */
-      if (!context.signal.aborted) {
-        throw error;
-      }
+      await reader.cancel();
+    } catch {
+      // Cleanup is best-effort; the primary error has already been
+      // propagated through the iteration above.
     }
   }
 
   private buildParseError(error: unknown): Error {
     const message = error instanceof Error ? error.message : String(error);
     return new Error(`Failed to parse ES|QL response. Error: ${message}`);
-  }
-
-  private isReadable(value: unknown): value is Readable {
-    return value instanceof Readable;
   }
 
   private toRows<T>(response: EsqlQueryResponse): T[] {

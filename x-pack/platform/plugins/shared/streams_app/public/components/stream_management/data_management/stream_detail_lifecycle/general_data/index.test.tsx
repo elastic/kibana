@@ -40,18 +40,40 @@ jest.mock('../../../../../hooks/use_kibana', () => ({
         streams: {
           streamsRepositoryClient: { fetch: jest.fn() },
         },
+        share: {
+          url: {
+            locators: {
+              get: jest.fn(() => ({
+                getUrl: jest.fn(async () => '/mock-index-template-url'),
+              })),
+            },
+          },
+        },
       },
     },
     services: { telemetryClient: { trackRetentionChanged: jest.fn() } },
   }),
 }));
 
+jest.mock('../../../../../hooks/use_streams_app_router', () => ({
+  useStreamsAppRouter: () => ({ link: jest.fn(() => '/mock-router-link') }),
+}));
+
 jest.mock('../../../../../hooks/use_timefilter', () => ({
-  useTimefilter: () => ({ timeState: {} }),
+  useTimefilter: () => ({
+    timeState: {},
+    timeState$: { subscribe: () => ({ unsubscribe: () => {} }) },
+  }),
 }));
 
 jest.mock('@kbn/react-hooks', () => ({
   useAbortController: () => ({ signal: undefined }),
+  useAbortableAsync: () => ({
+    value: undefined,
+    loading: false,
+    error: undefined,
+    refresh: () => {},
+  }),
 }));
 
 jest.mock('../common/section_panel', () => ({
@@ -88,13 +110,27 @@ jest.mock('./ingestion_rate', () => ({
   IngestionRate: () => <div data-test-subj="ingestionRate" />,
 }));
 
-jest.mock('./modal', () => ({
-  EditLifecycleModal: () => <div data-test-subj="editLifecycleModal" />,
-}));
-
 jest.mock('./lifecycle_summary', () => ({
-  LifecycleSummary: (props: MockLifecycleSummaryProps) => {
-    mockLifecycleSummaryProps = props;
+  LifecycleSummary: () => {
+    // Keep this unit test focused on StreamDetailGeneralData + unsaved prompt wiring.
+    // We emulate the lifecycle flyout updating the shared preview state.
+    const { useLifecyclePreview } = jest.requireActual(
+      '../common/hooks/lifecycle_preview'
+    ) as typeof import('../common/hooks/lifecycle_preview');
+    const preview = useLifecyclePreview();
+
+    mockLifecycleSummaryProps = {
+      onFlyoutOpenChange: (isOpen: boolean) => {
+        preview.setIsActive(isOpen);
+        if (!isOpen) {
+          preview.setHasUnsavedChanges(false);
+        }
+      },
+      onFlyoutUnsavedChangesChange: (hasUnsavedChanges: boolean) => {
+        preview.setHasUnsavedChanges(hasUnsavedChanges);
+      },
+    };
+
     return <div data-test-subj="mockLifecycleSummary" />;
   },
 }));

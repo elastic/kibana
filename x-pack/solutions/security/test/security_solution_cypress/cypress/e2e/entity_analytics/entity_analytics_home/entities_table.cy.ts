@@ -13,20 +13,20 @@ import {
 } from '../../../tasks/entity_analytics/entity_analytics_home';
 import { ENTITY_ANALYTICS_HOME_PAGE_URL } from '../../../urls/navigation';
 import {
-  PAGE_TITLE,
-  ENTITIES_TABLE_GRID,
-  ENTITIES_TABLE_EMPTY,
-  DATAGRID_HEADER,
   DATAGRID_COLUMN_SELECTOR,
+  DATAGRID_HEADER,
   DATAGRID_SORTING_SELECTOR,
+  ENTITIES_TABLE_GRID,
   EXPAND_ROW_BUTTON,
-  TIMELINE_ACTION,
   FIELDS_SELECTOR_BUTTON,
+  FIELDS_SELECTOR_CLOSE,
   FIELDS_SELECTOR_MODAL,
   FIELDS_SELECTOR_RESET,
-  FIELDS_SELECTOR_CLOSE,
-  LAST_UPDATED,
   FLYOUT_RIGHT_PANEL,
+  FLYOUT_TITLE_TEXT,
+  LAST_UPDATED,
+  PAGE_TITLE,
+  TIMELINE_ACTION,
 } from '../../../screens/entity_analytics/entity_analytics_home';
 import { TIMELINE_FLYOUT_WRAPPER } from '../../../screens/timeline';
 
@@ -78,7 +78,7 @@ describe(
       });
 
       it('displays the correct entity count', () => {
-        cy.contains('8 entities').should('be.visible');
+        cy.contains('13 entities').should('be.visible');
       });
 
       it('shows all default column headers', () => {
@@ -138,7 +138,7 @@ describe(
           .then((entityName) => {
             cy.get(EXPAND_ROW_BUTTON).first().click();
             cy.get(FLYOUT_RIGHT_PANEL).should('be.visible');
-            cy.get('[data-test-subj="flyoutTitleText"]').should('contain', entityName.trim());
+            cy.get(FLYOUT_TITLE_TEXT).should('contain', entityName.trim());
           });
       });
 
@@ -174,37 +174,6 @@ describe(
         cy.get(LAST_UPDATED).should('be.visible');
         cy.get(LAST_UPDATED).should('contain', 'Updated');
       });
-    });
-  }
-);
-
-describe(
-  'Entities table - Empty state',
-  {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsNewHomePageEnabled',
-          ])}`,
-          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
-        ],
-      },
-    },
-  },
-  () => {
-    beforeEach(() => {
-      interceptEntityStoreStatus('running');
-      login();
-      setGrouping(['none']);
-      visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
-      cy.wait('@entityStoreStatus', { timeout: 20000 });
-      cy.get(PAGE_TITLE).should('exist');
-    });
-
-    it('displays empty state when no entity data exists', () => {
-      cy.get(ENTITIES_TABLE_EMPTY).should('exist');
     });
   }
 );

@@ -5,11 +5,10 @@ enabled: true
 
 triggers:
   - type: manual
-
-inputs:
-  - name: alertid
-    type: string
-    default: 'abc123'
+    inputs:
+      - name: alertid
+        type: string
+        default: 'abc123'
 
 steps:
   - name: kibana_SetAlertsStatus_step

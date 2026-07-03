@@ -8,6 +8,7 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { AsCodeSavedDataView } from '@kbn/as-code-data-views-schema';
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
@@ -35,10 +36,34 @@ export function fromStoredDataView(
     index.fieldFormats,
     index.fieldAttrs
   );
+
   return {
     type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: index.title,
     time_field: index.timeFieldName,
     ...(fieldSettings && { field_settings: fieldSettings }),
+  };
+}
+
+export function fromStoredDataViewToAsCodeSavedSchema(index: DataViewSpec): AsCodeSavedDataView {
+  if (!index.title) throw new Error('Cannot derive data view without `title`');
+  const fieldSettings = fromStoredFields(
+    index.runtimeFieldMap,
+    index.fieldFormats,
+    index.fieldAttrs,
+    true
+  );
+
+  return {
+    id: index.id,
+    name: index.name,
+    index_pattern: index.title,
+    time_field: index.timeFieldName,
+    allow_hidden_indices: index.allowHidden,
+    field_settings: fieldSettings,
+    ...(index.sourceFilters &&
+      index.sourceFilters.length > 0 && {
+        field_filters: index.sourceFilters.map((sourceFilter) => sourceFilter.value),
+      }),
   };
 }

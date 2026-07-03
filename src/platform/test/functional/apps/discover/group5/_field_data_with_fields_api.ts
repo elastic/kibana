@@ -12,11 +12,14 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const browser = getService('browser');
+  const dataGrid = getService('dataGrid');
+  const security = getService('security');
   const { common, header, discover, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'header',
@@ -133,9 +136,78 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const marks = await discover.getMarks();
         expect(marks.length).to.be.above(0);
-        expect(marks).to.contain('club');
+        expect(marks).to.contain('Club');
 
         expect(await browser.getCurrentUrl()).to.contain('columns:!()');
+      });
+
+      it('doc view should show exact header fields', async function () {
+        await common.navigateToApp('discover');
+        await discover.waitUntilSearchingHasFinished();
+        const expectedHeader = '@timestamp Summary';
+        const DocHeader = await dataGrid.getHeaderFields();
+        expect(DocHeader.join(' ')).to.be(expectedHeader);
+      });
+
+      it('doc view should sort ascending', async function () {
+        const expectedTimeStamp = 'Sep 20, 2015 @ 00:00:00.000';
+        await dataGrid.clickDocSortAsc();
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains expected timestamp', async () => {
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const text = await cell.getVisibleText();
+          return text === expectedTimeStamp;
+        });
+      });
+    });
+
+    describe('column defaults and doc viewer', function () {
+      before(async function () {
+        await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
+        log.debug('load kibana index with default index pattern');
+        await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+        await kibanaServer.importExport.load(
+          'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
+        );
+        await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+        await common.navigateToApp('discover');
+        await timePicker.setDefaultAbsoluteRange();
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.replace({});
+      });
+
+      it('should correctly display documents', async function () {
+        log.debug('check if Document title exists in the grid');
+        expect(await discover.getDocHeader()).to.have.string('Summary');
+        const rowData = await discover.getDocTableIndex(1);
+        log.debug('check the newest doc timestamp in UTC (check diff timezone in last test)');
+        expect(rowData.startsWith('Sep 22, 2015 @ 23:50:13.253')).to.be.ok();
+        const expectedHitCount = '14,004';
+        await retry.try(async function () {
+          expect(await discover.getHitCount()).to.be(expectedHitCount);
+        });
+      });
+
+      it('adding a column removes a default column', async function () {
+        await unifiedFieldList.clickFieldListItemAdd('_score');
+        expect(await discover.getDocHeader()).to.have.string('_score');
+        expect(await discover.getDocHeader()).not.to.have.string('Summary');
+      });
+
+      it('removing a column adds a default column', async function () {
+        await unifiedFieldList.clickFieldListItemRemove('_score');
+        expect(await discover.getDocHeader()).not.to.have.string('_score');
+        expect(await discover.getDocHeader()).to.have.string('Summary');
+      });
+
+      it('displays _source viewer in doc viewer', async function () {
+        await dataGrid.clickRowToggle();
+        await discover.isShowingDocViewer();
+        await discover.clickDocViewerTab('doc_view_source');
+        await discover.isInEsqlMode();
       });
     });
   });

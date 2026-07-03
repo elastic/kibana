@@ -396,7 +396,7 @@ export function Table<T extends UserContentCommonSchema>({
           executeQueryOptions={{ enabled: false }}
           sorting={sorting}
           onChange={onTableChange}
-          data-test-subj="itemsInMemTable"
+          data-test-subj={isFetchingItems ? 'listingTable-isLoading' : 'listingTable-isLoaded'}
           rowHeader="attributes.title"
           tableCaption={tableCaption}
           scrollableInline

@@ -38,6 +38,7 @@ import {
   isExecuteQueryAction,
   isValidateQueryAction,
 } from './actions';
+import type { EsqlLoadedDocumentation } from './documentation';
 
 const StateAnnotation = Annotation.Root({
   // inputs
@@ -70,18 +71,22 @@ export const createNlToEsqlGraph = ({
   model,
   esClient,
   docBase,
+  documentation,
   esqlCallbacks,
+  includeDatasets = false,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   docBase: EsqlDocumentBase;
+  documentation: EsqlLoadedDocumentation;
   esqlCallbacks?: ValidateEsqlQueryCallbacks;
+  includeDatasets?: boolean;
 }) => {
-  // resolve the search target / generate sampling data
   const resolveTarget = async (state: StateType) => {
     const resolvedResource = await resolveResourceForEsqlWithSamplingStats({
       resourceName: state.target,
       samplingSize: 100,
+      includeDatasets,
       esClient,
     });
 
@@ -109,7 +114,7 @@ export const createNlToEsqlGraph = ({
     const { commands = [], functions = [] } = await requestDocModel.invoke(
       createRequestDocumentationPrompt({
         nlQuery: state.nlQuery,
-        prompts: docBase.getPrompts(),
+        documentation,
         resource: state.resource,
       })
     );
@@ -135,7 +140,7 @@ export const createNlToEsqlGraph = ({
     const response = await generateModel.invoke(
       createGenerateEsqlPrompt({
         nlQuery: state.nlQuery,
-        prompts: docBase.getPrompts(),
+        documentation,
         resource: state.resource,
         previousActions: state.actions,
         additionalInstructions: state.additionalInstructions,

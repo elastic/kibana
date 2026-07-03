@@ -14,7 +14,7 @@ export const getOpenLayerSettingsAction = (props: {
   hasLayerSettings: boolean;
 }): LayerAction => {
   const displayName = i18n.translate('xpack.lens.layerActions.layerSettingsAction', {
-    defaultMessage: 'Layer settings',
+    defaultMessage: 'Settings',
   });
 
   return {

@@ -8,12 +8,16 @@
 import { TIME_FIELD } from '../constants';
 import { buildEpisodeEventsEsqlQuery } from './episode_events_query';
 
+const SPACE_ID = 'default';
+
 describe('buildEpisodeEventsEsqlQuery', () => {
   it('filters by episode id and sorts by time ascending', () => {
     const episodeId = 'episode-xyz';
-    const queryString = buildEpisodeEventsEsqlQuery(episodeId).print('basic');
+    const queryString = buildEpisodeEventsEsqlQuery(SPACE_ID, episodeId).print('basic');
     expect(queryString).toContain('episode.id');
     expect(queryString).toContain(episodeId);
     expect(queryString).toContain(`SORT ${TIME_FIELD} ASC`);
+    expect(queryString).toContain('severity');
+    expect(queryString).toContain('data');
   });
 });

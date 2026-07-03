@@ -17,6 +17,7 @@ import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
+import { ProfileStateType } from '../../../../../context_awareness';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
 import type { DiscoverAppState, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
@@ -52,7 +53,13 @@ export const setTabs: InternalStateThunkActionCreator<
   function setTabsThunkFn(
     dispatch,
     getState,
-    { runtimeStateManager, tabsStorageManager, services, getCascadedDocumentsStateManager }
+    {
+      runtimeStateManager,
+      tabsStorageManager,
+      getCascadedDocumentsStateManager,
+      getContextAwarenessToolkit,
+      services,
+    }
   ) {
     const previousState = getState();
     const discoverSessionChanged =
@@ -78,6 +85,7 @@ export const setTabs: InternalStateThunkActionCreator<
       newRecentlyClosedTab.attributes = cloneDeep(tab.attributes);
       newRecentlyClosedTab.appState = cloneDeep(tab.appState);
       newRecentlyClosedTab.globalState = cloneDeep(tab.globalState);
+      newRecentlyClosedTab.profileState = cloneDeep(tab.profileState);
       justRemovedTabs.push(newRecentlyClosedTab);
 
       dispatch(disconnectTab({ tabId: tab.id }));
@@ -93,6 +101,7 @@ export const setTabs: InternalStateThunkActionCreator<
       runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState({
         services,
         cascadedDocumentsStateManager: getCascadedDocumentsStateManager(tab.id),
+        toolkit: getContextAwarenessToolkit(tab.id),
         initialValues: {
           unifiedHistogramLayoutPropsMap: tab.duplicatedFromId
             ? selectInitialUnifiedHistogramLayoutPropsMap(runtimeStateManager, tab.duplicatedFromId)
@@ -188,6 +197,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         tab.attributes = cloneDeep(existingTabToDuplicateFrom.attributes);
         tab.appState = cloneDeep(existingTabToDuplicateFrom.appState);
         tab.globalState = cloneDeep(existingTabToDuplicateFrom.globalState);
+        tab.profileState = cloneDeep(existingTabToDuplicateFrom.profileState);
         tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
       } else if (item.restoredFromId) {
         // the new tab was created by restoring a recently closed tab
@@ -203,6 +213,11 @@ export const updateTabs: InternalStateThunkActionCreator<
         tab.attributes = cloneDeep(recentlyClosedTabToRestore.attributes);
         tab.appState = cloneDeep(recentlyClosedTabToRestore.appState);
         tab.globalState = cloneDeep(recentlyClosedTabToRestore.globalState);
+        tab.profileState = services.profileStateRegistry.pickStateByType({
+          profileState: recentlyClosedTabToRestore.profileState,
+          stateType: ProfileStateType.Persistent,
+          shouldMergeDefaults: true,
+        });
       } else if (!('appState' in item)) {
         // the new tab is a fresh one
         const currentQuery = currentTab.appState.query;
@@ -452,7 +467,8 @@ export const openInNewTab: InternalStateThunkActionCreator<
       searchSessionId?: string;
       dataViewSpec?: DataViewSpec;
     }
-  ]
+  ],
+  Promise<void>
 > = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec }) =>
   function openInNewTabThunkFn(dispatch, getState) {
     const initialAppState = appState ? cloneDeep(appState) : {};
@@ -490,11 +506,10 @@ export const openInNewTab: InternalStateThunkActionCreator<
     );
   };
 
-export const openInNewTabExtPointAction: InternalStateThunkActionCreator<[OpenInNewTabParams]> = ({
-  query,
-  tabLabel,
-  timeRange,
-}) =>
+export const openInNewTabExtPointAction: InternalStateThunkActionCreator<
+  [OpenInNewTabParams],
+  Promise<void>
+> = ({ query, tabLabel, timeRange }) =>
   function openInNewTabExtPointActionThunkFn(dispatch) {
     const appState: TabState['appState'] = { query };
     const globalState: TabState['globalState'] = { timeRange };
@@ -513,7 +528,8 @@ export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
     {
       searchSession: UISession;
     }
-  ]
+  ],
+  Promise<void>
 > = ({ searchSession }) =>
   async function openSearchSessionInNewTabThunkFn(dispatch) {
     const restoreState = searchSession.restoreState as DiscoverAppLocatorParams;

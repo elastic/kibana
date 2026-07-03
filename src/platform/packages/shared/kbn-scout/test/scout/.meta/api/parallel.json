@@ -1,5 +1,5 @@
 {
-  "sha1": "c323184ccbad6df8576f8d951205975f0b7a446d",
+  "sha1": "5cd1c4e58318b8c56469f88c4f5a183bbb0052e9",
   "tests": [
     {
       "id": "fa4e4cd5fb0f29c-178a4921f7b18d0",
@@ -755,6 +755,68 @@
       }
     },
     {
+      "id": "a48a17ae8136ba9-4a8e13918686022",
+      "title": "Built-in ES roles setBuiltInRole should throw when the role does not exist in Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/auth/built_in_roles.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "a48a17ae8136ba9-4acc5fc9ece9474",
+      "title": "Built-in ES roles setBuiltInRole should throw when called on a Serverless project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/auth/built_in_roles.spec.ts",
+        "line": 23,
+        "column": 10
+      }
+    },
+    {
+      "id": "a48a17ae8136ba9-c966865be7e7513",
+      "title": "Built-in ES roles setBuiltInRole should provision the custom role slot and return the descriptor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/auth/built_in_roles.spec.ts",
+        "line": 43,
+        "column": 10
+      }
+    },
+    {
+      "id": "a48a17ae8136ba9-15098dd6a8dcec8",
+      "title": "Built-in ES roles getApiKeyForBuiltInRole should create an API key scoped to a built-in ES role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/auth/built_in_roles.spec.ts",
+        "line": 53,
+        "column": 10
+      }
+    },
+    {
       "id": "4022e536dd0fdb7-7e93077b7f1a2c8",
       "title": "SAML Auth fixture should create a session for 'admin' role",
       "expectedStatus": "passed",
@@ -772,12 +834,14 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/auth/saml_login.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 17,
+        "column": 12
       }
     },
     {
@@ -798,12 +862,14 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/auth/saml_login.spec.ts",
-        "line": 19,
-        "column": 10
+        "line": 22,
+        "column": 12
       }
     }
   ]

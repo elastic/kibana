@@ -296,7 +296,6 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiTableSortMobile.sorting\\": \\"Sorting\\",
     \\"euiToast.dismissToast\\": \\"Dismiss toast\\",
     \\"euiToast.newNotification\\": \\"A new notification appears\\",
-    \\"euiToast.notification\\": \\"Notification\\",
     \\"euiTourFooter.endTour\\": \\"End tour\\",
     \\"euiTourFooter.skipTour\\": \\"Skip tour\\",
     \\"euiTourFooter.closeTour\\": \\"Close tour\\",
@@ -312,7 +311,10 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiSaturation.roleDescription\\": \\"HSV color mode saturation and value 2-axis slider.\\",
     \\"euiHue.ariaValueText\\": \\"Hue\\",
     \\"euiHue.ariaRoleDescription\\": \\"Hue slider\\",
-    \\"euiColorPicker.selectedColorLabel\\": \\"Selected color\\"
+    \\"euiColorPicker.selectedColorLabel\\": \\"Selected color\\",
+    \\"euiContextMenuPanelTitle.ariaLabel\\": \\"Close current panel:\\",
+    \\"euiFlyoutMenu.pagination.previous\\": \\"Previous\\",
+    \\"euiFlyoutMenu.pagination.next\\": \\"Next\\"
   }
 }"
 `;

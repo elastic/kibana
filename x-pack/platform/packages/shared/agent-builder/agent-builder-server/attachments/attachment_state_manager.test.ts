@@ -226,6 +226,25 @@ describe('AttachmentStateManager', () => {
         'Invalid attachment data for type "text"'
       );
     });
+
+    it('persists group_id on the VersionedAttachment when provided', async () => {
+      const attachment = await manager.add({
+        type: 'text',
+        data: { content: 'grouped' },
+        group_id: 'alert-batch-1',
+      });
+
+      expect(attachment.group_id).toBe('alert-batch-1');
+    });
+
+    it('omits group_id from the VersionedAttachment when not provided', async () => {
+      const attachment = await manager.add({
+        type: 'text',
+        data: { content: 'standalone' },
+      });
+
+      expect(attachment.group_id).toBeUndefined();
+    });
   });
 
   describe('get()', () => {

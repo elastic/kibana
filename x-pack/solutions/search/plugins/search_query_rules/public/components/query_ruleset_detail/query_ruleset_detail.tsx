@@ -18,6 +18,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiTitle,
+  EuiToolTip,
   EuiTourStep,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -241,7 +242,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
             {
               text: (
                 <>
-                  <EuiIcon size="s" type="chevronSingleLeft" />{' '}
+                  <EuiIcon size="s" type="chevronSingleLeft" aria-hidden={true} />{' '}
                   {i18n.translate('xpack.queryRules.queryRulesetDetail.backButton', {
                     defaultMessage: 'Back',
                   })}
@@ -377,28 +378,42 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.queryRules.queryRulesetDetail.actionsPopover.ariaLabel',
+                      { defaultMessage: 'Ruleset actions' }
+                    )}
                     id={splitButtonPopoverActionsId}
                     button={
-                      <EuiButtonIcon
-                        disabled={createMode || isInitialLoading || rules.length === 0}
-                        data-test-subj="searchQueryRulesQueryRulesetActionsButton"
-                        size="m"
-                        iconType="boxesVertical"
-                        aria-label={i18n.translate(
+                      <EuiToolTip
+                        content={i18n.translate(
                           'xpack.queryRules.queryRulesetDetail.contextMenuPanel.ariaLabel',
                           {
                             defaultMessage: 'More',
                           }
                         )}
-                        onClick={() => setPopoverActions(!isPopoverActionsOpen)}
-                      />
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          disabled={createMode || isInitialLoading || rules.length === 0}
+                          data-test-subj="searchQueryRulesQueryRulesetActionsButton"
+                          size="m"
+                          iconType="boxesVertical"
+                          aria-label={i18n.translate(
+                            'xpack.queryRules.queryRulesetDetail.contextMenuPanel.ariaLabel',
+                            {
+                              defaultMessage: 'More',
+                            }
+                          )}
+                          onClick={() => setPopoverActions(!isPopoverActionsOpen)}
+                        />
+                      </EuiToolTip>
                     }
                     isOpen={isPopoverActionsOpen}
                     closePopover={() => setPopoverActions(false)}
                     panelPaddingSize="none"
                     anchorPosition="downLeft"
                   >
-                    <EuiContextMenuPanel size="s" items={items} />
+                    <EuiContextMenuPanel items={items} />
                   </EuiPopover>
                 </EuiFlexItem>
               </EuiFlexGroup>

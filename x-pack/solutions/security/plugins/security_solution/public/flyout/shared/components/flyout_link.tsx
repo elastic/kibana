@@ -80,7 +80,7 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   const { telemetry } = useKibana().services;
   const whichFlyout = useWhichFlyout();
   const renderPreview = isFlyoutOpen || whichFlyout !== null;
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const resolutionIdentifiers: IdentityFields = useMemo(
     () => identityFields ?? { [field]: value },

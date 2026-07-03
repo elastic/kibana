@@ -13,16 +13,38 @@ import type {
   InboxSetupDependencies,
   InboxStartDependencies,
 } from './types';
-import { InboxPlugin } from './plugin';
 
-export type { InboxPluginSetup, InboxPluginStart };
+export type {
+  InboxPluginSetup,
+  InboxPluginStart,
+  InboxActionProvider,
+  InboxActionProviderFacetBucket,
+  InboxActionProviderFacetsResult,
+  InboxActionProviderListParams,
+  InboxActionProviderListProcessedParams,
+  InboxActionProviderListResult,
+  InboxRequestContext,
+} from './types';
+
+export type {
+  InboxActionConflictError,
+  InvalidInboxActionSourceIdError,
+} from './services/inbox_action_registry';
+export {
+  createInboxActionConflictError,
+  createInvalidInboxActionSourceIdError,
+  isInboxActionConflictError,
+  isInvalidInboxActionSourceIdError,
+} from './services/inbox_action_registry';
 
 export const plugin: PluginInitializer<
   InboxPluginSetup,
   InboxPluginStart,
   InboxSetupDependencies,
   InboxStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<InboxConfig>) =>
-  new InboxPlugin(pluginInitializerContext);
+> = async (pluginInitializerContext: PluginInitializerContext<InboxConfig>) => {
+  const { InboxPlugin } = await import('./plugin');
+  return new InboxPlugin(pluginInitializerContext);
+};
 
 export { config } from './config';

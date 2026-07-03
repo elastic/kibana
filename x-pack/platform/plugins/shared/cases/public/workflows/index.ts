@@ -7,6 +7,7 @@
 
 // import { createCreateCaseFromTemplateStepDefinition } from './create_case_from_template';
 import type { CasesPublicSetupDependencies } from '../types';
+import { registerCasesTriggerDefinitions } from './triggers';
 
 export function registerCasesSteps(
   workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions']
@@ -96,6 +97,10 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.removeTagsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
     import('./set_category').then((m) => m.setCategoryStepDefinition)
   );
 
@@ -120,6 +125,16 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.pushCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
     import('./create_case_from_template').then((m) => m.createCreateCaseFromTemplateStepDefinition)
   );
+}
+
+export function registerCasesWorkflowTriggers(
+  workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions']
+) {
+  registerCasesTriggerDefinitions(workflowsExtensions);
 }

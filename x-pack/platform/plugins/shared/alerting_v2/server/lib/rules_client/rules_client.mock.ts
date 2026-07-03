@@ -5,32 +5,47 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
-import { createUserService } from '../services/user_service/user_service.mock';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { PluginInitializerContext, SavedObjectsClientContract } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { RulesClient } from './rules_client';
+import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
+import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
+import type { PluginConfig } from '../../config';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
+import { createUserService } from '../services/user_service/user_service.mock';
+import { RulesClient } from './rules_client';
 
 export function createRulesClient(): {
   rulesClient: RulesClient;
   mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  ruleEventPublisher: RuleEventPublisher;
 } {
   const { rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService();
   const request = httpServerMock.createKibanaRequest();
-  const http = httpServiceMock.createStartContract();
   const taskManager = taskManagerMock.createStart();
   const { userService } = createUserService();
+  const { publisher: ruleEventPublisher } = createRuleEventPublisher();
 
-  http.basePath.get.mockReturnValue('/s/default');
+  const config = {
+    enabled: true,
+    invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+    rules: { minimumScheduleInterval: '1m', maxScheduledPerMinute: 400 },
+  } as PluginConfig;
+
+  const pluginConfigAccessor = {
+    get: () => config,
+  } as unknown as PluginInitializerContext<PluginConfig>['config'];
 
   const rulesClient = new RulesClient(
     request,
-    http,
     rulesSavedObjectService,
     taskManager,
-    userService
+    userService,
+    'default',
+    pluginConfigAccessor,
+    rulesSavedObjectService,
+    ruleEventPublisher
   );
 
-  return { rulesClient, mockSavedObjectsClient };
+  return { rulesClient, mockSavedObjectsClient, ruleEventPublisher };
 }

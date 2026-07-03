@@ -56,11 +56,13 @@ describe('listTypesWithSystemRoute', () => {
         "body": Array [
           Object {
             "allow_multiple_system_actions": undefined,
+            "description": undefined,
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
             "is_deprecated": false,
+            "is_experimental": undefined,
             "is_system_action_type": true,
             "minimum_license_required": "gold",
             "name": "name",
@@ -129,11 +131,13 @@ describe('listTypesWithSystemRoute', () => {
         "body": Array [
           Object {
             "allow_multiple_system_actions": undefined,
+            "description": undefined,
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
             "is_deprecated": false,
+            "is_experimental": undefined,
             "is_system_action_type": false,
             "minimum_license_required": "gold",
             "name": "name",

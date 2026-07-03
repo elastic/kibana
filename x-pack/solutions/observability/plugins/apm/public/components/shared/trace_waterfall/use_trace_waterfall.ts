@@ -12,8 +12,8 @@ import { useMemo } from 'react';
 import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import { WaterfallLegendType, type IWaterfallLegend } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
-import type { ErrorMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import type { OnErrorClick } from './trace_waterfall_context';
+import type { ErrorMark } from '../charts/timeline/marker/error_marker';
 
 const FALLBACK_WARNING = i18n.translate(
   'xpack.apm.traceWaterfallItem.warningMessage.fallbackWarning',
@@ -302,7 +302,48 @@ function reparentOrphansToRoot(
   // map.
   const children = (parentChildMap[rootItem.id] ??= []);
 
-  children.push(...orphans.map((orphan) => ({ ...orphan, parentId: rootItem.id, isOrphan: true })));
+  children.push(
+    ...orphans
+      .filter((orphan) => {
+        // A partial trace can choose a descendant transaction as the visible root.
+        // Reparenting an orphan ancestor below that root would create a cycle in
+        // the waterfall traversal.
+        return !hasPathToTarget(parentChildMap, orphan.id, rootItem.id);
+      })
+      .map((orphan) => ({ ...orphan, parentId: rootItem.id, isOrphan: true }))
+  );
+}
+
+function hasPathToTarget(
+  parentChildMap: Record<string, TraceItem[]>,
+  startId: string,
+  targetId: string
+) {
+  const stack = (parentChildMap[startId] ?? []).map(({ id }) => id);
+  const visited = new Set<string>();
+
+  while (stack.length > 0) {
+    const currentId = stack.pop();
+    if (!currentId) {
+      continue;
+    }
+
+    if (currentId === targetId) {
+      return true;
+    }
+
+    if (visited.has(currentId)) {
+      continue;
+    }
+
+    visited.add(currentId);
+
+    for (const child of parentChildMap[currentId] ?? []) {
+      stack.push(child.id);
+    }
+  }
+
+  return false;
 }
 
 type RawTraceWaterfallItem = Omit<TraceWaterfallItem, 'color'>;
@@ -400,4 +441,20 @@ export function getTraceWaterfallDuration(flattenedTraceWaterfall: TraceWaterfal
     ...flattenedTraceWaterfall.map((item) => item.offset + item.skew + item.duration),
     0
   );
+}
+
+export function getSubtreeIds(
+  parentChildMap: Record<string, TraceItem[]>,
+  rootId: string
+): string[] {
+  const ids: string[] = [];
+  const stack = [rootId];
+  while (stack.length > 0) {
+    const current = stack.pop()!;
+    ids.push(current);
+    for (const child of parentChildMap[current] ?? []) {
+      stack.push(child.id);
+    }
+  }
+  return ids;
 }

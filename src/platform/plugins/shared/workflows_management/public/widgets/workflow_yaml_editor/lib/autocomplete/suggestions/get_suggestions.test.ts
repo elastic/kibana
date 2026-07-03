@@ -18,8 +18,8 @@ jest.mock('./connector_id/get_connector_id_suggestions', () => ({
 jest.mock('./connector_type/get_connector_type_suggestions', () => ({
   getConnectorTypeSuggestions: jest.fn(() => [{ label: 'type-1' }]),
 }));
-jest.mock('./custom_property/get_custom_property_suggestions', () => ({
-  getCustomPropertySuggestions: jest.fn(() => []),
+jest.mock('./step_property/get_step_property_suggestions', () => ({
+  getStepPropertySuggestions: jest.fn(() => []),
 }));
 jest.mock('./json_schema/get_json_schema_suggestions', () => ({
   getJsonSchemaSuggestions: jest.fn(() => []),
@@ -53,6 +53,9 @@ jest.mock('./workflow/get_workflow_suggestions', () => ({
 jest.mock('../../../../../../common/schema', () => ({
   getPropertyHandler: jest.fn(),
 }));
+jest.mock('./esql_query/get_esql_query_suggestions', () => ({
+  getEsqlQuerySuggestions: jest.fn(),
+}));
 
 function createMockContext(
   overrides: Partial<ExtendedAutocompleteContext> = {}
@@ -81,9 +84,13 @@ function createMockContext(
     isInScheduledTriggerWithBlock: false,
     isInStepsContext: true,
     isInWorkflowInputsContext: false,
+    isInEsqlQueryField: false,
+    esqlRegion: null,
+    esqlOffsetInQuery: null,
     dynamicConnectorTypes: null,
     workflows: { workflows: {}, totalWorkflows: 0 },
     currentWorkflowId: null,
+    isCurrentWorkflowManaged: false,
     workflowDefinition: null,
     model: {} as monaco.editor.ITextModel,
     position: new monaco.Position(1, 1),
@@ -424,5 +431,79 @@ describe('getSuggestions', () => {
     });
     const result = await getSuggestions(ctx);
     expect(result).toEqual([{ label: 'input-scaffold' }]);
+  });
+
+  describe('ES|QL query field ownership', () => {
+    beforeEach(() => {
+      const { getEsqlQuerySuggestions } = jest.requireMock(
+        './esql_query/get_esql_query_suggestions'
+      );
+      const { createLiquidFilterCompletions } = jest.requireMock('./liquid/liquid_completions');
+      getEsqlQuerySuggestions.mockReset();
+      createLiquidFilterCompletions.mockClear();
+    });
+
+    it('returns ES|QL suggestions without falling through to Liquid when ES|QL owns the popup', async () => {
+      const { getEsqlQuerySuggestions } = jest.requireMock(
+        './esql_query/get_esql_query_suggestions'
+      );
+      const { createLiquidFilterCompletions } = jest.requireMock('./liquid/liquid_completions');
+      getEsqlQuerySuggestions.mockResolvedValueOnce([{ label: 'WHERE' }]);
+
+      const ctx = createMockContext({
+        isInEsqlQueryField: true,
+        esqlRegion: {
+          esql: 'FROM logs |',
+          contentStartInFile: 0,
+          contentEndInFile: 11,
+          scalarStyle: 'BLOCK_LITERAL',
+        },
+        esqlOffsetInQuery: 11,
+        lineParseResult: {
+          matchType: 'liquid-filter',
+          fullKey: 'up',
+          match: ''.match(/^/)!,
+        },
+      });
+
+      const result = await getSuggestions(ctx, undefined, undefined, {
+        callbacks: {},
+      });
+
+      expect(result).toEqual([{ label: 'WHERE' }]);
+      expect(getEsqlQuerySuggestions).toHaveBeenCalledTimes(1);
+      expect(createLiquidFilterCompletions).not.toHaveBeenCalled();
+    });
+
+    it('returns [] from ES|QL path without Liquid filter fallthrough when suggest has nothing', async () => {
+      const { getEsqlQuerySuggestions } = jest.requireMock(
+        './esql_query/get_esql_query_suggestions'
+      );
+      const { createLiquidFilterCompletions } = jest.requireMock('./liquid/liquid_completions');
+      getEsqlQuerySuggestions.mockResolvedValueOnce([]);
+
+      const ctx = createMockContext({
+        isInEsqlQueryField: true,
+        esqlRegion: {
+          esql: 'FROM logs |',
+          contentStartInFile: 0,
+          contentEndInFile: 11,
+          scalarStyle: 'BLOCK_LITERAL',
+        },
+        esqlOffsetInQuery: 11,
+        lineParseResult: {
+          matchType: 'liquid-block-filter',
+          fullKey: 'up',
+          match: ''.match(/^/)!,
+        },
+      });
+
+      const result = await getSuggestions(ctx, undefined, undefined, {
+        callbacks: {},
+      });
+
+      expect(result).toEqual([]);
+      expect(createLiquidFilterCompletions).not.toHaveBeenCalled();
+    });
   });
 });

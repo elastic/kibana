@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
+import type { SkeletonOutput } from '@kbn/content-list-assembly';
 import { table } from '../assembly';
 import type { ColumnBuilderContext } from './types';
 import type { NameColumnProps } from './name/name_builder';
@@ -41,6 +42,14 @@ export interface ColumnProps extends ColumnLayoutProps {
   field?: string;
   /** Optional test subject for the column header/cells. */
   'data-test-subj'?: string;
+  /**
+   * Optional skeleton descriptor for this custom column during initial load.
+   *
+   * Use this when the column renders something richer than ordinary text,
+   * such as an avatar, badge, icon, or multi-line cell. When omitted, the
+   * table infers a text-like skeleton from the resolved column metadata.
+   */
+  skeleton?: SkeletonOutput | ((context: ColumnBuilderContext) => SkeletonOutput | undefined);
   /** Render function for the column cells. */
   render: (item: ContentListItem) => ReactNode;
 }
@@ -120,6 +129,17 @@ const resolveCustomColumn = (
   };
 };
 
+const resolveCustomColumnSkeleton = (
+  { skeleton }: ColumnProps,
+  context: ColumnBuilderContext
+): SkeletonOutput | undefined => {
+  if (typeof skeleton === 'function') {
+    return skeleton(context);
+  }
+
+  return skeleton;
+};
+
 /**
  * Column component for custom columns.
  *
@@ -147,4 +167,43 @@ const resolveCustomColumn = (
  */
 export const Column = column.createComponent<ColumnProps>({
   resolve: resolveCustomColumn,
+  skeleton: resolveCustomColumnSkeleton,
 });
+
+/**
+ * Builds a reusable custom-column component from a fixed {@link ColumnProps}
+ * config — the column-side analogue of `createFilterControl`. Lets a consuming
+ * package expose a ready-to-place column (header, layout, render and skeleton
+ * all encapsulated) instead of re-specifying a base `<Column>` at every call
+ * site.
+ *
+ * The returned component takes `Partial<ColumnProps>` overrides that win over
+ * the baked-in config (e.g. a narrower `width` at one call site). Returns a
+ * fresh component each call, so define it at module scope for a stable
+ * identity — mirrors `createFilterControl`.
+ *
+ * @example
+ * ```tsx
+ * const TypeColumn = createColumn({
+ *   id: 'typeTitle',
+ *   name: 'Type',
+ *   width: '11em',
+ *   truncateText: true,
+ *   render: (item) => <TypeCell item={item} />,
+ * });
+ *
+ * <ContentListTable>
+ *   <Column.Name />
+ *   <TypeColumn />
+ *   <Column.UpdatedAt />
+ * </ContentListTable>
+ * ```
+ */
+export const createColumn = (base: ColumnProps): FC<Partial<ColumnProps>> =>
+  column.createComponent<Partial<ColumnProps>>({
+    // `base` supplies the required fields; `attributes` are partial overrides.
+    resolve: (attributes, context) =>
+      resolveCustomColumn({ ...base, ...attributes } as ColumnProps, context),
+    skeleton: (attributes, context) =>
+      resolveCustomColumnSkeleton({ ...base, ...attributes } as ColumnProps, context),
+  });

@@ -152,6 +152,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         spaceId: 'default',
         triggerType: 'manual',
         isTestRun: false,
+        isManaged: false,
         stepCount: 2,
         stepTypes: expect.arrayContaining(['slack.postMessage', 'http.post']),
         connectorTypes: expect.arrayContaining(['slack', 'http']),
@@ -326,6 +327,30 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
       expect(eventData).not.toHaveProperty('eventTriggerId');
     });
+
+    it('should include managed workflow execution fields when present', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        isTestRun: true,
+        managed: true,
+        managedBy: 'workflowsExtensionsExample',
+        originManagedWorkflowId: 'system-example-greeting',
+        managedVersion: 3,
+      });
+
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        isTestRun: true,
+        isManaged: true,
+        managedBy: 'workflowsExtensionsExample',
+        originManagedWorkflowId: 'system-example-greeting',
+        managedVersion: 3,
+      });
+    });
   });
 
   describe('reportWorkflowExecutionFailed', () => {
@@ -485,6 +510,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         eventTriggerId: 'cases.updated',
         eventChainDepth: 2,
         isTestRun: false,
+        isManaged: false,
         logTriggerEventsEnabled: true,
       });
     });
@@ -510,6 +536,30 @@ describe('WorkflowExecutionTelemetryClient', () => {
       expect(eventData).not.toHaveProperty('compositionDepth');
       expect(eventData).not.toHaveProperty('parentWorkflowId');
       expect(eventData).not.toHaveProperty('parentWorkflowInvocation');
+    });
+
+    it('should include managed workflow execution fields when present', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        triggeredBy: 'cases.updated',
+        status: ExecutionStatus.SKIPPED,
+        managed: true,
+        managedBy: 'workflowsExtensionsExample',
+        originManagedWorkflowId: 'system-example-greeting',
+        managedVersion: 3,
+      });
+
+      client.reportEventDrivenExecutionSuppressed({
+        workflowExecution,
+        logTriggerEventsEnabled: true,
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        isManaged: true,
+        managedBy: 'workflowsExtensionsExample',
+        originManagedWorkflowId: 'system-example-greeting',
+        managedVersion: 3,
+      });
     });
   });
 

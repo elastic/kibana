@@ -6,7 +6,7 @@
  */
 
 import { format } from 'url';
-import type { TransactionDetailRedirectInfo } from '../../../../server/routes/transactions/get_transaction_by_trace';
+import type { TransactionDetailRedirectInfo } from '@kbn/apm-types';
 
 export const getRedirectToTransactionDetailPageUrl = ({
   transaction,

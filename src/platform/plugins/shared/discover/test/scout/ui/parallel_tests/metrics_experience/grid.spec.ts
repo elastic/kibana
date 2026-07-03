@@ -31,7 +31,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -103,24 +103,23 @@ spaceTest.describe(
       await expect(metricsExperience.grid).toBeVisible();
     });
 
-    spaceTest('should show chart actions menu on metric card', async ({ pageObjects, page }) => {
+    spaceTest('should show chart actions menu on metric card', async ({ pageObjects }) => {
       await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
 
       const cardIndex = 0;
 
-      await spaceTest.step('context menu shows View details and Copy to dashboard', async () => {
-        await metricsExperience.openCardContextMenu(cardIndex);
-        await expect(metricsExperience.chartActions.viewDetails).toBeVisible();
-        await expect(metricsExperience.chartActions.copyToDashboard).toBeVisible();
-      });
-
-      await spaceTest.step('hover bar shows Explore action', async () => {
-        await page.keyboard.press('Escape');
-        await metricsExperience.getCardByIndex(cardIndex).hover();
-        await expect(metricsExperience.getQuickActionsForCard(cardIndex).explore).toBeVisible();
-      });
+      await spaceTest.step(
+        'visible quick-action row shows Explore, View details, and Copy to dashboard',
+        async () => {
+          await metricsExperience.getCardByIndex(cardIndex).hover();
+          const actions = metricsExperience.chartActionsFor(cardIndex);
+          await expect(actions.explore).toBeVisible();
+          await expect(actions.viewDetails).toBeVisible();
+          await expect(actions.copyToDashboard).toBeVisible();
+        }
+      );
     });
   }
 );

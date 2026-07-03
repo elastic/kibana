@@ -19,7 +19,7 @@ import {
   buildColumnConfigLookup,
   getRenderMode,
   applyCellColoring,
-  isNonColorableValue,
+  isEmptyValue,
   FormattedCell,
   LinkCell,
   BadgeCell,
@@ -51,7 +51,7 @@ export const createGridCell = (
     const { oneClickFilter, colorMode = 'none', palette, colorMapping } = currentColumnConfig ?? {};
 
     const isClickable = Boolean(oneClickFilter && handleFilterClick);
-    const isNonColorable = isNonColorableValue(rawValue);
+    const isNonColorable = isEmptyValue(rawValue);
     const renderMode = getRenderMode(colorMode, isClickable, isNonColorable);
 
     const fallbackText = rawValue == null ? '' : String(rawValue);
@@ -75,8 +75,11 @@ export const createGridCell = (
     );
 
     const badgeColor = useMemo(() => {
-      if (renderMode !== 'badge' || (!palette && !colorMapping)) return null;
-      if (isNonColorableValue(rawValue)) return null;
+      if (renderMode !== 'badge') return null;
+      if (isEmptyValue(rawValue)) return null;
+      // Always delegate to getCellColor: when no palette/colorMapping is configured
+      // (e.g. via the as-code Lens API) the factory resolves sensible defaults so badges
+      // are colored automatically, mirroring the cell/text coloring behavior.
       const color = getCellColor(columnId, palette, colorMapping)(rawValue);
       return color || null;
     }, [renderMode, columnId, palette, colorMapping, rawValue]);
@@ -111,7 +114,7 @@ export const createGridCell = (
       case 'badge':
         return (
           <BadgeCell
-            label={formatter?.convert(rawValue, 'text') ?? fallbackText}
+            label={formatter?.convertToText(rawValue) ?? fallbackText}
             badgeColor={badgeColor}
             isClickable={isClickable}
             onClick={onFilter}
@@ -123,7 +126,7 @@ export const createGridCell = (
 
       case 'link': {
         const backgroundColor =
-          colorMode === 'cell' && !isNonColorableValue(rawValue)
+          colorMode === 'cell' && !isEmptyValue(rawValue)
             ? getCellColor(columnId, palette, colorMapping)(rawValue)
             : null;
         const baseColor = euiTheme.colors.link;
@@ -138,7 +141,7 @@ export const createGridCell = (
 
         return (
           <LinkCell
-            content={formatter?.convert(rawValue, 'text') ?? fallbackText}
+            content={formatter?.convertToText(rawValue) ?? fallbackText}
             linkColor={linkColor}
             onClick={onFilter}
             alignment={alignment}
@@ -151,7 +154,7 @@ export const createGridCell = (
       default:
         return (
           <FormattedCell
-            content={formatter?.reactConvert(rawValue) ?? fallbackText}
+            content={formatter?.convertToReact(rawValue) ?? fallbackText}
             alignment={alignment}
             fitRowToContent={fitRowToContent}
             isColored={Boolean(cellStyle)}

@@ -14,10 +14,11 @@ import type { GetStateType, IntegrationCallbacks, LensSerializedState } from '@k
 import type {
   LegacyLensStateApi,
   LensByRefSerializedAPIConfig,
-  LensSerializedAPIConfig,
+  LensWireAPIConfig,
 } from '@kbn/lens-common-2';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
 import { stripInheritedContext } from '../../../common/transforms/helpers';
+import { flattenAPIConfig } from '../../../common/transforms/utils';
 import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 
 export function initializeIntegrations(getLatestState: GetStateType): {
@@ -31,7 +32,7 @@ export function initializeIntegrations(getLatestState: GetStateType): {
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    Pick<HasSerializableState<LensSerializedAPIConfig>, 'serializeState'> &
+    Pick<HasSerializableState<LensWireAPIConfig>, 'serializeState'> &
     LegacyLensStateApi;
 } {
   return {
@@ -40,7 +41,7 @@ export function initializeIntegrations(getLatestState: GetStateType): {
        * This API is used by the parent to serialize the panel state to save it into its saved object.
        * Make sure to remove the attributes when the panel is by reference.
        */
-      serializeState: (): LensSerializedAPIConfig => {
+      serializeState: (): LensWireAPIConfig => {
         const currentState = stripInheritedContext(getLatestState());
 
         const { ref_id: refId, attributes, ...state } = currentState;
@@ -51,9 +52,7 @@ export function initializeIntegrations(getLatestState: GetStateType): {
           } satisfies LensByRefSerializedAPIConfig;
         }
 
-        const transformedState = transformToApiConfig(currentState);
-
-        return transformedState;
+        return flattenAPIConfig(transformToApiConfig(currentState));
       },
       getLegacySerializedState: (): LensSerializedState => {
         const currentState = getLatestState();

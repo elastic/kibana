@@ -18,6 +18,7 @@ import type {
 import { LENS_TAGCLOUD_DEFAULT_STATE, TAGCLOUD_ORIENTATION } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type {
   LensApiConfig,
   TagcloudConfig,
@@ -235,6 +236,7 @@ export function fromAPItoLensState(
     visualizationType: 'lnsTagcloud',
     ...getSharedChartAPIToLensState(config),
     references,
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates: layers,
       internalReferences,

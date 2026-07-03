@@ -71,6 +71,7 @@ const renderFlyout = (overrides: Partial<React.ComponentProps<typeof RuleSummary
     rule: baseRule,
     onClose: jest.fn(),
     onEdit: jest.fn(),
+    onQuickEdit: jest.fn(),
     onClone: jest.fn(),
     onDelete: jest.fn(),
     onToggleEnabled: jest.fn(),
@@ -143,6 +144,14 @@ describe('RuleSummaryFlyout', () => {
       'href',
       `/base/app/management/alertingV2/rules/${encodeURIComponent('rule with spaces/and slash')}`
     );
+  });
+
+  it('calls onQuickEdit with the rule when the pencil icon is clicked', () => {
+    const { props } = renderFlyout();
+
+    fireEvent.click(screen.getByTestId('ruleSummaryFlyoutQuickEditButton'));
+
+    expect(props.onQuickEdit).toHaveBeenCalledWith(baseRule);
   });
 
   it('forwards action callbacks to the RuleActionsMenu with the rule', () => {

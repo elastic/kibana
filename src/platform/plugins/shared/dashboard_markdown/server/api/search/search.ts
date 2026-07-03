@@ -29,7 +29,7 @@ export async function search(
   });
 
   return {
-    markdowns: soResponse.saved_objects.map((so) => {
+    data: soResponse.saved_objects.map((so) => {
       const { description, title } = so.attributes;
 
       return {
@@ -41,7 +41,10 @@ export async function search(
         meta: getMeta(so),
       };
     }),
-    page: soResponse.page,
-    total: soResponse.total,
+    meta: {
+      page: soResponse.page,
+      per_page: soResponse.per_page,
+      total: soResponse.total,
+    },
   };
 }

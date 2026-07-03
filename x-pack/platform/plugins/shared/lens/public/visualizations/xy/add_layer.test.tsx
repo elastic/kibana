@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AddLayerButton } from './add_layer';
 import type { XYVisualizationState } from './types';
 import { Position } from '@elastic/charts';
@@ -64,7 +64,7 @@ describe('AddLayerButton', () => {
         fireEvent.click(screen.getByLabelText('Add layer'));
       },
       clickVisualizationButton: () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Visualization' }));
+        fireEvent.click(screen.getByRole('menuitem', { name: 'Visualization' }));
       },
       clickSeriesOptionsButton: (seriesType = 'line') => {
         const lineOption = screen.getByTestId(`lnsXY_seriesType-${seriesType}`);
@@ -76,11 +76,7 @@ describe('AddLayerButton', () => {
         });
       },
       getSeriesTypeOptions: () => {
-        return within(
-          screen.getByTestId('contextMenuPanelTitleButton').parentElement as HTMLElement
-        )
-          .getAllByTestId('lnsChartSwitch-option-label')
-          .map((el) => el.textContent);
+        return screen.getAllByTestId('lnsChartSwitch-option-label').map((el) => el.textContent);
       },
     };
   };

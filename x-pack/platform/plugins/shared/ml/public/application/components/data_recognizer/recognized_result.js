@@ -31,7 +31,7 @@ export const RecognizedResult = ({ config, indexPattern, savedSearch }) => {
   // if a logo is available, use that, otherwise display the id
   // the logo should be a base64 encoded image or an eui icon
   if (config.logo && config.logo.icon) {
-    logo = <EuiIcon type={config.logo.icon} size="xl" />;
+    logo = <EuiIcon type={config.logo.icon} size="xl" aria-hidden={true} />;
   } else if (config.logo && config.logo.src) {
     logo = <img alt="" src={config.logo.src} />;
   } else {

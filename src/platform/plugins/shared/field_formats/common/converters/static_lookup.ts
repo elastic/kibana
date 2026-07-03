@@ -8,16 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import escape from 'lodash/escape';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type {
-  HtmlContextTypeConvert,
-  ReactContextTypeSingleConvert,
-  TextContextTypeConvert,
-} from '../types';
+import type { ReactConvertFunction, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
-import { getHighlightHtml, getHighlightReact, checkForMissingValueHtml } from '../utils';
+import { getHighlightReact } from '../utils';
 
 function convertLookupEntriesToMap(
   lookupEntries: Array<{ key?: string | null; value: unknown }>
@@ -111,34 +106,7 @@ export class StaticLookupFormat extends FieldFormat {
     return String(result ?? '');
   };
 
-  /**
-   * @deprecated
-   * Kept intentionally alongside `reactConvertSingle` because the HTML fallback in
-   * `html_content_type.ts` pre-checks the **raw input** for missing values (null, undefined,
-   * empty string) before ever calling `textConvert`. This means values like `''` that have a
-   * valid lookup mapping would be swallowed and rendered as "(blank)" instead of their mapped
-   * label. Once the HTML bridge is fully removed this method can be deleted.
-   */
-  htmlConvert: HtmlContextTypeConvert = (value, options = {}) => {
-    const { result, isMissingValue } = this.lookup(value);
-
-    if (isMissingValue) {
-      const missingHtml = checkForMissingValueHtml(result);
-      if (missingHtml) {
-        return missingHtml;
-      }
-    }
-
-    // Escape the result and handle highlights
-    const { field, hit } = options;
-    const formatted = escape(String(result ?? ''));
-
-    return !field || !hit || !hit.highlight || !hit.highlight[field.name]
-      ? formatted
-      : getHighlightHtml(formatted, hit.highlight[field.name]);
-  };
-
-  reactConvertSingle: ReactContextTypeSingleConvert = (val, options = {}) => {
+  reactConvert: ReactConvertFunction = (val, options = {}) => {
     const { result, isMissingValue } = this.lookup(val);
 
     if (isMissingValue) {
@@ -150,10 +118,7 @@ export class StaticLookupFormat extends FieldFormat {
     const formatted = String(result ?? '');
 
     const fieldName = field?.name;
-    if (fieldName && hit?.highlight?.[fieldName]) {
-      return getHighlightReact(formatted, hit.highlight[fieldName]);
-    }
 
-    return formatted;
+    return getHighlightReact(formatted, fieldName, hit);
   };
 }

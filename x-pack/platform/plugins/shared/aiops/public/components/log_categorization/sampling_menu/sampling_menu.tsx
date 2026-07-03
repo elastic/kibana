@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import { useMemo } from 'react';
 import React, { useState } from 'react';
 import { EuiPopover, EuiPanel, EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import useObservable from 'react-use/lib/useObservable';
 import type { RandomSampler } from './random_sampler';
@@ -33,6 +34,9 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
     <EuiPopover
       data-test-subj="aiopsRandomSamplerOptionsPopover"
       id="aiopsSamplingOptions"
+      aria-label={i18n.translate('xpack.aiops.logCategorization.samplingOptionsPopoverAriaLabel', {
+        defaultMessage: 'Sampling options',
+      })}
       button={
         <EuiButton
           data-test-subj="aiopsLogPatternAnalysisShowSamplingOptionsButton"

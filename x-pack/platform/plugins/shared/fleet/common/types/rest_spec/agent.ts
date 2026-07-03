@@ -105,6 +105,24 @@ export interface BulkAgentAction {
 
 export type PostBulkAgentUnenrollResponse = BulkAgentAction;
 
+export interface PostRemoveCollectorRequest {
+  params: {
+    agentId: string;
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostRemoveCollectorResponse {}
+
+export interface PostBulkRemoveCollectorsRequest {
+  body: {
+    agents: string[] | string;
+    includeInactive?: boolean;
+  };
+}
+
+export type PostBulkRemoveCollectorsResponse = BulkAgentAction;
+
 export interface PostAgentUpgradeRequest {
   params: {
     agentId: string;

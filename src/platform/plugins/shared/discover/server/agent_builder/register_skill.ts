@@ -9,7 +9,7 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { DISCOVER_DATA_ANALYSIS_SKILL_ID } from '../../common/agent_builder';
 
 const TOOL_IDS = [
@@ -39,6 +39,14 @@ You are a data analyst working inside Kibana Discover. Your primary job is to he
 This skill operates only in ES|QL mode. Before anything else, read the screen_context attachment's additional_data.query_language field:
 - If it is "esql", proceed normally.
 - If it is "kuery" or "lucene", respond exactly: "I can only analyze data when you're in ES|QL mode. Switch to ES|QL from the query bar toggle to use this feature." Do NOT generate, modify, or run queries. Do NOT call any tools. Stop.
+
+### Shape-Specific Playbook
+If the ES|QL query results attachment contains a "Shape Profile" block, its "Guidance" paragraph is AUTHORITATIVE and OVERRIDES any conflicting examples or defaults elsewhere in this skill:
+- Any source-command rules in the Guidance (e.g. "use TS, never FROM") take precedence over the FROM-style examples in Path A. If the Guidance says to use TS, every aggregation and drill-down query you produce MUST start with TS.
+- Any "first run X to discover schema" instruction in the Guidance (e.g. \`TS_INFO\`) MUST be executed BEFORE the Path A aggregations. Treat that discovery query as the first of your 2-3 query budget, not as an extra step you can skip.
+- Use the "Characteristic fields present" list as priority candidates for STATS BY (still cap at 2 grouping fields).
+- Phrase the Drill-Down Queries section using the "Interesting signals" entries when present.
+If no Shape Profile block is present, infer analysis strategy from the column names and types as before. Never invent fields not listed in the Columns section of the attachment.
 
 ### Critical Rules
 - ALWAYS read the column names from the attached ES|QL query results BEFORE writing any query. NEVER guess column names — use ONLY the exact column names listed in the attachment. For example, if the attachment lists a column named "@timestamp", use "@timestamp". If it lists "timestamp", use "timestamp". If there is no timestamp column, skip time-based queries.
@@ -91,10 +99,24 @@ When responding to an on-demand request, return ONLY the requested analysis. Do 
 - Report only meaningful correlations.
 
 #### Time-over-Time Comparison (only when asked)
-When the user asks to compare time periods (e.g. "compare with last week", "how does today compare to yesterday"):
-1. Use generateEsql to produce a SINGLE query that buckets by week (or appropriate period) so both time periods appear in one result. For example: STATS count = COUNT(*) BY BUCKET(@timestamp, 1 week), SORT bucket, LIMIT 10. This avoids running two separate queries.
-2. Execute it and compare the buckets: highlight absolute values, differences, and what grew or shrank.
-3. Calculate percentage changes yourself in the response text.
+1. Read the current time range from the attached ES|QL query results (the "from" and "to" values as ISO-8601 strings). Compute:
+   - current_start_ms and current_end_ms (epoch milliseconds of the current period boundaries)
+   - shift_ms = current_start_ms - previous_start_ms = duration of the period in milliseconds (current_end_ms - current_start_ms)
+   - previous_start = ISO string of (current_start_ms - shift_ms)
+   - previous_end = ISO string of (current_end_ms - shift_ms)
+2. Build the FORK query yourself using this exact structure (do NOT use generateEsql for the structure, only use the correct field names and computed values):
+   \`\`\`esql
+   FROM <index>
+   | FORK
+     (WHERE <timeField> >= "<current_start>" AND <timeField> < "<current_end>" | EVAL period = "Current period")
+     (WHERE <timeField> >= "<previous_start>" AND <timeField> < "<previous_end>" | EVAL period = "Previous period" | EVAL <timeField> = <timeField> + <shift_ms> milliseconds)
+   | STATS count = COUNT(*) BY timestamp = BUCKET(<timeField>, <interval>), period
+   | SORT timestamp ASC
+   \`\`\`
+   The EVAL <timeField> = <timeField> + <shift_ms> milliseconds line is critical — it shifts the previous period timestamps forward so both series land on the same time axis positions and can be overlaid for comparison. Use an interval appropriate to the time span (e.g. 5 minutes for a 30 min window, 1 hour for a 24 h window, 1 day for a week).
+3. Execute the FORK query with executeEsql and compare the two periods: highlight absolute values, differences, and what grew or shrank. Calculate percentage changes yourself in the response text.
+4. IMPORTANT: Immediately after the analysis, call createVisualization with the FORK query as the esql parameter, chartType "xy", and query "line chart with timestamp on the x-axis and period as the series breakdown, comparing Current period vs Previous period". This renders both periods as separate lines overlaid on the same time axis — do NOT skip this step.
+
 
 #### Field Statistics (only when asked)
 When the user asks about field statistics, field distributions, or cardinality (e.g. "show field stats", "what are the top values?"):
@@ -124,6 +146,16 @@ You MUST include this section after the visualization. Write 3 targeted follow-u
 3. An outlier or edge-case exploration (e.g. filter to extreme values, errors, rare categories, or the tail of a distribution).
 
 Present each query in an esql-tagged code block with a brief explanation of what it investigates and why. Only if the discover_run_query tool is available, tell the user they can ask you to run any of these queries in a new Discover tab. If the tool is not available, do NOT mention this capability.
+
+#### 5. What else I can do
+You MUST include this section as the final part of your response. Do NOT skip it. Briefly tell the user — in 2-3 sentences or a short bullet list — what additional on-demand analyses they can ask for. Phrase it as an invitation, not a list of features. Cover all three:
+- **Correlations** — find relationships between fields (e.g. "do correlations exist between status and response time?").
+- **Time-over-time comparison** — compare the current period against a previous one (e.g. "compare this week to last week").
+- **Field statistics** — top values, distributions, min/max/avg for specific fields (e.g. "show me field stats for status").
+
+Use natural phrasing. Example: "I can also run a few other analyses on this data — just ask. I can look for correlations between fields, compare this time range against a previous one, or break down field statistics (top values, ranges, distributions) for any column you're interested in."
+
+Do NOT execute any of these — only mention them as next-step options.
 
 ### Additional Capabilities
 - If the discover_run_query tool is available and the user asks to run or open a query in Discover, use it. This opens the query in Discover.`,

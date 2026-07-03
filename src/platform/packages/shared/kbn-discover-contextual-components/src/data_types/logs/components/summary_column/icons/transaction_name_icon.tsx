@@ -22,6 +22,7 @@ export const TransactionNameIcon = (agentName: AgentName) => {
       data-test-subj="discoverContextualComponentsSummaryColumnTransactionNameIcon"
       type={icon}
       size="s"
+      aria-hidden={true}
       css={css`
         margin-right: ${euiTheme.size.xs};
       `}

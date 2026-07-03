@@ -34,17 +34,21 @@ const { llmSynthesizeBatch } = jest.requireActual('./llm_synthesize') as {
   llmSynthesizeBatch: typeof import('./llm_synthesize').llmSynthesizeBatch;
 };
 
-const createMockEntity = (name: string, type = 'user'): LeadEntity => ({
-  record: { name, type, id: `${type}-${name}` } as unknown as LeadEntity['record'],
-  type,
-  name,
-});
+const createMockEntity = (name: string, type = 'user'): LeadEntity => {
+  const id = `${type}:${name}`;
+  return {
+    record: { name, type, id } as unknown as LeadEntity['record'],
+    id,
+    type,
+    name,
+  };
+};
 
 const createMockObservation = (
   entity: LeadEntity,
   overrides: Partial<Observation> = {}
 ): Observation => ({
-  entityId: `${entity.type}:${entity.name}`,
+  entityId: entity.id,
   moduleId: 'risk_analysis',
   type: 'high_risk_score',
   score: 80,

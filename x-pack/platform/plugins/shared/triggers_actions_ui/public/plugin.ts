@@ -31,7 +31,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { getRulesAppDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -46,12 +46,15 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ON_OPEN_PANEL_MENU, ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
+import { getAddConnectorFormLazy } from './common/get_add_connector_form';
+import type { CreateConnectorFormProps } from './application/sections/action_connector_form';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -80,7 +83,6 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertRuleFromVisAction } from './common/alert_rule_from_vis_ui_action';
-import { createSetBreadcrumbs } from './application/lib/breadcrumb';
 
 import type {
   ActionTypeModel,
@@ -122,6 +124,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getAddConnectorFlyout: (
     props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<CreateConnectorFlyoutProps>;
+  getAddConnectorForm: (
+    props: Omit<CreateConnectorFormProps, 'actionTypeRegistry'>
+  ) => ReactElement;
   getEditConnectorFlyout: (
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
@@ -194,6 +199,7 @@ interface PluginsStart {
   contentManagement?: ContentManagementPublicStart;
   share: SharePluginStart;
   cps?: CPSPluginStart;
+  inspector?: InspectorStart;
 }
 
 export class Plugin
@@ -297,9 +303,24 @@ export class Plugin
         title: i18n.translate('xpack.triggersActionsUI.rulesPage.title', {
           defaultMessage: 'Rules',
         }),
-        visibleIn: ['globalSearch'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
         category: DEFAULT_APP_CATEGORIES.management,
         async mount(params: AppMountParameters) {
+          const [coreStart] = (await core.getStartServices()) as [CoreStart, PluginsStart, unknown];
+          const { pathname, search, hash } = params.history.location;
+          await coreStart.application.navigateToApp('management', {
+            path: `/insightsAndAlerting/${PLUGIN_ID}${pathname}${search}${hash}`,
+            replace: true,
+          });
+          return () => {};
+        },
+      });
+
+      plugins.management.sections.section.insightsAndAlerting.registerApp({
+        id: PLUGIN_ID,
+        title: featureTitle,
+        order: 1,
+        async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
             PluginsStart,
@@ -334,7 +355,7 @@ export class Plugin
             element: params.element,
             theme: coreStart.theme,
             storage: new Storage(window.localStorage),
-            setBreadcrumbs: createSetBreadcrumbs(coreStart.chrome.setBreadcrumbs),
+            setBreadcrumbs: params.setBreadcrumbs,
             history: params.history,
             actionTypeRegistry,
             ruleTypeRegistry,
@@ -349,37 +370,8 @@ export class Plugin
             share: pluginsStart.share,
             uiActions: pluginsStart.uiActions,
             cps: pluginsStart.cps,
+            inspector: pluginsStart.inspector,
           });
-        },
-      });
-
-      plugins.management.sections.section.insightsAndAlerting.registerApp({
-        id: PLUGIN_ID,
-        title: featureTitle,
-        order: 1,
-        visibleIn: [],
-        async mount(params: ManagementAppMountParams) {
-          const [coreStart] = (await core.getStartServices()) as [CoreStart, PluginsStart, unknown];
-
-          const { pathname, search, hash } = params.history.location;
-          const [, page, id, ...rest] = pathname.split('/');
-          const tail = rest.length ? `/${rest.join('/')}` : '';
-
-          switch (page) {
-            case 'rule':
-              await coreStart.application.navigateToApp('rules', {
-                path: `${getRulesAppDetailsRoute(id)}${tail}${search}${hash}`,
-                replace: true,
-              });
-              break;
-            default:
-              await coreStart.application.navigateToApp('rules', {
-                path: `${pathname}${search}${hash}`,
-                replace: true,
-              });
-              break;
-          }
-          return () => {};
         },
       });
     }
@@ -542,6 +534,14 @@ export class Plugin
       },
       getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {
         return getAddConnectorFlyoutLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+          connectorServices: this.connectorServices!,
+          isServerless: !!plugins.serverless,
+        });
+      },
+      getAddConnectorForm: (props: Omit<CreateConnectorFormProps, 'actionTypeRegistry'>) => {
+        return getAddConnectorFormLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,

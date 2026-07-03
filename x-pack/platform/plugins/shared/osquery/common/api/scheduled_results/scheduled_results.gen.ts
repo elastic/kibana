@@ -25,7 +25,58 @@ import {
 } from '../model/schema/common_attributes.gen';
 import { GetScheduledActionResultsResponse } from './get_scheduled_action_results.gen';
 import { GetScheduledQueryResultsResponse } from './get_scheduled_query_results.gen';
+import { ExportFormat, ExportRequestBody, ExportJsonResponse } from '../export/export_results.gen';
 
+export const OsqueryExportScheduledQueryResultsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The output format of the exported file.
+     */
+    format: ExportFormat,
+  })
+);
+export type OsqueryExportScheduledQueryResultsRequestQuery = z.infer<
+  typeof OsqueryExportScheduledQueryResultsRequestQuery
+>;
+export type OsqueryExportScheduledQueryResultsRequestQueryInput = z.input<
+  typeof OsqueryExportScheduledQueryResultsRequestQuery
+>;
+
+export const OsqueryExportScheduledQueryResultsRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The schedule ID of the scheduled query.
+     */
+    scheduleId: z.string(),
+    /**
+     * The execution counter for the scheduled query run whose results are exported. Must be a non-negative integer.
+     */
+    executionCount: z.number().int().min(0),
+  })
+);
+export type OsqueryExportScheduledQueryResultsRequestParams = z.infer<
+  typeof OsqueryExportScheduledQueryResultsRequestParams
+>;
+export type OsqueryExportScheduledQueryResultsRequestParamsInput = z.input<
+  typeof OsqueryExportScheduledQueryResultsRequestParams
+>;
+
+export const OsqueryExportScheduledQueryResultsRequestBody = lazySchema(() => ExportRequestBody);
+export type OsqueryExportScheduledQueryResultsRequestBody = z.infer<
+  typeof OsqueryExportScheduledQueryResultsRequestBody
+>;
+export type OsqueryExportScheduledQueryResultsRequestBodyInput = z.input<
+  typeof OsqueryExportScheduledQueryResultsRequestBody
+>;
+
+/**
+* A JSON object with `_meta` (export metadata) and `results` (all result rows). Rows are held in memory before writing; prefer `ndjson` for large exports.
+
+*/
+export const OsqueryExportScheduledQueryResultsResponse = lazySchema(() => ExportJsonResponse);
+export type OsqueryExportScheduledQueryResultsResponse = z.infer<
+  typeof OsqueryExportScheduledQueryResultsResponse
+>;
 export const OsqueryGetScheduledActionResultsRequestQuery = lazySchema(() =>
   z.object({
     /**

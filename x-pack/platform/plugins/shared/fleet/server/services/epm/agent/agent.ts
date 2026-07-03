@@ -113,19 +113,16 @@ export function compileTemplate(
     throw new PackageInvalidArchiveError(`Error while compiling agent template: ${err.message}`);
   }
 
-  compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
-
-  // Normalize multi-line double-quoted YAML scalars. The yaml package (unlike
-  // js-yaml) rejects literal newlines inside double-quoted strings. Values that
-  // were JSON-stringified and then had parameters resolved may contain actual
-  // newlines (doubled by handleMultilineStringFormatter). Apply YAML double-quoted
-  // folding semantics: N consecutive newlines become N-1 \n escape sequences,
-  // matching the output that js-yaml.load produced from the multi-line format.
+  // Must run before replaceRootLevelYamlVariables: stringify output may contain
+  // unquoted `"` chars (e.g. regexp patterns) that cause this regex to match
+  // across lines and corrupt the YAML structure.
   compiledTemplate = compiledTemplate.replace(/"(?:[^"\\]|\\.)*"/gs, (match) =>
     match.includes('\n')
       ? match.replace(/\n+/g, (newlines) => '\\n'.repeat(newlines.length - 1))
       : match
   );
+
+  compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
 
   try {
     const yamlFromCompiledTemplate = parse(compiledTemplate);
@@ -342,7 +339,7 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
   let patchedTemplate = yamlTemplate;
   Object.entries(yamlVariables).forEach(([key, val]) => {
     patchedTemplate = patchedTemplate.replace(new RegExp(`^"${key}"`, 'gm'), () =>
-      val ? stringify(val) : ''
+      val ? stringify(val, { collectionStyle: 'block', lineWidth: 0 }) : ''
     );
   });
 

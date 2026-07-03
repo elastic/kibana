@@ -48,8 +48,8 @@ describe('configToGraph', () => {
       expect(result.nodes).toHaveLength(2);
       expect(result.edges).toHaveLength(1);
       expect(result.edges[0]).toMatchObject({
-        source: 'otlp',
-        target: 'elasticsearch/default',
+        source: 'receiver::otlp',
+        target: 'exporter::elasticsearch/default',
       });
     });
 
@@ -71,9 +71,12 @@ describe('configToGraph', () => {
       const result = configToGraph(config);
 
       const edgePairs = result.edges.map((e) => [e.source, e.target]);
-      expect(edgePairs).toContainEqual(['otlp', 'batch']);
-      expect(edgePairs).toContainEqual(['batch', 'transform/routing']);
-      expect(edgePairs).toContainEqual(['transform/routing', 'elasticsearch/default']);
+      expect(edgePairs).toContainEqual(['receiver::otlp', 'processor::batch']);
+      expect(edgePairs).toContainEqual(['processor::batch', 'processor::transform/routing']);
+      expect(edgePairs).toContainEqual([
+        'processor::transform/routing',
+        'exporter::elasticsearch/default',
+      ]);
       expect(result.edges).toHaveLength(3);
     });
 
@@ -95,11 +98,31 @@ describe('configToGraph', () => {
       const result = configToGraph(config);
 
       const edgePairs = result.edges.map((e) => [e.source, e.target]);
-      expect(edgePairs).toContainEqual(['otlp', 'batch']);
-      expect(edgePairs).toContainEqual(['zipkin', 'batch']);
-      expect(edgePairs).toContainEqual(['batch', 'elasticsearch/default']);
-      expect(edgePairs).toContainEqual(['batch', 'debug/verbose']);
+      expect(edgePairs).toContainEqual(['receiver::otlp', 'processor::batch']);
+      expect(edgePairs).toContainEqual(['receiver::zipkin', 'processor::batch']);
+      expect(edgePairs).toContainEqual(['processor::batch', 'exporter::elasticsearch/default']);
+      expect(edgePairs).toContainEqual(['processor::batch', 'exporter::debug/verbose']);
       expect(result.edges).toHaveLength(4);
+    });
+
+    it('assigns correct component type when same ID exists in receivers and exporters', () => {
+      const config: OTelCollectorConfig = {
+        receivers: { otlp: {} },
+        exporters: { 'elasticsearch/otel': {}, otlp: {} },
+        service: {
+          pipelines: {
+            traces: {
+              receivers: ['otlp'],
+              processors: [],
+              exporters: ['elasticsearch/otel'],
+            },
+          },
+        },
+      };
+      const result = configToGraph(config, 'traces');
+      const typeMap = new Map(result.nodes.map((n) => [n.id, n.data.componentType]));
+      expect(typeMap.get('receiver::otlp')).toBe('receiver');
+      expect(typeMap.get('exporter::elasticsearch/otel')).toBe('exporter');
     });
 
     it('handles pipeline with empty arrays gracefully', () => {
@@ -374,7 +397,11 @@ describe('configToGraph', () => {
       expect(result.isMergedView).toBe(true);
 
       const nodeIds = result.nodes.map((n) => n.id).sort();
-      expect(nodeIds).toEqual(['batch', 'elasticsearch/default', 'otlp']);
+      expect(nodeIds).toEqual([
+        'exporter::elasticsearch/default',
+        'processor::batch',
+        'receiver::otlp',
+      ]);
       expect(result.edges).toHaveLength(2);
     });
 
@@ -383,7 +410,11 @@ describe('configToGraph', () => {
       expect(result.isMergedView).toBe(true);
 
       const nodeIds = result.nodes.map((n) => n.id).sort();
-      expect(nodeIds).toEqual(['forward', 'httpcheck/stream-1', 'transform/routing']);
+      expect(nodeIds).toEqual([
+        'exporter::forward',
+        'processor::transform/routing',
+        'receiver::httpcheck/stream-1',
+      ]);
       expect(result.edges).toHaveLength(2);
     });
 
@@ -412,7 +443,11 @@ describe('configToGraph', () => {
       expect(result.isMergedView).toBe(true);
 
       const nodeIds = result.nodes.map((n) => n.id).sort();
-      expect(nodeIds).toEqual(['batch', 'elasticsearch/default', 'otlp']);
+      expect(nodeIds).toEqual([
+        'exporter::elasticsearch/default',
+        'processor::batch',
+        'receiver::otlp',
+      ]);
       expect(result.edges).toHaveLength(2);
     });
   });

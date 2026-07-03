@@ -6,11 +6,19 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBadge,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { PlatformIcons } from './queries/platforms';
-import type { PackQueryFormData } from './queries/use_pack_query_form';
+import type { PackQueryFormData, UsePackQueryFormProps } from './queries/use_pack_query_form';
+import { OS_LABELS, PLATFORM_IDS, isPlatformId } from './queries/platforms';
+import { ExperimentalFeaturesService } from '../common/experimental_features_service';
+import { formatQuerySchedule } from './format_query_schedule';
 
 export interface PackQueriesTableProps {
   data: PackQueryFormData[];
@@ -19,6 +27,7 @@ export interface PackQueriesTableProps {
   onEditClick?: (item: PackQueryFormData) => void;
   selectedItems?: PackQueryFormData[];
   setSelectedItems?: (selection: PackQueryFormData[]) => void;
+  packSchedule?: UsePackQueryFormProps['packSchedule'];
 }
 
 const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
@@ -28,56 +37,97 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   onEditClick,
   selectedItems,
   setSelectedItems,
+  packSchedule,
 }) => {
+  const isRruleSchedulingEnabled = ExperimentalFeaturesService.get().rruleScheduling;
+
+  const renderScheduleColumn = useCallback(
+    (_: unknown, item: PackQueryFormData) =>
+      formatQuerySchedule(
+        item.schedule_type
+          ? {
+              schedule_type: item.schedule_type,
+              interval: item.interval,
+              rrule_schedule: item.rrule_schedule,
+            }
+          : packSchedule ?? { interval: item.interval }
+      ),
+    [packSchedule]
+  );
   const renderDeleteAction = useCallback(
     (item: PackQueryFormData) => (
-      <EuiButtonIcon
-        color="danger"
-        // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
-        onClick={() => onDeleteClick && onDeleteClick(item)}
-        iconType="trash"
-        aria-label={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
           defaultMessage: 'Delete {queryName}',
           values: {
             queryName: item.id,
           },
         })}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          color="danger"
+          // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+          onClick={() => onDeleteClick && onDeleteClick(item)}
+          iconType="trash"
+          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
+            defaultMessage: 'Delete {queryName}',
+            values: {
+              queryName: item.id,
+            },
+          })}
+        />
+      </EuiToolTip>
     ),
     [onDeleteClick]
   );
 
   const renderEditAction = useCallback(
     (item: PackQueryFormData) => (
-      <EuiButtonIcon
-        color="primary"
-        // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
-        onClick={() => onEditClick && onEditClick(item)}
-        iconType="pencil"
-        aria-label={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {
           defaultMessage: 'Edit {queryName}',
           values: {
             queryName: item.id,
           },
         })}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          color="primary"
+          // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+          onClick={() => onEditClick && onEditClick(item)}
+          iconType="pencil"
+          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {
+            defaultMessage: 'Edit {queryName}',
+            values: {
+              queryName: item.id,
+            },
+          })}
+        />
+      </EuiToolTip>
     ),
     [onEditClick]
   );
 
-  const renderQueryColumn = useCallback(
-    (query: string) => (
-      <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-        {query}
-      </EuiCodeBlock>
-    ),
-    []
-  );
+  const renderPlatformColumn = useCallback((platform: string) => {
+    const ids = platform
+      ? platform
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [...PLATFORM_IDS];
 
-  const renderPlatformColumn = useCallback(
-    (platform: string) => <PlatformIcons platform={platform} />,
-    []
-  );
+    return (
+      <EuiFlexGroup gutterSize="xs" wrap>
+        {ids.map((id) => (
+          <EuiFlexItem key={id} grow={false}>
+            <EuiBadge color="hollow">{isPlatformId(id) ? OS_LABELS[id] : id}</EuiBadge>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  }, []);
 
   const renderVersionColumn = useCallback(
     (version: string) =>
@@ -98,24 +148,24 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
         }),
         width: '20%',
       },
-      {
-        field: 'interval',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.intervalColumnTitle', {
-          defaultMessage: 'Interval (s)',
-        }),
-        width: '100px',
-      },
-      {
-        field: 'query',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.queryColumnTitle', {
-          defaultMessage: 'Query',
-        }),
-        render: renderQueryColumn,
-      },
+      // Flag off: keep the legacy "Interval (s)" column in its original
+      // position (right after ID). Flag on: the Schedule column moves to the
+      // end (after platform / version).
+      ...(!isRruleSchedulingEnabled
+        ? [
+            {
+              field: 'interval',
+              name: i18n.translate('xpack.osquery.pack.queriesTable.intervalColumnTitle', {
+                defaultMessage: 'Interval (s)',
+              }),
+              width: '100px',
+            },
+          ]
+        : []),
       {
         field: 'platform',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.platformColumnTitle', {
-          defaultMessage: 'Platform',
+        name: i18n.translate('xpack.osquery.pack.queriesTable.osColumnTitle', {
+          defaultMessage: 'Operating systems',
         }),
         render: renderPlatformColumn,
       },
@@ -126,6 +176,17 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
         }),
         render: renderVersionColumn,
       },
+      ...(isRruleSchedulingEnabled
+        ? [
+            {
+              field: 'interval',
+              name: i18n.translate('xpack.osquery.pack.queriesTable.scheduleColumnTitle', {
+                defaultMessage: 'Schedule',
+              }),
+              render: renderScheduleColumn,
+            },
+          ]
+        : []),
       ...(!isReadOnly
         ? [
             {
@@ -147,10 +208,11 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
     ],
     [
       isReadOnly,
+      isRruleSchedulingEnabled,
       renderDeleteAction,
       renderEditAction,
       renderPlatformColumn,
-      renderQueryColumn,
+      renderScheduleColumn,
       renderVersionColumn,
     ]
   );

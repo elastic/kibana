@@ -49,6 +49,7 @@ export enum TransferAction {
 interface TransferOptionsBase {
   path?: string;
   app?: string;
+  newPanel?: boolean;
 }
 
 interface ByValueTransferOptions extends TransferOptionsBase {
@@ -66,10 +67,11 @@ type CombinedTransferOptions = ByValueTransferOptions | ByReferenceTransferOptio
 
 type DiscoverTransferSerializedState =
   | ControlPanelState<OptionsListESQLControlState>
-  | SearchEmbeddablePanelApiState;
+  | SearchEmbeddablePanelApiState
+  | {};
 
 interface GetSerializedStateResult {
-  serializedState: SearchEmbeddablePanelApiState | undefined;
+  serializedState: SearchEmbeddablePanelApiState | {};
   controlGroupState: ControlPanelsState<OptionsListESQLControlState>;
 }
 
@@ -91,6 +93,10 @@ export class EmbeddableEditorService {
   public isByValueEditor = (): boolean => Boolean(this.embeddableState?.valueInput);
 
   public isEmbeddedEditor = (): boolean => Boolean(this.embeddableState);
+
+  public getEmbeddableId = (): string | undefined => this.embeddableState?.embeddableId;
+
+  public getOriginatingPath = (): string | undefined => this.embeddableState?.originatingPath;
 
   public getByValueTab = (): DiscoverSessionTab | undefined =>
     this.getByValueInput().discoverSessionTab;
@@ -138,16 +144,19 @@ export class EmbeddableEditorService {
         app,
         {
           path,
-          state: serializedState
-            ? [
-                ...controlPackages,
-                {
-                  type: SEARCH_EMBEDDABLE_TYPE,
-                  serializedState,
-                  embeddableId: this.embeddableState?.embeddableId,
-                },
-              ]
-            : [],
+          state:
+            action !== TransferAction.Cancel
+              ? [
+                  ...controlPackages,
+                  {
+                    type: SEARCH_EMBEDDABLE_TYPE,
+                    serializedState,
+                    embeddableId: options?.newPanel
+                      ? undefined
+                      : this.embeddableState?.embeddableId,
+                  },
+                ]
+              : [],
         }
       );
     }
@@ -176,7 +185,7 @@ export class EmbeddableEditorService {
       };
     }
 
-    return { serializedState: undefined, controlGroupState: {} };
+    return { serializedState: {}, controlGroupState: {} };
   }
 
   private getByValueInput(): DiscoverSessionByValueInput {

@@ -100,7 +100,7 @@ export const HostRiskScoreQueryTabBody = ({
   startDate: from,
   type,
 }: HostsComponentsQueryProps) => {
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) === true;
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
   const getHostRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
     getHostRiskScoreSelector(state, hostsModel.HostsType.page)

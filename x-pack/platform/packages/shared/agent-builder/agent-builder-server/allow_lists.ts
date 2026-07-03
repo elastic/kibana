@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common/tools';
+import {
+  platformCoreTools,
+  platformCoreCasesTools,
+  platformStreamsSigEventsTools,
+} from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 
 /**
@@ -15,8 +19,13 @@ import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // platform core tools are registered from the agent builder plugin so will trigger a review anyway
   ...Object.values(platformCoreTools),
+  // Cases CRUD tools, registered by the Cases plugin
+  ...Object.values(platformCoreCasesTools),
   // Streams / Significant Events
   ...Object.values(platformStreamsSigEventsTools),
+
+  // Alerting
+  `${internalNamespaces.platformAlerting}.manage_rule`,
 
   // Observability
   `${internalNamespaces.observability}.get_anomaly_detection_jobs`,
@@ -39,29 +48,38 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
+  `${internalNamespaces.security}.run_rule_preview`,
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+  `${internalNamespaces.security}.add_entities_to_watchlist`,
+  `${internalNamespaces.security}.create_watchlist`,
+  `${internalNamespaces.security}.delete_watchlist`,
   `${internalNamespaces.security}.get_entity`,
+  `${internalNamespaces.security}.list_watchlists`,
+  `${internalNamespaces.security}.remove_entities_from_watchlist`,
   `${internalNamespaces.security}.search_entities`,
+  `${internalNamespaces.security}.update_watchlist`,
+  `${internalNamespaces.security}.list_leads`,
+  `${internalNamespaces.security}.generate_leads`,
+  `${internalNamespaces.security}.dismiss_lead`,
+  `${internalNamespaces.security}.pci_scope_discovery`,
+  `${internalNamespaces.security}.pci_compliance`,
+  `${internalNamespaces.security}.pci_field_mapper`,
+  `${internalNamespaces.security}.siem_readiness.get_coverage`,
+  `${internalNamespaces.security}.siem_readiness.get_quality`,
+  `${internalNamespaces.security}.siem_readiness.get_continuity`,
+  `${internalNamespaces.security}.siem_readiness.get_retention`,
 
-  // Streams – read
-  `${internalNamespaces.streams}.list_streams`,
-  `${internalNamespaces.streams}.get_stream`,
-  `${internalNamespaces.streams}.get_schema`,
-  `${internalNamespaces.streams}.get_data_quality`,
-  `${internalNamespaces.streams}.get_lifecycle_stats`,
+  // Streams
+  `${internalNamespaces.streams}.inspect_streams`,
+  `${internalNamespaces.streams}.diagnose_stream`,
   `${internalNamespaces.streams}.query_documents`,
-  `${internalNamespaces.streams}.get_failed_documents`,
-
-  // Streams – write
-  `${internalNamespaces.streams}.set_retention`,
-  `${internalNamespaces.streams}.fork_stream`,
+  `${internalNamespaces.streams}.design_pipeline`,
+  `${internalNamespaces.streams}.list_ilm_policies`,
+  `${internalNamespaces.streams}.update_stream`,
+  `${internalNamespaces.streams}.create_partition`,
   `${internalNamespaces.streams}.delete_stream`,
-  `${internalNamespaces.streams}.update_processors`,
-  `${internalNamespaces.streams}.map_fields`,
-  `${internalNamespaces.streams}.set_failure_store`,
-  `${internalNamespaces.streams}.update_stream_description`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -71,12 +89,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.list_workflows`,
   `${internalNamespaces.workflows}.get_workflow`,
   `${internalNamespaces.workflows}.get_examples`,
-  `${internalNamespaces.workflows}.workflow_insert_step`,
-  `${internalNamespaces.workflows}.workflow_modify_step`,
-  `${internalNamespaces.workflows}.workflow_modify_step_property`,
-  `${internalNamespaces.workflows}.workflow_modify_property`,
-  `${internalNamespaces.workflows}.workflow_delete_step`,
-  `${internalNamespaces.workflows}.workflow_set_yaml`,
+  `${internalNamespaces.workflows}.workflow_execute_step`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
@@ -88,6 +101,9 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
+  `${internalNamespaces.streams}.significant-events.discovery.investigator`,
+  `${internalNamespaces.streams}.significant-events.discovery.judge`,
+  `${internalNamespaces.streams}.investigation`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -109,6 +125,13 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'data-exploration',
   'visualization-creation',
   'graph-creation',
+  'agent-builder-traces',
+
+  // Platform – Cases
+  'cases-management',
+
+  // Platform – Alerting
+  'rule-management',
 
   // Platform – Dashboard
   'dashboard-management',
@@ -119,19 +142,32 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Streams
   'streams-management',
   'significant-events-memory',
+  'significant-events-management',
+  'streams-investigation-management',
   'knowledge-indicators-management',
   'ki-identification-management',
+  'streams-memory-synthesis',
+  'streams-memory-consolidation',
+  'streams-conversation-scraper',
+  'significant-events-onboarding',
+  'streams-gap-detection',
 
   // Platform – Workflows
   'workflow-authoring',
 
   // Security Solution
+  'entity-analytics-leads',
   'find-security-ml-jobs',
   'automatic_troubleshooting',
   'entity-analytics',
+  'manage-watchlists',
   'alert-analysis',
   'detection-rule-edit',
+  'recommend-prebuilt-rules',
   'threat-hunting',
+  'find-security-rules',
+  'pci-compliance',
+  'siem-readiness',
 
   // O11Y
   'observability.rca',
@@ -145,6 +181,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   `${internalNamespaces.search}.vector-hybrid-search`,
   `${internalNamespaces.search}.rag-chatbot`,
   `${internalNamespaces.search}.use-case-library`,
+  `${internalNamespaces.search}.elasticsearch-tutorial`,
+  'skill-authoring',
+  'connector-authoring',
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];

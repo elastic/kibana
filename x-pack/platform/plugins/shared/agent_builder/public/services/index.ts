@@ -8,6 +8,7 @@
 export { AgentBuilderAccessChecker } from './access';
 export { AgentService } from './agents';
 export { AttachmentsService } from './attachments';
+export { RenderersService } from './renderers';
 export { ChatService } from './chat';
 export { ConversationsService } from './conversations';
 export { DocLinksService } from './doc_links';
@@ -16,5 +17,6 @@ export { ToolsService } from './tools';
 export { SkillsService } from './skills/skills_service';
 export { SmlService } from './sml/sml_service';
 export { PluginsService } from './plugins/plugins_service';
+export { OAuthClientsService } from './oauth_clients';
 export { EventsService } from './events';
 export type { AgentBuilderInternalService } from './types';

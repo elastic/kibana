@@ -1,0 +1,17 @@
+steps:
+  - command: .buildkite/scripts/steps/checks/local_check.sh
+    label: 'Local Check'
+    agents:
+      machineType: n4-standard-16
+      diskType: hyperdisk-balanced
+      preemptible: true
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
+      diskSizeGb: 105
+    key: check
+    timeout_in_minutes: 35
+    env:
+      CHECK_GATE: 'true'
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

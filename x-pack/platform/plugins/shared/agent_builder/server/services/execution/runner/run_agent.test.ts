@@ -68,7 +68,7 @@ describe('runAgent', () => {
     });
 
     expect(agentClient.get).toHaveBeenCalledTimes(1);
-    expect(agentClient.get).toHaveBeenCalledWith(params.agentId);
+    expect(agentClient.get).toHaveBeenCalledWith(params.agentId, { access: 'use' });
   });
 
   it('calls the agent handler with the expected parameters', async () => {
@@ -136,5 +136,21 @@ describe('runAgent', () => {
     });
 
     expect(result).toEqual({ success: true, data: { foo: 'bar' } });
+  });
+
+  it('scopes the ES client with space-level project routing for CPS support', async () => {
+    const params: ScopedRunnerRunAgentParams = {
+      agentId: 'test-agent',
+      agentParams: { nextInput: { message: 'hi' } },
+    };
+
+    await runAgent({
+      agentExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(runnerDeps.elasticsearch.client.asScoped).toHaveBeenCalledWith(runnerDeps.request, {
+      projectRouting: 'space',
+    });
   });
 });

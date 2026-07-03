@@ -14,7 +14,11 @@ import {
   getAssetCriticalityEsqlTool,
   getAssetCriticalityInlineTool,
 } from './inline_tools';
-import { SECURITY_GET_ENTITY_TOOL_ID, SECURITY_SEARCH_ENTITIES_TOOL_ID } from '../../tools';
+import {
+  SECURITY_GET_ENTITY_TOOL_ID,
+  SECURITY_LIST_WATCHLISTS_TOOL_ID,
+  SECURITY_SEARCH_ENTITIES_TOOL_ID,
+} from '../../tools';
 
 // Feature flag controlling whether our tools try to dynamically generate ESQL queries based on the question asked of
 // if they use controlled queries that we author and maintain.
@@ -170,6 +174,8 @@ When asked to investigate unusual or anomalous behavior by entities, use:
     - entity.lifecycle.last_activity - last time this entity has been active in the entity store
     - risk_score_inputs - the alert inputs that contributed to the risk score calculation for this entity.
     - profile_history - historical snapshot profiles for this entity over a specified time interval
+    - anomalies - unusual or anomalous behaviors detected for this entity, mapped to MITRE ATT&CK tactics and techniques.
+    - vulnerabilities - known vulnerabilities associated with this entity, including CVE identifiers, severity levels, and descriptions.
     This tool may return multiple results if an exact match for the entity ID is not found.
     If multiple results are returned:
       - Provide a summary of the FIRST result.
@@ -188,6 +194,14 @@ Rules:
 - ALWAYS insert a BLANK LINE between the \`<render_attachment>\` tag and any following prose. Without this blank line, the prose will be dropped by the markdown parser.
 - Render each \`security.entity\` attachment at most once per turn.
 - When \`security.get_entity\` resolves multiple candidates (fallback RLIKE match), no attachment is stored and the \`other\` result contains no \`renderTag\`. In that case, **do not emit a \`<render_attachment>\` tag** — write prose only.
+
+### List Watchlists Tool
+- \`security.list_watchlists\` - Discover the watchlists configured in this space. Returns each watchlist's \`id\`, \`name\`, \`description\`, \`riskModifier\`, \`managed\`, \`entitySourceIds\`, and timestamps. Pass an optional \`nameContains\` substring to narrow the result.
+    Use this tool when the user asks to enumerate or look up watchlists, for example: "what watchlists do we have", "list watchlists", "show me the watchlists", "is there a watchlist called X". The tool does not render a rich attachment — summarize the results in prose (small list) or a short markdown table (when 4+ watchlists are returned). Entity member counts are not included; use \`security.search_entities\` with \`watchlists: [<id>]\` to get the actual members.
+    **Resolving a watchlist name to its members (discover → filter chain).** When the user asks who is on a named watchlist ("who's on the Privileged Users watchlist", "list members of Compromised Accounts"):
+      1. Call \`security.list_watchlists\` (pass \`nameContains\` when the user spelled the name). Find the matching watchlist's \`id\`.
+      2. Call \`security.search_entities\` with \`watchlists: [<id>]\` to list the members; the aggregate \`security.entity\` attachment that tool emits is the user-facing answer.
+    **Do NOT** call \`security.list_watchlists\` to find out which watchlists a specific entity belongs to — that is already on the entity's profile from \`security.get_entity\` as \`entity.attributes.watchlists\`.
 
 ### Search Entities Tool
 - \`security.search_entities\` - Search the entity store for security entities (host, user, service, generic) matching specific criteria.
@@ -290,6 +304,8 @@ Keep prose short and narrative-only:
 
 - For \`security.get_entity\` (single entity) results, write 1–3 sentences covering whether the entity is risky, what is driving the score, and what to investigate next. Do NOT produce an "Entity Overview" / field-by-field markdown block — those fields are already in the card.
   - When the result contains \`risk_score_inputs\`, one sentence on the top alert(s) contributing to the score is enough. Do NOT paste the full list of inputs as markdown.
+  - When the result contains \`anomalies\`, 1-2 bullets summarizing the anomalies with focus on the MITRE ATT&CK tactics is enough. Do NOT paste the full list of anomalies as markdown.
+  - When the result contains \`vulnerabilities\`, 1-2 bullets summarizing the vulnerabilities with focus on CVE identifiers and severity levels is enough. Do NOT paste the full list of vulnerabilities as markdown.
   - When the result contains \`profile_history\`, one sentence on the overall trend (increasing / decreasing / stable) is enough, plus a brief callout of any significant change in risk level, asset criticality, watchlist membership, or behaviors.
 - For \`security.search_entities\` (multi-entity) results, write 2–4 bullets with top-level takeaways: highest-risk row(s), biggest criticality gaps, outliers worth flagging, and recommended follow-ups. Do NOT re-list every row in markdown (columns like \`risk score\`, \`asset criticality\`, \`first_seen\`, \`last_seen\`) — the entities-table Canvas already shows those columns.
 
@@ -442,6 +458,24 @@ Steps:
 
 **Common mistake:** rendering only the \`security.entity\` entities table (titled e.g. "Top 10 Riskiest Users") and claiming in prose that it is the Entity Analytics dashboard. That is **wrong** — always render the \`security.entity_analytics_dashboard\` tag from \`attachments.add\` (and optionally the \`security.entity\` tag as a complement) when the user's prompt matches the "Dashboard trigger" phrases.
 
+### Example 12: List Watchlists
+
+User query: What watchlists do we have?
+
+Steps:
+1. Call \`security.list_watchlists\` (no arguments).
+2. Summarize the result in prose — name, risk modifier, and description per watchlist. Use a short markdown table when 4+ watchlists are returned. Do **not** emit a \`<render_attachment>\` tag; this tool does not produce a rich attachment.
+
+### Example 13: Members Of A Named Watchlist (discover → filter chain)
+
+User query: Who is on the Privileged Users watchlist?
+
+Steps:
+1. Call \`security.list_watchlists\` with \`nameContains: "Privileged Users"\` to resolve the name to a watchlist \`id\`. If multiple watchlists match, pick the one whose name best matches the user's phrasing and call out the ambiguity in prose. If no watchlists match, retry with a shorter distinctive token (e.g. \`nameContains: "privileged"\`).
+2. Call \`security.search_entities\` with \`watchlists: [<id from step 1>]\` (and any other filters the user gave) — the tool emits the aggregate \`security.entity\` attachment with the watchlist members.
+3. Copy the \`renderTag\` string verbatim from the \`search_entities\` \`other\` result onto its own line — the renderer shows the entities table Canvas with the members.
+4. Write 2–4 prose bullets calling out the riskiest members on the watchlist, biggest criticality gaps, and recommended follow-ups.
+
 ## Best Practices
 - Always use \`calculated_score_norm\` (0-100) when reporting risk scores
 - Provide the criticality level of the entity if available, otherwise report as "unknown"
@@ -562,7 +596,7 @@ export const getEntityAnalyticsSkill = (ctx: EntityAnalyticsSkillsContext) =>
     name: 'entity-analytics',
     basePath: 'skills/security/entities',
     description:
-      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, risk and criticality. ' +
+      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, list watchlists (discover watchlist names/ids and find members), risk and criticality. ' +
       'Rich attachments: `security.entity` (emitted automatically by search_entities/get_entity — renders as a single-entity card for 1 entity and as an entities table for 2+ entities); `security.entity_analytics_dashboard` (explicit attachments.add — only when the user asks to show/open/view the Entity Analytics home/overview product page). After each tool result that emits a rich attachment, output `<render_attachment id=… version=… />` in markdown (required for Preview/Canvas UI). ' +
       'Risk history, alert contributions, watchlists, behaviors, discovering risky entities.',
     content: `
@@ -578,6 +612,10 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
         : [getRiskScoreInlineTool(ctx), getAssetCriticalityInlineTool(ctx)],
     getRegistryTools: () =>
       ctx.isEntityStoreV2Enabled
-        ? [SECURITY_GET_ENTITY_TOOL_ID, SECURITY_SEARCH_ENTITIES_TOOL_ID]
+        ? [
+            SECURITY_GET_ENTITY_TOOL_ID,
+            SECURITY_LIST_WATCHLISTS_TOOL_ID,
+            SECURITY_SEARCH_ENTITIES_TOOL_ID,
+          ]
         : [],
   });

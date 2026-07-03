@@ -19,6 +19,7 @@ import {
   EuiPanel,
   EuiToolTip,
   EuiOutsideClickDetector,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -75,6 +76,7 @@ export const ToolbarSelector = ({
   fullWidth = false,
 }: ToolbarSelectorProps) => {
   const { euiTheme } = useEuiTheme();
+  const popoverTitleId = useGeneratedHtmlId();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [labelPopoverDisabled, setLabelPopoverDisabled] = useState(false);
 
@@ -191,6 +193,14 @@ export const ToolbarSelector = ({
       <EuiPopover
         id={dataTestSubj}
         ownFocus
+        aria-labelledby={popoverTitle ? popoverTitleId : undefined}
+        aria-label={
+          !popoverTitle
+            ? i18n.translate('sharedUXPackages.toolbarSelectorPopover.ariaLabel', {
+                defaultMessage: 'Selector options',
+              })
+            : undefined
+        }
         anchorPosition="downLeft"
         repositionToCrossAxis={false}
         initialFocus={
@@ -215,7 +225,6 @@ export const ToolbarSelector = ({
                 ? buttonTooltipContent
                 : buttonLabel
             }
-            delay="long"
             display="block"
           >
             <ToolbarButton
@@ -235,7 +244,11 @@ export const ToolbarSelector = ({
         isOpen={isOpen}
         closePopover={closePopover}
       >
-        {popoverTitle && <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>}
+        {popoverTitle && (
+          <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+            {popoverTitle}
+          </EuiPopoverTitle>
+        )}
         <EuiSelectable<SelectableEntry>
           id={`${dataTestSubj}Selectable`}
           singleSelection={singleSelection ?? true}
@@ -248,6 +261,7 @@ export const ToolbarSelector = ({
           listProps={{
             truncationProps: { truncation: 'middle' },
             isVirtualized: searchable,
+            paddingSize: 's',
           }}
           {...(searchable
             ? {

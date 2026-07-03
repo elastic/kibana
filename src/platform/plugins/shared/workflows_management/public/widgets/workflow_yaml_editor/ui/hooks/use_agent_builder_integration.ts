@@ -14,7 +14,7 @@ import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat/events'
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { monaco } from '@kbn/monaco';
-import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../../../common/agent_builder/constants';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { setAiAssisted } from '../../../../entities/workflows/store/workflow_detail/slice';
 import { AttachmentBridge, ProposalManager } from '../../../../features/ai_integration';
 import { ProposalTracker } from '../../../../features/ai_integration/proposal_tracker';

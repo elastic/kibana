@@ -22,14 +22,6 @@ const renderWithHistoryKey = (ui: React.ReactElement) =>
     <FlyoutHistoryKeyContext.Provider value={testHistoryKey}>{ui}</FlyoutHistoryKeyContext.Provider>
   );
 
-jest.mock('./waterfall_flyout/span_flyout', () => ({
-  spanFlyoutId: 'spanDetailFlyout',
-}));
-
-jest.mock('./waterfall_flyout/logs_flyout', () => ({
-  logsFlyoutId: 'logsFlyout',
-}));
-
 let capturedDocFlyoutHasAnimation: boolean | undefined;
 
 jest.mock('./waterfall_flyout/document_detail_flyout', () => ({
@@ -44,7 +36,7 @@ jest.mock('./waterfall_flyout/document_detail_flyout', () => ({
     capturedDocFlyoutHasAnimation = hasAnimation;
     return (
       <div
-        data-test-subj={type === 'spanDetailFlyout' ? 'spanFlyout' : 'logsFlyout'}
+        data-test-subj={type === 'span' ? 'spanFlyout' : 'logsFlyout'}
         data-trace-id={traceId}
         data-span-id={docId}
         data-id={docId}
@@ -135,7 +127,7 @@ describe('FullScreenWaterfall', () => {
           {...defaultProps}
           skipOpenAnimation={true}
           docId="transaction-doc-1"
-          activeFlyoutType="spanDetailFlyout"
+          activeFlyoutType="span"
         />
       );
 
@@ -148,7 +140,7 @@ describe('FullScreenWaterfall', () => {
           {...defaultProps}
           skipOpenAnimation={false}
           docId="transaction-doc-1"
-          activeFlyoutType="spanDetailFlyout"
+          activeFlyoutType="span"
         />
       );
 
@@ -161,7 +153,7 @@ describe('FullScreenWaterfall', () => {
           {...defaultProps}
           skipOpenAnimation={true}
           docId="transaction-doc-1"
-          activeFlyoutType="spanDetailFlyout"
+          activeFlyoutType="span"
         />
       );
 

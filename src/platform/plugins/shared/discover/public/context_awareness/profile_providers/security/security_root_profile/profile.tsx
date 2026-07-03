@@ -16,7 +16,11 @@ import type { SecurityProfileProviderFactory } from '../types';
 import { createCellRendererAccessor } from '../accessors/get_cell_renderer_accessor';
 import { createDefaultSecuritySolutionAppStateGetter as createDefaultSecuritySolutionAppStateGetter } from '../accessors/get_default_app_state';
 import { getAlertEventRowIndicator } from '../accessors/get_row_indicator';
-import { ALERTS_INDEX_PATTERN, SECURITY_PROFILE_ID } from '../constants';
+import {
+  ALERTS_INDEX_PATTERN,
+  ALLOWED_CELL_RENDER_FIELDS,
+  SECURITY_PROFILE_ID,
+} from '../constants';
 
 interface SecurityRootProfileContext {
   getSecuritySolutionCellRenderer?: (
@@ -41,7 +45,7 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
           if (!params.dataView.getIndexPattern().includes(ALERTS_INDEX_PATTERN)) {
             return entries;
           }
-          ['kibana.alert.workflow_status'].forEach((fieldName) => {
+          ALLOWED_CELL_RENDER_FIELDS.forEach((fieldName) => {
             entries[fieldName] =
               context.getSecuritySolutionCellRenderer?.(fieldName) ?? entries[fieldName];
           });

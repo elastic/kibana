@@ -55,6 +55,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { buildUrl } from '../../../../utils/build_url';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
+import { ERROR_GROUP_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentLabel,
@@ -231,6 +232,7 @@ export function ErrorSampleDetails({
               errorId: error?.error?.id,
               sortDirection: 'DESC',
             }}
+            ebt={{ element: ERROR_GROUP_DETAILS_EBT_ELEMENTS.SAMPLE_DETAIL_HEADER }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

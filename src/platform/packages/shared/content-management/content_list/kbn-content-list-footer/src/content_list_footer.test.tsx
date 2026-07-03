@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import {
   ContentListProvider,
+  contentListQueryClient,
   type FindItemsResult,
   type FindItemsParams,
 } from '@kbn/content-list-provider';
@@ -27,16 +28,23 @@ const mockFindItems = jest.fn(
 );
 
 const createWrapper =
-  (options?: { paginationDisabled?: boolean }) =>
+  (options?: {
+    paginationDisabled?: boolean;
+    findItems?: (params: FindItemsParams) => Promise<FindItemsResult>;
+    initialSearch?: string;
+  }) =>
   ({ children }: { children: React.ReactNode }) => {
-    const { paginationDisabled } = options ?? {};
+    const { paginationDisabled, findItems = mockFindItems, initialSearch } = options ?? {};
 
     return (
       <ContentListProvider
         id="test-list"
         labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
-        dataSource={{ findItems: mockFindItems }}
-        features={paginationDisabled ? { pagination: false } : undefined}
+        dataSource={{ findItems }}
+        features={{
+          ...(paginationDisabled ? { pagination: false as const } : {}),
+          ...(initialSearch ? { search: { initialSearch } } : {}),
+        }}
       >
         {children}
       </ContentListProvider>
@@ -46,6 +54,11 @@ const createWrapper =
 describe('ContentListFooter', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    await contentListQueryClient.cancelQueries();
+    contentListQueryClient.clear();
   });
 
   it('renders pagination when pagination is enabled', async () => {
@@ -72,6 +85,36 @@ describe('ContentListFooter', () => {
     );
 
     expect(container.querySelector('[data-test-subj="contentListFooter"]')).toBeNull();
+  });
+
+  it('renders a skeleton during initial load', () => {
+    const findItems = jest.fn(() => new Promise<FindItemsResult>(() => undefined));
+    const Wrapper = createWrapper({ findItems });
+
+    render(
+      <Wrapper>
+        <ContentListFooter />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('contentListFooter')).toBeInTheDocument();
+    expect(screen.getByTestId('contentListFooter-skeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('contentListFooter-pagination')).not.toBeInTheDocument();
+  });
+
+  it('returns null when a query has no matching results', async () => {
+    const findItems = jest.fn(async (): Promise<FindItemsResult> => ({ items: [], total: 0 }));
+    const Wrapper = createWrapper({ findItems, initialSearch: 'no match' });
+    const { container } = render(
+      <Wrapper>
+        <ContentListFooter />
+      </Wrapper>
+    );
+
+    await waitFor(() => {
+      expect(findItems).toHaveBeenCalled();
+      expect(container.querySelector('[data-test-subj="contentListFooter"]')).toBeNull();
+    });
   });
 
   it('applies a custom data-test-subj', async () => {

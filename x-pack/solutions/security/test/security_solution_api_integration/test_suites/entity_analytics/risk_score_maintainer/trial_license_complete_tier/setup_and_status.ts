@@ -126,8 +126,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     const maintainer = await maintainerRoutesHelper.getRiskScoreMaintainer();
     expect(maintainer).to.not.be(null);
-    expect(maintainer!.taskStatus).to.eql('started');
-    expect(maintainer!.runs).to.be.greaterThan(0);
+    // installEntityStoreV2 stops the maintainer after install so tests control
+    // when scoring runs. The run_now route runs it directly without re-enabling
+    // the Task Manager schedule, so the task remains stopped (or never_started
+    // if stop arrived before the first poll).
+    expect(['stopped', 'never_started']).to.contain(maintainer!.taskStatus);
   };
 
   describe('@ess @serverless @serverlessQA setup_and_status', () => {
@@ -189,7 +192,6 @@ export default ({ getService }: FtrProviderContext) => {
         await entityStoreUtils.installEntityStoreV2({
           entityTypes: ['host'],
           waitForEntities: false,
-          maintainerAutoStart: false,
         });
         await maintainerRoutes.runMaintainerSync('risk-score');
 
@@ -211,7 +213,6 @@ export default ({ getService }: FtrProviderContext) => {
         await entityStoreUtils.installEntityStoreV2({
           entityTypes: ['host'],
           waitForEntities: false,
-          maintainerAutoStart: false,
         });
         await maintainerRoutes.runMaintainerSync('risk-score');
 
@@ -222,7 +223,6 @@ export default ({ getService }: FtrProviderContext) => {
         await entityStoreUtilsCustomSpace.installEntityStoreV2({
           entityTypes: ['host'],
           waitForEntities: false,
-          maintainerAutoStart: false,
         });
         await maintainerRoutesCustomSpace.runMaintainerSync('risk-score');
 

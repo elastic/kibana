@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { screen, render } from '@testing-library/react';
+import { screen, render, waitFor } from '@testing-library/react';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
+import { SPACE_IDS } from '@kbn/rule-data-utils';
 import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import type { UrlSyncedAlertsSearchBarProps } from './url_synced_alerts_search_bar';
@@ -47,8 +48,6 @@ const mockStateContainerDefaults = {
   onKueryChange: jest.fn(),
   filters: [],
   onFiltersChange: jest.fn(),
-  controlFilters: [],
-  onControlFiltersChange: jest.fn(),
   rangeFrom: 'now-15m',
   onRangeFromChange: jest.fn(),
   rangeTo: 'now',
@@ -63,6 +62,7 @@ const mockStateContainerDefaults = {
 const defaultProps = {
   appName: 'test',
   onEsQueryChange: jest.fn(),
+  onFilterControlsChange: jest.fn(),
 };
 
 const TestComponent = (propOverrides: Partial<UrlSyncedAlertsSearchBarProps>) => (
@@ -97,6 +97,60 @@ describe('UrlSyncedAlertsSearchBar', () => {
     );
   });
 
+  it('forwards onFilterControlsChange and onControlApiAvailable to AlertFilterControls', () => {
+    jest.mocked(AlertFilterControls).mockImplementation(() => <div>AlertFilterControls</div>);
+    const onFilterControlsChange = jest.fn();
+    const onControlApiAvailable = jest.fn();
+    render(
+      <TestComponent
+        showFilterControls
+        onFilterControlsChange={onFilterControlsChange}
+        onControlApiAvailable={onControlApiAvailable}
+      />
+    );
+    expect(jest.mocked(AlertFilterControls)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        onFiltersChange: onFilterControlsChange,
+        onInit: onControlApiAvailable,
+      }),
+      expect.anything()
+    );
+  });
+
+  it('wires setControlsUrlState to the URL state container so config edits round-trip', () => {
+    jest.mocked(AlertFilterControls).mockImplementation(() => <div>AlertFilterControls</div>);
+    const onFilterControlsConfigChange = jest.fn();
+    jest.mocked(useAlertSearchBarStateContainer).mockReturnValue({
+      ...mockStateContainerDefaults,
+      onFilterControlsChange: onFilterControlsConfigChange,
+    });
+    render(<TestComponent showFilterControls />);
+    expect(jest.mocked(AlertFilterControls)).toHaveBeenCalledWith(
+      expect.objectContaining({ setControlsUrlState: onFilterControlsConfigChange }),
+      expect.anything()
+    );
+  });
+
+  it('builds the ES query from page-supplied filterControls', () => {
+    jest.mocked(AlertFilterControls).mockImplementation(() => <div>AlertFilterControls</div>);
+    const onEsQueryChange = jest.fn();
+    const filterControls = [
+      {
+        meta: { key: ALERT_STATUS, params: { query: 'active' } },
+        query: { match_phrase: { [ALERT_STATUS]: 'active' } },
+      },
+    ];
+    render(
+      <TestComponent
+        showFilterControls
+        filterControls={filterControls}
+        onEsQueryChange={onEsQueryChange}
+      />
+    );
+    const lastCall = onEsQueryChange.mock.calls[onEsQueryChange.mock.calls.length - 1][0];
+    expect(JSON.stringify(lastCall)).toContain(ALERT_STATUS);
+  });
+
   describe('defaultFilterControls', () => {
     beforeEach(() => {
       jest.mocked(AlertFilterControls).mockImplementation(() => <div>AlertFilterControls</div>);
@@ -127,6 +181,43 @@ describe('UrlSyncedAlertsSearchBar', () => {
       const calls = jest.mocked(AlertFilterControls).mock.calls;
       const lastCall = calls[calls.length - 1][0];
       expect(lastCall.controlsUrlState).toEqual(urlControls);
+    });
+  });
+
+  describe('space filtering', () => {
+    afterEach(() => {
+      jest.mocked(useKibana).mockReturnValue({
+        services: {
+          ...createStartServicesMock(),
+          notifications: notificationServiceMock.createStartContract(),
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+    });
+
+    it('passes a space filter to AlertFilterControls when spaceId is available', async () => {
+      jest.mocked(AlertFilterControls).mockImplementation(() => <div>AlertFilterControls</div>);
+      jest.mocked(useKibana).mockReturnValue({
+        services: {
+          ...createStartServicesMock(),
+          notifications: notificationServiceMock.createStartContract(),
+          spaces: { getActiveSpace: () => Promise.resolve({ id: 'my-space' }) },
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+
+      render(<TestComponent showFilterControls />);
+
+      await waitFor(() => {
+        const calls = jest.mocked(AlertFilterControls).mock.calls;
+        const lastCall = calls[calls.length - 1][0];
+        expect(lastCall.filters).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              meta: expect.objectContaining({ key: SPACE_IDS, params: { query: 'my-space' } }),
+              query: { match_phrase: { [SPACE_IDS]: 'my-space' } },
+            }),
+          ])
+        );
+      });
     });
   });
 

@@ -8,7 +8,13 @@
 import type { Observable } from 'rxjs';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
-import type { DocLinksServiceSetup, HttpResources, IBasePath, Logger } from '@kbn/core/server';
+import type {
+  DocLinksServiceSetup,
+  HttpResources,
+  I18nServiceSetup,
+  IBasePath,
+  Logger,
+} from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { SubFeaturePrivilegeIterator } from '@kbn/features-plugin/server/feature_privilege_iterator';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -59,9 +65,11 @@ export interface RouteDefinitionParams {
   getAuthenticationService: () => InternalAuthenticationServiceStart;
   getUserProfileService: () => UserProfileServiceStartInternal;
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
+  serverlessProjectId: string | undefined;
   analyticsService: AnalyticsServiceSetup;
   buildFlavor: BuildFlavor;
   docLinks: DocLinksServiceSetup;
+  i18n: I18nServiceSetup;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {

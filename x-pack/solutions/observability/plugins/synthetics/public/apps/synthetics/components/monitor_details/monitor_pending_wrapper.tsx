@@ -17,6 +17,7 @@ import { resetMonitorLastRunAction } from '../../state';
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useSyntheticsRefreshContext } from '../../contexts';
+import { MonitorRemoteCallout } from './monitor_remote_callout';
 
 const TIMEOUT_CHECK_INTERVAL_MS = 30_000;
 const SCHEDULE_MULTIPLIER = 2;
@@ -127,6 +128,7 @@ export const MonitorPendingWrapper: FC<PropsWithChildren<unknown>> = ({ children
 
   return (
     <>
+      <MonitorRemoteCallout />
       {!loaded ? (
         <PageLoader
           icon={<EuiLoadingSpinner size="xxl" />}

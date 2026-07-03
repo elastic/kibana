@@ -13,12 +13,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButtonIcon,
+  EuiLink,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiLink,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -78,17 +79,27 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
     <EuiPopover
       aria-labelledby={popoverTitleId}
       button={
-        <EuiButtonIcon
-          iconType={'gear'}
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'visTypeTimeseries.indexPatternSelect.switchModePopover.areaLabel',
             {
               defaultMessage: 'Configure data view selection mode',
             }
           )}
-          onClick={onButtonClick}
-          data-test-subj="switchIndexPatternSelectionModePopoverButton"
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType={'gear'}
+            aria-label={i18n.translate(
+              'visTypeTimeseries.indexPatternSelect.switchModePopover.areaLabel',
+              {
+                defaultMessage: 'Configure data view selection mode',
+              }
+            )}
+            onClick={onButtonClick}
+            data-test-subj="switchIndexPatternSelectionModePopoverButton"
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}

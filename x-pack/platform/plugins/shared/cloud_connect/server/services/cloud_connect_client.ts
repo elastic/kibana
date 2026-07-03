@@ -39,18 +39,15 @@ export class CloudConnectClient {
    * Returns whether the key is a "happy path" key (cluster-scoped) or an admin key
    */
   async validateApiKeyScope(apiKey: string): Promise<ApiKeyValidationResult> {
+    const url = `${this.cloudApiUrl}/saas/user?show_role_assignments=true`;
     try {
       this.logger.debug('Validating API key scope');
 
-      const response = await axios.get<CloudConnectUserResponse>(
-        `${this.cloudApiUrl}/saas/user?show_role_assignments=true`,
-        {
-          headers: {
-            Authorization: `apiKey ${apiKey}`,
-          },
-          timeout: 30000,
-        }
-      );
+      const response = await this.axiosInstance.get<CloudConnectUserResponse>(url, {
+        headers: {
+          Authorization: `apiKey ${apiKey}`,
+        },
+      });
 
       const roleAssignments = response.data.user.role_assignments.cloud_connected_resource;
 
@@ -88,7 +85,7 @@ export class CloudConnectClient {
         hasValidScope: true,
       };
     } catch (error) {
-      this.logger.error('Failed to validate API key scope', { error });
+      this.logger.error(`Failed to validate API key scope calling ${url}`, { error });
 
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
@@ -96,6 +93,14 @@ export class CloudConnectClient {
             isClusterScoped: false,
             hasValidScope: false,
             errorMessage: 'Invalid or expired API key',
+          };
+        }
+
+        if (error.response?.status === 403) {
+          return {
+            isClusterScoped: false,
+            hasValidScope: false,
+            errorMessage: `Access to ${url} was denied (HTTP 403). Ensure outbound HTTPS access to this endpoint is not blocked by a firewall or proxy.`,
           };
         }
       }
@@ -160,7 +165,7 @@ export class CloudConnectClient {
 
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to onboard cluster', { error });
+      this.logger.error('Failed to onboard cluster at /cloud-connected/clusters', { error });
       throw error;
     }
   }
@@ -192,7 +197,10 @@ export class CloudConnectClient {
 
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to onboard cluster with key generation', { error });
+      this.logger.error(
+        'Failed to onboard cluster with key generation at /cloud-connected/clusters?create_api_key=true',
+        { error }
+      );
       throw error;
     }
   }

@@ -8,7 +8,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import type { Logger } from '@kbn/core/server';
+import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
@@ -57,13 +57,15 @@ export class TLSRuleExecutor {
     server: SyntheticsServerSetup,
     syntheticsMonitorClient: SyntheticsMonitorClient,
     spaceId: string,
-    ruleName: string
+    ruleName: string,
+    uiSettingsClient?: IUiSettingsClient
   ) {
     this.previousStartedAt = previousStartedAt;
     this.params = p;
     this.soClient = soClient;
     this.esClient = new SyntheticsEsClient(this.soClient, scopedClient, {
       heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+      uiSettingsClient,
     });
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
@@ -219,7 +221,9 @@ export class TLSRuleExecutor {
       return [];
     }
     const configIds = certs.map((cert) => cert.configId);
-    const certIds = certs.map((cert) => cert.sha256);
+    const certIds = certs
+      .map((cert) => cert.sha256)
+      .filter((sha256): sha256 is string => sha256 !== undefined);
     const { body } = await this.esClient.search({
       query: {
         bool: {

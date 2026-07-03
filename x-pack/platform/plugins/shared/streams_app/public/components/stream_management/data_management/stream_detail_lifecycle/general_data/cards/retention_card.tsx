@@ -6,137 +6,99 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  Streams,
-  isDisabledLifecycle,
-  isDslLifecycle,
-  isIlmLifecycle,
-  isInheritLifecycle,
-  isRoot,
-} from '@kbn/streams-schema';
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import type { Streams } from '@kbn/streams-schema';
+import { isIlmLifecycle } from '@kbn/streams-schema';
+import React, { useEffect } from 'react';
+import { useKibana } from '../../../../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../../../../hooks/use_streams_app_fetch';
 import { BaseMetricCard } from '../../common/base_metric_card';
-import { getTimeSizeAndUnitLabel } from '../../../../../../util/format_size_units';
-import { IlmLink } from '../ilm_link';
+import { useLifecyclePreview } from '../../common/hooks/lifecycle_preview';
+import { useLifecycleAfterSave } from '../../common/hooks/lifecycle_after_save';
+import { getRetentionSubtitles, getRetentionValue } from './retention_card_helpers';
 
-export const RetentionCard = ({
-  definition,
-  openEditModal,
-  isEditLifecycleFlyoutOpen = false,
-}: {
-  definition: Streams.ingest.all.GetResponse;
-  openEditModal: () => void;
-  isEditLifecycleFlyoutOpen?: boolean;
-}) => {
+export const RetentionCard = ({ definition }: { definition: Streams.ingest.all.GetResponse }) => {
+  const { refreshToken } = useLifecycleAfterSave();
+  const {
+    isActive: isPreviewActive,
+    dataPhasesCount: previewDataPhasesCount,
+    downsampleStepsCount: previewDownsampleStepsCount,
+    retentionPeriod: previewRetentionPeriod,
+  } = useLifecyclePreview();
+
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+
   const lifecycle = definition.effective_lifecycle;
 
-  const isRootStream = isRoot(definition.stream.name);
-  const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
-  const isInheritingLifecycle = isInheritLifecycle(definition.stream.ingest.lifecycle);
+  const isIlm = isIlmLifecycle(lifecycle);
 
-  const getRetentionOrigin = () => {
-    if (isWiredStream) {
-      if (isInheritingLifecycle) {
-        return i18n.translate('xpack.streams.streamDetailLifecycle.inheritingFromParent', {
-          defaultMessage: 'Inherit from parent',
-        });
-      } else if (!isRootStream) {
-        return i18n.translate('xpack.streams.streamDetailLifecycle.overrideParent', {
-          defaultMessage: 'Override parent',
-        });
-      }
-      return null;
+  const {
+    value: ilmStatsValue,
+    loading: ilmStatsLoading,
+    refresh: refreshIlmStats,
+  } = useStreamsAppFetch(
+    ({ signal }) => {
+      if (!isIlm) return undefined;
+      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_stats', {
+        params: { path: { name: definition.stream.name } },
+        signal,
+      });
+    },
+    [streamsRepositoryClient, definition.stream.name, isIlm],
+    {
+      withTimeRange: false,
+      withRefresh: true,
+      clearValueOnNext: true,
+      unsetValueOnError: true,
+      disableToastOnError: true,
     }
+  );
 
-    return isInheritingLifecycle
-      ? i18n.translate('xpack.streams.streamDetailLifecycle.inheritingIndexTemplate', {
-          defaultMessage: 'Inherit from index template',
-        })
-      : i18n.translate('xpack.streams.streamDetailLifecycle.overrideIndexTemplate', {
-          defaultMessage: 'Override index template',
-        });
-  };
-
-  const retentionOrigin = getRetentionOrigin();
+  useEffect(() => {
+    if (!isIlm) return;
+    if (refreshToken === 0) return;
+    refreshIlmStats();
+  }, [isIlm, refreshIlmStats, refreshToken]);
 
   const getMetrics = () => {
-    const baseSubtitles: string[] = [];
-    let data: React.ReactNode;
+    const subtitle = getRetentionSubtitles({
+      definition,
+      lifecycle,
+      isIlm,
+      ilmStatsValue,
+      isPreviewActive,
+      previewDataPhasesCount,
+      previewDownsampleStepsCount,
+    });
 
-    if (isIlmLifecycle(lifecycle)) {
-      baseSubtitles.push(
-        i18n.translate('xpack.streams.streamDetailLifecycle.retention.ilmPolicy', {
-          defaultMessage: 'ILM policy',
-        })
-      );
-      data = <IlmLink lifecycle={lifecycle} />;
-    } else if (isDslLifecycle(lifecycle)) {
-      const formattedRetention = getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention);
-      const isIndefiniteRetention = formattedRetention === undefined;
-
-      baseSubtitles.push(
-        isIndefiniteRetention
-          ? i18n.translate('xpack.streams.streamDetailLifecycle.retention.indefinite', {
-              defaultMessage: 'Indefinite',
-            })
-          : i18n.translate('xpack.streams.streamDetailLifecycle.retention.custom', {
-              defaultMessage: 'Custom period',
-            })
-      );
-      data = formattedRetention ?? '∞';
-    } else if (isDisabledLifecycle(lifecycle)) {
-      baseSubtitles.push(
-        i18n.translate('xpack.streams.streamDetailLifecycle.retention.disabled', {
-          defaultMessage: 'Disabled',
-        })
-      );
-      data = '∞';
-    } else {
-      data = '—';
-    }
-
-    const subtitles = retentionOrigin ? [...baseSubtitles, retentionOrigin] : baseSubtitles;
+    const data = getRetentionValue({
+      isPreviewActive,
+      previewRetentionPeriod,
+      isIlm,
+      ilmStatsLoading,
+      ilmStatsValue,
+      lifecycle,
+    });
 
     return [
       {
         data,
-        subtitle: subtitles,
+        subtitle,
         'data-test-subj': 'retention',
       },
     ];
   };
 
-  const title = i18n.translate('xpack.streams.streamDetailLifecycle.retention.title', {
-    defaultMessage: 'Retention',
+  const title = i18n.translate('xpack.streams.streamDetailLifecycle.lifecycleSummary.title', {
+    defaultMessage: 'Lifecycle summary',
   });
 
   const metrics = getMetrics();
 
-  return (
-    <BaseMetricCard
-      title={title}
-      actions={
-        <EuiButton
-          data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
-          size="s"
-          color="text"
-          onClick={openEditModal}
-          disabled={!definition.privileges.lifecycle || isEditLifecycleFlyoutOpen}
-          aria-label={i18n.translate(
-            'xpack.streams.entityDetailViewWithoutParams.editDataRetentionMethodAriaLabel',
-            {
-              defaultMessage: 'Edit retention method',
-            }
-          )}
-        >
-          {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetentionMethod', {
-            defaultMessage: 'Edit retention method',
-          })}
-        </EuiButton>
-      }
-      metrics={metrics}
-      data-test-subj="retentionCard"
-    />
-  );
+  return <BaseMetricCard title={title} metrics={metrics} data-test-subj="retentionCard" />;
 };

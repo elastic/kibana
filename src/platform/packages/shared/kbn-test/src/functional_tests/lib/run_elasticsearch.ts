@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Url from 'url';
 import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
@@ -174,7 +173,6 @@ interface EsServerlessOptions {
   projectType: ServerlessProjectType;
   host?: string;
   resources: string[];
-  kibanaUrl: string;
   tag?: string;
   image?: string;
 }
@@ -211,11 +209,6 @@ function getESServerlessOptions(
     host: serverlessHost,
     resources: serverlessResources,
     uiam: config.get('esServerlessOptions.uiam', false),
-    kibanaUrl: Url.format({
-      protocol: config.get('servers.kibana.protocol'),
-      hostname: config.get('servers.kibana.hostname'),
-      port: config.get('servers.kibana.port'),
-    }),
   };
 
   if (esServerlessImageUrlOrTag) {

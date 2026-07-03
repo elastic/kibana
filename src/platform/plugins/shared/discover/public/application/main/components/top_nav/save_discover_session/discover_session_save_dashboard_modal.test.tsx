@@ -33,6 +33,7 @@ const renderSaveModal = (
     <EuiProvider>
       <I18nProvider>
         <DiscoverSessionSaveDashboardModal
+          hasLibraryItemWithTitle={async () => false}
           hideDashboardOptions={true}
           initialTags={[]}
           initialTimeRestore={false}

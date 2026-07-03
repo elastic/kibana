@@ -6,11 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiSpacer, EuiTitle } from '@elastic/eui';
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
+import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
@@ -25,7 +26,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { replace } from '../../../shared/links/url_helpers';
 import { SearchBar } from '../../../shared/search_bar/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
-import { SloOverviewFlyout } from '../../../shared/slo_overview_flyout';
+import { SloOverviewFlyout, useSloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { ServiceHeaderBadges } from './service_header_badges';
@@ -38,6 +39,7 @@ interface Props {
   children: React.ReactChild;
   selectedTab: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
+  customSearchBar?: React.ReactNode;
   bottomHeaderContent?: React.ComponentType;
   contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }
@@ -57,6 +59,7 @@ function TemplateWithContext({
   children,
   selectedTab,
   searchBarOptions,
+  customSearchBar,
   bottomHeaderContent: BottomHeaderContent,
   contentWrapper: ContentWrapper = React.Fragment,
 }: Props) {
@@ -79,18 +82,14 @@ function TemplateWithContext({
 
   const isPendingServiceAgent = !agentName && isPending(serviceAgentStatus);
 
-  const [sloOverviewFlyout, setSloOverviewFlyout] = useState<{
-    serviceName: string;
-    agentName?: string;
-  } | null>(null);
+  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
 
-  const openSloOverviewFlyout = useCallback(() => {
-    setSloOverviewFlyout({ serviceName, agentName });
-  }, [serviceName, agentName]);
+  const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
+    useSloOverviewFlyout();
 
-  const closeSloOverviewFlyout = useCallback(() => {
-    setSloOverviewFlyout(null);
-  }, []);
+  const onSloClick = useCallback(() => {
+    openSloOverviewFlyout(serviceName, agentName as AgentName);
+  }, [serviceName, agentName, openSloOverviewFlyout]);
 
   const alertsTabHref = router.link('/services/{serviceName}/alerts' as const, {
     path: { serviceName },
@@ -151,7 +150,13 @@ function TemplateWithContext({
           searchBar={
             <>
               {BottomHeaderContent && <BottomHeaderContent />}
-              <SearchBar {...searchBarOptions} showEnvironmentFilter />
+              {customSearchBar ?? (
+                <SearchBar
+                  {...searchBarOptions}
+                  showEnvironmentFilter
+                  showAnomalyThresholdSelector={shouldShowAnomalyUi}
+                />
+              )}
             </>
           }
           pageHeader={{
@@ -180,7 +185,7 @@ function TemplateWithContext({
                 environment={environment}
                 start={start}
                 end={end}
-                onSloClick={openSloOverviewFlyout}
+                onSloClick={onSloClick}
                 alertsTabHref={alertsTabHref}
               />
             ),

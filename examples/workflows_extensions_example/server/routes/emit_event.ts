@@ -9,13 +9,15 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import type { ExampleRequestHandlerContext } from '../request_context';
+import type { WorkflowsExtensionsRequestHandlerContext } from '@kbn/workflows-extensions/server';
 import { EMIT_EVENT_ROUTE_PATH } from '../../common/constants';
 import { CUSTOM_TRIGGER_ID } from '../../common/triggers/custom_trigger';
 
 export { EMIT_EVENT_ROUTE_PATH };
 
-export function registerEmitEventRoute(router: IRouter<ExampleRequestHandlerContext>): void {
+export function registerEmitEventRoute(
+  router: IRouter<WorkflowsExtensionsRequestHandlerContext>
+): void {
   router.post(
     {
       path: EMIT_EVENT_ROUTE_PATH,

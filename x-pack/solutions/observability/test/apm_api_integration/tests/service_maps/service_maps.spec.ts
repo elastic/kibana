@@ -12,8 +12,6 @@ import archives_metadata from '../../common/fixtures/es_archiver/archives_metada
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type DependencyResponse = SupertestReturnType<'GET /internal/apm/service-map/dependency'>;
-type ServiceNodeResponse =
-  SupertestReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
 type ServiceMapResponse = SupertestReturnType<'GET /internal/apm/service-map'>;
 
 export default function serviceMapsApiTests({ getService }: FtrProviderContext) {
@@ -119,7 +117,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                       Object {
                         "actualValue": 868025.86875,
                         "anomalyScore": 0,
-                        "healthStatus": "healthy",
                         "jobId": "apm-production-6117-high_mean_transaction_duration",
                         "serviceName": "opbeans-dotnet",
                         "transactionType": "request",
@@ -127,7 +124,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                       Object {
                         "actualValue": 102786.319148936,
                         "anomalyScore": 0,
-                        "healthStatus": "healthy",
                         "jobId": "apm-testing-41e5-high_mean_transaction_duration",
                         "serviceName": "opbeans-go",
                         "transactionType": "request",
@@ -135,7 +131,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                       Object {
                         "actualValue": 175568.855769231,
                         "anomalyScore": 0,
-                        "healthStatus": "healthy",
                         "jobId": "apm-production-6117-high_mean_transaction_duration",
                         "serviceName": "opbeans-java",
                         "transactionType": "request",
@@ -165,12 +160,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
               expect(anomaly.serviceName).to.be.a('string');
               expect(anomaly.serviceName.length).to.be.greaterThan(0);
               expect(anomaly.jobId).to.match(/^apm-/);
-
-              // healthStatus must be valid and match anomalyScore
-              expect(anomaly.healthStatus).to.match(/^(healthy|warning|critical)$/);
-              if (anomaly.anomalyScore === 0) {
-                expect(anomaly.healthStatus).to.equal('healthy');
-              }
             });
           });
         });
@@ -219,55 +208,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             expect(response.body.spans.length).to.be.greaterThan(1);
           });
         });
-      });
-    });
-
-    describe('/internal/apm/service-map/service/{serviceName} with data', () => {
-      let response: ServiceNodeResponse;
-      before(async () => {
-        response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/service-map/service/{serviceName}`,
-          params: {
-            path: { serviceName: 'opbeans-node' },
-            query: {
-              start: metadata.start,
-              end: metadata.end,
-              environment: 'ENVIRONMENT_ALL',
-            },
-          },
-        });
-      });
-
-      it('retuns status code 200', () => {
-        expect(response.status).to.be(200);
-      });
-
-      it('returns some error rate', () => {
-        expect(response.body.currentPeriod?.failedTransactionsRate?.value).to.eql(0);
-        expect(
-          response.body.currentPeriod?.failedTransactionsRate?.timeseries?.length
-        ).to.be.greaterThan(0);
-      });
-
-      it('returns some latency', () => {
-        expect(response.body.currentPeriod?.transactionStats?.latency?.value).to.be.greaterThan(0);
-        expect(
-          response.body.currentPeriod?.transactionStats?.latency?.timeseries?.length
-        ).to.be.greaterThan(0);
-      });
-
-      it('returns some throughput', () => {
-        expect(response.body.currentPeriod?.transactionStats?.throughput?.value).to.be.greaterThan(
-          0
-        );
-        expect(
-          response.body.currentPeriod?.transactionStats?.throughput?.timeseries?.length
-        ).to.be.greaterThan(0);
-      });
-
-      it('returns some cpu usage', () => {
-        expect(response.body.currentPeriod?.cpuUsage?.value).to.be.greaterThan(0);
-        expect(response.body.currentPeriod?.cpuUsage?.timeseries?.length).to.be.greaterThan(0);
       });
     });
 
@@ -392,61 +332,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           expect(response.body.currentPeriod?.failedTransactionsRate).to.not.be(undefined);
           expect(response.body.currentPeriod?.transactionStats?.latency).to.not.be(undefined);
           expect(response.body.currentPeriod?.transactionStats?.throughput).to.not.be(undefined);
-        });
-      });
-
-      describe('/internal/apm/service-map/service/{serviceName} with comparison', () => {
-        let response: ServiceNodeResponse;
-        before(async () => {
-          response = await apmApiClient.readUser({
-            endpoint: `GET /internal/apm/service-map/service/{serviceName}`,
-            params: {
-              path: { serviceName: 'opbeans-node' },
-              query: {
-                start: metadata.start,
-                end: metadata.end,
-                environment: 'ENVIRONMENT_ALL',
-                offset: '5m',
-              },
-            },
-          });
-        });
-
-        it('returns some data', () => {
-          const { currentPeriod, previousPeriod } = response.body;
-          [
-            currentPeriod.failedTransactionsRate,
-            previousPeriod?.failedTransactionsRate,
-            currentPeriod.transactionStats?.latency,
-            previousPeriod?.transactionStats?.latency,
-            currentPeriod.transactionStats?.throughput,
-            previousPeriod?.transactionStats?.throughput,
-            currentPeriod.cpuUsage,
-            previousPeriod?.cpuUsage,
-            currentPeriod.memoryUsage,
-            previousPeriod?.memoryUsage,
-          ].map((value) => expect(value?.timeseries?.length).to.be.greaterThan(0));
-        });
-
-        it('has same start time for both periods', () => {
-          const { currentPeriod, previousPeriod } = response.body;
-          expect(first(currentPeriod.failedTransactionsRate?.timeseries)?.x).to.equal(
-            first(previousPeriod?.failedTransactionsRate?.timeseries)?.x
-          );
-        });
-
-        it('has same end time for both periods', () => {
-          const { currentPeriod, previousPeriod } = response.body;
-          expect(last(currentPeriod.failedTransactionsRate?.timeseries)?.x).to.equal(
-            last(previousPeriod?.failedTransactionsRate?.timeseries)?.x
-          );
-        });
-
-        it('returns same number of buckets for both periods', () => {
-          const { currentPeriod, previousPeriod } = response.body;
-          expect(currentPeriod.failedTransactionsRate?.timeseries?.length).to.be(
-            previousPeriod?.failedTransactionsRate?.timeseries?.length
-          );
         });
       });
     });

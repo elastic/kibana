@@ -29,7 +29,6 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/kibana-utils-plugin'
-  - '@kbn/monaco'
   - '@kbn/search-types'
   - '@kbn/react-kibana-context-render'
   - '@kbn/core-test-helpers-kbn-server'
@@ -54,13 +53,14 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/actions-plugin'
   - '@kbn/core-http-server'
-  - '@kbn/management-settings-ids'
   - '@kbn/es-types'
   - '@kbn/controls-constants'
   - '@kbn/logging'
   - '@kbn/logging-mocks'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
+  - '@kbn/code-editor'
 tags:
   - plugin
   - prod

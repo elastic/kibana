@@ -16,6 +16,7 @@ import {
   saveKnowledgeBaseContentToIndex,
   deletePackageKnowledgeBase,
 } from '../../knowledge_base_index';
+import { getPackageKnowledgeBase } from '../../get';
 import type { InstallContext } from '../_state_machine_package_install';
 import { INSTALL_STATES } from '../../../../../../common/types';
 import { withPackageSpan } from '../../utils';
@@ -25,7 +26,7 @@ import {
   type ArchiveEntry,
 } from '../../../../../../common/types/models/epm';
 import type { EsAssetReference } from '../../../../../types';
-import { updateEsAssetReferences } from '../../es_assets_reference';
+import { optimisticallyAddEsAssetReferences } from '../../es_assets_reference';
 import type { KnowledgeBaseItem } from '../../../../../../common/types/models/epm';
 import { licenseService } from '../../../../license';
 import { getIntegrationKnowledgeSetting } from '../../get_integration_knowledge_setting';
@@ -109,6 +110,30 @@ export async function stepSaveKnowledgeBase(
     return { esReferences };
   }
 
+  const existing = await getPackageKnowledgeBase({ esClient, pkgName: packageInfo.name });
+  if (
+    existing?.items.length &&
+    existing.items.every((item) => item.version === packageInfo.version)
+  ) {
+    logger.debug(
+      `Knowledge base already indexed for ${packageInfo.name}@${packageInfo.version}, skipping re-index`
+    );
+
+    // The content is already current, so skip the (expensive) re-indexing. But still ensure the
+    // es asset references are present: they may be missing if the epm-packages saved object was
+    // reset while the indexed content survived (e.g. after an install rollback).
+    const knowledgeBaseAssetRefs = existing.items.map((item) => ({
+      id: `${packageInfo.name}-${item.fileName}`,
+      type: ElasticsearchAssetType.knowledgeBase,
+    }));
+    const updatedEsReferences = await optimisticallyAddEsAssetReferences(
+      savedObjectsClient,
+      packageInfo.name,
+      knowledgeBaseAssetRefs
+    );
+    return { esReferences: updatedEsReferences };
+  }
+
   return await indexKnowledgeBase(
     esReferences,
     savedObjectsClient,
@@ -162,14 +187,13 @@ export async function indexKnowledgeBase(
         type: ElasticsearchAssetType.knowledgeBase,
       }));
 
-      // Update ES asset references to include knowledge base assets
-      esReferences = await updateEsAssetReferences(
+      // Use optimistic concurrency control to safely merge KB refs with
+      // any refs that may have been added concurrently (e.g. by policy creation
+      // for input packages), since this step runs asynchronously.
+      esReferences = await optimisticallyAddEsAssetReferences(
         savedObjectsClient,
         packageInfo.name,
-        esReferences,
-        {
-          assetsToAdd: knowledgeBaseAssetRefs,
-        }
+        knowledgeBaseAssetRefs
       );
     } catch (error) {
       throw new FleetError(`Error saving knowledge base content: ${error}`);

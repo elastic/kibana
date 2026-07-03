@@ -31,9 +31,15 @@ import type {
   SearchEmbeddablePanelApiState,
   SearchEmbeddableRuntimeState,
 } from './types';
-import { SolutionType } from '../context_awareness';
+import {
+  EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+  SolutionType,
+  type ContextAwarenessToolkit,
+} from '../context_awareness';
+import { TEST_PROFILE_STATE_DEF } from '../context_awareness/__mocks__/profile_state';
 import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 
 jest.mock('./utils/serialization_utils', () => ({}));
 
@@ -394,6 +400,46 @@ describe('saved search embeddable', () => {
         ).not.toBeInTheDocument();
       });
     });
+
+    describe('anyStateChange$', () => {
+      let embeddableApi: SearchEmbeddableApi;
+      beforeEach((done) => {
+        const { search } = createSearchFnMock(1);
+        runtimeState = getInitialRuntimeState({
+          searchMock: search,
+          partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
+        });
+        factory
+          .buildEmbeddable({
+            initializeDrilldownsManager,
+            initialState: { ref_id: 'id', overrides: {} },
+            finalizeApi: finalizeApiMock,
+            uuid,
+            parentApi: mockedDashboardApi,
+          })
+          .then(({ api }) => {
+            embeddableApi = api;
+            done();
+          })
+          .catch(done);
+      });
+
+      test('should not emit on subscribe and emit when any state changes', (done) => {
+        embeddableApi.anyStateChange$.subscribe(() => {
+          try {
+            const title = embeddableApi.title$.value;
+            expect(title).toBe('cute puppies');
+          } catch (error) {
+            // title assertion fails when
+            // anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        });
+        embeddableApi.setTitle('cute puppies');
+      });
+    });
   });
 
   describe('deleted tab', () => {
@@ -486,6 +532,7 @@ describe('saved search embeddable', () => {
       const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager(
         {
           scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
       const resolveDataSourceProfileSpy = jest.spyOn(
@@ -551,6 +598,85 @@ describe('saved search embeddable', () => {
         expect(discoverGridComponent).toBeInTheDocument();
         expect(discoverComponent.queryByText('data-source-profile')).toBeInTheDocument();
       });
+    });
+
+    it('should provide an in-memory profile state toolkit', async () => {
+      let capturedToolkit: ContextAwarenessToolkit | undefined;
+      const originalCreateScopedProfilesManager =
+        discoverServiceMock.profilesManager.createScopedProfilesManager.bind(
+          discoverServiceMock.profilesManager
+        );
+
+      if (!discoverServiceMock.profileStateRegistry.hasDefinition(TEST_PROFILE_STATE_DEF)) {
+        discoverServiceMock.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+      }
+
+      jest
+        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
+        .mockImplementationOnce((args) => {
+          capturedToolkit = args.toolkit;
+          return originalCreateScopedProfilesManager(args);
+        });
+
+      runtimeState = getInitialRuntimeState();
+
+      await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      if (!capturedToolkit) {
+        throw new Error('Expected search embeddable to create a scoped profiles manager.');
+      }
+
+      const stateAdapter = capturedToolkit.getStateAdapter(TEST_PROFILE_STATE_DEF);
+      expect(stateAdapter.getState()).toEqual(TEST_PROFILE_STATE_DEF.defaultState);
+
+      stateAdapter.setState({ ...TEST_PROFILE_STATE_DEF.defaultState, uiValue: 'primary' });
+      stateAdapter.updateState({ uiValue: 'success' });
+
+      expect(stateAdapter.getState()).toEqual({
+        ...TEST_PROFILE_STATE_DEF.defaultState,
+        uiValue: 'success',
+      });
+    });
+
+    it('should not expose addFilter through the toolkit when filters are disabled', async () => {
+      let capturedToolkit: ContextAwarenessToolkit | undefined;
+      const originalCreateScopedProfilesManager =
+        discoverServiceMock.profilesManager.createScopedProfilesManager.bind(
+          discoverServiceMock.profilesManager
+        );
+
+      jest
+        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
+        .mockImplementationOnce((args) => {
+          capturedToolkit = args.toolkit;
+          return originalCreateScopedProfilesManager(args);
+        });
+
+      runtimeState = getInitialRuntimeState({
+        partialState: {
+          nonPersistedDisplayOptions: {
+            enableFilters: false,
+          },
+        },
+      });
+
+      await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      expect(capturedToolkit?.actions.addFilter).toBeUndefined();
     });
   });
 });

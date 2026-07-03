@@ -19,9 +19,8 @@ project:
 dependsOn:
   - '@kbn/zod'
   - '@kbn/zod-helpers'
-  - '@kbn/sse-utils'
   - '@kbn/streamlang'
-  - '@kbn/inference-common'
+  - '@kbn/std'
 tags:
   - shared-common
   - package

@@ -13,22 +13,24 @@ import {
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchEpisodeActionsOptions {
+  spaceId: string;
   episodeIds: string[];
   abortSignal?: AbortSignal;
-  services: { expressions: ExpressionsStart };
+  expressions: ExpressionsStart;
 }
 
 /**
  * Executes an ES|QL query to fetch latest acknowledge action and assignee by episode.
  */
 export const fetchEpisodeActions = ({
+  spaceId,
   episodeIds,
   abortSignal,
-  services: { expressions },
+  expressions,
 }: FetchEpisodeActionsOptions): Promise<AlertEpisodeAction[]> => {
   return executeEsqlQuery<AlertEpisodeAction>({
     expressions,
-    query: buildEpisodeActionsQuery(episodeIds).print('basic'),
+    query: buildEpisodeActionsQuery(spaceId, episodeIds).print('basic'),
     input: null,
     abortSignal,
     noCache: true,

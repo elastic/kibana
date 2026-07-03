@@ -141,8 +141,7 @@ describe('LifecyclePhase', () => {
       const button = screen.getByRole('button');
       fireEvent.click(button);
 
-      expect(screen.getByTestId('lifecyclePhase-warm-minAge')).toBeInTheDocument();
-      expect(screen.getByTestId('lifecyclePhase-warm-minAgeValue')).toHaveTextContent('30d');
+      expect(screen.getByTestId('lifecyclePhase-warm-ageBadge')).toHaveTextContent('30d');
     });
 
     it('should not display retention period for hot phase', () => {
@@ -151,7 +150,7 @@ describe('LifecyclePhase', () => {
       const button = screen.getByRole('button');
       fireEvent.click(button);
 
-      expect(screen.queryByTestId('lifecyclePhase-hot-minAge')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('lifecyclePhase-hot-ageBadge')).not.toBeInTheDocument();
     });
 
     it('should not display retention period for zero age', () => {
@@ -160,7 +159,7 @@ describe('LifecyclePhase', () => {
       const button = screen.getByRole('button');
       fireEvent.click(button);
 
-      expect(screen.queryByTestId('lifecyclePhase-warm-minAge')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('lifecyclePhase-warm-ageBadge')).not.toBeInTheDocument();
     });
 
     it('should display read-only indicator', () => {
@@ -170,6 +169,7 @@ describe('LifecyclePhase', () => {
       fireEvent.click(button);
 
       expect(screen.getByTestId('lifecyclePhase-cold-readOnly')).toBeInTheDocument();
+      expect(screen.getByTestId('lifecyclePhase-cold-readOnlyValue')).toHaveTextContent('Enabled');
     });
 
     it('should display searchable snapshot for cold phase', () => {
@@ -208,6 +208,55 @@ describe('LifecyclePhase', () => {
       expect(screen.getByTestId('lifecyclePhase-frozen-snapshotRepository')).toHaveTextContent(
         'aws-s3-repo'
       );
+    });
+
+    it('should display default repository required callout for frozen phase', () => {
+      const onCreateDefaultRepository = jest.fn();
+      const onRefreshDefaultRepository = jest.fn();
+
+      render(
+        <LifecyclePhase
+          label="frozen"
+          color="#00FFFF"
+          showDefaultRepositoryCallout
+          onCreateDefaultRepository={onCreateDefaultRepository}
+          onRefreshDefaultRepository={onRefreshDefaultRepository}
+          isRefreshingDefaultRepository={false}
+          canManageLifecycle
+        />
+      );
+
+      expect(screen.getByTestId('lifecyclePhase-frozen-warningIcon')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button'));
+
+      expect(
+        screen.getByTestId('lifecyclePhase-frozen-defaultRepositoryRequiredCallout')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('lifecyclePhase-frozen-snapshotRepository')
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('lifecyclePhase-frozen-createDefaultRepositoryButton'));
+      expect(onCreateDefaultRepository).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(screen.getByTestId('lifecyclePhase-frozen-refreshDefaultRepositoryButton'));
+      expect(onRefreshDefaultRepository).toHaveBeenCalledTimes(1);
+    });
+
+    it('should display warning icon for frozen phase enterprise callout', () => {
+      render(
+        <LifecyclePhase
+          label="frozen"
+          color="#00FFFF"
+          searchableSnapshot="aws-s3-repo"
+          showEnterpriseCallout
+          onUpgradeEnterprise={jest.fn()}
+          canManageLifecycle
+        />
+      );
+
+      expect(screen.getByTestId('lifecyclePhase-frozen-warningIcon')).toBeInTheDocument();
     });
 
     it('should not display searchable snapshot for non-cold/frozen phases', () => {

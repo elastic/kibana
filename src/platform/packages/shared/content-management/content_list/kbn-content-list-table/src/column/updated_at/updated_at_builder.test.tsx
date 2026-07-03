@@ -53,10 +53,24 @@ describe('updated at column builder', () => {
       expect(result).toMatchObject({ name: 'Modified' });
     });
 
-    it('applies custom layout props', () => {
+    it('applies the documented width / minWidth / maxWidth defaults when no props supplied', () => {
+      const result = buildUpdatedAtColumn({}, defaultContext);
+
+      expect(result).toMatchObject({
+        width: '9.5em',
+        // `'max-content'` floor lets the translated header expand the column
+        // past `width` in long-text locales (e.g. de "Letzte Aktualisierung").
+        minWidth: 'max-content',
+        // Pinned to `width` so the column never absorbs slack on full-width
+        // pages — that whitespace lives inside the table after `Column.Name`.
+        maxWidth: '9.5em',
+      });
+    });
+
+    it('lets consumer-supplied layout props win over defaults', () => {
       const props: UpdatedAtColumnProps = {
         width: '12em',
-        minWidth: '12em',
+        minWidth: '10em',
         maxWidth: '14em',
         truncateText: false,
       };
@@ -64,15 +78,35 @@ describe('updated at column builder', () => {
 
       expect(result).toMatchObject({
         width: '12em',
-        minWidth: '12em',
+        minWidth: '10em',
         maxWidth: '14em',
         truncateText: false,
       });
     });
 
-    it('does not include width when not specified', () => {
-      const result = buildUpdatedAtColumn({}, defaultContext);
-      expect(result).not.toHaveProperty('width');
+    it('falls back maxWidth to the consumer-supplied width when only width is overridden', () => {
+      const result = buildUpdatedAtColumn({ width: '14em' }, defaultContext);
+
+      expect(result).toMatchObject({
+        width: '14em',
+        minWidth: 'max-content',
+        maxWidth: '14em',
+      });
+    });
+
+    it('treats explicit `undefined` as an opt-out — clears the cap so the column can absorb slack', () => {
+      // `<Column.UpdatedAt maxWidth={undefined} />` should render with the
+      // preset `width` (`9.5em`) and `minWidth` (`'max-content'`) defaults
+      // intact, but no `max-width` style — the column is free to grow on
+      // wide viewports. Distinct from omitting the prop, which falls back
+      // to `maxWidth: '9.5em'` (locked).
+      const result = buildUpdatedAtColumn(
+        { maxWidth: undefined } satisfies UpdatedAtColumnProps,
+        defaultContext
+      );
+
+      expect(result).toMatchObject({ width: '9.5em', minWidth: 'max-content' });
+      expect(result).not.toHaveProperty('maxWidth');
     });
 
     it('respects sortable false', () => {

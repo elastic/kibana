@@ -213,7 +213,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await pageObjects.common.navigateToApp('rules');
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await testSubjects.click('rulesTab');
     });
 
@@ -334,7 +336,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
 
-      await pageObjects.common.navigateToApp('rules');
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await testSubjects.click('rulesTab');
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
@@ -428,7 +432,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
 
-      await pageObjects.common.navigateToApp('rules');
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await testSubjects.click('rulesTab');
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
@@ -525,7 +531,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
 
-      await pageObjects.common.navigateToApp('rules');
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await testSubjects.click('rulesTab');
 
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
@@ -561,7 +569,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      await pageObjects.common.navigateToApp('rules');
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await testSubjects.click('rulesTab');
 
       await pageObjects.triggersActionsUI.searchAlerts(alertName);

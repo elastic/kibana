@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useMemo } from 'react';
+import type { Capabilities } from '@kbn/core/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from '@kbn/workflows';
@@ -15,10 +17,12 @@ import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 const CapabilitiesMap = {
   canCreateWorkflow: WorkflowsManagementUiActions.create,
   canReadWorkflow: WorkflowsManagementUiActions.read,
+  canReadManagedWorkflow: WorkflowsManagementUiActions.readManaged,
   canUpdateWorkflow: WorkflowsManagementUiActions.update,
   canDeleteWorkflow: WorkflowsManagementUiActions.delete,
   canExecuteWorkflow: WorkflowsManagementUiActions.execute,
   canReadWorkflowExecution: WorkflowsManagementUiActions.readExecution,
+  canReadManagedWorkflowExecution: WorkflowsManagementUiActions.readManagedExecution,
   canCancelWorkflowExecution: WorkflowsManagementUiActions.cancelExecution,
 } as const;
 
@@ -29,7 +33,17 @@ export const useWorkflowsCapabilities = (): WorkflowsManagementCapabilities => {
   const {
     services: { application },
   } = useKibana<{ application: ApplicationStart }>();
-  const workflowsCapabilities = application?.capabilities?.[WORKFLOWS_MANAGEMENT_FEATURE_ID] ?? {};
+
+  return useMemo(
+    () => getWorkflowsCapabilities(application?.capabilities ?? {}),
+    [application?.capabilities]
+  );
+};
+
+export const getWorkflowsCapabilities = (
+  capabilities: Capabilities
+): WorkflowsManagementCapabilities => {
+  const workflowsCapabilities = capabilities?.[WORKFLOWS_MANAGEMENT_FEATURE_ID] ?? {};
 
   return Object.fromEntries(
     Object.entries(CapabilitiesMap).map(([key, value]) => [

@@ -45,7 +45,7 @@ export function registerCancelExecutionRoute(deps: RouteDependencies) {
         try {
           const { executionId } = request.params;
           const spaceId = spaces.getSpaceId(request);
-          await api.cancelWorkflowExecution(executionId, spaceId);
+          await api.cancelWorkflowExecution(executionId, spaceId, request);
           audit.logExecutionCanceled(request, { executionId });
           return response.ok();
         } catch (error) {

@@ -39,6 +39,7 @@ import {
 } from '../../utils/eis_utils';
 import { ModelFamilyFilter } from './model_family_filter';
 import { useKibana } from '../../hooks/use_kibana';
+import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 
 export const ElasticInferenceServiceModelsPage = () => {
   const {
@@ -49,6 +50,7 @@ export const ElasticInferenceServiceModelsPage = () => {
   );
   const queryClient = useQueryClient();
   const { data: endpoints, isLoading, isError } = useEisModels();
+  const { canManage } = useInferenceCapabilities();
   const {
     showDeleteAction,
     selectedInferenceEndpoint,
@@ -132,7 +134,7 @@ export const ElasticInferenceServiceModelsPage = () => {
               <EuiFieldSearch
                 placeholder={i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelspage.searchPlaceholder',
-                  { defaultMessage: 'Search models...' }
+                  { defaultMessage: 'Search Elastic Inference Service models...' }
                 )}
                 value={searchQuery}
                 fullWidth={true}
@@ -140,7 +142,7 @@ export const ElasticInferenceServiceModelsPage = () => {
                 aria-label={i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelspage.searchbar',
                   {
-                    defaultMessage: 'Find Elastic Inference Service models',
+                    defaultMessage: 'Search Elastic Inference Service models',
                   }
                 )}
                 data-test-subj="eisModelsSearchBar"
@@ -219,8 +221,9 @@ export const ElasticInferenceServiceModelsPage = () => {
           allEndpoints={endpoints}
           onClose={onModelDetailFlyoutClose}
           onSaveEndpoint={() => queryClient.invalidateQueries([INFERENCE_ENDPOINTS_QUERY_KEY])}
-          onDeleteEndpoint={displayDeleteActionItem}
+          onDeleteEndpoint={canManage ? displayDeleteActionItem : undefined}
           onCopyEndpointId={copyContent}
+          canManage={canManage}
         />
       )}
     </>

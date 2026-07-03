@@ -67,6 +67,7 @@ export class DashboardPageLinks extends FtrService {
   public async clickPanelEditorCloseButton() {
     this.log.debug('click links panel editor close button');
     await this.testSubjects.click('links--panelEditor--closeBtn');
+    await this.testSubjects.waitForDeleted('links--panelEditor--flyout');
   }
 
   public async clickLinksEditorSaveButton() {
@@ -206,9 +207,14 @@ export class DashboardPageLinks extends FtrService {
       await this.testSubjects.click('links--panelEditor--addLinkBtn');
       await this.expectLinkEditorFlyoutIsOpen();
     });
-    const option = await this.testSubjects.find('links--linkEditor--externalLink--radioBtn');
-    const label = await option.findByCssSelector('label[for="externalLink"]');
-    await label.click();
+    await this.retry.try(async () => {
+      const option = await this.testSubjects.find('links--linkEditor--externalLink--radioBtn');
+      const label = await option.findByCssSelector('label[for="externalLink"]');
+      await label.click();
+      if (!(await this.testSubjects.exists('links--linkEditor--externalLink--input'))) {
+        throw new Error('External link input did not render');
+      }
+    });
     await this.testSubjects.setValue('links--linkEditor--externalLink--input', destination);
   }
 

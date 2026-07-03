@@ -19,6 +19,7 @@ import {
   getRootItemOrFallback,
   TraceDataState,
   useTraceWaterfall,
+  getSubtreeIds,
 } from './use_trace_waterfall';
 
 jest.mock('@elastic/eui', () => ({
@@ -982,7 +983,146 @@ describe('getclockSkew', () => {
   });
 });
 
+describe('getSubtreeIds', () => {
+  const parentChildMap = {
+    root: [root],
+    '1': [child1, child2],
+    '2': [grandchild],
+  };
+
+  it('returns the root id and all descendant ids', () => {
+    const result = getSubtreeIds(parentChildMap, '1');
+    expect(result).toEqual(expect.arrayContaining(['1', '2', '3', '4']));
+    expect(result).toHaveLength(4);
+  });
+
+  it('returns only the given id when it has no children', () => {
+    const result = getSubtreeIds(parentChildMap, '3');
+    expect(result).toEqual(['3']);
+  });
+
+  it('returns a partial subtree starting from a non-root node', () => {
+    const result = getSubtreeIds(parentChildMap, '2');
+    expect(result).toEqual(expect.arrayContaining(['2', '4']));
+    expect(result).toHaveLength(2);
+  });
+});
+
 describe('useTraceWaterfall - legends from filtered subtree', () => {
+  it('does not treat an orphan ancestor of the selected transaction as a duplicate span', () => {
+    const traceItems: TraceItem[] = [
+      {
+        id: 'service-parent',
+        parentId: 'upstream-root',
+        timestampUs: 0,
+        name: 'service-parent',
+        traceId: 'trace1',
+        duration: 1000,
+        serviceName: 'checkout-service',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
+      },
+      {
+        id: 'entry-transaction',
+        parentId: 'service-parent',
+        timestampUs: 100,
+        name: 'entry-transaction',
+        traceId: 'trace1',
+        duration: 500,
+        serviceName: 'checkout-service',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
+      },
+      {
+        id: 'entry-child-span',
+        parentId: 'entry-transaction',
+        timestampUs: 150,
+        name: 'entry-child-span',
+        traceId: 'trace1',
+        duration: 100,
+        serviceName: 'checkout-service',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useTraceWaterfall({
+        traceItems,
+        entryTransactionId: 'entry-transaction',
+      })
+    );
+
+    expect(result.current.traceState).toBe(TraceDataState.Partial);
+    expect(result.current.traceWaterfall.map((item) => item.id)).toEqual([
+      'entry-transaction',
+      'entry-child-span',
+    ]);
+  });
+
+  it('reparents non-ancestor orphans below the selected transaction', () => {
+    const traceItems: TraceItem[] = [
+      {
+        id: 'entry-transaction',
+        parentId: 'service-parent',
+        timestampUs: 100,
+        name: 'entry-transaction',
+        traceId: 'trace1',
+        duration: 500,
+        serviceName: 'checkout-service',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
+      },
+      {
+        id: 'entry-child-span',
+        parentId: 'entry-transaction',
+        timestampUs: 150,
+        name: 'entry-child-span',
+        traceId: 'trace1',
+        duration: 100,
+        serviceName: 'checkout-service',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
+      },
+      {
+        id: 'genuine-orphan',
+        parentId: 'missing-parent',
+        timestampUs: 200,
+        name: 'genuine-orphan',
+        traceId: 'trace1',
+        duration: 50,
+        serviceName: 'checkout-service',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useTraceWaterfall({
+        traceItems,
+        entryTransactionId: 'entry-transaction',
+      })
+    );
+
+    expect(result.current.traceState).toBe(TraceDataState.Partial);
+    expect(result.current.traceWaterfall.map((item) => item.id)).toEqual([
+      'entry-transaction',
+      'entry-child-span',
+      'genuine-orphan',
+    ]);
+    expect(result.current.traceWaterfall[2]).toMatchObject({
+      id: 'genuine-orphan',
+      parentId: 'entry-transaction',
+      isOrphan: true,
+    });
+  });
+
   it('calculates legends only from visible subtree when entryTransactionId is provided', () => {
     const traceItems: TraceItem[] = [
       {

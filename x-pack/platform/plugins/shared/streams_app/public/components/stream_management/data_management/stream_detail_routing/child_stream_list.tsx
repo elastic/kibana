@@ -204,7 +204,7 @@ export function ChildStreamList({ availableStreams = [] }: { availableStreams?: 
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued" textAlign="center">
             {i18n.translate('xpack.streams.streamDetailRouting.childStreamList.classicNotice', {
-              defaultMessage: 'Ingest-time partitioning is not available for classic streams.',
+              defaultMessage: 'Ingest-time partitioning is not available for this stream type.',
             })}
           </EuiText>
         </EuiFlexItem>
@@ -258,9 +258,10 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
   const canReorderRoutingRules = useStreamsRoutingSelector((snapshot) =>
     snapshot.can({ type: 'routingRule.reorder', routing: snapshot.context.routing })
   );
-  const canManageRoutingRules = definition.privileges.manage;
+  const canManageRoutingRules = 'privileges' in definition ? definition.privileges.manage : true;
   const isAtMaxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
-  const shouldDisplayCreateButton = definition.privileges.simulate;
+  const shouldDisplayCreateButton =
+    'privileges' in definition ? definition.privileges.simulate : true;
   const CreateButtonComponent = aiFeatures && aiFeatures.enabled ? EuiButtonEmpty : EuiButton;
   const scrollToSuggestions = useScrollToActive(!!suggestions);
   const isEditingOrReorderingStreams = useStreamsRoutingSelector(
@@ -542,7 +543,8 @@ function QueryModeChildrenList() {
     (snapshot) => snapshot.context.editingQueryStreamName
   );
   const { createQueryStream, editQueryStream } = useStreamRoutingEvents();
-  const canManage = definition.privileges.manage;
+  const canManage = 'privileges' in definition ? definition.privileges.manage : true;
+  const isAtMaxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
 
   // Get child query stream names from the definition
   const childQueryStreamNames = useMemo(() => {
@@ -635,7 +637,9 @@ function QueryModeChildrenList() {
               <EuiToolTip
                 position="bottom"
                 content={
-                  !canManage
+                  isAtMaxNestingLevel
+                    ? maxNestingLevelText
+                    : !canManage
                     ? i18n.translate(
                         'xpack.streams.queryModeChildrenList.cannotCreateQueryStream',
                         {
@@ -650,7 +654,7 @@ function QueryModeChildrenList() {
                   size="s"
                   data-test-subj="streamsAppQueryModeCreateButton"
                   onClick={createQueryStream}
-                  disabled={!canManage}
+                  disabled={!canManage || isAtMaxNestingLevel}
                 >
                   {i18n.translate('xpack.streams.queryModeChildrenList.createQueryStream', {
                     defaultMessage: 'Create query sub-stream',

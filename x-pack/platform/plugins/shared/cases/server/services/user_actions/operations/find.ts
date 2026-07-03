@@ -63,10 +63,7 @@ export class UserActionFinder {
           filter: finalFilter,
         });
 
-      const res = transformFindResponseToExternalModel(
-        userActions,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      const res = transformFindResponseToExternalModel(userActions);
 
       const decodeRes = bulkDecodeSOAttributes(
         res.saved_objects,
@@ -232,10 +229,7 @@ export class UserActionFinder {
       for await (const findResults of finder.find()) {
         userActions = userActions.concat(
           findResults.saved_objects.map((so) => {
-            const res = transformToExternalModel(
-              so,
-              this.context.persistableStateAttachmentTypeRegistry
-            );
+            const res = transformToExternalModel(so);
 
             const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
 

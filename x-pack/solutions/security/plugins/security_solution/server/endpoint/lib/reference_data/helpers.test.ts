@@ -372,11 +372,16 @@ describe('initializeEndpointExceptionsPerPolicyOptInStatus', () => {
 
   describe('concurrent initialization (conflict handling)', () => {
     it('should handle SO conflict error when another instance creates the reference data first', async () => {
+      soClientMock.find.mockResolvedValue({
+        total: 0,
+        saved_objects: [],
+        per_page: 20,
+        page: 1,
+      });
+
       // First .get() returns not-found
       soClientMock.get
-        .mockRejectedValueOnce(
-          SavedObjectsErrorHelpers.createGenericNotFoundError('cheesefuck', 'dickbutt')
-        )
+        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError())
         // Second .get() (called after conflict) returns the existing record
         .mockResolvedValueOnce({
           id: REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus,

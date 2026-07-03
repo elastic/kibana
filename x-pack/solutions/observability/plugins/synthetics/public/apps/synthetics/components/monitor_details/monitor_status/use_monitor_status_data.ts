@@ -33,6 +33,7 @@ type Props = Pick<MonitorStatusPanelProps, 'from' | 'to'> & {
   initialSizeRef?: React.MutableRefObject<HTMLDivElement | null>;
   monitorId?: string;
   locationLabel?: string;
+  remoteName?: string;
 };
 
 export const useMonitorStatusData = ({
@@ -41,6 +42,7 @@ export const useMonitorStatusData = ({
   initialSizeRef,
   monitorId: monitorIdOverride,
   locationLabel: locationLabelOverride,
+  remoteName,
 }: Props) => {
   const { lastRefresh } = useSyntheticsRefreshContext();
   const { monitor } = useSelectedMonitor({ refetchMonitorEnabled: !monitorIdOverride });
@@ -87,6 +89,7 @@ export const useMonitorStatusData = ({
           from,
           to,
           interval: minsPerBin,
+          remoteName,
         })
       );
     }
@@ -97,6 +100,7 @@ export const useMonitorStatusData = ({
     minsPerBin,
     resolvedLocationLabel,
     resolvedMonitorId,
+    remoteName,
     lastRefresh,
     debouncedBinsCount,
   ]);

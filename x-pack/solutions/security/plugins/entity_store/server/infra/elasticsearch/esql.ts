@@ -33,7 +33,6 @@ export const executeEsqlQuery = async ({
   const response = (await esClient.esql.query(
     {
       query,
-      drop_null_columns: true,
       allow_partial_results: true,
       filter: buildDslFilters(excludeColdFrozenTiers),
     },

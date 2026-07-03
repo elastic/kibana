@@ -104,6 +104,9 @@ describe('Security Plugin', () => {
               "alerting": AlertingActions {
                 "prefix": "alerting:",
               },
+              "alerts": AlertsActions {
+                "prefix": "alerts:",
+              },
               "api": ApiActions {
                 "prefix": "api:",
               },
@@ -194,6 +197,7 @@ describe('Security Plugin', () => {
             "apiKeys": Object {
               "areAPIKeysEnabled": [Function],
               "areCrossClusterAPIKeysEnabled": [Function],
+              "cloneAsInternalUser": [Function],
               "create": [Function],
               "grantAsInternalUser": [Function],
               "invalidate": [Function],
@@ -207,6 +211,9 @@ describe('Security Plugin', () => {
             "actions": Actions {
               "alerting": AlertingActions {
                 "prefix": "alerting:",
+              },
+              "alerts": AlertsActions {
+                "prefix": "alerts:",
               },
               "api": ApiActions {
                 "prefix": "api:",

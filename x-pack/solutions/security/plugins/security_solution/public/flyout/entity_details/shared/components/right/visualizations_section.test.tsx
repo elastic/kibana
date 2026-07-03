@@ -25,6 +25,7 @@ import { mockDataFormattedForFieldBrowser } from '../../../../document_details/s
 import { DocumentDetailsContext } from '../../../../document_details/shared/context';
 import { TestProviders } from '../../../../../common/mock';
 import { useExpandSection } from '../../../../../flyout_v2/shared/hooks/use_expand_section';
+import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '../../../../../flyout_v2/shared/components/test_ids';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
 
 jest.mock('../../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
@@ -63,15 +64,23 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
 };
 
-const renderVisualizationsSection = (contextValue = panelContextValue) =>
+const renderVisualizationsSection = ({
+  contextValue = panelContextValue,
+  isPreviewMode = false,
+  scopeId = 'test-scope-id',
+}: {
+  contextValue?: typeof panelContextValue;
+  isPreviewMode?: boolean;
+  scopeId?: string;
+} = {}) =>
   render(
     <IntlProvider locale="en">
       <TestProviders>
         <DocumentDetailsContext.Provider value={contextValue}>
           <VisualizationsSection
             entityId="test-entity-id"
-            isPreviewMode={false}
-            scopeId="test-scope-id"
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
           />
         </DocumentDetailsContext.Provider>
       </TestProviders>
@@ -128,6 +137,17 @@ describe('<VisualizationsSection />', () => {
       METRIC_TYPE.LOADED,
       GRAPH_PREVIEW
     );
+  });
+
+  it('should not render the graph preview link in preview mode', () => {
+    mockUseExpandSection.mockReturnValue(true);
+    mockUseShouldShowGraph.mockReturnValue(true);
+
+    const { queryByTestId } = renderVisualizationsSection({ isPreviewMode: true });
+
+    expect(
+      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeNull();
   });
 
   it('should not render the graph preview component if the graph feature is disabled', () => {

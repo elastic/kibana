@@ -73,6 +73,10 @@ import type {
   TrialCompanionTelemetryEventsMap,
 } from './events/trial_companion/types';
 import type {
+  AttackDiscoverySchedulesEventTypes,
+  AttackDiscoverySchedulesTelemetryEventsMap,
+} from './events/attack_discovery_schedules/types';
+import type {
   SiemReadinessEventTypes,
   SiemReadinessTelemetryEventsMap,
 } from './events/siem_readiness/types';
@@ -80,6 +84,7 @@ import type {
 export * from './events/rule_creation/types';
 export * from './events/app/types';
 export * from './events/attacks/types';
+export * from './events/attack_discovery_schedules/types';
 export * from './events/alerts_grouping/types';
 export * from './events/data_quality/types';
 export * from './events/onboarding/types';
@@ -137,6 +142,8 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Ru
   ? AgentBuilderTelemetryEventsMap[T]
   : T extends AttacksEventTypes
   ? AttacksTelemetryEventsMap[T]
+  : T extends AttackDiscoverySchedulesEventTypes
+  ? AttackDiscoverySchedulesTelemetryEventsMap[T]
   : T extends SiemReadinessEventTypes
   ? SiemReadinessTelemetryEventsMap[T]
   : never;
@@ -162,4 +169,5 @@ export type TelemetryEventTypes =
   | TrialCompanionEventTypes
   | AgentBuilderEventTypes
   | AttacksEventTypes
+  | AttackDiscoverySchedulesEventTypes
   | SiemReadinessEventTypes;

@@ -11,15 +11,16 @@ export {
   protectedNamespaces as toolReservedNamespaces,
   isInProtectedNamespace,
 } from './base/namespaces';
+export { DOT_INDEX_ALLOW_LIST_PATTERNS, isVisibleSearchSource } from './base/dot_index_allow_list';
 export {
   ToolType,
   ToolOrigin,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
   platformCoreTools,
+  platformCoreCasesTools,
   platformStreamsSigEventsTools,
   attachmentTools,
-  filestoreTools,
   internalTools,
   defaultAgentToolIds,
   editableToolTypes,
@@ -61,6 +62,7 @@ export {
   isSkillNotFoundError,
   isAgentBuilderError,
   isAgentNotFoundError,
+  isAgentUnavailableError,
   isConversationNotFoundError,
   isPluginNotFoundError,
   isBadRequestError,
@@ -74,6 +76,7 @@ export {
   createToolNotFoundError,
   createSkillNotFoundError,
   createAgentNotFoundError,
+  createAgentUnavailableError,
   createConversationNotFoundError,
   createPluginNotFoundError,
   createBadRequestError,
@@ -85,6 +88,7 @@ export {
   type AgentBuilderToolNotFoundError,
   type AgentBuilderSkillNotFoundError,
   type AgentBuilderAgentNotFoundError,
+  type AgentBuilderAgentUnavailableError,
   type AgentBuilderConversationNotFoundError,
   type AgentBuilderPluginNotFoundError,
   type AgentBuilderBadRequestError,
@@ -98,21 +102,26 @@ export {
   createHooksExecutionError,
 } from './base/errors';
 export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
-export { type UserIdAndName } from './base/users';
+export { type UserIdAndName, type CurrentUser } from './base/users';
 export { EsResourceType } from './base/resources';
 export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
   AgentType,
-  AgentVisibility,
-  VISIBILITY_ICON,
-  VISIBILITY_BADGE_COLOR,
+  AgentAccessControlMode,
+  ACCESS_CONTROL_MODE_ICON,
+  ACCESS_CONTROL_MODE_BADGE_COLOR,
   AgentExecutionErrorCode,
-  isAgentOwner,
-  canChangeAgentVisibility,
-  hasAgentReadAccess,
-  hasAgentWriteAccess,
-  canCurrentUserEditAgent,
+  AgentAccessControlRole,
+  AGENT_ACCESS_CONTROL_MAX_ENTRIES,
+  AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH,
+  isAgentAccessControlRole,
+  accessControlRoleMeets,
+  maxAccessControlRole,
+  getDefaultAgentAccessControl,
+  type AgentAccessControl,
+  type AgentAccessControlEntry,
+  type AgentAccessControlPrincipalType,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
@@ -126,11 +135,18 @@ export {
   SubagentExecutionMode,
   ExecutionStatus,
   type SerializedExecutionError,
+  type AgentListOptions,
+  type AgentCreateRequest,
+  type AgentUpdateRequest,
+  type AgentDeleteRequest,
 } from './agents';
 export {
+  ConversationAccessControlMode,
+  getDefaultConversationAccessControl,
   type RoundInput,
   type ConverseInput,
   type AssistantResponse,
+  type ConversationAccessControl,
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
@@ -152,8 +168,13 @@ export {
   isCompactionStep,
   isBackgroundAgentCompleteStep,
   type BackgroundAgentCompleteStep,
+  isTodosStep,
+  findTodosStep,
+  type TodosStep,
+  carriedOverTodos,
   ChatEventType,
   ConversationRoundStatus,
+  ConversationDisplayStatus,
   type ChatEventBase,
   type ChatEvent,
   type ConversationAction,
@@ -207,6 +228,22 @@ export {
   type BackgroundAgentCompleteEvent,
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
+  isTodosUpdatedEvent,
+  TODOS_UPDATED_UI_EVENT,
+  type TodosUpdatedUiEventData,
+  type AskUserQuestionStep,
+  type AskUserQuestionStepData,
+  createAskUserQuestionStep,
+  isAskUserQuestionStep,
+  type UserQuestionAskedEvent,
+  type UserQuestionAskedEventData,
+  type UserQuestionAnsweredEvent,
+  type UserQuestionAnsweredEventData,
+  isUserQuestionAskedEvent,
+  isUserQuestionAnsweredEvent,
+  createUserQuestionAskedEvent,
+  createUserQuestionAnsweredEvent,
+  type ConversationListOptions,
 } from './chat';
 export {
   type PublicSkillDefinition,
@@ -248,4 +285,12 @@ export {
   type PluginManifestMetadata,
   type PluginDefinition,
 } from './plugins';
+export type { RendererDefinition, RendererPayloadOf } from './renderers';
 export { EffortLevels, type EffortLevel } from './model_provider';
+export {
+  type OAuthClient,
+  type OAuthClientLogo,
+  type OAuthClientConnectionsSummary,
+  OAuthClientType,
+} from './oauth_clients';
+export { MCP_SERVER_PATH } from './mcp';

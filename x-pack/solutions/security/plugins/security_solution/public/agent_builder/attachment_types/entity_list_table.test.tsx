@@ -14,6 +14,7 @@ import {
   navigateToEntityAnalyticsHomePageInApp,
   navigateToEntityAnalyticsWithFlyoutInApp,
 } from './entity_explore_navigation';
+import { EntityAnalyticsAgentNavigationProvider } from './entity_analytics_agent_navigation_context';
 import { EntityListTable, type EntityListRow } from './entity_list_table';
 
 jest.mock('./entity_explore_navigation', () => {
@@ -50,13 +51,19 @@ const buildApplication = (): ApplicationStart =>
   ({ navigateToApp: jest.fn() } as unknown as ApplicationStart);
 
 const renderTable = (
-  row: EntityListRow,
-  extraProps: Partial<React.ComponentProps<typeof EntityListTable>> = {}
+  rows: EntityListRow[],
+  extraProps: { searchSession?: ISessionService; closeCanvas?: () => void } = {}
 ) => {
   const application = buildApplication();
+  const { searchSession, closeCanvas } = extraProps;
   render(
     <I18nProvider>
-      <EntityListTable entities={[row]} application={application} {...extraProps} />
+      <EntityAnalyticsAgentNavigationProvider
+        application={application}
+        searchSession={searchSession}
+      >
+        <EntityListTable entities={rows} closeCanvas={closeCanvas} />
+      </EntityAnalyticsAgentNavigationProvider>
     </I18nProvider>
   );
   return { application };
@@ -68,17 +75,10 @@ describe('EntityListTable', () => {
   });
 
   it('renders one row per entity with its display name', () => {
-    render(
-      <I18nProvider>
-        <EntityListTable
-          entities={[
-            { entity_type: 'host', entity_id: 'host:web-01@default', entity_name: 'web-01' },
-            { entity_type: 'user', entity_id: 'user:bob@default', entity_name: 'bob' },
-          ]}
-          application={buildApplication()}
-        />
-      </I18nProvider>
-    );
+    renderTable([
+      { entity_type: 'host', entity_id: 'host:web-01@default', entity_name: 'web-01' },
+      { entity_type: 'user', entity_id: 'user:bob@default', entity_name: 'bob' },
+    ]);
 
     expect(screen.getByText('web-01')).toBeInTheDocument();
     expect(screen.getByText('bob')).toBeInTheDocument();
@@ -86,11 +86,13 @@ describe('EntityListTable', () => {
 
   describe('Name-column Open entity in Entity Analytics button', () => {
     it('opens the flyout with the HostPanelKey payload for host rows with an entity id', () => {
-      const { application } = renderTable({
-        entity_type: 'host',
-        entity_id: 'host:web-01@default',
-        entity_name: 'web-01',
-      });
+      const { application } = renderTable([
+        {
+          entity_type: 'host',
+          entity_id: 'host:web-01@default',
+          entity_name: 'web-01',
+        },
+      ]);
 
       fireEvent.click(screen.getByLabelText('Open entity in Entity Analytics'));
 
@@ -113,11 +115,13 @@ describe('EntityListTable', () => {
     });
 
     it('opens the flyout with the UserPanelKey payload for user rows with an entity id', () => {
-      renderTable({
-        entity_type: 'user',
-        entity_id: 'user:bob@default',
-        entity_name: 'bob',
-      });
+      renderTable([
+        {
+          entity_type: 'user',
+          entity_id: 'user:bob@default',
+          entity_name: 'bob',
+        },
+      ]);
 
       fireEvent.click(screen.getByLabelText('Open entity in Entity Analytics'));
 
@@ -135,11 +139,13 @@ describe('EntityListTable', () => {
     });
 
     it('opens the flyout with the ServicePanelKey payload for service rows with an entity id', () => {
-      renderTable({
-        entity_type: 'service',
-        entity_id: 'service:auth-svc@default',
-        entity_name: 'auth-svc',
-      });
+      renderTable([
+        {
+          entity_type: 'service',
+          entity_id: 'service:auth-svc@default',
+          entity_name: 'auth-svc',
+        },
+      ]);
 
       fireEvent.click(screen.getByLabelText('Open entity in Entity Analytics'));
 
@@ -156,10 +162,12 @@ describe('EntityListTable', () => {
     });
 
     it('falls back to the entity_id for the display name when entity_name is missing', () => {
-      renderTable({
-        entity_type: 'host',
-        entity_id: 'host:no-name@default',
-      });
+      renderTable([
+        {
+          entity_type: 'host',
+          entity_id: 'host:no-name@default',
+        },
+      ]);
 
       fireEvent.click(screen.getByLabelText('Open entity in Entity Analytics'));
 
@@ -171,11 +179,13 @@ describe('EntityListTable', () => {
     });
 
     it('falls back to the unfiltered Entity Analytics home for generic entities (no dedicated flyout)', () => {
-      const { application } = renderTable({
-        entity_type: 'generic',
-        entity_id: 'generic:some-id@default',
-        entity_name: 'some-id',
-      });
+      const { application } = renderTable([
+        {
+          entity_type: 'generic',
+          entity_id: 'generic:some-id@default',
+          entity_name: 'some-id',
+        },
+      ]);
 
       fireEvent.click(screen.getByLabelText('Open entity in Entity Analytics'));
 
@@ -188,11 +198,13 @@ describe('EntityListTable', () => {
       const searchSession = { clear: jest.fn() } as unknown as ISessionService;
 
       renderTable(
-        {
-          entity_type: 'host',
-          entity_id: 'host:web-01@default',
-          entity_name: 'web-01',
-        },
+        [
+          {
+            entity_type: 'host',
+            entity_id: 'host:web-01@default',
+            entity_name: 'web-01',
+          },
+        ],
         { searchSession }
       );
 
@@ -206,11 +218,13 @@ describe('EntityListTable', () => {
       const searchSession = { clear: jest.fn() } as unknown as ISessionService;
 
       renderTable(
-        {
-          entity_type: 'generic',
-          entity_id: 'generic:some-id@default',
-          entity_name: 'some-id',
-        },
+        [
+          {
+            entity_type: 'generic',
+            entity_id: 'generic:some-id@default',
+            entity_name: 'some-id',
+          },
+        ],
         { searchSession }
       );
 
@@ -228,11 +242,13 @@ describe('EntityListTable', () => {
       });
 
       renderTable(
-        {
-          entity_type: 'host',
-          entity_id: 'host:web-01@default',
-          entity_name: 'web-01',
-        },
+        [
+          {
+            entity_type: 'host',
+            entity_id: 'host:web-01@default',
+            entity_name: 'web-01',
+          },
+        ],
         { closeCanvas }
       );
 
@@ -250,11 +266,13 @@ describe('EntityListTable', () => {
       const closeCanvas = jest.fn();
 
       renderTable(
-        {
-          entity_type: 'generic',
-          entity_id: 'generic:some-id@default',
-          entity_name: 'some-id',
-        },
+        [
+          {
+            entity_type: 'generic',
+            entity_id: 'generic:some-id@default',
+            entity_name: 'some-id',
+          },
+        ],
         { closeCanvas }
       );
 
@@ -268,11 +286,13 @@ describe('EntityListTable', () => {
     });
 
     it('is a no-op when closeCanvas is not provided (inline table usage)', () => {
-      renderTable({
-        entity_type: 'host',
-        entity_id: 'host:web-01@default',
-        entity_name: 'web-01',
-      });
+      renderTable([
+        {
+          entity_type: 'host',
+          entity_id: 'host:web-01@default',
+          entity_name: 'web-01',
+        },
+      ]);
 
       expect(() => {
         fireEvent.click(screen.getByLabelText('Open entity in Entity Analytics'));

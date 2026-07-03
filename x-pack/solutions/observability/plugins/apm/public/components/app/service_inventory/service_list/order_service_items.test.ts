@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { SloStatus } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import { getAvailableFields, orderServiceItems } from './order_service_items';
@@ -204,23 +203,22 @@ describe('orderServiceItems', () => {
       ]);
     });
 
-    it('sorts only by health status when user clicks health column', () => {
+    it('sorts only by anomaly score when user clicks anomalies column', () => {
       const sortedItems = orderServiceItems({
-        sortField: ServiceInventoryFieldName.HealthStatus,
+        sortField: ServiceInventoryFieldName.AnomalyScore,
         sortDirection: 'desc',
         isDefaultSort: false,
         items: [
-          { serviceName: 'unknown', healthStatus: ServiceHealthStatus.unknown, alertsCount: 10 },
-          { serviceName: 'critical', healthStatus: ServiceHealthStatus.critical, alertsCount: 0 },
-          { serviceName: 'healthy', healthStatus: ServiceHealthStatus.healthy, alertsCount: 5 },
+          { serviceName: 'low-score', anomalyScore: 10, alertsCount: 10 },
+          { serviceName: 'high-score', anomalyScore: 90, alertsCount: 0 },
+          { serviceName: 'mid-score', anomalyScore: 50, alertsCount: 5 },
         ],
       });
 
-      // Should sort by health status only, ignoring alerts count
       expect(sortedItems.map((item) => item.serviceName)).toEqual([
-        'critical',
-        'healthy',
-        'unknown',
+        'high-score',
+        'mid-score',
+        'low-score',
       ]);
     });
 
@@ -257,7 +255,7 @@ describe('getAvailableFields', () => {
       sortField: ServiceInventoryFieldName.AlertsCount,
       hasAlerts: true,
       hasSlos: true,
-      hasHealthStatuses: false,
+      hasAnomalyScores: false,
     });
   });
 
@@ -265,33 +263,33 @@ describe('getAvailableFields', () => {
     const result = getAvailableFields([
       { serviceName: 'service-a', alertsCount: 0 },
       { serviceName: 'service-b', sloStatus: 'healthy' as SloStatus },
-      { serviceName: 'service-c', healthStatus: ServiceHealthStatus.critical },
+      { serviceName: 'service-c', anomalyScore: 75 },
     ]);
 
     expect(result).toEqual({
       sortField: ServiceInventoryFieldName.SloStatus,
       hasAlerts: false,
       hasSlos: true,
-      hasHealthStatuses: true,
+      hasAnomalyScores: true,
     });
   });
 
-  it('returns HealthStatus sortField when no alerts or SLOs but services have health status', () => {
+  it('returns AnomalyScore sortField when no alerts or SLOs but services have anomaly scores', () => {
     const result = getAvailableFields([
       { serviceName: 'service-a', alertsCount: 0 },
-      { serviceName: 'service-b', healthStatus: ServiceHealthStatus.healthy },
+      { serviceName: 'service-b', anomalyScore: 42 },
       { serviceName: 'service-c', throughput: 100 },
     ]);
 
     expect(result).toEqual({
-      sortField: ServiceInventoryFieldName.HealthStatus,
+      sortField: ServiceInventoryFieldName.AnomalyScore,
       hasAlerts: false,
       hasSlos: false,
-      hasHealthStatuses: true,
+      hasAnomalyScores: true,
     });
   });
 
-  it('returns Throughput sortField when no alerts, SLOs, or health statuses', () => {
+  it('returns Throughput sortField when no alerts, SLOs, or anomaly scores', () => {
     const result = getAvailableFields([
       { serviceName: 'service-a', throughput: 100 },
       { serviceName: 'service-b', latency: 50 },
@@ -301,7 +299,7 @@ describe('getAvailableFields', () => {
       sortField: ServiceInventoryFieldName.Throughput,
       hasAlerts: false,
       hasSlos: false,
-      hasHealthStatuses: false,
+      hasAnomalyScores: false,
     });
   });
 
@@ -312,7 +310,7 @@ describe('getAvailableFields', () => {
       sortField: ServiceInventoryFieldName.Throughput,
       hasAlerts: false,
       hasSlos: false,
-      hasHealthStatuses: false,
+      hasAnomalyScores: false,
     });
   });
 
@@ -327,7 +325,7 @@ describe('getAvailableFields', () => {
       sortField: ServiceInventoryFieldName.SloStatus,
       hasAlerts: false,
       hasSlos: true,
-      hasHealthStatuses: false,
+      hasAnomalyScores: false,
     });
   });
 });

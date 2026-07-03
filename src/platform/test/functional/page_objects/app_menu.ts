@@ -50,8 +50,10 @@ export class AppMenuPageObject extends FtrService {
 
     if (await this.testSubjects.exists(APP_MENU_OVERFLOW_BUTTON)) {
       await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
+      await this.testSubjects.existOrFail(APP_MENU_POPOVER, { timeout: 3000 });
       const exists = await this.testSubjects.exists(testId);
       await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
+      await this.testSubjects.missingOrFail(APP_MENU_POPOVER, { timeout: 3000 });
       return exists;
     }
 
@@ -65,8 +67,10 @@ export class AppMenuPageObject extends FtrService {
 
     if (await this.testSubjects.exists(APP_MENU_OVERFLOW_BUTTON)) {
       await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
+      await this.testSubjects.existOrFail(APP_MENU_POPOVER, { timeout: 3000 });
       const exists = await this.testSubjects.exists(testId);
       await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
+      await this.testSubjects.missingOrFail(APP_MENU_POPOVER, { timeout: 3000 });
       if (exists) {
         return;
       }

@@ -22,7 +22,7 @@ AI Insights evaluations replay observability data from GCS snapshot repositories
 
 - `obs-ai-datasets/otel-demo/payment-service-failures` — payment service invalid token errors
 - `obs-ai-datasets/otel-demo/payment-unreachable` — payment service unreachable from checkout (via the `paymentUnreachable` feature flag in the OTel demo)
-- `obs-ai-datasets/otel-demo/ad-high-cpu` — high CPU in the ad service (OpenTelemetry Demo `adHighCpu` feature flag)
+- `obs-ai-datasets/otel-demo/kafka-queue-problems` — Kafka queue overload and consumer lag in fraud-detection (via the `kafkaQueueProblems` feature flag in the OTel demo)
 
 Set `GCS_CREDENTIALS` before starting Scout. This must contain the full JSON service account credential string (not a file path):
 

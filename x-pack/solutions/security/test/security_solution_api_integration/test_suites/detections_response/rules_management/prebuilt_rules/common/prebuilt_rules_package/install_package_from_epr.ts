@@ -9,6 +9,10 @@ import {
   ENDPOINT_PACKAGE_NAME,
   PREBUILT_RULES_PACKAGE_NAME,
 } from '@kbn/security-solution-plugin/common/detection_engine/constants';
+import {
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+} from '@kbn/security-solution-plugin/common/api/initialization';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
@@ -22,14 +26,13 @@ import {
   deletePrebuiltRulesFleetPackage,
 } from '../../../../utils/rules/prebuilt_rules/delete_fleet_packages';
 import { installPrebuiltRulesFleetPackage } from '../../../../utils/rules/prebuilt_rules/install_prebuilt_rules_fleet_package';
+import { initializeSecuritySolution } from '../../../../utils/rules/prebuilt_rules/initialize_security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
   const retryService = getService('retry');
-  const detectionsApi = getService('detectionsApi');
-
   describe('@ess @serverless @skipInServerlessMKI Install prebuilt rules from EPR', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
@@ -39,28 +42,34 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('bootstraps prebuilt rules by installing required packages from EPR', async () => {
       await retryService.tryWithRetries(
-        'bootstrapPrebuiltRules',
+        'initializeSecuritySolution',
         async () => {
           await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
           await deleteEndpointFleetPackage({ supertest, es, log, retryService });
 
-          const { body } = await detectionsApi.bootstrapPrebuiltRules().expect(200);
+          const { body } = await initializeSecuritySolution(supertest, [
+            INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+            INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+          ]).expect(200);
 
-          expect(body).toMatchObject({
-            packages: expect.arrayContaining([
-              expect.objectContaining({
-                name: PREBUILT_RULES_PACKAGE_NAME,
-                status: 'installed',
-              }),
-              expect.objectContaining({
-                name: ENDPOINT_PACKAGE_NAME,
-                status: 'installed',
-              }),
-            ]),
+          const prebuiltRulesResult = body.flows[INITIALIZATION_FLOW_INIT_PREBUILT_RULES];
+          const endpointResult = body.flows[INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION];
+
+          expect(prebuiltRulesResult).toMatchObject({
+            status: 'ready',
+            payload: expect.objectContaining({
+              name: PREBUILT_RULES_PACKAGE_NAME,
+            }),
+          });
+          expect(endpointResult).toMatchObject({
+            status: 'ready',
+            payload: expect.objectContaining({
+              name: ENDPOINT_PACKAGE_NAME,
+            }),
           });
         },
         {
-          retryCount: 10, // 10s delay * 120 reties = 20 mins
+          retryCount: 10,
           retryDelay: 5000,
           timeout: 60000 * 10, // total timeout applied to all attempts altogether, 10 mins
         }

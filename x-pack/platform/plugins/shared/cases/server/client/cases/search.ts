@@ -23,7 +23,11 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesSearchParams } from '../types';
 import { validateSearchCasesCustomFields } from './validators';
-import { resolveExtendedFieldFilters } from '../../services/cases/extended_field_search_utils';
+import {
+  resolveExtendedFieldFilters,
+  tokenizeSearchForLabels,
+  resolveFieldLabelSearch,
+} from '../../services/cases/extended_field_search_utils';
 import { enrichCasesWithFieldLabels } from './utils';
 
 /**
@@ -139,18 +143,22 @@ export const search = async (
         })
       : [];
 
+    const templateMetadata = templateSOs.map((so) => ({
+      templateId: so.attributes.templateId,
+      templateVersion: so.attributes.templateVersion,
+      fieldNames: so.attributes.fieldNames,
+    }));
+
     const rawFilters = paramArgs.extendedFieldFilters;
     const resolvedExtendedFieldFilters =
       rawFilters && rawFilters.length > 0
-        ? resolveExtendedFieldFilters(
-            rawFilters,
-            templateSOs.map((so) => ({
-              templateId: so.attributes.templateId,
-              templateVersion: so.attributes.templateVersion,
-              fieldNames: so.attributes.fieldNames,
-            }))
-          )
+        ? resolveExtendedFieldFilters(rawFilters, templateMetadata)
         : undefined;
+
+    const fieldLabelResults = paramArgs.search
+      ? resolveFieldLabelSearch(tokenizeSearchForLabels(paramArgs.search), templateMetadata)
+      : [];
+    const resolvedFieldLabelFilters = fieldLabelResults.length > 0 ? fieldLabelResults : undefined;
 
     const [cases, statusStats] = await Promise.all([
       caseService.searchCasesGroupedByID({
@@ -161,6 +169,7 @@ export const search = async (
         },
         namespaces,
         extendedFieldFilters: resolvedExtendedFieldFilters,
+        fieldLabelFilters: resolvedFieldLabelFilters,
       }),
       caseService.getCaseStatusStats({
         searchOptions: statusStatsOptions,

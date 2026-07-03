@@ -23,6 +23,7 @@ export * from './get_log_level_field_with_fallback';
 export * from './get_log_event_type_field_with_fallback';
 export * from './get_should_show_field_handler';
 export * from './get_stack_trace_fields';
+export * from './is_esql_saved_search';
 export * from './nested_fields';
 export * from './get_field_value';
 export * from './get_visible_columns';

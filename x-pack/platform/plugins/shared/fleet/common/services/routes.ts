@@ -228,8 +228,17 @@ export const agentlessPolicyRouteService = {
   getCreatePath: () => {
     return AGENTLESS_POLICIES_ROUTES.CREATE_PATTERN;
   },
+  getListPath: () => {
+    return AGENTLESS_POLICIES_ROUTES.LIST_PATTERN;
+  },
+  getInfoPath: (policyId: string) => {
+    return AGENTLESS_POLICIES_ROUTES.GET_PATTERN.replace('{policyId}', policyId);
+  },
   getDeletePath: (policyId: string) => {
     return AGENTLESS_POLICIES_ROUTES.DELETE_PATTERN.replace('{policyId}', policyId);
+  },
+  getBulkThroughputPath: () => {
+    return AGENTLESS_POLICIES_ROUTES.BULK_THROUGHPUT_PATTERN;
   },
 };
 
@@ -326,6 +335,9 @@ export const agentRouteService = {
   getUnenrollPath: (agentId: string) =>
     AGENT_API_ROUTES.UNENROLL_PATTERN.replace('{agentId}', agentId),
   getBulkUnenrollPath: () => AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
+  getRemoveCollectorPath: (agentId: string) =>
+    AGENT_API_ROUTES.REMOVE_COLLECTOR_PATTERN.replace('{agentId}', agentId),
+  getBulkRemoveCollectorsPath: () => AGENT_API_ROUTES.BULK_REMOVE_COLLECTORS_PATTERN,
   getReassignPath: (agentId: string) =>
     AGENT_API_ROUTES.REASSIGN_PATTERN.replace('{agentId}', agentId),
   getBulkReassignPath: () => AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
@@ -427,6 +439,7 @@ export const enrollmentAPIKeyRouteService = {
   getInfoPath: (keyId: string) => ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN.replace('{keyId}', keyId),
   getDeletePath: (keyId: string) =>
     ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN.replace('{keyId}', keyId),
+  getBulkDeletePath: () => ENROLLMENT_API_KEY_ROUTES.BULK_DELETE_PATTERN,
 };
 
 export const uninstallTokensRouteService = {

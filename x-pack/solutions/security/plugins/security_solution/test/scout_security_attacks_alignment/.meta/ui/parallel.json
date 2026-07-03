@@ -1,5 +1,5 @@
 {
-  "sha1": "152027f2dac49012af5111c866305a451c9997c6",
+  "sha1": "3cf9437c9e5aa4e542ccaaa4b1886e8c67ce2766",
   "tests": [
     {
       "id": "343791488d016cc-1054e603e578b92",
@@ -24,7 +24,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 47,
+        "line": 52,
         "column": 14
       }
     },
@@ -40,7 +40,39 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 59,
+        "line": 64,
+        "column": 14
+      }
+    },
+    {
+      "id": "d8e9d8aa0b28c46-55ef49bdcbb0b9e",
+      "title": "Attacks UI manual execution smoke successfully triggers generation via UI without error from Attack Discovery page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_execution_ui.spec.ts",
+        "line": 39,
+        "column": 14
+      }
+    },
+    {
+      "id": "d8e9d8aa0b28c46-f8faa754b641717",
+      "title": "Attacks UI manual execution smoke successfully triggers generation via UI without error from Attacks page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_execution_ui.spec.ts",
+        "line": 110,
         "column": 14
       }
     },
@@ -61,6 +93,22 @@
       }
     },
     {
+      "id": "97e35cdc4d140e2-47e4d3edab4532d",
+      "title": "Attacks page filters filters attacks by type and persists selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_filters.spec.ts",
+        "line": 56,
+        "column": 14
+      }
+    },
+    {
       "id": "83af64580ba0bee-6831be53f693f72",
       "title": "Attacks page smoke renders critical attacks page components",
       "expectedStatus": "passed",
@@ -72,7 +120,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_page_smoke.spec.ts",
-        "line": 33,
+        "line": 38,
         "column": 14
       }
     },
@@ -88,13 +136,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_schedule.spec.ts",
-        "line": 34,
+        "line": 39,
         "column": 14
       }
     },
     {
-      "id": "cf8d4b3ea94cc93-6838d4ba4b2f1e3",
-      "title": "Attacks navigation updates side nav based on attacks alignment advanced setting",
+      "id": "f6efc9f182744e4-47742f95ac597e4",
+      "title": "Attacks schedule flyout opens the schedule details flyout from the attack table row",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -103,8 +151,24 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_schedule.spec.ts",
+        "line": 51,
+        "column": 14
+      }
+    },
+    {
+      "id": "cf8d4b3ea94cc93-6838d4ba4b2f1e3",
+      "title": "Attacks navigation updates side nav based on attacks alignment advanced setting",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/navigation.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 14
       }
     }

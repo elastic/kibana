@@ -16,7 +16,6 @@ import type {
   ObservationModule,
 } from '../types';
 import { computeStaleness, DEFAULT_ENGINE_CONFIG } from '../types';
-import { entityToKey } from '../observation_modules/utils';
 import { llmSynthesizeBatch } from './llm_synthesize';
 
 interface LeadGenerationEngineDeps {
@@ -177,7 +176,7 @@ const scoreEntities = (
   config: LeadGenerationEngineConfig,
   moduleWeights: ReadonlyMap<string, number>
 ): ScoredEntity[] => {
-  const entityByKey = new Map(allEntities.map((e) => [entityToKey(e), e]));
+  const entityByKey = new Map(allEntities.map((e) => [e.id, e]));
   const observationsByEntity = groupObservationsByEntity(observations);
 
   return [...observationsByEntity.entries()]
@@ -297,7 +296,7 @@ const groupByObservationPattern = (scoredEntities: ScoredEntity[]): ScoredEntity
 const buildByline = (group: ScoredEntity[], observations: Observation[]): string => {
   if (group.length === 1) {
     const { entity } = group[0];
-    const entityObs = observations.filter((o) => o.entityId === entityToKey(entity));
+    const entityObs = observations.filter((o) => o.entityId === entity.id);
 
     const totalAlerts = extractNumber(entityObs, 'total_alerts');
     const distinctRules =

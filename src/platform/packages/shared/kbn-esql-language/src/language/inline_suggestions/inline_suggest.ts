@@ -237,6 +237,20 @@ export async function inlineSuggest(
     const trimmedText = processQuery(textBeforeCursor).toLowerCase();
     const trimmedFullText = processQuery(fullText).toLowerCase();
 
+    // If the full text is empty, don't show any suggestions
+    if (!trimmedFullText) {
+      return { items: [] };
+    }
+
+    const lastLine = textBeforeCursor.split('\n').pop() ?? '';
+    if (!lastLine.trim()) {
+      return { items: [] };
+    }
+
+    if (lastLine.trim().startsWith('//')) {
+      return { items: [] };
+    }
+
     if (trimmedText !== trimmedFullText) {
       // Don't show suggestions if cursor is not at the end of the query
       return { items: [] };

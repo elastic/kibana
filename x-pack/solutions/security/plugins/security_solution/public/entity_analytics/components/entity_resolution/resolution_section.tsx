@@ -23,14 +23,15 @@ import {
   RESOLUTION_GROUP_LINK_TITLE,
   RESOLUTION_GROUP_LINK_TOOLTIP,
 } from './translations';
-import { RESOLUTION_SECTION_TEST_ID } from './test_ids';
+import { RESOLUTION_GROUP_LINK_TEST_ID, RESOLUTION_SECTION_TEST_ID } from './test_ids';
 import { getEntityId, getEntityName } from './helpers';
 
 interface ResolutionSectionProps {
   entityId: string;
   entityType: EntityType;
   scopeId: string;
-  openDetailsPanel: (path: EntityDetailsPath) => void;
+  /** When omitted, the header renders as plain, non-clickable text (no link, no arrow). */
+  openDetailsPanel?: (path: EntityDetailsPath) => void;
 }
 
 export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
@@ -51,7 +52,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
   const { openFlyout } = useExpandableFlyoutApi();
 
   const handleOpenResolutionTab = useCallback(() => {
-    openDetailsPanel({ tab: EntityDetailsLeftPanelTab.RESOLUTION_GROUP });
+    openDetailsPanel?.({ tab: EntityDetailsLeftPanelTab.RESOLUTION_GROUP });
   }, [openDetailsPanel]);
 
   const handleEntityNameClick = useCallback(
@@ -95,13 +96,17 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
       <ExpandablePanel
         header={{
           title: RESOLUTION_GROUP_LINK_TITLE,
-          link: {
-            callback: handleOpenResolutionTab,
-            tooltip: RESOLUTION_GROUP_LINK_TOOLTIP,
-          },
-          iconType: 'arrowStart',
+          // link + arrow only when navigation is wired up
+          ...(openDetailsPanel && {
+            link: {
+              callback: handleOpenResolutionTab,
+              tooltip: RESOLUTION_GROUP_LINK_TOOLTIP,
+            },
+            iconType: 'arrowStart',
+          }),
         }}
         expand={{ expandable: false }}
+        data-test-subj={RESOLUTION_GROUP_LINK_TEST_ID}
       >
         <ResolutionGroupTable
           group={group ?? null}

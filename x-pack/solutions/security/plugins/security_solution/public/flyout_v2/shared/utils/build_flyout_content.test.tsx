@@ -21,9 +21,17 @@ jest.mock('../../../flyout/document_details/right/components/table_field_name_ce
   },
 }));
 
-jest.mock('../../network_details', () => ({
+jest.mock('../../network/main', () => ({
   Network: ({ ip, flowTarget }: { ip: string; flowTarget: string }) => (
     <div data-test-subj="mockNetwork">{`${ip}-${flowTarget}`}</div>
+  ),
+}));
+
+jest.mock('../../entity/host/main', () => ({
+  Host: ({ hostName, hit }: { hostName: string; hit?: { flattened: Record<string, unknown> } }) => (
+    <div data-test-subj="mockHost" data-has-hit={hit ? 'true' : 'false'}>
+      {hostName}
+    </div>
   ),
 }));
 
@@ -35,30 +43,50 @@ jest.mock(
 );
 
 describe('buildFlyoutContent', () => {
-  it('should return a Network element for a source IP field', () => {
+  it('should return a Network element for a source IP field', async () => {
     const result = buildFlyoutContent('source.ip', '10.0.0.1');
 
     expect(result).not.toBeNull();
 
-    const { getByTestId } = render(result!);
-    expect(getByTestId('mockNetwork')).toHaveTextContent(`10.0.0.1-${FlowTargetSourceDest.source}`);
+    const { findByTestId } = render(result!);
+    expect(await findByTestId('mockNetwork')).toHaveTextContent(
+      `10.0.0.1-${FlowTargetSourceDest.source}`
+    );
   });
 
-  it('should return a Network element for a destination IP field', () => {
+  it('should return a Network element for a destination IP field', async () => {
     const result = buildFlyoutContent('destination.ip', '192.168.1.1');
 
     expect(result).not.toBeNull();
 
-    const { getByTestId } = render(result!);
-    expect(getByTestId('mockNetwork')).toHaveTextContent(
+    const { findByTestId } = render(result!);
+    expect(await findByTestId('mockNetwork')).toHaveTextContent(
       `192.168.1.1-${FlowTargetSourceDest.destination}`
     );
   });
 
-  it('should return null for a non-IP field', () => {
+  it('should return a Host element for a host.name field', async () => {
     const result = buildFlyoutContent('host.name', 'my-host');
 
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
+
+    const { findByTestId } = render(result!);
+    expect(await findByTestId('mockHost')).toHaveTextContent('my-host');
+  });
+
+  it('should pass hit to Host element when provided', async () => {
+    const mockHit = {
+      id: 'test-doc-id',
+      raw: { _id: 'test-doc-id', _index: 'test-index' },
+      flattened: { 'host.name': 'my-host' },
+    } as unknown as Parameters<typeof buildFlyoutContent>[2];
+
+    const result = buildFlyoutContent('host.name', 'my-host', mockHit);
+
+    expect(result).not.toBeNull();
+
+    const { findByTestId } = render(result!);
+    expect(await findByTestId('mockHost')).toHaveAttribute('data-has-hit', 'true');
   });
 
   it('should return null for an unknown field', () => {

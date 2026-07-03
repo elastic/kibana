@@ -58,6 +58,7 @@ interface ToggleOptions {
 interface UseToggleEntityAnalyticsReturn {
   status: EntityAnalyticsStatus;
   isLoading: boolean;
+  isStatusLoading: boolean;
   toggle: () => Promise<void>;
   isEntityStoreFeatureFlagDisabled: boolean;
   errors: EntityAnalyticsErrors;
@@ -77,7 +78,7 @@ export const useToggleEntityAnalytics = ({
   const { uiSettings } = useKibana().services;
   const invalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery();
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
-  const isEntityStoreV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const isEntityStoreV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const riskEngineStatusQuery = useRiskEngineStatus({
     refetchInterval: TEN_SECONDS,
@@ -120,8 +121,12 @@ export const useToggleEntityAnalytics = ({
   const riskEngineState = summarizeOperations(riskEngineMutations);
   const entityStoreState = summarizeOperations(entityStoreMutations);
 
+  const isStatusLoading = entityStoreStatusQuery.isLoading || riskEngineStatusQuery.isLoading;
+
   const isLoading =
     isToggling || riskEngineState.isPending || entityStoreState.isPending || isSavingSettings;
+
+  const isToggleBlocked = isLoading || isStatusLoading;
 
   const riskEngineStatus = riskEngineStatusQuery.data?.risk_engine_status;
 
@@ -158,7 +163,7 @@ export const useToggleEntityAnalytics = ({
   }, [entityStoreStatus, installEntityStoreMutation, startEntityStoreMutation]);
 
   const toggle = useCallback(async () => {
-    if (isLoading) {
+    if (isToggleBlocked) {
       return;
     }
 
@@ -223,7 +228,7 @@ export const useToggleEntityAnalytics = ({
       setIsToggling(false);
     }
   }, [
-    isLoading,
+    isToggleBlocked,
     riskEngineStatus,
     entityStoreStatus,
     isEntityStoreFeatureFlagDisabled,
@@ -242,6 +247,7 @@ export const useToggleEntityAnalytics = ({
   return {
     status,
     isLoading,
+    isStatusLoading,
     toggle,
     isEntityStoreFeatureFlagDisabled,
     errors,

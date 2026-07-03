@@ -9,8 +9,12 @@ import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import styled from '@emotion/styled';
 import { asDuration } from '../../../../../../common/utils/formatters';
-import type { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { Legend } from '../legend';
+import type { Mark } from '.';
+
+export interface AgentMark extends Mark {
+  type: 'agentMark';
+}
 
 const NameContainer = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.euiTheme.colors.mediumShade};

@@ -41,7 +41,7 @@ export type SideNavigationProps = NavigationProps;
  * `SideNavigation` — standalone navigation component for non-Kibana applications.
  *
  * Wraps the internal `Navigation` component. Kibana-specific dependencies
- * (`@kbn/i18n`, `@kbn/core-chrome-layout-constants`) are replaced at build
+ * (`@kbn/i18n`, `@kbn/ui-chrome-layout-constants`) are replaced at build
  * time via webpack aliases.
  */
 export const SideNavigation = (props: SideNavigationProps) => {

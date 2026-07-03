@@ -60,7 +60,7 @@ export const VisualizationTableList = ({
   savedObjectsTagging,
   parentProps,
 }: VisualizationTableListProps) => {
-  const { getBreadcrumbs, onFetchSuccess, setPageDataTestSubject } = parentProps;
+  const { getBreadcrumbs, onFetchSuccess, setPageDataTestSubject, showCreateButton } = parentProps;
   const euiThemeContext = useEuiTheme();
   const tableStyles = useMemo(
     () => getVisualizationListingTableStyles(euiThemeContext),
@@ -74,16 +74,25 @@ export const VisualizationTableList = ({
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
   const closeNewVisModal = useRef(() => {});
 
-  const createNewVis = useCallback(async () => {
-    const currentApp = await firstValueFrom(core.application.currentAppId$);
-    const breadcrumbs = currentApp ? getBreadcrumbs?.(currentApp) : undefined;
-    closeNewVisModal.current = visualizations.showNewVisModal({
-      originatingApp: currentApp,
-      originatingPath: window.location.hash,
-      breadcrumbs,
-      outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
-    });
-  }, [visualizations, core.application, getBreadcrumbs]);
+  const createNewVis = useCallback(() => {
+    firstValueFrom(core.application.currentAppId$)
+      .then((currentApp) => {
+        const breadcrumbs = currentApp ? getBreadcrumbs?.(currentApp) : undefined;
+        closeNewVisModal.current = visualizations.showNewVisModal({
+          originatingApp: currentApp,
+          originatingPath: window.location.hash,
+          breadcrumbs,
+          outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
+        });
+      })
+      .catch((error) => {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('visualizationListing.visualizeListingCreateErrorTitle', {
+            defaultMessage: 'Error opening new visualization modal',
+          }),
+        });
+      });
+  }, [visualizations, core.application, core.notifications.toasts, getBreadcrumbs]);
 
   useEffect(() => {
     return () => {
@@ -244,7 +253,7 @@ export const VisualizationTableList = ({
           customValidators: contentEditorValidators,
         }}
         emptyPrompt={noItemsFragment}
-        createItem={createNewVis}
+        createItem={showCreateButton === false ? undefined : createNewVis}
         customTableColumn={getCustomColumn()}
         customSortingOptions={getCustomSortingOptions()}
         initialPageSize={initialPageSize}

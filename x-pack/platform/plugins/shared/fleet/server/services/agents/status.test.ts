@@ -237,6 +237,14 @@ describe('getAgentStatusForAgentPolicy', () => {
 });
 
 describe('getIncomingDataByAgentsId', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
+
   it('should work with a large set of datastream patterns', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -273,5 +281,25 @@ describe('getIncomingDataByAgentsId', () => {
       ],
       dataPreview: [],
     });
+  });
+
+  it('should filter by event.ingested rather than @timestamp', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true } as any);
+    esClient.search.mockReturnValueOnce({
+      hits: {},
+      aggregations: { agent_ids: { buckets: [] } },
+    } as any);
+
+    await getIncomingDataByAgentsId({
+      esClient,
+      agentsIds: ['agentId1'],
+      dataStreamPattern: 'logs-*',
+    });
+
+    const searchArgs = esClient.search.mock.calls[0][0] as any;
+    const rangeFilter = searchArgs.query.bool.filter.find((f: any) => f.range);
+    expect(Object.keys(rangeFilter.range)).toEqual(['event.ingested']);
   });
 });

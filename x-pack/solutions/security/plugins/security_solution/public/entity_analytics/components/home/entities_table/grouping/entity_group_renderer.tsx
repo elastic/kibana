@@ -30,7 +30,7 @@ import { getRiskLevel } from '../../../../../../common/entity_analytics/risk_eng
 import { formatRiskScore } from '../../../../common/utils';
 import { getRiskScoreColors } from '../risk_score_cell';
 import type { EntitiesGroupingAggregation, TargetMetadataMap } from './use_fetch_grouped_data';
-import { ENTITY_GROUPING_OPTIONS } from '../constants';
+import { ENTITY_GROUPING_OPTIONS, TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT } from '../constants';
 
 const entitiesStatLabel = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entitiesTable.group.stat.entities',
@@ -50,9 +50,11 @@ const openEntityFlyoutLabel = i18n.translate(
 const ResolutionGroupPanel = ({
   bucket,
   targetMetadata,
+  tableId,
 }: {
   bucket: RawBucket<EntitiesGroupingAggregation>;
   targetMetadata: TargetMetadataMap;
+  tableId: string;
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
 
@@ -80,13 +82,13 @@ const ResolutionGroupPanel = ({
           params: {
             [panelParam]: targetEntityName,
             entityId,
-            contextID: ENTITY_ANALYTICS_TABLE_ID,
-            scopeId: ENTITY_ANALYTICS_TABLE_ID,
+            contextID: tableId,
+            scopeId: tableId,
           },
         },
       });
     },
-    [openFlyout, targetEntityName, entityType, entityId]
+    [openFlyout, targetEntityName, entityType, entityId, tableId]
   );
 
   return (
@@ -96,6 +98,7 @@ const ResolutionGroupPanel = ({
           <EuiToolTip content={openEntityFlyoutLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={openEntityFlyoutLabel}
+              data-test-subj={TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT}
               iconType="expand"
               size="xs"
               onClick={handleOpenFlyout}
@@ -118,14 +121,19 @@ const ResolutionGroupPanel = ({
   );
 };
 
-export const createGroupPanelRenderer = (targetMetadata: TargetMetadataMap) => {
+export const createGroupPanelRenderer = (
+  targetMetadata: TargetMetadataMap,
+  tableId: string = ENTITY_ANALYTICS_TABLE_ID
+) => {
   const GroupPanelRenderer = (
     selectedGroup: string,
     bucket: RawBucket<EntitiesGroupingAggregation>,
     _nullGroupMessage?: string
   ) => {
     if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
-      return <ResolutionGroupPanel bucket={bucket} targetMetadata={targetMetadata} />;
+      return (
+        <ResolutionGroupPanel bucket={bucket} targetMetadata={targetMetadata} tableId={tableId} />
+      );
     }
 
     if (selectedGroup === ENTITY_GROUPING_OPTIONS.ENTITY_TYPE) {

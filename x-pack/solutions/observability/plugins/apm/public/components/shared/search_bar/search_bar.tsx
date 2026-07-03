@@ -14,14 +14,17 @@ import { TimeComparison } from '../time_comparison';
 import { TransactionTypeSelect } from '../transaction_type_select';
 import { UnifiedSearchBar } from '../unified_search_bar';
 import { useSecondaryFiltersWidthStyle } from './use_secondary_filters_width_style';
+import { AnomalyThresholdSelect } from '../anomaly_threshold_select';
 
 interface Props {
   hidden?: boolean;
   showUnifiedSearchBar?: boolean;
+  showFilterBar?: boolean;
   showTimeComparison?: boolean;
   showEnvironmentFilter?: boolean;
   showQueryInput?: boolean;
   showTransactionTypeSelector?: boolean;
+  showAnomalyThresholdSelector?: boolean;
   searchBarPlaceholder?: string;
   searchBarBoolFilter?: QueryDslQueryContainer[];
 }
@@ -29,16 +32,21 @@ interface Props {
 export function SearchBar({
   hidden = false,
   showUnifiedSearchBar = true,
+  showFilterBar = false,
   showTimeComparison = false,
   showEnvironmentFilter = false,
   showTransactionTypeSelector = false,
+  showAnomalyThresholdSelector = false,
   showQueryInput = true,
   searchBarPlaceholder,
   searchBarBoolFilter,
 }: Props) {
   const { isMedium } = useBreakpoints();
   const hasSecondaryFilters =
-    showTransactionTypeSelector || showEnvironmentFilter || showTimeComparison;
+    showTransactionTypeSelector ||
+    showEnvironmentFilter ||
+    showTimeComparison ||
+    showAnomalyThresholdSelector;
 
   const { secondaryFiltersWidthStyle, setSearchBarContainerRef } = useSecondaryFiltersWidthStyle({
     isMedium,
@@ -57,6 +65,7 @@ export function SearchBar({
             placeholder={searchBarPlaceholder}
             boolFilter={searchBarBoolFilter}
             showQueryInput={showQueryInput}
+            showFilterBar={showFilterBar}
             showDatePicker
             showSubmitButton
           />
@@ -91,6 +100,12 @@ export function SearchBar({
                   <TimeComparison compressed fullWidth />
                 </EuiFlexItem>
               )}
+
+              {showAnomalyThresholdSelector && (
+                <EuiFlexItem>
+                  <AnomalyThresholdSelect compressed fullWidth />
+                </EuiFlexItem>
+              )}
             </EuiFlexGrid>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -114,6 +129,12 @@ export function SearchBar({
             {showTimeComparison && (
               <EuiFlexItem>
                 <TimeComparison compressed fullWidth />
+              </EuiFlexItem>
+            )}
+
+            {showAnomalyThresholdSelector && (
+              <EuiFlexItem>
+                <AnomalyThresholdSelect compressed fullWidth />
               </EuiFlexItem>
             )}
           </EuiFlexGrid>

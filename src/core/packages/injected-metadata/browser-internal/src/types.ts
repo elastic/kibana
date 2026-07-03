@@ -29,6 +29,7 @@ export interface InjectedMetadataParams {
 export interface InternalInjectedMetadataSetup {
   getBasePath: () => string;
   getServerBasePath: () => string;
+  getSpaceId: () => string;
   getPublicBaseUrl: () => string | undefined;
   getAssetsHrefBase: () => string;
   getKibanaBuildNumber: () => number;
@@ -64,6 +65,9 @@ export interface InternalInjectedMetadataSetup {
         initialFeatureFlags: Record<string, unknown>;
       }
     | undefined;
+  getUserStorage: () => {
+    values: Record<string, unknown>;
+  };
 }
 
 /** @internal */

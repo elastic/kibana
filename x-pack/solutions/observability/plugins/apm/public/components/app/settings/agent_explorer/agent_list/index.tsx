@@ -54,7 +54,6 @@ export function getAgentsColumns({
             content={i18n.translate('xpack.apm.agentExplorerTable.viewAgentInstances', {
               defaultMessage: 'Toggle agent instances view',
             })}
-            delay="long"
           >
             <EuiButtonIcon
               size="xs"
@@ -162,7 +161,13 @@ export function getAgentsColumns({
                     defaultMessage: 'Latest Agent Version',
                   })}
                   &nbsp;
-                  <EuiIcon size="s" color="subdued" type="question" className="eui-alignCenter" />
+                  <EuiIcon
+                    size="s"
+                    color="subdued"
+                    type="question"
+                    className="eui-alignCenter"
+                    aria-hidden={true}
+                  />
                 </>
               </EuiToolTip>
             ),

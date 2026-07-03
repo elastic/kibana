@@ -28,6 +28,7 @@ import { registerSiemRuleMigrationsCreateRulesRoute } from './rules/create';
 import { registerSiemRuleMigrationsGetRulesRoute } from './rules/get';
 import { registerSiemRuleMigrationsEnhanceRoute } from './rules/enhance';
 import { registerSiemRuleMigrationsCreateQRadarRulesRoute } from './rules/qradar/create';
+import { registerSiemRuleMigrationsCreateSentinelRulesRoute } from './rules/sentinel/create';
 import { registerSiemRuleMigrationsDeleteRoute } from './delete';
 import { registerSiemRuleMigrationsIntegrationsStatsRoute } from './integrations_stats';
 import { registerSiemRuleMigrationsUpdateRoute } from './update';
@@ -54,6 +55,11 @@ export const registerSiemRuleMigrationsRoutes = (
   if (config.experimentalFeatures.qradarRulesMigration) {
     registerSiemRuleMigrationsCreateQRadarRulesRoute(router, logger);
     registerSiemRuleMigrationsEnhanceRoute(router, logger);
+  }
+
+  /** Sentinel */
+  if (config.experimentalFeatures.sentinelRulesMigration) {
+    registerSiemRuleMigrationsCreateSentinelRulesRoute(router, logger);
   }
   /** *******/
   /** *******/

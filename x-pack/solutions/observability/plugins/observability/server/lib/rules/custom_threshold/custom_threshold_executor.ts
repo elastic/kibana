@@ -9,6 +9,7 @@ import { isEqual } from 'lodash';
 import {
   ALERT_EVALUATION_VALUES,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_TIME_RANGE,
   ALERT_REASON,
   ALERT_GROUP,
   ALERT_GROUPING,
@@ -153,7 +154,7 @@ export const createCustomThresholdExecutor = ({
     // Calculate initial start and end date with no time window, as each criterion has its own time window
     const { dateStart, dateEnd } = getTimeRange();
     const esQueryConfig = await getEsQueryConfig(uiSettingsClient);
-    const alertResults = await evaluateRule(
+    const criterionResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
       dataViewIndexPattern,
@@ -168,6 +169,12 @@ export const createCustomThresholdExecutor = ({
       state.lastRunTimestamp,
       previousMissingGroups
     );
+
+    const alertResults = criterionResults.map((r) => r.evaluations);
+    const evaluationTimeRange = {
+      gte: new Date(Math.min(...criterionResults.map((r) => r.timeRange.start))).toISOString(),
+      lte: new Date(Math.max(...criterionResults.map((r) => r.timeRange.end))).toISOString(),
+    };
 
     const resultGroupSet = new Set<string>();
     for (const resultSet of alertResults) {
@@ -286,6 +293,7 @@ export const createCustomThresholdExecutor = ({
             [ALERT_REASON]: reason,
             [ALERT_EVALUATION_VALUES]: evaluationValues,
             [ALERT_EVALUATION_THRESHOLD]: threshold,
+            [ALERT_EVALUATION_TIME_RANGE]: evaluationTimeRange,
             // Array of Group, example: [ { field: 'host.name', value: 'host-0' }]
             [ALERT_GROUP]: groups,
             // Object, example: { host: { name: 'host-0' } }
@@ -301,6 +309,7 @@ export const createCustomThresholdExecutor = ({
           typeof params.searchConfiguration?.index === 'string'
             ? params.searchConfiguration?.index
             : params.searchConfiguration?.index?.title;
+        const singleCriterion = alertResults.length === 1 ? alertResults[0][group] : undefined;
         alertsClient.setAlertData({
           id: `${group}`,
           context: {
@@ -322,10 +331,12 @@ export const createCustomThresholdExecutor = ({
               dataViewId: dataViewIdTitle ?? dataViewId,
               groups,
               logsLocator,
-              metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
+              metrics: singleCriterion?.metrics ?? [],
               searchConfiguration: params.searchConfiguration,
               startedAt: indexedStartedAt,
               spaceId,
+              timeSize: singleCriterion?.timeSize,
+              timeUnit: singleCriterion?.timeUnit,
             }),
             ...additionalContext,
           },
@@ -357,6 +368,8 @@ export const createCustomThresholdExecutor = ({
           metrics: params.criteria[0]?.metrics,
           searchConfiguration: params.searchConfiguration,
           startedAt: indexedStartedAt,
+          timeSize: params.criteria[0]?.timeSize,
+          timeUnit: params.criteria[0]?.timeUnit,
         }),
         reason: alertHits?.[ALERT_REASON],
         ...additionalContext,

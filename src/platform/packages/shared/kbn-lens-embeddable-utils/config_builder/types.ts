@@ -63,6 +63,7 @@ export type LensDataset = LensDataviewDataset | LensDatatableDataset | LensESQLD
 
 export interface LensBaseConfig {
   title: string;
+  description?: string;
   /** default data view id or index pattern to use, it can be overriden on each query */
   dataset?: LensDataset;
 }

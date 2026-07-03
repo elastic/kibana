@@ -11,7 +11,7 @@ import type { Criteria, EuiBasicTableProps, EuiTableRowProps } from '@elastic/eu
 import { EuiBasicTable, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
-import { useOverviewStatus } from '../../../../hooks/use_overview_status';
+import { useOverviewStatusState } from '../../../../hooks/use_overview_status';
 import { selectOverviewFlyoutConfig, selectOverviewPageState } from '../../../../../../state';
 import type { MonitorOverviewPageState } from '../../../../../../state/overview/models';
 import { setOverviewPageStateAction } from '../../../../../../state/overview';
@@ -46,9 +46,7 @@ export const MonitorsTable = ({
   items: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
 }) => {
-  const { loaded, status, loading } = useOverviewStatus({
-    scopeStatusByLocation: true,
-  });
+  const { loaded, status, loading } = useOverviewStatusState();
   const {
     pageOfItems,
     pagination,

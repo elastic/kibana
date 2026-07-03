@@ -25,7 +25,11 @@ import { Operations } from '../../authorization';
  */
 export interface TemplatesSubClient {
   getAllTemplates(params: TemplatesFindRequest): Promise<TemplatesFindResponse>;
-  getTemplate(templateId: string, version?: string): Promise<SavedObject<Template> | undefined>;
+  getTemplate(
+    templateId: string,
+    version?: string,
+    options?: { includeDeleted?: boolean }
+  ): Promise<SavedObject<Template> | undefined>;
   createTemplate(input: CreateTemplateInput): Promise<SavedObject<Template>>;
   updateTemplate(templateId: string, input: UpdateTemplateInput): Promise<SavedObject<Template>>;
   deleteTemplate(templateId: string): Promise<void>;
@@ -45,8 +49,8 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
   const templatesSubClient: TemplatesSubClient = {
     getAllTemplates: (params: TemplatesFindRequest) => templatesService.getAllTemplates(params),
 
-    getTemplate: (templateId: string, version?: string) =>
-      templatesService.getTemplate(templateId, version),
+    getTemplate: (templateId: string, version?: string, options?: { includeDeleted?: boolean }) =>
+      templatesService.getTemplate(templateId, version, options),
 
     createTemplate: async (input: CreateTemplateInput) => {
       const id = uuidv4();

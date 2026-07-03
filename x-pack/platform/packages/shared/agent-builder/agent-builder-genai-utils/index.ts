@@ -15,6 +15,7 @@ export {
   partitionByCcs,
   getFieldsFromFieldCaps,
   getIndexFields,
+  validateEsqlQuery,
   type IndexFieldsResult,
   type IndexFieldType,
   type MappingField,
@@ -29,6 +30,7 @@ export {
   type AliasSearchSource,
   type IndexSearchSource,
   type DataStreamSearchSource,
+  type DatasetSearchSource,
   type EsSearchSource,
   type ListSourcesResponse,
 } from './tools/steps';
@@ -37,6 +39,8 @@ export {
   type IndexExplorerResponse,
   generateEsql,
   type GenerateEsqlResponse,
+  generateEsqlCompletion,
+  type GenerateEsqlCompletionResponse,
   relevanceSearch,
   type RelevanceSearchResponse,
   naturalLanguageSearch,
@@ -44,3 +48,9 @@ export {
   runSearchTool,
   type TopSnippetsConfig,
 } from './tools';
+export {
+  resolveResourceForEsqlWithSamplingStats,
+  type ResolvedResourceWithSampling,
+  formatResourceWithSampledValues,
+} from './tools/utils/resources';
+export { type MappingFieldWithStats } from './tools/utils/sampling';

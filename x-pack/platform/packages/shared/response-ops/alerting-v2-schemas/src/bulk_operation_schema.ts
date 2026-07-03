@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { BULK_FILTER_MAX_RULES } from './constants';
+import { BULK_FILTER_MAX_RULES, ID_MAX_LENGTH, MAX_BULK_ITEMS, MAX_KQL_LENGTH } from './constants';
 
 /**
  * Schema for bulk operation request bodies.
@@ -20,13 +20,14 @@ import { BULK_FILTER_MAX_RULES } from './constants';
 export const bulkOperationParamsSchema = z
   .object({
     ids: z
-      .array(z.string())
+      .array(z.string().min(1).max(ID_MAX_LENGTH))
       .min(1)
-      .max(100)
+      .max(MAX_BULK_ITEMS)
       .optional()
       .describe('Explicit list of rule IDs to operate on.'),
     filter: z
       .string()
+      .max(MAX_KQL_LENGTH)
       .optional()
       .describe(
         `KQL filter string to match rules. At most ${BULK_FILTER_MAX_RULES} matching rules are processed per request.`

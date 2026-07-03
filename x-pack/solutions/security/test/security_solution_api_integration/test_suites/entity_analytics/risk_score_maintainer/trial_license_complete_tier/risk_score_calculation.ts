@@ -60,8 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/261160
-  describe.skip('@ess @serverless @serverlessQA Risk Score Maintainer Entity Calculation', function () {
+  describe('@ess @serverless @serverlessQA Risk Score Maintainer Entity Calculation', function () {
     this.tags(['esGate']);
 
     context('with test log data', () => {

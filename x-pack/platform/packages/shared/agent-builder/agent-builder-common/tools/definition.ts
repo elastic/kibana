@@ -76,6 +76,10 @@ export interface ToolDefinition<
    * The type-specific configuration for this tool.
    */
   configuration: TConfig;
+  /**
+   * When true, this tool is only available when experimental features are enabled.
+   */
+  experimental: boolean;
 }
 
 export interface ToolDefinitionWithSchema<

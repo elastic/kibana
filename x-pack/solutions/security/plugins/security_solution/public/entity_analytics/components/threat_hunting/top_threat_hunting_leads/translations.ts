@@ -32,6 +32,16 @@ export const OPTIONS = i18n.translate(
   { defaultMessage: 'Options' }
 );
 
+export const COLLAPSE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.collapse',
+  { defaultMessage: 'Collapse' }
+);
+
+export const EXPAND = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.expand',
+  { defaultMessage: 'Expand' }
+);
+
 export const AUTO_GENERATE_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.autoGenerate',
   { defaultMessage: 'Auto-generate every 24 hours' }
@@ -210,6 +220,11 @@ export const NO_CONNECTOR_DESCRIPTION = i18n.translate(
 export const SCHEDULE_UPDATE_ERROR = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.scheduleUpdateError',
   { defaultMessage: 'Failed to update schedule' }
+);
+
+export const GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateDisabledNoWritePermissionTooltip',
+  { defaultMessage: "You don't have write access to the leads index" }
 );
 
 export const getStalenessLabel = (staleness: string): string => {

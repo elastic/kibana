@@ -5,10 +5,24 @@
  * 2.0.
  */
 
-import type { AlertScenario } from './types';
-import { PAYMENT_SERVICE_GCS } from './constants';
+import type { AlertRuleConfig, AlertScenario } from './types';
+import { AD_HIGH_CPU_GCS, PAYMENT_SERVICE_GCS, PAYMENT_UNREACHABLE_GCS } from './constants';
+
+const AD_HIGH_CPU_METRICS_DATA_VIEW = {
+  id: 'ad-high-cpu-eval-metrics',
+  title: 'metrics-*',
+  timeFieldName: '@timestamp',
+  sourceFilters: [],
+  fieldFormats: {},
+  runtimeFieldMap: {},
+  allowNoIndex: false,
+  name: 'metrics-*',
+  allowHidden: false,
+} as const;
 
 const PAYMENT_ERROR_COUNT_ALERT_SCENARIO_ID = 'payment-error-count-alert';
+const PAYMENT_UNREACHABLE_ALERT_SCENARIO_ID = 'payment-unreachable-alert';
+const AD_HIGH_CPU_ALERT_SCENARIO_ID = 'ad-high-cpu-alert';
 
 const PAYMENT_ALERT_EXPECTED_OUTPUT = `-   Summary: A single handled error was detected in the payment service, specifically related to an invalid token during a payment request. The error appears isolated, with no evidence of broader anomalies or downstream impact.
 
@@ -25,6 +39,29 @@ const PAYMENT_ALERT_EXPECTED_OUTPUT = `-   Summary: A single handled error was d
     -   Review recent traces for the affected error group to confirm scope and verify if the error is isolated to specific users or requests.
     -   Validate that the error is properly handled and does not impact payment processing for valid tokens.
     -   If no further errors occur, monitor for recurrence but no urgent action is required. If errors increase, investigate token validation logic and upstream authentication flows.`;
+
+const PAYMENT_UNREACHABLE_ALERT_EXPECTED = `-   Summary: An APM error count alert fired for the frontend service because the payment service is unreachable. The checkout flow fails with a gRPC Unavailable error ("name resolver error: produced zero addresses") when attempting to charge a card via the payment service. This is a connectivity or infrastructure failure, not an application code defect.
+
+-   Assessment: The payment service is entirely unreachable from the checkout service — DNS or name resolution returns zero addresses for the payment endpoint. This causes all checkout attempts to fail, resulting in user-facing errors propagated through the frontend. The \`paymentUnreachable\` feature flag in flagd is the most likely cause if this is a test environment; otherwise, this indicates a real infrastructure issue (service down, DNS failure, network partition).
+
+-   Related signals:
+
+    -   Errors: "failed to charge card: could not charge the card: rpc error: code = Unavailable desc = name resolver error: produced zero addresses" (apmErrors, last seen within alert window, Direct) — all checkout/payment flows fail.
+    -   Anomalies: Payment service absent from traces (apmServiceSummary, alert window, Direct) — the payment service is not running or not reachable.
+    -   Downstream: checkout and frontend-proxy report errors due to payment unavailability (apmServiceTopology, Indirect).
+-   Immediate actions:
+
+    1.  Verify the payment service is running, healthy, and reachable from the checkout service's network.
+    2.  Check DNS resolution for the payment service endpoint from within the checkout service's environment.
+    3.  If using the \`paymentUnreachable\` feature flag, verify its state in flagd and disable it if unintentional.`;
+
+const AD_HIGH_CPU_ALERT_EXPECTED = `-   Summary: The ad service is experiencing severely elevated transaction latency, indicating a significant performance degradation that is likely impacting end users.
+
+-   Assessment: CPU runtime metrics show elevated CPU utilization well above healthy levels.
+-   Next Steps:
+
+    1.  Check logs and errors for the ad service for timeout patterns or exception spikes.
+    2.  Consider scaling out the ad service (currently 1 instance) to handle the increased load.`;
 
 export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
   [PAYMENT_ERROR_COUNT_ALERT_SCENARIO_ID]: {
@@ -55,6 +92,83 @@ export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
       alertsIndex: '.alerts-observability.apm.alerts-default',
     },
     expectedOutput: PAYMENT_ALERT_EXPECTED_OUTPUT,
+  },
+  [PAYMENT_UNREACHABLE_ALERT_SCENARIO_ID]: {
+    id: PAYMENT_UNREACHABLE_ALERT_SCENARIO_ID,
+    description: 'APM error count alert for frontend when payment service is unreachable',
+    snapshotName: 'payment-unreachable',
+    gcs: PAYMENT_UNREACHABLE_GCS,
+    alertRule: {
+      ruleParams: {
+        consumer: 'apm',
+        enabled: true,
+        name: 'Error count threshold - payment unreachable',
+        rule_type_id: 'apm.error_rate',
+        tags: [],
+        params: {
+          threshold: 1,
+          windowSize: 5,
+          windowUnit: 'm',
+          serviceName: 'frontend',
+          environment: 'ENVIRONMENT_ALL',
+          groupBy: ['service.name', 'service.environment'],
+        },
+        actions: [],
+        schedule: {
+          interval: '1m',
+        },
+      },
+      alertsIndex: '.alerts-observability.apm.alerts-default',
+    },
+    expectedOutput: PAYMENT_UNREACHABLE_ALERT_EXPECTED,
+  },
+  [AD_HIGH_CPU_ALERT_SCENARIO_ID]: {
+    id: AD_HIGH_CPU_ALERT_SCENARIO_ID,
+    description: 'Custom threshold alert for ad service latency under high CPU load',
+    snapshotName: 'ad-high-cpu',
+    gcs: AD_HIGH_CPU_GCS,
+    alertRule: {
+      ruleParams: {
+        consumer: 'observability',
+        enabled: true,
+        name: 'Custom threshold - ad service high CPU latency',
+        rule_type_id: 'observability.rules.custom_threshold',
+        tags: [],
+        params: {
+          criteria: [
+            {
+              comparator: '>',
+              threshold: [15000],
+              timeSize: 5,
+              timeUnit: 'm',
+              metrics: [
+                {
+                  name: 'A',
+                  field: 'transaction.duration.histogram.values',
+                  aggType: 'avg',
+                },
+              ],
+            },
+          ],
+          alertOnNoData: false,
+          alertOnGroupDisappear: false,
+          groupBy: ['service.name', 'host.name'],
+          searchConfiguration: {
+            query: {
+              query: 'service.name: "ad"',
+              language: 'kuery',
+            },
+            index: AD_HIGH_CPU_METRICS_DATA_VIEW,
+          },
+        },
+        actions: [],
+        schedule: {
+          interval: '1m',
+        },
+      } as unknown as AlertRuleConfig['ruleParams'],
+      alertsIndex: '.alerts-observability.threshold.alerts-default',
+    },
+    expectedOutput: AD_HIGH_CPU_ALERT_EXPECTED,
   },
 };
 

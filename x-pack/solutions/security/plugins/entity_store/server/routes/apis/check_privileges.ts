@@ -10,6 +10,9 @@ import {
   API_VERSIONS,
   ENTITY_STORE_ROUTES,
   getEntitiesAlias,
+  getLatestEntityIndexPattern,
+  getEntityMetadataAlias,
+  getMetadataEntityIndexPattern,
   ENTITY_LATEST,
 } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
@@ -46,17 +49,26 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
         const entityStoreCtx = await ctx.entityStore;
         const security = entityStoreCtx.security;
         const spaceId = entityStoreCtx.namespace;
-        const entitiesIndexPattern = getEntitiesAlias(ENTITY_LATEST, spaceId);
+        const entitiesAliasPattern = getEntitiesAlias(ENTITY_LATEST, spaceId);
+        const latestEntityIndexPattern = getLatestEntityIndexPattern(spaceId);
+        const metadataAliasPattern = getEntityMetadataAlias(spaceId);
+        const metadataEntityIndexPattern = getMetadataEntityIndexPattern(spaceId);
 
         const response = await checkAndFormatPrivileges({
-          indexPattern: entitiesIndexPattern,
+          // Metadata indices are written by asInternalUser — exclude from has_read/write_permissions
+          // calculation (which gates the enable-store button) while still checking read access via
+          // privilegesToCheck so has_all_required correctly requires read on metadata.
+          indexPatterns: [entitiesAliasPattern, latestEntityIndexPattern],
           request: req,
           security,
           privilegesToCheck: {
             elasticsearch: {
               cluster: [],
               index: {
-                [entitiesIndexPattern]: ['read', 'write'],
+                [entitiesAliasPattern]: ['read', 'write'],
+                [latestEntityIndexPattern]: ['read', 'write'],
+                [metadataAliasPattern]: ['read'],
+                [metadataEntityIndexPattern]: ['read'],
               },
             },
           },

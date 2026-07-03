@@ -26,15 +26,21 @@ import type {
   AsCodeDataViewSpec,
   AsCodeFieldSettings,
   AsCodeRuntimeField,
+  AsCodeSavedCompositeRuntimeField,
+  AsCodeSavedDataView,
+  AsCodeSavedFieldSettings,
+  AsCodeSavedRuntimeField,
 } from '@kbn/as-code-data-views-schema';
 
-export function isRuntimeField(field: AsCodeFieldSettings): field is AsCodeRuntimeField {
+export function isRuntimeField(
+  field: AsCodeFieldSettings | AsCodeSavedFieldSettings
+): field is AsCodeRuntimeField | AsCodeSavedRuntimeField {
   return 'type' in field;
 }
 
 export function isCompositeRuntimeField(
-  field: AsCodeFieldSettings
-): field is AsCodeCompositeRuntimeField {
+  field: AsCodeFieldSettings | AsCodeSavedFieldSettings
+): field is AsCodeCompositeRuntimeField | AsCodeSavedCompositeRuntimeField {
   return isRuntimeField(field) && field.type === RUNTIME_FIELD_COMPOSITE_TYPE;
 }
 
@@ -111,7 +117,7 @@ export function toStoredFieldFormats(
  * @returns A `fieldAttrs` object suitable for use in a DataViewSpec
  */
 export function toStoredFieldAttributes(
-  fieldSettings: AsCodeDataViewSpec['field_settings'] = {}
+  fieldSettings: AsCodeDataViewSpec['field_settings'] | AsCodeSavedDataView['field_settings'] = {}
 ): DataViewSpec['fieldAttrs'] {
   const fieldAttrs: DataViewSpec['fieldAttrs'] = {};
   for (const [name, field] of Object.entries(fieldSettings)) {
@@ -120,21 +126,29 @@ export function toStoredFieldAttributes(
         fieldAttrs[name] = {
           ...(field.custom_label && { customLabel: field.custom_label }),
           ...(field.custom_description && { customDescription: field.custom_description }),
+          ...getPopularity(field),
         };
       } else {
         for (const [subName, subField] of Object.entries(field.fields)) {
           fieldAttrs[`${name}.${subName}`] = {
             ...(subField.custom_label && { customLabel: subField.custom_label }),
             ...(subField.custom_description && { customDescription: subField.custom_description }),
+            ...getPopularity(subField),
           };
         }
       }
-    } else if ('custom_label' in field || 'custom_description' in field) {
+    } else if ('custom_label' in field || 'custom_description' in field || 'popularity' in field) {
       fieldAttrs[name] = {
         ...(field.custom_label && { customLabel: field.custom_label }),
         ...(field.custom_description && { customDescription: field.custom_description }),
+        ...getPopularity(field),
       };
     }
   }
   return fieldAttrs;
+}
+
+function getPopularity(field: AsCodeFieldSettings | AsCodeSavedFieldSettings) {
+  if ('popularity' in field && field.popularity !== undefined) return { count: field.popularity };
+  return {};
 }

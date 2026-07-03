@@ -247,19 +247,19 @@ export const trustedDevicesFormSelectors = {
   },
 
   selectField: (field: 'Username' | 'Host' | 'Device ID' | 'Manufacturer' | 'Product ID') => {
-    cy.getByTestSubj('trustedDevices-form-fieldSelect').click();
+    cy.getByTestSubj('trustedDevices-form-entry0fieldSelect').click();
     cy.get('[role="option"]').contains(field).click();
   },
 
   selectOperator: (operator: 'is' | 'matches') => {
-    cy.getByTestSubj('trustedDevices-form-operatorSelect').click();
+    cy.getByTestSubj('trustedDevices-form-entry0operatorSelect').click();
     cy.get('[role="option"]')
       .contains(operator === 'is' ? 'is' : 'matches')
       .click();
   },
 
   fillValue: (value: string) => {
-    cy.getByTestSubj('trustedDevices-form-valueField').within(() => {
+    cy.getByTestSubj('trustedDevices-form-entry0valueField').within(() => {
       cy.get('input[role="combobox"]').click();
       cy.get('input[role="combobox"]').should('be.focused');
       cy.get('input[role="combobox"]').type(`{selectall}{backspace}`);

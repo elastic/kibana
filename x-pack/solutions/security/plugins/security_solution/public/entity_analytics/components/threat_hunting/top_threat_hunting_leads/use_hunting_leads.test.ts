@@ -38,6 +38,9 @@ describe('useHuntingLeads', () => {
       fetchLeadGenerationStatus: jest.fn().mockResolvedValue({ isEnabled: false }),
       enableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
       disableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
+      fetchLeadGenerationPrivileges: jest
+        .fn()
+        .mockResolvedValue({ has_read_permissions: true, has_write_permissions: true }),
     });
     mockUseAppToasts.mockReturnValue({
       addSuccess: mockAddSuccess,
@@ -63,7 +66,8 @@ describe('useHuntingLeads', () => {
     mockUseQuery.mockImplementation(
       (config: { queryFn?: (ctx: { signal?: AbortSignal }) => Promise<unknown> }) => {
         queryCallCount++;
-        if (queryCallCount === 1) {
+        // useQuery call order: 1=privileges, 2=fetchLeads, 3=fetchLeadGenerationStatus
+        if (queryCallCount === 2) {
           capturedQueryFn = config.queryFn;
         }
         return {
@@ -191,5 +195,40 @@ describe('useHuntingLeads', () => {
     const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
 
     expect(result.current.isGenerating).toBe(true);
+  });
+
+  it('returns readPermissionError true when privileges indicate no read access', () => {
+    mockUseQuery.mockImplementation((config: { queryKey?: string[]; queryFn?: () => unknown }) => {
+      if (config.queryKey?.[0] === 'lead-generation-privileges') {
+        return {
+          data: { has_read_permissions: false, has_write_permissions: false },
+          isLoading: false,
+          refetch: jest.fn(),
+        };
+      }
+      return { data: undefined, isLoading: false, refetch: jest.fn() };
+    });
+
+    const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
+
+    expect(result.current.readPermissionError).toBe(true);
+  });
+
+  it('returns writePermissionError true when privileges indicate no write access', () => {
+    mockUseQuery.mockImplementation((config: { queryKey?: string[]; queryFn?: () => unknown }) => {
+      if (config.queryKey?.[0] === 'lead-generation-privileges') {
+        return {
+          data: { has_read_permissions: true, has_write_permissions: false },
+          isLoading: false,
+          refetch: jest.fn(),
+        };
+      }
+      return { data: undefined, isLoading: false, refetch: jest.fn() };
+    });
+
+    const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
+
+    expect(result.current.writePermissionError).toBe(true);
+    expect(result.current.readPermissionError).toBe(false);
   });
 });

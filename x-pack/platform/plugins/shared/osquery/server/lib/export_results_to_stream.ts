@@ -8,15 +8,20 @@
 import { PassThrough } from 'stream';
 import { once } from 'events';
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { estypes } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
+import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
 import { flattenOsqueryHit } from '../../common/utils/flatten_osquery_hit';
 import type { ResultFormatter, ExportMetadata } from './format_results';
+import type {
+  ExportResultsRequestOptions,
+  ExportResultsStrategyResponse,
+} from '../../common/search_strategy/osquery';
+import { OsqueryQueries } from '../../common/search_strategy/osquery';
 
-const EXPORT_PAGE_SIZE = 1_000;
 const MAX_EXPORT_RESULTS = 500_000;
 
 function getErrorMessage(error: unknown): string {
@@ -71,10 +76,27 @@ async function writeWithBackpressure(
   }
 }
 
+export type BaseExportRequest = Omit<
+  ExportResultsRequestOptions,
+  'pit' | 'searchAfter' | 'trackTotalHits'
+>;
+
 export interface ExportResultsToStreamOptions {
-  esClient: ElasticsearchClient;
-  index: string;
-  query: estypes.QueryDslQueryContainer;
+  /**
+   * Scoped search client from `context.search` — routes page fetches through
+   * the osquery search strategy so index resolution, CCS prefixing, and
+   * internal-user selection are handled centrally by the factory.
+   */
+  search: IScopedSearchClient;
+  /** PIT opened by the route handler (PIT lifecycle stays in the route; see design D5). */
+  pit: { id: string; keep_alive: string };
+  /**
+   * Callback invoked by cleanup to close the PIT. The route handler owns PIT
+   * open/close lifecycle; this callback delegates the close timing to the stream.
+   */
+  closePit: (pitId: string) => Promise<void>;
+  /** All export request fields except those the loop varies per page. */
+  baseRequest: BaseExportRequest;
   formatter: ResultFormatter;
   metadata: ExportMetadata;
   aborted$: Observable<void>;
@@ -93,9 +115,10 @@ export interface ExportResultsError {
 }
 
 export async function exportResultsToStream({
-  esClient,
-  index,
-  query,
+  search,
+  pit,
+  closePit,
+  baseRequest,
   formatter,
   metadata,
   aborted$,
@@ -110,46 +133,26 @@ export async function exportResultsToStream({
     stream.destroy();
   });
 
-  let pitId: string | undefined;
-
   const cleanup = async () => {
     abortSubscription.unsubscribe();
-    if (pitId) {
-      try {
-        await esClient.closePointInTime({ id: pitId });
-      } catch (e) {
-        // Leaked PITs consume cluster memory until keep_alive expires (5m).
-        // Surface at warn so cluster-memory pressure is visible in ops dashboards.
-        logger.warn(`Failed to close PIT ${pitId}: ${getErrorMessage(e)}`);
-      }
-
-      pitId = undefined;
-    }
+    await closePit(pit.id);
   };
 
   try {
-    const pitResponse = await esClient.openPointInTime(
-      {
-        index,
-        keep_alive: '5m',
-      },
-      { signal: abortController.signal }
+    // First page — check total count and request track_total_hits
+    const firstPageResponse = await lastValueFrom(
+      search.search<ExportResultsRequestOptions, ExportResultsStrategyResponse>(
+        {
+          ...baseRequest,
+          factoryQueryType: OsqueryQueries.exportResults,
+          pit,
+          trackTotalHits: true,
+        },
+        { strategy: 'osquerySearchStrategy', abortSignal: abortController.signal }
+      )
     );
-    pitId = pitResponse.id;
 
-    // First page — check total count
-    const firstPage = await esClient.search(
-      {
-        pit: { id: pitId, keep_alive: '5m' },
-        query,
-        size: EXPORT_PAGE_SIZE,
-        track_total_hits: true,
-        fields: ['elastic_agent.*', 'agent.*', 'osquery.*'],
-        sort: [{ '@timestamp': { order: 'desc' as const } }, '_doc'],
-        _source: ecsMapping ? true : ['agent'],
-      },
-      { signal: abortController.signal }
-    );
+    const firstPage = firstPageResponse.rawResponse;
 
     const total =
       typeof firstPage.hits.total === 'number'
@@ -243,18 +246,19 @@ export async function exportResultsToStream({
 
         // Page through remaining results
         while (searchAfter && !signal.aborted) {
-          const page = await esClient.search(
-            {
-              pit: { id: pitId!, keep_alive: '5m' },
-              query,
-              size: EXPORT_PAGE_SIZE,
-              fields: ['elastic_agent.*', 'agent.*', 'osquery.*'],
-              sort: [{ '@timestamp': { order: 'desc' as const } }, '_doc'],
-              search_after: searchAfter,
-              _source: ecsMapping ? true : ['agent'],
-            },
-            { signal }
+          const pageResponse = await lastValueFrom(
+            search.search<ExportResultsRequestOptions, ExportResultsStrategyResponse>(
+              {
+                ...baseRequest,
+                factoryQueryType: OsqueryQueries.exportResults,
+                pit,
+                searchAfter,
+              },
+              { strategy: 'osquerySearchStrategy', abortSignal: signal }
+            )
           );
+
+          const page = pageResponse.rawResponse;
 
           if (page.hits.hits.length === 0) break;
 

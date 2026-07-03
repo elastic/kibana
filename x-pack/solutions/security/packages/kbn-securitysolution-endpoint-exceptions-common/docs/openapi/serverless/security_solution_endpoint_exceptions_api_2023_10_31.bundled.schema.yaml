@@ -13,11 +13,10 @@ servers:
 paths:
   /api/endpoint_list:
     post:
-      description: >-
-        Create the exception list for Elastic Endpoint rule exceptions. When you
-        create the exception list, it will have a `list_id` of `endpoint_list`.
-        If the Elastic Endpoint exception list already exists, your request will
-        return an empty response.
+      description: Create the exception list for Elastic Endpoint rule exceptions.
+        When you create the exception list, it will have a `list_id` of
+        `endpoint_list`. If the Elastic Endpoint exception list already exists,
+        your request will return an empty response.
       operationId: CreateEndpointList
       responses:
         '200':
@@ -51,6 +50,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body]: expected value of type [object] but got [undefined]'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -59,18 +64,39 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: API [POST /api/endpoint_list] is unauthorized for user, this action is
+                      granted by the Kibana privileges [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Insufficient privileges
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
@@ -79,9 +105,8 @@ paths:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items:
     delete:
-      description: >-
-        Delete an Elastic Endpoint exception list item, specified by the `id` or
-        `item_id` field.
+      description: Delete an Elastic Endpoint exception list item, specified by the
+        `id` or `item_id` field.
       operationId: DeleteEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -112,8 +137,7 @@ paths:
                       - field: file.hash.sha256
                         operator: included
                         type: match
-                        value: >-
-                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                     id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                     item_id: block-malicious-file
                     list_id: endpoint_list
@@ -132,6 +156,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: Either "item_id" or "id" needs to be defined in the request
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -140,24 +170,51 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: API [DELETE /api/endpoint_list/items?item_id=block-malicious-file] is
+                      unauthorized for user, this action is granted by the
+                      Kibana privileges [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Insufficient privileges
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: 'exception list item item_id: "block-malicious-file" does not exist'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Endpoint list item not found
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
@@ -165,9 +222,8 @@ paths:
       tags:
         - Security Endpoint Exceptions API
     get:
-      description: >-
-        Get the details of an Elastic Endpoint exception list item, specified by
-        the `id` or `item_id` field.
+      description: Get the details of an Elastic Endpoint exception list item,
+        specified by the `id` or `item_id` field.
       operationId: ReadEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -198,8 +254,7 @@ paths:
                       - field: file.hash.sha256
                         operator: included
                         type: match
-                        value: >-
-                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                     id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                     item_id: block-malicious-file
                     list_id: endpoint_list
@@ -219,6 +274,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: id or item_id required
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -227,24 +288,51 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: API [GET /api/endpoint_list/items?item_id=block-malicious-file] is
+                      unauthorized for user, this action is granted by the
+                      Kibana privileges [lists-read]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Insufficient privileges
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: 'exception list item item_id: "block-malicious-file" does not exist'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Endpoint list item not found
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
@@ -252,9 +340,8 @@ paths:
       tags:
         - Security Endpoint Exceptions API
     post:
-      description: >-
-        Create an Elastic Endpoint exception list item, and associate it with
-        the Elastic Endpoint exception list.
+      description: Create an Elastic Endpoint exception list item, and associate it
+        with the Elastic Endpoint exception list.
       operationId: CreateEndpointListItem
       requestBody:
         content:
@@ -283,8 +370,7 @@ paths:
                     - field: file.hash.sha256
                       operator: included
                       type: match
-                      value: >-
-                        e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                      value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                   name: Block malicious file
                   os_types:
                     - windows
@@ -338,8 +424,7 @@ paths:
                       - field: file.hash.sha256
                         operator: included
                         type: match
-                        value: >-
-                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                     id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                     item_id: block-malicious-file
                     list_id: endpoint_list
@@ -359,6 +444,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body]: name: Required'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -367,24 +458,50 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: API [POST /api/endpoint_list/items] is unauthorized for user, this
+                      action is granted by the Kibana privileges [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Insufficient privileges
         '409':
           content:
             application/json:
+              examples:
+                alreadyExists:
+                  value:
+                    message: 'exception list item id: "block-malicious-file" already exists'
+                    status_code: 409
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Endpoint list item already exists
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
@@ -392,9 +509,8 @@ paths:
       tags:
         - Security Endpoint Exceptions API
     put:
-      description: >-
-        Update an Elastic Endpoint exception list item, specified by the `id` or
-        `item_id` field.
+      description: Update an Elastic Endpoint exception list item, specified by the
+        `id` or `item_id` field.
       operationId: UpdateEndpointListItem
       requestBody:
         content:
@@ -408,8 +524,7 @@ paths:
                     - field: file.hash.sha256
                       operator: included
                       type: match
-                      value: >-
-                        e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                      value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                   item_id: block-malicious-file
                   name: Block malicious file (updated)
                   os_types:
@@ -420,10 +535,9 @@ paths:
               type: object
               properties:
                 _version:
-                  description: >-
-                    The version id, normally returned by the API when the item
-                    is retrieved. Use it ensure updates are made against the
-                    latest version.
+                  description: The version id, normally returned by the API when the item is
+                    retrieved. Use it ensure updates are made against the latest
+                    version.
                   type: string
                 comments:
                   $ref: '#/components/schemas/ExceptionListItemCommentArray'
@@ -472,8 +586,7 @@ paths:
                       - field: file.hash.sha256
                         operator: included
                         type: match
-                        value: >-
-                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                     id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                     item_id: block-malicious-file
                     list_id: endpoint_list
@@ -494,6 +607,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body]: name: Required'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -502,24 +621,50 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: API [PUT /api/endpoint_list/items] is unauthorized for user, this
+                      action is granted by the Kibana privileges [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Insufficient privileges
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: 'list item item_id: "block-malicious-file" not found'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Endpoint list item not found
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
@@ -587,8 +732,7 @@ paths:
                           - field: file.hash.sha256
                             operator: included
                             type: match
-                            value: >-
-                              e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                            value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
                         id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
                         item_id: block-malicious-file
                         list_id: endpoint_list
@@ -637,6 +781,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request query]: page: Expected number, received string'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -645,24 +795,50 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: >-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: API [GET /api/endpoint_list/items/_find] is unauthorized for user, this
+                      action is granted by the Kibana privileges [lists-read]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Insufficient privileges
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: 'list id: "endpoint_list" does not exist'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Endpoint list not found
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
@@ -682,8 +858,7 @@ components:
       type: object
       properties:
         _version:
-          description: >-
-            The version id, normally returned by the API when the item was
+          description: The version id, normally returned by the API when the item was
             retrieved. Use it ensure updates are done against the latest
             version.
           type: string
@@ -713,8 +888,7 @@ components:
         tags:
           $ref: '#/components/schemas/ExceptionListTags'
         tie_breaker_id:
-          description: >-
-            Field used in search to ensure all containers are sorted and
+          description: Field used in search to ensure all containers are sorted and
             returned correctly.
           type: string
         type:
@@ -747,30 +921,17 @@ components:
       example: This list tracks allowlisted values.
       type: string
     ExceptionListHumanId:
-      description: >
+      description: |
         The exception list's human-readable string identifier.
-
 
         For endpoint artifacts, use one of the following values:
 
-
-        * `endpoint_list`: [Elastic Endpoint exception
-        list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
-
-        * `endpoint_trusted_apps`: [Trusted applications
-        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
-
-        * `endpoint_trusted_devices`: [Trusted devices
-        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
-
-        * `endpoint_event_filters`: [Event filters
-        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
-
-        * `endpoint_host_isolation_exceptions`: [Host isolation exceptions
-        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
-
-        * `endpoint_blocklists`: [Blocklists
-        list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
+        * `endpoint_list`: [Elastic Endpoint exception list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
+        * `endpoint_trusted_apps`: [Trusted applications list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
+        * `endpoint_trusted_devices`: [Trusted devices list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
+        * `endpoint_event_filters`: [Event filters list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
+        * `endpoint_host_isolation_exceptions`: [Host isolation exceptions list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
+        * `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
       example: simple_list
       format: nonempty
       minLength: 1
@@ -785,8 +946,7 @@ components:
       type: object
       properties:
         _version:
-          description: >-
-            The version id, normally returned by the API when the item was
+          description: The version id, normally returned by the API when the item was
             retrieved. Use it ensure updates are done against the latest
             version.
           type: string
@@ -822,8 +982,7 @@ components:
         tags:
           $ref: '#/components/schemas/ExceptionListItemTags'
         tie_breaker_id:
-          description: >-
-            Field used in search to ensure all containers are sorted and
+          description: Field used in search to ensure all containers are sorted and
             returned correctly.
           type: string
         type:
@@ -1026,9 +1185,8 @@ components:
         - included
       type: string
     ExceptionListItemExpireTime:
-      description: >-
-        The exception item’s expiration date, in ISO format. This field is only
-        available for regular exception items, not endpoint exceptions.
+      description: The exception item’s expiration date, in ISO format. This field is
+        only available for regular exception items, not endpoint exceptions.
       format: date-time
       type: string
     ExceptionListItemHumanId:
@@ -1057,9 +1215,8 @@ components:
       type: array
     ExceptionListItemTags:
       items:
-        description: >-
-          String array containing words and phrases to help categorize exception
-          items.
+        description: String array containing words and phrases to help categorize
+          exception items.
         format: nonempty
         minLength: 1
         type: string
@@ -1089,15 +1246,13 @@ components:
         $ref: '#/components/schemas/ExceptionListOsType'
       type: array
     ExceptionListTags:
-      description: >-
-        String array containing words and phrases to help categorize exception
-        containers.
+      description: String array containing words and phrases to help categorize
+        exception containers.
       items:
         type: string
       type: array
     ExceptionListType:
-      description: >-
-        The type of exception list to be created. Different list types may
+      description: The type of exception list to be created. Different list types may
         denote where they can be utilized.
       enum:
         - detection
@@ -1213,9 +1368,8 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: >-
-      Endpoint Exceptions API allows you to manage detection rule endpoint
-      exceptions to prevent a rule from generating an alert from incoming events
-      even when the rule's other criteria are met.
+  - description: Endpoint Exceptions API allows you to manage detection rule
+      endpoint exceptions to prevent a rule from generating an alert from
+      incoming events even when the rule's other criteria are met.
     name: Security Endpoint Exceptions API
     x-displayName: Security Elastic Endpoint exceptions

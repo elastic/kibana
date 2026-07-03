@@ -10,17 +10,17 @@ import { EuiSpacer } from '@elastic/eui';
 import { buildDataTableRecord, type DataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
-import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/main/constants/local_storage';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
-import { HighlightedFields } from '../../../../flyout_v2/document/components/highlighted_fields';
+import { HighlightedFields } from '../../../../flyout_v2/document/main/components/highlighted_fields';
 import {
   INVESTIGATION_SECTION_TEST_ID,
   INVESTIGATION_SECTION_TITLE,
-} from '../../../../flyout_v2/document/components/investigation_section';
-import { InvestigationGuide } from '../../../../flyout_v2/document/components/investigation_guide';
+} from '../../../../flyout_v2/document/main/components/investigation_section';
+import { InvestigationGuide } from '../../../../flyout_v2/document/main/components/investigation_guide';
 import { getField } from '../../shared/utils';
-import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/main/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { LeftPanelInvestigationTab } from '../../left';

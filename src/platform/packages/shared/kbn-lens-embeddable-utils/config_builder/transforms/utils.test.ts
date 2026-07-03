@@ -12,11 +12,11 @@ import {
   buildReferences,
   getDataSourceIndex,
   addLayerColumn,
-  getDefaultReferences,
   operationFromColumn,
   buildDataSourceState,
   isSingleLayer,
   generateLayer,
+  generateApiLayer,
   filtersAndQueryToLensState,
   filtersAndQueryToApiFormat,
 } from './utils';
@@ -49,6 +49,30 @@ test('build references correctly builds references', () => {
       Object {
         "id": "test-dataview",
         "name": "indexpattern-datasource-layer-layer2",
+        "type": "index-pattern",
+      },
+    ]
+  `);
+});
+
+test('build references uses the xy annotation prefix for annotation layer ids', () => {
+  const results = buildReferences(
+    {
+      layer1: dataView,
+      annotations_1: dataView,
+    },
+    new Set(['annotations_1'])
+  );
+  expect(results).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "id": "test-dataview",
+        "name": "indexpattern-datasource-layer-layer1",
+        "type": "index-pattern",
+      },
+      Object {
+        "id": "test-dataview",
+        "name": "xy-visualization-layer-annotations_1",
         "type": "index-pattern",
       },
     ]
@@ -243,7 +267,7 @@ describe('buildDatasourceStates', () => {
           },
         },
         sampling: 1,
-        ignore_global_filters: false,
+        ignore_global_filters: true,
       },
       undefined as any,
       () => [{ columnId: 'test', fieldName: 'test' }]
@@ -260,6 +284,7 @@ describe('buildDatasourceStates', () => {
                     "fieldName": "test",
                   },
                 ],
+                "ignoreGlobalFilters": true,
                 "index": "test-ef03ee470d96c0a475dca463e351acd1ad966fa7997b95884750639034d53f21",
                 "query": Object {
                   "esql": "from test | limit 10",
@@ -283,18 +308,19 @@ describe('buildDatasourceStates', () => {
   });
 });
 
-describe('getDefaultReferences', () => {
-  test('generates correct references for index and layer id', () => {
-    const result = getDefaultReferences('my-index', 'layer_1');
-    expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "my-index",
-          "name": "indexpattern-datasource-layer-layer_1",
-          "type": "index-pattern",
-        },
-      ]
-    `);
+describe('generateApiLayer', () => {
+  test('returns text based ignore_global_filters from layer state', () => {
+    const result = generateApiLayer({
+      index: 'test-index',
+      query: { esql: 'FROM test-index' },
+      columns: [],
+      ignoreGlobalFilters: true,
+    });
+
+    expect(result).toEqual({
+      sampling: 1,
+      ignore_global_filters: true,
+    });
   });
 });
 

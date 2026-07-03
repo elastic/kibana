@@ -21,6 +21,7 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
   ActionGroup,
+  ActionGroupId,
   ActionPolicyId,
   ActionPolicy,
   ActionPolicyWorkflowPayload,
@@ -45,17 +46,27 @@ export class DispatchStep implements DispatcherStep {
 
     const limiter = pLimit(MAX_CONCURRENT_DISPATCHES);
 
-    await Promise.allSettled(
+    const groupResults = await Promise.allSettled(
       dispatch.map((group) => limiter(() => this.dispatchGroup(group, policies)))
     );
 
-    return { type: 'continue' };
+    const dispatchedExecutions = new Map<ActionGroupId, string[]>();
+    for (const result of groupResults) {
+      if (result.status !== 'fulfilled') continue;
+      const { groupId, executionIds } = result.value;
+      if (executionIds.length > 0) {
+        dispatchedExecutions.set(groupId, executionIds);
+      }
+    }
+
+    return { type: 'continue', data: { dispatchedExecutions } };
   }
 
   private async dispatchGroup(
     group: ActionGroup,
     policies?: Map<ActionPolicyId, ActionPolicy>
-  ): Promise<void> {
+  ): Promise<{ groupId: ActionGroupId; executionIds: string[] }> {
+    const executionIds: string[] = [];
     try {
       const policy = policies?.get(group.policyId);
       const apiKey = policy?.apiKey;
@@ -65,7 +76,7 @@ export class DispatchStep implements DispatcherStep {
           message: () =>
             `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`,
         });
-        return;
+        return { groupId: group.id, executionIds };
       }
 
       const fakeRequest = this.craftFakeRequest(apiKey);
@@ -76,7 +87,10 @@ export class DispatchStep implements DispatcherStep {
         }
 
         try {
-          await this.dispatchWorkflow(group, destination.id, fakeRequest);
+          const executionId = await this.dispatchWorkflow(group, destination.id, fakeRequest);
+          if (executionId) {
+            executionIds.push(executionId);
+          }
         } catch (err) {
           this.logger.error({
             error:
@@ -100,6 +114,7 @@ export class DispatchStep implements DispatcherStep {
               ),
       });
     }
+    return { groupId: group.id, executionIds };
   }
 
   private craftFakeRequest(apiKey: string): KibanaRequest {
@@ -109,7 +124,6 @@ export class DispatchStep implements DispatcherStep {
 
     const fakeRawRequest: FakeRawRequest = {
       headers: requestHeaders,
-      path: '/',
     };
 
     return kibanaRequestFactory(fakeRawRequest);
@@ -119,14 +133,14 @@ export class DispatchStep implements DispatcherStep {
     group: ActionGroup,
     workflowId: string,
     request: KibanaRequest
-  ): Promise<void> {
+  ): Promise<string | undefined> {
     const workflow = await this.workflowsManagement.getWorkflow(workflowId, group.spaceId);
 
     if (!workflow) {
       this.logger.warn({
         message: () => `Workflow ${workflowId} not found, skipping dispatch for group ${group.id}`,
       });
-      return;
+      return undefined;
     }
 
     if (!workflow.enabled) {
@@ -134,7 +148,7 @@ export class DispatchStep implements DispatcherStep {
         message: () =>
           `Workflow ${workflowId} is disabled, enable it to dispatch for group ${group.id}`,
       });
-      return;
+      return undefined;
     }
 
     const model: WorkflowExecutionEngineModel = {
@@ -150,6 +164,7 @@ export class DispatchStep implements DispatcherStep {
       policyId: group.policyId,
       groupKey: group.groupKey,
       episodes: group.episodes,
+      rules: group.rules,
     };
 
     this.logger.debug({
@@ -160,7 +175,7 @@ export class DispatchStep implements DispatcherStep {
     const executionId = await this.workflowsManagement.scheduleWorkflow(
       model,
       group.spaceId,
-      payload,
+      { payload },
       request,
       ACTION_POLICY_TRIGGER
     );
@@ -169,5 +184,7 @@ export class DispatchStep implements DispatcherStep {
       message: () =>
         `Workflow ${workflowId} execution scheduled with id ${executionId} for group ${group.id}`,
     });
+
+    return executionId;
   }
 }

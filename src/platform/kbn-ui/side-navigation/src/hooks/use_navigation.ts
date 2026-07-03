@@ -39,7 +39,7 @@ interface NavigationState {
 export const useNavigation = (
   isCollapsed: boolean,
   items: NavigationStructure,
-  logoId: string,
+  logoId: string | undefined,
   activeItemId?: string
 ) => {
   const { primaryItem, secondaryItem, isLogoActive } = useMemo(

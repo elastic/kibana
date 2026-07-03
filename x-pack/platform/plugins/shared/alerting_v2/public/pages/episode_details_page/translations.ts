@@ -7,14 +7,30 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BREADCRUMB_EPISODE_DETAILS_FALLBACK = i18n.translate(
+/** --- Breadcrumb --- */
+export const EPISODE_DETAILS_BREADCRUMB_FALLBACK = i18n.translate(
   'xpack.alertingV2.breadcrumbs.episodeDetailsFallback',
   {
-    defaultMessage: 'Episode',
+    defaultMessage: 'Alert episode',
   }
 );
 
-export function formatDurationMs(ms: number): string {
+export const OVERVIEW_TAB_TITLE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.mainTabOverview',
+  {
+    defaultMessage: 'Overview',
+  }
+);
+
+export const METADATA_TAB_TITLE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.mainTabMetadata',
+  {
+    defaultMessage: 'Metadata',
+  }
+);
+
+/** --- Duration (sidebar) --- */
+export const FORMAT_EPISODE_DURATION_MS = (ms: number): string => {
   if (ms < 1000) {
     return i18n.translate('xpack.alertingV2.episodeDetails.durationMs', {
       defaultMessage: '{ms} ms',
@@ -47,19 +63,9 @@ export function formatDurationMs(ms: number): string {
     defaultMessage: '{seconds} s',
     values: { seconds },
   });
-}
+};
 
-export const RULE_KIND_SIGNAL = i18n.translate('xpack.alertingV2.episodeDetails.ruleKindSignal', {
-  defaultMessage: 'Signal',
-});
-
-export const RULE_KIND_ALERTING = i18n.translate(
-  'xpack.alertingV2.episodeDetails.ruleKindAlerting',
-  {
-    defaultMessage: 'Alerting',
-  }
-);
-
+/** --- Error state --- */
 export const EPISODE_NOT_FOUND_TITLE = i18n.translate(
   'xpack.alertingV2.episodes.episodeNotFoundTitle',
   {
@@ -78,6 +84,7 @@ export const BACK_TO_ALERT_EPISODES = i18n.translate('xpack.alertingV2.episodes.
   defaultMessage: 'Back to alert episodes',
 });
 
+/** --- Page header --- */
 export const LOADING_RULE_TITLE = i18n.translate(
   'xpack.alertingV2.episodeDetails.loadingRuleTitle',
   {
@@ -85,6 +92,7 @@ export const LOADING_RULE_TITLE = i18n.translate(
   }
 );
 
+/** --- Sidebar --- */
 export const SIDEBAR_TITLE_EPISODE_DETAILS = i18n.translate(
   'xpack.alertingV2.episodeDetails.sidebarTitle',
   {
@@ -106,30 +114,31 @@ export const SIDEBAR_VIEW_LEGEND = i18n.translate(
   }
 );
 
-export const SIDEBAR_TAB_DETAILS = i18n.translate(
+export const SIDEBAR_TAB_TITLE_DETAILS = i18n.translate(
   'xpack.alertingV2.episodeDetails.sidebarTabTitle',
   {
     defaultMessage: 'Details',
   }
 );
 
-export const LABEL_EPISODE_ID = i18n.translate('xpack.alertingV2.episodeDetails.episodeIdLabel', {
-  defaultMessage: 'Alert episode id',
+/** --- Episode details list --- */
+export const GROUPING_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.groupingLabel', {
+  defaultMessage: 'Grouping fields',
 });
 
-export const LABEL_GROUPING = i18n.translate('xpack.alertingV2.episodeDetails.groupingLabel', {
-  defaultMessage: 'Grouping',
+export const TAGS_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.tagsLabel', {
+  defaultMessage: 'Tags',
 });
 
-export const LABEL_TRIGGERED = i18n.translate('xpack.alertingV2.episodeDetails.triggeredLabel', {
+export const TRIGGERED_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.triggeredLabel', {
   defaultMessage: 'Triggered',
 });
 
-export const LABEL_DURATION = i18n.translate('xpack.alertingV2.episodeDetails.durationLabel', {
+export const DURATION_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.durationLabel', {
   defaultMessage: 'Duration',
 });
 
-export const LABEL_ASSIGNEE = i18n.translate('xpack.alertingV2.episodeDetails.assigneeLabel', {
+export const ASSIGNEE_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.assigneeLabel', {
   defaultMessage: 'Assignee',
 });
 
@@ -169,6 +178,8 @@ export const LABEL_RESOLVED_BY = i18n.translate('xpack.alertingV2.episodeDetails
   defaultMessage: 'Resolved by',
 });
 
+/** --- Rule overview panel --- */
+
 export const RULE_OVERVIEW_TITLE = i18n.translate(
   'xpack.alertingV2.episodeDetails.ruleOverviewTitle',
   {
@@ -194,20 +205,7 @@ export const RULE_STATUS_DISABLED = i18n.translate(
   }
 );
 
+/** --- Runbook --- */
 export const RUNBOOK_EMPTY = i18n.translate('xpack.alertingV2.episodeDetails.runbookEmpty', {
   defaultMessage: 'No runbook has been added to this rule.',
 });
-
-export const RELATED_EPISODES_TITLE = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedEpisodesTitle',
-  {
-    defaultMessage: 'Related alert episodes',
-  }
-);
-
-export const RELATED_EPISODES_EMPTY = i18n.translate(
-  'xpack.alertingV2.episodeDetails.relatedEpisodesEmpty',
-  {
-    defaultMessage: 'No related episodes found.',
-  }
-);

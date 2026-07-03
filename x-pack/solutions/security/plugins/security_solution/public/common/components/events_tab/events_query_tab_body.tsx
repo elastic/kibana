@@ -15,7 +15,6 @@ import { dataTableActions } from '@kbn/securitysolution-data-table';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useBulkAddEventsToCaseActions } from '../../../cases/attachments/event/hooks/use_bulk_event_actions';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { CustomBulkAction } from '../../../../common/types';
 import { RowRendererValues } from '../../../../common/api/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
@@ -58,11 +57,6 @@ export type EventsQueryTabBodyComponentProps = Omit<QueryTabBodyProps, 'setQuery
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   indexNames: string[];
   tableId: TableId;
-  /**
-   * When set (e.g. host details + Entity Store v2 identity filters), the events histogram uses this
-   * serialized query instead of {@link QueryTabBodyProps.filterQuery}, which may still reflect host.name-only scope.
-   */
-  histogramFilterQuery?: string;
 };
 
 const EXTERNAL_ALERTS_URL_PARAM = 'onlyExternalAlerts';
@@ -81,13 +75,10 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   deleteQuery,
   endDate,
   filterQuery,
-  histogramFilterQuery,
   startDate,
   tableId,
 }) => {
   let ACTION_BUTTON_COUNT = MAX_ACTION_BUTTON_COUNT;
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -177,8 +168,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     [additionalFilters, showExternalAlerts]
   );
 
-  const matrixHistogramFilterQuery = histogramFilterQuery ?? filterQuery;
-
   const addBulkToTimelineActions = useAddBulkToTimelineAction({
     localFilters: composedPageFilters,
     tableId,
@@ -205,10 +194,11 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           id={ALERTS_EVENTS_HISTOGRAM_ID}
           startDate={startDate}
           endDate={endDate}
-          filterQuery={matrixHistogramFilterQuery}
+          filterQuery={filterQuery}
+          applyPageAndTabsFilters={false}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
-          sourcererScopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
+          pageScope={PageScope.explore}
         />
       )}
       <StatefulEventsViewer
@@ -219,7 +209,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
+        pageScope={PageScope.explore}
         tableId={tableId}
         unit={showExternalAlerts ? i18n.EXTERNAL_ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={defaultModel}
