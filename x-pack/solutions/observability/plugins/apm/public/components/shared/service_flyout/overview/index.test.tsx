@@ -13,12 +13,23 @@ import { ServiceFlyoutOverview } from '.';
 
 const mockUseServiceHasSystemMetrics = jest.fn<boolean | undefined, []>();
 
+jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: { http: {}, notifications: { toasts: { addDanger: jest.fn() } } },
+    share: { url: { locators: { get: jest.fn() } } },
+  }),
+}));
+
 jest.mock('../hooks/use_service_has_system_metrics', () => ({
   useServiceHasSystemMetrics: () => mockUseServiceHasSystemMetrics(),
 }));
 
 jest.mock('../../../../hooks/use_adhoc_apm_data_view', () => ({
   useAdHocApmDataView: () => ({ dataView: undefined }),
+}));
+
+jest.mock('@kbn/apm-ui-shared', () => ({
+  ServiceFlyoutTransactionsSection: () => <div data-test-subj="transactionsSectionMock" />,
 }));
 
 jest.mock('./query_controls', () => ({
@@ -71,6 +82,16 @@ describe('ServiceFlyoutOverview infrastructure section visibility', () => {
     expect(
       screen.queryByTestId('serviceFlyoutSection-infrastructureMetrics')
     ).not.toBeInTheDocument();
+  });
+
+  it('renders a skeleton placeholder while system metrics data is loading', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue(undefined);
+
+    renderOverview();
+
+    expect(
+      screen.getByTestId('serviceFlyoutSection-infrastructureMetricsSkeleton')
+    ).toBeInTheDocument();
   });
 
   it('hides the infrastructure section when the service has no system metrics', () => {

@@ -10,6 +10,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -192,7 +194,15 @@ export function ServiceFlyoutOverview({
             refreshToken={refreshToken}
           />
         </EuiFlexItem>
-        {hasSystemMetrics && (
+        {hasSystemMetrics === undefined ? (
+          <EuiFlexItem data-test-subj="serviceFlyoutSection-infrastructureMetricsSkeleton">
+            <>
+              <EuiSkeletonTitle size="xs" />
+              <EuiSpacer size="s" />
+              <EuiSkeletonText lines={2} />
+            </>
+          </EuiFlexItem>
+        ) : hasSystemMetrics ? (
           <EuiFlexItem>
             <ServiceFlyoutChartsSection
               id="infrastructureMetrics"
@@ -204,7 +214,7 @@ export function ServiceFlyoutOverview({
               refreshToken={refreshToken}
             />
           </EuiFlexItem>
-        )}
+        ) : null}
         <EuiFlexItem>
           <ServiceFlyoutTransactionsSection
             http={core.http}
