@@ -246,5 +246,9 @@ describe('MetricsExperienceGridWrapper', () => {
     });
 
     expect(aggregationAdapter.updateState).toHaveBeenCalledWith({ counterAggregation: 'max' });
+    expect(unifiedGridProps?.aggregationSettings).toEqual({
+      ...METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+      counterAggregation: 'max',
+    });
   });
 });
