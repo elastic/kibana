@@ -18,6 +18,9 @@ import { FR_FR_GRAMMAR } from './locales/fr_fr';
  * excludes shorthand datemath, absolute dates, and unix timestamps — those stay
  * English/symbol-invariant (see plan: localized absolute-date parsing is deferred).
  */
+/** Per-unit, per-plurality override map used by {@link LocaleGrammar.generation}. */
+export type UnitFormOverrides = Partial<Record<TimeUnit, { singular?: string; plural?: string }>>;
+
 export interface LocaleGrammar {
   /** The literal word for "now" recognised in input and used in generated text. */
   nowKeyword: string;
@@ -35,6 +38,29 @@ export interface LocaleGrammar {
   durationTemplates: { past: string[]; future: string[] };
   /** `{count} {unit}`-shaped templates for "N units ago/from now". */
   instantTemplates: { past: string[]; future: string[] };
+  /**
+   * Grammatical-agreement overrides applied only when GENERATING text.
+   * Parsing is unaffected — every accepted surface form belongs in
+   * `durationTemplates`/`unitAliases` instead. Each override MUST therefore
+   * also be parseable through those fields, or generated text stops
+   * round-tripping (the corpus suite proves this).
+   */
+  generation?: {
+    /**
+     * Replaces `durationTemplates.past[0]` for specific units when the
+     * direction word inflects (e.g. French feminine "dernières {count} {unit}",
+     * German masculine singular "letzter {count} {unit}").
+     */
+    durationPast?: UnitFormOverrides;
+    /** Same as `durationPast`, for `durationTemplates.future[0]`. */
+    durationFuture?: UnitFormOverrides;
+    /**
+     * Replaces the `unitWords` entry inside generated INSTANT phrases when the
+     * unit word inflects after the template's preposition (e.g. German dative
+     * "vor 15 Tagen", not nominative "Tage").
+     */
+    instantUnitWords?: UnitFormOverrides;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -54,6 +80,9 @@ export const ENGLISH_GRAMMAR: LocaleGrammar = {
     'last week': { start: 'now-1w/w', end: 'now-1w/w' },
     'last month': { start: 'now-1M/M', end: 'now-1M/M' },
     'last year': { start: 'now-1y/y', end: 'now-1y/y' },
+    'next week': { start: 'now+1w/w', end: 'now+1w/w' },
+    'next month': { start: 'now+1M/M', end: 'now+1M/M' },
+    'next year': { start: 'now+1y/y', end: 'now+1y/y' },
   },
   namedRangeAliases: {
     td: 'today',
@@ -193,6 +222,66 @@ export function buildDelimiterPattern(delimiter: string): RegExp | null {
   return trimmed ? new RegExp(`^(.+?)\\s+${escapeRegExp(trimmed)}\\s+(.+)$`) : null;
 }
 
+/** One possible way to split a text on a delimiter occurrence. */
+export interface DelimiterSplitCandidate {
+  left: string;
+  right: string;
+  /** Index in the source text where the right side begins (after the delimiter's trailing whitespace). */
+  rightOffset: number;
+  /** Span of the delimiter word itself (excluding surrounding whitespace) in the source text. */
+  delimiterStart: number;
+  delimiterEnd: number;
+}
+
+/**
+ * Enumerates every position where `delimiter` (surrounded by whitespace, with
+ * non-blank text on both sides) could split `text`, left to right. Callers
+ * must try candidates until one produces two parseable sides rather than
+ * trusting the first occurrence: a delimiter word can also appear INSIDE a
+ * natural-language phrase — French's accent-less delimiter `a` is a substring
+ * of the instant phrase "il y a 3 jours", so in
+ * `"il y a 3 jours a il y a 2 jours"` only the middle occurrence is a real
+ * range delimiter.
+ */
+export function findDelimiterSplits(text: string, delimiter: string): DelimiterSplitCandidate[] {
+  const trimmedDelimiter = delimiter.trim();
+  if (!trimmedDelimiter) return [];
+
+  const pattern = new RegExp(`\\s+${escapeRegExp(trimmedDelimiter)}\\s+`, 'g');
+  const candidates: DelimiterSplitCandidate[] = [];
+
+  for (const match of text.matchAll(pattern)) {
+    const index = match.index ?? 0;
+    const left = text.slice(0, index);
+    const rightOffset = index + match[0].length;
+    const right = text.slice(rightOffset);
+    if (!left.trim() || !right.trim()) continue;
+
+    const delimiterStart = index + match[0].indexOf(trimmedDelimiter);
+    candidates.push({
+      left,
+      right,
+      rightOffset,
+      delimiterStart,
+      delimiterEnd: delimiterStart + trimmedDelimiter.length,
+    });
+  }
+
+  return candidates;
+}
+
+/**
+ * The `{unit}` placeholder matches ANY word (Unicode letters + combining
+ * marks), NOT the strict unit-alias alternation. Whether the captured word is
+ * a real unit is validated AFTER matching (`resolveUnit`), exactly like the
+ * `{count}`-adjacent lookups in `parse_text.ts` and `modify_range_parts.ts` —
+ * both no-op gracefully on an unknown word. Keeping the regex lenient means a
+ * mistyped unit ("last 7 dayz") still matches the template shape, so
+ * `parse_range_parts.ts` still emits the correctly-typed parts for arrow-key
+ * navigation instead of losing the whole phrase.
+ */
+const LENIENT_UNIT_PATTERN = '[\\p{L}\\p{M}]+';
+
 /**
  * Converts a natural-language template (e.g. `'{count} {unit} ago'`) into a
  * regex, tracking which segments are placeholders vs. literal text. Segments
@@ -203,7 +292,7 @@ export function buildDelimiterPattern(delimiter: string): RegExp | null {
  * re-searching the input for literal text (robust to case/whitespace
  * differences between the template and the actual matched input).
  */
-function compileTemplate(template: string, unitPattern: string): CompiledTemplate {
+function compileTemplate(template: string): CompiledTemplate {
   const parts = template.split(/(\{count}|\{unit})/).filter((part) => part !== '');
   const segments: TemplateSegment[] = [];
   let pattern = '';
@@ -218,7 +307,7 @@ function compileTemplate(template: string, unitPattern: string): CompiledTemplat
       segments.push({ type: 'count' });
     } else if (part === '{unit}') {
       unitGroup = ++groupIdx;
-      pattern += `(${unitPattern})`;
+      pattern += `(${LENIENT_UNIT_PATTERN})`;
       segments.push({ type: 'unit' });
     } else {
       pattern += escapeRegExp(part).replace(/ /g, '\\s+');
@@ -226,7 +315,7 @@ function compileTemplate(template: string, unitPattern: string): CompiledTemplat
     }
   }
 
-  return { segments, regex: new RegExp(`^${pattern}$`, 'di'), countGroup, unitGroup };
+  return { segments, regex: new RegExp(`^${pattern}$`, 'diu'), countGroup, unitGroup };
 }
 
 /** Resolves a user-typed unit string through aliases (exact first, then lowercase). */
@@ -277,10 +366,10 @@ function compileMergedGrammar(locale: LocaleGrammar | undefined): CompiledGramma
 
   return {
     shorthandRegex: new RegExp(`^(now)?([+-]?)(\\d+)(${unitPattern})(\\/[smhdwMy])?$`),
-    durationPast: concatPast.map((t) => compileTemplate(t, unitPattern)),
-    durationFuture: concatFuture.map((t) => compileTemplate(t, unitPattern)),
-    instantPast: instantPast.map((t) => compileTemplate(t, unitPattern)),
-    instantFuture: instantFuture.map((t) => compileTemplate(t, unitPattern)),
+    durationPast: concatPast.map(compileTemplate),
+    durationFuture: concatFuture.map(compileTemplate),
+    instantPast: instantPast.map(compileTemplate),
+    instantFuture: instantFuture.map(compileTemplate),
     delimiters,
     delimiterPatterns,
     unitAliases,

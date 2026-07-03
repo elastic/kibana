@@ -15,16 +15,17 @@ import type { LocaleGrammar } from '../locale_grammar';
  * Vocabulary drafted by AI assistance, seeded from `moment/locale/de.js`'s
  * `relativeTime` dictionary where it covers a unit (e.g. "Tag"/"Tage",
  * "Minute"/"Minuten"). Gaps (named ranges, delimiter, templates) filled by
- * hand. **Needs native-speaker / localization-team review before this is
- * considered linguistically correct** — known simplifications:
+ * hand, then refined with native-speaker review feedback:
  *
- * - `unitWords` use the nominative case for both singular and plural
- *   (e.g. `Tag`/`Tage`). German grammar technically wants the dative case
- *   after a preposition (`einem Tag`/`Tagen`, confirmed in
- *   `moment/locale/de.js`'s `processRelativeTime`). Generated text will be
- *   slightly non-idiomatic in some phrases (understandable, not wrong-meaning).
- * - Delimiter ("bis") and named-range phrasing are reasonable but not
- *   verified-idiomatic.
+ * - Named ranges accept both nominative and accusative masculine forms
+ *   ("dieser"/"diesen Monat", "letzter"/"letzten Monat").
+ * - Duration templates accept every adjective ending ("letzte 7 Tage",
+ *   "letzter 1 Tag", "letztes 1 Jahr", "letzten 30 Tagen"); `generation`
+ *   picks the gender-correct singular form ("Letzter 1 Tag" for the
+ *   masculine "Tag"/"Monat", "Letztes 1 Jahr" for the neuter "Jahr").
+ * - Instant phrases take the dative after "vor"/"in", which inflects the
+ *   plural of Tag/Monat/Jahr ("vor 15 Tagen") — expressed via
+ *   `generation.instantUnitWords`; the remaining plurals already end in `-n`.
  */
 export const DE_DE_GRAMMAR: LocaleGrammar = {
   nowKeyword: 'jetzt',
@@ -35,10 +36,16 @@ export const DE_DE_GRAMMAR: LocaleGrammar = {
     morgen: { start: 'now+1d/d', end: 'now+1d/d' },
     'diese woche': { start: 'now/w', end: 'now/w' },
     'diesen monat': { start: 'now/M', end: 'now/M' },
+    'dieser monat': { start: 'now/M', end: 'now/M' },
     'dieses jahr': { start: 'now/y', end: 'now/y' },
     'letzte woche': { start: 'now-1w/w', end: 'now-1w/w' },
     'letzten monat': { start: 'now-1M/M', end: 'now-1M/M' },
+    'letzter monat': { start: 'now-1M/M', end: 'now-1M/M' },
     'letztes jahr': { start: 'now-1y/y', end: 'now-1y/y' },
+    'nächste woche': { start: 'now+1w/w', end: 'now+1w/w' },
+    'nächsten monat': { start: 'now+1M/M', end: 'now+1M/M' },
+    'nächster monat': { start: 'now+1M/M', end: 'now+1M/M' },
+    'nächstes jahr': { start: 'now+1y/y', end: 'now+1y/y' },
   },
   // No localized aliases — `td`/`yd`/`tmr` are English mnemonics; we don't
   // invent equivalents unless a locale clearly wants them.
@@ -74,13 +81,48 @@ export const DE_DE_GRAMMAR: LocaleGrammar = {
     M: { singular: 'Monat', plural: 'Monate' },
     y: { singular: 'Jahr', plural: 'Jahre' },
   },
+  // Every adjective ending parses; past/future lists stay index-aligned so
+  // arrow-key direction flips preserve the typed inflection
+  // ("letzter" ↔ "nächster" — see modify_range_parts.ts).
   durationTemplates: {
-    past: ['letzte {count} {unit}'],
-    future: ['nächste {count} {unit}'],
+    past: [
+      'letzte {count} {unit}',
+      'letzter {count} {unit}',
+      'letztes {count} {unit}',
+      'letzten {count} {unit}',
+    ],
+    future: [
+      'nächste {count} {unit}',
+      'nächster {count} {unit}',
+      'nächstes {count} {unit}',
+      'nächsten {count} {unit}',
+    ],
   },
   instantTemplates: {
     // Aligned with moment/locale/de.js's own `past: 'vor %s'` / `future: 'in %s'`.
     past: ['vor {count} {unit}'],
     future: ['in {count} {unit}'],
+  },
+  generation: {
+    // Singular adjective agrees with the unit's gender: der Tag / der Monat
+    // (masculine → "letzter"), das Jahr (neuter → "letztes"); the feminine
+    // units and all plurals keep the default "letzte"/"nächste".
+    durationPast: {
+      d: { singular: 'letzter {count} {unit}' },
+      M: { singular: 'letzter {count} {unit}' },
+      y: { singular: 'letztes {count} {unit}' },
+    },
+    durationFuture: {
+      d: { singular: 'nächster {count} {unit}' },
+      M: { singular: 'nächster {count} {unit}' },
+      y: { singular: 'nächstes {count} {unit}' },
+    },
+    // "vor"/"in" take the dative, which adds `-n` to these plurals; the other
+    // units' plurals (Minuten, Wochen, …) already end in `-n`.
+    instantUnitWords: {
+      d: { plural: 'Tagen' },
+      M: { plural: 'Monaten' },
+      y: { plural: 'Jahren' },
+    },
   },
 };

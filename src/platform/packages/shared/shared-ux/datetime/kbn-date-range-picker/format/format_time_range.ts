@@ -213,16 +213,20 @@ function fillTemplate(template: string, count: number, unitWord: string): string
   return template.replace('{count}', String(count)).replace('{unit}', unitWord);
 }
 
+const pluralityOf = (count: number): 'singular' | 'plural' => (count === 1 ? 'singular' : 'plural');
+
 /** Resolves the unit word for `unit`/`count` in `grammar`, falling back to English if absent. */
 function resolveUnitWord(unit: string, count: number, grammar: LocaleGrammar): string {
   const words = grammar.unitWords[unit as TimeUnit] ?? ENGLISH_GRAMMAR.unitWords[unit as TimeUnit];
-  return count === 1 ? words.singular : words.plural;
+  return words[pluralityOf(count)];
 }
 
 /**
  * Formats relative time as natural language, generated from the active
  * grammar's own instant templates — never hand-built English — so whatever
- * is displayed is guaranteed re-parseable.
+ * is displayed is guaranteed re-parseable. The unit word honors the grammar's
+ * `generation.instantUnitWords` agreement overrides (e.g. German dative
+ * "vor 15 Tagen", not "vor 15 Tage").
  * e.g., (7, 'm', false) => "7 minutes ago"
  * e.g., (3, 'd', true) => "3 days from now"
  */
@@ -232,15 +236,21 @@ function formatRelativeTime(
   isFuture: boolean,
   grammar: LocaleGrammar
 ): string {
-  const unitWord = resolveUnitWord(unit, count, grammar);
+  const unitWord =
+    grammar.generation?.instantUnitWords?.[unit as TimeUnit]?.[pluralityOf(count)] ??
+    resolveUnitWord(unit, count, grammar);
   const template = (isFuture ? grammar.instantTemplates.future : grammar.instantTemplates.past)[0];
   return fillTemplate(template, count, unitWord);
 }
 
 /**
  * Formats a compact relative time label, generated from the active grammar's
- * own duration templates. The result is capitalized as a UI label (matching
- * the same sentence-initial capitalization already applied to named ranges).
+ * own duration templates. The template honors the grammar's per-unit
+ * `generation` agreement overrides (e.g. French feminine "Dernières 15
+ * minutes", German masculine singular "Letzter 1 Tag") before falling back to
+ * the first duration template. The result is capitalized as a UI label
+ * (matching the same sentence-initial capitalization already applied to named
+ * ranges).
  * e.g., (7, 'm', false) => "Last 7 minutes"
  * e.g., (3, 'd', true) => "Next 3 days"
  */
@@ -251,9 +261,12 @@ function formatCompactRelativeTime(
   grammar: LocaleGrammar
 ): string {
   const unitWord = resolveUnitWord(unit, count, grammar);
-  const template = (
-    isFuture ? grammar.durationTemplates.future : grammar.durationTemplates.past
-  )[0];
+  const overrides = isFuture
+    ? grammar.generation?.durationFuture
+    : grammar.generation?.durationPast;
+  const template =
+    overrides?.[unit as TimeUnit]?.[pluralityOf(count)] ??
+    (isFuture ? grammar.durationTemplates.future : grammar.durationTemplates.past)[0];
   const phrase = fillTemplate(template, count, unitWord);
   return phrase.charAt(0).toUpperCase() + phrase.slice(1);
 }

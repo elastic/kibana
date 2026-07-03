@@ -101,9 +101,13 @@ const extractLeadingWord = (template: string): string | undefined => template.ma
  * Finds the opposite-direction word for `word` within `grammar`, or
  * `undefined` if `word` isn't one of this grammar's direction words, or the
  * `action` doesn't apply (e.g. stepping a future word further into the future).
- * Always returns the FIRST template's word for the target direction — matches
- * historical behavior where "past" (an alias of "last") flips forward to
- * "next", but flipping back always lands on the canonical "last".
+ * Prefers the SAME-INDEX template's word for the target direction, so
+ * inflected variants flip to their counterpart (German "letzter" ↔ "nächster",
+ * French "dernières" ↔ "prochaines" — the locale grammars keep their template
+ * lists index-aligned for this). Falls back to the first template's word when
+ * the lists are asymmetric — matches historical behavior where "past" (an
+ * alias of "last") flips forward to "next", but flipping back always lands on
+ * the canonical "last".
  */
 const getOppositeDirectionWord = (
   word: string,
@@ -118,11 +122,13 @@ const getOppositeDirectionWord = (
     .map(extractLeadingWord)
     .filter((w): w is string => !!w);
 
-  if (pastWords.some((w) => w.toLowerCase() === lower) && action === MODIFICATION_INCREASE) {
-    return futureWords[0];
+  if (action === MODIFICATION_INCREASE) {
+    const index = pastWords.findIndex((w) => w.toLowerCase() === lower);
+    if (index !== -1) return futureWords[index] ?? futureWords[0];
   }
-  if (futureWords.some((w) => w.toLowerCase() === lower) && action === MODIFICATION_DECREASE) {
-    return pastWords[0];
+  if (action === MODIFICATION_DECREASE) {
+    const index = futureWords.findIndex((w) => w.toLowerCase() === lower);
+    if (index !== -1) return pastWords[index] ?? pastWords[0];
   }
   return undefined;
 };

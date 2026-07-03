@@ -12,8 +12,8 @@ import moment from 'moment';
 import { DATE_RANGE_DISPLAY_DELIMITER, DATE_TYPE_NOW } from '../constants';
 import type { DateType } from '../types';
 import {
-  buildDelimiterPattern,
   escapeRegExp,
+  findDelimiterSplits,
   getCompiledGrammar,
   type CompiledGrammar,
   type CompiledTemplate,
@@ -168,43 +168,30 @@ const addCapturedPart = (
   return localStart + text.length;
 };
 
-const findDelimiterSplit = (value: string, delimiters: string[]): DelimiterSplit | null => {
-  for (const delimiter of delimiters) {
-    const pattern = buildDelimiterPattern(delimiter);
-    const match = pattern ? value.match(pattern) : null;
-    if (!match) continue;
-
-    const left = match[1];
-    const separatorWithWhitespace = value
-      .slice(left.length)
-      .match(new RegExp(`^\\s+${escapeRegExp(delimiter)}\\s+`));
-    if (!separatorWithWhitespace) continue;
-
-    const separatorStart =
-      left.length + separatorWithWhitespace[0].indexOf(separatorWithWhitespace[0].trim());
-    const separatorEnd = separatorStart + delimiter.length;
-    const rightOffset = left.length + separatorWithWhitespace[0].length;
-    const right = value.slice(rightOffset);
-
-    if (!left.trim() || !right.trim()) continue;
-
-    return {
-      left,
-      right,
-      rightOffset,
-      separator: {
-        text: delimiter,
-        start: separatorStart,
-        end: separatorEnd,
-        kind: 'separator',
-        navigable: false,
-        rangeIndex: null,
-      },
-    };
-  }
-
-  return null;
-};
+/**
+ * Enumerates every delimiter-split candidate for `value` — all occurrences of
+ * each delimiter, in delimiter order then left-to-right. Callers pick the
+ * first candidate whose sides both parse (see {@link findDelimiterSplits} for
+ * why the first occurrence isn't automatically the right one).
+ */
+const findDelimiterSplitCandidates = (value: string, delimiters: string[]): DelimiterSplit[] =>
+  delimiters.flatMap((delimiter) =>
+    findDelimiterSplits(value, delimiter).map(
+      ({ left, right, rightOffset, delimiterStart, delimiterEnd }): DelimiterSplit => ({
+        left,
+        right,
+        rightOffset,
+        separator: {
+          text: delimiter.trim(),
+          start: delimiterStart,
+          end: delimiterEnd,
+          kind: 'separator',
+          navigable: false,
+          rangeIndex: null,
+        },
+      })
+    )
+  );
 
 const getTrimmedSide = (side: string, offset: number): { text: string; offset: number } => {
   const trimmedStart = side.search(/\S/);
@@ -612,9 +599,21 @@ const getCompactDisplayRangeIndex = (
   return isFutureDuration || isFutureInstant ? 1 : 0;
 };
 
+const emitSplitParts = (split: DelimiterSplit, compiled: CompiledGrammar): RangePart[] => [
+  ...parseSide(split.left, 0, 0, compiled),
+  split.separator,
+  ...parseSide(split.right, split.rightOffset, 1, compiled),
+];
+
 /**
  * Splits edit-input text into semantic range parts. Named ranges, durations,
  * instants, and delimiters are matched against `locale` merged with English.
+ *
+ * Delimiter occurrences are candidates, not authoritative: the first split
+ * whose sides BOTH parse wins, then the whole input is tried as a single
+ * side (a phrase like French "il y a 3 jours" contains the delimiter word
+ * "a" without being a range), and only then does the first candidate's
+ * separator-only decomposition apply (partially-typed ranged input).
  */
 export function parseInputParts(
   input: string,
@@ -622,32 +621,30 @@ export function parseInputParts(
   locale?: string
 ): RangePart[] {
   const compiled = getCompiledGrammar(locale ?? i18n.getLocale());
-  const split = findDelimiterSplit(input, [...compiled.delimiters, '-']);
-  if (split) {
-    return [
-      ...parseSide(split.left, 0, 0, compiled),
-      split.separator,
-      ...parseSide(split.right, split.rightOffset, 1, compiled),
-    ];
+  const candidates = findDelimiterSplitCandidates(input, [...compiled.delimiters, '-']);
+  for (const split of candidates) {
+    const left = parseSide(split.left, 0, 0, compiled);
+    const right = parseSide(split.right, split.rightOffset, 1, compiled);
+    if (left.length && right.length) return [...left, split.separator, ...right];
   }
 
-  return parseSide(input, 0, getSingleRangeIndex(rangeType), compiled);
+  const single = parseSide(input, 0, getSingleRangeIndex(rangeType), compiled);
+  if (single.length || candidates.length === 0) return single;
+
+  return emitSplitParts(candidates[0], compiled);
 }
 
 /**
  * Splits idle button display text into semantic range parts. The display
- * delimiter (`→`) is a locale-invariant symbol; named ranges/durations/
+ * delimiter (`→`) is a locale-invariant symbol (it cannot appear inside a
+ * phrase, so the first occurrence is authoritative); named ranges/durations/
  * instants within each side are matched against `locale` merged with English.
  */
 export function parseDisplayParts(display: string, locale?: string): RangePart[] {
   const compiled = getCompiledGrammar(locale ?? i18n.getLocale());
-  const split = findDelimiterSplit(display, [DATE_RANGE_DISPLAY_DELIMITER]);
+  const [split] = findDelimiterSplitCandidates(display, [DATE_RANGE_DISPLAY_DELIMITER]);
   if (split) {
-    return [
-      ...parseSide(split.left, 0, 0, compiled),
-      split.separator,
-      ...parseSide(split.right, split.rightOffset, 1, compiled),
-    ];
+    return emitSplitParts(split, compiled);
   }
 
   return parseSide(display, 0, getCompactDisplayRangeIndex(display, compiled), compiled);

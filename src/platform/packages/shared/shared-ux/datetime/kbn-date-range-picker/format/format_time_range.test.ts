@@ -137,12 +137,30 @@ describe('timeRangeToDisplayText', () => {
       expect(toDisplay('now to +15m', { locale: 'de-DE' })).toBe('Nächste 15 Minuten');
     });
 
+    it('generates gender-agreeing German singular duration labels', () => {
+      // der Tag / der Monat (masculine) vs das Jahr (neuter)
+      expect(toDisplay('-1d', { locale: 'de-DE' })).toBe('Letzter 1 Tag');
+      expect(toDisplay('-1M', { locale: 'de-DE' })).toBe('Letzter 1 Monat');
+      expect(toDisplay('-1y', { locale: 'de-DE' })).toBe('Letztes 1 Jahr');
+      expect(toDisplay('now to +1y', { locale: 'de-DE' })).toBe('Nächstes 1 Jahr');
+    });
+
     it('generates German relative-to-relative instant phrasing', () => {
       expect(toDisplay('-15m to -5m', { locale: 'de-DE' })).toBe('vor 15 Minuten → vor 5 Minuten');
     });
 
-    it('generates a French compact relative label (past)', () => {
-      expect(toDisplay('-1w', { locale: 'fr-FR' })).toBe('Derniers 1 semaine');
+    it('generates the German dative plural after "vor"/"in" (Tagen, not Tage)', () => {
+      expect(toDisplay('-15d to -5d', { locale: 'de-DE' })).toBe('vor 15 Tagen → vor 5 Tagen');
+      expect(toDisplay('-15M to -5M', { locale: 'de-DE' })).toBe('vor 15 Monaten → vor 5 Monaten');
+      expect(toDisplay('-15y to -5y', { locale: 'de-DE' })).toBe('vor 15 Jahren → vor 5 Jahren');
+    });
+
+    it('generates gender-agreeing French duration labels', () => {
+      // la semaine / la minute (feminine) vs le jour (masculine)
+      expect(toDisplay('-1w', { locale: 'fr-FR' })).toBe('Dernière 1 semaine');
+      expect(toDisplay('-15m', { locale: 'fr-FR' })).toBe('Dernières 15 minutes');
+      expect(toDisplay('-15d', { locale: 'fr-FR' })).toBe('Derniers 15 jours');
+      expect(toDisplay('now to +15m', { locale: 'fr-FR' })).toBe('Prochaines 15 minutes');
     });
 
     it('generates French relative-to-relative instant phrasing', () => {

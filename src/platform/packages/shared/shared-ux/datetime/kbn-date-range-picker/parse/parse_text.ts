@@ -28,8 +28,8 @@ import type {
 } from '../types';
 import { isValidTimeRange } from '../utils';
 import {
-  buildDelimiterPattern,
   ENGLISH_GRAMMAR,
+  findDelimiterSplits,
   getCompiledGrammar,
   resolveUnit,
   type CompiledGrammar,
@@ -183,19 +183,25 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
     return buildRange(text, roundedStart, duration.end, formats, true);
   }
 
-  // (4) Try splitting on delimiters (locale grammar + universal dash + extra)
-  const parts = trySplit(trimmed, compiled, delimiter);
-  if (parts) {
-    const startDateString = instantToDateString(parts[0], compiled, formats);
-    const endDateString = instantToDateString(parts[1], compiled, formats);
-    if (startDateString && endDateString) {
-      const roundedStart = applyStartBoundRounding(startDateString, roundRelativeTime);
-      return buildRange(text, roundedStart, endDateString, formats, false);
+  // (4) Try splitting on delimiters (extra + locale grammar + universal dash).
+  // Every occurrence of every delimiter is a CANDIDATE, accepted only when
+  // both sides parse — a delimiter word may equally appear inside a phrase
+  // (French "il y a 3 jours" contains the accent-less delimiter "a"), in which
+  // case the wrong occurrences fail side-parsing and the right one (or the
+  // whole-text instant path below) wins.
+  const splitDelimiters = [...(delimiter ? [delimiter] : []), ...compiled.delimiters, '-'];
+  for (const splitDelimiter of splitDelimiters) {
+    for (const candidate of findDelimiterSplits(trimmed, splitDelimiter)) {
+      const startDateString = instantToDateString(candidate.left, compiled, formats);
+      const endDateString = instantToDateString(candidate.right, compiled, formats);
+      if (startDateString && endDateString) {
+        const roundedStart = applyStartBoundRounding(startDateString, roundRelativeTime);
+        return buildRange(text, roundedStart, endDateString, formats, false);
+      }
     }
-    return buildInvalidRange(text);
   }
 
-  // (5) Single instant (no delimiter found)
+  // (5) Single instant (no delimiter candidate produced two parseable sides)
   const dateString = instantToDateString(trimmed, compiled, formats);
   if (!dateString) return buildInvalidRange(text);
 
@@ -383,31 +389,6 @@ function buildInvalidRange(text: string): TimeRange {
     startOffset: null,
     endOffset: null,
   };
-}
-
-/**
- * Attempts to split text into two parts using available delimiters.
- * Tries in order: extra delimiter, then the compiled grammar's delimiter
- * (locale + universal dash) patterns.
- */
-function trySplit(
-  text: string,
-  compiled: CompiledGrammar,
-  extra?: string
-): [string, string] | null {
-  const patterns = extra
-    ? [buildDelimiterPattern(extra), ...compiled.delimiterPatterns].filter(
-        (p): p is RegExp => p !== null
-      )
-    : compiled.delimiterPatterns;
-
-  for (const pattern of patterns) {
-    const match = text.match(pattern);
-    if (match && match[1].trim() && match[2].trim()) {
-      return [match[1].trim(), match[2].trim()];
-    }
-  }
-  return null;
 }
 
 /** Tries each compiled template against the text, returning the first successful match or `null`. */
