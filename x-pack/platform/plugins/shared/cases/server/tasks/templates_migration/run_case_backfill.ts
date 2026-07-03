@@ -140,7 +140,7 @@ const backfillCasesForSpace = async (
 
   while (true) {
     if (signal.aborted) {
-      return { complete: false, scanned, backfilled, cursor: makeCursor() };
+      return { outcome: 'paused', scanned, backfilled, cursor: makeCursor() };
     }
 
     const page = await fetchPage();
@@ -188,18 +188,23 @@ const backfillCasesForSpace = async (
     // Exhausted this space's cases.
     if (cases.length < CASE_BACKFILL_PAGE_SIZE) {
       await safeClosePit(repo, cursor.pitId, log);
-      // Only mark complete when nothing failed; otherwise reschedule for a fresh, idempotent retry.
-      return { complete: !hadFailures, scanned, backfilled, cursor: undefined };
+      // Complete only when nothing failed; otherwise report `failed` so the space is retried fresh.
+      return {
+        outcome: hadFailures ? 'failed' : 'complete',
+        scanned,
+        backfilled,
+        cursor: undefined,
+      };
     }
 
-    // Per-run scan budget hit — reschedule. If a page failed, restart the space next run (drop the
-    // cursor) so the failed cases are revisited; otherwise resume forward from the PIT cursor.
+    // Per-run scan budget hit. If a page failed, report `failed` (retry the space fresh — its cases
+    // are idempotent); otherwise `paused` with the PIT cursor so the next run resumes where we left off.
     if (scanned >= scanBudget) {
       if (hadFailures) {
         await safeClosePit(repo, cursor.pitId, log);
-        return { complete: false, scanned, backfilled, cursor: undefined };
+        return { outcome: 'failed', scanned, backfilled, cursor: undefined };
       }
-      return { complete: false, scanned, backfilled, cursor: makeCursor() };
+      return { outcome: 'paused', scanned, backfilled, cursor: makeCursor() };
     }
   }
   /* eslint-enable require-atomic-updates */
@@ -224,7 +229,7 @@ export const runCaseBackfillPhase = async (
   );
 
   if (pending.length === 0) {
-    return { complete: true, backfilled: 0 };
+    return { complete: true, backfilled: 0, hadFailures: false };
   }
 
   // Resume the cursor's space first if it is still pending; otherwise it was already completed and
@@ -243,16 +248,17 @@ export const runCaseBackfillPhase = async (
 
   let scannedThisRun = 0;
   let backfilled = 0;
+  let hadFailures = false;
 
   for (const so of ordered) {
     if (signal.aborted) {
-      return { complete: false, backfilled, nextCursor: undefined };
+      return { complete: false, backfilled, hadFailures, nextCursor: undefined };
     }
 
     const budgetLeft = CASE_BACKFILL_SCAN_BUDGET - scannedThisRun;
     if (budgetLeft <= 0) {
-      // Budget spent between spaces — reschedule to continue with the next space on a fresh run.
-      return { complete: false, backfilled, nextCursor: undefined };
+      // Budget spent between spaces — reschedule to continue with the remaining spaces on a fresh run.
+      return { complete: false, backfilled, hadFailures, nextCursor: undefined };
     }
 
     const cursorForSpace = cursor?.configureId === so.id ? cursor : undefined;
@@ -270,14 +276,20 @@ export const runCaseBackfillPhase = async (
     scannedThisRun += result.scanned;
     backfilled += result.backfilled;
 
-    if (!result.complete) {
-      // Budget hit, aborted, or a page had failures — stop here and reschedule with whatever cursor
-      // the space returned. The remaining spaces are picked up on the next run.
-      return { complete: false, backfilled, nextCursor: result.cursor };
+    if (result.outcome === 'paused') {
+      // Budget hit or cancelled on this space — stop and resume it (via its cursor) next run.
+      return { complete: false, backfilled, hadFailures, nextCursor: result.cursor };
     }
 
-    await setCasesMigratedFlag(repo, so);
+    if (result.outcome === 'complete') {
+      await setCasesMigratedFlag(repo, so);
+    } else {
+      // 'failed' — leave the space unflagged and keep going, so one bad space doesn't starve the
+      // rest. It is retried on a later run; the run reports hadFailures so the runner can give up.
+      hadFailures = true;
+    }
   }
 
-  return { complete: true, backfilled };
+  // Reached the end of the pending list. Complete only if every space finished without failures.
+  return { complete: !hadFailures, backfilled, hadFailures, nextCursor: undefined };
 };

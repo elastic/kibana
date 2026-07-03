@@ -25,7 +25,12 @@ import {
   CASES_TEMPLATES_MIGRATION_TASK_TYPE,
   CASES_TEMPLATES_MIGRATION_TASK_ID,
 } from './constants';
-import { CASE_BACKFILL_RESCHEDULE_DELAY_MS, MAX_CONCURRENT_MIGRATIONS } from './types';
+import {
+  CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS,
+  CASE_BACKFILL_RESCHEDULE_DELAY_MS,
+  MAX_CASE_BACKFILL_FAILED_RUNS,
+  MAX_CONCURRENT_MIGRATIONS,
+} from './types';
 import type { MigrationTaskState } from './types';
 import { findAllConfigurations, migrateOneConfigure } from './migrate_configuration';
 import { runCaseBackfillPhase } from './run_case_backfill';
@@ -221,15 +226,32 @@ export class TemplatesMigrationTaskManager {
         `${backfill.complete ? '' : ' (more cases remain — rescheduling)'}`
     );
 
-    // While the backfill has more to do, self-reschedule and persist the cursor. Once complete,
-    // delete this one-shot task.
-    if (!backfill.complete) {
-      const nextState: Record<string, unknown> = backfill.nextCursor
-        ? { caseBackfill: backfill.nextCursor }
-        : {};
-      return { state: nextState, runAt: new Date(Date.now() + CASE_BACKFILL_RESCHEDULE_DELAY_MS) };
+    // Backfill fully done — delete this one-shot task.
+    if (backfill.complete) {
+      return { state: {}, shouldDeleteTask: true };
     }
 
-    return { state: {}, shouldDeleteTask: true };
+    // Count consecutive runs that couldn't complete a space because its updates kept failing. A run
+    // that only stopped for budget/cancellation is normal progress and resets the count. After the
+    // cap, give up rather than rescheduling a poison space forever.
+    const failedRuns = backfill.hadFailures ? (previousState.failedRuns ?? 0) + 1 : 0;
+    if (failedRuns >= MAX_CASE_BACKFILL_FAILED_RUNS) {
+      log.error(
+        `[${executionId}] Giving up the cases extended_fields backfill after ${failedRuns} consecutive runs ` +
+          `with update failures — some cases were not backfilled. Resolve the underlying error (see earlier ` +
+          `"updates failed" logs) and restart Kibana to re-run the migration.`
+      );
+      return { state: {}, shouldDeleteTask: true };
+    }
+
+    // Otherwise self-reschedule with the resume cursor + failure count, backing off when a run failed.
+    const nextState: Record<string, unknown> = {
+      ...(backfill.nextCursor ? { caseBackfill: backfill.nextCursor } : {}),
+      ...(failedRuns > 0 ? { failedRuns } : {}),
+    };
+    const delayMs = backfill.hadFailures
+      ? CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS
+      : CASE_BACKFILL_RESCHEDULE_DELAY_MS;
+    return { state: nextState, runAt: new Date(Date.now() + delayMs) };
   }
 }

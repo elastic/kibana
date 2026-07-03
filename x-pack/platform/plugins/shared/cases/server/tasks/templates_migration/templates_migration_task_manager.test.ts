@@ -23,6 +23,7 @@ import {
   CASES_TEMPLATES_MIGRATION_TASK_TYPE,
   CASES_TEMPLATES_MIGRATION_TASK_ID,
 } from './constants';
+import { CASE_BACKFILL_RESCHEDULE_DELAY_MS, MAX_CASE_BACKFILL_FAILED_RUNS } from './types';
 
 const createSavedObjectsRepositoryMock = () => ({
   find: jest.fn(),
@@ -1071,6 +1072,246 @@ describe('TemplatesMigrationTaskManager', () => {
       );
       expect(caseFind?.[0]).not.toHaveProperty('sortField');
       expect(caseFind?.[0]).not.toHaveProperty('sortOrder');
+    });
+  });
+
+  describe('bounded failure handling', () => {
+    const caseWithLegacyField = (id: string, owner = 'cases') => ({
+      id,
+      type: CASE_SAVED_OBJECT,
+      references: [],
+      attributes: {
+        owner,
+        customFields: [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'v' }],
+        extended_fields: null,
+      },
+      sort: [id],
+    });
+
+    // Routes configure + per-owner case finds; each owner's cases are served once (then empty, so
+    // the space exhausts). The case find is matched to an owner via its `filter` string.
+    const routeByOwner = (configSOs: unknown[], casesByOwner: Record<string, unknown[]>) => {
+      const served = new Set<string>();
+      repo.find.mockImplementation((opts: { type: string; filter?: string }) => {
+        if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: configSOs, total: configSOs.length });
+        }
+        if (opts.type === CASE_SAVED_OBJECT) {
+          const owner = Object.keys(casesByOwner).find((o) =>
+            String(opts.filter).includes(`"${o}"`)
+          );
+          if (owner && !served.has(owner)) {
+            served.add(owner);
+            const cases = casesByOwner[owner];
+            return Promise.resolve({ saved_objects: cases, total: cases.length, pit_id: 'pit-1' });
+          }
+          return Promise.resolve({ saved_objects: [], total: 0, pit_id: 'pit-1' });
+        }
+        return Promise.resolve({ saved_objects: [], total: 0 });
+      });
+    };
+
+    it('a persistently failing space does not starve other spaces in the same run', async () => {
+      const cfgA = buildConfigureSO({
+        id: 'cfgA',
+        owner: 'securitySolution',
+        customFields: [buildLegacyCustomField('cf_text')],
+      });
+      const cfgB = buildConfigureSO({
+        id: 'cfgB',
+        owner: 'observability',
+        customFields: [buildLegacyCustomField('cf_text')],
+      });
+      routeByOwner([cfgA, cfgB], {
+        securitySolution: [caseWithLegacyField('a1', 'securitySolution')],
+        observability: [caseWithLegacyField('b1', 'observability')],
+      });
+      // security's update fails; observability's succeeds.
+      repo.bulkUpdate.mockImplementation((updates: Array<{ id: string }>) =>
+        Promise.resolve({
+          saved_objects: updates.map((u) =>
+            u.id === 'a1'
+              ? { id: u.id, type: CASE_SAVED_OBJECT, error: { message: 'boom' } }
+              : { id: u.id, type: CASE_SAVED_OBJECT }
+          ),
+        })
+      );
+
+      const manager = await buildAndSchedule();
+      const result = await getTaskRunner(manager).run();
+
+      // The healthy space completes even though the failing one didn't...
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        'cfgB',
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+      expect(repo.update).not.toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        'cfgA',
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+      // ...and the run reschedules (still incomplete) recording one failing run.
+      expect(result).toEqual(
+        expect.objectContaining({
+          runAt: expect.any(Date),
+          state: expect.objectContaining({ failedRuns: 1 }),
+        })
+      );
+    });
+
+    it('gives up (deletes the task) after the max consecutive failing runs', async () => {
+      const cfg = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      routeByOwner([cfg], { cases: [caseWithLegacyField('c1')] });
+      repo.bulkUpdate.mockResolvedValue({
+        saved_objects: [{ id: 'c1', type: CASE_SAVED_OBJECT, error: { message: 'boom' } }],
+      });
+
+      const manager = await buildAndSchedule();
+      // Resume as if one run short of the cap already failed.
+      const result = await runTask(manager, {
+        state: { failedRuns: MAX_CASE_BACKFILL_FAILED_RUNS - 1 },
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Giving up'));
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+    });
+
+    it('increments failedRuns and backs off the reschedule when a run has update failures', async () => {
+      const cfg = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      routeByOwner([cfg], { cases: [caseWithLegacyField('c1')] });
+      repo.bulkUpdate.mockResolvedValue({
+        saved_objects: [{ id: 'c1', type: CASE_SAVED_OBJECT, error: { message: 'boom' } }],
+      });
+
+      const manager = await buildAndSchedule();
+      const before = Date.now();
+      const result = (await getTaskRunner(manager).run()) as {
+        state: { failedRuns?: number };
+        runAt: Date;
+      };
+
+      expect(result.state).toEqual(expect.objectContaining({ failedRuns: 1 }));
+      // Longer failure backoff, not the happy-path delay.
+      expect(result.runAt.getTime() - before).toBeGreaterThan(CASE_BACKFILL_RESCHEDULE_DELAY_MS);
+    });
+
+    it('resets failedRuns after a run that stops only for budget (no failures)', async () => {
+      // 1000-case pages that never fail → the scan budget is what stops the run (a clean pause),
+      // so a prior failure streak must reset to zero.
+      const fullPage = {
+        saved_objects: Array.from({ length: 1000 }, (_, i) => ({
+          id: `c-${i}`,
+          type: CASE_SAVED_OBJECT,
+          references: [],
+          attributes: { owner: 'cases', customFields: [], extended_fields: null },
+          sort: [i],
+        })),
+        total: 1000,
+        pit_id: 'pit-1',
+      };
+      const cfg = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      repo.find.mockImplementation((opts: { type: string }) => {
+        if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [cfg], total: 1 });
+        }
+        if (opts.type === CASE_SAVED_OBJECT) {
+          return Promise.resolve(fullPage);
+        }
+        return Promise.resolve({ saved_objects: [], total: 0 });
+      });
+
+      const manager = await buildAndSchedule();
+      const result = (await runTask(manager, { state: { failedRuns: 3 } })) as {
+        state: { failedRuns?: number };
+        runAt?: Date;
+      };
+
+      expect(result.runAt).toEqual(expect.any(Date));
+      expect(result.state.failedRuns).toBeUndefined();
+    });
+  });
+
+  // A stateful fake of the cases index that models a PIT scan the way the real SO repo does when no
+  // sortField is given: results are ordered by a unique per-doc tiebreaker (like `_shard_doc`), and
+  // `searchAfter` returns strictly the docs after that tiebreaker. bulkUpdate mutates the docs in
+  // place. This exercises the real pagination control flow — proving no case is skipped or visited
+  // twice across page boundaries even when many share the same `created_at`. (A true end-to-end test
+  // against real Elasticsearch is a recommended follow-up; there is no jest-integration harness for
+  // this startup task today.)
+  describe('faithful PIT pagination (skip-safety)', () => {
+    it('backfills every case across multiple pages when they all share a created_at', async () => {
+      const TOTAL = 2500; // 3 pages at CASE_BACKFILL_PAGE_SIZE (1000)
+      const docs = Array.from({ length: TOTAL }, (_, i) => ({
+        id: `case-${i}`,
+        // Identical created_at for all — the old created_at sort would have skipped some here.
+        attributes: {
+          owner: 'cases',
+          created_at: '2024-01-01T00:00:00.000Z',
+          customFields: [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: `v-${i}` }],
+          extended_fields: null as Record<string, unknown> | null,
+        },
+      }));
+
+      const cfg = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      let pitCounter = 0;
+      repo.openPointInTimeForType.mockImplementation(() =>
+        Promise.resolve({ id: `pit-${++pitCounter}` })
+      );
+      repo.find.mockImplementation(
+        (opts: { type: string; searchAfter?: number[]; perPage: number }) => {
+          if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+            return Promise.resolve({ saved_objects: [cfg], total: 1 });
+          }
+          // No sortField → order by array index (the unique `_shard_doc`-like tiebreaker).
+          const after = opts.searchAfter ? opts.searchAfter[0] : -1;
+          const start = after + 1;
+          const pageDocs = docs.slice(start, start + opts.perPage).map((d, i) => ({
+            id: d.id,
+            type: CASE_SAVED_OBJECT,
+            references: [],
+            attributes: d.attributes,
+            sort: [start + i],
+          }));
+          return Promise.resolve({ saved_objects: pageDocs, total: TOTAL, pit_id: 'pit-scan' });
+        }
+      );
+      repo.bulkUpdate.mockImplementation(
+        (
+          updates: Array<{ id: string; attributes: { extended_fields: Record<string, unknown> } }>
+        ) => {
+          for (const u of updates) {
+            const doc = docs.find((d) => d.id === u.id);
+            if (doc) doc.attributes.extended_fields = u.attributes.extended_fields;
+          }
+          return Promise.resolve({
+            saved_objects: updates.map((u) => ({ id: u.id, type: CASE_SAVED_OBJECT })),
+          });
+        }
+      );
+
+      const manager = await buildAndSchedule();
+      const result = await getTaskRunner(manager).run();
+
+      // Every case was backfilled exactly once — none skipped at a page boundary.
+      const backfilled = docs.filter(
+        (d) => d.attributes.extended_fields?.cf_text_as_keyword != null
+      );
+      expect(backfilled).toHaveLength(TOTAL);
+      expect(docs[0].attributes.extended_fields).toEqual({ cf_text_as_keyword: 'v-0' });
+      expect(docs[TOTAL - 1].attributes.extended_fields).toEqual({
+        cf_text_as_keyword: `v-${TOTAL - 1}`,
+      });
+      // Fully done → task deleted, space flagged.
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        cfg.id,
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
     });
   });
 
