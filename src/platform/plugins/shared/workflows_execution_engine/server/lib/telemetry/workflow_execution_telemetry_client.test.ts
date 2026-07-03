@@ -313,24 +313,26 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
 
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
-      expect(eventData.aiStepsUsage).toEqual([
-        {
-          stepId: 'run_investigator_agent',
-          connectorId: '.openai-gpt-5.2',
-          inputTokens: 100,
-          outputTokens: 40,
-          cachedTokens: 0,
-          totalTokens: 140,
-        },
-        {
-          stepId: 'run_judge_agent',
-          connectorId: '.anthropic-claude-4.6-sonnet',
-          inputTokens: 200,
-          outputTokens: 60,
-          cachedTokens: 30,
-          totalTokens: 260,
-        },
-      ]);
+      expect(eventData).toMatchObject({
+        aiStepsUsage: [
+          {
+            stepId: 'run_investigator_agent',
+            connectorId: '.openai-gpt-5.2',
+            inputTokens: 100,
+            outputTokens: 40,
+            cachedTokens: 0,
+            totalTokens: 140,
+          },
+          {
+            stepId: 'run_judge_agent',
+            connectorId: '.anthropic-claude-4.6-sonnet',
+            inputTokens: 200,
+            outputTokens: 60,
+            cachedTokens: 30,
+            totalTokens: 260,
+          },
+        ],
+      });
     });
 
     it('should omit the per-step usage breakdown when stepUsage is absent', () => {

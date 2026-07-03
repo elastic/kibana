@@ -100,6 +100,7 @@ export const OutputSchema = z.object({
       usage: z.object({
         connectorId: z
           .string()
+          .max(512)
           .optional()
           .describe('Id of the LLM connector used for this step, when reported by the model.'),
         inputTokens: z.number().describe('Total input tokens consumed across all LLM rounds.'),
