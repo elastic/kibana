@@ -8,32 +8,63 @@
  */
 
 import {
+  EuiBadge,
   EuiCallOut,
-  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-import React from 'react';
+import type { IconType } from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { renderTemplate } from '@kbn/workflows-library';
+import type { TemplateBody } from '@kbn/workflows-library';
+import { CatalogTemplateIcons } from './catalog_template_icons';
+import { WorkflowYamlPreview } from './template_yaml_preview';
 import { useTemplate } from '../hooks/use_template';
+import { getWorkflowTypes } from '../lib/get_workflow_types';
+import { humanizeCategoryId } from '../lib/humanize_category_id';
 
 export interface TemplateDetailProps {
   slug: string;
+  /** Called once the template body has loaded — e.g. to set breadcrumbs. */
+  onLoaded?: (template: TemplateBody) => void;
 }
 
+/** App icons for the known solutions; unknown solutions render without one. */
+const SOLUTION_ICONS: Record<string, IconType> = {
+  security: 'logoSecurity',
+  observability: 'logoObservability',
+  search: 'logoElasticsearch',
+};
+
+const capitalize = (value: string): string =>
+  value.length > 0 ? value[0].toUpperCase() + value.slice(1) : value;
+
 /**
- * Placeholder template detail view.
- *
- * TODO (follow-up session): render a read-only preview of the template YAML
- * using the existing workflow Monaco editor (`YamlEditor` +
- * `WORKFLOW_READ_ONLY_MONACO_OPTIONS` from
- * `workflows_management/public/shared/ui` and
- * `workflows_management/public/widgets/workflow_yaml_editor/lib/workflow_monaco_layout_options`),
- * the install-form preview, and the Install CTA.
+ * Workflow Template Library detail view: friendly template metadata (solution
+ * and category badges, step/trigger icons) plus a read-only preview of the
+ * template's workflow definition.
  */
-export const TemplateDetail = React.memo<TemplateDetailProps>(({ slug }) => {
+export const TemplateDetail = React.memo<TemplateDetailProps>(({ slug, onLoaded }) => {
   const { data, isLoading, isError } = useTemplate(slug);
+  const { euiTheme } = useEuiTheme();
+
+  const previewYaml = useMemo(() => (data ? renderTemplate({ template: data }) : ''), [data]);
+  const { stepTypes, triggerTypes } = useMemo(
+    () => (data ? getWorkflowTypes(data.body) : { stepTypes: [], triggerTypes: [] }),
+    [data]
+  );
+
+  useEffect(() => {
+    if (data) {
+      onLoaded?.(data);
+    }
+  }, [data, onLoaded]);
 
   if (isLoading) {
     return <EuiLoadingSpinner size="xl" data-test-subj="workflowLibraryTemplateDetail-loading" />;
@@ -54,52 +85,137 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(({ slug }) => {
   }
 
   const { metadata } = data;
+  const solutions = metadata.solutions ?? Object.keys(SOLUTION_ICONS); // No solutions means all solutions are supported
 
   return (
-    <div data-test-subj="workflowLibraryTemplateDetail">
-      <EuiTitle size="m">
-        <h1>{metadata.name}</h1>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <p>{metadata.description}</p>
-      <EuiSpacer size="m" />
-      <EuiDescriptionList
-        compressed
-        listItems={[
-          {
-            title: i18n.translate('workflows.library.templateDetail.slugLabel', {
-              defaultMessage: 'Slug',
-            }),
-            description: metadata.slug,
-          },
-          {
-            title: i18n.translate('workflows.library.templateDetail.versionLabel', {
-              defaultMessage: 'Version',
-            }),
-            description: metadata.version,
-          },
-          {
-            title: i18n.translate('workflows.library.templateDetail.categoriesLabel', {
-              defaultMessage: 'Categories',
-            }),
-            description: metadata.categories.join(', '),
-          },
-        ]}
-      />
-      <EuiSpacer size="l" />
-      <EuiCallOut
-        data-test-subj="workflowLibraryTemplateDetail-previewPlaceholder"
-        iconType="iInCircle"
-        title={i18n.translate('workflows.library.templateDetail.previewPlaceholderTitle', {
-          defaultMessage: 'Preview coming soon',
-        })}
-      >
-        {i18n.translate('workflows.library.templateDetail.previewPlaceholderBody', {
-          defaultMessage:
-            "A read-only preview of this template's YAML, plus the install flow, will be added in a follow-up.",
-        })}
-      </EuiCallOut>
-    </div>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="m"
+      data-test-subj="workflowLibraryTemplateDetail"
+      css={{ height: '100%' }}
+    >
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="m" alignItems="flexStart">
+          <EuiFlexItem grow={false} css={{ width: '30%' }}>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false} wrap>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="l">
+                      <h1>{metadata.name}</h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow" data-test-subj="workflowLibraryTemplateDetail-version">
+                      {i18n.translate('workflows.library.templateDetail.version', {
+                        defaultMessage: 'v{version}',
+                        values: { version: metadata.version },
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <CatalogTemplateIcons stepTypes={stepTypes} triggerTypes={triggerTypes} />
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued">{metadata.description}</EuiText>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">
+                      <strong>
+                        {i18n.translate('workflows.library.templateDetail.solutionsLabel', {
+                          defaultMessage: 'Solutions:',
+                        })}
+                      </strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup
+                      gutterSize="xs"
+                      wrap
+                      responsive={false}
+                      data-test-subj="workflowLibraryTemplateDetail-solutions"
+                    >
+                      {solutions.map((solution) => (
+                        <EuiFlexItem grow={false} key={`solution-${solution}`}>
+                          <EuiBadge color="hollow" iconType={SOLUTION_ICONS[solution]}>
+                            {capitalize(solution)}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiSpacer size="s" />
+
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">
+                      <strong>
+                        {i18n.translate('workflows.library.templateDetail.categoriesLabel', {
+                          defaultMessage: 'Categories:',
+                        })}
+                      </strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup
+                      gutterSize="xs"
+                      wrap
+                      responsive={false}
+                      data-test-subj="workflowLibraryTemplateDetail-categories"
+                    >
+                      {metadata.categories.map((category) => (
+                        <EuiFlexItem grow={false} key={`category-${category}`}>
+                          <EuiBadge color="hollow">{humanizeCategoryId(category)}</EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem
+            css={{
+              height: '100%',
+              border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+              backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+            }}
+          >
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup direction="column" alignItems="center">
+                  <EuiFlexItem grow={false} css={{ padding: `${euiTheme.size.s} 0` }}>
+                    <EuiBadge color="warning" style={{ padding: `0 ${euiTheme.size.l}` }}>
+                      {i18n.translate('workflows.library.templateDetail.previewTitle', {
+                        defaultMessage: 'Preview',
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow css={{ minHeight: 0, overflow: 'hidden' }}>
+                <WorkflowYamlPreview
+                  yaml={previewYaml}
+                  height="100%"
+                  data-test-subj="workflowLibraryTemplateDetail-preview"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 });
 TemplateDetail.displayName = 'TemplateDetail';

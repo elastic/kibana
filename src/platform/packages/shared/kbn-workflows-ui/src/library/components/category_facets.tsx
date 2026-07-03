@@ -11,19 +11,13 @@ import { EuiFacetButton, EuiFacetGroup } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
+import { humanizeCategoryId } from '../lib/humanize_category_id';
 
 export interface CategoryFacetsProps {
   /** The full, unfiltered-by-category catalog — used to compute facet counts. */
   templates: Template[];
   selectedCategories: string[];
   onChange: (categories: string[]) => void;
-}
-
-function humanizeCategoryId(id: string): string {
-  return id
-    .split('-')
-    .map((word) => (word.length > 0 ? word[0].toUpperCase() + word.slice(1) : word))
-    .join(' ');
 }
 
 /**

@@ -7,5 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LibraryCatalogBrowserPage } from './catalog_browser_page';
-export { LibraryTemplateDetailPage } from './template_detail_page';
+/**
+ * Turn a kebab-case category id into a display label (e.g. `threat-intel` →
+ * `Threat Intel`). Rendering the canonical `library/categories.yaml` names is a
+ * known follow-up.
+ */
+export function humanizeCategoryId(id: string): string {
+  return id
+    .split('-')
+    .map((word) => (word.length > 0 ? word[0].toUpperCase() + word.slice(1) : word))
+    .join(' ');
+}
