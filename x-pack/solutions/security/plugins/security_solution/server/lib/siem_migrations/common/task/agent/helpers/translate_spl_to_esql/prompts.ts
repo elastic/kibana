@@ -24,12 +24,10 @@ Here are some context for you to reference for your task, read it carefully as y
 <splunk_query>
 {splunk_query}
 </splunk_query>
-<index_knowledge_base>
-The following is the index knowledge base containing mappings, sample documents and any extra knowledge for the target index. This can be used to ensure correct field names and sometimes values that are used when generating the query.
-\`\`\`json
-{index_knowledge_base}
-\`\`\`
-</index_knowledge_base>
+<translation_context>
+The following translation context may include source index mappings, sample documents, integration documentation, lookup resource metadata, or other information that can help translate the query.
+{translation_context}
+</translation_context>
 <placeholders_syntax>
 If you encounter any placeholders for macros or lookups in the SPL query, leave them as-is in the ES|QL query output. They are markers that need to be preserved.
 They are wrapped in brackets ("[]") and always start with "macro:" or "lookup:". Mention all placeholders you left in the final summary.

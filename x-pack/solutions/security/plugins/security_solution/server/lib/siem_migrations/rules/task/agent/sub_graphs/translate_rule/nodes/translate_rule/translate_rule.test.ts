@@ -25,7 +25,7 @@ FROM logs-*
 - Translated rule.`);
   });
 
-  it('adds enriched lookup runtime fields to the translation knowledge base', async () => {
+  it('adds enriched lookup runtime fields to the translation context', async () => {
     const node = getTranslateRuleNode({ esqlKnowledgeBase, logger });
     type TranslateRuleNode = typeof node;
 
@@ -70,6 +70,51 @@ FROM logs-*
     );
     expect(esqlKnowledgeBase.translate).toHaveBeenCalledWith(
       expect.stringContaining('integration context')
+    );
+    const prompt = esqlKnowledgeBase.translate.mock.calls[0][0];
+    expect(prompt).toContain('<translation_context>');
+    expect(prompt).not.toContain('<index_knowledge_base>');
+    expect(prompt).not.toContain('```json');
+  });
+
+  it('uses source-index fallback guidance when only lookup context is available', async () => {
+    const node = getTranslateRuleNode({ esqlKnowledgeBase, logger });
+    type TranslateRuleNode = typeof node;
+
+    await node(
+      {
+        original_rule: {
+          id: 'rule-1',
+          vendor: 'splunk',
+          query_language: 'spl',
+          title: 'Threat Intel IP',
+          description: 'Detects connections to threat intel IPs',
+          query: 'index=main | lookup threat_intel_ip ip AS destination.ip',
+        },
+        inline_query: 'index=main | lookup lookup_default_threat_intel_ip ip AS destination.ip',
+        resources: {
+          lookup: [
+            {
+              type: 'lookup',
+              name: 'threat_intel_ip',
+              content: 'lookup_default_threat_intel_ip',
+              fields: [{ path: 'ip', type: 'ip' }],
+            },
+          ],
+        },
+      } as Parameters<TranslateRuleNode>[0],
+      {} as Parameters<TranslateRuleNode>[1]
+    );
+
+    const prompt = esqlKnowledgeBase.translate.mock.calls[0][0];
+    expect(prompt).toContain('<lookup_resources>');
+    expect(prompt).toContain(
+      '<lookup_resource source_name="threat_intel_ip" index="lookup_default_threat_intel_ip">'
+    );
+    expect(prompt).toContain('No source index mapping or sample values are available');
+    expect(prompt).toContain('use it only for LOOKUP JOIN index names');
+    expect(prompt).not.toContain(
+      'You MUST map SPL field names to the correct Elasticsearch field names using the provided index mapping and sample values'
     );
   });
 });
