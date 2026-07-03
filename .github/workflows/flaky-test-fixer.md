@@ -50,9 +50,26 @@ tools:
     toolsets: [default, search]
   web-fetch:
   bash: true
+
+# Bootstrap Kibana on the self-hosted runner before the sandboxed agent starts, so
+# `node_modules` (and `@kbn/setup-node-env`) exist and the agent can run
+# `node scripts/eslint` / `node scripts/type_check` to verify its fix. Kibana uses
+# Yarn Classic (registry.yarnpkg.com), which the sandbox firewall does not allow, so
+# an in-sandbox `yarn kbn bootstrap` would 403 — do it here on the host instead.
+runs-on: kibana
+steps:
+  - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+    with:
+      node-version-file: '.nvmrc'
+      cache: yarn
+  - name: Bootstrap Kibana
+    run: yarn kbn bootstrap
+
 network:
   allowed:
     - defaults
+    - node
+    - kibana-bazel-remote-h5qd3jkxkq-uc.a.run.app
     - buildkite.com
     - '*.buildkite.com'
     - ci-stats.kibana.dev
