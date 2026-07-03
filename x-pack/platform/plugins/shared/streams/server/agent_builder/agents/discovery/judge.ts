@@ -13,7 +13,7 @@ import { getSignificantEventsAvailability } from '../../../routes/utils/assert_s
 
 export const SIGNIFICANT_EVENTS_JUDGE_AGENT_ID = 'platform.sig_events.discovery.judge';
 
-export const createSigEventsJudgeAgent = ({
+export const createSignificantEventsJudgeAgent = ({
   server,
 }: {
   server: StreamsServer;
