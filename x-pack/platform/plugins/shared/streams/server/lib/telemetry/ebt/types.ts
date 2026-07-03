@@ -6,7 +6,8 @@
  */
 
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
-import type { SigEventStatus, StreamType } from '@kbn/streams-schema';
+import type { StreamType } from '@kbn/streams-schema';
+import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
 interface StreamEndpointLatencyProps {
   name: string;
@@ -29,6 +30,7 @@ interface StreamsDescriptionGeneratedProps {
   stream_name: string;
   stream_type: StreamType;
 }
+
 interface StreamsSignificantEventsQueriesGeneratedProps {
   count: number;
   connector_id: string;
@@ -96,7 +98,7 @@ interface StreamsAgentToolEventCreateProps {
 interface StreamsAgentToolEventStatusUpdateProps {
   success: boolean;
   event_id: string;
-  status: SigEventStatus;
+  status: SignificantEventStatus;
   error_message?: string;
 }
 

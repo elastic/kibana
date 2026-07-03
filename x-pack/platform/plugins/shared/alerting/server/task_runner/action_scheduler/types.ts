@@ -71,6 +71,7 @@ export interface ActionSchedulerOptions<
   actionsClient: PublicMethodsOf<ActionsClient>;
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
   priority?: TaskPriority;
+  activeSnoozedIds?: Set<string>;
 }
 
 export type Executable<

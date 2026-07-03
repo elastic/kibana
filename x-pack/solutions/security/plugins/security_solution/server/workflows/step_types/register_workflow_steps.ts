@@ -10,6 +10,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
+import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
 import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
 import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
 import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
@@ -47,6 +48,7 @@ export const registerWorkflowSteps = (
   });
 
   workflowsExtensions.registerStepDefinition(setAlertStatusStepDefinition);
+  workflowsExtensions.registerStepDefinition(setAlertTagsStepDefinition);
   workflowsExtensions.registerStepDefinition(assignAlertStepDefinition);
   workflowsExtensions.registerStepDefinition(enableRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(disableRuleStepDefinition);

@@ -12,6 +12,7 @@ import { registerWorkflowSteps } from './register_workflow_steps';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
+import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
 import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
 import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
 import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
@@ -34,6 +35,7 @@ const REGISTRATIONS = [
   { definition: renderAlertNarrativeStepDefinition, featureFlagGated: true },
   { definition: buildAlertEntityGraphStepDefinition, featureFlagGated: true },
   { definition: setAlertStatusStepDefinition, featureFlagGated: false },
+  { definition: setAlertTagsStepDefinition, featureFlagGated: false },
   { definition: assignAlertStepDefinition, featureFlagGated: false },
   { definition: enableRuleStepDefinition, featureFlagGated: false },
   { definition: disableRuleStepDefinition, featureFlagGated: false },
