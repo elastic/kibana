@@ -9,6 +9,7 @@ import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import {
+  getResultFileName,
   getToolCallDirPath,
   getToolCallEntryAbsolutePath,
 } from '../../runner/store/volumes/tool_results/utils';
@@ -33,7 +34,7 @@ describe('buildGuardedToolContent', () => {
     expect(content).toEqual(JSON.stringify({ results }));
   });
 
-  it('merges a single oversized result into one `other` result with a recovery pointer', () => {
+  it('merges a single oversized result into one `other` result linking directly to the result file', () => {
     const huge = 'x'.repeat(500 * 4); // ~500 tokens
     const results = [otherResult({ text: huge })];
 
@@ -49,18 +50,22 @@ describe('buildGuardedToolContent', () => {
     expect(parsed.results[0].type).toBe(ToolResultType.other);
 
     const message = (parsed.results[0].data as { content: string }).content;
-    const expectedPath = getToolCallEntryAbsolutePath(
-      getToolCallDirPath({ toolId: 'my_tool', toolCallId: 'call-1' })
+    const expectedFilePath = getToolCallEntryAbsolutePath(
+      `${getToolCallDirPath({ toolId: 'my_tool', toolCallId: 'call-1' })}/${getResultFileName(
+        0,
+        1
+      )}`
     );
     expect(message).toContain('Output too large');
     expect(message).toContain('tokens');
-    expect(message).toContain(expectedPath);
-    expect(message).toContain('`list_files`');
+    // The single-result case links directly to the result file, not the directory.
+    expect(message).toContain(expectedFilePath);
     expect(message).toContain('`read_file`');
+    expect(message).not.toContain('`list_files`');
     expect(message).toContain('Preview (first 100 tokens):');
   });
 
-  it('counts multiple results as a whole and merges them when their combined size is over budget', () => {
+  it('counts multiple results as a whole, merges them, and points at the directory (no single file to link to)', () => {
     const results = [
       otherResult({ text: 'a'.repeat(200) }),
       otherResult({ text: 'b'.repeat(200) }),
@@ -76,6 +81,14 @@ describe('buildGuardedToolContent', () => {
     const parsed = JSON.parse(content) as { results: ToolResult[] };
     expect(parsed.results).toHaveLength(1);
     expect(parsed.results[0].type).toBe(ToolResultType.other);
+
+    const message = (parsed.results[0].data as { content: string }).content;
+    const expectedDirPath = getToolCallEntryAbsolutePath(
+      getToolCallDirPath({ toolId: 'my_tool', toolCallId: 'call-1' })
+    );
+    expect(message).toContain(expectedDirPath);
+    expect(message).toContain('`list_files`');
+    expect(message).toContain('`read_file`');
   });
 
   it('leaves multiple results untouched when their combined size is under budget', () => {

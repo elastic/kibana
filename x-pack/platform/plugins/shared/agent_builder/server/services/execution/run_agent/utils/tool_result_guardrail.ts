@@ -13,6 +13,7 @@ import {
   truncateTokens,
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import {
+  getResultFileName,
   getToolCallDirPath,
   getToolCallEntryAbsolutePath,
 } from '../../runner/store/volumes/tool_results/utils';
@@ -41,22 +42,39 @@ export const buildGuardedToolContent = ({
 }: BuildToolContentParams & { maxTokens: number }): string => {
   const stringified = JSON.stringify({ results });
 
-  try {
-    const totalTokens = estimateTokens(stringified);
-    if (totalTokens <= maxTokens) {
-      return stringified;
-    }
-
-    const preview = truncateTokens(stringified, maxTokens);
-    const message = isExcludedFromFilestore(toolId)
-      ? `Output too large (~${totalTokens} tokens) and has been truncated for this response; the full result is not recoverable via the virtual filesystem for this tool.\nPreview (first ${maxTokens} tokens):\n${preview}`
-      : `Output too large (~${totalTokens} tokens). The full, untruncated result was saved to the virtual filesystem under ${getToolCallEntryAbsolutePath(
-          getToolCallDirPath({ toolId, toolCallId })
-        )} — use the \`list_files\` tool on that directory and \`read_file\` on the result file(s) to recover it.\nPreview (first ${maxTokens} tokens):\n${preview}`;
-
-    return JSON.stringify({ results: [createOtherResult({ content: message })] });
-  } catch {
-    // Fail open: the guardrail must never become a new source of tool-call failures.
+  const totalTokens = estimateTokens(stringified);
+  if (totalTokens <= maxTokens) {
     return stringified;
   }
+
+  const preview = truncateTokens(stringified, maxTokens);
+  const recovery = getRecoveryInstructions({ toolId, toolCallId, resultCount: results.length });
+  const message = `Output too large (~${totalTokens} tokens). ${recovery}\nPreview (first ${maxTokens} tokens):\n${preview}`;
+
+  return JSON.stringify({ results: [createOtherResult({ content: message })] });
+};
+
+const getRecoveryInstructions = ({
+  toolId,
+  toolCallId,
+  resultCount,
+}: {
+  toolId: string;
+  toolCallId: string;
+  resultCount: number;
+}): string => {
+  if (isExcludedFromFilestore(toolId)) {
+    return 'The full result is not recoverable.';
+  }
+
+  const dirPath = getToolCallDirPath({ toolId, toolCallId });
+
+  if (resultCount === 1) {
+    const filePath = getToolCallEntryAbsolutePath(`${dirPath}/${getResultFileName(0, 1)}`);
+    return `The full, untruncated result was saved to the virtual filesystem at ${filePath} — use the \`read_file\` tool on that path to access it.`;
+  }
+
+  return `The full, untruncated results were saved to the virtual filesystem under ${getToolCallEntryAbsolutePath(
+    dirPath
+  )} — use the \`list_files\` tool on that directory and \`read_file\` on the result file(s) to recover it.`;
 };
