@@ -38,7 +38,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
       return { oldSource: '', newSource: '', numOfChangedFields: 0, noDiffAvailable: true };
     }
 
-    const noDiffAvailable =
+    const hasNoDiff =
       EDIT_ACTIONS_REQUIRING_PRIOR_STATE.includes(item.action) &&
       !item.old_values &&
       // Rule imports can be both a new entry and an overwrite of an existing entry,
@@ -56,14 +56,14 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
         oldSource: '',
         newSource: stableStringify(after, { space: 2 }),
         numOfChangedFields: 0,
-        noDiffAvailable,
+        noDiffAvailable: hasNoDiff,
       };
     }
 
     const changedFields = extractChangedFieldNames(item);
 
     if (changedFields.length === 0) {
-      return { oldSource: '', newSource: '', numOfChangedFields: 0, noDiffAvailable };
+      return { oldSource: '', newSource: '', numOfChangedFields: 0, noDiffAvailable: hasNoDiff };
     }
 
     const before = reconstructBefore(after, item.old_values);
@@ -72,7 +72,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
       oldSource: stableStringify(before, { space: 2 }),
       newSource: stableStringify(after, { space: 2 }),
       numOfChangedFields: changedFields.length,
-      noDiffAvailable,
+      noDiffAvailable: hasNoDiff,
     };
   }, [item]);
 
