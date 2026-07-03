@@ -13,7 +13,6 @@ import type {
   ALERT_SEVERITY_MEDIUM,
   ALERT_SEVERITY_LOW,
   ALERT_SEVERITY_INFO,
-  ALERT_SEVERITY_WARNING,
 } from '@kbn/rule-data-utils';
 
 export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
@@ -33,8 +32,7 @@ export type AlertSeverityLevel =
   | typeof ALERT_SEVERITY_HIGH
   | typeof ALERT_SEVERITY_MEDIUM
   | typeof ALERT_SEVERITY_LOW
-  | typeof ALERT_SEVERITY_INFO
-  | typeof ALERT_SEVERITY_WARNING;
+  | typeof ALERT_SEVERITY_INFO;
 
 /**
  * Built-in data condition type identifiers.
