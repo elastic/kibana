@@ -533,7 +533,7 @@ paths:
       summary: Export live query results
       tags:
         - Security Osquery API
-      x-state: Added in 9.5.0
+      x-state: Generally available; Added in 9.5.0
   /api/osquery/packs:
     get:
       description: Get a list of all query packs.
