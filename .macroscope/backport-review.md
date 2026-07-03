@@ -40,13 +40,18 @@ Fetch the original PR's diff and file list via `GET /repos/elastic/kibana/pulls/
 
 Review the backport PR diff against the original PR. When a parity issue is found, link to the equivalent line in the original PR.
 
+The backport diff should equal the original PR's diff applied on the target branch base — no extra paths, no missing paths, no `main`-only content the target branch never had. Use the original PR's file list as the authoritative allowlist. This applies to all code, not just tests.
+
 Highlight:
 
-- **Missing or extra files:** flag files missing from the backport (dropped cherry-picks) or unjustified new files (scope creep)
-- **Test-specific parity:** ensure tests are backported, if it makes sense from within the context of the version branch.
-- **Stray markers:** let the author know if `<<<<<<<`, `=======`, or `>>>>>>>` exist in the diff.
-- **Config drift ("ghost references"):** if a file is deleted, ensure no lingering references remain (e.g., `.github/CODEOWNERS`, deleted global setups still in Playwright config, `require.resolve` of deleted fixtures).
-- **Versions-specific terms:** flag APIs or terms that do not exist on the `targetBranch` (e.g., using "Data View" on a 7.17 backport).
+- **Missing or extra files:** flag dropped cherry-picks (files in the original PR but missing here) and scope creep (paths not in the original PR's file list) — usually `main`-only code, tests, or fixtures dragged in because the target branch diverged.
+- **Unexpected deletions:** flag files the backport deletes that the original PR did not delete — usually a `main`-side deletion wrongly accepted during conflict resolution (e.g. git rename detection pairing a deleted file with a new one).
+- **Stray markers:** flag any `<<<<<<<`, `=======`, or `>>>>>>>` in the diff.
+- **Whole-file reformat:** flag a file whose backport diff is far larger than that file's diff in the original PR (re-sorted, re-indented, blank-line churn, mangled globs); only the lines the original PR changed belong here. Config and data files like `.github/CODEOWNERS` and JSON are common victims.
+- **Stale generated/snapshot files:** flag generated or snapshot files (lockfiles, manifests, snapshots — e.g. Scout `.meta/*.json`) copied from the original PR instead of regenerated on the target branch. For `.meta` manifests this shows up as a `sha1` not matching the target branch's test directory tree, or a test list referencing specs absent on the target branch.
+- **Parity within version context:** ensure the change makes sense on the target branch — tests, features, or APIs the branch lacks should not be backported.
+- **Config drift ("ghost references"):** when a file is deleted, ensure no lingering references remain (e.g. `.github/CODEOWNERS`, deleted global setups still in Playwright config, `require.resolve` of deleted fixtures).
+- **Version-specific terms:** flag APIs or terms that do not exist on the `targetBranch` (e.g. using "Data View" on a 7.17 backport).
 
 ## 4. Output
 

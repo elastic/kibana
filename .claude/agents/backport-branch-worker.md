@@ -25,6 +25,17 @@ Cherry-pick the source merge commit into the target branch worktree with `git ch
 
 If git fetch, worktree creation, cherry-pick, bootstrap, or safe-output tooling exits with an error unrelated to a merge conflict, return `failed` with the exact command or tool error. Do not retry blindly or invent workarounds.
 
+## Backport scope rule
+
+The backport must be exactly the source PR's own change applied on the target branch — nothing more, nothing less. Compute that change once with `git diff <source merge commit SHA>^ <source merge commit SHA>` and treat the files and lines it changes as the only edits the backport may contain. This applies to all code, not just tests.
+
+Because the target branch has diverged from `main`, cherry-picking a squash/merge commit can silently pull in `main`-only content or accept `main`-side edits and deletions the source PR never made. Enforce this:
+
+- Every file path in your final `git diff origin/<target branch>...HEAD` must also appear in the source PR diff. Restore anything extra to the target branch version with `git checkout origin/<target branch> -- <path>`.
+- Add or delete a file only when the source PR itself adds or deletes it. Never accept a `main`-side addition or deletion the source PR did not make.
+- Change only the specific lines the source PR changes in each file; never reformat, re-sort, or rewrite a whole file. If a file's backport diff is much larger than that file's diff in the source PR, you changed too much — redo it with the minimal edit. Config and data files (e.g. `.github/CODEOWNERS`, JSON) corrupt easily this way.
+- Regenerate generated or snapshot files (lockfiles, manifests, snapshots — e.g. Scout `.meta/*.json`) on the target branch instead of copying the source PR's values. If you cannot regenerate them in the worktree, return `needs manual backport`.
+
 If the cherry-pick applies without conflicts:
 
 1. Confirm the diff is limited to the cherry-pick.
@@ -38,7 +49,7 @@ If the cherry-pick has conflicts:
    - the conflicted worktree file,
    - `git show <source merge commit SHA>:<path>` when that path exists in the source merge commit,
    - the target branch version of the file.
-3. Resolve only files involved in the conflict. Do not edit unrelated files. If a conflict represents a deletion, use `git rm <file>` instead of leaving an empty file behind.
+3. Resolve only files involved in the conflict; do not edit unrelated files. For a deletion conflict, `git rm <file>` only if the source PR deletes that path; otherwise (the deletion comes from `main`) keep the target branch version with `git checkout origin/<target branch> -- <file>`.
 4. For package or lockfile conflicts:
    - Apply only the source PR dependency/version intent to the target branch's package manifest.
    - For dependency-only Renovate PRs, infer intent from the PR body and from `git diff <source merge commit SHA>^ <source merge commit SHA> -- package.json`, not from the entire incoming conflict block. Preserve unrelated target-branch dependency versions that only appear because they are adjacent in the conflicted block.
@@ -60,6 +71,7 @@ Backport PR creation steps:
    - A worktree search for `<<<<<<<`, `=======`, and `>>>>>>>` finds no conflict markers.
    - `git log -1` is the completed cherry-pick commit with the `-x` attribution.
    - `git diff origin/<target branch>...HEAD` is limited to the intended cherry-pick resolution.
+   - Scope check: every file path in `git diff --name-only origin/<target branch>...HEAD` also appears in the source PR's changed paths (`git diff --name-only <source merge commit SHA>^ <source merge commit SHA>`) — no extra files, no unintended deletions, no whole-file reformats, generated/snapshot files regenerated not copied. If you cannot make the two lists match, return `needs manual backport`.
 2. If any PR creation precondition fails, abort any in-progress cherry-pick, leave the worktree for logs, return `needs manual backport`, and do not call `create_pull_request`.
 3. Stay in the worktree directory and run `git branch --show-current`.
 4. Choose a canonical temporary PR reference for this branch using the form `#aw_` followed by 3-12 alphanumeric or underscore characters, such as `#aw_bp94` for branch `9.4` or `#aw_bp819` for branch `8.19`.
@@ -94,11 +106,14 @@ Return a short structured result:
 {
   "branch": "<target branch>",
   "status": "created | needs manual backport | failed",
+  "scope_gate": "passed | failed | not-run",
   "summary": "one sentence",
   "conflicted_files": [],
   "pr_title": "[<target branch>] <source PR title> (#<source PR number>)"
 }
 ```
+
+`scope_gate` must be `passed` for any `created` result. If the scope check did not pass, do not report `created`.
 
 Rules:
 
@@ -108,6 +123,7 @@ Rules:
 - Never create draft PRs, placeholder PRs, manual-resolution PRs, or PRs that preserve conflict markers.
 - Never use a custom PR body. The body must match the Backport body template above exactly.
 - Never change files that are not part of the cherry-pick resolution.
+- Never break the Backport scope rule: no extra files, no `main`-side additions or deletions the source PR did not make, no whole-file reformats, no copied generated/snapshot values.
 - Never run `node scripts/check_changes.ts` in a backport worktree; older target branches may not have that script.
 - Never run extra tests or checks in the backport worktree unless the parent task explicitly instructed you to.
 - Never suppress type, lint, or test errors.
