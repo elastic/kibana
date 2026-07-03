@@ -22,7 +22,11 @@ import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts
 import { EventKind } from './constants/event_kinds';
 import { Footer } from './footer';
 import { Header } from './header';
+import { getTabsDisplayed, validTabIds } from './tabs';
+import type { TabId } from './tabs';
 import { OverviewTab } from './tabs/overview_tab';
+import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
+import { useTabs } from '../../shared/hooks/use_tabs';
 import { NotesDetails } from '../../shared/tools/notes';
 import { useKibana } from '../../../common/lib/kibana';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
@@ -55,13 +59,18 @@ export interface DocumentFlyoutProps {
    * Callback invoked after alert mutations to refresh related flyouts.
    */
   onAlertUpdated: () => void;
+  /**
+   * Scope ID passed to cell actions (e.g. 'alerts-page', 'timeline-1').
+   * Defaults to '' which resolves to PageScope.default.
+   */
+  scopeId?: string;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
 export const DocumentFlyout = memo(
-  ({ hit, onAlertUpdated, renderCellActions }: DocumentFlyoutProps) => {
+  ({ hit, onAlertUpdated, renderCellActions, scopeId = '' }: DocumentFlyoutProps) => {
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();
@@ -74,6 +83,16 @@ export const DocumentFlyout = memo(
     const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
+
+    const { selectedTabId, setSelectedTabId } = useTabs<TabId>({
+      validTabIds,
+      storageKey: FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS,
+    });
+
+    const tabs = useMemo(
+      () => getTabsDisplayed({ hit, renderCellActions, onAlertUpdated, scopeId }),
+      [hit, renderCellActions, onAlertUpdated, scopeId]
+    );
 
     const onShowNotes = useCallback(() => {
       overlays.openSystemFlyout(
@@ -107,14 +126,23 @@ export const DocumentFlyout = memo(
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}
             onShowNotes={onShowNotes}
+            tabs={isSecurityApp ? tabs : []}
+            selectedTabId={selectedTabId}
+            setSelectedTabId={setSelectedTabId}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <OverviewTab
-            hit={hit}
-            renderCellActions={renderCellActions}
-            onAlertUpdated={onAlertUpdated}
-          />
+          {isSecurityApp ? (
+            <div css={{ height: '100%' }}>
+              {tabs.find((tab) => tab.id === selectedTabId)?.content}
+            </div>
+          ) : (
+            <OverviewTab
+              hit={hit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
+          )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter css={footerStyles}>
           <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotes} />
