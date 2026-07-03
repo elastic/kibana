@@ -209,7 +209,7 @@ describe('<AttackFlyout />', () => {
 
     const { getByTestId } = render(
       <TestProviders startServices={startServices}>
-        <AttackFlyout hit={createAttackHit()} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
       </TestProviders>
     );
 
@@ -237,7 +237,7 @@ describe('<AttackFlyout />', () => {
 
     const { getByTestId } = render(
       <TestProviders startServices={startServices}>
-        <AttackFlyout hit={createAttackHit()} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
       </TestProviders>
     );
 
@@ -266,7 +266,7 @@ describe('<AttackFlyout />', () => {
 
     const { getByTestId } = render(
       <TestProviders startServices={startServices}>
-        <AttackFlyout hit={createAttackHit()} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
       </TestProviders>
     );
 
