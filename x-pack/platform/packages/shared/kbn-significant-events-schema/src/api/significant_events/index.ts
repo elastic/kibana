@@ -7,7 +7,6 @@
 
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
-import type { TaskStatus } from '@kbn/streams-schema';
 import {
   esqlQuerySchema,
   queryFeatureSchema,
@@ -42,7 +41,7 @@ interface SignificantEventOccurrence {
   count: number;
 }
 
-type SignificantEventsResponse = StreamQuery & {
+type QueryWithOccurrences = StreamQuery & {
   stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
@@ -51,8 +50,8 @@ type SignificantEventsResponse = StreamQuery & {
   rule_backed: boolean;
 };
 
-interface SignificantEventsGetResponse {
-  significant_events: SignificantEventsResponse[];
+interface QueryOccurrencesResponse {
+  queries: QueryWithOccurrences[];
   aggregated_occurrences: SignificantEventOccurrence[];
 }
 
@@ -74,23 +73,6 @@ interface SignificantEventsQueriesGenerationResult {
   tokensUsed: Pick<ChatCompletionTokenCount, 'prompt' | 'completion'>;
 }
 
-type SignificantEventsQueriesGenerationTaskResult =
-  | {
-      status:
-        | TaskStatus.NotStarted
-        | TaskStatus.InProgress
-        | TaskStatus.Stale
-        | TaskStatus.BeingCanceled
-        | TaskStatus.Canceled;
-    }
-  | {
-      status: TaskStatus.Failed;
-      error: string;
-    }
-  | ({
-      status: TaskStatus.Completed | TaskStatus.Acknowledged;
-    } & SignificantEventsQueriesGenerationResult);
-
 interface LifecycleDetection {
   detection_id: string;
   rule_name?: string;
@@ -107,11 +89,10 @@ interface EventLifecycleResponse {
 }
 
 export type {
-  SignificantEventsResponse,
-  SignificantEventsGetResponse,
+  QueryWithOccurrences,
+  QueryOccurrencesResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
-  SignificantEventsQueriesGenerationTaskResult,
   LifecycleDetection,
   EventLifecycleResponse,
 };
