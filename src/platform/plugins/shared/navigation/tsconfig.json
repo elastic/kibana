@@ -35,7 +35,7 @@
     "@kbn/navigation-customization-components",
     "@kbn/core-chrome-navigation-customization",
     "@kbn/zod",
-    "@kbn/core-chrome-browser-navigation-utils",
+    "@kbn/core-chrome-browser-navigation-utils"
   ],
   "exclude": [
     "target/**/*",
