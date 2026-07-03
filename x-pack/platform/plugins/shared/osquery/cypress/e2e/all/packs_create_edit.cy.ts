@@ -190,6 +190,9 @@ describe(
         closeModalIfVisible();
 
         cy.contains('Create pack');
+        // With `rruleScheduling` enabled, the pack form defaults to an interval
+        // schedule (3600s) that Fleet config fans onto every query without its
+        // own override — see `serializeSchedule`/`convertSOQueriesToPackConfig`.
         const queries = {
           Query1: {
             interval: 3600,
