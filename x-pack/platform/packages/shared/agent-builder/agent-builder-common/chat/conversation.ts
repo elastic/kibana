@@ -23,7 +23,7 @@ import type {
   AskUserQuestionAnswer,
 } from '../agents/prompts';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
-import type { ConversationAccessControl } from './access_control/types';
+import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
 
 /**
@@ -366,6 +366,11 @@ export interface RoundModelUsageStats {
    * Total number of output tokens received this round.
    */
   output_tokens: number;
+  /**
+   * Number of input tokens served from cache this round, when reported by the provider.
+   * Subset of `input_tokens` (cache reads), not additive.
+   */
+  cached_input_tokens?: number;
   /**
    * Model identifier from the provider response, if available.
    */

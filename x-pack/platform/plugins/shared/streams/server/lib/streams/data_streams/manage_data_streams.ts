@@ -194,6 +194,7 @@ export async function updateDataStreamsLifecycle({
         name: names,
         data_retention: lifecycle.dsl.data_retention,
         ...(dslDownsampling?.length ? { downsampling: dslDownsampling } : {}),
+        ...(lifecycle.dsl.frozen_after ? { frozen_after: lifecycle.dsl.frozen_after } : {}),
       };
       await retryTransientEsErrors(() => esClient.indices.putDataLifecycle(request), { logger });
 
@@ -234,6 +235,9 @@ export async function updateDataStreamsLifecycle({
               name,
               data_retention: templateLifecycle.dsl.data_retention,
               ...(templateDownsampling?.length ? { downsampling: templateDownsampling } : {}),
+              ...(templateLifecycle.dsl.frozen_after
+                ? { frozen_after: templateLifecycle.dsl.frozen_after }
+                : {}),
             };
             await retryTransientEsErrors(() => esClient.indices.putDataLifecycle(request), {
               logger,
@@ -488,10 +492,16 @@ export function getTemplateLifecycle(
         })
       : undefined;
 
+    const frozenAfter =
+      typeof template.lifecycle?.frozen_after === 'string'
+        ? template.lifecycle.frozen_after
+        : undefined;
+
     return {
       dsl: {
         data_retention: dataRetention,
         ...(downsample?.length ? { downsample } : {}),
+        ...(frozenAfter ? { frozen_after: frozenAfter } : {}),
       },
     };
   }
