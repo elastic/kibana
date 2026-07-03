@@ -11,5 +11,6 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
 import type { searchResponseBodySchema } from './schemas';
 
-export type LinksSearchRequestParams = TypeOf<typeof asCodeSearchRequestSchema>;
+// all search request params are optional
+export type LinksSearchRequestParams = Partial<TypeOf<typeof asCodeSearchRequestSchema>>;
 export type LinksSearchResponseBody = TypeOf<typeof searchResponseBodySchema>;
