@@ -6,7 +6,16 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
-import { EuiBadge, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
@@ -55,6 +64,7 @@ const isConnectorPolicy = (packagePolicy: InMemoryPackagePolicy) =>
 
 export const AgentlessPackagePoliciesTable = ({
   isLoading,
+  error,
   packagePolicies,
   packagePoliciesTotal,
   refreshPackagePolicies,
@@ -62,6 +72,7 @@ export const AgentlessPackagePoliciesTable = ({
   from,
 }: {
   isLoading: boolean;
+  error?: Error | null;
   packagePolicies: Array<{
     agentPolicies: AgentPolicy[];
     packagePolicy: InMemoryPackagePolicy;
@@ -438,6 +449,34 @@ export const AgentlessPackagePoliciesTable = ({
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.integrationList.loadingPoliciesMessage"
               defaultMessage="Loading integration policies…"
+            />
+          ) : error ? (
+            <EuiEmptyPrompt
+              color="danger"
+              iconType="error"
+              data-test-subj="agentlessPoliciesLoadError"
+              title={
+                <h3>
+                  <FormattedMessage
+                    id="xpack.fleet.epm.packageDetails.integrationList.agentlessLoadErrorTitle"
+                    defaultMessage="Unable to load agentless integration policies"
+                  />
+                </h3>
+              }
+              body={<p>{error.message}</p>}
+              actions={
+                <EuiButton
+                  color="danger"
+                  iconType="refresh"
+                  onClick={refreshPackagePolicies}
+                  data-test-subj="agentlessPoliciesLoadErrorRetryButton"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.epm.packageDetails.integrationList.agentlessLoadErrorRetry"
+                    defaultMessage="Retry"
+                  />
+                </EuiButton>
+              }
             />
           ) : (
             <FormattedMessage

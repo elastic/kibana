@@ -186,6 +186,7 @@ export const PackagePoliciesPage = ({
   const {
     data: agentlessData,
     isLoading: agentlessIsLoading,
+    error: agentlessError,
     resendRequest: refreshAgentlessPolicies,
   } = useAgentlessPolicies({
     page: agentlessPagination.currentPage,
@@ -283,6 +284,7 @@ export const PackagePoliciesPage = ({
                 <EuiPanel hasBorder={true} hasShadow={false}>
                   <AgentlessPackagePoliciesTable
                     isLoading={agentlessIsLoading || isAgentlessFullPackageInfoLoading}
+                    error={agentlessError}
                     packagePolicies={agentlessPackageAndAgentPolicies}
                     packagePoliciesTotal={agentlessData?.total ?? 0}
                     refreshPackagePolicies={refreshAgentlessPolicies}

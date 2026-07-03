@@ -153,6 +153,43 @@ describe('AgentlessPackagePoliciesTable', () => {
     });
   });
 
+  it('shows an error prompt (not the empty message) when the list request fails', async () => {
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(
+      <AgentlessPackagePoliciesTable
+        {...defaultProps}
+        packagePolicies={[]}
+        packagePoliciesTotal={0}
+        error={new Error('boom')}
+      />
+    );
+    await act(async () => {
+      expect(result.getByText('Unable to load agentless integration policies')).toBeInTheDocument();
+      expect(result.getByText('boom')).toBeInTheDocument();
+      expect(
+        result.queryByText('No agentless integration policies')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it('retries the list request when the error prompt retry button is clicked', async () => {
+    const refreshPackagePolicies = jest.fn();
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(
+      <AgentlessPackagePoliciesTable
+        {...defaultProps}
+        packagePolicies={[]}
+        packagePoliciesTotal={0}
+        error={new Error('boom')}
+        refreshPackagePolicies={refreshPackagePolicies}
+      />
+    );
+    await act(async () => {
+      fireEvent.click(result.getByTestId('agentlessPoliciesLoadErrorRetryButton'));
+    });
+    expect(refreshPackagePolicies).toHaveBeenCalledTimes(1);
+  });
+
   it('renders the table with package policies', async () => {
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);

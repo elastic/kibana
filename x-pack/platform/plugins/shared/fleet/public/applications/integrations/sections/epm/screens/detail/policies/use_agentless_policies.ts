@@ -24,7 +24,10 @@ export const useAgentlessPolicies = ({
   perPage: number;
   kuery?: string;
 }) => {
-  const { data, isLoading, error, refetch } = useQuery(
+  const { data, isLoading, error, refetch } = useQuery<
+    Awaited<ReturnType<typeof sendListAgentlessPolicies>>,
+    Error
+  >(
     ['agentlessPolicies', page, perPage, kuery],
     () => sendListAgentlessPolicies({ page, perPage, kuery }),
     { refetchOnWindowFocus: false }
