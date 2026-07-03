@@ -22,8 +22,6 @@ import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandabl
 import { createExpandableFlyoutApiMock } from '../../../mock/expandable_flyout';
 import { useUserPrivileges } from '../../user_privileges';
 import { initialUserPrivilegesState } from '../../user_privileges/user_privileges_context';
-import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../../common/constants';
-
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -47,7 +45,7 @@ const mockOpenSystemFlyout = jest.fn();
 const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
   <div>{'MockDocumentFlyoutWrapper'}</div>
 ));
-const mockUiSettings = { get: jest.fn().mockReturnValue(false) };
+const mockUseUiSetting = jest.fn().mockReturnValue(false);
 jest.mock('../../../lib/kibana', () => {
   const original = jest.requireActual('../../../lib/kibana');
   return {
@@ -61,9 +59,9 @@ jest.mock('../../../lib/kibana', () => {
           ...original.useKibana().services.overlays,
           openSystemFlyout: mockOpenSystemFlyout,
         },
-        uiSettings: mockUiSettings,
       },
     }),
+    useUiSetting: mockUseUiSetting,
   };
 });
 jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
@@ -137,7 +135,7 @@ describe('RowAction', () => {
     });
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
     (useRouteSpy as jest.Mock).mockReturnValue([mockRouteSpy]);
-    mockUiSettings.get.mockReturnValue(false);
+    mockUseUiSetting.mockReturnValue(false);
   });
 
   test('displays expand events button', () => {
@@ -186,9 +184,7 @@ describe('RowAction', () => {
   });
 
   test('should open system flyout when enableNewFlyout setting is enabled', () => {
-    mockUiSettings.get.mockImplementation((key: string) =>
-      key === ENABLE_NEW_FLYOUT_SETTING ? true : false
-    );
+    mockUseUiSetting.mockReturnValue(true);
     const refetch = jest.fn();
 
     const wrapper = render(

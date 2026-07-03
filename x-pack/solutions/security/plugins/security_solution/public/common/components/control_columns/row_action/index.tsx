@@ -16,7 +16,7 @@ import { documentFlyoutHistoryKey } from '../../../../flyout_v2/shared/constants
 import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { DocumentFlyoutWrapper } from '../../../../flyout_v2/document/main/document_flyout_wrapper';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
-import { useKibana } from '../../../lib/kibana';
+import { useKibana, useUiSetting } from '../../../lib/kibana';
 import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../../common/constants';
 import {
   DocumentDetailsLeftPanelKey,
@@ -86,12 +86,12 @@ const RowActionComponent = ({
   );
 
   const { services } = useKibana();
-  const { telemetry, overlays, uiSettings } = services;
+  const { telemetry, overlays } = services;
   const store = useStore();
   const history = useHistory();
 
   const { openFlyout } = useExpandableFlyoutApi();
-  const enableNewFlyout = uiSettings.get(ENABLE_NEW_FLYOUT_SETTING, false);
+  const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
   const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const columnValues = useMemo(

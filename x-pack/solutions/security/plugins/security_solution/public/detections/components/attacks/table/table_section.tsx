@@ -23,7 +23,7 @@ import { useDataTableFilters } from '../../../../common/hooks/use_data_table_fil
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
@@ -134,8 +134,8 @@ export const TableSection = React.memo(
     const { to, from } = useGlobalTime();
 
     const { services } = useKibana();
-    const { telemetry, overlays, uiSettings } = services;
-    const enableNewFlyout = uiSettings.get(ENABLE_NEW_FLYOUT_SETTING, false);
+    const { telemetry, overlays } = services;
+    const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const store = useStore();
     const history = useHistory();

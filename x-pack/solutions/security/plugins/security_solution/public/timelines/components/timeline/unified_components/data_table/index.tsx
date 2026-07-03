@@ -33,7 +33,7 @@ import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../../../common/lib/kibana';
 import type {
   ColumnHeaderOptions,
   OnFetchMoreRecords,
@@ -148,7 +148,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       overlays,
     } = services;
 
-    const enableNewFlyout = uiSettings.get(ENABLE_NEW_FLYOUT_SETTING, false);
+    const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
 

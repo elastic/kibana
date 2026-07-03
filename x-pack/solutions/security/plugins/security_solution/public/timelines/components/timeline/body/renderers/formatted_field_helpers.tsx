@@ -21,7 +21,7 @@ import endPointSvg from '../../../../../common/utils/logo_endpoint/64_color.svg'
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../../../common/lib/kibana';
 import { APP_UI_ID, ENABLE_NEW_FLYOUT_SETTING } from '../../../../../../common/constants';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { GenericLinkButton } from '../../../../../common/components/links/helpers';
@@ -59,11 +59,11 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const { services } = useKibana();
-  const { overlays, application, uiSettings } = services;
+  const { overlays, application } = services;
   const store = useStore();
   const history = useHistory();
   const eventContext = useContext(StatefulEventContext);
-  const enableNewFlyout = uiSettings.get(ENABLE_NEW_FLYOUT_SETTING, false);
+  const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const ruleName = `${value}`;

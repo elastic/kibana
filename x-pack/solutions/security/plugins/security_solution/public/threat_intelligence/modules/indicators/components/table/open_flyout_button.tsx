@@ -14,7 +14,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IOCRightPanelKey } from '../../../../../flyout/ioc_details/constants/panel_keys';
 import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../../../common/constants';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../../../common/lib/kibana';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { IOCDetails } from '../../../../../flyout_v2/ioc/main';
@@ -36,8 +36,8 @@ export interface OpenIndicatorFlyoutButtonProps {
 export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyoutButtonProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const { services } = useKibana();
-  const { overlays, uiSettings } = services;
-  const enableNewFlyout = uiSettings.get(ENABLE_NEW_FLYOUT_SETTING, false);
+  const { overlays } = services;
+  const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
   const store = useStore();
   const history = useHistory();
   const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();

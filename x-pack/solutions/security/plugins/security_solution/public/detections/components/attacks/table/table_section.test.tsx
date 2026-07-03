@@ -28,10 +28,9 @@ import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
 import { EmptyResultsPrompt } from './empty_results_prompt';
 import { useGroupStats } from './grouping_settings/use_group_stats';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 import { useLocalStorage } from '../../../../common/components/local_storage';
-import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 jest.mock('../../../../common/components/local_storage', () => ({
@@ -110,7 +109,6 @@ const mockUseGroupStats = useGroupStats as jest.Mock;
 
 const reportEvent = jest.fn();
 const mockOpenSystemFlyout = jest.fn();
-const mockUiSettingsGet = jest.fn().mockReturnValue(false);
 
 const defaultProps: Parameters<typeof TableSection>[0] = {
   assignees: [],
@@ -129,7 +127,7 @@ describe('<TableSection />', () => {
       jest.fn(),
     ]);
 
-    mockUiSettingsGet.mockReturnValue(false);
+    (useUiSetting as jest.Mock).mockReturnValue(false);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         telemetry: {
@@ -137,9 +135,6 @@ describe('<TableSection />', () => {
         },
         overlays: {
           openSystemFlyout: mockOpenSystemFlyout,
-        },
-        uiSettings: {
-          get: mockUiSettingsGet,
         },
       },
     });
@@ -280,9 +275,7 @@ describe('<TableSection />', () => {
   });
 
   it('should call openSystemFlyout with AttackFlyoutWrapper when enableNewFlyout is true', async () => {
-    mockUiSettingsGet.mockImplementation((key: string) =>
-      key === ENABLE_NEW_FLYOUT_SETTING ? true : false
-    );
+    (useUiSetting as jest.Mock).mockReturnValue(true);
     mockUseAttackGroupHandler.mockReturnValue({
       getAttack: jest.fn().mockReturnValue({ id: 'attack-1' }),
       isLoading: false,

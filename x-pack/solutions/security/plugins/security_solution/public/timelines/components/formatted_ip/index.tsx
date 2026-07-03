@@ -15,7 +15,7 @@ import { useStore } from 'react-redux';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../common/lib/kibana';
 import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../common/constants';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { NetworkPanelKey } from '../../../flyout/network_details';
@@ -63,10 +63,10 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const { services } = useKibana();
-  const { overlays, uiSettings } = services;
+  const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const enableNewFlyout = uiSettings.get(ENABLE_NEW_FLYOUT_SETTING, false);
+  const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const eventContext = useContext(StatefulEventContext);

@@ -36,9 +36,6 @@ describe('RenderRuleName', () => {
           navigateToApp: mockNavigateToApp,
           getUrlForApp: jest.fn().mockReturnValue('/app/security/rules/id/rule-id-123'),
         },
-        uiSettings: {
-          get: jest.fn().mockReturnValue(false),
-        },
       },
     });
   });
