@@ -26,6 +26,7 @@ export const CreateAgentlessPolicyRequestSchema = {
       condition: undefined,
       policy_template: schema.maybe(
         schema.string({
+          maxLength: 256,
           meta: {
             description:
               'The policy template to use for the agentless package policy. If not provided, the default policy template is used.',
@@ -49,40 +50,72 @@ export const CreateAgentlessPolicyRequestSchema = {
           }
         )
       ),
-      // Cloud connector configuration - all connector settings go here
+      // Cloud connector configuration - all connector settings go here.
+      // Optional AND accepts an explicit `null` so a GET response round-trips cleanly into a
+      // PUT/POST: the GET mapper emits `cloud_connector: null` when no connector is attached, and
+      // `null` is treated the same as omitted (no connector / detach on update).
       cloud_connector: schema.maybe(
-        schema.object({
-          enabled: schema.boolean({
-            defaultValue: false,
-            meta: { description: 'Set to `true` to enable cloud connectors for this policy.' },
-          }),
-          cloud_connector_id: schema.maybe(
-            schema.string({
-              meta: {
-                description:
-                  'ID of an existing cloud connector to reuse. If not provided, a new connector is created.',
+        schema.oneOf([
+          schema.literal(null),
+          schema.object(
+            {
+              enabled: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'Set to `true` to attach a cloud connector to this policy. Must be `true` to set any of `cloud_connector_id`, `name`, or `target_csp`.',
+                },
+              }),
+              cloud_connector_id: schema.maybe(
+                schema.string({
+                  maxLength: 256,
+                  meta: {
+                    description:
+                      'ID of an existing cloud connector to reuse. If not provided, a new connector is created. Requires `enabled: true` and cannot be combined with `name`.',
+                  },
+                })
+              ),
+              name: schema.maybe(
+                schema.string({
+                  minLength: 1,
+                  maxLength: 255,
+                  meta: {
+                    description:
+                      'Name for a new cloud connector. If not provided, a name is generated automatically from the credentials. Requires `enabled: true` and only applies when creating a new connector (cannot be combined with `cloud_connector_id`).',
+                  },
+                })
+              ),
+              target_csp: schema.maybe(
+                schema.oneOf(
+                  [schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')],
+                  {
+                    meta: {
+                      description:
+                        'Target cloud service provider. If not provided, the provider is detected automatically from the inputs. Requires `enabled: true`.',
+                    },
+                  }
+                )
+              ),
+            },
+            {
+              validate: ({ enabled, cloud_connector_id: id, name, target_csp: targetCsp }) => {
+                // `enabled` defaults to false, so a body like `{ cloud_connector_id: 'X' }` would
+                // silently detach the connector despite the caller clearly intending to attach it.
+                // Reject the attach-only fields unless `enabled` is explicitly true to surface the
+                // contradiction as a 400 instead of a silent no-op.
+                if (!enabled && (id || name || targetCsp)) {
+                  return 'cloud_connector.enabled must be true to set cloud_connector_id, name, or target_csp';
+                }
+                // `cloud_connector_id` selects an existing connector to reuse; `name` only applies
+                // when creating a new one, so it is silently ignored alongside an id. Reject the
+                // combination rather than dropping `name` without feedback.
+                if (id && name) {
+                  return 'cloud_connector.name cannot be set together with cloud_connector_id (name only applies when creating a new connector)';
+                }
               },
-            })
+            }
           ),
-          name: schema.maybe(
-            schema.string({
-              minLength: 1,
-              maxLength: 255,
-              meta: {
-                description:
-                  'Name for the cloud connector. If not provided, a name is generated automatically from the credentials.',
-              },
-            })
-          ),
-          target_csp: schema.maybe(
-            schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')], {
-              meta: {
-                description:
-                  'Target cloud service provider. If not provided, the provider is detected automatically from the inputs.',
-              },
-            })
-          ),
-        })
+        ])
       ),
     },
     // Distinct meta.id so this extension does not silently overwrite the
@@ -92,6 +125,26 @@ export const CreateAgentlessPolicyRequestSchema = {
     // shared registry is last-write-wins on collisions.
     { meta: { id: 'create_agentless_policy_request' } }
   ),
+};
+
+export const UpdateAgentlessPolicyRequestSchema = {
+  params: schema.object({
+    policyId: schema.string({
+      maxLength: 256,
+      meta: {
+        description: 'The ID of the agentless policy to update.',
+      },
+    }),
+  }),
+  // PUT uses full-replace semantics with the exact same body contract as POST
+  //
+  // Two inherited create-only fields are accepted but intentionally ignored on
+  // update (kept in the body purely to share the schema/OAS component with POST):
+  //  - `id`: the target is identified by the `policyId`
+  //  - `create_dataset_templates`: a create-time install flag for dataset index
+  //    templates; `packagePolicyService.update` has no equivalent option, so the
+  //    service never forwards it on update.
+  body: CreateAgentlessPolicyRequestSchema.body,
 };
 
 export const DeleteAgentlessPolicyRequestSchema = {
@@ -144,6 +197,20 @@ export interface CreateAgentlessPolicyRequest {
  * (instead of `cloud_connector_id`), and `package.title` is not required.
  */
 export type NewAgentlessPolicy = CreateAgentlessPolicyRequest['body'];
+
+/**
+ * Request for updating an agentless policy.
+ *
+ * `body` reuses the create contract (full-replace PUT), so it stays in sync with
+ * {@link NewAgentlessPolicy}. The response is the unified {@link AgentlessPolicy}
+ * envelope shared with create/get.
+ */
+export interface UpdateAgentlessPolicyRequest {
+  params: TypeOf<typeof UpdateAgentlessPolicyRequestSchema.params>;
+  body: TypeOf<typeof UpdateAgentlessPolicyRequestSchema.body>;
+}
+
+export type UpdateAgentlessPolicyResponse = TypeOf<typeof AgentlessPolicyResponseSchema>;
 
 export type DeleteAgentlessPolicyResponse = TypeOf<typeof DeleteAgentlessPolicyResponseSchema>;
 
