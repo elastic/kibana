@@ -30,3 +30,4 @@ The non-dashboard TSVB conversion specs focus on conversion logic. The following
 - Replace in dashboard: does the converted Lens panel replace the original TSVB panel?
 - Save to library: can the converted visualization be saved as a library item?
 
+The dashboard conversion spec is temporarily marked `fixme` while Scout stability is validated. The original stateful FTR suite was skipped for [#179307](https://github.com/elastic/kibana/issues/179307), while serverless FTR also covered these dashboard flows, so keep the skip temporary and confirm follow-up coverage before removing the old context.
