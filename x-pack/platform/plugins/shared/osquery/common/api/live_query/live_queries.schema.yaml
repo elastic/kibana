@@ -187,7 +187,7 @@ paths:
       operationId: OsqueryExportLiveQueryResults
       x-codegen-enabled: true
       x-labels: [ ess, serverless ]
-      x-state: Added in 9.5.0
+      x-state: Generally available; Added in 9.5.0
       parameters:
         - name: id
           in: path
