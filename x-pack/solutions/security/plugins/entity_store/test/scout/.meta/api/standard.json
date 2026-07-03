@@ -1,5 +1,5 @@
 {
-  "sha1": "9670876d123c19465efa2bc92aba28a6b30cd6cf",
+  "sha1": "4677c746ef4f6b111e32996f85fcae1209070320",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -253,7 +253,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 28,
+        "line": 32,
         "column": 10
       }
     },
@@ -269,7 +269,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 44,
+        "line": 48,
         "column": 10
       }
     },
@@ -285,13 +285,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 61,
+        "line": 65,
         "column": 10
       }
     },
     {
-      "id": "d9737789d696c32-1e7b426238d5db6",
-      "title": "Entity Store check privileges API Should return has_read_permissions: false when user has read access to only one of the two required indices",
+      "id": "d9737789d696c32-34f8999fb069dee",
+      "title": "Entity Store check privileges API Should return has_read_permissions: false when user has read access to only one of the required indices",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -301,7 +301,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 89,
+        "line": 93,
         "column": 10
       }
     },
@@ -317,7 +317,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/check_privileges.spec.ts",
-        "line": 120,
+        "line": 124,
         "column": 10
       }
     },
@@ -2194,6 +2194,38 @@
       }
     },
     {
+      "id": "ffbbb3b02706b32-fbbfd087056a8ba",
+      "title": "metadata datastream is installed by entity store init creates the .entities.v2.metadata.security_default datastream on install",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/metadata_data_stream.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "ffbbb3b02706b32-3ad24e91d8ddddc",
+      "title": "metadata datastream is installed by entity store init installs an ingest pipeline that auto-populates event.ingested on indexed docs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/metadata_data_stream.spec.ts",
+        "line": 69,
+        "column": 12
+      }
+    },
+    {
       "id": "519a3ae85face73-5aa4d7047b173ce",
       "title": "Painless runtime field translation should match in-memory euid for every document using getEuidPainlessRuntimeMapping (user)",
       "expectedStatus": "passed",
@@ -2866,8 +2898,8 @@
       }
     },
     {
-      "id": "d70526b3c43ca29-c0753f88f610cbc",
-      "title": "Entity Store Resolution API tests Link: should return 404 for non-existent entities",
+      "id": "d70526b3c43ca29-3c3759b1065556f",
+      "title": "Entity Store Resolution API tests Link: should return 400 for non-existent entities",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2914,8 +2946,8 @@
       }
     },
     {
-      "id": "d70526b3c43ca29-2e5ae47106a8a2f",
-      "title": "Entity Store Resolution API tests Unlink: should return 404 for non-existent entities",
+      "id": "d70526b3c43ca29-a0ccc9eedf16023",
+      "title": "Entity Store Resolution API tests Unlink: should return 400 for non-existent entities",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

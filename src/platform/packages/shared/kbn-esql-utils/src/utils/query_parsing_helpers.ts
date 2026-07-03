@@ -289,7 +289,7 @@ export const getKqlSearchQueries = (esql: string) => {
  * @param lineWidth - Optional line width in characters; when provided, output is wrapped to fit. Otherwise uses the library default (80).
  */
 export const prettifyQuery = (src: string, lineWidth?: number): string => {
-  const { root } = Parser.parse(src, { withFormatting: true });
+  const { root } = Parser.parse(src, { withFormatting: true, withParens: true });
   return WrappingPrettyPrinter.print(root, {
     multiline: true,
     ...(lineWidth !== undefined && { wrap: lineWidth }),

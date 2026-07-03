@@ -13,7 +13,7 @@ import { exec } from '../lib';
 export const InstallDependencies: Task = {
   description: 'Installing node_modules, including production builds of packages',
 
-  async run(config, log, build) {
+  async run(_config, log, build) {
     // The in-build package.json is regenerated with `file:` deps pointing at the
     // copied-in package dirs, so it no longer matches the repo lockfile; install
     // resolves fresh (deps are exact-pinned + pnpm.overrides, so it's deterministic).

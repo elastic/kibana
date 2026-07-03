@@ -28,11 +28,12 @@
 @elastic/charts@71.7.0
 @elastic/datemath@5.0.3
 @elastic/emotion-sheet@1.4.1
-@elastic/esql@4.4.0
+@elastic/esql@4.7.1
 @elastic/eui-theme-borealis@8.0.0
 @elastic/eui-theme-common@10.0.0
-@elastic/eui@116.3.1
+@elastic/eui@116.5.0
 @elastic/numeral@2.5.1
+@elastic/pretty-printer@4.7.1
 @elastic/prismjs-esql@1.1.4
 @emnapi/core@1.11.1
 @emnapi/runtime@1.11.1
