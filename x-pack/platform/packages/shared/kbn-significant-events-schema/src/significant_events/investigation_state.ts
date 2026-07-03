@@ -19,8 +19,7 @@ export const INVESTIGATION_PROGRESS_UI_EVENT = 'investigation_progress' as const
 /**
  * Name of the step in `investigation_workflow.yaml` whose structured output holds the final
  * investigation state. Consumers reading the persisted result off a workflow execution look up
- * the step execution with this `stepId`. The workflow's sync test asserts the YAML still
- * declares a step with this name.
+ * the step execution with this `stepId` — keep it in sync with the step name in the YAML.
  */
 export const INVESTIGATE_STEP_ID = 'investigate' as const;
 

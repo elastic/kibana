@@ -97,8 +97,8 @@ steps:
       # Keep this in sync with investigationStateSchema in @kbn/significant-events-schema
       # (x-pack/platform/packages/shared/kbn-significant-events-schema/src/significant_events/investigation_state.ts)
       # — this is the same schema the investigation_progress_report tool streams live, so the
-      # final structured output here must match exactly. investigation_workflow.test.ts asserts
-      # structural equality between this block and z.toJSONSchema(investigationStateSchema).
+      # final structured output here must match exactly (including maxLength/maxItems: the UI
+      # parses the persisted result with the zod schema and rejects anything over its limits).
       schema:
         type: object
         properties:
