@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/entity-store",
-  "owner": "@elastic/core-analysis",
+  "owner": "@elastic/security-entity-analytics",
   "description": "Central place for Entities management and logs extraction",
   "group": "security",
   "visibility": "private",
