@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { EdgeProps } from '@xyflow/react';
 import { EdgeLabelRenderer } from '@xyflow/react';
 import React, { memo } from 'react';
@@ -35,9 +35,12 @@ interface WorkflowEdgeData extends Record<string, unknown> {
 
 const LABEL_TRUNCATE = 24;
 
-/** Default (non-traversed) edge stroke color. Exported so other renderers
- *  (e.g. the placeholder node's bridge line) can match the exact same color. */
-export const EDGE_STROKE_DEFAULT = '#a8c5ee';
+/** Default (non-traversed) edge stroke color for light mode. Figma (node
+ *  10808:19179) uses the neutral `borderBasePlain` tone `#cad3e2` for connector
+ *  lines, not a saturated blue. Prefer the `borderBasePlain` euiTheme token at
+ *  call sites so the color adapts to dark mode; this constant is the fallback
+ *  used where a theme isn't handy. */
+export const EDGE_STROKE_DEFAULT = '#cad3e2';
 
 function WorkflowGraphEdgeInner(props: EdgeProps) {
   const {
@@ -52,6 +55,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
     style = {},
   } = props;
   const edgeData = data as WorkflowEdgeData | undefined;
+  const { euiTheme } = useEuiTheme();
 
   const {
     path: edgePath,
@@ -70,9 +74,10 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
   });
 
   const traversed = edgeData?.traversed ?? false;
-  // Match the success color used by the node's green checkmark icon (#16c5c0).
-  // Non-traversed edges use a muted blue to match the step palette.
-  const stroke = traversed ? '#16c5c0' : EDGE_STROKE_DEFAULT;
+  // Traversed edges use the `success` token to match the node's success state.
+  // Non-traversed edges use the neutral `borderBasePlain` tone. Both adapt to
+  // dark mode (borderBasePlain: light `#cad3e2` → dark `#485975`).
+  const stroke = traversed ? euiTheme.colors.success : euiTheme.colors.borderBasePlain;
   const strokeWidth = 1;
 
   const fullLabel = edgeData?.label ?? '';
@@ -117,9 +122,11 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
               fontSize: 11,
               fontWeight: 400,
               lineHeight: '20px',
-              background: '#f6f9fc',
-              border: '1px solid #bfdbff',
-              color: '#1d2a3e',
+              // Figma light: bg #f6f9fc, border #bfdbff, text #1d2a3e. Tokens
+              // keep those values in light and adapt on the dark canvas.
+              background: euiTheme.colors.backgroundBaseSubdued,
+              border: `1px solid ${euiTheme.colors.borderBasePrimary}`,
+              color: euiTheme.colors.textParagraph,
               whiteSpace: 'nowrap',
             }}
           >

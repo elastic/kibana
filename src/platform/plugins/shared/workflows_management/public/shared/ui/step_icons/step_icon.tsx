@@ -124,7 +124,10 @@ export const StepIcon = React.memo(
             mask-size: contain;
             mask-repeat: no-repeat;
             mask-position: center;
-            background-color: ${statusColor ?? euiTheme.colors.textParagraph};
+            // Inherit the ambient text color so callers can tint the icon (e.g.
+            // the graph trigger node paints it accent/pink to match its border).
+            // Falls back to the same neutral text tone in un-colored contexts.
+            background-color: ${statusColor ?? 'currentColor'};
           `}
           onClick={onClick}
           aria-hidden={true}
