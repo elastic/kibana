@@ -592,13 +592,7 @@ export function isColorByValuePalette(color?: AllColoringTypes): color is ColorB
 export function isColorByValueAbsolute(
   color?: AllColoringTypes
 ): color is ColorByValueAbsolute | ColorByValuePaletteType {
-  // The `absolute` and `percentage` schemas are combined in one, so we check the range.
-  // The named-palette (`dynamic_palette`) variant is rangeless; it maps directly onto the
-  // value domain, so it is treated as absolute (there is no percentage counterpart).
-  return (
-    isColorByValuePalette(color) ||
-    (isColorByValueColor(color) && 'range' in color && color.range === 'absolute')
-  );
+  return isColorByValueColor(color) && 'range' in color && color.range === 'absolute';
 }
 
 export function isColorMappingColor(color?: AllColoringTypes): color is ColorMappingType {

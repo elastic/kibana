@@ -1281,8 +1281,8 @@ describe('Color util transforms', () => {
     });
 
     describe('isColorByValueAbsolute', () => {
-      it('should treat the rangeless named palette as absolute', () => {
-        expect(isColorByValueAbsolute(namedPalette)).toBe(true);
+      it('should be false for named palette', () => {
+        expect(isColorByValueAbsolute(namedPalette)).toBe(false);
       });
 
       it('should be true for absolute color by value and false for percentage', () => {

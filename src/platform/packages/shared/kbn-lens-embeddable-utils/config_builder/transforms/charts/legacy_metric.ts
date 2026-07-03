@@ -49,6 +49,7 @@ import {
   fromColorByValueLensStateToAPI,
   isAutoColor,
   isColorByValueAbsolute,
+  isColorByValuePalette,
 } from '../coloring';
 import { isEsqlTableTypeDataSource } from '../../utils';
 import { stripUndefined } from './utils';
@@ -131,7 +132,7 @@ function reverseBuildVisualizationState(
         visualization.colorMode === 'Background' ? 'background' : 'value';
 
       const color = fromColorByValueLensStateToAPI(visualization.palette) ?? AUTO_COLOR;
-      if (isColorByValueAbsolute(color) || isAutoColor(color)) {
+      if (isColorByValueAbsolute(color) || isAutoColor(color) || isColorByValuePalette(color)) {
         props.metric.color = color;
       }
     }
