@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { BulkCreateRulesParams, RulesClient } from '@kbn/alerting-plugin/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../../../common';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
@@ -42,14 +42,7 @@ export const bulkCreatePrebuiltRules = async ({
   if (rules.length === 0) return { results, errors };
 
   const itemById = new Map<string, PrebuiltRuleAsset>();
-  const bulkInputs: Array<{
-    data: ReturnType<typeof convertRuleResponseToAlertingRule> & {
-      alertTypeId: string;
-      consumer: string;
-      enabled: boolean;
-    };
-    options: { id: string };
-  }> = [];
+  const bulkInputs: BulkCreateRulesParams<RuleParams>['rules'] = [];
 
   for (const rule of rules) {
     let mlAuthError: Error | undefined;
