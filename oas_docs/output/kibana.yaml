@@ -85371,7 +85371,7 @@ components:
                 description: Column to use
                 type: string
               format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
               label:
                 description: Label for the operation
                 type: string
@@ -85403,7 +85403,7 @@ components:
                 description: Column to use
                 type: string
               format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
               label:
                 description: Label for the operation
                 type: string
@@ -85454,7 +85454,7 @@ components:
           description: Column to use
           type: string
         format:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         label:
           description: Label for the operation
           type: string
@@ -87639,12 +87639,12 @@ components:
         - inputs
       title: dry_run_package_policy
       type: object
-    Kibana_HTTP_APIs_dslDurationFormat:
+    Kibana_HTTP_APIs_durationFormat:
       additionalProperties: false
       description: Duration format between time units.
       properties:
         from:
-          description: Source time unit. DSL supports fine-grained units (`ps`, `ns`, `us`) in addition to standard units.
+          description: Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.
           enum:
             - ps
             - ns
@@ -88054,58 +88054,6 @@ components:
         - query
       title: ES|QL Data Source
       type: object
-    Kibana_HTTP_APIs_esqlDurationFormat:
-      additionalProperties: false
-      description: Duration format between time units.
-      properties:
-        from:
-          description: Source time unit for ES|QL data sources (`ms`, `s`, `min`, `h`, `d`, `w`, `mo`, `y`).
-          enum:
-            - ms
-            - s
-            - min
-            - h
-            - d
-            - w
-            - mo
-            - 'y'
-          type: string
-        suffix:
-          description: Suffix appended to the formatted value.
-          type: string
-        to:
-          description: 'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.'
-          enum:
-            - auto
-            - auto-approximate
-            - ms
-            - s
-            - min
-            - h
-            - d
-            - w
-            - mo
-            - 'y'
-          type: string
-        type:
-          enum:
-            - duration
-          type: string
-      required:
-        - type
-        - from
-        - to
-      title: Duration Format
-      type: object
-    Kibana_HTTP_APIs_esqlFormatType:
-      anyOf:
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_numericFormat'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_byteFormat'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDurationFormat'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyDurationFormat'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_customFormat'
-      description: Number display format for ES|QL dimension values.
-      title: ES|QL Format Type
     Kibana_HTTP_APIs_FailureStore:
       anyOf:
         - additionalProperties: false
@@ -88446,7 +88394,7 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_numericFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_byteFormat'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_dslDurationFormat'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_durationFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyDurationFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_customFormat'
       description: Number display format for the dimension value.
@@ -89118,7 +89066,7 @@ components:
               description: Column to use
               type: string
             format:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
             goal:
               additionalProperties: false
               type: object
@@ -91252,7 +91200,7 @@ components:
               description: Column to use
               type: string
             format:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
             label:
               description: Label for the operation
               type: string
@@ -91287,7 +91235,7 @@ components:
               description: Column to use
               type: string
             format:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
             label:
               description: Label for the operation
               type: string
@@ -91301,7 +91249,7 @@ components:
               description: Column to use
               type: string
             format:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
             label:
               description: Label for the operation
               type: string
@@ -95811,16 +95759,16 @@ components:
       type: object
     Kibana_HTTP_APIs_legacyDurationFormat:
       additionalProperties: false
-      description: Legacy duration format accepting pre-GA free-form string values.
+      description: Legacy duration format used when the `asCode.useGASchemas` feature flag is disabled. Accepts free-form unit strings (no enum validation) to preserve pre-GA behavior.
       properties:
         from:
-          description: Source time unit (legacy free-form string; use short ES|QL-aligned enums when `asCode.useGASchemas` is enabled).
+          description: Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.
           type: string
         suffix:
           description: Suffix appended to the formatted value.
           type: string
         to:
-          description: Display time unit (legacy free-form string; use short ES|QL-aligned enums when `asCode.useGASchemas` is enabled).
+          description: Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.
           type: string
         type:
           enum:
@@ -97536,7 +97484,7 @@ components:
               description: Number of columns.
               type: number
             format:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
             label:
               description: Label for the operation
               type: string
@@ -97676,7 +97624,7 @@ components:
                     description: Column to use
                     type: string
                   format:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
                   label:
                     description: Label for the operation
                     type: string
@@ -97706,7 +97654,7 @@ components:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricCompareToPrimary'
                     description: Compare the secondary metric to a baseline value or to the primary metric.
                   format:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
                   label:
                     description: Label for the operation
                     type: string
@@ -101739,7 +101687,7 @@ components:
                 description: Column to use
                 type: string
               format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
               label:
                 description: Label for the operation
                 type: string
@@ -101762,7 +101710,7 @@ components:
                 description: Column to use
                 type: string
               format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
               label:
                 description: Label for the operation
                 type: string
@@ -101790,7 +101738,7 @@ components:
               description: Column to use
               type: string
             format:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
             label:
               description: Label for the operation
               type: string
@@ -106137,7 +106085,7 @@ components:
                 description: Column to use
                 type: string
               format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
               label:
                 description: Label for the operation
                 type: string
@@ -106171,7 +106119,7 @@ components:
                 description: Column to use
                 type: string
               format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
               label:
                 description: Label for the operation
                 type: string
@@ -107426,7 +107374,7 @@ components:
               description: Column to use
               type: string
             format:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
             label:
               description: Label for the operation
               type: string
@@ -110807,7 +110755,7 @@ components:
               description: Column to use
               type: string
             format:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
             label:
               description: Label for the operation
               type: string
@@ -110836,7 +110784,7 @@ components:
               description: Column to use
               type: string
             format:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
             label:
               description: Label for the operation
               type: string
@@ -112230,7 +112178,7 @@ components:
                 description: Column to use
                 type: string
               format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
               label:
                 description: Label for the operation
                 type: string
@@ -112263,7 +112211,7 @@ components:
                 description: Column to use
                 type: string
               format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
               label:
                 description: Label for the operation
                 type: string
@@ -114720,7 +114668,7 @@ components:
                 description: Column to use
                 type: string
               format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
               label:
                 description: Label for the operation
                 type: string
@@ -114753,7 +114701,7 @@ components:
                 description: Column to use
                 type: string
               format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
               label:
                 description: Label for the operation
                 type: string
@@ -117724,7 +117672,7 @@ components:
               description: Column to use
               type: string
             format:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
             label:
               description: Label for the operation
               type: string
@@ -117764,7 +117712,7 @@ components:
               description: Column to use
               type: string
             format:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
             label:
               description: Label for the operation
               type: string
@@ -117791,7 +117739,7 @@ components:
                 description: Column to use
                 type: string
               format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlFormatType'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
               label:
                 description: Label for the operation
                 type: string
