@@ -9,7 +9,8 @@
 
 import React, { useCallback } from 'react';
 import { createContext } from 'react';
-import type { Dimension } from '../../../../../types';
+import type { Dimension, MetricsAggregationSettings } from '../../../../../types';
+import { METRICS_AGGREGATION_SETTINGS_DEFAULTS } from '../../../../../common/utils/aggregation_settings';
 import {
   type FlyoutState,
   type FlyoutTabId,
@@ -19,12 +20,14 @@ import {
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   profileId: string;
+  aggregationSettings: MetricsAggregationSettings;
   onPageChange: (value: number) => void;
   onDimensionsChange: (value: Dimension[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
   onFlyoutStateChange: (value: FlyoutState | undefined) => void;
   onFlyoutSelectedTabChange: (value: FlyoutTabId) => void;
+  onAggregationSettingsChange: (update: Partial<MetricsAggregationSettings>) => void;
 }
 
 export const MetricsExperienceStateContext =
@@ -33,9 +36,13 @@ export const MetricsExperienceStateContext =
 export function MetricsExperienceStateProvider({
   children,
   profileId,
+  aggregationSettings = METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+  onAggregationSettingsChange,
 }: {
   children: React.ReactNode;
   profileId: string;
+  aggregationSettings?: MetricsAggregationSettings;
+  onAggregationSettingsChange?: (update: Partial<MetricsAggregationSettings>) => void;
 }) {
   const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
   const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
@@ -87,10 +94,18 @@ export function MetricsExperienceStateProvider({
     [setFlyoutState]
   );
 
+  const handleAggregationSettingsChange = useCallback(
+    (update: Partial<MetricsAggregationSettings>) => {
+      onAggregationSettingsChange?.(update);
+    },
+    [onAggregationSettingsChange]
+  );
+
   return (
     <MetricsExperienceStateContext.Provider
       value={{
         profileId,
+        aggregationSettings,
         currentPage,
         isFullscreen,
         searchTerm,
@@ -102,6 +117,7 @@ export function MetricsExperienceStateProvider({
         onToggleFullscreen,
         onFlyoutStateChange,
         onFlyoutSelectedTabChange,
+        onAggregationSettingsChange: handleAggregationSettingsChange,
       }}
     >
       {children}

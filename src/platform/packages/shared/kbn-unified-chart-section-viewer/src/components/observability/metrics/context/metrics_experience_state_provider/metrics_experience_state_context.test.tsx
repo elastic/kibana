@@ -172,4 +172,67 @@ describe('MetricsExperienceStateProvider', () => {
       expect(result.current.isFullscreen).toBe(false);
     });
   });
+
+  describe('aggregationSettings', () => {
+    it('defaults to METRICS_AGGREGATION_SETTINGS_DEFAULTS when not provided', () => {
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+
+      expect(result.current.aggregationSettings).toEqual({
+        counterAggregation: 'sum',
+        gaugeAggregation: 'avg',
+        histogramPercentile: 'p95',
+      });
+    });
+
+    it('uses the provided aggregationSettings instead of the defaults', () => {
+      const customWrapper = ({ children }: { children: React.ReactNode }) => (
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          aggregationSettings={{
+            counterAggregation: 'max',
+            gaugeAggregation: 'min',
+            histogramPercentile: 'p50',
+          }}
+        >
+          {children}
+        </MetricsExperienceStateProvider>
+      );
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper: customWrapper });
+
+      expect(result.current.aggregationSettings).toEqual({
+        counterAggregation: 'max',
+        gaugeAggregation: 'min',
+        histogramPercentile: 'p50',
+      });
+    });
+
+    it('forwards updates to the onAggregationSettingsChange prop', () => {
+      const onAggregationSettingsChange = jest.fn();
+      const customWrapper = ({ children }: { children: React.ReactNode }) => (
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          onAggregationSettingsChange={onAggregationSettingsChange}
+        >
+          {children}
+        </MetricsExperienceStateProvider>
+      );
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper: customWrapper });
+
+      act(() => {
+        result.current.onAggregationSettingsChange({ counterAggregation: 'max' });
+      });
+
+      expect(onAggregationSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
+    });
+
+    it('does not throw when onAggregationSettingsChange is not provided', () => {
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+
+      expect(() => {
+        act(() => {
+          result.current.onAggregationSettingsChange({ counterAggregation: 'max' });
+        });
+      }).not.toThrow();
+    });
+  });
 });
