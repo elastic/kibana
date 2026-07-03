@@ -12,17 +12,8 @@ import {
 
 describe('entity_summary_staleness', () => {
   describe('buildEntitySummaryStaleness', () => {
-    it('builds snapshot only for enabled signals', () => {
-      expect(
-        buildEntitySummaryStaleness(
-          {
-            riskScoreNorm: 82.97,
-            anomalyJobIds: ['job-a'],
-            ruleNames: ['Rule A'],
-          },
-          ['risk_score']
-        )
-      ).toEqual({
+    it('captures only the risk score signal', () => {
+      expect(buildEntitySummaryStaleness({ riskScoreNorm: 82.97 }, ['risk_score'])).toEqual({
         enabled_signals: ['risk_score'],
         snapshot: { risk_score: 82.97 },
       });
@@ -38,21 +29,16 @@ describe('entity_summary_staleness', () => {
       expect(computeEntitySummaryStalenessReasons(summary, {})).toEqual([]);
     });
 
-    it('ignores anomaly jobs when not enabled', () => {
+    it('does not trigger when risk score is unchanged (risk is the sole signal)', () => {
       const summary = {
         highlights: [{ title: 'T', text: 'x' }],
         staleness: {
           enabled_signals: ['risk_score'],
-          snapshot: { risk_score: 70, anomaly_job_ids: [] },
+          snapshot: { risk_score: 70 },
         },
       };
 
-      expect(
-        computeEntitySummaryStalenessReasons(summary, {
-          riskScoreNorm: 70,
-          anomalyJobIds: ['new-job'],
-        })
-      ).toEqual([]);
+      expect(computeEntitySummaryStalenessReasons(summary, { riskScoreNorm: 70 })).toEqual([]);
     });
 
     it('detects risk score change when risk_score is enabled', () => {

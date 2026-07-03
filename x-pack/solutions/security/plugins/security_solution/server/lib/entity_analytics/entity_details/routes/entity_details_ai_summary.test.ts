@@ -271,4 +271,17 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
       '[EntityAiSummary] Failed to persist AI summary: ES write failed'
     );
   });
+
+  it('returns 403 and does not persist when the license is below enterprise', async () => {
+    // Simulate a cluster on a sub-enterprise license (e.g. basic): `withLicense` must
+    // block before any persistence. Configure the downgrade on the raw context, then
+    // re-convert so the gate observes it at request time.
+    (ctx.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+    const licenseGatedContext = requestContextMock.convertContext(ctx);
+
+    const response = await server.inject(buildRequest(), licenseGatedContext);
+
+    expect(response.status).toEqual(403);
+    expect(mockBulkAppendMetadata).not.toHaveBeenCalled();
+  });
 });

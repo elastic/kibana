@@ -10,7 +10,6 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiCallOut,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -20,7 +19,6 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiPanel,
-  EuiToolTip,
 } from '@elastic/eui';
 import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
 import { useFetchAnonymizationFields, useMaybeAssistantContext } from '@kbn/elastic-assistant';
@@ -45,7 +43,6 @@ import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_detai
 import { useFetchPersistedAiSummary } from '../hooks/use_fetch_persisted_ai_summary';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
-import type { StalenessDisplayMode } from './entity_highlights_result';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 import { buildEntitySummaryStalenessEntitySnapshot } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
@@ -105,16 +102,6 @@ export const EntityHighlightsAccordion: React.FC<{
       setShowAnonymizedValues(e.target.checked);
     },
     [setShowAnonymizedValues]
-  );
-
-  // Demo toggle: switch between warning display modes. Remove before GA.
-  const [stalenessDisplayMode, setStalenessDisplayMode] = useState<StalenessDisplayMode>('banner');
-  const stalenessToggleButtons = useMemo(
-    () => [
-      { id: 'banner', label: 'Banner' },
-      { id: 'inline', label: 'Inline' },
-    ],
-    []
   );
 
   // Read the persisted summary from the metadata datastream (may be null if never
@@ -265,21 +252,6 @@ export const EntityHighlightsAccordion: React.FC<{
         extraAction={
           (aiConnectors?.length ?? 0) > 0 && (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              {stalenessReasons.length > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip content="Demo toggle: switch between staleness warning styles">
-                    <EuiButtonGroup
-                      legend="Staleness display mode"
-                      options={stalenessToggleButtons}
-                      idSelected={stalenessDisplayMode}
-                      onChange={(id) => setStalenessDisplayMode(id as StalenessDisplayMode)}
-                      buttonSize="compressed"
-                      color="warning"
-                      data-test-subj="entity-highlights-staleness-mode-toggle"
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
               <EuiFlexItem grow={false}>
                 <EntityHighlightsSettings
                   assistantResult={assistantResult}
@@ -347,7 +319,6 @@ export const EntityHighlightsAccordion: React.FC<{
             generatedAt={assistantResult?.generatedAt ?? null}
             generatedBy={assistantResult?.generatedBy ?? ''}
             stalenessReasons={stalenessReasons}
-            stalenessDisplayMode={stalenessDisplayMode}
             onRefresh={fetchEntityHighlights}
           />
         )}

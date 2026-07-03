@@ -379,4 +379,80 @@ describe('EntityHighlightsResult', () => {
 
     expect(screen.queryByText('Recommended actions')).not.toBeInTheDocument();
   });
+
+  describe('staleness warning callout', () => {
+    it('does not render the callout when there are no staleness reasons', () => {
+      render(
+        <EntityHighlightsResult
+          assistantResult={defaultAssistantResult}
+          showAnonymizedValues={false}
+          generatedAt={null}
+          onRefresh={mockOnRefresh}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      expect(screen.queryByTestId('entity-highlights-staleness-callout')).not.toBeInTheDocument();
+    });
+
+    it('renders a single EUI warning callout with a risk-specific header and one regenerate action', () => {
+      render(
+        <EntityHighlightsResult
+          assistantResult={defaultAssistantResult}
+          showAnonymizedValues={false}
+          generatedAt={null}
+          stalenessReasons={['Risk score changed from 70 to 90']}
+          onRefresh={mockOnRefresh}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      const callout = screen.getByTestId('entity-highlights-staleness-callout');
+      expect(callout).toBeInTheDocument();
+      expect(
+        screen.getByText('Entity risk has changed since this summary was generated')
+      ).toBeInTheDocument();
+
+      // Single regenerate action inside the callout — the old dual-button UI is gone.
+      expect(screen.getByTestId('entity-highlights-staleness-regenerate')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('entity-highlights-staleness-inline-regenerate')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('entity-highlights-staleness-inline')).not.toBeInTheDocument();
+    });
+
+    it('renders a single reason as plain text rather than a bulleted list', () => {
+      render(
+        <EntityHighlightsResult
+          assistantResult={defaultAssistantResult}
+          showAnonymizedValues={false}
+          generatedAt={null}
+          stalenessReasons={['Risk score changed from 70 to 90']}
+          onRefresh={mockOnRefresh}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      const reason = screen.getByText('Risk score changed from 70 to 90');
+      expect(reason.tagName).toBe('P');
+      expect(reason.closest('li')).toBeNull();
+    });
+
+    it('calls onRefresh when the callout regenerate button is clicked', () => {
+      render(
+        <EntityHighlightsResult
+          assistantResult={defaultAssistantResult}
+          showAnonymizedValues={false}
+          generatedAt={null}
+          stalenessReasons={['Risk score changed from 70 to 90']}
+          onRefresh={mockOnRefresh}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      fireEvent.click(screen.getByTestId('entity-highlights-staleness-regenerate'));
+
+      expect(mockOnRefresh).toHaveBeenCalledTimes(1);
+    });
+  });
 });

@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiCopy,
@@ -32,8 +31,6 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { EntityHighlightsResponse } from '../types';
 
-export type StalenessDisplayMode = 'banner' | 'inline';
-
 interface EntityHighlightsResultProps {
   assistantResult: {
     response: EntityHighlightsResponse | null;
@@ -43,7 +40,6 @@ interface EntityHighlightsResultProps {
   generatedAt: number | null;
   generatedBy?: string;
   stalenessReasons?: string[];
-  stalenessDisplayMode?: StalenessDisplayMode;
   onRefresh: () => void;
 }
 
@@ -53,7 +49,6 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   generatedAt,
   generatedBy,
   stalenessReasons,
-  stalenessDisplayMode = 'banner',
   onRefresh,
 }) => {
   const anonymizedResult = useAnonymizedResponse(assistantResult, showAnonymizedValues);
@@ -63,35 +58,39 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
     return null;
   }
 
-  const isStale = stalenessReasons && stalenessReasons.length > 0;
-
-  const showInlineStaleness = isStale && stalenessDisplayMode === 'inline';
+  const isStale = Boolean(stalenessReasons && stalenessReasons.length > 0);
+  const isSingleReason = stalenessReasons?.length === 1;
 
   return (
     <EuiPanel hasBorder={true}>
-      {isStale && stalenessDisplayMode === 'banner' && (
+      {isStale && stalenessReasons && (
         <>
           <EuiCallOut
-            size="s"
             color="warning"
             iconType="warning"
             data-test-subj="entity-highlights-staleness-callout"
             title={
               <FormattedMessage
                 id="xpack.securitySolution.flyout.entityDetails.highlights.stalenessTitle"
-                defaultMessage="Entity data has changed since this summary was generated"
+                defaultMessage="Entity risk has changed since this summary was generated"
               />
             }
           >
-            <EuiText size="xs">
-              <ul style={{ margin: 0, paddingLeft: '1em' }}>
-                {stalenessReasons.map((reason, i) => (
-                  <li key={i}>{reason}</li>
-                ))}
-              </ul>
+            {/* Single reason reads as plain prose; only fall back to a list for multiple reasons. */}
+            <EuiText size="s">
+              {isSingleReason ? (
+                <p>{stalenessReasons[0]}</p>
+              ) : (
+                <ul>
+                  {stalenessReasons.map((reason, i) => (
+                    <li key={i}>{reason}</li>
+                  ))}
+                </ul>
+              )}
             </EuiText>
-            <EuiSpacer size="xs" />
-            <EuiButtonEmpty
+            <EuiSpacer size="s" />
+            <EuiButton
+              color="warning"
               size="s"
               iconType="refresh"
               onClick={onRefresh}
@@ -101,7 +100,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
                 id="xpack.securitySolution.flyout.entityDetails.highlights.stalenessRegenerate"
                 defaultMessage="Regenerate summary"
               />
-            </EuiButtonEmpty>
+            </EuiButton>
           </EuiCallOut>
           <EuiSpacer size="m" />
         </>
@@ -156,46 +155,6 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
         )}
       </div>
 
-      {/* Inline staleness: prominent full-width CTA after the dimmed content */}
-      {showInlineStaleness && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-            responsive={false}
-            data-test-subj="entity-highlights-staleness-inline"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="warning" color="warning" size="s" aria-hidden={true} />
-            </EuiFlexItem>
-            <EuiFlexItem grow>
-              <EuiText size="xs" color="warning">
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.highlights.stalenessInlineLabel"
-                  defaultMessage="Summary may be outdated — {reasons}"
-                  values={{ reasons: stalenessReasons.join(', ') }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiButton
-            fullWidth
-            fill
-            color="warning"
-            iconType="refresh"
-            size="s"
-            onClick={onRefresh}
-            data-test-subj="entity-highlights-staleness-inline-regenerate"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.highlights.stalenessInlineRegenerate"
-              defaultMessage="Regenerate summary"
-            />
-          </EuiButton>
-        </>
-      )}
       <>
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="m" />

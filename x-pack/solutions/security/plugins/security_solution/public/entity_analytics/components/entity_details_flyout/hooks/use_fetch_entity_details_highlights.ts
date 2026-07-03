@@ -225,8 +225,6 @@ export const useFetchEntityDetailsHighlights = ({
           generated_at: generatedAt,
           staleness: buildEntitySummaryStaleness({
             riskScoreNorm: entitySnapshot?.riskScoreNorm ?? null,
-            anomalyJobIds: entitySnapshot?.anomalyJobIds ?? [],
-            ruleNames: entitySnapshot?.ruleNames ?? [],
           }),
         },
       })

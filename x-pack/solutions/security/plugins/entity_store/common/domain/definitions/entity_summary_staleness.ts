@@ -21,16 +21,11 @@ export interface EntitySummaryHighlight {
 
 /**
  * Signal values captured at generation time. Property names correspond to staleness
- * signal ids; only `risk_score` is compared today (see the registry below), the others
- * are captured for the deferred staleness-signal-parity follow-up.
+ * signal ids. Entity risk is the sole staleness trigger, so only `risk_score` is captured.
  */
 export interface EntitySummaryStalenessSnapshot {
   /** `entity.risk.calculated_score_norm` at generation time (flyout risk gauge). */
   risk_score?: number | null;
-  /** `entity.behaviors.anomaly_job_ids` at generation time. */
-  anomaly_job_ids?: string[] | null;
-  /** `entity.behaviors.rule_names` at generation time. */
-  rule_names?: string[] | null;
 }
 
 /** Policy and snapshot used for summary staleness checks. */
@@ -89,20 +84,13 @@ export const DEFAULT_ENTITY_SUMMARY_STALENESS_SIGNALS: EntitySummaryStalenessSig
   'risk_score',
 ];
 
-/** Normalized entity fields used when capturing and comparing staleness snapshots. */
+/**
+ * Normalized entity fields used when capturing and comparing staleness snapshots.
+ * Entity risk is the sole staleness trigger, so this carries only the risk score.
+ */
 export interface EntitySummaryStalenessEntitySnapshot {
   /** `entity.risk.calculated_score_norm` — same value shown in the entity flyout risk summary. */
   riskScoreNorm?: number | null;
-  /**
-   * `entity.behaviors.anomaly_job_ids` at generation time. Captured by callers today;
-   * the staleness comparison for this signal is a follow-up (only `risk_score` is compared).
-   */
-  anomalyJobIds?: string[] | null;
-  /**
-   * `entity.behaviors.rule_names` at generation time. Captured by callers today;
-   * the staleness comparison for this signal is a follow-up (only `risk_score` is compared).
-   */
-  ruleNames?: string[] | null;
 }
 
 const RISK_SCORE_EPSILON = 0.01;
