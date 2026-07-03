@@ -334,13 +334,15 @@ export function useFleetServerHostsForm(
               sslAgentKeySecretInput.hasChanged) && {
               secrets: {
                 ssl: {
-                  ...(sslKeySecretInput.hasChanged && { key: sslKeySecretInput.value || null }),
-                  ...(sslESKeySecretInput.hasChanged && {
-                    es_key: sslESKeySecretInput.value || null,
-                  }),
-                  ...(sslAgentKeySecretInput.hasChanged && {
-                    agent_key: sslAgentKeySecretInput.value || null,
-                  }),
+                  key: sslKeySecretInput.hasChanged
+                    ? sslKeySecretInput.value || null
+                    : (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key,
+                  es_key: sslESKeySecretInput.hasChanged
+                    ? sslESKeySecretInput.value || null
+                    : (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key,
+                  agent_key: sslAgentKeySecretInput.hasChanged
+                    ? sslAgentKeySecretInput.value || null
+                    : (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key,
                 },
               },
             }),

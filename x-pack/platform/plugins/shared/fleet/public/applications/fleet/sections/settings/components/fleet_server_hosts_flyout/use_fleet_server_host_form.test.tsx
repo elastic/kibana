@@ -413,4 +413,47 @@ describe('useFleetServerHostsForm', () => {
       );
     });
   });
+
+  it('should preserve an untouched secret when clearing a different one', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    testRenderer.startServices.http.put.mockResolvedValue({});
+    const { result } = testRenderer.renderHook(() =>
+      useFleetServerHostsForm(
+        {
+          id: 'id1',
+          name: 'fleet server 1',
+          host_urls: ['https://test.fr'],
+          is_default: false,
+          is_preconfigured: false,
+          secrets: {
+            ssl: {
+              key: { id: 'secret-key-id-123' },
+              es_key: { id: 'secret-es-key-id-456' },
+            },
+          },
+        },
+        onSuccess
+      )
+    );
+
+    act(() => result.current.inputs.sslKeySecretInput.setValue(''));
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => {
+      expect(onSuccess).toBeCalled();
+      expect(testRenderer.startServices.http.put).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          secrets: expect.objectContaining({
+            ssl: expect.objectContaining({
+              key: null,
+              es_key: { id: 'secret-es-key-id-456' },
+            }),
+          }),
+        })
+      );
+    });
+  });
 });

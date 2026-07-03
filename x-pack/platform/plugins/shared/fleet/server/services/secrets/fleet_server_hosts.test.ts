@@ -172,6 +172,28 @@ describe('Fleet server hosts secrets', () => {
       expect(esClientMock.transport.request.mock.calls).toEqual([]);
     });
 
+    it('should preserve an untouched secret when another is explicitly cleared', async () => {
+      const updatedFleetServerHost = {
+        ...fleetServerHost,
+        secrets: {
+          ssl: {
+            key: null,
+            es_key: { id: 'key2' },
+          },
+        },
+      };
+      const res = await extractAndUpdateFleetServerHostsSecrets({
+        oldFleetServerHost: fleetServerHost,
+        fleetServerHostUpdate: updatedFleetServerHost,
+        esClient: esClientMock,
+      });
+      expect(res.secretReferences).toEqual([{ id: 'key2' }]);
+      expect(res.secretsToDelete).toEqual([{ id: 'key1' }]);
+      expect(res.fleetServerHostUpdate.secrets?.ssl?.key).toBeUndefined();
+      expect(res.fleetServerHostUpdate.secrets?.ssl?.es_key).toEqual({ id: 'key2' });
+      expect(esClientMock.transport.request.mock.calls).toEqual([]);
+    });
+
     it('should not delete anything when null is sent for a never-set secret field', async () => {
       const updatedFleetServerHost = {
         ...fleetServerHost,
