@@ -115,7 +115,7 @@ Open a single draft PR with the smallest possible test-side fix for this flaky-t
 
 ## Environment
 
-Kibana is already bootstrapped for you — `node_modules` and `@kbn/setup-node-env` are installed on the runner before you start. **Do not run `yarn kbn bootstrap`** (it would be redundant and the sandbox has no access to the package registries). Just run the Kibana CLIs directly, e.g. `node scripts/eslint <files>` and `node scripts/type_check --project <tsconfig>`.
+Kibana is already bootstrapped for you.
 
 ## Steps
 
