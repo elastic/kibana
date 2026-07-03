@@ -101,6 +101,15 @@ if is_pr_with_label "ci:cloud-redeploy" || is_pr_with_label "ci:entity-store-per
   fi
 fi
 
+# DEMO ONLY — revert before merge (see PR #272111 demo handoff).
+# Enable the endpoint-response-actions skill on THIS PR's cloud deployment via
+# Kibana user settings. The product default stays false (a security-review
+# requirement encoded in common/experimental_features.ts); this only turns it
+# on for this demo deployment, exactly how a real cloud rollout would enable an
+# experimental flag. `logging.root.level: all` preserves the verbose-logging
+# behavior this script already sets.
+DEMO_USER_SETTINGS_YAML=$'logging.root.level: all\nxpack.securitySolution.enableExperimental: ["endpointResponseActionsSkill"]'
+
 echo "--- Create Deployment"
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
 if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; then
@@ -150,14 +159,15 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
   sleep 120
   retry 5 60 ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json > "$ECCTL_LOGS"
 
-  echo "Enabling verbose logging..."
-  ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
-    .resources.kibana[0].plan.kibana.user_settings_yaml = "logging.root.level: all"
+  echo "Enabling verbose logging (+ DEMO skill flag)..."
+  ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq --arg us "$DEMO_USER_SETTINGS_YAML" '
+    .resources.kibana[0].plan.kibana.user_settings_yaml = $us
     ' > /tmp/verbose_logging.json
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/verbose_logging.json > "$ECCTL_LOGS"
 else
-  ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
+  ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq --arg us "$DEMO_USER_SETTINGS_YAML" '
     .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
+    .resources.kibana[0].plan.kibana.user_settings_yaml = $us |
     (.. | select(.version? != null).version) = "'$VERSION'" |
     (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.zone_count != null) | .zone_count) = '$ES_ZONE_COUNT' |
     (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.id == "hot_content") | .size.value) = '$ES_HOT_TIER_MEMORY_SIZE'
