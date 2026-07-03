@@ -6,10 +6,10 @@
  */
 
 import { nodeBuilder } from '@kbn/es-query';
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, DEPLOYMENT_AGNOSTIC_WITHOUT_SERVERLESS_OBS } from '../fixtures/constants';
 import {
   RULE_SPECS,
   FAKE_ALERT_INSTANCE_ID,
@@ -23,11 +23,7 @@ const buildRuleFilter = (ruleId: string): string =>
 
 apiTest.describe(
   'Stack alerts privilege - read privilege',
-  {
-    tag: tags.deploymentAgnostic.filter(
-      (tag) => ![...tags.stateful.observability, ...tags.serverless.observability.all].includes(tag)
-    ),
-  },
+  { tag: DEPLOYMENT_AGNOSTIC_WITHOUT_SERVERLESS_OBS },
   () => {
     let state: StackAlertsPrivilegeState;
     let withReadPrivilegeCreds: RoleApiCredentials;

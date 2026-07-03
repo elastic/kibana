@@ -42,7 +42,10 @@ const TestComponent = (_props: ComponentProps<typeof DefaultCellValue>) => (
 
 describe('DefaultCellValue', () => {
   beforeEach(() => {
-    useGetRuleTypesPermissions.mockReturnValue({ authorizedToReadRuleType: () => true });
+    useGetRuleTypesPermissions.mockReturnValue({
+      authorizedToReadRuleType: () => true,
+      authorizedToReadRuleForAlert: () => true,
+    });
   });
   it.each([TIMESTAMP, ALERT_START])('should format date fields', (columnId) => {
     render(<TestComponent {...props} columnId={columnId} />);
@@ -61,14 +64,20 @@ describe('DefaultCellValue', () => {
     };
 
     it('renders the rule name as a link when the user can read the rule', () => {
-      useGetRuleTypesPermissions.mockReturnValue({ authorizedToReadRuleType: () => true });
+      useGetRuleTypesPermissions.mockReturnValue({
+        authorizedToReadRuleType: () => true,
+        authorizedToReadRuleForAlert: () => true,
+      });
       render(<TestComponent {...props} columnId={ALERT_RULE_NAME} alert={ruleNameAlert} />);
       expect(screen.getByTestId('alertRuleNameLink')).toBeInTheDocument();
       expect(screen.queryByRole('link')).toBeInTheDocument();
     });
 
     it('renders the rule name as plain text when the user cannot read the rule', () => {
-      useGetRuleTypesPermissions.mockReturnValue({ authorizedToReadRuleType: () => false });
+      useGetRuleTypesPermissions.mockReturnValue({
+        authorizedToReadRuleType: () => false,
+        authorizedToReadRuleForAlert: () => false,
+      });
       render(<TestComponent {...props} columnId={ALERT_RULE_NAME} alert={ruleNameAlert} />);
       expect(screen.getByTestId('alertRuleName')).toBeInTheDocument();
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
