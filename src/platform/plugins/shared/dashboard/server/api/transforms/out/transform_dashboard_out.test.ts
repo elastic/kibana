@@ -331,6 +331,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         optionsJSON: JSON.stringify({}),
         kibanaSavedObjectMeta: {},
         title: 'my title',
+        description: 'my description',
         isApproximate: true,
       };
       const { dashboardState } = transformDashboardOut(
@@ -348,6 +349,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         optionsJSON: JSON.stringify({}),
         kibanaSavedObjectMeta: {},
         title: 'my title',
+        description: 'my description',
       };
       const { dashboardState } = transformDashboardOut(
         input,
