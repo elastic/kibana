@@ -11,6 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { InferenceClient } from '@kbn/inference-common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import type { SignificantEventsTuningConfig } from '@kbn/significant-events-schema';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
@@ -30,7 +31,6 @@ import type { StreamsSettingsStorageClient } from '../lib/streams/storage/stream
 import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
 import type { SignificantEventsScheduledWorkflowsService } from '../lib/workflows/significant_events_scheduled_workflows';
 import type { WorkflowClients } from '../lib/workflows/create_workflow_clients';
-import type { SignificantEventsTuningConfig } from '../../common/significant_events_tuning_config';
 
 export type GetScopedClients = (params: {
   request: KibanaRequest;

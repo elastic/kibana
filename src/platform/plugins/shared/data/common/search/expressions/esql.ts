@@ -356,7 +356,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             sessionId: getSearchSessionId(),
             executionContext: getExecutionContext(),
             projectRouting: input?.projectRouting,
-            approximation: input?.useApproximation,
+            approximation: input?.isApproximate,
             dropNullColumns: true,
             includeExecutionMetadata: true,
           }
@@ -406,7 +406,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 },
               }),
           })
-          .json(params)
+          .json({
+            ...params,
+            ...(input?.isApproximate !== undefined && { approximation: input.isApproximate }),
+          })
           .ok({ json: { rawResponse }, requestParams });
 
         // Map to Datatable
@@ -414,7 +417,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
       } catch (error) {
         // Inspector logging on error
         logInspectorRequest()
-          .json(params)
+          .json({
+            ...params,
+            ...(input?.isApproximate !== undefined && { approximation: input.isApproximate }),
+          })
           .error({
             json: 'attributes' in error ? error.attributes : { message: error.message },
           });

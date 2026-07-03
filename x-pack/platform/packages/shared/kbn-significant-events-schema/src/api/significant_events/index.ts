@@ -7,7 +7,6 @@
 
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
-import type { TaskStatus } from '@kbn/streams-schema';
 import {
   esqlQuerySchema,
   queryFeatureSchema,
@@ -74,23 +73,6 @@ interface SignificantEventsQueriesGenerationResult {
   tokensUsed: Pick<ChatCompletionTokenCount, 'prompt' | 'completion'>;
 }
 
-type SignificantEventsQueriesGenerationTaskResult =
-  | {
-      status:
-        | TaskStatus.NotStarted
-        | TaskStatus.InProgress
-        | TaskStatus.Stale
-        | TaskStatus.BeingCanceled
-        | TaskStatus.Canceled;
-    }
-  | {
-      status: TaskStatus.Failed;
-      error: string;
-    }
-  | ({
-      status: TaskStatus.Completed | TaskStatus.Acknowledged;
-    } & SignificantEventsQueriesGenerationResult);
-
 interface LifecycleDetection {
   detection_id: string;
   rule_name?: string;
@@ -111,7 +93,6 @@ export type {
   SignificantEventsGetResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
-  SignificantEventsQueriesGenerationTaskResult,
   LifecycleDetection,
   EventLifecycleResponse,
 };
