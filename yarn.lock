@@ -2315,6 +2315,10 @@
     tree-dump "1.1.0"
     tslib "2.8.1"
 
+"@elastic/eui-illustrations@file:./elastic-eui-illustrations-1.0.0.tgz":
+  version "1.0.0"
+  resolved "file:./elastic-eui-illustrations-1.0.0.tgz#8e6f4495ca1f41d791c5e11c046fdda67ddc3489"
+
 "@elastic/eui-theme-borealis@8.0.0":
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-8.0.0.tgz#51b11163728fc634bea4848586642eecc0b6b39c"
@@ -2332,10 +2336,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@116.5.0":
+"@elastic/eui@file:./elastic-eui-116.5.0-2.tgz":
   version "116.5.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-116.5.0.tgz#0240c84dd03b56fbfd709080c34d04cc45e3cc0e"
-  integrity sha512-AiS+0rlGUoDskGXS9eB8JAq17A8zOCjVObWhJSkUoa9ft5YLn4eV3jttJ2NSf2xzn/R0hhEI8vKTjkTgV36HkA==
+  resolved "file:./elastic-eui-116.5.0-2.tgz#73952c6ca6119e000988c5ca8fc9314d0d3503e0"
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
