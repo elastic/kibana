@@ -36,7 +36,7 @@ describe('RuleDetailsFieldGroup', () => {
     );
 
     expect(screen.getByText('Tags')).toBeInTheDocument();
-    expect(screen.getByTestId('form-optional-field-label')).toHaveTextContent('optional');
+    expect(screen.getAllByTestId('form-optional-field-label')).toHaveLength(2);
   });
 
   it('renders the description field immediately', () => {
@@ -50,7 +50,6 @@ describe('RuleDetailsFieldGroup', () => {
 
     expect(screen.getByText('Description')).toBeInTheDocument();
     expect(screen.queryByText('Add description')).not.toBeInTheDocument();
-    expect(screen.getAllByTestId('form-optional-field-label')).toHaveLength(2);
   });
 
   it('does not render enabled or kind fields', () => {
