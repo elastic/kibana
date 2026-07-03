@@ -26,9 +26,9 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
     await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_PATHS.ESQL_CONVERSION_DASHBOARD);
     await scoutSpace.uiSettings.set({
-      defaultIndex: testData.DATA_VIEW_IDS.LOGSTASH,
+      defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
       'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_TIME_RANGE.from}", "to": "${testData.LOGSTASH_TIME_RANGE.to}"}`,
+      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
     });
   });
 

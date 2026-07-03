@@ -88,16 +88,16 @@ spaceTest.describe(
 
     spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
       await scoutSpace.uiSettings.set({
-        defaultIndex: testData.DATA_VIEW_IDS.LOGSTASH,
+        defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
         'dateFormat:tz': 'UTC',
         'timepicker:timeDefaults': JSON.stringify({
-          from: testData.LOGSTASH_TIME_RANGE.from,
-          to: testData.LOGSTASH_TIME_RANGE.to,
+          from: testData.LOGSTASH_IN_RANGE_DATES.from,
+          to: testData.LOGSTASH_IN_RANGE_DATES.to,
         }),
       });
 
       const { data: dataView } = await apiServices.dataViews.create({
-        title: testData.DATA_VIEW_IDS.LOGSTASH,
+        title: testData.DATA_VIEW_ID.LOGSTASH,
         name: `scout-metric-progress-bar-editor-dv-${Date.now()}`,
         timeFieldName: '@timestamp',
         spaceId: scoutSpace.id,

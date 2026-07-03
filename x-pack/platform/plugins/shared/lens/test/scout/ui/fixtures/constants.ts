@@ -12,11 +12,11 @@ export const ES_ARCHIVE_PATHS = {
   LOGSTASH: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
 } as const;
 
-export const DATA_VIEW_IDS = {
+export const DATA_VIEW_ID = {
   LOGSTASH: 'logstash-*',
 } as const;
 
-export const LOGSTASH_TIME_RANGE = {
+export const LOGSTASH_IN_RANGE_DATES = {
   from: 'Sep 19, 2015 @ 06:31:44.000',
   to: 'Sep 23, 2015 @ 18:31:44.000',
 } as const;

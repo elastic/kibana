@@ -8,7 +8,7 @@
 import type { DebugState } from '@elastic/charts';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 
-import { DATA_TEST_SUBJECTS, LOGSTASH_TIME_RANGE, DATA_VIEW_IDS } from './constants';
+import { DATA_TEST_SUBJECTS, LOGSTASH_IN_RANGE_DATES, DATA_VIEW_ID } from './constants';
 
 interface ElasticChartDebugContext {
   addInitScript: (script: () => void) => Promise<{ dispose: () => Promise<void> }>;
@@ -46,8 +46,8 @@ const OPEN_IN_LENS_UI_SETTINGS = ['defaultIndex', 'dateFormat:tz', 'timepicker:t
 export async function setupLogstashOpenInLensDefaults({
   uiSettings,
 }: LogstashOpenInLensSetupContext): Promise<void> {
-  await uiSettings.setDefaultIndex(DATA_VIEW_IDS.LOGSTASH);
-  await uiSettings.setDefaultTime(LOGSTASH_TIME_RANGE);
+  await uiSettings.setDefaultIndex(DATA_VIEW_ID.LOGSTASH);
+  await uiSettings.setDefaultTime(LOGSTASH_IN_RANGE_DATES);
   await uiSettings.set({ 'dateFormat:tz': 'UTC' });
 }
 

@@ -13,7 +13,7 @@ import { testData } from '../fixtures';
 const DASHBOARD_API_PATH = '/api/dashboards';
 const DASHBOARD_API_VERSION = '2023-10-31';
 
-const LOGSTASH_TIME_RANGE = {
+const LOGSTASH_IN_RANGE_DATES = {
   from: '2015-09-19T06:31:44.000Z',
   to: '2015-09-23T18:31:44.000Z',
 };
@@ -53,16 +53,16 @@ spaceTest.describe(
 
     spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
       await scoutSpace.uiSettings.set({
-        defaultIndex: testData.DATA_VIEW_IDS.LOGSTASH,
+        defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
         'dateFormat:tz': 'UTC',
         'timepicker:timeDefaults': JSON.stringify({
-          from: testData.LOGSTASH_TIME_RANGE.from,
-          to: testData.LOGSTASH_TIME_RANGE.to,
+          from: testData.LOGSTASH_IN_RANGE_DATES.from,
+          to: testData.LOGSTASH_IN_RANGE_DATES.to,
         }),
       });
 
       const { data: dataView } = await apiServices.dataViews.create({
-        title: testData.DATA_VIEW_IDS.LOGSTASH,
+        title: testData.DATA_VIEW_ID.LOGSTASH,
         name: `scout-metric-progress-bar-dv-${Date.now()}`,
         timeFieldName: '@timestamp',
         spaceId: scoutSpace.id,
@@ -87,7 +87,7 @@ spaceTest.describe(
           kbnClient,
           {
             title: 'Metric progress bar vertical',
-            time_range: LOGSTASH_TIME_RANGE,
+            time_range: LOGSTASH_IN_RANGE_DATES,
             panels: [
               {
                 type: 'vis',
@@ -140,7 +140,7 @@ spaceTest.describe(
           kbnClient,
           {
             title: 'Metric progress bar horizontal',
-            time_range: LOGSTASH_TIME_RANGE,
+            time_range: LOGSTASH_IN_RANGE_DATES,
             panels: [
               {
                 type: 'vis',
@@ -194,7 +194,7 @@ spaceTest.describe(
           kbnClient,
           {
             title: 'Metric without progress bar',
-            time_range: LOGSTASH_TIME_RANGE,
+            time_range: LOGSTASH_IN_RANGE_DATES,
             panels: [
               {
                 type: 'vis',
