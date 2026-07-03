@@ -17,25 +17,15 @@ import { AttackDiscoveryPage } from './pages';
 
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
-import {
-  ATTACKS_PATH,
-  ATTACK_DISCOVERY_PATH,
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-} from '../../common/constants';
+import { ATTACKS_PATH, ATTACK_DISCOVERY_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
-import { useKibana } from '../common/lib/kibana';
 import { useSpaceId } from '../common/hooks/use_space_id';
 import { useIdsFromUrl } from './pages/results/history/use_ids_from_url';
+import { useIsAlertsAndAttacksAlignmentEnabled } from '../common/hooks/use_is_alerts_and_attacks_alignment_enabled';
 
 export const AttackDiscoveryRoutes = React.memo((props: RouteComponentProps) => {
-  const {
-    services: { uiSettings },
-  } = useKibana();
-  const enableAlertsAndAttacksAlignment = uiSettings.get(
-    ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-    true
-  );
+  const enableAlertsAndAttacksAlignment = useIsAlertsAndAttacksAlignmentEnabled();
 
   const spaceId = useSpaceId();
   const { ids } = useIdsFromUrl();

@@ -71,7 +71,7 @@ export const getFilteredLinks = async (
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
   const enableAlertsAndAttacksAlignment = core.uiSettings.get(
     ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-    true
+    experimentalFeatures.enableAlertsAndAttacksAlignment
   );
 
   return Object.freeze([
