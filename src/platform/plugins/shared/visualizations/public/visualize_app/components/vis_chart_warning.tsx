@@ -132,7 +132,7 @@ const warningMessages = {
   [CHARTS_TO_BE_DEPRECATED.controls]: ControlsWarningFormatMessage,
 };
 
-export const VizChartWarning: FC<Props> = ({ chartType, chartConfigToken, mode }) => {
+export const VisChartWarning: FC<Props> = ({ chartType, chartConfigToken, mode }) => {
   const { services } = useKibana<VisualizeServices>();
   const canEditAdvancedSettings = services.application.capabilities.advancedSettings.save;
   const advancedSettingsLink = services.application.getUrlForApp('management', {
@@ -142,7 +142,7 @@ export const VizChartWarning: FC<Props> = ({ chartType, chartConfigToken, mode }
   const WarningMessage = warningMessages[chartType];
   return (
     <EuiCallOut
-      data-test-subj="vizChartWarning"
+      data-test-subj="visChartWarning"
       title={
         <WarningMessage
           advancedSettingsLink={advancedSettingsLink}
