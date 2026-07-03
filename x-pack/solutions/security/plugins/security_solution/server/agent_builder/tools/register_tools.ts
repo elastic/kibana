@@ -11,11 +11,17 @@ import type { ExperimentalFeatures } from '../../../common';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import {
+  addEntitiesToWatchlistTool,
+  createWatchlistTool,
+  deleteWatchlistTool,
   entityRiskScoreTool,
-  generateLeadsTool,
   getEntityTool,
-  listLeadsTool,
+  listWatchlistsTool,
+  removeEntitiesFromWatchlistTool,
   searchEntitiesTool,
+  updateWatchlistTool,
+  generateLeadsTool,
+  listLeadsTool,
   dismissLeadTool,
 } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
@@ -45,7 +51,8 @@ export const registerTools = async (
   experimentalFeatures: ExperimentalFeatures,
   ml: SetupPlugins['ml'],
   rulePreviewDeps: RunRulePreviewDeps,
-  isServerless: boolean = false
+  isServerless: boolean = false,
+  hasEncryptionKey: boolean = false
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
@@ -53,7 +60,15 @@ export const registerTools = async (
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
   agentBuilder.tools.register(getEntityTool(core, logger, ml, experimentalFeatures));
+  agentBuilder.tools.register(addEntitiesToWatchlistTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(createWatchlistTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    deleteWatchlistTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
+  agentBuilder.tools.register(listWatchlistsTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(removeEntitiesFromWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(updateWatchlistTool(core, logger, experimentalFeatures));
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));
