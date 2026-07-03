@@ -670,7 +670,9 @@ describe('usePackagePolicy - agentless', () => {
   });
 
   it('saves through the agentless API', async () => {
-    jest.mocked(sendUpdateAgentlessPolicy).mockResolvedValue({ item: { id: 'agentless-1' } } as any);
+    jest
+      .mocked(sendUpdateAgentlessPolicy)
+      .mockResolvedValue({ item: { id: 'agentless-1' } } as any);
 
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() =>
