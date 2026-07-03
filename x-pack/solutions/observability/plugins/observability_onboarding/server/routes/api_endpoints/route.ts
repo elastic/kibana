@@ -37,6 +37,9 @@ export interface ApiEndpointApiKeyResponse {
   encodedApiKey: string;
 }
 
+export const hasManagedElasticsearchEndpoint = (managedOtlpServiceUrl?: string): boolean =>
+  Boolean(managedOtlpServiceUrl?.trim());
+
 function hasRequiredPrivileges(
   id: ApiEndpointId,
   {
@@ -127,7 +130,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       (await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED, false)) &&
       Boolean(managedOtlpServiceUrl);
     const isManagedElasticsearchEndpointAvailable =
-      isManagedOtlpServiceAvailable && Boolean(managedOtlpServiceUrl);
+      hasManagedElasticsearchEndpoint(managedOtlpServiceUrl);
 
     const apiKeyFactoryContext: ApiKeyFactoryContext = {
       isManagedOtlpServiceAvailable,

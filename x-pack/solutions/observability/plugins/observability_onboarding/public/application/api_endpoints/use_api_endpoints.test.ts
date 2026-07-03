@@ -84,24 +84,24 @@ describe('useApiEndpoints', () => {
     expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://es.example.com');
   });
 
-  it('falls back to the Elasticsearch URL when the managed OTLP service is unavailable', () => {
+  it('builds the managed Elasticsearch-compatible URL from the managed OTLP URL', () => {
     const { result } = setup({
       isServerless: false,
       elasticsearchUrl: 'https://es.example.com',
       managedOtlpServiceUrl: 'https://otlp.example.com:443',
     });
 
-    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://es.example.com');
+    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://otlp.example.com:443/_es');
   });
 
-  it('labels the fallback Elasticsearch endpoint as Elasticsearch', () => {
+  it('labels the managed Elasticsearch-compatible endpoint as Elasticsearch bulk when the managed OTLP URL is configured', () => {
     const { result } = setup({
       isManagedOtlpServiceAvailable: false,
       elasticsearchUrl: 'https://es.example.com',
       managedOtlpServiceUrl: 'https://otlp.example.com:443',
     });
 
-    expect(findEndpoint(result, 'elasticsearch')?.label).toBe('Elasticsearch');
+    expect(findEndpoint(result, 'elasticsearch')?.label).toBe('Elasticsearch bulk');
   });
 
   it('builds the managed Elasticsearch-compatible URL from the managed OTLP URL when the managed service is available', () => {

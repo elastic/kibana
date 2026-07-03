@@ -33,7 +33,7 @@ describe('API_ENDPOINTS', () => {
 
   describe('getUrl', () => {
     describe('Elasticsearch URL', () => {
-      it('uses the Elasticsearch URL when the managed OTLP service is unavailable on non-Serverless deployments', () => {
+      it('uses the managed Elasticsearch-compatible endpoint when the managed URL is configured on non-Serverless deployments', () => {
         expect(
           getEndpoint('elasticsearch').getUrl(
             createContext({
@@ -42,7 +42,7 @@ describe('API_ENDPOINTS', () => {
               managedOtlpServiceUrl: 'https://otlp.example.com:443',
             })
           )
-        ).toBe('https://es.example.com');
+        ).toBe('https://otlp.example.com:443/_es');
       });
 
       it('uses the managed Elasticsearch-compatible endpoint when the managed OTLP service is available on non-Serverless deployments', () => {

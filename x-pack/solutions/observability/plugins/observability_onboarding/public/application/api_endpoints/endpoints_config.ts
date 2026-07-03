@@ -33,12 +33,11 @@ const normalizeEndpointUrl = (url?: string): string | undefined => {
   return trimmedUrl ? trimTrailingSlashes(trimmedUrl) : undefined;
 };
 const getManagedElasticsearchUrl = ({
-  isManagedOtlpServiceAvailable,
   managedOtlpServiceUrl,
 }: ApiEndpointContext): string | undefined => {
   const managedUrl = normalizeEndpointUrl(managedOtlpServiceUrl);
 
-  return isManagedOtlpServiceAvailable && managedUrl ? `${managedUrl}/_es` : undefined;
+  return managedUrl ? `${managedUrl}/_es` : undefined;
 };
 
 const elasticsearchLabel = i18n.translate(
