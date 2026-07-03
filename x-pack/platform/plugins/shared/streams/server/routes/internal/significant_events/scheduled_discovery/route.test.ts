@@ -13,14 +13,16 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
 } from '@kbn/management-settings-ids';
-import { internalSignificantEventsSettingsRoutes } from './route';
+import { internalSignificantEventsScheduledDiscoveryRoutes } from './route';
 
 jest.mock('../../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
 const route =
-  internalSignificantEventsSettingsRoutes['PUT /internal/streams/_significant_events/settings'];
+  internalSignificantEventsScheduledDiscoveryRoutes[
+    'PUT /internal/streams/_significant_events/scheduled_discovery/settings'
+  ];
 
 type HandlerParams = Parameters<typeof route.handler>[0];
 
@@ -44,10 +46,6 @@ const createHandlerParams = ({
     getAll: jest.fn().mockResolvedValue(spaceSettings),
     setMany: jest.fn().mockResolvedValue(undefined),
   };
-  const globalUiSettingsClient = {
-    getAll: jest.fn().mockResolvedValue({}),
-    setMany: jest.fn().mockResolvedValue(undefined),
-  };
   const scheduledWorkflowService = {
     ensureWorkflow: jest
       .fn()
@@ -62,7 +60,6 @@ const createHandlerParams = ({
     getScopedClients: jest.fn().mockResolvedValue({
       licensing: {},
       uiSettingsClient,
-      globalUiSettingsClient,
     }),
     server: {},
     significantEventsScheduledWorkflowsService: scheduledWorkflowService,
@@ -76,26 +73,24 @@ const createHandlerParams = ({
     context: {},
   } as unknown as HandlerParams;
 
-  return { handlerParams, uiSettingsClient, globalUiSettingsClient, scheduledWorkflowService };
+  return { handlerParams, uiSettingsClient, scheduledWorkflowService };
 };
 
-describe('significant events settings route', () => {
+describe('scheduled significant events discovery settings route', () => {
   it('persists scheduled discovery settings and reconciles per-space workflows on enable', async () => {
-    const { handlerParams, uiSettingsClient, globalUiSettingsClient, scheduledWorkflowService } =
-      createHandlerParams({
-        scheduledDiscovery: {
-          enabled: true,
-          detectionIntervalMinutes: 45,
-          reviewIntervalMinutes: 15,
-          discoveryBatchSize: 6,
-          triageBatchSize: 8,
-          maxReviewPasses: 4,
-        },
-      });
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: {
+        enabled: true,
+        detectionIntervalMinutes: 45,
+        reviewIntervalMinutes: 15,
+        discoveryBatchSize: 6,
+        triageBatchSize: 8,
+        maxReviewPasses: 4,
+      },
+    });
 
     await route.handler(handlerParams);
 
-    expect(globalUiSettingsClient.setMany).not.toHaveBeenCalled();
     expect(uiSettingsClient.setMany).toHaveBeenCalledWith({
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 45,
