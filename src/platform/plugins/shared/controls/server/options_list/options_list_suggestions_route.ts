@@ -49,7 +49,7 @@ const optionsListFetchBodyCommonSchema = schema.object(
     ignoreValidations: schema.maybe(schema.boolean()),
     isReload: schema.maybe(schema.boolean()),
     sort: schema.maybe(schema.any()),
-    projectRouting: schema.maybe(schema.string()),
+    projectRouting: schema.maybe(schema.string({ maxLength: 10000 })),
   },
   { unknowns: 'allow' }
 );
