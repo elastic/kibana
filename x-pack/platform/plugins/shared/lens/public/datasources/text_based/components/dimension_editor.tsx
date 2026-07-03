@@ -201,8 +201,9 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
       {props.dataSectionExtra && (
         <div
           css={css`
-            padding-left: ${euiTheme.size.base};
-            padding-right: ${euiTheme.size.base};
+            &:not(:empty) {
+              padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
+            }
           `}
         >
           {props.dataSectionExtra}
