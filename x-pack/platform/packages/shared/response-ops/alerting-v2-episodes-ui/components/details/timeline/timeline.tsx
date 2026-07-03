@@ -7,22 +7,12 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiAvatar,
-  EuiButtonEmpty,
-  EuiComment,
-  EuiCommentList,
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiAvatar, EuiButtonEmpty, EuiComment, EuiCommentList, useEuiTheme } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { AlertEpisodeStatusBadge } from '../../status/status_badge';
-import { AlertEpisodeSeverityBadge } from '../../severity/episode_severity_badge';
-import { getEpisodeSeverityLabel } from '../../severity/severity_utils';
 import type { TimelineEntry } from './entries';
 import { AlertEpisodeTimelineActionComment } from './timeline_action_comment';
-import { AlertEpisodeTimelineRelativeTimestamp } from './timeline_relative_timestamp';
+import { AlertEpisodeTimelineSeverityComment } from './timeline_severity_comment';
+import { AlertEpisodeTimelineStateComment } from './timeline_state_comment';
 import * as i18n from './translations';
 
 export interface AlertEpisodeTimelineProps {
@@ -67,80 +57,10 @@ export const AlertEpisodeTimeline = ({
     }
 
     if (item.kind === 'severity_change') {
-      const isInitial = item.prevSeverity === undefined;
-      return (
-        <EuiComment
-          key={`severity-${idx}`}
-          data-test-subj="alertingV2TimelineEntry"
-          data-timestamp={item.timestamp}
-          username={i18n.SYSTEM_LABEL}
-          timestamp={<AlertEpisodeTimelineRelativeTimestamp timestamp={item.timestamp} />}
-          timelineAvatar={
-            <EuiAvatar
-              size="s"
-              name={isInitial ? i18n.SET_SEVERITY_TO : i18n.CHANGED_SEVERITY_TO}
-              iconType={isInitial ? 'flag' : 'arrowRight'}
-              color="subdued"
-            />
-          }
-          event={
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-              <EuiFlexItem grow={false}>
-                {isInitial ? i18n.SET_SEVERITY_TO : i18n.CHANGED_SEVERITY_TO}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <AlertEpisodeSeverityBadge severity={item.newSeverity} />
-              </EuiFlexItem>
-              {item.prevSeverity !== undefined && (
-                <EuiFlexItem grow={false}>
-                  {i18n.getAfterNEventsLabel(
-                    item.prevEventCount,
-                    getEpisodeSeverityLabel(item.prevSeverity)
-                  )}
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          }
-        />
-      );
+      return <AlertEpisodeTimelineSeverityComment key={`severity-${idx}`} entry={item} />;
     }
 
-    const isInitial = item.prevStatus === undefined;
-    return (
-      <EuiComment
-        key={`state-${idx}`}
-        data-test-subj="alertingV2TimelineEntry"
-        data-timestamp={item.timestamp}
-        username={i18n.SYSTEM_LABEL}
-        timestamp={<AlertEpisodeTimelineRelativeTimestamp timestamp={item.timestamp} />}
-        timelineAvatar={
-          <EuiAvatar
-            size="s"
-            name={isInitial ? i18n.STARTED_EPISODE_AS : i18n.CHANGED_STATUS_TO}
-            iconType={isInitial ? 'flag' : 'arrowRight'}
-            color="subdued"
-          />
-        }
-        event={
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              {isInitial ? i18n.STARTED_EPISODE_AS : i18n.CHANGED_STATUS_TO}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AlertEpisodeStatusBadge status={item.newStatus} />
-            </EuiFlexItem>
-            {item.prevStatus !== undefined && (
-              <EuiFlexItem grow={false}>
-                {i18n.getAfterNEventsLabel(
-                  item.prevEventCount,
-                  i18n.STATUS_LABELS[item.prevStatus] ?? item.prevStatus
-                )}
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        }
-      />
-    );
+    return <AlertEpisodeTimelineStateComment key={`state-${idx}`} entry={item} />;
   });
 
   if (hasMore) {
