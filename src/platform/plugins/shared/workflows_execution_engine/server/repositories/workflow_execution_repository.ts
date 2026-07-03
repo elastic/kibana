@@ -19,10 +19,10 @@ import { bulkUpdateDocuments, resolveVersions } from './bulk_update_documents';
 import type { DocumentVersionsById, EsDocumentVersion } from './document_version';
 import { getDocumentsById } from './get_doc_by_id';
 import { resolveWriteIndex } from './resolve_write_index';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_EXECUTIONS_DS } from '../../common';
 
 export class WorkflowExecutionRepository {
-  private dataStreamName = WORKFLOWS_EXECUTIONS_INDEX;
+  private dataStreamName = WORKFLOWS_EXECUTIONS_DS;
 
   constructor(private esClient: ElasticsearchClient) {}
 

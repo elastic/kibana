@@ -10,13 +10,13 @@
 import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../common';
+import { WORKFLOWS_EXECUTIONS_DS } from '../../../common';
 
 export const WORKFLOW_EXECUTIONS_DATA_VIEW_ID = 'workflows-executions-adhoc';
 
 export const WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC: DataViewSpec = {
   id: WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
-  title: WORKFLOWS_EXECUTIONS_INDEX,
+  title: WORKFLOWS_EXECUTIONS_DS,
   timeFieldName: 'startedAt',
 };
 

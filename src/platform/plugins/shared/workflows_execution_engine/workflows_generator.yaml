@@ -3,7 +3,7 @@ name: Upload 20 Scheduled Copies
 enabled: true
 consts:
   WORKFLOW_METRICS_COLLECTOR_INDEX: workflow-metrics-collector
-  WORKFLOW_EXECUTIONS_INDEX_PATTERN: .workflows-executions*
+  WORKFLOW_EXECUTIONS_INDEX_PATTERN: .workflows-executions-ds*
 triggers:
   - type: manual
     inputs:
@@ -122,8 +122,8 @@ steps:
                           metricValue = Instant.parse(startedAt).toEpochMilli() - Instant.parse(createdAt).toEpochMilli();
                         }
                 - group: workflowExecution
-                  alias_name: .workflows-executions
-                  executions_index_pattern: .workflows-executions*
+                  alias_name: .workflows-executions-ds
+                  executions_index_pattern: .workflows-executions-ds*
                   metrics_mapping:
                     - metric: 'workflowExecution.count'
                       unit: 'int'
@@ -360,7 +360,7 @@ steps:
                   type: elasticsearch.request
                   with:
                     method: POST
-                    path: .workflows-executions*/_count
+                    path: .workflows-executions-ds*/_count
                     body:
                       query:
                         term:

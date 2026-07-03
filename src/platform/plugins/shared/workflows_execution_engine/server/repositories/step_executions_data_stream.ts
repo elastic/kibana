@@ -9,21 +9,21 @@
 
 import type { DataStreamsSetup, DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { MappingsDefinition } from '@kbn/es-mappings';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows';
+import { WORKFLOWS_STEP_EXECUTIONS_DS } from '@kbn/workflows';
 import {
-  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+  WORKFLOWS_STEP_EXECUTIONS_DS_MAPPINGS,
   WORKFLOWS_STEP_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION,
 } from '../../common/step_executions_index';
 
 export { WORKFLOWS_STEP_EXECUTIONS_MANAGED_INDEX_MAPPINGS_VERSION };
 
 const stepExecutionsMappings =
-  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS as unknown as MappingsDefinition;
+  WORKFLOWS_STEP_EXECUTIONS_DS_MAPPINGS as unknown as MappingsDefinition;
 
 // Note: Bump the version when you make changes to the definition.
 export const initializeStepExecutionsDataStream = (coreDataStreams: DataStreamsSetup): void => {
   coreDataStreams.registerDataStream({
-    name: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+    name: WORKFLOWS_STEP_EXECUTIONS_DS,
     version: 1,
     hidden: true,
     template: {
@@ -33,5 +33,5 @@ export const initializeStepExecutionsDataStream = (coreDataStreams: DataStreamsS
 };
 
 export const initializeStepExecutionsClient = (coreDataStreams: DataStreamsStart) => {
-  return coreDataStreams.initializeClient(WORKFLOWS_STEP_EXECUTIONS_INDEX);
+  return coreDataStreams.initializeClient(WORKFLOWS_STEP_EXECUTIONS_DS);
 };

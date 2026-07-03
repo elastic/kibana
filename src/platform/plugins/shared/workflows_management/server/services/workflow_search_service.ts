@@ -20,7 +20,7 @@ import { buildWorkflowFilters } from '@kbn/workflows/server';
 import type { WorkflowListItemDto, WorkflowSortField } from '@kbn/workflows/types/v1';
 
 import type { WorkflowSearchDeps } from './types';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_EXECUTIONS_DS } from '../../common';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { paginateWithSearchAfter } from '../api/lib/paginate_with_search_after';
 import { transformStorageDocumentToWorkflowDto } from '../api/lib/workflow_dto_transform';
@@ -325,7 +325,7 @@ export class WorkflowSearchService {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
       const response = await this.deps.esClient.search({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         size: 0,
         query: {
           bool: {
@@ -387,7 +387,7 @@ export class WorkflowSearchService {
 
     try {
       const response = await this.deps.esClient.search<EsWorkflowExecution>({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         size: 0,
         query: {
           bool: {

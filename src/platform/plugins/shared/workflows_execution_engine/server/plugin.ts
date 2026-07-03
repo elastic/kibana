@@ -20,6 +20,8 @@ import {
   ExecutionStatus,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
+  WORKFLOWS_EXECUTIONS_DS,
+  WORKFLOWS_STEP_EXECUTIONS_DS,
 } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
@@ -93,6 +95,8 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import {
+  WORKFLOW_MIGRATION_TASK_ID,
+  WORKFLOW_MIGRATION_TASK_TYPE,
   WORKFLOW_RESUME_TASK_TYPE,
   WORKFLOW_RUN_TASK_TYPE,
   WORKFLOW_SCHEDULED_TASK_TYPE,
@@ -125,6 +129,12 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
+
+/** How often the recurring execution-history migration task runs. */
+const WORKFLOW_MIGRATION_TASK_INTERVAL = '24h';
+
+/** Timeout for a single migration run; sized for a batched ES scan + bulk write. */
+const WORKFLOW_MIGRATION_TASK_TIMEOUT = '10m';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -646,6 +656,67 @@ export class WorkflowsExecutionEnginePlugin
         },
       },
     });
+    plugins.taskManager.registerTaskDefinitions({
+      [WORKFLOW_MIGRATION_TASK_TYPE]: {
+        title: 'Migrate Workflow Executions',
+        description:
+          'Migrates terminal workflow & step executions from the mutable execution state index into the append-only execution history data streams.',
+        timeout: WORKFLOW_MIGRATION_TASK_TIMEOUT,
+        // One-shot semantics per scheduled run: on transient failure the recurring
+        // schedule retries on the next interval rather than re-running immediately.
+        maxAttempts: 1,
+        createTaskRunner: ({ abortController }) => {
+          return {
+            run: async () => {
+              const [coreStart] = await core.getStartServices();
+              await this.initialize(coreStart);
+              const esClient = coreStart.elasticsearch.client.asInternalUser;
+
+              const migrations = [
+                {
+                  sourceIndex: '.workflows-executions',
+                  destIndex: WORKFLOWS_EXECUTIONS_DS,
+                },
+                {
+                  sourceIndex: '.workflows-step-executions',
+                  destIndex: WORKFLOWS_STEP_EXECUTIONS_DS,
+                },
+              ];
+
+              const tasks = migrations.map(async ({ sourceIndex, destIndex }) => {
+                const indexExists = await esClient.indices.exists({
+                  index: sourceIndex,
+                });
+
+                if (!indexExists) {
+                  return Promise.resolve();
+                }
+
+                await esClient.reindex({
+                  wait_for_completion: false,
+                  source: {
+                    index: sourceIndex,
+                  },
+                  dest: {
+                    index: destIndex,
+                  },
+                });
+              });
+
+              await Promise.all(tasks);
+
+              await Promise.all(
+                migrations.map(({ sourceIndex }) =>
+                  esClient.indices.putMapping({ index: sourceIndex, _meta: { migrated: true } })
+                )
+              );
+
+              return { state: {} };
+            },
+          };
+        },
+      },
+    });
 
     return {};
   }
@@ -659,6 +730,24 @@ export class WorkflowsExecutionEnginePlugin
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
+
+    // Recurring, idempotent: keeps the execution state index small by migrating
+    // terminal executions into the history data streams on a fixed interval.
+    void plugins.taskManager
+      .ensureScheduled({
+        id: WORKFLOW_MIGRATION_TASK_ID,
+        taskType: WORKFLOW_MIGRATION_TASK_TYPE,
+        schedule: { interval: WORKFLOW_MIGRATION_TASK_INTERVAL },
+        params: {},
+        state: {},
+      })
+      .catch((error: unknown) => {
+        this.logger.warn(
+          `Failed to schedule workflow executions migration task: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      });
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);

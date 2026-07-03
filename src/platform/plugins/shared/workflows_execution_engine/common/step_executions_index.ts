@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows';
+import { WORKFLOWS_STEP_EXECUTIONS_DS } from '@kbn/workflows';
 
-export { WORKFLOWS_STEP_EXECUTIONS_INDEX };
+export { WORKFLOWS_STEP_EXECUTIONS_DS };
 
 // Normalized LLM token usage. Shared between the step-execution mapping (per-step
 // usage extracted from `output.metadata.usage`) and the execution mapping (the
@@ -23,7 +23,7 @@ export const TOKEN_USAGE_MAPPING: MappingProperty = {
   },
 };
 
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
+export const WORKFLOWS_STEP_EXECUTIONS_DS_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
   properties: {
     '@timestamp': {

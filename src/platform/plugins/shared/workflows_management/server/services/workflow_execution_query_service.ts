@@ -24,9 +24,9 @@ import type {
 
 import type { WorkflowExecutionQueryDeps } from './types';
 import {
-  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_EXECUTIONS_DS,
   WORKFLOWS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_DS,
 } from '../../common';
 import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
 import {
@@ -131,8 +131,8 @@ export class WorkflowExecutionQueryService {
     return getWorkflowExecution({
       esClient: this.deps.esClient,
       logger: this.deps.logger,
-      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
-      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_DS,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_DS,
       workflowExecutionId: executionId,
       spaceId,
       includeInput: options?.includeInput,
@@ -146,8 +146,8 @@ export class WorkflowExecutionQueryService {
   ): Promise<ChildWorkflowExecutionItem[]> {
     return getChildWorkflowExecutions({
       esClient: this.deps.esClient,
-      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
-      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_DS,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_DS,
       parentExecutionId,
       spaceId,
     });
@@ -222,7 +222,7 @@ export class WorkflowExecutionQueryService {
     return searchWorkflowExecutions({
       esClient: this.deps.esClient,
       logger: this.deps.logger,
-      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
+      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_DS,
       query: { bool: { must } },
       size,
       from,
@@ -238,7 +238,7 @@ export class WorkflowExecutionQueryService {
   ): Promise<estypes.SearchResponse<unknown>> {
     try {
       return await this.deps.esClient.search({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         query: buildWorkflowExecutionsSearchQuery(params.query, spaceId, {
           includeManagedExecutions: params.includeManagedExecutions,
         }),
@@ -261,7 +261,7 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<WorkflowExecutionHistoryModel[]> {
     const response = await this.deps.esClient.search<StepExecutionWithLegacyFields>({
-      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      index: WORKFLOWS_STEP_EXECUTIONS_DS,
       query: {
         bool: {
           must: [{ term: { executionId } }, { term: { spaceId } }],
@@ -295,7 +295,7 @@ export class WorkflowExecutionQueryService {
     const searchResult = await searchStepExecutions({
       esClient: this.deps.esClient,
       logger: this.deps.logger,
-      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_DS,
       workflowExecutionId: params.executionId,
       additionalQuery: { term: { id: params.id } },
       spaceId,
@@ -314,7 +314,7 @@ export class WorkflowExecutionQueryService {
     return searchStepExecutions({
       esClient: this.deps.esClient,
       logger: this.deps.logger,
-      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_DS,
       workflowId: params.workflowId,
       stepId: params.stepId,
       spaceId,
@@ -356,7 +356,7 @@ export class WorkflowExecutionQueryService {
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
     try {
       response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        index: WORKFLOWS_STEP_EXECUTIONS_DS,
         query: {
           bool: {
             must: [{ term: { spaceId } }, { term: { status: 'waiting_for_input' } }],
@@ -472,7 +472,7 @@ export class WorkflowExecutionQueryService {
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
     try {
       response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        index: WORKFLOWS_STEP_EXECUTIONS_DS,
         query: {
           bool: {
             must: [{ term: { spaceId } }, { term: { stepType: 'waitForInput' } }, ...filterMust],
@@ -573,7 +573,7 @@ export class WorkflowExecutionQueryService {
         EsWorkflowStepExecution,
         ProcessedWaitForInputFacetAggs
       >({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        index: WORKFLOWS_STEP_EXECUTIONS_DS,
         // `size: 0` — we only want the aggs, not the matching docs.
         size: 0,
         query: {
@@ -635,7 +635,7 @@ export class WorkflowExecutionQueryService {
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
     try {
       response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        index: WORKFLOWS_STEP_EXECUTIONS_DS,
         query: {
           bool: {
             must: [
@@ -744,7 +744,7 @@ export class WorkflowExecutionQueryService {
   async getWaitingStepExecutionId(executionId: string, spaceId: string): Promise<string | null> {
     try {
       const response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        index: WORKFLOWS_STEP_EXECUTIONS_DS,
         query: {
           bool: {
             must: [
@@ -783,7 +783,7 @@ export class WorkflowExecutionQueryService {
   ): Promise<EsWorkflowStepExecution | null> {
     const { executionId, id } = params;
     const response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      index: WORKFLOWS_STEP_EXECUTIONS_DS,
       query: {
         bool: {
           must: [{ term: { workflowRunId: executionId } }, { term: { id } }, { term: { spaceId } }],
@@ -815,7 +815,7 @@ export class WorkflowExecutionQueryService {
   ): Promise<boolean> {
     try {
       const response = await this.deps.esClient.update({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        index: WORKFLOWS_STEP_EXECUTIONS_DS,
         id: stepExecutionId,
         // `respondedAt` is the first-writer-wins guard. Retrying conflicts
         // lets simultaneous updates re-run the script against the winner's

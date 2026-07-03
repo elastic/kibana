@@ -9,7 +9,7 @@
 
 import { useEffect } from 'react';
 import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../common';
+import { WORKFLOWS_EXECUTIONS_DS } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const rewriteWorkflowExecutionsHttpFetchOptions = (
@@ -19,7 +19,7 @@ export const rewriteWorkflowExecutionsHttpFetchOptions = (
 
   if (path.startsWith('/internal/controls/optionsList/')) {
     const index = decodeURIComponent(path.split('/').pop() ?? '');
-    if (index === WORKFLOWS_EXECUTIONS_INDEX) {
+    if (index === WORKFLOWS_EXECUTIONS_DS) {
       return {
         path: '/internal/workflows/executions/options_list',
         version: '1',
@@ -29,7 +29,7 @@ export const rewriteWorkflowExecutionsHttpFetchOptions = (
 
   if (
     path === '/internal/data_views/fields' &&
-    (query as { pattern?: string } | undefined)?.pattern === WORKFLOWS_EXECUTIONS_INDEX
+    (query as { pattern?: string } | undefined)?.pattern === WORKFLOWS_EXECUTIONS_DS
   ) {
     return {
       path: '/internal/workflows/executions/fields',

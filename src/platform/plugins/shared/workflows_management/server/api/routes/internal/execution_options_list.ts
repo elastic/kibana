@@ -14,7 +14,7 @@ import type {
   OptionsListSuccessResponse,
 } from '@kbn/controls-plugin/common/options_list/types';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../../common';
+import { WORKFLOWS_EXECUTIONS_DS } from '../../../../common';
 import {
   buildUnmanagedWorkflowExecutionsFilter,
   buildWorkflowExecutionsSpaceFilter,
@@ -127,7 +127,7 @@ export function registerExecutionOptionsListRoute({
           const selectedOptions = optionsListRequest.selectedOptions;
 
           const esResponse = await esClient.search({
-            index: WORKFLOWS_EXECUTIONS_INDEX,
+            index: WORKFLOWS_EXECUTIONS_DS,
             size: 0,
             query: {
               bool: {

@@ -8,7 +8,7 @@
  */
 
 /** Hidden data stream name for workflow executions. */
-export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
+export const WORKFLOWS_EXECUTIONS_DS = '.workflows-executions-ds';
 
 /** Hidden data stream name for workflow step executions. */
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
+export const WORKFLOWS_STEP_EXECUTIONS_DS = '.workflows-step-executions-ds';

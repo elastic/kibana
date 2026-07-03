@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../../common';
+import { WORKFLOWS_EXECUTIONS_DS } from '../../../../common';
 import { buildUnmanagedWorkflowExecutionsFilter } from '../../lib/build_workflow_executions_search_query';
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION, MAX_EXECUTION_FIELD_NAME_LENGTH } from '../utils/route_constants';
@@ -89,7 +89,7 @@ export function registerExecutionFieldsRoute({ router }: RouteDependencies) {
           });
 
           const { fields, indices } = await indexPatternsFetcher.getFieldsForWildcard({
-            pattern: WORKFLOWS_EXECUTIONS_INDEX,
+            pattern: WORKFLOWS_EXECUTIONS_DS,
             metaFields: parseFields(request.query.meta_fields),
             fieldCapsOptions: {
               allow_no_indices: request.query.allow_no_index || false,

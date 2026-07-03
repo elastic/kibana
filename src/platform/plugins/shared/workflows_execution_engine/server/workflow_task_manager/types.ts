@@ -13,6 +13,15 @@ export const WORKFLOW_RESUME_TASK_TYPE = 'workflow:resume';
 
 export const WORKFLOW_SCHEDULED_TASK_TYPE = 'workflow:scheduled';
 
+/**
+ * Recurring task that migrates terminal workflow & step executions from the mutable
+ * execution state index into the append-only execution history data streams.
+ */
+export const WORKFLOW_MIGRATION_TASK_TYPE = 'workflow:migrate-executions';
+
+/** Stable, well-known id for the singleton recurring migration task. */
+export const WORKFLOW_MIGRATION_TASK_ID = 'workflow:migrate-executions';
+
 export interface StartWorkflowExecutionParams {
   workflowRunId: string;
   spaceId: string;

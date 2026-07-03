@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '@kbn/workflows';
+import { WORKFLOWS_EXECUTIONS_DS } from '@kbn/workflows';
 import { TOKEN_USAGE_MAPPING } from './step_executions_index';
 
-export { WORKFLOWS_EXECUTIONS_INDEX };
+export { WORKFLOWS_EXECUTIONS_DS };
 
 export const PLUGIN_ID = 'workflowsExecutionEngine';
 export const PLUGIN_NAME = 'Workflows Execution Engine';
 
-export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
+export const WORKFLOWS_EXECUTIONS_DS_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
   properties: {
     '@timestamp': {

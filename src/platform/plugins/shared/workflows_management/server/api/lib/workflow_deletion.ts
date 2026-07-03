@@ -14,7 +14,7 @@ import { buildWorkflowFilters } from '@kbn/workflows/server';
 
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { partitionBulkResults } from './bulk_response_helpers';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
+import { WORKFLOWS_EXECUTIONS_DS, WORKFLOWS_STEP_EXECUTIONS_DS } from '../../../common';
 import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow_storage';
 import { unscheduleWorkflowTasks } from '../../task_defs/unschedule_workflow_tasks';
 import type { WorkflowTaskScheduler } from '../../tasks/workflow_task_scheduler';
@@ -113,7 +113,7 @@ const purgeWorkflowRelatedData = async (
   const deleteOps = [
     esClient
       .deleteByQuery({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         query,
         refresh: true,
         conflicts: 'proceed',
@@ -125,7 +125,7 @@ const purgeWorkflowRelatedData = async (
       }),
     esClient
       .deleteByQuery({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        index: WORKFLOWS_STEP_EXECUTIONS_DS,
         query,
         refresh: true,
         conflicts: 'proceed',

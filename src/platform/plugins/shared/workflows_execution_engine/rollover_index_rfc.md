@@ -159,7 +159,7 @@ The repositories use two modes depending on the operation:
 ```
 getWorkflowExecution(encodedId, spaceId):
     { indexSuffix } = decodeEncodedWorkflowExecutionId(encodedId)
-    backingIndex = resolveIndex(indexSuffix, WORKFLOWS_EXECUTIONS_INDEX_PATTERN)
+    backingIndex = resolveIndex(indexSuffix, WORKFLOWS_EXECUTIONS_DS_PATTERN)
 
     doc = esClient.get(index: backingIndex, id: encodedId)
     if doc.spaceId !== spaceId:
@@ -190,7 +190,7 @@ getStepExecutions(workflowExecution):
 ```
 searchWorkflowExecutions(query, spaceId, sort, size):
     return esClient.search(
-        index: WORKFLOWS_EXECUTIONS_INDEX,  // alias — fans out to all backing indexes
+        index: WORKFLOWS_EXECUTIONS_DS,  // alias — fans out to all backing indexes
         query: query AND { term: { spaceId } },
         sort, size
     )

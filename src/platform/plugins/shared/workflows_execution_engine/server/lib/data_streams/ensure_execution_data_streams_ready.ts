@@ -10,7 +10,7 @@
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows';
+import { WORKFLOWS_EXECUTIONS_DS, WORKFLOWS_STEP_EXECUTIONS_DS } from '@kbn/workflows';
 import { initializeStepExecutionsClient } from '../../repositories/step_executions_data_stream';
 import { initializeWorkflowExecutionsClient } from '../../repositories/workflow_executions_data_stream';
 
@@ -62,8 +62,8 @@ export const ensureExecutionDataStreamsReady = async (
         initializeStepExecutionsClient(dataStreams),
       ]);
       await Promise.all([
-        verifyOrCreateDataStream(esClient, WORKFLOWS_EXECUTIONS_INDEX),
-        verifyOrCreateDataStream(esClient, WORKFLOWS_STEP_EXECUTIONS_INDEX),
+        verifyOrCreateDataStream(esClient, WORKFLOWS_EXECUTIONS_DS),
+        verifyOrCreateDataStream(esClient, WORKFLOWS_STEP_EXECUTIONS_DS),
       ]);
     })().catch((error) => {
       ensureReadyPromise = undefined;

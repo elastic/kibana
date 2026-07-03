@@ -17,7 +17,7 @@ import { extractVersionFromBulkItem } from './document_version';
 import type { VersionedDocument } from './get_doc_by_id';
 import { getDocumentsById } from './get_doc_by_id';
 import { resolveWriteIndex } from './resolve_write_index';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_STEP_EXECUTIONS_DS } from '../../common';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
 
@@ -34,7 +34,7 @@ export type StepExecutionWrite =
     };
 
 export class StepExecutionRepository {
-  private dataStreamName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
+  private dataStreamName = WORKFLOWS_STEP_EXECUTIONS_DS;
 
   constructor(private esClient: ElasticsearchClient) {}
 
