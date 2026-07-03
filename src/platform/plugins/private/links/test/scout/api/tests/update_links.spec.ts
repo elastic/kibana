@@ -16,7 +16,8 @@ apiTest.describe('links - update', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
+  apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+    await kbnClient.savedObjects.clean({ types: ['links'] });
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     viewerCredentials = await requestAuth.getApiKeyForViewer();
   });

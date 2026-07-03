@@ -17,9 +17,10 @@ apiTest.describe('links - delete', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
   let createdId: string;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
+  apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+    await kbnClient.savedObjects.clean({ types: ['links'] });
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
-    viewerCredentials = await requestAuth.getApiKey('viewer');
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
   });
 
   apiTest.beforeEach(async ({ apiClient }) => {
