@@ -66072,7 +66072,7 @@ paths:
           content:
             application/json:
               examples:
-                queryOccurrenceStats:
+                queryOccurrences:
                   value:
                     aggregated_occurrences:
                       - count: 42
