@@ -46,6 +46,14 @@ jest.mock('./tool_library_panel', () => ({
   ToolLibraryPanel: () => <div data-test-subj="toolLibraryPanel" />,
 }));
 
+jest.mock('./tool_create_flyout', () => ({
+  ToolCreateFlyout: ({ onToolCreated }: { onToolCreated?: (tool: { id: string }) => void }) => (
+    <div data-test-subj="toolCreateFlyout">
+      <button onClick={() => onToolCreated?.({ id: 'new-tool' })}>Simulate tool created</button>
+    </div>
+  ),
+}));
+
 jest.mock('./tool_detail_panel', () => ({
   ToolDetailPanel: () => <div data-test-subj="toolDetailPanel" />,
 }));
@@ -142,9 +150,11 @@ describe('AgentTools', () => {
     expect(openFlyout).toHaveBeenCalledTimes(1);
   });
 
-  it('closes dropdown when "Create a tool" is clicked (no-op stub)', async () => {
+  it('opens the create tool flyout and closes the dropdown when "Create a tool" is clicked', async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     renderComponent();
+
+    expect(screen.queryByTestId('toolCreateFlyout')).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Add tool' }));
     expect(screen.getByText('Create a tool')).toBeInTheDocument();
@@ -152,6 +162,27 @@ describe('AgentTools', () => {
     await user.click(screen.getByText('Create a tool'));
 
     await waitFor(() => expect(screen.queryByText('Create a tool')).not.toBeInTheDocument());
+    expect(screen.getByTestId('toolCreateFlyout')).toBeInTheDocument();
+  });
+
+  it('selects the newly created tool immediately, without waiting for the attach mutation', async () => {
+    const setSelectedToolId = jest.fn();
+    useQueryState.mockReturnValue([undefined, setSelectedToolId]);
+
+    const handleAddTool = jest.fn();
+    useToolsMutation.mockReturnValue({ handleAddTool, handleRemoveTool: jest.fn() });
+
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    renderComponent();
+
+    await user.click(screen.getByRole('button', { name: 'Add tool' }));
+    await user.click(screen.getByText('Create a tool'));
+    await user.click(screen.getByRole('button', { name: 'Simulate tool created' }));
+
+    expect(handleAddTool).toHaveBeenCalledWith({ id: 'new-tool' });
+    // Selection must not depend on the attach mutation's onSuccess (a separate,
+    // slower network round trip) — the tool is already reflected optimistically.
+    expect(setSelectedToolId).toHaveBeenCalledWith('new-tool');
   });
 
   it('hides the Add tool button when canEditAgent is false', () => {
