@@ -90,7 +90,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     });
   }, [rawRound, services.plugins.evals, traceId]);
 
-  const showTraceButton = isExperimentalEnabled && Boolean(traceId);
+  const showTraceButton = Boolean(traceId);
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction !== null;
 
   return (
