@@ -43,9 +43,11 @@ export type SkillsDirectoryStructure = Directory<{
       compliance: FileDirectory<{}>;
       rules: FileDirectory;
       entities: FileDirectory<{}>;
+      watchlists: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
       ml: FileDirectory<{}>;
       siem_readiness: FileDirectory<{}>;
+      entity_analytics_leads: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;

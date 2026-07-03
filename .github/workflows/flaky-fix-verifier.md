@@ -147,6 +147,9 @@ safe-outputs:
   add-comment:
     max: 3
     target: *pr_number
+    # Post as `kibanamachine` so the `/flaky` comment triggers `trigger-flaky.yml`
+    # (GITHUB_TOKEN comments don't fire workflows, and that gate only accepts kibanamachine/members).
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
   add-labels:
     allowed:
       - flaky-fix-check:started
