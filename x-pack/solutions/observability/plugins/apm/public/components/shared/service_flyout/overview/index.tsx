@@ -24,6 +24,7 @@ import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
 import { getChartDefinitions } from './chart_configs';
@@ -141,6 +142,7 @@ export function ServiceFlyoutOverview({
 }: ServiceFlyoutOverviewProps) {
   const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
   const { core, share } = useApmPluginContext();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { dataView } = useAdHocApmDataView();
   const indexes = dataView?.getIndexPattern();
   const hasSystemMetrics = useServiceHasSystemMetrics({
@@ -225,8 +227,8 @@ export function ServiceFlyoutOverview({
             locators={share.url.locators}
             serviceName={service.id}
             environment={environment}
-            start={rangeFrom}
-            end={rangeTo}
+            start={start}
+            end={end}
             transactionType={transactionType}
             latencyAggregationType={latencyAggregationType}
           />

@@ -8,10 +8,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import type { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { ServiceFlyoutOverview } from '.';
 
 const mockUseServiceHasSystemMetrics = jest.fn<boolean | undefined, []>();
+let transactionsSectionProps: React.ComponentProps<typeof ServiceFlyoutTransactionsSection> | null =
+  null;
 
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => ({
@@ -29,7 +32,12 @@ jest.mock('../../../../hooks/use_adhoc_apm_data_view', () => ({
 }));
 
 jest.mock('@kbn/apm-ui-shared', () => ({
-  ServiceFlyoutTransactionsSection: () => <div data-test-subj="transactionsSectionMock" />,
+  ServiceFlyoutTransactionsSection: (
+    props: React.ComponentProps<typeof ServiceFlyoutTransactionsSection>
+  ) => {
+    transactionsSectionProps = props;
+    return <div data-test-subj="transactionsSectionMock" />;
+  },
 }));
 
 jest.mock('./query_controls', () => ({
@@ -71,6 +79,19 @@ function renderOverview(overrides: Partial<typeof defaultProps> = {}) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  transactionsSectionProps = null;
+});
+
+describe('ServiceFlyoutOverview transactions section props', () => {
+  it('passes resolved ISO timestamps to ServiceFlyoutTransactionsSection, not raw relative date strings', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue(false);
+    renderOverview();
+
+    expect(transactionsSectionProps?.start).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(transactionsSectionProps?.end).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(transactionsSectionProps?.start).not.toBe('now-15m');
+    expect(transactionsSectionProps?.end).not.toBe('now');
+  });
 });
 
 describe('ServiceFlyoutOverview infrastructure section visibility', () => {
