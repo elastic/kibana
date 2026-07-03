@@ -9,5 +9,4 @@ export * from './seed_alerts';
 export * from './seed_features';
 export * from './seed_logs';
 export * from './seed_queries';
-export * from './seed_tasks';
 export * from './clean';
