@@ -6,7 +6,8 @@
  */
 
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
-import type { SigEventStatus, StreamType } from '@kbn/streams-schema';
+import type { StreamType } from '@kbn/streams-schema';
+import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
 interface StreamEndpointLatencyProps {
   name: string;
@@ -29,6 +30,7 @@ interface StreamsDescriptionGeneratedProps {
   stream_name: string;
   stream_type: StreamType;
 }
+
 interface StreamsSignificantEventsQueriesGeneratedProps {
   count: number;
   connector_id: string;
@@ -96,7 +98,14 @@ interface StreamsAgentToolEventCreateProps {
 interface StreamsAgentToolEventStatusUpdateProps {
   success: boolean;
   event_id: string;
-  status: SigEventStatus;
+  status: SignificantEventStatus;
+  error_message?: string;
+}
+
+interface StreamsAgentToolEventInvestigationAttachProps {
+  success: boolean;
+  event_id: string;
+  workflow_execution_id: string;
   error_message?: string;
 }
 
@@ -120,6 +129,25 @@ interface StreamsSignificantEventsDiscoveryTriggeredProps {
   space_id: string;
 }
 
+interface StreamsSignificantEventsDetectionScanProps {
+  /** ES `took` (ms) reported by the alerts-source search itself. */
+  took_ms: number;
+  /** Wall-clock (ms) around the reader call, including transport and parsing. */
+  duration_ms: number;
+  /** Number of distinct rules covered by the change-point scan. */
+  rules_scanned: number;
+  /** Resolved alerting engine backing the read: `v2` reads `.rule-events`, `v1` reads `.alerts-*`. */
+  alerting_engine: 'v1' | 'v2';
+  /** The alerts-source index that was read (e.g. `.rule-events`). */
+  alerts_source_index: string;
+  /** The scan lookback window, e.g. `now-30m`. */
+  lookback: string;
+  /** The change-point bucket interval, e.g. `30s`. */
+  bucket_interval: string;
+  /** The Kibana space in which the scan ran. */
+  space_id: string;
+}
+
 interface StreamsOnboardingScheduledProps {
   stream_name: string;
   execution_id: string;
@@ -140,7 +168,9 @@ export {
   type StreamsAgentToolKiIdentificationStartedProps,
   type StreamsAgentToolEventCreateProps,
   type StreamsAgentToolEventStatusUpdateProps,
+  type StreamsAgentToolEventInvestigationAttachProps,
   type StreamsCodeAnalysisGroundingProps,
   type StreamsSignificantEventsDiscoveryTriggeredProps,
+  type StreamsSignificantEventsDetectionScanProps,
   type StreamsOnboardingScheduledProps,
 };

@@ -19,9 +19,9 @@ fi
 # `@kbn/evals` defaults this to `kbn_evals`, but you can override via KBN_EVALS_TELEMETRY_PLUGIN_ID.
 
 # Set a base build run ID from the Buildkite build. This is used as a seed for
-# generating deterministic per-task experiment IDs (not as the experiment_id itself).
-# Suite-run grouping in the UI uses metadata.ci.build_id which is populated
-# automatically from BUILDKITE_BUILD_ID in the Buildkite metadata.
+# generating deterministic per-task experiment IDs (not as the experiment_id itself)
+# and feeds metadata.execution_id, the key the Experiments listing groups by
+# (see buildExecutionId in @kbn/evals for how the suite and model are combined).
 if [[ -z "${TEST_RUN_ID:-}" ]] && [[ -n "${BUILDKITE_BUILD_ID:-}" ]]; then
   export TEST_RUN_ID="bk-${BUILDKITE_BUILD_ID}"
 fi
@@ -204,7 +204,11 @@ EOF
 EOF
       done <<<"$CONNECTOR_IDS"
 
-      if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] && [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
+      # Only ping suite owners on the pipeline's default branch (main). Manual rebuilds
+      # from feature branches still run the evals but skip the Slack notification, so we
+      # don't spam suite owners with results from in-progress/experimental branches.
+      EVAL_NOTIFY_BRANCH="${BUILDKITE_PIPELINE_DEFAULT_BRANCH:-main}"
+      if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] && [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]] && [[ "${BUILDKITE_BRANCH:-}" == "${EVAL_NOTIFY_BRANCH}" ]]; then
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "LLM Evals: ${EVAL_SUITE_ID} (suite owner notify)"
         key: "kbn-evals-${group_key_safe}-suite-owner-notify"
