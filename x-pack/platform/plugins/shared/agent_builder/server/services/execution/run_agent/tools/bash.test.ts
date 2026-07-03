@@ -6,6 +6,7 @@
  */
 
 import type { BashExecResult, IBashService } from '@kbn/agent-builder-server/runner';
+import { SAFEGUARD_TOKEN_COUNT } from '../bash/output_truncation';
 import { createBashTool } from './bash';
 
 describe('bash tool', () => {
@@ -31,9 +32,10 @@ describe('bash tool', () => {
     });
   });
 
-  it('is exempt from the tool-result length guardrail', () => {
+  it('raises the tool-result length guardrail budget to cover its own worst case', () => {
     const bashService = { exec: jest.fn() } as unknown as IBashService;
     const tool = createBashTool({ bashService });
-    expect(tool.maxResultTokens).toBe(Infinity);
+    // stdout and stderr are each capped independently at SAFEGUARD_TOKEN_COUNT.
+    expect(tool.maxResultTokens).toBe(SAFEGUARD_TOKEN_COUNT * 2);
   });
 });

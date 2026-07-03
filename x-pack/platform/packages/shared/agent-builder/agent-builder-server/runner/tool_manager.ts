@@ -55,8 +55,8 @@ export interface ToolManager {
 
   /**
    * Sets the token budget used by the tool-result length guardrail for tools that
-   * don't define their own `maxResultTokens` override. Should be called once per run
-   * before adding tools; defaults to `DEFAULT_MAX_TOOL_RESULT_TOKENS` if never called.
+   * don't define their own `maxResultTokens` override.
+   * Should be called once per run before adding tools (else will use default value);
    */
   setMaxToolResultTokens(maxTokens: number): void;
 
