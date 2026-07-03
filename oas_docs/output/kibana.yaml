@@ -44553,27 +44553,30 @@ paths:
           name: query
           required: false
           schema:
-            maxLength: 500
             type: string
         - description: A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are included.
           in: query
           name: tags
           required: false
           schema:
+            default: []
+            description: Tag IDs associated with this dashboard.
             items:
               maxLength: 250
               type: string
-            maxItems: 1000
+            maxItems: 100
             type: array
         - description: A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are excluded.
           in: query
           name: excluded_tags
           required: false
           schema:
+            default: []
+            description: Tag IDs associated with this dashboard.
             items:
               maxLength: 250
               type: string
-            maxItems: 1000
+            maxItems: 100
             type: array
         - description: The page of results to return.
           in: query
