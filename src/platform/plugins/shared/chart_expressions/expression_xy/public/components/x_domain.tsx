@@ -45,7 +45,7 @@ export const getXDomain = (
   datatableUtilitites: DatatableUtilitiesService,
   layers: CommonXYDataLayerConfig[],
   minInterval: number | undefined,
-  isTimeViz: boolean,
+  isTimeVis: boolean,
   isHistogram: boolean,
   hasBars: boolean,
   timeZone: string,
@@ -54,7 +54,7 @@ export const getXDomain = (
   const appliedTimeRange = getAppliedTimeRange(datatableUtilitites, layers)?.timeRange;
   const from = appliedTimeRange?.from;
   const to = appliedTimeRange?.to;
-  const baseDomain = isTimeViz
+  const baseDomain = isTimeVis
     ? {
         min: from ? moment(from).valueOf() : NaN,
         max: to ? moment(to).valueOf() : NaN,
@@ -64,8 +64,8 @@ export const getXDomain = (
     ? { minInterval, min: NaN, max: NaN }
     : undefined;
 
-  if ((isHistogram || isTimeViz) && isFullyQualified(baseDomain)) {
-    if (xExtent && !isTimeViz) {
+  if ((isHistogram || isTimeVis) && isFullyQualified(baseDomain)) {
+    if (xExtent && !isTimeVis) {
       return {
         extendedDomain: {
           min: xExtent.lowerBound ?? NaN,
