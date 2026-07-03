@@ -62125,6 +62125,9 @@ paths:
           name: id
           required: true
           schema:
+            enum:
+              - email_exact_match
+              - related_user_bridge
             type: string
       responses:
         '200':
@@ -62182,6 +62185,9 @@ paths:
           name: id
           required: true
           schema:
+            enum:
+              - email_exact_match
+              - related_user_bridge
             type: string
       responses:
         '200':
