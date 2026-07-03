@@ -8,15 +8,16 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
+import type { z } from '@kbn/zod/v4';
 
 export interface TraceAccessor {
   traceId: string;
   esClient: ElasticsearchClient;
 }
 
-export interface EvaluatorContext {
+export interface EvaluatorContext<ReferenceData = Record<string, unknown>> {
   trace: TraceAccessor;
-  referenceData?: Record<string, unknown>;
+  referenceData?: ReferenceData;
   inferenceClient?: BoundInferenceClient;
   log: Logger;
 }
@@ -31,19 +32,13 @@ export interface EvaluatorResult {
   }>;
 }
 
-export interface ReferenceDataField {
-  type: string;
-  required: boolean;
-  description: string;
-}
-
-export interface EvaluatorDefinition {
+export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>> {
   name: string;
   version: string;
   kind: 'llm' | 'code';
   description: string;
-  referenceDataSchema?: Record<string, ReferenceDataField>;
-  evaluate(ctx: EvaluatorContext): Promise<EvaluatorResult>;
+  referenceDataSchema?: z.ZodType<ReferenceData>;
+  evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;
 }
 
 export interface EvaluatorRegistry {

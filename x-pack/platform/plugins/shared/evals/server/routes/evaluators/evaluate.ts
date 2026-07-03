@@ -14,6 +14,7 @@ import {
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
@@ -63,6 +64,7 @@ export const registerEvaluateRoute = ({
         const resolvedEvaluators: Array<{
           config: (typeof evaluators)[number];
           definition: EvaluatorDefinition;
+          parsedReferenceData?: Record<string, unknown>;
         }> = [];
 
         for (const config of evaluators) {
@@ -90,22 +92,22 @@ export const registerEvaluateRoute = ({
           });
         }
 
-        for (const { definition } of resolvedEvaluators) {
-          if (!definition.referenceDataSchema) {
+        for (const entry of resolvedEvaluators) {
+          if (!entry.definition.referenceDataSchema) {
+            entry.parsedReferenceData = referenceData;
             continue;
           }
-          for (const [field, fieldDef] of Object.entries(definition.referenceDataSchema)) {
-            if (
-              fieldDef.required &&
-              (referenceData?.[field] == null || `${referenceData[field]}`.trim().length === 0)
-            ) {
-              return response.badRequest({
-                body: {
-                  message: `reference_data.${field} is required for evaluator "${definition.name}"`,
-                },
-              });
-            }
+          const parsed = entry.definition.referenceDataSchema.safeParse(referenceData);
+          if (!parsed.success) {
+            return response.badRequest({
+              body: {
+                message: `Invalid reference_data for evaluator "${
+                  entry.definition.name
+                }": ${z.prettifyError(parsed.error)}`,
+              },
+            });
           }
+          entry.parsedReferenceData = parsed.data as Record<string, unknown>;
         }
 
         const coreContext = await context.core;
@@ -150,7 +152,7 @@ export const registerEvaluateRoute = ({
         };
 
         const results: EvaluateResponse['results'] = [];
-        for (const { config, definition } of resolvedEvaluators) {
+        for (const { config, definition, parsedReferenceData } of resolvedEvaluators) {
           try {
             const inferenceClient =
               definition.kind === 'llm' && config.connector_id
@@ -159,7 +161,7 @@ export const registerEvaluateRoute = ({
 
             const result = await definition.evaluate({
               trace: traceAccessor,
-              referenceData,
+              referenceData: parsedReferenceData,
               inferenceClient,
               log: logger,
             });

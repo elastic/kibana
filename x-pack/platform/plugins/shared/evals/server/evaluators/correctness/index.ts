@@ -6,6 +6,7 @@
  */
 
 import type { ToolChoice } from '@kbn/inference-common';
+import { z } from '@kbn/zod/v4';
 import pRetry from 'p-retry';
 import { extractChatEvidence } from '../chat_evidence';
 import type { EvaluatorDefinition } from '../types';
@@ -28,26 +29,24 @@ const getCorrectnessAnalysis = (response: {
   return firstToolCall.function.arguments as CorrectnessAnalysis;
 };
 
-export const correctnessEvaluator: EvaluatorDefinition = {
+const referenceDataSchema = z.object({
+  expected: z
+    .string()
+    .trim()
+    .min(1)
+    .max(131072)
+    .describe('The expected ground truth response to compare against.'),
+});
+
+export const correctnessEvaluator: EvaluatorDefinition<z.infer<typeof referenceDataSchema>> = {
   name: 'correctness',
   version: '1.0.0',
   kind: 'llm',
   description: 'Measures factuality, relevance, and sequence accuracy against expected output.',
-  referenceDataSchema: {
-    expected: {
-      type: 'string',
-      required: true,
-      description: 'The expected ground truth response to compare against.',
-    },
-  },
-  async evaluate({ trace, referenceData, inferenceClient, log }) {
+  referenceDataSchema,
+  async evaluate({ trace, referenceData, inferenceClient }) {
     if (!inferenceClient) {
       throw new Error('Inference client is required for correctness evaluator');
-    }
-
-    const groundTruthResponse = referenceData?.expected;
-    if (groundTruthResponse == null || `${groundTruthResponse}`.trim().length === 0) {
-      throw new Error('reference_data.expected is required for correctness evaluator');
     }
 
     const chatEvidence = await extractChatEvidence(trace);
@@ -59,7 +58,7 @@ export const correctnessEvaluator: EvaluatorDefinition = {
           input: {
             user_query: chatEvidence.user_query,
             agent_response: chatEvidence.agent_response,
-            ground_truth_response: `${groundTruthResponse}`,
+            ground_truth_response: referenceData!.expected,
           },
           toolChoice: {
             function: 'analyze',

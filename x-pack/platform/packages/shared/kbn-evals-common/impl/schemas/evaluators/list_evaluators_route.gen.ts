@@ -24,16 +24,7 @@ export const ListEvaluatorsResponse = lazySchema(() =>
         version: z.string().max(64),
         kind: z.enum(['llm', 'code']),
         description: z.string().max(2048),
-        reference_data_schema: z
-          .object({})
-          .catchall(
-            z.object({
-              type: z.string().max(256),
-              required: z.boolean(),
-              description: z.string().max(2048),
-            })
-          )
-          .optional(),
+        reference_data_schema: z.object({}).catchall(z.unknown()).optional(),
       })
     ),
   })

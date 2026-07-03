@@ -6,6 +6,7 @@
  */
 
 import { API_VERSIONS, EVALS_EVALUATORS_URL, INTERNAL_API_ACCESS } from '@kbn/evals-common';
+import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
@@ -14,6 +15,7 @@ export const registerListEvaluatorsRoute = ({ router, evaluatorRegistry }: Route
     .get({
       path: EVALS_EVALUATORS_URL,
       access: INTERNAL_API_ACCESS,
+      enableQueryVersion: true,
       security: {
         authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
@@ -31,7 +33,15 @@ export const registerListEvaluatorsRoute = ({ router, evaluatorRegistry }: Route
           kind: evaluator.kind,
           description: evaluator.description,
           ...(evaluator.referenceDataSchema
-            ? { reference_data_schema: evaluator.referenceDataSchema }
+            ? {
+                reference_data_schema: (() => {
+                  const { $schema, type, ...schema } = z.toJSONSchema(
+                    evaluator.referenceDataSchema,
+                    { target: 'draft-7', unrepresentable: 'any' }
+                  ) as Record<string, unknown>;
+                  return schema;
+                })(),
+              }
             : {}),
         }));
 

@@ -41,21 +41,7 @@ paths:
                           maxLength: 2048
                         reference_data_schema:
                           type: object
-                          additionalProperties:
-                            type: object
-                            properties:
-                              type:
-                                type: string
-                                maxLength: 256
-                              required:
-                                type: boolean
-                              description:
-                                type: string
-                                maxLength: 2048
-                            required:
-                              - type
-                              - required
-                              - description
+                          additionalProperties: true
                       required:
                         - name
                         - version

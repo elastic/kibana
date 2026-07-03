@@ -13,6 +13,7 @@ import { API_VERSIONS, EVALS_EVALUATORS_URL } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { EvaluatorRegistry } from '../../evaluators/types';
 import { registerListEvaluatorsRoute } from './list_evaluators';
@@ -60,13 +61,13 @@ describe('GET /internal/evals/evaluators', () => {
         version: '1.0.0',
         kind: 'llm',
         description: 'Correctness evaluator',
-        referenceDataSchema: {
-          expected: {
-            type: 'string',
-            required: true,
-            description: 'The expected ground truth response to compare against.',
-          },
-        },
+        referenceDataSchema: z.object({
+          expected: z
+            .string()
+            .trim()
+            .min(1)
+            .describe('The expected ground truth response to compare against.'),
+        }),
         evaluate: jest.fn(),
       },
     ],
@@ -128,13 +129,15 @@ describe('GET /internal/evals/evaluators', () => {
       version: '1.0.0',
       kind: 'llm',
       description: 'Correctness evaluator',
-      reference_data_schema: {
-        expected: {
-          type: 'string',
-          required: true,
-          description: 'The expected ground truth response to compare against.',
-        },
-      },
+      reference_data_schema: expect.objectContaining({
+        properties: expect.objectContaining({
+          expected: expect.objectContaining({
+            type: 'string',
+            description: 'The expected ground truth response to compare against.',
+          }),
+        }),
+        required: ['expected'],
+      }),
     });
   });
 });

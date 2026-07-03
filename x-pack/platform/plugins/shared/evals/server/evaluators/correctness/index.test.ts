@@ -96,7 +96,7 @@ describe('correctness evaluator', () => {
     ]);
   });
 
-  it('throws when referenceData.expected is missing', async () => {
+  it('throws when inferenceClient is not provided', async () => {
     const logger = loggingSystemMock.createLogger();
     const { esClient } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
@@ -104,26 +104,38 @@ describe('correctness evaluator', () => {
     await expect(
       correctnessEvaluator.evaluate({
         trace: traceAccessor,
-        referenceData: {},
-        inferenceClient: { prompt: jest.fn() } as unknown as BoundInferenceClient,
+        referenceData: { expected: 'Payment service is healthy.' },
         log: logger,
       })
-    ).rejects.toThrow('reference_data.expected is required for correctness evaluator');
+    ).rejects.toThrow('Inference client is required for correctness evaluator');
   });
 
-  it('throws when referenceData.expected is an empty string', async () => {
-    const logger = loggingSystemMock.createLogger();
-    const { esClient } = createEsClient();
-    const traceAccessor = createTraceAccessor({ traceId, esClient });
+  describe('referenceDataSchema', () => {
+    const { referenceDataSchema } = correctnessEvaluator;
 
-    await expect(
-      correctnessEvaluator.evaluate({
-        trace: traceAccessor,
-        referenceData: { expected: '   ' },
-        inferenceClient: { prompt: jest.fn() } as unknown as BoundInferenceClient,
-        log: logger,
-      })
-    ).rejects.toThrow('reference_data.expected is required for correctness evaluator');
+    it('accepts a valid expected string', () => {
+      const result = referenceDataSchema!.safeParse({ expected: 'some expected output' });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects missing expected field', () => {
+      const result = referenceDataSchema!.safeParse({});
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects empty or whitespace-only expected', () => {
+      expect(referenceDataSchema!.safeParse({ expected: '' }).success).toBe(false);
+      expect(referenceDataSchema!.safeParse({ expected: '   ' }).success).toBe(false);
+    });
+
+    it('strips extra fields from the payload', () => {
+      const result = referenceDataSchema!.safeParse({
+        expected: 'answer',
+        unrelated: 'extra field',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({ expected: 'answer' });
+    });
   });
 
   it('registers correctness in the evaluator registry', () => {

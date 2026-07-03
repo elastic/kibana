@@ -13,6 +13,7 @@ import { API_VERSIONS, EVALS_EVALUATE_URL } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
 import { awaitTraceReady } from '../../evaluators/trace_readiness';
@@ -250,13 +251,9 @@ describe('POST /internal/evals/_evaluate', () => {
   it('returns 400 when required reference_data fields are missing', async () => {
     const correctness: EvaluatorDefinition = {
       ...buildEvaluator({ name: 'correctness', kind: 'llm' }),
-      referenceDataSchema: {
-        expected: {
-          type: 'string',
-          required: true,
-          description: 'The expected ground truth response to compare against.',
-        },
-      },
+      referenceDataSchema: z.object({
+        expected: z.string().trim().min(1),
+      }),
     };
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([correctness]),
@@ -279,9 +276,55 @@ describe('POST /internal/evals/_evaluate', () => {
     );
 
     expect(response.status).toBe(400);
-    expect(response.payload).toEqual({
-      message: 'reference_data.expected is required for evaluator "correctness"',
+    expect(response.payload.message).toContain(
+      'Invalid reference_data for evaluator "correctness"'
+    );
+  });
+
+  it('validates combined reference_data for multiple evaluators with disjoint schemas', async () => {
+    const evaluatorA: EvaluatorDefinition = {
+      ...buildEvaluator({ name: 'evaluator_a', kind: 'llm' }),
+      referenceDataSchema: z.object({ expected: z.string().min(1) }),
+    };
+    const evaluatorB: EvaluatorDefinition = {
+      ...buildEvaluator({ name: 'evaluator_b', kind: 'llm' }),
+      referenceDataSchema: z.object({ context: z.string().min(1) }),
+    };
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([evaluatorA, evaluatorB]),
+      inferenceStart: {
+        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+      } as unknown as InferenceServerStart,
     });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: {
+            traces: [
+              {
+                trace_id: '0af7651916cd43dd8448eb211c80319c',
+                reference_data: { expected: 'answer', context: 'some context' },
+              },
+            ],
+          },
+          evaluators: [
+            { name: 'evaluator_a', connector_id: 'connector-1' },
+            { name: 'evaluator_b', connector_id: 'connector-1' },
+          ],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(evaluatorA.evaluate).toHaveBeenCalledWith(
+      expect.objectContaining({ referenceData: { expected: 'answer' } })
+    );
+    expect(evaluatorB.evaluate).toHaveBeenCalledWith(
+      expect.objectContaining({ referenceData: { context: 'some context' } })
+    );
   });
 
   it('returns 400 for multi-turn mode', async () => {
