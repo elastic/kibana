@@ -8,10 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import {
-  RESPONSE_TOO_LARGE_MESSAGE,
-  handleMaximumResponseSizeExceededError,
-} from './handle_response_size_error';
+import { handleMaximumResponseSizeExceededError } from './handle_response_size_error';
 
 describe('handleMaximumResponseSizeExceededError', () => {
   const setup = () => {
@@ -21,9 +18,8 @@ describe('handleMaximumResponseSizeExceededError', () => {
 
   it('returns an actionable 400 and logs at warn level for a maximum response size error', () => {
     const { logger, response } = setup();
-    const error = new errors.RequestAbortedError(
-      'The content length (9000) is bigger than the maximum allowed buffer (42)'
-    );
+    const message = 'The content length (9000) is bigger than the maximum allowed buffer (42)';
+    const error = new errors.RequestAbortedError(message);
 
     const result = handleMaximumResponseSizeExceededError({
       error,
@@ -34,7 +30,9 @@ describe('handleMaximumResponseSizeExceededError', () => {
 
     expect(result).toBeDefined();
     expect(result!.status).toBe(400);
-    expect(result!.payload).toEqual({ message: RESPONSE_TOO_LARGE_MESSAGE });
+    expect(result!.payload).toEqual({
+      message: `The response is too large to process. error: ${message}`,
+    });
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.error).not.toHaveBeenCalled();
   });

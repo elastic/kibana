@@ -19,7 +19,6 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 const MAX_SCORES_PER_EXPERIMENT = 10_000;
 
@@ -154,14 +153,6 @@ export const registerCompareExperimentsRoute = ({ router, logger }: RouteDepende
             },
           });
         } catch (error) {
-          const tooLarge = handleMaximumResponseSizeExceededError({
-            error,
-            response,
-            logger,
-            context: 'Compare evaluation experiments',
-          });
-          if (tooLarge) return tooLarge;
-
           logger.error(
             `Failed to compare evaluation experiments: ${
               error instanceof Error ? error.message : String(error)

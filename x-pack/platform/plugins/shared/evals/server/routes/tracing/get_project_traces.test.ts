@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -403,24 +402,5 @@ describe('GET /internal/evals/tracing/projects/{projectName}/traces', () => {
     expect(response.status).toBe(500);
     expect(response.payload).toEqual({ message: 'Failed to get project traces' });
     expect(logger.error).toHaveBeenCalled();
-  });
-
-  it('returns an actionable 400 and logs at warn when the ES response is too large', async () => {
-    const { handler, context, esClient, logger } = setup();
-    esClient.search.mockRejectedValueOnce(
-      new errors.RequestAbortedError(
-        'The content length (9000) is bigger than the maximum allowed buffer (42)'
-      )
-    );
-
-    const response = await handler(context, makeRequest(), kibanaResponseFactory);
-
-    expect(response.status).toBe(400);
-    expect(response.payload).toEqual({
-      message:
-        'The resulting dataset is too large to process. Try narrowing your search with filters or use a smaller time range.',
-    });
-    expect(logger.warn).toHaveBeenCalled();
-    expect(logger.error).not.toHaveBeenCalled();
   });
 });

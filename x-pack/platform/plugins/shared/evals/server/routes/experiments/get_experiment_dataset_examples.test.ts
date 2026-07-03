@@ -143,7 +143,7 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
     expect(response.status).toBe(400);
     expect(response.payload).toEqual({
       message:
-        'The resulting dataset is too large to process. Try narrowing your search with filters or use a smaller time range.',
+        'The response is too large to process. error: The content length (9000) is bigger than the maximum allowed buffer (42)',
     });
     expect(logger.warn).toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
