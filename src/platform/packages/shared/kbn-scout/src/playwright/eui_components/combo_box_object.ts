@@ -74,21 +74,22 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
   }
 
   /**
-   * Type `value` to filter the options, then select the first match by keyboard.
+   * Type `value` to filter the options, then select the matching one.
    *
    * Use this for the many Kibana combo boxes whose option list is **filterable,
    * virtualized, or backed by a suggestions API** — the option is not rendered
    * in the DOM until the search term is typed, so the base
    * {@link setSelectedOptions} (which never types) times out looking for it.
    *
-   * Selection is keyboard-based (`ArrowDown` + `Enter`) on purpose: while the
-   * input has a search value EUI middle-truncates the rendered option text
-   * (`EuiTextTruncate`, e.g. `by…es`) and drops the option `title`, so the
-   * option's text / title / accessible name are all unreliable to match on.
-   * Keyboard selection of the highlighted match sidesteps that entirely (this is
-   * how the pre-helper combo-box utilities selected filtered options). If `create`
-   * is set and no option renders within `timeout`, the typed value is committed
-   * via `onCreateOption` (Enter).
+   * Selection matches the option by its **accessible name**. While filtering, EUI
+   * middle-truncates the visible option text (`EuiTextTruncate`, e.g. `by…es`) and
+   * drops the option `title`, but the accessible name keeps the full label — so
+   * `getByRole('option', { name })` resolves reliably where a text/title match
+   * would not. Because it is a poll, it also waits out async / server-side
+   * filtering (it only passes once the real match renders, never a stale
+   * pre-filter suggestion). A single match is clicked; a keyboard fallback
+   * (`ArrowDown` + `Enter`) handles duplicate labels. When `create` is set, the
+   * typed value is committed directly via `onCreateOption` (Enter).
    */
   async searchAndSelect(
     value: string,
