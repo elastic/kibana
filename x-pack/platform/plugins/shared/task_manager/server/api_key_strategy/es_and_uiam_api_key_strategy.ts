@@ -105,7 +105,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
         taskInstances,
         request,
         user,
-        apiKeyCreatedByUser
+        apiKeyCreatedByUser,
+        isUiamRequest
       );
 
       const uiamOnlyResult = new Map<string, ApiKeySOFields>();
@@ -132,7 +133,13 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     const uiamKeys =
       opts?.onEsKey === true
         ? new Map<string, UiamApiKeyResult>()
-        : await this.grantUiamApiKeys(taskInstances, request, user, apiKeyCreatedByUser);
+        : await this.grantUiamApiKeys(
+            taskInstances,
+            request,
+            user,
+            apiKeyCreatedByUser,
+            isUiamRequest
+          );
 
     const result = new Map<string, ApiKeySOFields>();
     taskInstances.forEach((task) => {
@@ -154,7 +161,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     taskInstances: TaskInstance[],
     request: KibanaRequest,
     user: AuthenticatedUser | null,
-    apiKeyCreatedByUser: boolean
+    apiKeyCreatedByUser: boolean,
+    isUiamRequest: boolean
   ): Promise<Map<string, UiamApiKeyResult>> {
     const uiam = this.security.authc.apiKeys.uiam;
     const uiamKeyByTaskIdMap = new Map<string, UiamApiKeyResult>();
@@ -176,8 +184,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       return uiamKeyByTaskIdMap;
     }
 
-    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-    if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
+    if (!isUiamRequest) {
       this.logger.debug(
         'Request credential is not UIAM-compatible, skipping UIAM API key grant. Only ES API keys will be used.',
         { tags: UIAM_LOGS_CREDENTIALS_TAGS }
