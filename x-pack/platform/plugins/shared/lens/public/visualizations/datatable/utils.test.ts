@@ -8,6 +8,8 @@
 import type { CellDecorationFillConfig } from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import {
+  type CustomPaletteParams,
+  type PaletteOutput,
   getDefaultFillConfig,
   isPaletteFillMode,
   getProgressBarDomain,
@@ -19,9 +21,9 @@ import {
 
 describe('datatable progress bar utils', () => {
   describe('getDefaultFillConfig', () => {
-    it('defaults to a single fill with auto range and the progress default color', () => {
+    it('defaults to a gradient fill with auto range and the progress default color', () => {
       expect(getDefaultFillConfig('progress')).toEqual({
-        fillMode: 'single',
+        fillMode: 'gradient',
         color: DEFAULT_PROGRESS_BAR_COLOR,
         valueRange: { mode: 'auto' },
       });
@@ -208,7 +210,28 @@ describe('datatable progress bar utils', () => {
 
     it('zips parallel colors/stops into domain-valued stops', () => {
       expect(
-        getProgressBarPaletteStops(paletteService, { min: 0, max: 100 }, ['#aaa', '#bbb'], [0, 50])
+        getProgressBarPaletteStops(
+          paletteService,
+          { min: 0, max: 100 },
+          undefined,
+          ['#aaa', '#bbb'],
+          [0, 50]
+        )
+      ).toEqual([
+        { color: '#aaa', stop: 0 },
+        { color: '#bbb', stop: 50 },
+      ]);
+    });
+
+    it('accepts object-backed stops from the editor palette state', () => {
+      expect(
+        getProgressBarPaletteStops(
+          paletteService,
+          { min: 0, max: 100 },
+          undefined,
+          ['#aaa', '#bbb'],
+          [{ stop: 0 }, { stop: 50 }]
+        )
       ).toEqual([
         { color: '#aaa', stop: 0 },
         { color: '#bbb', stop: 50 },
@@ -222,6 +245,7 @@ describe('datatable progress bar utils', () => {
       const stops = getProgressBarPaletteStops(
         paletteService,
         { min: 0, max: 100 },
+        undefined,
         ['#111', '#222', '#333', '#444'],
         []
       );
@@ -235,12 +259,38 @@ describe('datatable progress bar utils', () => {
 
     it('honors a single serialized color as a flat fill anchored at min', () => {
       expect(
-        getProgressBarPaletteStops(paletteService, { min: -20, max: 50 }, ['#abcdef'], [])
+        getProgressBarPaletteStops(
+          paletteService,
+          { min: -20, max: 50 },
+          undefined,
+          ['#abcdef'],
+          []
+        )
       ).toEqual([{ color: '#abcdef', stop: -20 }]);
     });
 
+    it('spreads named palette colors across the selected progress-bar bounds', () => {
+      const bounds = { min: 70, max: 90 };
+      const palette: PaletteOutput<CustomPaletteParams> = { type: 'palette', name: 'status' };
+      const stops = getProgressBarPaletteStops(paletteService, bounds, palette, [], []);
+      const expectedStep = (bounds.max - bounds.min) / stops.length;
+
+      expect(stops.length).toBeGreaterThan(0);
+      stops.forEach((stop, index) => {
+        expect(typeof stop.color).toBe('string');
+        expect(stop.color.length).toBeGreaterThan(0);
+        expect(stop.stop).toBe(bounds.min + expectedStep * index);
+      });
+    });
+
     it('recomputes the default palette only when no colors are serialized', () => {
-      const stops = getProgressBarPaletteStops(paletteService, { min: 0, max: 100 }, [], []);
+      const stops = getProgressBarPaletteStops(
+        paletteService,
+        { min: 0, max: 100 },
+        undefined,
+        [],
+        []
+      );
       expect(stops.length).toBeGreaterThan(0);
       stops.forEach((s) => {
         expect(typeof s.color).toBe('string');
@@ -288,8 +338,11 @@ describe('datatable progress bar utils', () => {
         { min: -30, max: 27 }
       );
       expect(range).toEqual({ mode: 'custom', min: -30, max: 27 });
-      expect(Number.isFinite(range.min as number)).toBe(true);
-      expect(Number.isFinite(range.max as number)).toBe(true);
+      if (range.mode !== 'custom') {
+        throw new Error('Expected a custom range');
+      }
+      expect(Number.isFinite(range.min)).toBe(true);
+      expect(Number.isFinite(range.max)).toBe(true);
     });
   });
 });

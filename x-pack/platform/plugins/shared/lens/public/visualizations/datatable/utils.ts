@@ -140,6 +140,20 @@ export function getColorDefaults({
   return { palette, colorMapping: undefined };
 }
 
+/**
+ * Progress bars default to the same palette family the user currently gets when
+ * manually switching a numeric color mapping to `Status`. We seed only the
+ * palette name here and let the shared coloring helpers derive the rest from
+ * the live data bounds, preserving the existing default step count and stop
+ * distribution for that manual path.
+ */
+export function getDefaultProgressPalette(): PaletteOutput<CustomPaletteParams> {
+  return {
+    type: 'palette',
+    name: 'status',
+  };
+}
+
 // Per-decoration defaults live in the cell-decoration capability registry; these
 // re-exports keep the existing `../utils` import surface stable for consumers.
 export { DEFAULT_PROGRESS_BAR_COLOR, getDecorationDefaultColor } from './cell_decoration';
@@ -253,17 +267,21 @@ export function getProgressBarDomain(
  * 1. `colors` + matching `stops` → zip them directly (custom palette).
  * 2. `colors` only → distribute those colors evenly across the data bounds, so
  *    the user's chosen palette is honored rather than discarded.
- * 3. nothing usable → recompute the default by-value palette from the service.
+ * 3. named `palette` only → resolve that palette's colors from the service and
+ *    spread them across the selected progress-bar bounds.
+ * 4. nothing usable → fall back to the default progress palette colors.
  */
 export function getProgressBarPaletteStops(
   paletteService: PaletteRegistry,
   dataBounds: DataBounds,
+  palette?: PaletteOutput<CustomPaletteParams>,
   colors?: string[],
-  stops?: number[]
+  stops?: Array<number | Pick<ColorStop, 'stop'>>
 ): Array<{ color: string; stop: number }> {
   if (colors?.length && stops?.length) {
     return colors.reduce<Array<{ color: string; stop: number }>>((acc, color, index) => {
-      const stop = stops[index];
+      const rawStop = stops[index];
+      const stop = typeof rawStop === 'number' ? rawStop : rawStop?.stop;
       if (stop != null) acc.push({ color, stop });
       return acc;
     }, []);
@@ -276,9 +294,16 @@ export function getProgressBarPaletteStops(
     return distributeColorsAcrossDomain(colors, dataBounds);
   }
 
-  // No usable serialized colors: recompute domain-valued stops from the default.
-  const defaultPalette = getColorByValuePalette(paletteService, dataBounds);
-  return defaultPalette.params?.stops ?? [];
+  const resolvedPaletteColors = resolveProgressBarPaletteColors(paletteService, palette);
+  if (resolvedPaletteColors?.length) {
+    return distributeColorsAcrossDomain(resolvedPaletteColors, dataBounds);
+  }
+
+  const fallbackColors = resolveProgressBarPaletteColors(
+    paletteService,
+    getDefaultProgressPalette()
+  );
+  return fallbackColors ? distributeColorsAcrossDomain(fallbackColors, dataBounds) : [];
 }
 
 /**
@@ -296,6 +321,30 @@ function distributeColorsAcrossDomain(
   const span = max - min;
   const step = span / colors.length;
   return colors.map((color, index) => ({ color, stop: min + step * index }));
+}
+
+function resolveProgressBarPaletteColors(
+  paletteService: PaletteRegistry,
+  palette?: PaletteOutput<CustomPaletteParams>
+): string[] | undefined {
+  if (!palette || palette.name === CUSTOM_PALETTE) {
+    return undefined;
+  }
+
+  const colorCount =
+    palette.params?.stops?.length ?? palette.params?.steps ?? defaultPaletteParams.steps;
+
+  return getColorByValuePalette(
+    paletteService,
+    { min: 0, max: 100 },
+    {
+      ...palette,
+      params: {
+        ...palette.params,
+        steps: colorCount,
+      },
+    }
+  ).params?.stops?.map(({ color }) => color);
 }
 
 /**

@@ -32,6 +32,7 @@ import {
   getColumnAlignment,
   getDataBoundsForAccessor,
   getColorByValuePalette,
+  getDefaultProgressPalette,
   getDefaultFillConfig,
 } from '../utils';
 import {
@@ -111,21 +112,39 @@ export type TableDimensionEditorProps =
 
 export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const { frame, accessor, isInlineEditing, isDarkMode, formatFactory } = props;
-  const column = props.state.columns.find(({ columnId }) => accessor === columnId);
+  const flushState = useCallback(
+    (nextState: DatatableVisualizationState) => {
+      props.setState(nextState);
+    },
+    [props]
+  );
   const { inputValue: localState, handleInputChange: setLocalState } =
     useDebouncedValue<DatatableVisualizationState>({
       value: props.state,
-      onChange: props.setState,
+      onChange: flushState,
     });
+  const column = localState.columns.find(({ columnId }) => accessor === columnId);
 
   const updateColumnState = useCallback(
-    (columnId: string, newColumn: Partial<ColumnType>) => {
-      setLocalState({
+    (
+      columnId: string,
+      newColumn: Partial<ColumnType>,
+      options: {
+        flush?: boolean;
+      } = {}
+    ) => {
+      const nextState = {
         ...localState,
         columns: updateColumn(localState, columnId, newColumn),
-      });
+      };
+
+      setLocalState(nextState);
+
+      if (options.flush) {
+        flushState(nextState);
+      }
     },
-    [setLocalState, localState]
+    [setLocalState, localState, flushState]
   );
 
   if (!column) return null;
@@ -257,7 +276,8 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                     }
                   } else {
                     if (!column?.palette) {
-                      params.palette = activePalette;
+                      params.palette =
+                        newMode === 'progress' ? getDefaultProgressPalette() : activePalette;
                     }
                   }
                 }
@@ -305,7 +325,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 panelRef={props.panelRef}
                 isInlineEditing={isInlineEditing}
                 formatter={formatter}
-                onUpdate={(newColumn) => updateColumnState(accessor, newColumn)}
+                onUpdate={(newColumn) => updateColumnState(accessor, newColumn, { flush: true })}
               />
             ) : showColorByTerms ? (
               <ColorMappingByTerms
@@ -364,22 +384,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
             data-test-subj="lns-table-column-hidden"
             checked={Boolean(column?.hidden)}
             disabled={!column.hidden && visibleColumnsCount <= 1}
-            onChange={() => {
-              const newState = {
-                ...localState,
-                columns: localState.columns.map((currentColumn) => {
-                  if (currentColumn.columnId === accessor) {
-                    return {
-                      ...currentColumn,
-                      hidden: !column.hidden,
-                    };
-                  } else {
-                    return currentColumn;
-                  }
-                }),
-              };
-              setLocalState(newState);
-            }}
+            onChange={() => updateColumnState(accessor, { hidden: !column.hidden })}
           />
         </EuiFormRow>
       )}
@@ -400,22 +405,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
             data-test-subj="lns-table-column-one-click-filter"
             checked={Boolean(column?.oneClickFilter)}
             disabled={column.hidden}
-            onChange={() => {
-              const newState = {
-                ...localState,
-                columns: localState.columns.map((currentColumn) => {
-                  if (currentColumn.columnId === accessor) {
-                    return {
-                      ...currentColumn,
-                      oneClickFilter: !column.oneClickFilter,
-                    };
-                  } else {
-                    return currentColumn;
-                  }
-                }),
-              };
-              setLocalState(newState);
-            }}
+            onChange={() => updateColumnState(accessor, { oneClickFilter: !column.oneClickFilter })}
           />
         </EuiFormRow>
       )}

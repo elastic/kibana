@@ -123,7 +123,7 @@ export const CELL_DECORATION_CAPABILITIES: Record<
     supportedAlignments: ['left', 'right'],
     defaultAlignment: 'right',
     defaultColor: DEFAULT_PROGRESS_BAR_COLOR,
-    defaultFillMode: 'single',
+    defaultFillMode: 'gradient',
   },
 };
 

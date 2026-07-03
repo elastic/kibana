@@ -15,6 +15,7 @@ import type { ThemeServiceStart } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import {
   CUSTOM_PALETTE,
+  DEFAULT_COLOR_STEPS,
   DEFAULT_COLOR_MAPPING_CONFIG,
   getFallbackDataBounds,
   getOverridePaletteStops,
@@ -673,10 +674,30 @@ export const getDatatableVisualization = ({
             column.columnId
           );
           const stops = getOverridePaletteStops(paletteService, column.palette);
+          const serializedPaletteColorCount =
+            stops?.length ??
+            column.palette?.params?.stops?.length ??
+            column.palette?.params?.steps ??
+            DEFAULT_COLOR_STEPS;
+          const serializedPaletteColors =
+            stops?.map(({ color }) => color) ??
+            (!isBucketable && column.palette && column.palette.name !== CUSTOM_PALETTE
+              ? getColorByValuePalette(
+                  paletteService,
+                  { min: 0, max: 100 },
+                  {
+                    ...column.palette,
+                    params: {
+                      ...column.palette.params,
+                      steps: serializedPaletteColorCount,
+                    },
+                  }
+                ).params?.stops?.map(({ color }) => color)
+              : undefined);
           const paletteParams = {
             ...column.palette?.params,
             // rewrite colors and stops as two distinct arguments
-            colors: stops?.map(({ color }) => color),
+            colors: serializedPaletteColors,
             stops:
               column.palette?.params?.name === LENS_ROW_HEIGHT_MODE.custom
                 ? stops?.map(({ stop }) => stop)

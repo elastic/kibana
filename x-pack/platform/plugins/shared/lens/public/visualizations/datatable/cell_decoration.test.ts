@@ -99,7 +99,7 @@ describe('cell decoration capabilities', () => {
     it('seeds the progress default color from the registry', () => {
       expect(getDecorationDefaultColor('progress')).toBe(DEFAULT_PROGRESS_BAR_COLOR);
       expect(CELL_DECORATION_CAPABILITIES.progress.defaultColor).toBe(DEFAULT_PROGRESS_BAR_COLOR);
-      expect(CELL_DECORATION_CAPABILITIES.progress.defaultFillMode).toBe('single');
+      expect(CELL_DECORATION_CAPABILITIES.progress.defaultFillMode).toBe('gradient');
       expect(CELL_DECORATION_CAPABILITIES.progress.defaultAlignment).toBe('right');
     });
 

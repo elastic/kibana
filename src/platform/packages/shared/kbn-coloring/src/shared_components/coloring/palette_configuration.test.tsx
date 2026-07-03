@@ -155,6 +155,47 @@ describe('palette panel', () => {
         }),
       });
     });
+
+    it('persists palette-name changes immediately before the debounce window elapses', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      act(() => {
+        changePaletteIn(instance, 'negative');
+      });
+
+      expect(props.setPalette).toHaveBeenCalledWith({
+        type: 'palette',
+        name: 'negative',
+        params: expect.objectContaining({
+          name: 'negative',
+          reverse: false,
+        }),
+      });
+    });
+
+    it('allows switching back to the original palette before debounced props catch up', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      act(() => {
+        changePaletteIn(instance, 'negative');
+      });
+      instance.update();
+      act(() => {
+        changePaletteIn(instance, 'positive');
+      });
+      instance.update();
+
+      jest.advanceTimersByTime(250);
+
+      expect(props.setPalette).toHaveBeenLastCalledWith({
+        type: 'palette',
+        name: 'positive',
+        params: expect.objectContaining({
+          name: 'positive',
+          reverse: false,
+        }),
+      });
+    });
   });
 
   describe('percentage / number modes', () => {

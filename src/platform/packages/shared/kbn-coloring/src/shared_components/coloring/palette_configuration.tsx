@@ -22,7 +22,7 @@ import type {
 } from '../../palettes';
 import { getFallbackDataBounds } from '../../palettes';
 
-import { toColorRanges } from './utils';
+import { changeColorPalette, toColorRanges } from './utils';
 import { ColorRanges, ColorRangesContext } from './color_ranges';
 import { allRangesValid } from './color_ranges/color_ranges_validation';
 import { paletteConfigurationReducer } from './palette_configuration_reducer';
@@ -99,12 +99,20 @@ export const CustomizablePalette = ({
           palettes={palettes}
           activePalette={localState.activePalette}
           setPalette={(newPalette) => {
-            const isPaletteChanged = newPalette.name !== activePalette.name;
+            const isPaletteChanged = newPalette.name !== localState.activePalette.name;
             if (isPaletteChanged) {
+              const resolvedPalette = changeColorPalette(
+                newPalette,
+                localState.activePalette,
+                palettes,
+                dataBounds,
+                disableSwitchingContinuity
+              );
               dispatch({
                 type: 'changeColorPalette',
                 payload: { palette: newPalette, dataBounds, palettes, disableSwitchingContinuity },
               });
+              setPalette(resolvedPalette);
             }
           }}
           showCustomPalette

@@ -467,7 +467,8 @@ describe('data table dimension editor', () => {
             expect.objectContaining({
               colorMode: 'progress',
               alignment: 'right',
-              fillStyle: expect.objectContaining({ fillMode: 'single' }),
+              fillStyle: expect.objectContaining({ fillMode: 'gradient' }),
+              palette: expect.objectContaining({ type: 'palette', name: 'status' }),
             }),
           ],
         })
@@ -529,19 +530,19 @@ describe('data table dimension editor', () => {
       });
     });
 
-    it('gives the custom range slider headroom below the current min so it can be pulled down', () => {
+    it('anchors a positive-only custom range slider at zero and a nice upper bound', () => {
       mockFirstColumn({ dataType: 'number' });
+      frame.activeData!.first.rows = [{ foo: 70 }, { foo: 80 }, { foo: 90 }];
       state.columns[0].colorMode = 'progress';
       state.columns[0].fillStyle = {
         fillMode: 'single',
-        valueRange: { mode: 'custom', min: 0, max: 10 },
+        valueRange: { mode: 'custom', min: 0, max: 90 },
       };
       renderTableDimensionEditor();
 
-      // The number inputs carry the slider bounds; the lower bound must extend
-      // below the current min (0) so a custom min below 0 is selectable.
-      const [minInput] = screen.getAllByRole('spinbutton');
-      expect(Number(minInput.getAttribute('min'))).toBeLessThan(0);
+      const [minInput, maxInput] = screen.getAllByRole('spinbutton');
+      expect(Number(minInput.getAttribute('min'))).toBe(0);
+      expect(Number(maxInput.getAttribute('max'))).toBe(100);
     });
 
     it('renders a finite custom range slider for a solid fill with open-ended palette bounds', () => {
@@ -618,6 +619,34 @@ describe('data table dimension editor', () => {
             expect.objectContaining({
               fillStyle: expect.objectContaining({
                 valueRange: { mode: 'custom', min: -5, max: 25 },
+              }),
+            }),
+          ],
+        })
+      );
+    });
+
+    it('seeds Auto -> Custom from the visible auto domain for positive-only data', async () => {
+      mockFirstColumn({ dataType: 'number' });
+      frame.activeData!.first.rows = [{ foo: 70 }, { foo: 80 }, { foo: 90 }];
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].fillStyle = {
+        fillMode: 'single',
+        valueRange: { mode: 'auto' },
+      };
+      renderTableDimensionEditor();
+
+      await act(async () =>
+        screen.getByTestId('lnsDatatable_progressBar_valueRange_custom').click()
+      );
+      await act(async () => jest.advanceTimersByTime(256));
+
+      expect(props.setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: [
+            expect.objectContaining({
+              fillStyle: expect.objectContaining({
+                valueRange: { mode: 'custom', min: 0, max: 90 },
               }),
             }),
           ],

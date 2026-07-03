@@ -20,6 +20,7 @@ import type { DataContextType } from './types';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import {
   getProgressBarDomain,
+  getDecorationCustomRange,
   getProgressBarPaletteStops,
   DEFAULT_PROGRESS_BAR_COLOR,
 } from '../utils';
@@ -117,11 +118,23 @@ export const createGridCell = (
       }
       const dataBounds = minMaxByColumnId?.get(getOriginalId(columnId)) ?? getFallbackDataBounds();
       const { min, max } = getProgressBarDomain({ fillStyle, palette }, dataBounds);
+      const paletteRange = getDecorationCustomRange({ fillStyle, palette }, dataBounds);
+      const paletteDomain = {
+        min:
+          typeof paletteRange.min === 'number' && Number.isFinite(paletteRange.min)
+            ? paletteRange.min
+            : dataBounds.min,
+        max:
+          typeof paletteRange.max === 'number' && Number.isFinite(paletteRange.max)
+            ? paletteRange.max
+            : dataBounds.max,
+      };
       // Recompute default-palette stops when the serialized palette omits them,
       // so solid/gradient bars are colored rather than falling back to a flat color.
       const paletteStops = getProgressBarPaletteStops(
         paletteService,
-        dataBounds,
+        paletteDomain,
+        palette,
         palette?.params?.colors,
         palette?.params?.stops
       );
