@@ -224,10 +224,7 @@ const DEFAULT_DOCKER_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.enabled', 'false'],
 
-  [
-    'ES_JAVA_OPTS',
-    '-Xms1536m -Xmx1536m -Des.datafeed_cross_project_feature_flag_enabled=true -Des.ml_cross_project_feature_flag_enabled=true',
-  ],
+  ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
 ];
 
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
@@ -323,10 +320,7 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
   ['xpack.security.remote_cluster_server.ssl.verification_mode', 'certificate'],
   ['xpack.security.remote_cluster_server.ssl.client_authentication', 'required'],
 
-  [
-    'ES_JAVA_OPTS',
-    '-Xms1g -Xmx1g -Des.datafeed_cross_project_feature_flag_enabled=true -Des.ml_cross_project_feature_flag_enabled=true',
-  ],
+  ['ES_JAVA_OPTS', '-Xms1g -Xmx1g'],
 ];
 
 const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
@@ -377,10 +371,7 @@ export function getServerlessNodes(
       esArgs: [
         ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
         ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
-        [
-          'ES_JAVA_OPTS',
-          '-Xms1536m -Xmx1536m -Des.datafeed_cross_project_feature_flag_enabled=true -Des.ml_cross_project_feature_flag_enabled=true',
-        ],
+        ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
       ],
     },
     {
@@ -1449,10 +1440,7 @@ const DEFAULT_DOCKER_SNAPSHOT_ESARGS: Array<[string, string]> = [
   ['ingest.geoip.downloader.enabled', 'false'],
   ['search.check_ccs_compatibility', 'true'],
 
-  [
-    'ES_JAVA_OPTS',
-    '-Xms1536m -Xmx1536m -Des.datafeed_cross_project_feature_flag_enabled=true -Des.ml_cross_project_feature_flag_enabled=true',
-  ],
+  ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
 ];
 
 /**
