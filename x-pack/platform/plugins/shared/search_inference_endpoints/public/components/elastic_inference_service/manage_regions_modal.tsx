@@ -510,7 +510,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           fill
           onClick={handleSave}
           isDisabled={isBusy || isLoading || totalSelected === 0}
-          isLoading={isSaving || isDeleting}
+          isLoading={isSaving}
           data-test-subj="manageRegionsSaveButton"
         >
           {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.save', {
