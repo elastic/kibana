@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { RiskInputs } from '.';
 import { RISK_INPUTS_TOOL_TEST_ID } from './test_ids';
 
@@ -99,27 +100,30 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   }),
 }));
 
-describe('<RiskInputs />', () => {
+describe('<RiskInputs /> host', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the header with the "Risk score" title and host label', () => {
-    const { getByTestId } = render(<RiskInputs entityName="my-host" onShowHost={jest.fn()} />);
-    const header = getByTestId('mockToolsFlyoutHeader');
-    expect(header).toHaveAttribute('data-title', 'Risk score');
-    expect(header).toHaveAttribute('data-label', 'my-host');
-    expect(header).toHaveAttribute('data-icon-type', 'storage');
+  it('renders with storage icon and host entity type', () => {
+    const { getByTestId } = render(
+      <RiskInputs entityType={EntityType.host} entityName="my-host" />
+    );
+    expect(getByTestId('mockToolsFlyoutHeader')).toHaveAttribute('data-title', 'Risk score');
+    expect(getByTestId('mockToolsFlyoutHeader')).toHaveAttribute('data-label', 'my-host');
+    expect(getByTestId('mockToolsFlyoutHeader')).toHaveAttribute('data-icon-type', 'storage');
   });
 
-  it('renders the risk inputs body container', () => {
-    const { getByTestId } = render(<RiskInputs entityName="my-host" onShowHost={jest.fn()} />);
+  it('renders the host risk inputs body container', () => {
+    const { getByTestId } = render(
+      <RiskInputs entityType={EntityType.host} entityName="my-host" />
+    );
     expect(getByTestId(RISK_INPUTS_TOOL_TEST_ID)).toBeInTheDocument();
   });
 
-  it('passes entity context to the underlying RiskInputsTab', () => {
+  it('passes host entity context to RiskInputsTab', () => {
     const { getByTestId } = render(
-      <RiskInputs entityName="my-host" entityId="euid-123" onShowHost={jest.fn()} />
+      <RiskInputs entityType={EntityType.host} entityName="my-host" entityId="euid-123" />
     );
     const tab = getByTestId('mockRiskInputsTab');
     expect(tab).toHaveAttribute('data-entity-type', 'host');
@@ -127,20 +131,63 @@ describe('<RiskInputs />', () => {
     expect(tab).toHaveAttribute('data-entity-id', 'euid-123');
   });
 
-  it('forwards onShowHost to the header click handler', () => {
-    const onShowHost = jest.fn();
-    const { getByTestId } = render(<RiskInputs entityName="my-host" onShowHost={onShowHost} />);
+  it('forwards onShowEntity to the header click handler for host', () => {
+    const onShowEntity = jest.fn();
+    const { getByTestId } = render(
+      <RiskInputs entityType={EntityType.host} entityName="my-host" onShowEntity={onShowEntity} />
+    );
     getByTestId('mockToolsFlyoutHeader').click();
-    expect(onShowHost).toHaveBeenCalledTimes(1);
+    expect(onShowEntity).toHaveBeenCalledTimes(1);
   });
 
   it('opens a child system flyout when a risk-input alert is expanded', () => {
-    const { getByTestId } = render(<RiskInputs entityName="my-host" onShowHost={jest.fn()} />);
+    const { getByTestId } = render(
+      <RiskInputs entityType={EntityType.host} entityName="my-host" />
+    );
     getByTestId('mockRiskInputsTab').click();
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ session: 'inherit' })
     );
+  });
+});
+
+describe('<RiskInputs /> user', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders with user icon and user entity type', () => {
+    const { getByTestId } = render(
+      <RiskInputs entityType={EntityType.user} entityName="my-user" />
+    );
+    expect(getByTestId('mockToolsFlyoutHeader')).toHaveAttribute('data-icon-type', 'user');
+  });
+
+  it('renders the user risk inputs body container', () => {
+    const { getByTestId } = render(
+      <RiskInputs entityType={EntityType.user} entityName="my-user" />
+    );
+    expect(getByTestId(RISK_INPUTS_TOOL_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('passes user entity context to RiskInputsTab', () => {
+    const { getByTestId } = render(
+      <RiskInputs entityType={EntityType.user} entityName="my-user" entityId="euid-456" />
+    );
+    const tab = getByTestId('mockRiskInputsTab');
+    expect(tab).toHaveAttribute('data-entity-type', 'user');
+    expect(tab).toHaveAttribute('data-entity-name', 'my-user');
+    expect(tab).toHaveAttribute('data-entity-id', 'euid-456');
+  });
+
+  it('forwards onShowEntity to the header click handler for user', () => {
+    const onShowEntity = jest.fn();
+    const { getByTestId } = render(
+      <RiskInputs entityType={EntityType.user} entityName="my-user" onShowEntity={onShowEntity} />
+    );
+    getByTestId('mockToolsFlyoutHeader').click();
+    expect(onShowEntity).toHaveBeenCalledTimes(1);
   });
 });

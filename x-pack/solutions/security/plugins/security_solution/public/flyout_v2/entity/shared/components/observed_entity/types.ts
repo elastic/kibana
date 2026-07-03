@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BasicEntityData } from '../entity_table/types';
+import type { BasicEntityData } from '../../../../../flyout/entity_details/shared/components/entity_table/types';
 import type { AnomalyTableProviderChildrenProps } from '../../../../../common/components/ml/anomaly/anomaly_table_provider';
 
 export interface FirstLastSeenData {
