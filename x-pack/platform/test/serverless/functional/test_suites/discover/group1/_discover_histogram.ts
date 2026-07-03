@@ -67,6 +67,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.setTime(time);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
+      // The histogram is a separate Lens embeddable that fetches independently of the
+      // document table, so `waitUntilSearchingHasFinished()` can return while the chart
+      // canvas is still rendering. Wait for the render-complete signal before callers read
+      // `canvasExists()` to avoid a flaky early read (see #270641).
+      await elasticChart.waitForRenderComplete();
       if (interval) {
         await PageObjects.discover.setChartInterval(interval);
         await PageObjects.header.waitUntilLoadingHasFinished();
