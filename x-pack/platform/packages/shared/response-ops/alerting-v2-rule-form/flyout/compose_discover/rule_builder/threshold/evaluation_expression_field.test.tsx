@@ -59,7 +59,9 @@ describe('EvaluationExpressionField', () => {
     const input = screen.getByTestId('ruleBuilderEvalExpression-0') as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: 'c', selectionStart: 1, selectionEnd: 1 } });
-    fireEvent.click(await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count'));
+    fireEvent.click(
+      await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
+    );
 
     expect(input.value).toBe('count');
   });

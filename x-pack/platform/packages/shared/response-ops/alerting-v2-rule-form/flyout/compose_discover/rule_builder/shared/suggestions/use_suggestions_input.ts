@@ -163,7 +163,9 @@ export const useSuggestionsInput = ({
           return;
         case 'ArrowUp':
           event.preventDefault();
-          setActiveIndex((current) => ((current ?? 0) - 1 + suggestions.length) % suggestions.length);
+          setActiveIndex(
+            (current) => ((current ?? 0) - 1 + suggestions.length) % suggestions.length
+          );
           return;
         case 'Enter':
           if (activeIndex !== null) {
@@ -198,8 +200,7 @@ export const useSuggestionsInput = ({
       'aria-autocomplete': 'list',
       'aria-expanded': isOpen,
       'aria-controls': listId,
-      'aria-activedescendant':
-        activeIndex !== null ? `${listId}-option-${activeIndex}` : undefined,
+      'aria-activedescendant': activeIndex !== null ? `${listId}-option-${activeIndex}` : undefined,
     },
     dropdownProps: {
       isOpen,

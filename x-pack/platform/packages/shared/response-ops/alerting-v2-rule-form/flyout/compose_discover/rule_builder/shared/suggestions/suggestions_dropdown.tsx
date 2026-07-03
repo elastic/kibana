@@ -69,9 +69,18 @@ export const SuggestionsDropdown: React.FC<SuggestionsDropdownProps> = ({
             aria-selected={index === activeIndex}
             css={index === activeIndex ? activeOptionStyles : optionStyles}
             data-test-subj={`${testSubjPrefix}-option-${suggestion.text}`}
+            // Virtual focus (aria-activedescendant on the input) drives keyboard navigation, so
+            // these options are intentionally excluded from the tab order (tabIndex={-1}); the
+            // keydown handler exists for completeness in case they're ever reached by script.
+            tabIndex={-1}
             // Selecting a suggestion must not steal focus away from the input being edited.
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => onSelect(suggestion)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                onSelect(suggestion);
+              }
+            }}
             onMouseEnter={() => onMouseEnterIndex(index)}
           >
             <EuiText size="s">{suggestion.text}</EuiText>

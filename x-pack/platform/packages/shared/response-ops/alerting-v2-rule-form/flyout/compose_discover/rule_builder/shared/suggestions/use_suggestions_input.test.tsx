@@ -31,18 +31,24 @@ const TestInput: React.FC<{ initialValue?: string; provider: SuggestionsProvider
     <>
       <input data-test-subj="testInput" ref={inputRef} {...inputProps} />
       {dropdownProps.isOpen && (
-        <ul role="listbox" id={dropdownProps.listId}>
+        <div role="listbox" id={dropdownProps.listId}>
           {dropdownProps.suggestions.map((suggestion, index) => (
-            <li
+            <div
               key={suggestion.text}
               role="option"
               aria-selected={index === dropdownProps.activeIndex}
+              tabIndex={-1}
               onClick={() => dropdownProps.onSelect(suggestion)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  dropdownProps.onSelect(suggestion);
+                }
+              }}
             >
               {suggestion.text}
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </>
   );

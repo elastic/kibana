@@ -20,7 +20,7 @@ describe('SuggestionsDropdown', () => {
   it('renders an option per suggestion when open', () => {
     render(
       <SuggestionsDropdown
-        input={<EuiFieldText value="" onChange={() => {}} />}
+        input={<EuiFieldText value="" onChange={() => {}} compressed />}
         isOpen
         closePopover={() => {}}
         suggestions={suggestions}
@@ -39,7 +39,7 @@ describe('SuggestionsDropdown', () => {
   it('does not render the listbox when there are no suggestions', () => {
     render(
       <SuggestionsDropdown
-        input={<EuiFieldText value="" onChange={() => {}} />}
+        input={<EuiFieldText value="" onChange={() => {}} compressed />}
         isOpen
         closePopover={() => {}}
         suggestions={[]}
@@ -57,7 +57,7 @@ describe('SuggestionsDropdown', () => {
   it('marks the active suggestion as selected', () => {
     render(
       <SuggestionsDropdown
-        input={<EuiFieldText value="" onChange={() => {}} />}
+        input={<EuiFieldText value="" onChange={() => {}} compressed />}
         isOpen
         closePopover={() => {}}
         suggestions={suggestions}
@@ -83,7 +83,7 @@ describe('SuggestionsDropdown', () => {
     const onSelect = jest.fn();
     render(
       <SuggestionsDropdown
-        input={<EuiFieldText value="" onChange={() => {}} />}
+        input={<EuiFieldText value="" onChange={() => {}} compressed />}
         isOpen
         closePopover={() => {}}
         suggestions={suggestions}
