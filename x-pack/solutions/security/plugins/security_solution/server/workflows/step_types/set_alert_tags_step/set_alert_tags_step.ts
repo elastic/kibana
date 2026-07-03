@@ -6,9 +6,9 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { ExecutionError } from '@kbn/workflows/server';
 import { DETECTION_ENGINE_ALERT_TAGS_URL } from '../../../../common/constants';
 import { setAlertTagsStepCommonDefinition } from '../../../../common/workflows/step_types/set_alert_tags_step/set_alert_tags_step_common';
+import { toAlertApiExecutionError } from '../to_alert_api_execution_error';
 
 export const setAlertTagsStepDefinition = createServerStepDefinition({
   ...setAlertTagsStepCommonDefinition,
@@ -24,7 +24,7 @@ export const setAlertTagsStepDefinition = createServerStepDefinition({
     const ids = Array.isArray(alertIds) ? alertIds : [alertIds];
 
     try {
-      const { status: responseStatus, body } = await context.contextManager.callKibanaApi<{
+      await context.contextManager.callKibanaApi<{
         version?: string | number;
         updated?: number;
         failures?: unknown[];
@@ -40,14 +40,6 @@ export const setAlertTagsStepDefinition = createServerStepDefinition({
         },
       });
 
-      if (responseStatus >= 400) {
-        throw new ExecutionError({
-          type: 'ApiError',
-          message: `Failed to set alert tags: HTTP ${responseStatus}`,
-          details: { body },
-        });
-      }
-
       const addedCount = tagsToAdd.length;
       const removedCount = tagsToRemove.length;
       const parts: string[] = [];
@@ -61,14 +53,7 @@ export const setAlertTagsStepDefinition = createServerStepDefinition({
         },
       };
     } catch (error) {
-      if (error instanceof ExecutionError) {
-        throw error;
-      }
-      throw new ExecutionError({
-        type: 'ApiError',
-        message: error instanceof Error ? error.message : 'Unknown error occurred',
-        details: { error },
-      });
+      throw toAlertApiExecutionError(error, 'set alert tags');
     }
   },
 });

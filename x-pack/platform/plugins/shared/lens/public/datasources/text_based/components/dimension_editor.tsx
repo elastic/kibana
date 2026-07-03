@@ -43,6 +43,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     dateRange,
     expressions,
     esqlVariables,
+    isApproximate,
     enableFormatSelector,
   } = props;
 
@@ -58,7 +59,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           Object.values(indexPatterns).length
             ? Object.values(indexPatterns)[0].timeFieldName
             : undefined,
-          esqlVariables
+          esqlVariables,
+          isApproximate
         );
 
         if (table) {
@@ -88,6 +90,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     dateRange.fromDate,
     dateRange.toDate,
     esqlVariables,
+    isApproximate,
     expressions,
     indexPatterns,
     props,
@@ -198,7 +201,17 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           }}
         />
       </EuiFormRow>
-      {props.dataSectionExtra}
+      {props.dataSectionExtra && (
+        <div
+          css={css`
+            &:not(:empty) {
+              padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
+            }
+          `}
+        >
+          {props.dataSectionExtra}
+        </div>
+      )}
       {!isFullscreen && selectedField && (
         <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
           <EuiText
