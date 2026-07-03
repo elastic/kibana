@@ -16,6 +16,7 @@ import {
   ALERT_STATUS_ROUTE,
   ALERT_UUID_PROPERTY,
   PREVIEW_ALERTS_INDEX,
+  ALERT_UUID_MAX_LENGTH,
 } from '../../common/constants';
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 
@@ -40,7 +41,7 @@ export const registerAlertStatusRoute = (
         validate: {
           request: {
             query: schema.object({
-              alertUuid: schema.string(),
+              alertUuid: schema.string({ maxLength: ALERT_UUID_MAX_LENGTH }),
             }),
           },
         },

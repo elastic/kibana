@@ -18,6 +18,10 @@ import {
   PROCESS_ENTITY_ID_PROPERTY,
   PROCESS_EVENTS_PER_PAGE,
   IO_EVENT_FIELDS,
+  INDEX_NAME_MAX_LENGTH,
+  SESSION_ENTITY_ID_MAX_LENGTH,
+  TIMESTAMP_STRING_MAX_LENGTH,
+  CURSOR_STRING_MAX_LENGTH,
 } from '../../common/constants';
 import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
 
@@ -39,10 +43,10 @@ export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              index: schema.string(),
-              sessionEntityId: schema.string(),
-              sessionStartTime: schema.string(),
-              cursor: schema.maybe(schema.string()),
+              index: schema.string({ maxLength: INDEX_NAME_MAX_LENGTH }),
+              sessionEntityId: schema.string({ maxLength: SESSION_ENTITY_ID_MAX_LENGTH }),
+              sessionStartTime: schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH }),
+              cursor: schema.maybe(schema.string({ maxLength: CURSOR_STRING_MAX_LENGTH })),
               pageSize: schema.maybe(schema.number({ min: 1, max: IO_EVENTS_PER_PAGE })), // currently only set in FTR tests to test pagination
             }),
           },

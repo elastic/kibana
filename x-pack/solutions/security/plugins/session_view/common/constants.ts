@@ -71,6 +71,18 @@ export const ALERT_ICONS: { [key: string]: string } = {
 };
 export const DEFAULT_ALERT_FILTER_VALUE = 'all';
 
+// Schema validation ceilings — used in route request schemas to satisfy CodeQL unbounded-string checks
+// Index name: Elasticsearch enforces a 255-byte limit on index names
+export const INDEX_NAME_MAX_LENGTH = 255;
+// Entity/process IDs: UUID-like identifiers stored in ECS entity_id fields, 256 is a comfortable upper bound
+export const SESSION_ENTITY_ID_MAX_LENGTH = 256;
+// Timestamps: ISO 8601 datetime strings are at most ~35 chars; 64 is a generous bound
+export const TIMESTAMP_STRING_MAX_LENGTH = 64;
+// Cursor: search_after cursors are serialised timestamps, same bound as above
+export const CURSOR_STRING_MAX_LENGTH = 64;
+// Alert UUID: standard 36-char UUID format; 256 gives head-room for future formats
+export const ALERT_UUID_MAX_LENGTH = 256;
+
 // a list of fields to pull in ES queries for process_events_route, io_events_route and alerts.
 export const PROCESS_EVENT_FIELDS = [
   '@timestamp',

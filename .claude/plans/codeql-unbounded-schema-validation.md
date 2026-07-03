@@ -34,9 +34,9 @@ in the flagged schemas. This is hardening — PRs are `backport:skip`, `release_
 - [x] Validate (targeted — fast): `node scripts/eslint --fix <changed files>` and `node scripts/type_check --project x-pack/solutions/security/plugins/cloud_security_posture/tsconfig.json`. Run `node scripts/jest` on any co-located `*.test.ts` you touched. Fix all errors before marking done.
 
 ### Task 3: Bound session_view route schemas
-- [ ] Bound the request schemas (params/query/body) in `plugins/session_view/server/routes/process_events_route.ts`, `io_events_route.ts`, `alerts_route.ts`, `get_total_io_bytes_route.ts`, `alert_status_route.ts`
-- [ ] Add a justifying comment for each new ceiling; use named `const`s
-- [ ] Validate (targeted — fast): `node scripts/eslint --fix <changed files>` and `node scripts/type_check --project x-pack/solutions/security/plugins/session_view/tsconfig.json`. Run `node scripts/jest` on any co-located `*.test.ts` you touched. Fix all errors before marking done.
+- [x] Bound the request schemas (params/query/body) in `plugins/session_view/server/routes/process_events_route.ts`, `io_events_route.ts`, `alerts_route.ts`, `get_total_io_bytes_route.ts`, `alert_status_route.ts`
+- [x] Add a justifying comment for each new ceiling; use named `const`s
+- [x] Validate (targeted — fast): `node scripts/eslint --fix <changed files>` and `node scripts/type_check --project x-pack/solutions/security/plugins/session_view/tsconfig.json`. Run `node scripts/jest` on any co-located `*.test.ts` you touched. Fix all errors before marking done.
 
 ### Task 4: Bound kubernetes_security routes and cloud_defend schema
 - [ ] Bound the request schemas in `plugins/kubernetes_security/server/routes/multi_terms_aggregate.ts`, `aggregate.ts`, `count.ts`

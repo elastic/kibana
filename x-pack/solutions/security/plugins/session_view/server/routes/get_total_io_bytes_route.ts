@@ -11,6 +11,9 @@ import {
   TOTAL_BYTES_CAPTURED_PROPERTY,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
   TIMESTAMP_PROPERTY,
+  INDEX_NAME_MAX_LENGTH,
+  SESSION_ENTITY_ID_MAX_LENGTH,
+  TIMESTAMP_STRING_MAX_LENGTH,
 } from '../../common/constants';
 
 export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) => {
@@ -31,9 +34,9 @@ export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) =>
         validate: {
           request: {
             query: schema.object({
-              index: schema.string(),
-              sessionEntityId: schema.string(),
-              sessionStartTime: schema.string(),
+              index: schema.string({ maxLength: INDEX_NAME_MAX_LENGTH }),
+              sessionEntityId: schema.string({ maxLength: SESSION_ENTITY_ID_MAX_LENGTH }),
+              sessionStartTime: schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH }),
             }),
           },
         },
