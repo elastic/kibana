@@ -42,8 +42,6 @@ export interface NavigationCustomizationServiceUiDeps {
   core: CoreStart;
   chrome: InternalChromeStart;
   security?: SecurityPluginStart;
-  /** The resolved solution type for the current space. Required for EBT; absent on the
-   *  synchronous handler-only registration call that fires before the space resolves. */
   solution?: SolutionId;
 }
 
@@ -64,7 +62,6 @@ export class NavigationCustomizationService {
   private handlerRegistered = false;
   private menuLinkAdded = false;
   private activeSolution?: SolutionId;
-  /** Guards the per-load nav-state event so it fires at most once per lifecycle. */
   private loadedReported = false;
 
   /**
@@ -109,20 +106,11 @@ export class NavigationCustomizationService {
       chrome.project.registerCustomizeNavigationHandler(() => this.openModal(core, chrome));
     }
 
-    // Track that the space has resolved to a known project-nav solution. The value is not
-    // stamped on events (Spaces already adds `context.spaceSolution` to the analytics
-    // context); its presence gates event emission so that context is populated at report
-    // time.
     if (solution) {
       this.activeSolution = solution;
     }
 
     // Emit the per-load nav-state event once, the first time the solution is known.
-    // This carries the current customized-vs-default state so adoption can be derived
-    // from a single event: the denominator is all loads and the numerator is the
-    // `nav_customize_state: true` subset, both deduped at query time by the
-    // platform-provided `context.userId` and broken down by `context.spaceSolution`.
-    // No User Storage write is performed.
     if (solution && !this.loadedReported) {
       this.loadedReported = true;
       const savedCustomization = core.userStorage.get<NavigationCustomization>(
@@ -167,7 +155,7 @@ export class NavigationCustomizationService {
       );
 
       // Captured after mountModal is called synchronously by openCustomizeNavigationModal.
-      let closeModal: () => void = () => {};
+      let closeModal: () => void = () => { };
 
       openCustomizeNavigationModal({
         items,
@@ -191,14 +179,11 @@ export class NavigationCustomizationService {
 
           persist
             .then(() => {
-              // Report persisted customizations, gated on the write succeeding and on the
-              // space having resolved (so `context.spaceSolution` is populated).
+              // Report persisted customizations
               if (!this.activeSolution) return;
               const hiddenSet = new Set(hiddenIds);
 
-              // A save with no moves and nothing hidden is equivalent to the
-              // default layout — e.g. the user clicked "Reset to default" and
-              // applied — so it does not count as a customization.
+              // A save with no moves and nothing hidden does not count as a customization
               const didCustomize = c.moves.length > 0 || c.hidden.length > 0;
               reportNavigationCustomization(core.analytics, {
                 action: didCustomize ? 'customization_saved' : 'default_saved',
@@ -212,8 +197,7 @@ export class NavigationCustomizationService {
                   defaultMessage: 'Unable to save navigation customization',
                 }),
                 toastMessage: i18n.translate('navigation.customization.saveErrorMessage', {
-                  defaultMessage:
-                    'Your navigation customization could not be saved. You might not have permission to save preferences in this space.',
+                  defaultMessage: 'Your navigation customization could not be saved.',
                 }),
               });
             });
@@ -221,11 +205,7 @@ export class NavigationCustomizationService {
           closeModal();
         },
         onReset: () => {
-          // Only update the live preview — the User Storage write is deferred
-          // until the user clicks Apply, keeping Reset consistent with the
-          // preview-until-Apply model used by every other edit in this modal.
-          // If the user cancels after a Reset, onClose restores savedCustomization
-          // and User Storage is never touched, so the stored value is preserved.
+          // Only update the live preview, user has not yet clicked Apply.
           chrome.project.setNavigationCustomization(undefined);
           return this.getNavigationItems(chrome).then((nav) => nav.items);
         },

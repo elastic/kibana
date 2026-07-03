@@ -17,12 +17,6 @@ export const NAV_CUSTOMIZATION_EVENT_TYPE = 'navigation_customization';
 
 export type NavCustomizationAction = 'customization_saved' | 'default_saved';
 
-/**
- * The active solution is not stamped on these events: Spaces already adds it to the
- * analytics context as `context.spaceSolution` (a keyword on every browser event), which
- * is the dimension analysts break down by. Events are still emitted only once the space
- * has resolved, so that context is populated.
- */
 export interface NavLoadedEventProps {
   /**
    * Whether a non-default customization is currently stored for this user/space.
@@ -43,7 +37,6 @@ export interface NavCustomizationEventProps {
 
 /**
  * Builds the nav-item ID arrays expected by the save event.
- * Array position encodes order; no separate `order` field is needed.
  */
 export function buildNavItemsProperties(
   itemsInOrder: Array<{ id: string; hidden: boolean }>
