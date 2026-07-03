@@ -6044,7 +6044,7 @@ paths:
             -F 'service_name="foo"' \
             -F 'service_version="1.0.0"' \
             -F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
-            -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' 
+            -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"'
   /api/apm/sourcemaps/{id}:
     delete:
       description: |
@@ -7186,7 +7186,7 @@ paths:
                   query: |
                     FROM logs-abc*
                     | STATS count = COUNT(*), min_timestamp = MIN(@timestamp)
-                    | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) 
+                    | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW())
                     | KEEP event_rate
               example6:
                 summary: Patch indicator match rule
@@ -8117,7 +8117,7 @@ paths:
       description: |
         Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
 
-        The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
+        The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once.
         The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
         > warn
         > When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
@@ -8759,7 +8759,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -8821,7 +8821,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -8933,7 +8933,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -9020,7 +9020,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -9117,7 +9117,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -10136,7 +10136,7 @@ paths:
                     deleted: 0,
                     failures: []
                     noops: 0,
-                    requests_per_second: '-1,'
+                    requests_per_second: -1,
                     retries:
                       bulk: 0,
                       search: 0
@@ -12002,7 +12002,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -12120,7 +12120,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -12333,7 +12333,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -12579,7 +12582,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type: Invalid enum value. Expected ''agnostic'' | ''single'', received ''foo'''
+                    message: "[request query]: namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'foo'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -12879,7 +12882,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -13270,7 +13273,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -13957,7 +13960,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -14082,7 +14085,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -14217,7 +14220,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -38415,7 +38421,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -41479,11 +41488,11 @@ paths:
   /api/observability_ai_assistant/chat/complete:
     post:
       description: |
-        Create a new chat completion by using the Observability AI Assistant. 
+        Create a new chat completion by using the Observability AI Assistant.
 
-        The API returns the model's response based on the current conversation context. 
+        The API returns the model's response based on the current conversation context.
 
-        It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM). 
+        It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).
 
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: observability-ai-assistant-chat-complete
@@ -42439,7 +42448,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: Array of anonymization fields to update.
@@ -43664,7 +43673,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: List of prompts to be updated.
@@ -59884,7 +59893,7 @@ components:
         - value
     Security_Detections_API_BulkActionEditPayloadSchedule:
       description: |
-        Overwrites schedule of rules. 
+        Overwrites schedule of rules.
 
         - `set_schedule` sets a schedule for rules. If the same schedule already exists for a rule, no changes are made.
 
@@ -63317,7 +63326,7 @@ components:
         - `query` (object, optional): Object containing a query filter which gets applied to an action and determines whether the action should run.
             - `kql` (string, required): A KQL string.
             - `filters` (array of objects, required): Array of filter objects, as defined in the `kbn-es-query` package.
-              
+
       type: object
     Security_Detections_API_RuleActionFrequency:
       description: The action frequency defines when the action runs (for example, only on rule execution or at specific time intervals).
@@ -63695,8 +63704,8 @@ components:
       description: |
         The rule's version number.
 
-        - For prebuilt rules it represents the version of the rule's content in the source [detection-rules](https://github.com/elastic/detection-rules) repository (and the corresponding `security_detection_engine` Fleet package that is used for distributing prebuilt rules). 
-        - For custom rules it is set to `1` when the rule is created. 
+        - For prebuilt rules it represents the version of the rule's content in the source [detection-rules](https://github.com/elastic/detection-rules) repository (and the corresponding `security_detection_engine` Fleet package that is used for distributing prebuilt rules).
+        - For custom rules it is set to `1` when the rule is created.
         > info
         > It is not incremented on each update. Compare this to the `revision` field.
       minimum: 1
@@ -64343,7 +64352,7 @@ components:
         - field: field from the event indices on which the rule runs
         - type: must be mapping
         - value: field from the Elasticsearch threat index
-          
+
         You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See Example of Threat Match rule which uses both `and` and `or` logic.
       items:
         type: object
@@ -66208,7 +66217,7 @@ components:
               - 10.0.2.15
               - fe80::21a6:63d3:d70e:e3ad
               - 127.0.0.1
-              - '::1'
+              - ::1
             mac:
               - 08:00:27:b1:1d:5a
             name: WinDev2104Eval
@@ -66629,7 +66638,7 @@ components:
       properties: {}
     Security_Endpoint_Management_API_Kuery:
       description: A KQL string.
-      example: 'united.endpoint.host.os.name : ''Windows'''
+      example: "united.endpoint.host.os.name : 'Windows'"
       type: string
     Security_Endpoint_Management_API_MetadataListResponse:
       example:
@@ -66688,7 +66697,7 @@ components:
                 id: 0cfead88e2024bd8a27476352b5ab264
                 ip:
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                   - 10.0.2.15
                   - fe80::2ac7:8e15:b957:2fa1
                 mac:
@@ -66772,7 +66781,7 @@ components:
                   - 10.0.2.15
                   - fe80::21a6:63d3:d70e:e3ad
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                 mac:
                   - 08:00:27:b1:1d:5a
                 name: WinDev2104Eval
@@ -70468,7 +70477,7 @@ components:
           example: Bad Request
           type: string
         message:
-          example: 'Invalid value ''foo'' supplied to: [...]'
+          example: "Invalid value 'foo' supplied to: [...]"
           type: string
         statusCode:
           example: 400
@@ -70485,7 +70494,10 @@ components:
           example: Unauthorized
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+          example: |-
+            [security_exception
+            	Root causes:
+            		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
           type: string
         statusCode:
           example: 401
@@ -72991,7 +73003,7 @@ components:
           items:
             type: string
           description: |
-            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
         message:
           type: string
           description: The email message text. Markdown format is supported.
@@ -74753,7 +74765,7 @@ components:
                                 - min
                                 - cardinality
                               description: |
-                                An aggregation to gather data for the rule. For example, find the average, highest or lowest value of a numeric field. Or use a cardinality aggregation to find the approximate number of unique values in a field. 
+                                An aggregation to gather data for the rule. For example, find the average, highest or lowest value of a numeric field. Or use a cardinality aggregation to find the approximate number of unique values in a field.
                             field:
                               type: string
                         - type: object
