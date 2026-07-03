@@ -43361,7 +43361,6 @@
     "xpack.securitySolution.flyout.alertsHighlightedField.showMore": "Weniger anzeigen",
     "xpack.securitySolution.flyout.alertSummary.optionsMenuTitle": "Optionen",
     "xpack.securitySolution.flyout.analyzer.title": "Analysator",
-    "xpack.securitySolution.flyout.attackDetails.footer.takeActionButtonLabel": "Maßnahmen ergreifen",
     "xpack.securitySolution.flyout.attackDetails.left.insights.buttonGroupLegend": "Optionen für Einblicke",
     "xpack.securitySolution.flyout.attackDetails.left.insights.correlations.noRelatedAlerts": "Keine zugehörigen Warnmeldungen.",
     "xpack.securitySolution.flyout.attackDetails.left.insights.correlations.relatedAlertsTitle": "{count} {count, plural, one {alert} other {Alerts}} im Zusammenhang mit der Herkunft",
