@@ -44,8 +44,4 @@ export const spaceTest = spaceBaseTest.extend<
   },
 });
 
-export {
-  SESSION_API_PATH,
-  DELAYED_5S_DASHBOARD_TITLE,
-  DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE,
-} from './constants';
+export { SESSION_API_PATH, DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE } from './constants';

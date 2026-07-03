@@ -15,8 +15,5 @@ export const LOGSTASH_FUNCTIONAL_ARCHIVE =
 export const DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE =
   'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_async/async_search.json';
 
-// Title used to locate the dashboard after a per-space load (IDs differ per space).
-export const DELAYED_5S_DASHBOARD_TITLE = 'Delayed 5s';
-
 // Internal session management API path.
 export const SESSION_API_PATH = '/internal/session';

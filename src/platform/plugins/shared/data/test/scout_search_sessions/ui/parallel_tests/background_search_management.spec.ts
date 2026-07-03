@@ -8,8 +8,6 @@
  */
 
 /**
- * Migrated from: x-pack/platform/test/search_sessions_integration/tests/apps/management/search_sessions/sessions_management.ts
- * FTR config:    x-pack/platform/test/search_sessions_integration/config.management.ts
  *
  * End-to-end journey tests for the Background Search management UI.
  *
@@ -32,12 +30,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { expect } from '@kbn/scout/ui';
 import type { KbnClient } from '@kbn/scout';
-import {
-  spaceTest,
-  SESSION_API_PATH,
-  DELAYED_5S_DASHBOARD_TITLE,
-  DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE,
-} from '../fixtures';
+import { spaceTest, SESSION_API_PATH, DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE } from '../fixtures';
 
 // Version header required by the background search internal API.
 const SESSION_VERSION = '1';
@@ -68,7 +61,7 @@ async function deleteAllBackgroundSearches(kbnClient: KbnClient, spaceId: string
       kbnClient.request({
         method: 'DELETE',
         path: spacedDeletePath(id),
-        headers: { [ELASTIC_HTTP_VERSION_HEADER]: SESSION_VERSION, 'kbn-xsrf': 'anything' },
+        headers: SESSION_HEADERS,
         ignoreErrors: [404],
       })
     )
@@ -87,12 +80,13 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
     // uses createNewCopies:true so each space gets unique IDs — capture the dashboard ID
     // by looking up the loaded object by its well-known title.
     const loadedObjects = await scoutSpace.savedObjects.load(DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE);
+    const dashboardTitle = 'Delayed 5s';
     const delayed5s = loadedObjects.find(
-      (so) => so.type === 'dashboard' && so.title === DELAYED_5S_DASHBOARD_TITLE
+      (so) => so.type === 'dashboard' && so.title === dashboardTitle
     );
     if (!delayed5s) {
       throw new Error(
-        `Dashboard "${DELAYED_5S_DASHBOARD_TITLE}" not found in loaded objects. ` +
+        `Dashboard "${dashboardTitle}" not found in loaded objects. ` +
           `Available: ${loadedObjects
             .filter((so) => so.type === 'dashboard')
             .map((so) => so.title)
@@ -101,12 +95,12 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
     }
     dashboardId = delayed5s.id;
 
-    await scoutSpace.uiSettings.set({ defaultIndex: 'logstash-*', 'search:timeout': 10000 });
+    await scoutSpace.uiSettings.set({ defaultIndex: 'logstash-*', 'search:timeout': 10_000 });
     await deleteAllBackgroundSearches(kbnClient, scoutSpace.id);
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
   });
 
   spaceTest.afterAll(async ({ kbnClient, scoutSpace }) => {
@@ -139,19 +133,19 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
       await spaceTest.step('submit query and save as a background search', async () => {
         // Click the main submit button to trigger a fresh search.
         const submitBtn = page.testSubj.locator('querySubmitButton');
-        await expect(submitBtn).toBeVisible({ timeout: 15_000 });
+        await submitBtn.waitFor({ state: 'visible', timeout: 15_000 });
         await submitBtn.click();
 
         // The secondary "Send to background" button appears while the search is running.
         // Click it to persist the search as a background search.
         const bgSubmitBtn = page.testSubj.locator('querySubmitButton-secondary-button');
-        await expect(bgSubmitBtn).toBeVisible({ timeout: 15_000 });
+        await bgSubmitBtn.waitFor({ state: 'visible', timeout: 15_000 });
         await bgSubmitBtn.click();
 
         // Wait for the toast confirming the background search has been saved.
-        await expect(page.testSubj.locator('backgroundSearchToastLink')).toBeVisible({
-          timeout: 20_000,
-        });
+        await page.testSubj
+          .locator('backgroundSearchToastLink')
+          .waitFor({ state: 'visible', timeout: 20_000 });
 
         // Wait for the dashboard to finish rendering — this ensures all search IDs are
         // registered in the background search's idMapping before we navigate away.
@@ -186,10 +180,9 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
 
       await spaceTest.step('navigate back to the dashboard via the management link', async () => {
         await pageObjects.backgroundSearchManagement.viewRow();
-
-        await expect(
-          page.testSubj.locator('embeddablePanelHeading-SumofBytesbyExtension(Delayed5s)')
-        ).toBeVisible({ timeout: 30_000 });
+        await page.testSubj
+          .locator('embeddablePanelHeading-SumofBytesbyExtension(Delayed5s)')
+          .waitFor({ state: 'visible', timeout: 30_000 });
 
         await pageObjects.dashboard.waitForRenderComplete();
       });

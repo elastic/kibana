@@ -11,7 +11,7 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 /**
- * Page object for the Background Search management UI at
+ * Page object for the Background Search management UI at the URL:
  * /app/management/kibana/search_sessions.
  */
 export class BackgroundSearchManagementPage {
@@ -56,14 +56,6 @@ export class BackgroundSearchManagementPage {
 
   /**
    * Wait for the row's status badge to reach `targetStatus`.
-   *
-   * These row-scoped helpers assume the single-session-per-space invariant: each
-   * parallel worker owns its space, so the table holds exactly one row. The test-subj
-   * locators therefore resolve uniquely. If a second row ever appears, Playwright's
-   * strict-mode check fails loudly rather than silently acting on an arbitrary row —
-   * which is why we deliberately do not use `.first()` here (also disallowed by the
-   * `playwright/no-nth-methods` lint rule).
-   *
    * The management page auto-refreshes every 10 s when the server is started with
    * `--data.search.sessions.management.refreshInterval=10s`.
    */
@@ -80,7 +72,6 @@ export class BackgroundSearchManagementPage {
     await this.table.getByTestId('sessionManagementActionsCol').click();
     await this.page.testSubj.click('sessionManagementPopoverAction-rename');
     const input = this.page.testSubj.locator('editNameInput');
-    await expect(input).toBeVisible();
     await input.fill(newName);
     await this.page.testSubj.click('confirmEditName');
   }
