@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
+import { useEffect, useCallback, useMemo, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
@@ -121,33 +123,23 @@ export const useAgentBuilderRuleCreation = ({
   const { agentBuilder, aiRuleCreation, telemetry } = services;
   const { addSuccess, addWarning } = useAppToasts();
   const isAiRuleUpdateRef = useRef(false);
-  const [isSyncActive, setIsSyncActive] = useState(false);
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  // The sync effect re-fires on every form edit, so a persistent failure would stack toasts;
-  // warn once and re-arm only after a sync succeeds again.
+  // Activation is driven by explicit user actions (Add to chat, applying a card, binding to this
+  // rule's card in an open conversation) — never by merely visiting the page.
+  const isSyncActive = useObservable(aiRuleCreation.formSyncActive$, false);
+  // Warn once per failure streak; re-armed by the next successful sync.
   const hasWarnedSyncFailureRef = useRef(false);
-  // Latest-prop mirror so the long-lived conversation subscription reads the current page id.
-  const pageRuleIdRef = useRef(pageRuleId);
-  pageRuleIdRef.current = pageRuleId;
-  // Identity of the rule being synced (see resolveSyncRuleId). Written only in the conversation
-  // effect and on chat→form applies; read everywhere else. Present ⇔ the sync is an update.
+  // Saved-rule id the sync targets (see resolveSyncRuleId). Present ⇔ the sync is an update.
   const syncRuleIdRef = useRef<string | undefined>(pageRuleId);
 
-  // Track sync activation while the rule form is open, and reset it on close. Activation itself
-  // is driven by explicit user actions — the "Add to chat" button, applying a card to the form,
-  // or binding to this rule's card in an open conversation — never by merely visiting the page,
-  // so users who don't touch chat get no background attachment pushes.
+  // Reset sync state when the form closes.
   useEffect(() => {
-    const subscription = aiRuleCreation.formSyncActive$.subscribe(setIsSyncActive);
     return () => {
-      subscription.unsubscribe();
       aiRuleCreation.deactivateFormSync();
       aiRuleCreation.releaseBind();
     };
   }, [aiRuleCreation]);
 
-  // Edit pages have no telemetry-hook session cleanup (the create page does), so release any AI
-  // session when the edit form closes — otherwise it bleeds its id/start time into the next one.
+  // Edit pages have no telemetry-hook session cleanup (the create page does), so clear it here.
   useEffect(() => {
     if (!pageRuleId) {
       return;
@@ -167,28 +159,26 @@ export const useAgentBuilderRuleCreation = ({
       const attachments = (change?.conversation?.attachments ?? []) as ConversationAttachment[];
       const boundId = aiRuleCreation.getBoundAttachmentId();
       const ruleAttachment = findRuleAttachment(attachments, boundId);
-      const cardRuleId = resolveSyncRuleId(ruleAttachment, pageRuleIdRef.current);
+      const cardRuleId = resolveSyncRuleId(ruleAttachment, pageRuleId);
       syncRuleIdRef.current = cardRuleId;
 
-      // Bind alignment only applies to a card linked to a saved rule (a draft card binds on apply).
-      if (!ruleAttachment || !cardRuleId) {
+      // Bind alignment only applies on an edit page with a card linked to a saved rule.
+      if (!ruleAttachment || !cardRuleId || !pageRuleId) {
         return;
       }
-
-      // Keep the form→chat bind aligned with the rule being edited.
-      const editPageRuleId = pageRuleIdRef.current;
-      if (editPageRuleId && cardRuleId !== editPageRuleId) {
+      if (cardRuleId !== pageRuleId) {
         // Different rule's attachment — don't sync this form into it.
         aiRuleCreation.deactivateFormSync();
         aiRuleCreation.releaseBind();
-      } else if (editPageRuleId && cardRuleId === editPageRuleId && boundId === null) {
+      } else if (boundId === null) {
         // This rule's card, not yet bound (e.g. reached the form without going through the card).
         aiRuleCreation.setBoundAttachment(ruleAttachment.id);
         aiRuleCreation.activateFormSync();
       }
     });
     return () => subscription.unsubscribe();
-  }, [agentBuilder, aiRuleCreation]);
+    // pageRuleId comes from the URL and is fixed for the page's lifetime.
+  }, [agentBuilder, aiRuleCreation, pageRuleId]);
 
   const addRuleAttachment = useCallback(
     (ruleData: unknown, label: string, savedRuleId?: string) => {
@@ -272,10 +262,10 @@ export const useAgentBuilderRuleCreation = ({
     ]
   );
 
+  // Latest-callback mirror: resubscribing to the BehaviorSubject-backed stream on every render
+  // would re-emit the current rule and re-apply it to the form.
   const updateFormFromChatRef = useRef(updateFormFromChat);
   updateFormFromChatRef.current = updateFormFromChat;
-  const addRuleAttachmentRef = useRef(addRuleAttachment);
-  addRuleAttachmentRef.current = addRuleAttachment;
 
   useEffect(() => {
     const subscription = aiRuleCreation.aiCreatedRule$.subscribe((rule) => {
@@ -287,15 +277,6 @@ export const useAgentBuilderRuleCreation = ({
     return () => subscription.unsubscribe();
   }, [aiRuleCreation]);
 
-  // Latest form inputs, read inside the debounce so the effect doesn't need them as deps.
-  const formInputsRef = useRef({
-    defineStepData,
-    aboutStepData,
-    scheduleStepData,
-    actionsStepData,
-  });
-  formInputsRef.current = { defineStepData, aboutStepData, scheduleStepData, actionsStepData };
-
   // Value-stable signature so the debounce re-arms on content change, not on every render
   // (step-data objects get a fresh identity each render and would otherwise starve the timer).
   const formSignature = useMemo(
@@ -303,37 +284,25 @@ export const useAgentBuilderRuleCreation = ({
     [defineStepData, aboutStepData, scheduleStepData, actionsStepData]
   );
 
-  // FORM -> CHAT
-  useEffect(() => {
-    const {
-      defineStepData: define,
-      aboutStepData: about,
-      scheduleStepData: schedule,
-      actionsStepData: actions,
-    } = formInputsRef.current;
-    if (
-      !isSyncActive ||
-      !agentBuilder?.addAttachment ||
-      !define ||
-      !about ||
-      !schedule ||
-      !actions ||
-      !actionTypeRegistry
-    ) {
-      return;
-    }
-
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    debounceTimerRef.current = setTimeout(() => {
+  // FORM -> CHAT: push the current form state to the rule card, debounced per edit.
+  useDebounce(
+    () => {
+      if (
+        !isSyncActive ||
+        !defineStepData ||
+        !aboutStepData ||
+        !scheduleStepData ||
+        !actionsStepData ||
+        !actionTypeRegistry
+      ) {
+        return;
+      }
       try {
         const formattedRule = formatRule<RuleCreateProps>(
-          define,
-          about,
-          schedule,
-          actions,
+          defineStepData,
+          aboutStepData,
+          scheduleStepData,
+          actionsStepData,
           actionTypeRegistry
         );
         const ruleIdForSync = syncRuleIdRef.current;
@@ -370,21 +339,10 @@ export const useAgentBuilderRuleCreation = ({
           });
         }
       }
-    }, SYNC_DEBOUNCE_MS);
-
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, [
-    isSyncActive,
-    agentBuilder,
-    formSignature,
-    actionTypeRegistry,
-    addRuleAttachment,
-    addWarning,
-  ]);
+    },
+    SYNC_DEBOUNCE_MS,
+    [formSignature, isSyncActive]
+  );
 
   return { isAiRuleUpdateRef };
 };
