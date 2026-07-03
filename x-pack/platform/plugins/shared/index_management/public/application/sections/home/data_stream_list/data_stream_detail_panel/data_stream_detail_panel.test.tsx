@@ -339,6 +339,7 @@ describe('DataStreamDetailPanel', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
       });
 
@@ -375,6 +376,7 @@ describe('DataStreamDetailPanel', () => {
           delete_index: false,
           manage_data_stream_lifecycle: false,
           read_failure_store: false,
+          manage: false,
         },
       });
 
@@ -404,6 +406,7 @@ describe('DataStreamDetailPanel', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
       });
 
@@ -467,6 +470,7 @@ describe('DataStreamDetailPanel', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
       });
 
@@ -527,6 +531,7 @@ describe('DataStreamDetailPanel', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
       });
 
@@ -586,6 +591,7 @@ describe('DataStreamDetailPanel', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
       });
 
@@ -648,6 +654,7 @@ describe('DataStreamDetailPanel', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
       });
 
@@ -699,6 +706,7 @@ describe('DataStreamDetailPanel', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
       });
 
@@ -763,6 +771,7 @@ describe('DataStreamDetailPanel', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
       });
 
@@ -813,6 +822,7 @@ describe('DataStreamDetailPanel', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
       });
 
@@ -870,6 +880,7 @@ describe('DataStreamDetailPanel', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
       });
 
@@ -965,6 +976,7 @@ describe('DataStreamDetailPanel', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
       });
 
@@ -1172,6 +1184,7 @@ describe('DataStreamDetailPanel', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
       });
 
