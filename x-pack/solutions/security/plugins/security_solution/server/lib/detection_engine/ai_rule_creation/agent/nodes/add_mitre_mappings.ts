@@ -25,7 +25,7 @@ import type {
   ThreatTechnique,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 
-interface MitreMappingSelectionResponse {
+export interface MitreMappingSelectionResponse {
   tactics: string[]; // Array of tactic IDs like ["TA0001", "TA0002"]
   techniques: Array<{
     id: string;
@@ -41,7 +41,7 @@ interface AddMitreMappingsNodeParams {
 /**
  * Validates and formats the MITRE mapping response according to the Threat schema
  */
-const formatMitreMapping = (response: MitreMappingSelectionResponse): Array<Threat> => {
+export const formatMitreMapping = (response: MitreMappingSelectionResponse): Array<Threat> => {
   const threatMappings: Array<Threat> = [];
 
   // Group techniques by tactic
