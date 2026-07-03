@@ -66,9 +66,7 @@ describe('useAgentBuilderRuleCreation', () => {
     actionsStepForm: FormHook<ActionsStepRule, ActionsStepRule>;
   };
 
-  const renderTestHook = (
-    props: { existingRuleId?: string; defineStepData?: DefineStepRule } = {}
-  ) =>
+  const renderTestHook = (props: { pageRuleId?: string; defineStepData?: DefineStepRule } = {}) =>
     renderHook(
       ({ defineStepData }: { defineStepData: DefineStepRule }) =>
         useAgentBuilderRuleCreation({
@@ -78,7 +76,7 @@ describe('useAgentBuilderRuleCreation', () => {
           scheduleStepData: {} as ScheduleStepRule,
           actionsStepData: {} as ActionsStepRule,
           actionTypeRegistry: {} as ActionTypeRegistryContract,
-          existingRuleId: props.existingRuleId,
+          pageRuleId: props.pageRuleId,
         }),
       { initialProps: { defineStepData: props.defineStepData ?? ({} as DefineStepRule) } }
     );
@@ -147,7 +145,7 @@ describe('useAgentBuilderRuleCreation', () => {
     });
 
     it('targets the bound attachment and includes origin after binding to an update-intent card', () => {
-      renderTestHook({ existingRuleId: 'rule-1' });
+      renderTestHook({ pageRuleId: 'rule-1' });
 
       // Conversation shows this rule's card (origin matches the edit page's rule id).
       act(() => {
@@ -199,7 +197,7 @@ describe('useAgentBuilderRuleCreation', () => {
     it('deactivates sync and releases the bind when the conversation shows a different rule', () => {
       const deactivateFormSync = jest.spyOn(aiRuleCreation, 'deactivateFormSync');
       const releaseBind = jest.spyOn(aiRuleCreation, 'releaseBind');
-      renderTestHook({ existingRuleId: 'rule-1' });
+      renderTestHook({ pageRuleId: 'rule-1' });
 
       act(() => {
         activeConversation$.next({
@@ -216,7 +214,7 @@ describe('useAgentBuilderRuleCreation', () => {
       aiRuleCreation.formSyncActive$.subscribe((active) => {
         syncActive = active;
       });
-      renderTestHook({ existingRuleId: 'rule-1' });
+      renderTestHook({ pageRuleId: 'rule-1' });
 
       act(() => {
         activeConversation$.next({
@@ -262,7 +260,7 @@ describe('useAgentBuilderRuleCreation', () => {
     });
 
     it('clears a lingering AI session when an edit page unmounts', () => {
-      const { unmount } = renderTestHook({ existingRuleId: 'rule-1' });
+      const { unmount } = renderTestHook({ pageRuleId: 'rule-1' });
       aiRuleCreation.startSession();
 
       unmount();

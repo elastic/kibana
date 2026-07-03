@@ -30,10 +30,7 @@ import {
   SECURITY_RULE_ATTACHMENT_ID,
 } from '../../../../../../common/constants';
 import { formatRule } from '../helpers';
-import {
-  getRuleIdFromAttachment,
-  getRuleAttachmentIntent,
-} from '../../../../../agent_builder/attachment_types/rule/helpers';
+import { getRuleIdFromAttachment } from '../../../../../agent_builder/attachment_types/rule/helpers';
 
 const ruleDefaultMetadataFields = {
   references: [],
@@ -64,17 +61,6 @@ interface ConversationAttachment {
   versions?: unknown;
 }
 
-/**
- * Which rule/card the form is syncing against — the single source of truth for identity,
- * derived from the conversation's rule card (or the page when there is none).
- * `intent` is frozen against page state so it can't flip mid-conversation;
- * `ruleId` is the saved-rule id the card is linked to, undefined for an unlinked draft.
- */
-interface SyncTarget {
-  intent: 'create' | 'update';
-  ruleId: string | undefined;
-}
-
 /** The conversation's rule card the form should track: the bound card when present, else the first rule card. */
 const findRuleAttachment = (
   attachments: ConversationAttachment[],
@@ -84,18 +70,21 @@ const findRuleAttachment = (
     ? attachments.find((a) => a.id === boundId && a.type === SecurityAgentBuilderAttachments.rule)
     : undefined) ?? attachments.find((a) => a.type === SecurityAgentBuilderAttachments.rule);
 
-const computeSyncTarget = (
+/**
+ * Saved-rule id the form is syncing against — the single source of truth for identity.
+ * Present means the sync updates that saved rule; absent means it drafts a new one.
+ * Derived from the conversation's rule card (its `origin`), or the page's rule when there is
+ * no card. A card without `origin` is a fresh draft and must NOT inherit the edit page's rule
+ * id — a create-intent chat on an edit page stays a create.
+ */
+const resolveSyncRuleId = (
   attachment: ConversationAttachment | undefined,
-  existingRuleId: string | undefined
-): SyncTarget => {
+  pageRuleId: string | undefined
+): string | undefined => {
   if (!attachment) {
-    return { intent: existingRuleId ? 'update' : 'create', ruleId: undefined };
+    return pageRuleId;
   }
-  const view = versionedAttachmentView(attachment);
-  const intent = getRuleAttachmentIntent(view as never);
-  const ruleId = getRuleIdFromAttachment(view as never);
-  // Create-intent cards must not inherit the edit page's rule id.
-  return { intent, ruleId: intent === 'create' ? ruleId : ruleId ?? existingRuleId };
+  return getRuleIdFromAttachment(versionedAttachmentView(attachment) as never);
 };
 
 interface UseAgentBuilderRuleCreationParams {
@@ -108,8 +97,8 @@ interface UseAgentBuilderRuleCreationParams {
   scheduleStepData?: ScheduleStepRule;
   actionsStepData?: ActionsStepRule;
   actionTypeRegistry?: ActionTypeRegistryContract;
-  /** Existing rule id — present on rule edit pages; absent on the create page. */
-  existingRuleId?: string;
+  /** Saved-rule id from the edit-page URL; absent on the create page. */
+  pageRuleId?: string;
 }
 
 interface UseAgentBuilderRuleCreationResult {
@@ -126,7 +115,7 @@ export const useAgentBuilderRuleCreation = ({
   scheduleStepData,
   actionsStepData,
   actionTypeRegistry,
-  existingRuleId,
+  pageRuleId,
 }: UseAgentBuilderRuleCreationParams): UseAgentBuilderRuleCreationResult => {
   const { services } = useKibana();
   const { agentBuilder, aiRuleCreation, telemetry } = services;
@@ -137,23 +126,12 @@ export const useAgentBuilderRuleCreation = ({
   // The sync effect re-fires on every form edit, so a persistent failure would stack toasts;
   // warn once and re-arm only after a sync succeeds again.
   const hasWarnedSyncFailureRef = useRef(false);
-  const existingRuleIdRef = useRef(existingRuleId);
-  existingRuleIdRef.current = existingRuleId;
-  // Identity of the rule/card being synced. Written only here and in the conversation effect
-  // (via computeSyncTarget) and on chat→form applies; read everywhere else.
-  const syncTargetRef = useRef<SyncTarget>({
-    intent: existingRuleId ? 'update' : 'create',
-    ruleId: existingRuleId,
-  });
-
-  const getRuleIdForSync = useCallback((): string | undefined => {
-    const { intent, ruleId } = syncTargetRef.current;
-    // Create-intent chat on a rule edit page must not inherit the page's rule id.
-    if (intent === 'create') {
-      return ruleId;
-    }
-    return ruleId ?? existingRuleIdRef.current ?? undefined;
-  }, []);
+  // Latest-prop mirror so the long-lived conversation subscription reads the current page id.
+  const pageRuleIdRef = useRef(pageRuleId);
+  pageRuleIdRef.current = pageRuleId;
+  // Identity of the rule being synced (see resolveSyncRuleId). Written only in the conversation
+  // effect and on chat→form applies; read everywhere else. Present ⇔ the sync is an update.
+  const syncRuleIdRef = useRef<string | undefined>(pageRuleId);
 
   // Track sync activation while the rule form is open, and reset it on close. Activation itself
   // is driven by explicit user actions — the "Add to chat" button, applying a card to the form,
@@ -171,7 +149,7 @@ export const useAgentBuilderRuleCreation = ({
   // Edit pages have no telemetry-hook session cleanup (the create page does), so release any AI
   // session when the edit form closes — otherwise it bleeds its id/start time into the next one.
   useEffect(() => {
-    if (!existingRuleId) {
+    if (!pageRuleId) {
       return;
     }
     return () => {
@@ -179,7 +157,7 @@ export const useAgentBuilderRuleCreation = ({
         aiRuleCreation.clearSession();
       }
     };
-  }, [existingRuleId, aiRuleCreation]);
+  }, [pageRuleId, aiRuleCreation]);
 
   useEffect(() => {
     if (!agentBuilder?.events?.ui?.activeConversation$) {
@@ -189,16 +167,16 @@ export const useAgentBuilderRuleCreation = ({
       const attachments = (change?.conversation?.attachments ?? []) as ConversationAttachment[];
       const boundId = aiRuleCreation.getBoundAttachmentId();
       const ruleAttachment = findRuleAttachment(attachments, boundId);
-      const target = computeSyncTarget(ruleAttachment, existingRuleIdRef.current);
-      syncTargetRef.current = target;
+      const cardRuleId = resolveSyncRuleId(ruleAttachment, pageRuleIdRef.current);
+      syncRuleIdRef.current = cardRuleId;
 
-      if (!ruleAttachment || target.intent === 'create') {
+      // Bind alignment only applies to a card linked to a saved rule (a draft card binds on apply).
+      if (!ruleAttachment || !cardRuleId) {
         return;
       }
 
       // Keep the form→chat bind aligned with the rule being edited.
-      const editPageRuleId = existingRuleIdRef.current;
-      const cardRuleId = getRuleIdFromAttachment(versionedAttachmentView(ruleAttachment) as never);
+      const editPageRuleId = pageRuleIdRef.current;
       if (editPageRuleId && cardRuleId !== editPageRuleId) {
         // Different rule's attachment — don't sync this form into it.
         aiRuleCreation.deactivateFormSync();
@@ -217,10 +195,9 @@ export const useAgentBuilderRuleCreation = ({
       if (!agentBuilder?.addAttachment) {
         return;
       }
-      const { intent } = syncTargetRef.current;
       // The saved-rule id lives in the attachment's top-level `origin` (the source of truth for the
       // "Update" button); include it on the push so syncing form edits never drops the link.
-      const ruleId = intent === 'update' ? savedRuleId ?? getRuleIdForSync() : undefined;
+      const ruleId = savedRuleId ?? syncRuleIdRef.current;
       const targetId = aiRuleCreation.getBoundAttachmentId() ?? SECURITY_RULE_ATTACHMENT_ID;
       const attachment: AttachmentInput = {
         id: targetId,
@@ -235,7 +212,7 @@ export const useAgentBuilderRuleCreation = ({
       };
       agentBuilder.addAttachment(attachment);
     },
-    [agentBuilder, getRuleIdForSync, aiRuleCreation]
+    [agentBuilder, aiRuleCreation]
   );
 
   const updateFormFromChat = useCallback(
@@ -253,10 +230,10 @@ export const useAgentBuilderRuleCreation = ({
         durationSinceSessionStartMs: Date.now() - session.startTimestamp,
       });
 
-      const ruleIdForSync =
-        syncTargetRef.current.intent === 'update' ? rule.id ?? getRuleIdForSync() : undefined;
+      // An update sync adopts the saved rule's own id when the applied rule carries one.
+      const ruleIdForSync = syncRuleIdRef.current ? rule.id ?? syncRuleIdRef.current : undefined;
       if (ruleIdForSync) {
-        syncTargetRef.current = { ...syncTargetRef.current, ruleId: ruleIdForSync };
+        syncRuleIdRef.current = ruleIdForSync;
       }
 
       isAiRuleUpdateRef.current = true;
@@ -291,7 +268,6 @@ export const useAgentBuilderRuleCreation = ({
       addSuccess,
       addRuleAttachment,
       aiRuleCreation,
-      getRuleIdForSync,
       telemetry,
     ]
   );
@@ -360,12 +336,11 @@ export const useAgentBuilderRuleCreation = ({
           actions,
           actionTypeRegistry
         );
-        const isUpdateIntent = syncTargetRef.current.intent === 'update';
-        const ruleIdForSync = isUpdateIntent ? getRuleIdForSync() : undefined;
+        const ruleIdForSync = syncRuleIdRef.current;
         addRuleAttachment(
           formattedRule,
           formattedRule.name ||
-            (isUpdateIntent && ruleIdForSync
+            (ruleIdForSync
               ? i18n.translate(
                   'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabelExisting',
                   { defaultMessage: 'Rule' }
@@ -408,7 +383,6 @@ export const useAgentBuilderRuleCreation = ({
     formSignature,
     actionTypeRegistry,
     addRuleAttachment,
-    getRuleIdForSync,
     addWarning,
   ]);
 

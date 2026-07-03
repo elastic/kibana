@@ -168,7 +168,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     scheduleStepData,
     actionsStepData,
     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-    existingRuleId: rule?.id,
+    // From the URL, not `rule?.id` — available synchronously at mount, before the rule loads.
+    pageRuleId: ruleId,
   });
 
   const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
