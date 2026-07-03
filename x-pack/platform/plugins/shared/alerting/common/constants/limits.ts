@@ -30,6 +30,6 @@ export const MAX_BULK_UNTRACK_ALERT_UUIDS = 1000;
 export const MAX_INDEX_NAME_LENGTH = 255;
 export const MAX_SPACE_IDS = 100;
 export const MAX_PER_PAGE_LOGS = 1000;
-export const MAX_NAMESPACES = 100;
+export const MAX_NAMESPACES = 1000;
 export const MAX_NUMBER_OF_EXECUTIONS = 10000;
 export const ISO_DATE_MAX_LENGTH = 100;
