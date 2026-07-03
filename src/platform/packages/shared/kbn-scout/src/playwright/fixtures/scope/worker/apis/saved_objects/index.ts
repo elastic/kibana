@@ -54,9 +54,6 @@ export interface SavedObjectsApiService {
   create: <TAttributes extends Record<string, unknown>>(
     params: CreateSavedObjectParams<TAttributes>
   ) => Promise<SavedObjectApiResponse<TAttributes>>;
-  search: <TAttributes extends Record<string, unknown>>(
-    params: Omit<CreateSavedObjectParams<TAttributes>, 'type'>
-  ) => Promise<SavedObjectApiResponse<TAttributes>>;
 }
 
 export const getSavedObjectsApiHelper = (
@@ -97,6 +94,5 @@ export const getSavedObjectsApiHelper = (
 
   return {
     create,
-    search: async (params) => await create({ ...params, type: 'search' }),
   };
 };

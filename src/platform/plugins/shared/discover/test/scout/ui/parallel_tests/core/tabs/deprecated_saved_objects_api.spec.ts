@@ -28,7 +28,8 @@ spaceTest.describe(
     spaceTest(
       'should support Discover sessions without tabs created through the deprecated saved objects API',
       async ({ apiServices, browserAuth, pageObjects, scoutSpace }) => {
-        await apiServices.savedObjects.search({
+        await apiServices.savedObjects.create({
+          type: 'search',
           spaceId: scoutSpace.id,
           typeMigrationVersion: '10.8.0',
           attributes: {
