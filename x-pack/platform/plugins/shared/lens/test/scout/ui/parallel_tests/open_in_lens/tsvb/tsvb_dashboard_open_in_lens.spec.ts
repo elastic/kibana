@@ -43,7 +43,7 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
 
   // https://github.com/elastic/kibana/issues/179307
   spaceTest.fixme(
-    'should convert a by value TSVB viz to a Lens viz',
+    'should convert a by value TSVB vis to a Lens vis',
     async ({ browserAuth, page, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       const { dashboard, lens } = pageObjects;
@@ -53,7 +53,7 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
       const originalPanelCount = await dashboard.getPanelCount();
 
       // Set custom time range on the panel
-      await dashboard.openCustomizePanel('My TSVB to Lens viz 1');
+      await dashboard.openCustomizePanel('My TSVB to Lens vis 1');
       await dashboard.enableCustomTimeRange();
       await dashboard.openDatePickerQuickMenu();
       await dashboard.clickCommonlyUsedTimeRange('Last_30 days');
@@ -62,7 +62,7 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
       await dashboard.expectTimeRangeBadgeExists();
 
       // Convert to Lens
-      await dashboard.clickPanelAction(testData.CONVERT_TO_LENS_ACTION, 'My TSVB to Lens viz 1');
+      await dashboard.clickPanelAction(testData.CONVERT_TO_LENS_ACTION, 'My TSVB to Lens vis 1');
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
       const dimensions = page.testSubj.locator('lns-dimensionTrigger');
@@ -76,17 +76,17 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
       expect(newPanelCount).toBe(originalPanelCount);
 
       const titles = await dashboard.getPanelTitles();
-      expect(titles[0]).toBe('My TSVB to Lens viz 1 (converted)');
+      expect(titles[0]).toBe('My TSVB to Lens vis 1 (converted)');
       await dashboard.expectTimeRangeBadgeExists();
-      await dashboard.removePanel('My TSVB to Lens viz 1 (converted)');
+      await dashboard.removePanel('My TSVB to Lens vis 1 (converted)');
     }
   );
 
   // https://github.com/elastic/kibana/issues/179307
   spaceTest.fixme(
-    'should convert a by reference TSVB viz to a Lens viz',
+    'should convert a by reference TSVB vis to a Lens vis',
     async ({ browserAuth, page, pageObjects }) => {
-      const visTitle = 'My TSVB to Lens viz 2';
+      const visTitle = 'My TSVB to Lens vis 2';
       await browserAuth.loginAsAdmin();
       const { dashboard, lens } = pageObjects;
 

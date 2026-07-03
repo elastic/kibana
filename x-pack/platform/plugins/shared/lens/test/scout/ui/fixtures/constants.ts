@@ -19,6 +19,8 @@ export const LOGSTASH_IN_RANGE_DATES = {
 };
 
 const FIXTURES_PATH = 'x-pack/platform/plugins/shared/lens/test/scout/ui/fixtures';
+const OPEN_IN_LENS_FIXTURES_ROOT =
+  'x-pack/platform/plugins/shared/lens/test/scout/ui/fixtures/kbn_archives/open_in_lens/agg_based';
 
 export const KBN_ARCHIVES = {
   ESQL_CONVERSION_DASHBOARD: `${FIXTURES_PATH}/esql_conversion_dashboard.json`,
@@ -28,6 +30,15 @@ export const KBN_ARCHIVES = {
   TSVB_TOP_N: `${FIXTURES_PATH}/tsvb_top_n.json`,
   TSVB_TABLE: `${FIXTURES_PATH}/tsvb_table.json`,
   TSVB_DASHBOARD: `${FIXTURES_PATH}/tsvb_dashboard.json`,
+  OPEN_IN_LENS_AGG_BASED: {
+    METRIC: `${OPEN_IN_LENS_FIXTURES_ROOT}/metric.json`,
+    PIE: `${OPEN_IN_LENS_FIXTURES_ROOT}/pie.json`,
+    XY: `${OPEN_IN_LENS_FIXTURES_ROOT}/xy.json`,
+    GAUGE: `${OPEN_IN_LENS_FIXTURES_ROOT}/gauge.json`,
+    GOAL: `${OPEN_IN_LENS_FIXTURES_ROOT}/goal.json`,
+    TABLE: `${OPEN_IN_LENS_FIXTURES_ROOT}/table.json`,
+    HEATMAP: `${OPEN_IN_LENS_FIXTURES_ROOT}/heatmap.json`,
+  },
 };
 export const TSVB_DASHBOARDS = {
   METRIC: 'Convert to Lens - TSVB - Metric',
@@ -37,6 +48,16 @@ export const TSVB_DASHBOARDS = {
   TABLE: 'Convert to Lens - TSVB - Table',
   DASHBOARD_1: 'Convert to Lens - Dashboard - TSVB - 1',
   DASHBOARD_2: 'Convert to Lens - Dashboard - TSVB - 2',
+};
+
+export const OPEN_IN_LENS_DASHBOARDS = {
+  METRIC: 'Convert to Lens - Metric',
+  PIE: 'Convert to Lens - Pie',
+  XY: 'Convert to Lens - XY',
+  GAUGE: 'Convert to Lens - Gauge',
+  GOAL: 'Convert to Lens - Goal',
+  TABLE: 'Convert to Lens - Table',
+  HEATMAP: 'Convert to Lens - Heatmap',
 };
 
 export const CONVERT_TO_LENS_ACTION = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
