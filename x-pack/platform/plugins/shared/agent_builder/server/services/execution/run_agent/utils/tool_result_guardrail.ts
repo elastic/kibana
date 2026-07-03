@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ToolResult } from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore } from '@kbn/agent-builder-common/tools';
 import { createOtherResult } from '@kbn/agent-builder-server';
+import type { BuildToolContentParams } from '@kbn/agent-builder-genai-utils/langchain';
 import {
   estimateTokens,
   truncateTokens,
@@ -35,12 +35,7 @@ export const buildGuardedToolContent = ({
   toolId,
   toolCallId,
   maxTokens,
-}: {
-  results: ToolResult[];
-  toolId: string;
-  toolCallId: string;
-  maxTokens: number;
-}): string => {
+}: BuildToolContentParams & { maxTokens: number }): string => {
   const stringified = JSON.stringify({ results });
 
   try {

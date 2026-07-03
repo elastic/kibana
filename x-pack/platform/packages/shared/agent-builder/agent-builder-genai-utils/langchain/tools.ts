@@ -99,6 +99,14 @@ export const createToolIdMappings = <T extends { id: string }>(tools: T[]): Tool
   return mapping;
 };
 
+export interface BuildToolContentParams {
+  results: ToolResult[];
+  toolId: string;
+  toolCallId: string;
+}
+
+export type BuildToolContentFn = (params: BuildToolContentParams) => string;
+
 export const toolToLangchain = async ({
   tool,
   toolId,
@@ -112,11 +120,7 @@ export const toolToLangchain = async ({
   logger: Logger;
   sendEvent?: AgentEventEmitterFn;
   addReasoningParam?: boolean;
-  buildContent?: (params: {
-    results: ToolResult[];
-    toolId: string;
-    toolCallId: string;
-  }) => string;
+  buildContent?: BuildToolContentFn;
 }): Promise<StructuredTool> => {
   const description = tool.getLlmDescription
     ? await tool.getLlmDescription({ description: tool.description, config: tool.configuration })
