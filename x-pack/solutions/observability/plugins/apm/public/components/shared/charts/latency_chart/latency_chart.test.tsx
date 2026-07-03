@@ -6,7 +6,7 @@
  */
 
 import { composeStories } from '@storybook/react';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import * as stories from './latency_chart.stories';
 
@@ -14,8 +14,7 @@ const { Example } = composeStories(stories);
 
 describe('LatencyChart', () => {
   it('renders', async () => {
-    await waitFor(() => {
-      expect(() => render(<Example />)).not.toThrowError();
-    });
+    render(<Example />);
+    expect(await screen.findByRole('heading', { name: 'Latency' })).toBeInTheDocument();
   });
 });
