@@ -12,18 +12,27 @@ import {
   CreateAgentlessPolicyRequestSchema,
   DeleteAgentlessPolicyRequestSchema,
   DeleteAgentlessPolicyResponseSchema,
+  GetBulkAgentlessPolicyThroughputRequestSchema,
+  GetBulkAgentlessPolicyThroughputResponseSchema,
+  GetAgentlessPolicyRequestSchema,
+  UpdateAgentlessPolicyRequestSchema,
 } from '../../../common/types/rest_spec/agentless_policy';
 import { AgentlessPolicyResponseSchema } from '../../../common/types/models/agentless_policy_schema';
 import { AGENTLESS_POLICIES_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
+import { AgentlessPolicyListResponseSchema, ListAgentlessPoliciesRequestSchema } from '../../types';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
-import { genericErrorResponse } from '../schema/errors';
+import { genericErrorResponse, notFoundResponse } from '../schema/errors';
 
 import {
   createAgentlessPolicyHandler,
   deleteAgentlessPolicyHandler,
+  getAgentlessPolicyHandler,
+  listAgentlessPoliciesHandler,
   syncAgentlessPoliciesHandler,
+  getBulkAgentlessPolicyThroughputHandler,
+  updateAgentlessPolicyHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -122,6 +131,143 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       createAgentlessPolicyHandler
     );
 
+  // List
+  router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
+    .get({
+      path: AGENTLESS_POLICIES_ROUTES.LIST_PATTERN,
+      summary: 'Get agentless policies',
+      description: 'List agentless policies',
+      options: {
+        tags: ['oas-tag:Fleet agentless policies'],
+        availability: {
+          since: '9.5.0',
+          stability: 'experimental',
+        },
+      },
+      fleetAuthz: {
+        integrations: { readIntegrationPolicies: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/list_agentless_policies.yaml'),
+        },
+        validate: {
+          request: ListAgentlessPoliciesRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => AgentlessPolicyListResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      listAgentlessPoliciesHandler
+    );
+
+  // Get
+  router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
+    .get({
+      path: AGENTLESS_POLICIES_ROUTES.GET_PATTERN,
+      summary: 'Get an agentless policy',
+      description: 'Get an agentless policy by ID',
+      options: {
+        tags: ['oas-tag:Fleet agentless policies'],
+        availability: {
+          since: '9.5.0',
+          stability: 'experimental',
+        },
+      },
+      fleetAuthz: {
+        integrations: { readIntegrationPolicies: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_agentless_policy.yaml'),
+        },
+        validate: {
+          request: GetAgentlessPolicyRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => AgentlessPolicyResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+            404: {
+              description: 'The agentless policy was not found.',
+              body: notFoundResponse,
+            },
+          },
+        },
+      },
+      getAgentlessPolicyHandler
+    );
+
+  // Update
+  router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
+    .put({
+      path: AGENTLESS_POLICIES_ROUTES.UPDATE_PATTERN,
+      summary: 'Update an agentless policy',
+      description:
+        'Update an agentless policy by ID. Uses full-replace semantics: the policy is rebuilt entirely from the request body, so any omitted optional field (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is cleared or reset to its default. The integration package name is immutable and the runtime-managed `cluster_id` is preserved from the existing policy.',
+      options: {
+        tags: ['oas-tag:Fleet agentless policies'],
+        availability: {
+          since: '9.5.0',
+          stability: 'experimental',
+        },
+      },
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/update_agentless_policy.yaml'),
+        },
+        validate: {
+          request: UpdateAgentlessPolicyRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => AgentlessPolicyResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+            404: {
+              description: 'The agentless policy was not found.',
+              body: notFoundResponse,
+            },
+            409: {
+              description:
+                'A conflict occurred — for example, the requested name is already used by another integration policy.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      updateAgentlessPolicyHandler
+    );
+
   // Delete
   router.versioned
     // @ts-ignore https://github.com/elastic/kibana/issues/203170
@@ -165,5 +311,45 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       deleteAgentlessPolicyHandler
+    );
+
+  // Bulk throughput
+  router.versioned
+    .post({
+      path: AGENTLESS_POLICIES_ROUTES.BULK_THROUGHPUT_PATTERN,
+      access: 'internal',
+      summary: 'Get throughput for multiple agentless policies',
+      description: 'Get 24h throughput data for a batch of agentless integration policies.',
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.AGENTS.READ,
+              ],
+            },
+          ],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: GetBulkAgentlessPolicyThroughputRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GetBulkAgentlessPolicyThroughputResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getBulkAgentlessPolicyThroughputHandler
     );
 };

@@ -21,6 +21,8 @@ export type {
   AppHeaderMetadataItems,
   AppHeaderMetadataTextItem,
   AppHeaderTab,
+  AppHeaderTabAction,
+  AppHeaderTabActions,
   AppHeaderTabBadge,
   AppHeaderTabIconBadge,
   AppHeaderTitle,

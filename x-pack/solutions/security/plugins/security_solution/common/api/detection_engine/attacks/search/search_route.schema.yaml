@@ -20,7 +20,11 @@ paths:
           application/json:
             schema:
               description: Elasticsearch query and aggregation request
-              $ref: '../../signals/query_signals/query_signals_route.schema.yaml#/components/schemas/QueryAlertsBodyParams'
+              $ref: '#/components/schemas/SearchAttacksBodyParams'
+            examples:
+              byIds:
+                value:
+                  ids: ['80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1']
       responses:
         200:
           description: Successful response
@@ -50,3 +54,13 @@ paths:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  schemas:
+    SearchAttacksBodyParams:
+      allOf:
+        - $ref: '../../signals/query_signals/query_signals_route.schema.yaml#/components/schemas/QueryAlertsBodyParams'
+        - type: object
+          properties:
+            ids:
+              $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'

@@ -7,7 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   AgentContextLayerPluginSetup,
   AgentContextLayerPluginStart,
@@ -15,6 +15,7 @@ import type {
   AgentContextLayerStartDependencies,
 } from './types';
 import { registerFeatures } from './features';
+import { registerUISettings } from './ui_settings';
 import { registerSearchRoute } from './routes/search';
 import { registerGetRoute } from './routes/get';
 import { registerListRoute } from './routes/list';
@@ -30,6 +31,7 @@ import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
 import { registerAgentContextLayerWorkflowSteps } from './workflow_steps';
 import { corpusEntrySmlType } from './sml_types/corpus_entry';
+import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
 export class AgentContextLayerPlugin
   implements
@@ -58,6 +60,7 @@ export class AgentContextLayerPlugin
     setupDeps: AgentContextLayerSetupDependencies
   ): AgentContextLayerPluginSetup {
     registerFeatures({ features: setupDeps.features });
+    registerUISettings({ uiSettings: coreSetup.uiSettings });
 
     const smlSetup = this.smlServiceInstance.setup({ logger: this.logger.get('sml') });
 
@@ -124,13 +127,13 @@ export class AgentContextLayerPlugin
         isFeatureEnabled: async (request) => {
           // Mirrors `withSmlFeatureFlag` (HTTP routes) and the per-run
           // check inside the SML crawler task. Request-scoped so per-space
-          // overrides of the experimental setting are honored.
+          // overrides of the Context Engine setting are honored.
           if (!this.coreStart) {
             throw new Error('Agent Context Layer feature-flag check called before plugin start');
           }
           const soClient = this.coreStart.savedObjects.getScopedClient(request);
           const uiSettingsClient = this.coreStart.uiSettings.asScopedToClient(soClient);
-          return uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+          return uiSettingsClient.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
         },
       });
     }
@@ -195,48 +198,20 @@ export class AgentContextLayerPlugin
       },
       getTypeDefinition: smlService.getTypeDefinition,
       resolveSmlAttachItems: (params) => resolveSmlAttachItems({ ...params, sml: smlService }),
-      indexAttachment: async (params) => {
-        const soClient = savedObjects.getScopedClient(params.request, {
-          ...(params.includedHiddenTypes?.length
-            ? { includedHiddenTypes: params.includedHiddenTypes }
-            : {}),
-        });
-        const spaceId =
-          params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-        const base = {
-          originId: params.originId,
-          attachmentType: params.attachmentType,
-          action: params.action,
-          spaces: [spaceId],
-          esClient: elasticsearch.client.asInternalUser,
-          savedObjectsClient: soClient,
-          logger: this.logger.get('sml'),
-        };
-        if (params.content !== undefined) {
-          return smlService.indexAttachment({ ...base, content: params.content });
-        }
-        return smlService.indexAttachment({ ...base, force: params.force });
-      },
-      deleteAttachment: async (params) => {
-        const soClient = savedObjects.getScopedClient(params.request, {
-          ...(params.includedHiddenTypes?.length
-            ? { includedHiddenTypes: params.includedHiddenTypes }
-            : {}),
-        });
-        const spaceId =
-          params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-        return smlService.deleteAttachment({
-          originId: params.originId,
-          attachmentType: params.attachmentType,
-          spaces: [spaceId],
-          esClient: elasticsearch.client.asInternalUser,
-          savedObjectsClient: soClient,
-          logger: this.logger.get('sml'),
-          ...(params.ingestionMethod !== undefined
-            ? { ingestionMethod: params.ingestionMethod }
-            : {}),
-        });
-      },
+      indexAttachment: buildIndexAttachment({
+        smlService,
+        elasticsearch,
+        savedObjects,
+        spaces,
+        logger: this.logger.get('sml'),
+      }),
+      deleteAttachment: buildDeleteAttachment({
+        smlService,
+        elasticsearch,
+        savedObjects,
+        spaces,
+        logger: this.logger.get('sml'),
+      }),
     };
 
     this.startContract = startContract;

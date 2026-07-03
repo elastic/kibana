@@ -46,13 +46,18 @@ interface LogRuleChanges {
      */
     action: string;
     /**
-     * Original timestamp of the change
+     * Original timestamp of the change. Uses `ruleSO.updated_at` when omitted.
      */
-    timestamp: string | number | Date;
+    timestamp?: string | number | Date;
     /**
      * Change metadata object to be written to the each change history item
      */
     metadata?: RuleChangeTrackingMetadata;
+    /**
+     * Controls ES index refresh behavior. Pass `'wait_for'` when the history
+     * entry must be immediately searchable after the write.
+     */
+    refresh?: boolean | 'wait_for';
   };
 }
 
@@ -60,7 +65,7 @@ export async function logRuleChanges({
   ruleSOs,
   encryptedFieldsMap,
   rulesClientContext: { changeTrackingService, ruleTypeRegistry, logger, spaceId, isSystemAction },
-  changesContext: { action, timestamp, metadata },
+  changesContext: { action, timestamp, metadata, refresh },
 }: LogRuleChanges): Promise<void> {
   if (!changeTrackingService) {
     return;
@@ -70,6 +75,9 @@ export async function logRuleChanges({
     ? overlayEncryptedFields(ruleSOs, encryptedFieldsMap)
     : ruleSOs;
   const changes: RuleChange[] = [];
+  // Fallback timestamp is used when both timestamp and ruleSO.updated_at are missing.
+  // In practice it'll be almost never used.
+  const fallbackChangeTimestamp = new Date().toISOString();
 
   for (const ruleSO of effectiveRuleSOs) {
     if (ruleSO.error) {
@@ -108,8 +116,13 @@ export async function logRuleChanges({
       );
       const ruleSnapshot = transformRuleDomainToRuleChangeHistorySnapshot(ruleDomain);
 
+      const changeTimestamp =
+        timestamp != null
+          ? new Date(timestamp).toISOString()
+          : ruleSO.updated_at ?? fallbackChangeTimestamp;
+
       changes.push({
-        timestamp: new Date(timestamp).toISOString(),
+        timestamp: changeTimestamp,
         objectId: ruleSO.id,
         objectType: RULE_SAVED_OBJECT_TYPE,
         module: ruleType.solution,
@@ -141,6 +154,7 @@ export async function logRuleChanges({
       action,
       spaceId,
       data,
+      refresh,
     });
   } catch (e) {
     logger.warn(`Unable to log bulk rule changes for action "${action}": ${e}`);
