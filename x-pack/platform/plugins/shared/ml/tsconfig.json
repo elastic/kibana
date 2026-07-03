@@ -158,5 +158,6 @@
     "@kbn/scout",
     "@kbn/core-http-common",
     "@kbn/zod",
+    "@kbn/core-rendering-browser",
   ]
 }
