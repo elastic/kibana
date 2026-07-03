@@ -171,6 +171,7 @@ export function TransactionsTable({
         <EuiFlexItem>
           <EuiCallOut
             announceOnMount
+            size="s"
             title={i18n.translate('apmUiShared.transactionsTable.cardinalityWarning.title', {
               defaultMessage:
                 'Number of transaction groups exceed the allowed maximum (1,000) that are displayed.',
