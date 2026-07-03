@@ -219,18 +219,25 @@ export function DateRangePickerControl() {
       background-color: ${euiTheme.colors.backgroundLightPrimary};
     }
   `;
+  // Temporary until a fix lands in EUI
+  const disabledIconOverrideStyles = css`
+    .euiFormControlLayoutIcons {
+      color: ${euiTheme.colors.textDisabled};
+    }
+  `;
 
   return (
     <div
       ref={controlRef}
       onKeyDown={onControlKeyDown}
-      css={
+      css={[
         width === 'restricted'
           ? wrapperRestrictedStyles
           : width === 'auto' && isEditing
           ? wrapperAutoInputStyles
-          : undefined
-      }
+          : undefined,
+        disabled && disabledIconOverrideStyles,
+      ]}
       data-test-subj="dateRangePickerControlWrapper"
     >
       <EuiFormControlLayout
