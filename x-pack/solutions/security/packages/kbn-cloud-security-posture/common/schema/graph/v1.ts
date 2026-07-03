@@ -90,9 +90,13 @@ export const GRAPH_NODE_ID_MAX_LENGTH = 8192;
 // Elasticsearch index / data-stream names are capped at 255 bytes.
 export const INDEX_NAME_MAX_LENGTH = 255;
 
-// ISO 8601 datetime strings are at most 29 chars ("2024-01-01T00:00:00.000Z");
-// epoch-ms as a string is 13 digits. 32 covers all valid forms with headroom.
-export const TIMESTAMP_STRING_MAX_LENGTH = 32;
+// ISO 8601 datetime strings: millisecond precision is 24 chars
+// ("2024-01-01T00:00:00.000Z"), while nanosecond precision (ES `date_nanos`) with a
+// numeric UTC offset reaches ~36 chars ("2024-01-01T00:00:00.000000000+05:30");
+// epoch-ms as a string is 13 digits. 64 covers all valid forms with generous
+// headroom and matches the ISO-timestamp ceiling used by the entity-store task-state
+// schemas (`ISO_TIMESTAMP_MAX_LENGTH`).
+export const TIMESTAMP_STRING_MAX_LENGTH = 64;
 
 // Enum-like display strings (entity type, sub_type, icon name) whose longest
 // member is well under 64 characters; 64 gives generous headroom.
