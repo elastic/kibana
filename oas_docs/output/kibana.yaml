@@ -45245,6 +45245,23 @@ paths:
         Returns a paginated list of links library items. Each result includes title, description, and metadata. Use `GET /api/links/{id}` to retrieve the complete state.
       operationId: get-links
       parameters:
+        - description: The page of results to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of results to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
         - description: Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.
           in: query
           name: query
@@ -45275,21 +45292,6 @@ paths:
               type: string
             maxItems: 100
             type: array
-        - description: The page of results to return.
-          in: query
-          name: page
-          required: false
-          schema:
-            minimum: 1
-            type: number
-        - description: The number of results to return per page.
-          in: query
-          name: per_page
-          required: false
-          schema:
-            maximum: 1000
-            minimum: 1
-            type: number
       responses:
         '200':
           content:
