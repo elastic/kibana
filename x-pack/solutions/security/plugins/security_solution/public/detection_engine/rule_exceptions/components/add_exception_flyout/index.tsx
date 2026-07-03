@@ -544,6 +544,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
 
   return (
     <EuiFlyout
+      session="never"
       size="l"
       onClose={handleCloseFlyout}
       data-test-subj="addExceptionFlyout"
