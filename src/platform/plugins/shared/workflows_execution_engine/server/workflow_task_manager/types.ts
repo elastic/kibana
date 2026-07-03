@@ -20,7 +20,7 @@ export const WORKFLOW_SCHEDULED_TASK_TYPE = 'workflow:scheduled';
 export const WORKFLOW_MIGRATION_TASK_TYPE = 'workflow:migrate-executions';
 
 /** Stable, well-known id for the singleton recurring migration task. */
-export const WORKFLOW_MIGRATION_TASK_ID = 'workflow:migrate-executions:v97'; // TODO: REMOVE THIS IN PROD
+export const WORKFLOW_MIGRATION_TASK_ID = 'workflow:migrate-executions';
 
 export interface StartWorkflowExecutionParams {
   workflowRunId: string;

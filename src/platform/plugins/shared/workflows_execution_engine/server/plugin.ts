@@ -111,6 +111,7 @@ import {
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
+import { initMigrationTask, scheduleMigrationTask } from './tasks/migration_task/migration_task';
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -134,12 +135,6 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
-
-/** How often the recurring execution-history migration task runs. */
-const WORKFLOW_MIGRATION_TASK_INTERVAL = '24h';
-
-/** Timeout for a single migration run; sized for a batched ES scan + bulk write. */
-const WORKFLOW_MIGRATION_TASK_TIMEOUT = '10m';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -657,100 +652,7 @@ export class WorkflowsExecutionEnginePlugin
         },
       },
     });
-    plugins.taskManager.registerTaskDefinitions({
-      [WORKFLOW_MIGRATION_TASK_TYPE]: {
-        title: 'Migrate Workflow Executions',
-        description:
-          'Migrates terminal workflow & step executions from the mutable execution state index into the append-only execution history data streams.',
-        timeout: WORKFLOW_MIGRATION_TASK_TIMEOUT,
-        // One-shot semantics per scheduled run: on transient failure the recurring
-        // schedule retries on the next interval rather than re-running immediately.
-        maxAttempts: 1,
-        createTaskRunner: ({ abortController }) => {
-          return {
-            run: async () => {
-              const [coreStart] = await core.getStartServices();
-              const esClient = coreStart.elasticsearch.client.asInternalUser;
-              const workflowDsClient = await initializeWorkflowExecutionsClient(
-                coreStart.dataStreams
-              );
-              const workflowStepDsClient = await initializeStepExecutionsClient(
-                coreStart.dataStreams
-              );
-
-              const migrations = [
-                {
-                  sourceIndex: '.workflows-executions',
-                  destIndex: WORKFLOWS_EXECUTIONS_DS,
-                },
-                {
-                  sourceIndex: '.workflows-step-executions',
-                  destIndex: WORKFLOWS_STEP_EXECUTIONS_DS,
-                },
-              ];
-
-              const results: unknown[] = [];
-
-              for (const { sourceIndex, destIndex } of migrations) {
-                try {
-                  const indexExists = await esClient.indices.exists({
-                    index: sourceIndex,
-                  });
-
-                  if (indexExists) {
-                    const asyncReindex = await esClient.reindex({
-                      wait_for_completion: false,
-                      conflicts: 'proceed',
-                      source: {
-                        index: sourceIndex,
-                        size: 3,
-                      },
-                      dest: {
-                        index: destIndex,
-                      },
-                      script: {
-                        lang: 'painless',
-                        source: `
-                        ctx._id = ctx._source.id;
-                        if (ctx._source.createdAt == null) {
-                          ctx._source['@timestamp'] = ctx._source.startedAt;
-                          return;
-                        }
-                        ctx._source['@timestamp'] = ctx._source.createdAt;
-                      `,
-                      },
-                    });
-
-                    while (!abortController.signal.aborted) {
-                      const task = await esClient.tasks.get({
-                        task_id: asyncReindex.task as string,
-                      });
-
-                      if (task.completed) {
-                        results.push(task);
-                        break;
-                      }
-
-                      await new Promise((resolve) => setTimeout(resolve, 1000));
-                    }
-                  }
-                } catch (error) {
-                  results.push({ error: error.message });
-                }
-              }
-
-              await Promise.all(
-                migrations.map(({ sourceIndex }) =>
-                  esClient.indices.putMapping({ index: sourceIndex, _meta: { migrated: true } })
-                )
-              );
-
-              return { state: {} };
-            },
-          };
-        },
-      },
-    });
+    initMigrationTask(core, plugins);
 
     return {};
   }
@@ -767,21 +669,7 @@ export class WorkflowsExecutionEnginePlugin
 
     // Recurring, idempotent: keeps the execution state index small by migrating
     // terminal executions into the history data streams on a fixed interval.
-    void plugins.taskManager
-      .ensureScheduled({
-        id: WORKFLOW_MIGRATION_TASK_ID,
-        taskType: WORKFLOW_MIGRATION_TASK_TYPE,
-        schedule: { interval: WORKFLOW_MIGRATION_TASK_INTERVAL },
-        params: {},
-        state: {},
-      })
-      .catch((error: unknown) => {
-        this.logger.warn(
-          `Failed to schedule workflow executions migration task: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      });
+    void scheduleMigrationTask(plugins, this.logger);
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
