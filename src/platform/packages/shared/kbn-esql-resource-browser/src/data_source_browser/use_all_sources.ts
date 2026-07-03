@@ -38,6 +38,14 @@ const normalizeDatasets = ({ datasets }: EsqlDatasetsResult): ESQLSourceResult[]
     hidden: false,
   })) ?? [];
 
+const mergeSources = (
+  base: ESQLSourceResult[],
+  datasets: ESQLSourceResult[]
+): ESQLSourceResult[] => {
+  const seenNames = new Set(base.map((source) => source.name));
+  return [...base, ...datasets.filter((dataset) => !seenNames.has(dataset.name))];
+};
+
 export interface UseAllSourcesParams {
   isOpen: boolean;
   preloadedSources?: ESQLSourceResult[];
@@ -75,20 +83,32 @@ export const useAllSources = ({
       try {
         const result = await getDatasets();
         return normalizeDatasets(result);
-      } catch {
+      } catch (error) {
+        // getDatasets already swallows fetch errors; this only guards against
+        // normalizeDatasets failing on an unexpected response shape.
+        // eslint-disable-next-line no-console
+        console.error('Failed to normalize the datasets', error);
         return [];
       }
     };
 
     if (preloadedSources !== undefined) {
-      // Even with preloaded sources we still need to fetch datasets, since preloaded
-      // sources come from the autocomplete cache and don't include federated datasets.
-      fetchDatasets().then((datasets) => {
-        if (isMountedRef.current && isEffectActive) {
-          setAllSources([...preloadedSources, ...datasets]);
-        }
-      });
-      return;
+      // Render preloaded sources immediately, then append federated datasets when they
+      // arrive, since preloaded sources come from the autocomplete cache and don't include them.
+      setAllSources(preloadedSources);
+      setIsLoading(true);
+      fetchDatasets()
+        .then((datasets) => {
+          if (isMountedRef.current && isEffectActive) {
+            setAllSources(mergeSources(preloadedSources, datasets));
+          }
+        })
+        .finally(() => {
+          if (isMountedRef.current && isEffectActive) setIsLoading(false);
+        });
+      return () => {
+        isEffectActive = false;
+      };
     }
 
     const fetchSources = async () => {
@@ -103,7 +123,9 @@ export const useAllSources = ({
             getSources?.() ?? [],
             fetchDatasets(),
           ]);
-          if (isMountedRef.current && isEffectActive) setAllSources([...fetched, ...datasets]);
+          if (isMountedRef.current && isEffectActive) {
+            setAllSources(mergeSources(fetched, datasets));
+          }
         }
       } catch {
         if (isMountedRef.current && isEffectActive) setAllSources([]);

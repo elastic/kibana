@@ -22,7 +22,9 @@ export const getDatasets = cacheParametrizedAsyncFunction(
     try {
       const result = await http.get<EsqlDatasetsResult>(DATASETS_ROUTE);
       return result ?? { datasets: [] };
-    } catch {
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to fetch the datasets', error);
       return { datasets: [] };
     }
   },
