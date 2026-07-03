@@ -127,7 +127,6 @@ export const useSuggestionsInput = ({
       setIsOpen(false);
       setSuggestions([]);
       setActiveIndex(null);
-      inputElementRef.current?.focus();
     },
     [value, onChange]
   );
