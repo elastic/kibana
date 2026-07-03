@@ -23,7 +23,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const DELETE_PHASE_CARD = 'dlmPhasesSelectorDeletePhaseCard';
 
   const openLifecycleFlyout = async (dataStreamName: string) => {
-    await pageObjects.indexManagement.clickDataStreamNameLink(dataStreamName);
+    await pageObjects.indexManagement.searchAndClickDataStreamNameLink(dataStreamName);
     await testSubjects.click('manageDataStreamButton');
     await testSubjects.click('editDataLifecycleButton');
     await testSubjects.existOrFail('editDataLifecycleFlyoutApplyButton');
@@ -118,7 +118,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('shows the details flyout when clicking on a data stream', async () => {
       // Open details flyout
-      await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
+      await pageObjects.indexManagement.searchAndClickDataStreamNameLink(TEST_DS_NAME);
       // Verify url is stateful
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/data_streams/${TEST_DS_NAME}`);
@@ -146,7 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await applyLifecycleChange();
 
         // Applying closes the details panel and reloads the list; reopen to verify the summary.
-        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
+        await pageObjects.indexManagement.searchAndClickDataStreamNameLink(TEST_DS_NAME);
         await retry.try(async () => {
           const detail = await testSubjects.getVisibleText('successfulIngestLifecycleDetail');
           expect(detail).to.contain('7 days');
@@ -206,7 +206,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const verifyIndexModeIsOrigin = async (indexModeName: string) => {
         // Open details flyout of data stream
-        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_INDEX_MODE);
+        await pageObjects.indexManagement.searchAndClickDataStreamNameLink(TEST_DS_NAME_INDEX_MODE);
         // Check that index mode detail exists and its label is origin
         expect(await testSubjects.exists('indexModeDetail')).to.be(true);
         expect(await testSubjects.getVisibleText('indexModeDetail')).to.be(indexModeName);
@@ -253,7 +253,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Open data stream
-        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_INDEX_MODE);
+        await pageObjects.indexManagement.searchAndClickDataStreamNameLink(TEST_DS_NAME_INDEX_MODE);
         // Check that index mode detail exists and its label is destination index mode
         expect(await testSubjects.exists('indexModeDetail')).to.be(true);
         expect(await testSubjects.getVisibleText('indexModeDetail')).to.be(indexModeName);
