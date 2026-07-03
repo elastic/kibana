@@ -359,7 +359,9 @@ export const labelNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
     shape: schema.literal('label'),
-    parentId: schema.maybe(schema.string({ maxLength: ENTITY_ID_MAX_LENGTH })),
+    // `parentId` references a parent group node's `id`, which is a composite graph
+    // node id — bound it by the same ceiling as node ids, not raw entity ids.
+    parentId: schema.maybe(schema.string({ maxLength: GRAPH_NODE_ID_MAX_LENGTH })),
     color: nodeColorSchema,
     ips: schema.maybe(
       schema.arrayOf(schema.string({ maxLength: IP_ADDRESS_MAX_LENGTH }), {
@@ -384,7 +386,9 @@ export const relationshipNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
     shape: schema.literal('relationship'),
-    parentId: schema.maybe(schema.string({ maxLength: ENTITY_ID_MAX_LENGTH })),
+    // `parentId` references a parent group node's `id`, which is a composite graph
+    // node id — bound it by the same ceiling as node ids, not raw entity ids.
+    parentId: schema.maybe(schema.string({ maxLength: GRAPH_NODE_ID_MAX_LENGTH })),
   }),
 ]);
 
