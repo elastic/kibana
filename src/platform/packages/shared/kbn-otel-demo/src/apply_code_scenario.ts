@@ -62,7 +62,9 @@ export async function applyCodeScenario({
   log.info(`Preparing code scenario source: ${chalk.yellow(scenario.id)}`);
   await Fs.promises.rm(scenarioRepoDir, { recursive: true, force: true });
   await Fs.promises.mkdir(Path.dirname(scenarioRepoDir), { recursive: true });
-  await execa('git', ['clone', '--local', cleanRepoDir, scenarioRepoDir], { stdio: 'pipe' });
+  await execa('git', ['clone', '--local', '--', cleanRepoDir, scenarioRepoDir], {
+    stdio: 'pipe',
+  });
   await execa('git', ['config', 'user.name', 'Kibana OTel Demo'], {
     cwd: scenarioRepoDir,
     stdio: 'pipe',

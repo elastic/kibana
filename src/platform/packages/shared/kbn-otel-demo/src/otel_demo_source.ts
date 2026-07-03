@@ -24,14 +24,14 @@ async function cloneOtelDemoAtVersion(repoDir: string, version: string): Promise
   try {
     await execa(
       'git',
-      ['clone', '--depth', '1', '--branch', version, OTEL_DEMO_REPO_URL, repoDir],
+      ['clone', '--depth', '1', '--branch', version, '--', OTEL_DEMO_REPO_URL, repoDir],
       { stdio: 'inherit' }
     );
   } catch {
     await Fs.promises.rm(repoDir, { recursive: true, force: true });
     await execa(
       'git',
-      ['clone', '--depth', '1', '--branch', `v${version}`, OTEL_DEMO_REPO_URL, repoDir],
+      ['clone', '--depth', '1', '--branch', `v${version}`, '--', OTEL_DEMO_REPO_URL, repoDir],
       { stdio: 'inherit' }
     );
   }
