@@ -12,7 +12,7 @@ import { entityRiskScoreChangedTriggerDefinition } from '../../../common/workflo
 export const entityRiskScoreChangedPublicDefinition: PublicTriggerDefinition = {
   ...entityRiskScoreChangedTriggerDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/sortable').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/app_security').then(({ icon }) => ({
       default: icon,
     }))
   ),

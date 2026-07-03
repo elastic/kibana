@@ -12,6 +12,8 @@ import { entityAssetCriticalityUpdatedTriggerDefinition } from '../../../common/
 export const entityAssetCriticalityUpdatedPublicDefinition: PublicTriggerDefinition = {
   ...entityAssetCriticalityUpdatedTriggerDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/refresh').then(({ icon }) => ({ default: icon }))
+    import('@elastic/eui/es/components/icon/assets/app_security').then(({ icon }) => ({
+      default: icon,
+    }))
   ),
 };

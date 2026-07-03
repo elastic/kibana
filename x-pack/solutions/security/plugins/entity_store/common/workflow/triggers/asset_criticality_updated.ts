@@ -11,7 +11,7 @@ import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { EntityType } from '../../domain/definitions/entity_schema';
 
 export const ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID =
-  'entityStore.entityAssetCriticalityUpdated' as const;
+  'security.entityAssetCriticalityUpdated' as const;
 
 export const ASSET_CRITICALITY_UPDATED_WATCHED_FIELDS = ['asset.criticality'] as const;
 

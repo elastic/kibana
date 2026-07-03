@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { EntityType } from '../../domain/definitions/entity_schema';
 
-export const ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID = 'entityStore.entityRiskScoreChanged' as const;
+export const ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID = 'security.entityRiskScoreChanged' as const;
 
 export const RISK_SCORE_CHANGED_WATCHED_FIELDS = ['entity.risk.calculated_score_norm'] as const;
 
