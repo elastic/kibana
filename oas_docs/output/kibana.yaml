@@ -29617,6 +29617,277 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/fleet/agentless_policies/_upgrade:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies/_upgrade</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Upgrade multiple agentless policies to their installed package version, migrating each package policy's config onto the new schema. Always returns 200 with a per-policy result array; a missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch, so valid ids are still upgraded. A successful result means the policy's saved object was upgraded, while the agentless deployment is reconciled asynchronously in the background. Note: agent-policy-level agentless settings (resources, ownership tags) are not re-derived from the new package version — use the update (PUT) endpoint for those.
+      operationId: post-fleet-agentless-policies-upgrade
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              upgradeAgentlessPoliciesRequestExample:
+                description: Bulk upgrade agentless policies to their installed package version
+                value:
+                  policyIds:
+                    - d52a7812-5736-4fdc-aed8-72152afa1ffa
+                    - aws-policy-12345
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_bulk_upgrade_agentless_policies_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                upgradeAgentlessPoliciesPartialFailureResponseExample:
+                  description: Example response where one policy upgraded and another id was missing or not an agentless policy (the batch still returns 200)
+                  value:
+                    - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      name: ess_billing-1
+                      success: true
+                    - body:
+                        message: Agentless policy aws-policy-12345 not found
+                      id: aws-policy-12345
+                      statusCode: 404
+                      success: false
+                upgradeAgentlessPoliciesResponseExample:
+                  description: Example response where every policy was upgraded
+                  value:
+                    - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      name: ess_billing-1
+                      success: true
+                    - id: aws-policy-12345
+                      name: cspm-aws-policy
+                      success: true
+              schema:
+                items:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_bulk_upgrade_agentless_policy_result'
+                maxItems: 10000
+                type: array
+          description: 'Indicates a successful response. Each item reports the per-policy upgrade outcome; inspect every item''s `success` flag. A missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch.'
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Bulk upgrade agentless policies
+      tags:
+        - Fleet agentless policies
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/agentless_policies/_upgrade/dryrun:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies/_upgrade/dryrun</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Preview upgrading multiple agentless policies without applying any change. Targets the installed package version by default; pass `pkgVersion` to preview a specific (for example, not-yet-installed) version. Each result returns the current/proposed version and any migration errors, plus — only on a clean dry-run (`hasErrors: false`) — the migrated `proposedPolicy`. `proposedPolicy` is for the edit-and-upgrade flow (edit it, then save via the update (PUT) endpoint); to apply an upgrade as-is, use `_upgrade`.
+      operationId: post-fleet-agentless-policies-upgrade-dryrun
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              upgradeAgentlessPoliciesDryRunRequestExample:
+                description: Preview the upgrade of agentless policies to their installed package version
+                value:
+                  policyIds:
+                    - d52a7812-5736-4fdc-aed8-72152afa1ffa
+              upgradeAgentlessPoliciesDryRunTargetVersionRequestExample:
+                description: Preview the upgrade against an explicit target package version (for example, before installing the new version). Defaults to the installed package version when omitted.
+                value:
+                  pkgVersion: 1.6.0
+                  policyIds:
+                    - d52a7812-5736-4fdc-aed8-72152afa1ffa
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_upgrade_dry_run_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                upgradeAgentlessPoliciesDryRunMigrationErrorsExample:
+                  description: Example dry-run response where migrating the config to the new version produced errors. `hasErrors` is true and `errors` explains why; do not feed the (partial) proposed config into the update endpoint without resolving them.
+                  value:
+                    - currentVersion: 1.5.0
+                      errors:
+                        - message: Variable "organization_id" is required
+                      hasErrors: true
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      name: ess_billing-1
+                      proposedVersion: 1.6.0
+                upgradeAgentlessPoliciesDryRunMixedResponseExample:
+                  description: 'Example dry-run response for a mixed batch: one policy previews cleanly while two ids are missing or not agentless. Missing / non-agentless ids are surfaced as per-item failures (`hasErrors: true` + `statusCode`) without failing the batch, and results stay in request order.'
+                  value:
+                    - currentVersion: 0.5.0
+                      hasErrors: false
+                      id: 2e426392-f856-4ab2-bc31-92d4dbb8d134
+                      name: agentless_hello_world-16
+                      proposedPolicy:
+                        cloud_connector: null
+                        created_at: '2026-07-01T15:59:08.299Z'
+                        created_by: admin
+                        description: ''
+                        id: 2e426392-f856-4ab2-bc31-92d4dbb8d134
+                        inputs:
+                          agentless_hello_world-cel:
+                            enabled: true
+                            streams:
+                              agentless_hello_world.generic:
+                                enabled: true
+                                vars:
+                                  url: https://epr.elastic.co
+                              agentless_hello_world.mock_counter:
+                                enabled: false
+                                vars:
+                                  events_per_second: 10
+                                  mode: constant
+                                  spike_events: 100
+                                  spike_every_seconds: 60
+                          agentless_hello_world-httpjson:
+                            enabled: false
+                            streams:
+                              agentless_hello_world.generic:
+                                enabled: false
+                                vars:
+                                  url: https://epr.elastic.co
+                        name: agentless_hello_world-16
+                        namespace: default
+                        package:
+                          name: agentless_hello_world
+                          title: Agentless Hello World
+                          version: 0.5.0
+                        updated_at: '2026-07-01T16:02:14.067Z'
+                        updated_by: admin
+                      proposedVersion: 0.5.0
+                    - body:
+                        message: Agentless policy 9300464c-6cfc-4566-850d-e9e7927457fe not found
+                      hasErrors: true
+                      id: 9300464c-6cfc-4566-850d-e9e7927457fe
+                      statusCode: 404
+                    - body:
+                        message: Agentless policy 5b8763e9-791a-4038-be29-b384d578200e not found
+                      hasErrors: true
+                      id: 5b8763e9-791a-4038-be29-b384d578200e
+                      statusCode: 404
+                upgradeAgentlessPoliciesDryRunResponseExample:
+                  description: 'Example clean dry-run response (`hasErrors: false`) with the proposed (migrated) policy. `proposedPolicy` is intended for the edit-and-upgrade flow: edit it and submit the edited payload to the update (PUT) endpoint. To apply without edits, use the `_upgrade` endpoint instead.'
+                  value:
+                    - currentVersion: 1.5.0
+                      hasErrors: false
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      name: ess_billing-1
+                      proposedPolicy:
+                        created_at: '2025-11-06T18:27:43.541Z'
+                        created_by: test_user
+                        description: test
+                        id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                        inputs:
+                          ESS Billing-cel:
+                            enabled: true
+                            vars:
+                              organization_id: '1234'
+                        name: ess_billing-1
+                        namespace: default
+                        package:
+                          name: ess_billing
+                          title: Elasticsearch Service Billing
+                          version: 1.6.0
+                        updated_at: '2025-11-06T18:27:43.541Z'
+                        updated_by: test_user
+                      proposedVersion: 1.6.0
+              schema:
+                items:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_upgrade_dry_run_result'
+                maxItems: 10000
+                type: array
+          description: 'Indicates a successful response. Each clean item (`hasErrors: false`) previews the migrated policy as a consumable agentless policy (`proposedPolicy`); a missing or non-agentless id, or a migration error, is reported as a per-item failure (`hasErrors: true`, with `proposedPolicy` omitted) without failing the batch. Inspect every item.'
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Preview an agentless policies upgrade
+      tags:
+        - Fleet agentless policies
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/agentless_policies/{policyId}:
     delete:
       description: |-
@@ -82289,6 +82560,73 @@ components:
         - item
       title: agentless_policy_response
       type: object
+    Kibana_HTTP_APIs_agentless_policy_upgrade_dry_run_request:
+      additionalProperties: false
+      properties:
+        pkgVersion:
+          description: Target package version to preview the upgrade against. Defaults to the installed package version.
+          maxLength: 256
+          type: string
+        policyIds:
+          description: IDs of the agentless policies to preview upgrading.
+          items:
+            maxLength: 256
+            type: string
+          maxItems: 1000
+          type: array
+      required:
+        - policyIds
+      title: agentless_policy_upgrade_dry_run_request
+      type: object
+    Kibana_HTTP_APIs_agentless_policy_upgrade_dry_run_result:
+      additionalProperties: false
+      properties:
+        body:
+          additionalProperties: false
+          type: object
+          properties:
+            message:
+              description: Error message when the dry-run failed for this policy.
+              type: string
+          required:
+            - message
+        currentVersion:
+          description: The current installed package version of the policy.
+          type: string
+        errors:
+          description: Migration errors encountered while computing the upgrade.
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              message:
+                description: Human-readable migration error.
+                type: string
+            required:
+              - message
+          type: array
+        hasErrors:
+          description: Whether the dry-run migration produced any errors.
+          type: boolean
+        id:
+          description: The ID of the agentless policy.
+          type: string
+        name:
+          description: The name of the agentless policy.
+          type: string
+        proposedPolicy:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy'
+        proposedVersion:
+          description: The package version the policy would be upgraded to.
+          type: string
+        statusCode:
+          description: HTTP-like status code when the dry-run failed for this policy.
+          type: number
+      required:
+        - id
+        - hasErrors
+      title: agentless_policy_upgrade_dry_run_result
+      type: object
     Kibana_HTTP_APIs_aiops_change_point_chart:
       additionalProperties: false
       description: Change point detection chart embeddable schema
@@ -83602,6 +83940,49 @@ components:
       required:
         - packages
       title: bulk_uninstall_packages_request
+      type: object
+    Kibana_HTTP_APIs_bulk_upgrade_agentless_policies_request:
+      additionalProperties: false
+      properties:
+        policyIds:
+          description: IDs of the agentless policies to upgrade to their installed package version.
+          items:
+            maxLength: 256
+            type: string
+          maxItems: 1000
+          type: array
+      required:
+        - policyIds
+      title: bulk_upgrade_agentless_policies_request
+      type: object
+    Kibana_HTTP_APIs_bulk_upgrade_agentless_policy_result:
+      additionalProperties: false
+      properties:
+        body:
+          additionalProperties: false
+          type: object
+          properties:
+            message:
+              description: Error message when the upgrade failed for this policy.
+              type: string
+          required:
+            - message
+        id:
+          description: The ID of the agentless policy.
+          type: string
+        name:
+          description: The name of the agentless policy.
+          type: string
+        statusCode:
+          description: HTTP-like status code when the upgrade failed for this policy.
+          type: number
+        success:
+          description: Whether the policy's saved object was upgraded successfully. The live workload is reconciled asynchronously in the background.
+          type: boolean
+      required:
+        - id
+        - success
+      title: bulk_upgrade_agentless_policy_result
       type: object
     Kibana_HTTP_APIs_bulk_upgrade_packages_request:
       additionalProperties: false
