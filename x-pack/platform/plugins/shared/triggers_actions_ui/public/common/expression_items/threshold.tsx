@@ -16,6 +16,7 @@ import {
   EuiSelect,
   EuiFieldNumber,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { isNil } from 'lodash';
 import type { Comparator } from '@kbn/alerting-comparators';
@@ -73,12 +74,22 @@ export const ThresholdExpression = ({
   initialPopoverOpen = false,
   badge,
 }: ThresholdExpressionProps) => {
+  const { euiTheme } = useEuiTheme();
   const comparators = customComparators ?? builtInComparators;
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(initialPopoverOpen);
   const [comparator, setComparator] = useState<string>(thresholdComparator);
   const [numRequiredThresholds, setNumRequiredThresholds] = useState<number>(
     comparators[thresholdComparator].requiredValues
   );
+  const hasThresholdError = Boolean(
+    (errors.threshold0 && errors.threshold0.length) || (errors.threshold1 && errors.threshold1.length)
+  );
+  // A badge (and, for the warning row, a remove button positioned over this
+  // expression) leaves no safe place for EuiExpression's own invalid icon to
+  // render without colliding with it. The description text is already
+  // colored red via `color`, so fall back to a border instead of the icon
+  // whenever a badge is present.
+  const hasBadge = Boolean(badge);
 
   const andThresholdText = i18n.translate(
     'xpack.triggersActionsUI.common.expressionItems.threshold.andLabel',
@@ -114,20 +125,20 @@ export const ThresholdExpression = ({
               {badge}
             </>
           }
-          isActive={Boolean(
-            alertThresholdPopoverOpen ||
-              (errors.threshold0 && errors.threshold0.length) ||
-              (errors.threshold1 && errors.threshold1.length)
-          )}
+          isActive={Boolean(alertThresholdPopoverOpen || hasThresholdError)}
           onClick={() => {
             setAlertThresholdPopoverOpen(true);
           }}
           display={display === 'inline' ? 'inline' : 'columns'}
-          isInvalid={
-            (errors.threshold0 && errors.threshold0.length) ||
-            (errors.threshold1 && errors.threshold1.length)
-              ? true
-              : false
+          isInvalid={hasBadge ? false : hasThresholdError}
+          color={hasBadge && hasThresholdError ? 'danger' : undefined}
+          style={
+            hasBadge && hasThresholdError
+              ? {
+                  border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.danger}`,
+                  borderRadius: euiTheme.border.radius.medium,
+                }
+              : undefined
           }
         />
       }
