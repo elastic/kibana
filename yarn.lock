@@ -2205,10 +2205,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@71.7.0":
-  version "71.7.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-71.7.0.tgz#9ff7c35d2bc93987a0267abdde2b967c181fdf7c"
-  integrity sha512-AH+WdEAlAaFY3YjWkLD5WofkH1J9dyDRkqX/GwJxVS7hiCSbKo2AFUIO1JBPnJ0xjMCSk100cFgIb8NDlUo5jw==
+"@elastic/charts@71.8.0":
+  version "71.8.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-71.8.0.tgz#e60fbebbd82006e6d705b4c3cc04ccc59ee4c042"
+  integrity sha512-Vtk9vK1naR1yofgQ3VYGMS1vnhYkPNXYlM6Sjt+KWWkGqqgAnX36vVOpeM2xtSzvXk3BziB4V4R+ZDThn29qVA==
   dependencies:
     "@popperjs/core" "^2.11.8"
     "@reduxjs/toolkit" "1.9.7"
@@ -4547,6 +4547,22 @@
   uid ""
 
 "@kbn/agent-builder-tools-base@link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-visualizations-common@link:x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-visualizations-plugin@link:x-pack/platform/plugins/shared/agent_builder_visualizations":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-visualizations-server@link:x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-visualizations@link:x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations":
   version "0.0.0"
   uid ""
 
@@ -35311,9 +35327,9 @@ undici@7.28.0, undici@^7.19.1:
   integrity sha512-cRZYrTDwWznlnRiPjggAGxZXanty6M8RV1ff8Wm4LWXBp7/IG8v5DnOm74DtUBp9OONpK75YlPnIjQqX0dBDtA==
 
 undici@^6.21.1, undici@^6.21.2:
-  version "6.24.1"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-6.24.1.tgz#9df1425cede20b836d95634347946f79578b7e71"
-  integrity sha512-sC+b0tB1whOCzbtlx20fx3WgCXwkW627p4EA9uM+/tNNPkSS+eSEld6pAs9nDv7WbY1UUljBMYPtu9BCOrCWKA==
+  version "6.27.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-6.27.0.tgz#41f9e48f7c5a40d27376caaead8c9a9fc7bca9c4"
+  integrity sha512-YmfV3YnEDzXRC5lZ2jWtWWHKGUm1zIt8AhesR1tens+HTNv+YZlN/dp6G727LOvMJ8xjP9Be7Y2Sdr96LDm+pg==
 
 unherit@^1.0.4:
   version "1.1.0"
