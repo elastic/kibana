@@ -13,7 +13,7 @@ import { JsonTab } from './json_tab';
 import {
   JSON_TAB_CONTENT_TEST_ID,
   JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID,
-} from '../../../shared/components/json_tab';
+} from '../../../../flyout_v2/shared/tabs/json_tab';
 import { PREFIX } from '../../../shared/test_ids';
 
 jest.mock('@elastic/eui', () => ({

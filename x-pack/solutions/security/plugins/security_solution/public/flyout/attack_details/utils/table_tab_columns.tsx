@@ -7,14 +7,23 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import memoizeOne from 'memoize-one';
 import { EuiText, type EuiBasicTableColumn } from '@elastic/eui';
-
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EventFieldsData } from '../../../common/components/event_details/types';
 import { TableFieldNameCell } from '../../document_details/right/components/table_field_name_cell';
-import { getFieldFromBrowserField } from '../../document_details/right/tabs/table_tab';
 import { CellActions } from '../components/cell_actions';
 import { TableFieldValueCell } from '../components/table_field_value_cell';
+
+const getFieldFromBrowserField = memoizeOne(
+  (field: string, browserFields: BrowserFields): FieldSpec | undefined => {
+    const category = getCategory(field);
+    return browserFields[category]?.fields?.[field] as FieldSpec;
+  },
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
+);
 
 export const FIELD = i18n.translate(
   'xpack.securitySolution.attackDetailsFlyout.table.fieldCellLabel',

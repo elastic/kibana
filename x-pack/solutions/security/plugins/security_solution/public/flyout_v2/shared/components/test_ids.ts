@@ -45,6 +45,21 @@ export const OPEN_FLYOUT_LINK_TEST_ID = `${PREFIX}OpenFlyoutLink` as const;
 export const FLYOUT_LOADING_TEST_ID = `${PREFIX}Loading` as const;
 export const FLYOUT_ERROR_TEST_ID = `${PREFIX}Error` as const;
 
+/* Table tab */
+
+export const TABLE_TAB_TEST_ID = `${PREFIX}TableTab` as const;
+export const TABLE_TAB_PIN_ACTION_TEST_ID = `${PREFIX}TableTabPinAction` as const;
+export const TABLE_TAB_TOUR_TEST_ID = `${PREFIX}TableTabTour` as const;
+
+const TABLE_TAB_SETTING_TEST_ID = `${PREFIX}TableTabSetting` as const;
+export const TABLE_TAB_SETTING_BUTTON_TEST_ID = `${TABLE_TAB_SETTING_TEST_ID}Button` as const;
+export const TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID =
+  `${TABLE_TAB_SETTING_TEST_ID}HighlightedFieldsOnly` as const;
+export const TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID =
+  `${TABLE_TAB_SETTING_TEST_ID}HideEmptyFields` as const;
+export const TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID =
+  `${TABLE_TAB_SETTING_TEST_ID}HideAlertFields` as const;
+
 export const GRAPH_PREVIEW_TEST_ID = `${PREFIX}GraphPreview` as const;
 export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` as const;
 export const GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID =

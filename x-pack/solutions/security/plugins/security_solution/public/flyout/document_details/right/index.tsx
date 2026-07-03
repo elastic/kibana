@@ -9,8 +9,9 @@ import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
-import { useTabs } from './hooks/use_tabs';
+import { useTabs } from '../../../flyout_v2/shared/hooks/use_tabs';
 import { FLYOUT_STORAGE_KEYS } from '../shared/constants/local_storage';
+import { allThreeTabs, twoTabs } from './tabs';
 import { useKibana } from '../../../common/lib/kibana';
 import { useDocumentDetailsContext } from '../shared/context';
 import type { DocumentDetailsProps } from '../shared/types';
@@ -36,7 +37,12 @@ export const RightPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => 
   // if the flyout is expandable we render all 3 tabs (overview, table and json)
   // if the flyout is not, we render only table and json
   const flyoutIsExpandable = useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject });
-  const { tabsDisplayed, selectedTabId } = useTabs({ flyoutIsExpandable, path });
+  const tabsDisplayed = flyoutIsExpandable ? allThreeTabs : twoTabs;
+  const { selectedTabId } = useTabs<RightPanelPaths>({
+    validTabIds: tabsDisplayed.map((t) => t.id),
+    storageKey: FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS,
+    initialTabId: path?.tab,
+  });
 
   const setSelectedTabId = (tabId: RightPanelTabType['id']) => {
     openRightPanel({

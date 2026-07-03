@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiText, EuiToolTip, type EuiBasicTableColumn } from '@e
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { getFieldFromBrowserField } from '../tabs/table_tab';
 import { TableFieldNameCell } from '../components/table_field_name_cell';
-import { TableFieldValueCell } from '../components/table_field_value_cell';
+import { TableFieldValueCell } from '../../../../flyout_v2/shared/tabs/table_field_value_cell';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { CellActions } from '../../shared/components/cell_actions';
 import { FLYOUT_TABLE_PIN_ACTION_TEST_ID } from '../components/test_ids';
@@ -125,6 +125,7 @@ export const getTableTabColumns: ColumnsProvider = ({
       return (
         <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
           <TableFieldValueCell
+            field={data.field}
             scopeId={scopeId}
             data={data as EventFieldsData}
             eventId={eventId}

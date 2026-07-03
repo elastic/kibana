@@ -10,11 +10,10 @@ import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FlyoutError } from '../components/flyout_error';
 
 export const JSON_TAB_CONTENT_TEST_ID = 'jsonView' as const;
-export const JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID = `JsonTabCopyToClipboard` as const;
-
-// import { useDocumentDetailsContext } from './context';
+export const JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID = 'JsonTabCopyToClipboard' as const;
 
 const FLYOUT_BODY_PADDING = 24;
 const COPY_TO_CLIPBOARD_BUTTON_HEIGHT = 24;
@@ -24,24 +23,27 @@ export interface JsonTabProps {
   /**
    * The data-test-subj to prefix the component one's
    */
-  ['data-test-subj']?: string;
-  /**
-   * Use to influence the height of the JsonCodeEditor (in some place the flyout does not have a footer).
-   */
-  showFooterOffset: boolean;
+  'data-test-subj': string;
   /**
    * Json value to render in the JsonCodeEditor
    */
   value: Record<string, unknown>;
+  /**
+   * When true, omits the footer height from the editor height calculation (use when there is no flyout footer).
+   */
+  showFooterOffset?: boolean;
+  isEmpty?: boolean;
 }
 
-/**
- * Json view displayed in the document details expandable flyout right section and in the indicator flyout.
- */
+/** Renders a document as formatted JSON with a copy-to-clipboard button. Shows an error state when `isEmpty` is true. */
 export const JsonTab = memo(
-  ({ value, showFooterOffset, 'data-test-subj': dataTestSubj }: JsonTabProps) => {
+  ({
+    value,
+    'data-test-subj': dataTestSubj,
+    isEmpty = false,
+    showFooterOffset = false,
+  }: JsonTabProps) => {
     const jsonValue = JSON.stringify(value, null, 2);
-
     const flexGroupElement = useRef<HTMLDivElement>(null);
     const [editorHeight, setEditorHeight] = useState<number>();
 
@@ -60,7 +62,9 @@ export const JsonTab = memo(
       }
 
       setEditorHeight(height);
-    }, [setEditorHeight, showFooterOffset]);
+    }, [showFooterOffset]);
+
+    if (isEmpty) return <FlyoutError />;
 
     return (
       <EuiFlexGroup
