@@ -38,6 +38,8 @@ export interface LocaleGrammar {
   durationTemplates: { past: string[]; future: string[] };
   /** `{count} {unit}`-shaped templates for "N units ago/from now". */
   instantTemplates: { past: string[]; future: string[] };
+  // TODO: rename — bare `generation` reads like a version counter rather than an
+  // exception layer applied when generating text.
   /**
    * Grammatical-agreement overrides applied only when GENERATING text.
    * Parsing is unaffected — every accepted surface form belongs in
