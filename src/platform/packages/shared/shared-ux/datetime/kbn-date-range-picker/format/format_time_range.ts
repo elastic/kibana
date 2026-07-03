@@ -215,10 +215,14 @@ function fillTemplate(template: string, count: number, unitWord: string): string
 
 const pluralityOf = (count: number): 'singular' | 'plural' => (count === 1 ? 'singular' : 'plural');
 
-/** Resolves the unit word for `unit`/`count` in `grammar`, falling back to English if absent. */
+/**
+ * Resolves the unit word for `unit`/`count` in `grammar`, falling back to
+ * English, and to the raw `unit` string when it is not a known unit at all.
+ */
 function resolveUnitWord(unit: string, count: number, grammar: LocaleGrammar): string {
-  const words = grammar.unitWords[unit as TimeUnit] ?? ENGLISH_GRAMMAR.unitWords[unit as TimeUnit];
-  return words[pluralityOf(count)];
+  const words: LocaleGrammar['unitWords'][TimeUnit] | undefined =
+    grammar.unitWords[unit as TimeUnit] ?? ENGLISH_GRAMMAR.unitWords[unit as TimeUnit];
+  return words ? words[pluralityOf(count)] : unit;
 }
 
 /**
