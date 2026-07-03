@@ -157,7 +157,6 @@ dependsOn:
   - '@kbn/react-hooks'
   - '@kbn/app-header'
   - '@kbn/use-observable'
-  - '@kbn/esql-language'
 tags:
   - plugin
   - prod
