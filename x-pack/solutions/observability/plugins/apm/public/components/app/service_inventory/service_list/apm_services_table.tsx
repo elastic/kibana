@@ -124,12 +124,11 @@ export function getServiceColumns({
               return (
                 <EuiToolTip
                   position="bottom"
-                  content={i18n.translate(
-                    'xpack.apm.home.servicesTable.tooltip.activeAlertsExplanation',
-                    {
-                      defaultMessage: 'Active alerts',
-                    }
-                  )}
+                  content={i18n.translate('xpack.apm.serviceHeader.alertsBadge.countLabel', {
+                    defaultMessage:
+                      '{count, plural, one {# active alert} other {# active alerts}}. Click to view more.',
+                    values: { count: alertsCount },
+                  })}
                 >
                   <EuiBadge
                     data-test-subj="serviceInventoryAlertsBadgeLink"

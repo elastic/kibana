@@ -134,7 +134,7 @@ export function AnomaliesBadge({ score, detectorType, navigationProps }: Anomali
         })
       : i18n.translate('xpack.apm.anomaliesBadge.tooltip.score', {
           defaultMessage:
-            'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}}{hasHref, select, true { - Click to view more} other {}}',
+            'Anomaly score (max.): {score}{detectorType, select, none {} other { - {detectorLabel}}}{hasHref, select, true { - Click to view more.} other {}}',
           values: {
             score: score.toFixed(2),
             detectorType: detectorType ?? 'none',

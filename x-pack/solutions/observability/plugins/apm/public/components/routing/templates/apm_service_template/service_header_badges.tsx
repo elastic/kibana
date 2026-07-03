@@ -37,7 +37,7 @@ export function ServiceHeaderBadges({
 }: ServiceHeaderBadgesProps) {
   const { euiTheme } = useEuiTheme();
   const { core, plugins } = useApmPluginContext();
-  const { capabilities, navigateToUrl } = core.application;
+  const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canReadSlos = !!capabilities.slo?.read;
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
@@ -127,20 +127,10 @@ export function ServiceHeaderBadges({
   }
 
   const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.countLabel', {
-    defaultMessage: '{count, plural, one {# active alert} other {# active alerts}}.',
+    defaultMessage:
+      '{count, plural, one {# active alert} other {# active alerts}}. Click to view more.',
     values: { count: alertsCount },
   });
-
-  // Both the alerts and anomalies badges link to their respective tabs (alerts
-  // and overview). When the user is already on that tab the badge has nothing
-  // to navigate to, so we render it as non-interactive to avoid a link that
-  // "does nothing" (and the related screen-reader confusion).
-  const isOnAlertsTab = selectedTab === 'alerts';
-
-  const onAlertsBadgeClick = (e: React.MouseEvent | React.KeyboardEvent) => {
-    e.preventDefault();
-    navigateToUrl(alertsTabHref);
-  };
 
   return (
     <EuiFlexGroup
@@ -156,9 +146,7 @@ export function ServiceHeaderBadges({
               data-test-subj="serviceHeaderAlertsBadge"
               color="danger"
               iconType="warning"
-              {...(isOnAlertsTab
-                ? { role: 'img', 'aria-label': alertsTooltip }
-                : { onClick: onAlertsBadgeClick, onClickAriaLabel: alertsTooltip })}
+              href={alertsTabHref}
             >
               {alertsCount}
             </EuiBadge>
