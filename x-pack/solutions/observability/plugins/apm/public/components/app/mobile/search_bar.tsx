@@ -58,13 +58,11 @@ export function MobileSearchBar({
   return (
     <div ref={setSearchBarContainerRef}>
       {showUnifiedSearchBar && (
-        <EuiFlexItem>
-          <UnifiedSearchBar
-            placeholder={searchBarPlaceholder}
-            showQueryInput={showQueryInput}
-            showFilterBar={showFilterBar}
-          />
-        </EuiFlexItem>
+        <UnifiedSearchBar
+          placeholder={searchBarPlaceholder}
+          showQueryInput={showQueryInput}
+          showFilterBar={showFilterBar}
+        />
       )}
       {hasSecondaryFilters && (
         <>
