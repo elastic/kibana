@@ -852,6 +852,7 @@ export interface WorkflowsSearchParams {
   sortField?: WorkflowSortField;
   sortOrder?: 'asc' | 'desc';
   managed?: 'all' | 'managed' | 'unmanaged';
+  visibilityContext?: string[];
 }
 
 export interface RequestOptions {
