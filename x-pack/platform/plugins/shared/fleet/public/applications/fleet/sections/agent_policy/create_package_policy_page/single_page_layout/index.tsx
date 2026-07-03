@@ -223,6 +223,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
+    submitAttempted,
     createDatasetTemplates,
     setCreateDatasetTemplates,
   } = useOnSubmit({
@@ -598,7 +599,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults}
-            submitAttempted={formState === 'INVALID'}
+            submitAttempted={submitAttempted}
             isAgentlessSelected={isAgentlessSelected}
             agentPolicies={agentPolicies}
             onNamespaceCustomizationEnabledChange={(enabled) => {
@@ -617,7 +618,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults}
-              submitAttempted={formState === 'INVALID'}
+              submitAttempted={submitAttempted}
               isAgentlessSelected={isAgentlessSelected}
               varGroupSelections={varGroupSelections}
               bottomExtension={
@@ -652,7 +653,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       packagePolicy,
       updatePackagePolicy,
       validationResults,
-      formState,
+      submitAttempted,
       extensionView,
       createBottomExtensionView,
       integrationToEnable,

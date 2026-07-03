@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient } from '@kbn/react-query';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -170,11 +170,9 @@ const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
 
 const mockedUseEpisodesKpisQuery = jest.mocked(useEpisodesKpisQuery);
 
-// The page calls useEpisodesKpisQuery twice: filtered (filterState defined)
-// and total (filterState undefined). Differentiate by that arg.
-const defaultKpisImpl: typeof useEpisodesKpisQuery = ({ filterState }) => ({
+const defaultKpisImpl: typeof useEpisodesKpisQuery = () => ({
   data: {
-    alertsCount: filterState ? 3 : 10,
+    alertsCount: 3,
     firingRules: 0,
     assignedToMe: 0,
     unassigned: 0,
@@ -193,15 +191,10 @@ const getCapturedBulkActions = (): CustomBulkActions => {
 };
 
 const renderPage = () => {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <I18nProvider>
-      <MemoryRouter>
-        <QueryClientProvider client={queryClient}>
-          <AlertEpisodesListPage />
-        </QueryClientProvider>
-      </MemoryRouter>
-    </I18nProvider>
+    <ListPageTestProviders>
+      <AlertEpisodesListPage />
+    </ListPageTestProviders>
   );
 };
 
@@ -221,7 +214,13 @@ describe('AlertEpisodesListPage', () => {
   });
 
   it('renders the experimental badge in the page header', () => {
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alert episodes');
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
+  it('renders the manage rules link in the app header menu', async () => {
+    const manageRulesLink = await screen.findByTestId('alertingV2EpisodesListManageRules');
+    expect(manageRulesLink).toHaveAttribute('href', '/app/management/alertingV2/rules');
   });
 
   it('passes customBulkActions derived from episode actions to UnifiedDataTable', () => {
@@ -394,17 +393,16 @@ describe('episode count + reset filters toolbar', () => {
     mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
   });
 
-  it('renders "Showing X of Y alerts" with filtered and total counts', async () => {
+  it('renders the episode count', async () => {
     renderPage();
     const node = await screen.findByTestId('alertEpisodesItemCount');
-    expect(node.textContent).toMatch(/^Showing\s+3\s+of\s+10\s+alerts$/);
+    expect(node.textContent).toMatch(/^Showing\s+3\s+episodes$/);
   });
 
-  it('fires useEpisodesKpisQuery both with and without filterState', () => {
+  it('fires useEpisodesKpisQuery only with filterState', () => {
     renderPage();
     const calls = mockedUseEpisodesKpisQuery.mock.calls.map(([args]) => args);
-    expect(calls.some((c) => c.filterState !== undefined)).toBe(true);
-    expect(calls.some((c) => c.filterState === undefined)).toBe(true);
+    expect(calls.every((c) => c.filterState !== undefined)).toBe(true);
   });
 
   it('disables the reset filters button when filter state equals the default', async () => {
