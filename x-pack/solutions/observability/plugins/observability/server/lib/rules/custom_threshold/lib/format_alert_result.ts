@@ -92,7 +92,9 @@ export const formatAlertResult = (
         : noDataValue,
     label: label || CUSTOM_EQUATION_I18N,
     threshold: Array.isArray(thresholdToFormat)
-      ? thresholdToFormat.map((v: number) => metricValueFormatter(v, metrics[0].field) + rateUnitPerSec)
+      ? thresholdToFormat.map(
+          (v: number) => metricValueFormatter(v, metrics[0].field) + rateUnitPerSec
+        )
       : [metricValueFormatter(currentValue, metrics[0].field) + rateUnitPerSec],
     comparator: comparatorToUse,
   };

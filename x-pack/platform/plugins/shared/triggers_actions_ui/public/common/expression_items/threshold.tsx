@@ -82,7 +82,8 @@ export const ThresholdExpression = ({
     comparators[thresholdComparator].requiredValues
   );
   const hasThresholdError = Boolean(
-    (errors.threshold0 && errors.threshold0.length) || (errors.threshold1 && errors.threshold1.length)
+    (errors.threshold0 && errors.threshold0.length) ||
+      (errors.threshold1 && errors.threshold1.length)
   );
   // A badge (and, for the warning row, a remove button positioned over this
   // expression) leaves no safe place for EuiExpression's own invalid icon to
