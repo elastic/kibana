@@ -345,6 +345,36 @@ export const BulkUpgradeAgentlessPoliciesRequestSchema = {
 };
 
 /**
+ * Request body for the upgrade dry-run endpoint. Extends the bulk-upgrade body with an
+ * optional `pkgVersion` so callers can preview a migration to a *not-yet-installed* target
+ * version — the UI upgrade flow computes the preview before installing the new package
+ * (mirrors the package-policy dry-run's `packageVersion`). When omitted, the target
+ * defaults to the installed package version.
+ */
+export const AgentlessPolicyUpgradeDryRunRequestSchema = {
+  body: schema.object(
+    {
+      policyIds: schema.arrayOf(schema.string({ maxLength: 256 }), {
+        maxSize: 1000,
+        meta: {
+          description: 'IDs of the agentless policies to preview upgrading.',
+        },
+      }),
+      pkgVersion: schema.maybe(
+        schema.string({
+          maxLength: 256,
+          meta: {
+            description:
+              'Target package version to preview the upgrade against. Defaults to the installed package version.',
+          },
+        })
+      ),
+    },
+    { meta: { id: 'agentless_policy_upgrade_dry_run_request' } }
+  ),
+};
+
+/**
  * Per-policy result of a bulk upgrade. Mirrors the package-policy
  * `UpgradePackagePolicyResponseItem`: a `success` flag plus an optional
  * `statusCode`/`body` carrying the per-policy failure. As with package-policy,

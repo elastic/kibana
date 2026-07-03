@@ -109,7 +109,8 @@ export interface AgentlessPoliciesService {
   ) => Promise<BulkUpgradeAgentlessPoliciesResponse>;
 
   getAgentlessPolicyUpgradeDryRunDiff: (
-    policyIds: string[]
+    policyIds: string[],
+    pkgVersion?: string
   ) => Promise<AgentlessPolicyUpgradeDryRunResponse>;
 }
 
@@ -749,7 +750,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
   }
 
   async getAgentlessPolicyUpgradeDryRunDiff(
-    policyIds: string[]
+    policyIds: string[],
+    pkgVersion?: string
   ): Promise<AgentlessPolicyUpgradeDryRunResponse> {
     this.logger.debug(`Computing upgrade dry-run for ${policyIds.length} agentless policies`);
 
@@ -776,7 +778,15 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     await runWithCache(async () => {
       for (const id of agentlessIds) {
         try {
-          const diff = await this.packagePolicyService.getUpgradeDryRunDiff(this.soClient, id);
+          // `pkgVersion` lets the caller preview a migration to a not-yet-installed target
+          // version (the UI computes the dry-run before installing the new package). When
+          // undefined, `getUpgradeDryRunDiff` defaults to the installed package version.
+          const diff = await this.packagePolicyService.getUpgradeDryRunDiff(
+            this.soClient,
+            id,
+            undefined,
+            pkgVersion
+          );
           results.push(this.projectUpgradeDryRunDiff(id, diff));
         } catch (err) {
           this.logger.error(

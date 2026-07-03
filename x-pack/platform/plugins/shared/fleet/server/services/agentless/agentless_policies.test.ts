@@ -1310,6 +1310,62 @@ describe('AgentlessPoliciesService', () => {
         { id: 'a', hasErrors: true, statusCode: 500, body: { message: 'boom' } },
       ]);
     });
+
+    it('should forward an explicit pkgVersion to getUpgradeDryRunDiff as the target version', async () => {
+      packagePolicyService.getByIDs.mockResolvedValue([buildAgentlessPackagePolicy({ id: 'a' })]);
+      packagePolicyService.getUpgradeDryRunDiff.mockResolvedValue({
+        name: 'Test Agentless Policy',
+        hasErrors: false,
+        diff: [
+          buildAgentlessPackagePolicy({ id: 'a' }),
+          {
+            name: 'Test Agentless Policy',
+            namespace: 'default',
+            package: { name: 'test_agentless', title: 'Test Agentless', version: '2.0.0' },
+            inputs: [],
+            vars: {},
+          },
+        ],
+      } as any);
+
+      await createService().getAgentlessPolicyUpgradeDryRunDiff(['a'], '2.0.0');
+
+      // The target version is passed as the 4th argument (the 3rd, `packagePolicy`, stays
+      // undefined so the engine loads the policy itself).
+      expect(packagePolicyService.getUpgradeDryRunDiff).toHaveBeenCalledWith(
+        expect.anything(),
+        'a',
+        undefined,
+        '2.0.0'
+      );
+    });
+
+    it('should default to the installed version (undefined pkgVersion) when none is provided', async () => {
+      packagePolicyService.getByIDs.mockResolvedValue([buildAgentlessPackagePolicy({ id: 'a' })]);
+      packagePolicyService.getUpgradeDryRunDiff.mockResolvedValue({
+        name: 'Test Agentless Policy',
+        hasErrors: false,
+        diff: [
+          buildAgentlessPackagePolicy({ id: 'a' }),
+          {
+            name: 'Test Agentless Policy',
+            namespace: 'default',
+            package: { name: 'test_agentless', title: 'Test Agentless', version: '2.0.0' },
+            inputs: [],
+            vars: {},
+          },
+        ],
+      } as any);
+
+      await createService().getAgentlessPolicyUpgradeDryRunDiff(['a']);
+
+      expect(packagePolicyService.getUpgradeDryRunDiff).toHaveBeenCalledWith(
+        expect.anything(),
+        'a',
+        undefined,
+        undefined
+      );
+    });
   });
 
   describe('createAgentlessPolicy with cloud connectors', () => {

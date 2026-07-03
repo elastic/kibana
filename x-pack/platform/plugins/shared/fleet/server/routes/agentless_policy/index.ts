@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 import {
   BulkUpgradeAgentlessPoliciesRequestSchema,
   BulkUpgradeAgentlessPoliciesResponseSchema,
+  AgentlessPolicyUpgradeDryRunRequestSchema,
   AgentlessPolicyUpgradeDryRunResponseSchema,
   CreateAgentlessPolicyRequestSchema,
   DeleteAgentlessPolicyRequestSchema,
@@ -368,7 +369,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: AGENTLESS_POLICIES_ROUTES.UPGRADE_DRYRUN_PATTERN,
       summary: 'Preview an agentless policies upgrade',
       description:
-        'Preview upgrading multiple agentless policies to their installed package version without applying any change. Each result returns the migrated config as a consumable agentless policy (`proposedPolicy`) plus the current/proposed version and any migration errors.',
+        'Preview upgrading multiple agentless policies without applying any change. By default the target is the installed package version; pass `pkgVersion` to preview a migration to a specific (for example, not-yet-installed) version. Each result returns the migrated config as a consumable agentless policy (`proposedPolicy`) plus the current/proposed version and any migration errors.',
       options: {
         tags: ['oas-tag:Fleet agentless policies'],
         availability: {
@@ -388,7 +389,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             path.join(__dirname, 'examples/upgrade_agentless_policies_dryrun.yaml'),
         },
         validate: {
-          request: BulkUpgradeAgentlessPoliciesRequestSchema,
+          request: AgentlessPolicyUpgradeDryRunRequestSchema,
           response: {
             200: {
               description: 'OK: A successful request.',

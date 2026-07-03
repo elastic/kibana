@@ -14,6 +14,7 @@ import { appContextService, packagePolicyService } from '../../services';
 import type { FleetRequestHandler, ListAgentlessPoliciesRequestSchema } from '../../types';
 import { AgentlessPoliciesServiceImpl } from '../../services/agentless/agentless_policies';
 import type {
+  AgentlessPolicyUpgradeDryRunRequestSchema,
   BulkUpgradeAgentlessPoliciesRequestSchema,
   DeleteAgentlessPolicyRequestSchema,
   GetBulkAgentlessPolicyThroughputRequestSchema,
@@ -152,7 +153,7 @@ export const bulkUpgradeAgentlessPoliciesHandler: FleetRequestHandler<
 export const upgradeAgentlessPoliciesDryRunHandler: FleetRequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof BulkUpgradeAgentlessPoliciesRequestSchema.body>
+  TypeOf<typeof AgentlessPolicyUpgradeDryRunRequestSchema.body>
 > = async (context, request, response) => {
   const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
 
@@ -169,7 +170,10 @@ export const upgradeAgentlessPoliciesDryRunHandler: FleetRequestHandler<
   );
 
   const policyIds = uniq(request.body.policyIds);
-  const body = await agentlessPoliciesService.getAgentlessPolicyUpgradeDryRunDiff(policyIds);
+  const body = await agentlessPoliciesService.getAgentlessPolicyUpgradeDryRunDiff(
+    policyIds,
+    request.body.pkgVersion
+  );
 
   // Unlike the package-policy dry-run handler, we deliberately do NOT promote a per-policy
   // hard failure (guard 404 or fatal dry-run error) to a top-level HTTP status. The batch
