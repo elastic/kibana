@@ -61,7 +61,7 @@ describe('LibraryCache', () => {
     expect(cache.catalog).toBeUndefined();
     expect(cache.versionId).toBeUndefined();
     expect(cache.isFresh()).toBe(false);
-    expect(cache.getHealth()).toEqual({ sourceMode: 'http' });
+    expect(cache.getHealth()).toEqual({ sourceMode: 'http', lastRefreshAt: null });
   });
 
   it('treats the catalog as fresh within TTL after a successful refresh', () => {
