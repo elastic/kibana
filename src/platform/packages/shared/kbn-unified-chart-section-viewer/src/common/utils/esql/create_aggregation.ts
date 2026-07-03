@@ -14,6 +14,8 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FunctionNames } from '@kbn/esql-language';
 import { isLegacyHistogram } from '../legacy_histogram';
 import { resolveConflictingFieldTypes } from './resolve_conflicting_field_types';
+import type { MetricsAggregationSettings } from '../../../types';
+import { HISTOGRAM_PERCENTILE_VALUES } from '../aggregation_settings';
 
 /**
  * Gets the appropriate casting function name for a field type.
@@ -59,17 +61,34 @@ function buildAggregationNode(
   types: ES_FIELD_TYPES[],
   instrument: MappingTimeSeriesMetricType,
   field: ESQLAstExpression,
-  customFunction?: string
+  customFunction?: string,
+  aggregationSettings?: MetricsAggregationSettings
 ): ESQLAstExpression | undefined {
   const resolvedField = applyCastIfNeeded(types, field);
   const primaryType = types[0];
   if (customFunction) return synth.exp`${synth.kwd(customFunction)}(${resolvedField})`;
-  if (isLegacyHistogram(primaryType, instrument))
-    return synth.exp`PERCENTILE(TO_TDIGEST(${resolvedField}), ${95})`;
-  if (primaryType === 'exponential_histogram' || primaryType === 'tdigest')
-    return synth.exp`PERCENTILE(${resolvedField}, ${95})`;
-  if (instrument === 'counter') return synth.exp`SUM(RATE(${resolvedField}))`;
-  return synth.exp`AVG(${resolvedField})`;
+  if (isLegacyHistogram(primaryType, instrument)) {
+    const percentile = aggregationSettings
+      ? HISTOGRAM_PERCENTILE_VALUES[aggregationSettings.histogramPercentile]
+      : 95;
+    return synth.exp`PERCENTILE(TO_TDIGEST(${resolvedField}), ${percentile})`;
+  }
+  if (primaryType === 'exponential_histogram' || primaryType === 'tdigest') {
+    const percentile = aggregationSettings
+      ? HISTOGRAM_PERCENTILE_VALUES[aggregationSettings.histogramPercentile]
+      : 95;
+    return synth.exp`PERCENTILE(${resolvedField}, ${percentile})`;
+  }
+  if (instrument === 'counter') {
+    const counterFunction = aggregationSettings
+      ? aggregationSettings.counterAggregation.toUpperCase()
+      : 'SUM';
+    return synth.exp`${synth.kwd(counterFunction)}(RATE(${resolvedField}))`;
+  }
+  const gaugeFunction = aggregationSettings
+    ? aggregationSettings.gaugeAggregation.toUpperCase()
+    : 'AVG';
+  return synth.exp`${synth.kwd(gaugeFunction)}(${resolvedField})`;
 }
 
 /**
@@ -91,6 +110,7 @@ function buildAggregationNode(
  * @param metricName - The actual name of the metric field to aggregate.
  * @param placeholderName - The name of the placeholder to use in the template.
  * @param customFunction - Optional custom aggregation function to use for default case.
+ * @param aggregationSettings - Optional per-`metric_type` aggregation overrides (counter/gauge/histogram).
  * @returns The ES|QL aggregation string.
  */
 export function createMetricAggregation({
@@ -99,15 +119,17 @@ export function createMetricAggregation({
   metricName,
   placeholderName = 'metricName',
   customFunction,
+  aggregationSettings,
 }: {
   types: ES_FIELD_TYPES[];
   instrument: MappingTimeSeriesMetricType;
   metricName?: string;
   placeholderName?: string;
   customFunction?: string;
+  aggregationSettings?: MetricsAggregationSettings;
 }): string {
   const field = metricName ? synth.col(metricName.split('.')) : synth.dpar(placeholderName);
-  const node = buildAggregationNode(types, instrument, field, customFunction);
+  const node = buildAggregationNode(types, instrument, field, customFunction, aggregationSettings);
   if (!node) {
     return '';
   }

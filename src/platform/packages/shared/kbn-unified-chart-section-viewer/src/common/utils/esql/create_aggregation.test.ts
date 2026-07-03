@@ -105,6 +105,99 @@ describe('createMetricAggregation', () => {
   });
 });
 
+describe('createMetricAggregation with aggregationSettings override', () => {
+  const aggregationSettings = {
+    counterAggregation: 'max' as const,
+    gaugeAggregation: 'min' as const,
+    histogramPercentile: 'p90' as const,
+  };
+
+  it('applies the counter aggregation setting wrapped in RATE()', () => {
+    const result = createMetricAggregation({
+      types: [ES_FIELD_TYPES.LONG],
+      instrument: 'counter',
+      metricName: 'requests.count',
+      aggregationSettings,
+    });
+    expect(result).toBe('MAX(RATE(requests.count))');
+  });
+
+  it('applies the gauge aggregation setting directly', () => {
+    const result = createMetricAggregation({
+      types: [ES_FIELD_TYPES.DOUBLE],
+      instrument: 'gauge',
+      metricName: 'cpu.usage',
+      aggregationSettings,
+    });
+    expect(result).toBe('MIN(cpu.usage)');
+  });
+
+  it('applies the histogram percentile setting for legacy histograms', () => {
+    const result = createMetricAggregation({
+      types: [ES_FIELD_TYPES.HISTOGRAM],
+      instrument: 'histogram',
+      metricName: 'histogram.legacy',
+      aggregationSettings,
+    });
+    expect(result).toBe('PERCENTILE(TO_TDIGEST(histogram.legacy), 90)');
+  });
+
+  it('applies the histogram percentile setting for tdigest fields regardless of instrument', () => {
+    const result = createMetricAggregation({
+      types: [ES_FIELD_TYPES.TDIGEST],
+      instrument: 'counter',
+      metricName: 'http.request.duration',
+      aggregationSettings,
+    });
+    expect(result).toBe('PERCENTILE(http.request.duration, 90)');
+  });
+
+  it('applies the histogram percentile setting for exponential_histogram fields', () => {
+    const result = createMetricAggregation({
+      types: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
+      instrument: 'gauge',
+      metricName: 'http.request.duration',
+      aggregationSettings,
+    });
+    expect(result).toBe('PERCENTILE(http.request.duration, 90)');
+  });
+
+  it('customFunction still takes priority over aggregationSettings', () => {
+    const result = createMetricAggregation({
+      types: [ES_FIELD_TYPES.LONG],
+      instrument: 'counter',
+      metricName: 'requests.count',
+      customFunction: 'COUNT',
+      aggregationSettings,
+    });
+    expect(result).toBe('COUNT(requests.count)');
+  });
+
+  it('falls back to the 95th percentile and SUM/AVG defaults when aggregationSettings is omitted', () => {
+    expect(
+      createMetricAggregation({
+        types: [ES_FIELD_TYPES.TDIGEST],
+        instrument: 'counter',
+        metricName: 'http.request.duration',
+      })
+    ).toBe('PERCENTILE(http.request.duration, 95)');
+    expect(
+      createMetricAggregation({
+        types: [ES_FIELD_TYPES.LONG],
+        instrument: 'counter',
+        metricName: 'requests.count',
+      })
+    ).toBe('SUM(RATE(requests.count))');
+    expect(
+      createMetricAggregation({
+        types: [ES_FIELD_TYPES.DOUBLE],
+        instrument: 'gauge',
+        metricName: 'cpu.usage',
+      })
+    ).toBe('AVG(cpu.usage)');
+  });
+});
+
 describe('createTimeBucketAggregation', () => {
   it('should return the correct time bucket aggregation', () => {
     const result = createTimeBucketAggregation({
