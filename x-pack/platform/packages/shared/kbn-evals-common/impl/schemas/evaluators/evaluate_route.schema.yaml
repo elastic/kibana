@@ -98,8 +98,10 @@ paths:
                           properties:
                             name:
                               type: string
+                              maxLength: 256
                             version:
                               type: string
+                              maxLength: 64
                             kind:
                               type: string
                               enum:
@@ -114,13 +116,16 @@ paths:
                             properties:
                               name:
                                 type: string
+                                maxLength: 256
                               score:
                                 type: number
                                 nullable: true
                               label:
                                 type: string
+                                maxLength: 1024
                               explanation:
                                 type: string
+                                maxLength: 8192
                               metadata:
                                 type: object
                                 additionalProperties: true
@@ -131,3 +136,4 @@ paths:
                           properties:
                             message:
                               type: string
+                              maxLength: 8192

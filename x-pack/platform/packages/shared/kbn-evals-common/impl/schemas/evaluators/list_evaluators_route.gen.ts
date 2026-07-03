@@ -20,17 +20,17 @@ export const ListEvaluatorsResponse = lazySchema(() =>
   z.object({
     evaluators: z.array(
       z.object({
-        name: z.string(),
-        version: z.string(),
+        name: z.string().max(256),
+        version: z.string().max(64),
         kind: z.enum(['llm', 'code']),
-        description: z.string(),
+        description: z.string().max(2048),
         reference_data_schema: z
-          .record(
-            z.string(),
+          .object({})
+          .catchall(
             z.object({
-              type: z.string(),
+              type: z.string().max(256),
               required: z.boolean(),
-              description: z.string(),
+              description: z.string().max(2048),
             })
           )
           .optional(),

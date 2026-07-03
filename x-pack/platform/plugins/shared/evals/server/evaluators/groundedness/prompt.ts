@@ -16,9 +16,9 @@ export const LlmGroundednessEvaluationPrompt = createPrompt({
   name: 'llm_groundedness_evaluation',
   description: 'Prompt for evaluating the groundedness of LLM responses',
   input: z.object({
-    user_query: z.string(),
-    agent_response: z.string(),
-    tool_call_history: z.string().optional(),
+    user_query: z.string().max(8192),
+    agent_response: z.string().max(131072),
+    tool_call_history: z.string().max(131072).optional(),
   }),
 })
   .version({

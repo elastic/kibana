@@ -51,24 +51,24 @@ export const EvaluateResponse = lazySchema(() =>
       z.object({
         status: z.enum(['ok', 'error']),
         evaluator: z.object({
-          name: z.string(),
-          version: z.string(),
+          name: z.string().max(256),
+          version: z.string().max(64),
           kind: z.enum(['llm', 'code']),
         }),
         scores: z
           .array(
             z.object({
-              name: z.string(),
+              name: z.string().max(256),
               score: z.number().nullable().optional(),
-              label: z.string().optional(),
-              explanation: z.string().optional(),
+              label: z.string().max(1024).optional(),
+              explanation: z.string().max(8192).optional(),
               metadata: z.object({}).catchall(z.unknown()).optional(),
             })
           )
           .optional(),
         error: z
           .object({
-            message: z.string(),
+            message: z.string().max(8192),
           })
           .optional(),
       })

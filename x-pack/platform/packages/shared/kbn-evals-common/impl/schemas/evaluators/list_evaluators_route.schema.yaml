@@ -27,8 +27,10 @@ paths:
                       properties:
                         name:
                           type: string
+                          maxLength: 256
                         version:
                           type: string
+                          maxLength: 64
                         kind:
                           type: string
                           enum:
@@ -36,6 +38,7 @@ paths:
                             - code
                         description:
                           type: string
+                          maxLength: 2048
                         reference_data_schema:
                           type: object
                           additionalProperties:
@@ -43,10 +46,12 @@ paths:
                             properties:
                               type:
                                 type: string
+                                maxLength: 256
                               required:
                                 type: boolean
                               description:
                                 type: string
+                                maxLength: 2048
                             required:
                               - type
                               - required
