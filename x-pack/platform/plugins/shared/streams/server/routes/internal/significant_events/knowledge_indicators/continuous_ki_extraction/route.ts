@@ -19,7 +19,7 @@ import {
   MIN_EXTRACTION_INTERVAL_HOURS,
 } from '../../../../../../common/constants';
 
-const putKiExtractionSettingsBodySchema = z.object({
+const putContinuousKiExtractionSettingsBodySchema = z.object({
   continuousKiExtraction: z.object({
     enabled: z.boolean().optional(),
     intervalHours: z.number().min(MIN_EXTRACTION_INTERVAL_HOURS).optional(),
@@ -27,7 +27,7 @@ const putKiExtractionSettingsBodySchema = z.object({
   }),
 });
 
-export const putContinuousKiExtractionSettingsRoute = createServerRoute({
+export const putContinuousKIExtractionSettingsRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_knowledge_indicators/continuous_ki_extraction/settings',
   options: {
     access: 'internal',
@@ -41,7 +41,7 @@ export const putContinuousKiExtractionSettingsRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: putKiExtractionSettingsBodySchema,
+    body: putContinuousKiExtractionSettingsBodySchema,
   }),
   handler: async ({
     params,
@@ -115,6 +115,6 @@ export const putContinuousKiExtractionSettingsRoute = createServerRoute({
   },
 });
 
-export const internalSignificantEventsKiExtractionRoutes = {
-  ...putContinuousKiExtractionSettingsRoute,
+export const internalSignificantEventsKIContinuousKIExtractionRoutes = {
+  ...putContinuousKIExtractionSettingsRoute,
 };

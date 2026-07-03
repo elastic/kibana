@@ -21,6 +21,7 @@ import {
   type DashboardOperation,
 } from './operations';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 
 const createMockLogger = (): Logger =>
@@ -207,6 +208,37 @@ describe('executeDashboardOperations', () => {
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
         grid: { x: 0, y: 9, w: 12, h: 5 },
+      }),
+    ]);
+    expect(result.failures).toEqual([]);
+  });
+
+  it('adds a by-value Vega config-source panel as a vega-type panel', async () => {
+    const spec = '{"mark":"line","data":{"url":{"%type%":"esql","query":"FROM logs"}}}';
+
+    const result = await executeDashboardOperations({
+      dashboardData: { title: 'Test dashboard', description: 'Description', panels: [] },
+      operations: [
+        {
+          operation: 'add_panels',
+          panels: [
+            {
+              source: 'config',
+              type: 'vis',
+              config: { spec },
+              grid: { x: 0, y: 0, w: 48, h: 14 },
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    expect(result.dashboardData.panels).toEqual([
+      expect.objectContaining({
+        type: VEGA_VIS_TYPE,
+        config: { spec },
+        grid: { x: 0, y: 0, w: 48, h: 14 },
       }),
     ]);
     expect(result.failures).toEqual([]);
@@ -1806,7 +1838,7 @@ describe('executeDashboardOperations', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects a vis config-source panel whose config is not a Lens API config', () => {
+  it('rejects a vis config-source panel whose config is neither a Lens nor a Vega config', () => {
     const result = dashboardOperationSchema.safeParse({
       operation: 'add_panels',
       panels: [
@@ -1814,6 +1846,38 @@ describe('executeDashboardOperations', () => {
           source: 'config',
           type: 'vis',
           config: { title: 'Total requests' },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a vis config-source panel whose config is a by-value Vega spec', () => {
+    const result = dashboardOperationSchema.safeParse({
+      operation: 'add_panels',
+      panels: [
+        {
+          source: 'config',
+          type: 'vis',
+          config: { spec: '{"mark":"line"}' },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a vis config-source Vega panel whose spec is empty', () => {
+    const result = dashboardOperationSchema.safeParse({
+      operation: 'add_panels',
+      panels: [
+        {
+          source: 'config',
+          type: 'vis',
+          config: { spec: '' },
           grid: { x: 0, y: 0, w: 24, h: 9 },
         },
       ],

@@ -365,10 +365,10 @@ export const listStreamQueriesResponse: { queries: StreamQuery[] } = {
 };
 
 // ---------------------------------------------------------------------------
-// GET /api/streams/{name}/significant_events  –  query occurrence stats response
+// GET /api/streams/{name}/significant_events  –  query occurrences response
 // ---------------------------------------------------------------------------
 
-export const getQueryOccurrenceStatsResponse: QueryOccurrencesResponse = {
+export const getQueryOccurrencesResponse: QueryOccurrencesResponse = {
   queries: [
     {
       id: 'error-count-by-host',
