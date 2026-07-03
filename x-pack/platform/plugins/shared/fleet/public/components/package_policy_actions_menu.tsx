@@ -10,7 +10,12 @@ import { EuiContextMenuItem, EuiCopy, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES } from '../../common/constants';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
+
+import {
+  EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES,
+  FLEET_CONNECTORS_PACKAGE,
+} from '../../common/constants';
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import {
   useAgentPolicyRefresh,
@@ -28,6 +33,8 @@ import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
 import { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
+
+const CONNECTORS_PATH = '/data/content_connectors/connectors';
 
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
   agentPolicies: AgentPolicy[];
@@ -56,7 +63,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
-  const { cloud } = useStartServices();
+  const { cloud, application } = useStartServices();
 
   const isManaged = Boolean(packagePolicy.is_managed);
   const agentPolicyIsManaged = Boolean(agentPolicy?.is_managed);
@@ -109,6 +116,11 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     pkgTitle: packagePolicy.package?.title || '',
     targetVersion: packagePolicy.pendingUpgradeReview?.target_version || '',
   });
+
+  const isConnectorPolicy = packagePolicy.package?.name === FLEET_CONNECTORS_PACKAGE;
+  const connectorId = packagePolicy.inputs
+    .map((input) => input?.vars?.connector_id?.value)
+    .find(Boolean);
 
   const menuItems = [
     // FIXME: implement View package policy action
@@ -237,6 +249,26 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         defaultMessage="Copy integration"
       />
     </EuiContextMenuItem>,
+    ...(isConnectorPolicy
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="PackagePolicyActionsManageConnectorItem"
+            icon="gear"
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              application.navigateToApp(MANAGEMENT_APP_ID, {
+                path: connectorId ? `${CONNECTORS_PATH}/${connectorId}` : CONNECTORS_PATH,
+              });
+            }}
+            key="packagePolicyManageConnector"
+          >
+            <FormattedMessage
+              id="xpack.fleet.policyDetails.packagePoliciesTable.manageConnectorActionTitle"
+              defaultMessage="Manage connector"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
   ];
 
   if (isAgentlessPolicy) {
