@@ -36,6 +36,19 @@ const asString = (value: unknown): string | undefined =>
 const asStringArray = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
 
+const extractAssigneeUids = (assignees: unknown): string[] => {
+  if (!Array.isArray(assignees)) {
+    return [];
+  }
+
+  return assignees
+    .filter(
+      (assignee): assignee is { uid: string } =>
+        assignee != null && typeof assignee.uid === 'string'
+    )
+    .map((assignee) => assignee.uid);
+};
+
 const extractCustomFieldValues = (customFields: unknown): string[] => {
   if (!Array.isArray(customFields)) {
     return [];
@@ -79,6 +92,15 @@ export const getSearchableContent = (attributes: UserActionTransformedAttributes
       if (text) texts.push(text);
       break;
     }
+    case UserActionTypes.severity: {
+      const text = asString(payload.severity);
+      if (text) texts.push(text);
+      break;
+    }
+    case UserActionTypes.assignees: {
+      texts.push(...extractAssigneeUids(payload.assignees));
+      break;
+    }
     case UserActionTypes.customFields: {
       texts.push(...extractCustomFieldValues(payload.customFields));
       break;
@@ -93,10 +115,13 @@ export const getSearchableContent = (attributes: UserActionTransformedAttributes
     case UserActionTypes.create_case: {
       const title = asString(payload.title);
       const description = asString(payload.description);
+      const severity = asString(payload.severity);
       if (title) texts.push(title);
       if (description) texts.push(description);
+      if (severity) texts.push(severity);
       texts.push(...asStringArray(payload.tags));
       texts.push(...extractCustomFieldValues(payload.customFields));
+      texts.push(...extractAssigneeUids(payload.assignees));
       break;
     }
     default:

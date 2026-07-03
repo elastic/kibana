@@ -95,6 +95,11 @@ export class UserActionFinder {
    * Fetches all user actions for a case using a point-in-time finder.
    * The `search` field from FindOptions is intentionally excluded — text search
    * is handled via in-memory filtering at the client layer.
+   *
+   * `limit` bounds how many user actions are collected before the PIT is closed,
+   * to avoid unbounded memory/CPU usage for cases with very large activity logs
+   * (see `MAX_USER_ACTIONS_FOR_SEARCH`). Callers that pass a `limit` should be
+   * aware that any user actions beyond it will not be considered.
    */
   public async findAll({
     caseId,
@@ -102,7 +107,8 @@ export class UserActionFinder {
     types,
     filter,
     author,
-  }: Omit<FindOptions, 'page' | 'perPage' | 'search'>): Promise<
+    limit,
+  }: Omit<FindOptions, 'page' | 'perPage' | 'search'> & { limit?: number }): Promise<
     UserActionSavedObjectTransformed[]
   > {
     try {
@@ -114,14 +120,17 @@ export class UserActionFinder {
         UserActionFinder.buildAuthorFilter(author),
       ]);
 
-      return await this.collectFromPIT({
-        type: CASE_USER_ACTION_SAVED_OBJECT,
-        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-        sortField: defaultSortField,
-        sortOrder: sortOrder ?? 'asc',
-        filter: finalFilter,
-        perPage: MAX_DOCS_PER_PAGE,
-      });
+      return await this.collectFromPIT(
+        {
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          sortField: defaultSortField,
+          sortOrder: sortOrder ?? 'asc',
+          filter: finalFilter,
+          perPage: MAX_DOCS_PER_PAGE,
+        },
+        limit
+      );
     } catch (error) {
       this.context.log.error(`Error finding all user actions for case id: ${caseId}: ${error}`);
       throw error;
@@ -285,7 +294,8 @@ export class UserActionFinder {
   }
 
   private async collectFromPIT(
-    options: SavedObjectsCreatePointInTimeFinderOptions
+    options: SavedObjectsCreatePointInTimeFinderOptions,
+    limit?: number
   ): Promise<UserActionSavedObjectTransformed[]> {
     const finder =
       this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<UserActionPersistedAttributes>(
@@ -304,8 +314,16 @@ export class UserActionFinder {
           };
         })
       );
+
+      if (limit != null && results.length >= limit) {
+        // Stop pulling further pages once we've hit the cap. The PIT must be
+        // explicitly closed here since we're breaking out before the finder's
+        // generator naturally drains and auto-closes it.
+        await finder.close();
+        break;
+      }
     }
 
-    return results;
+    return limit != null ? results.slice(0, limit) : results;
   }
 }

@@ -144,6 +144,36 @@ describe('UserActionsService: Finder', () => {
         const callFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
         expect(callFilter).toBeUndefined();
       });
+
+      /**
+       * `username` is not guaranteed to be set on `created_by` (e.g. API key
+       * authenticated requests only reliably populate `profile_uid`, see
+       * `CasesClientFactory.getUserInfo`). Filtering by `author` is username-based,
+       * so such user actions simply won't match the filter — this test guards
+       * against that scenario ever throwing or otherwise breaking the response,
+       * even though it's a known limitation that those user actions can't
+       * currently be found via the `author` filter.
+       */
+      it('does not throw when a user action has a null created_by.username', async () => {
+        const userAction = createUserActionSO({
+          attributesOverrides: {
+            created_by: { email: 'a', username: null, full_name: 'abc', profile_uid: 'uid-1' },
+          },
+        });
+        mockFind(createSOFindResponse([createUserActionFindSO(userAction)]));
+
+        await expect(finder.find({ caseId: '1', author: 'testuser' })).resolves.toEqual(
+          expect.objectContaining({
+            saved_objects: expect.arrayContaining([
+              expect.objectContaining({
+                attributes: expect.objectContaining({
+                  created_by: expect.objectContaining({ username: null }),
+                }),
+              }),
+            ]),
+          })
+        );
+      });
     });
   });
 
@@ -182,6 +212,49 @@ describe('UserActionsService: Finder', () => {
           }),
         })
       );
+    });
+
+    it('stops fetching once the limit is reached and closes the PIT early', async () => {
+      const close = jest.fn();
+      const batch = (count: number) =>
+        createSOFindResponse(
+          Array.from({ length: count }, () => createUserActionFindSO(createUserActionSO()))
+        );
+
+      unsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue({
+        close,
+        // @ts-expect-error
+        find: function* asyncGenerator() {
+          yield batch(3);
+          yield batch(3);
+          yield batch(3);
+        },
+      });
+
+      const res = await finder.findAll({ caseId: '1', limit: 4 });
+
+      expect(res).toHaveLength(4);
+      expect(close).toHaveBeenCalled();
+    });
+
+    it('does not cap results when no limit is provided', async () => {
+      const batch = (count: number) =>
+        createSOFindResponse(
+          Array.from({ length: count }, () => createUserActionFindSO(createUserActionSO()))
+        );
+
+      unsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue({
+        close: jest.fn(),
+        // @ts-expect-error
+        find: function* asyncGenerator() {
+          yield batch(3);
+          yield batch(3);
+        },
+      });
+
+      const res = await finder.findAll({ caseId: '1' });
+
+      expect(res).toHaveLength(6);
     });
 
     it('applies types filter in findAll', async () => {

@@ -349,6 +349,67 @@ describe('findUserActions', () => {
 
       expect(result.total).toBe(1);
     });
+
+    it('matches severity user action values', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          type: 'severity',
+          payload: { severity: 'critical' },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'critical' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+    });
+
+    it('matches severity values in create_case payload', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          type: 'create_case',
+          payload: {
+            title: 'New case',
+            description: 'A description',
+            tags: [],
+            status: 'open',
+            severity: 'critical',
+            owner: 'securitySolution',
+            assignees: [],
+            connector: { id: 'none', name: 'none', type: '.none', fields: null },
+            settings: { syncAlerts: false },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'critical' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+    });
+
+    it('matches assignee profile uids', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          type: 'assignees',
+          payload: { assignees: [{ uid: 'assignee-profile-uid' }] },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'assignee-profile-uid' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+    });
   });
 
   describe('author filter', () => {

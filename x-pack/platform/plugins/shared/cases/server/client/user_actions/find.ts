@@ -23,6 +23,7 @@ import { createCaseError } from '../../common/error';
 import { asArray } from '../../common/utils';
 import type { CasesClient } from '../client';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
+import { MAX_USER_ACTIONS_FOR_SEARCH } from '../../../common/constants';
 
 interface FindWithSearchParams {
   caseId: string;
@@ -45,6 +46,7 @@ export const find = async (
   } = clientArgs;
 
   try {
+    // supertest and query-string encode a single entry in an array as just a string so make sure we have an array
     const types = asArray(params.types);
 
     const queryParams = decodeWithExcessOrThrow(UserActionInternalFindRequestRt)({
@@ -112,6 +114,7 @@ const findWithSearch = async ({
     caseId,
     ...findAllParams,
     filter: authorizationFilter,
+    limit: MAX_USER_ACTIONS_FOR_SEARCH,
   });
 
   ensureSavedObjectsAreAuthorized(
