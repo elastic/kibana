@@ -33,7 +33,6 @@ import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { getTableTabColumns } from '../utils/table_tab_columns';
 import { useHighlightedFields } from '../../../../flyout_v2/document/main/hooks/use_highlighted_fields';
-import { TableTabTour } from '../components/table_tab_tour';
 
 const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
 
@@ -334,28 +333,25 @@ export const TableTab = memo(() => {
     return { ...SEARCH_CONFIG, toolsRight: renderToolsRight() };
   }, [renderToolsRight]);
   return (
-    <>
-      <TableTabTour setIsPopoverOpen={setIsPopoverOpen} />
-      <EuiInMemoryTable
-        items={items}
-        itemId="field"
-        columns={columns}
-        onTableChange={onTableChange}
-        pagination={paginationSettings}
-        rowProps={onSetRowProps}
-        search={search}
-        sorting={false}
-        data-test-subj={TABLE_TAB_CONTENT_TEST_ID}
-        tableCaption={i18n.translate('xpack.securitySolution.flyout.table.documentFieldsCaption', {
-          defaultMessage: 'Document fields',
-        })}
-        css={css`
-          .euiTableRow {
-            font-size: ${smallFontSize};
-          }
-        `}
-      />
-    </>
+    <EuiInMemoryTable
+      items={items}
+      itemId="field"
+      columns={columns}
+      onTableChange={onTableChange}
+      pagination={paginationSettings}
+      rowProps={onSetRowProps}
+      search={search}
+      sorting={false}
+      data-test-subj={TABLE_TAB_CONTENT_TEST_ID}
+      tableCaption={i18n.translate('xpack.securitySolution.flyout.table.documentFieldsCaption', {
+        defaultMessage: 'Document fields',
+      })}
+      css={css`
+        .euiTableRow {
+          font-size: ${smallFontSize};
+        }
+      `}
+    />
   );
 });
 

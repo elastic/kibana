@@ -20,7 +20,6 @@ import {
   TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID,
   TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID,
 } from '../components/test_ids';
-import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -33,7 +32,6 @@ jest.mock('react-redux', () => {
 });
 const mockGet = jest.fn();
 const mockSet = jest.fn();
-const mockNotifications = notificationServiceMock.createStartContract();
 
 jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');
@@ -45,7 +43,6 @@ jest.mock('../../../../common/lib/kibana', () => {
           get: mockGet,
           set: mockSet,
         },
-        notifications: mockNotifications,
       },
     }),
     useUiSetting: () => false,
@@ -61,7 +58,6 @@ jest.mock('../components/test_ids', () => ({
   TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID: 'mockTableHighlightedFieldsOnly',
   TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID: 'mockTableHideEmptyFields',
   TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID: 'mockTableHideAlertFields',
-  TABLE_TAB_TOUR_TEST_ID: 'mockTableTabTour',
 }));
 
 jest.mock('../../../../common/mock', () => {

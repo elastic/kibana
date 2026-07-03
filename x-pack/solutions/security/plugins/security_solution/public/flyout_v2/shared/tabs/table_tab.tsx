@@ -41,7 +41,6 @@ import { FLYOUT_STORAGE_KEYS } from '../../document/main/constants/local_storage
 import { useKibana } from '../../../common/lib/kibana';
 import { useHighlightedFields } from '../../document/main/hooks/use_highlighted_fields';
 import type { CellActionRenderer } from '../components/cell_actions';
-import { TableTabTour } from '../components/table_tab_tour';
 
 export interface TableTabState {
   pinnedFields: string[];
@@ -241,26 +240,23 @@ export const TableTab = memo(({ hit, renderCellActions, scopeId = '' }: TableTab
   );
 
   return (
-    <>
-      <TableTabTour setIsPopoverOpen={setIsPopoverOpen} />
-      <SharedTableTab
-        items={items}
-        tableCaption={TABLE_CAPTION}
-        data-test-subj={TABLE_TAB_TEST_ID}
-        paginated
-        searchPlaceholder={SEARCH_PLACEHOLDER}
-        fieldColumnWidth="40%"
-        toolsRight={toolsRight}
-        pinnedFields={tableTabState.pinnedFields}
-        onPinField={onPinField}
-        renderFieldName={renderFieldName}
-        renderValue={renderValue}
-        highlightedFields={highlightedFieldNames}
-        renderCellActions={renderCellActions}
-        scopeId={scopeId}
-        rowFontSize="xs"
-      />
-    </>
+    <SharedTableTab
+      items={items}
+      tableCaption={TABLE_CAPTION}
+      data-test-subj={TABLE_TAB_TEST_ID}
+      paginated
+      searchPlaceholder={SEARCH_PLACEHOLDER}
+      fieldColumnWidth="40%"
+      toolsRight={toolsRight}
+      pinnedFields={tableTabState.pinnedFields}
+      onPinField={onPinField}
+      renderFieldName={renderFieldName}
+      renderValue={renderValue}
+      highlightedFields={highlightedFieldNames}
+      renderCellActions={renderCellActions}
+      scopeId={scopeId}
+      rowFontSize="xs"
+    />
   );
 });
 

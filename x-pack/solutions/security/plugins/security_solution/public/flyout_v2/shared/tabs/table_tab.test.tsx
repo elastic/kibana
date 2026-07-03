@@ -20,10 +20,6 @@ jest.mock('./base_table_tab', () => ({
   },
 }));
 
-jest.mock('../components/table_tab_tour', () => ({
-  TableTabTour: () => <div data-test-subj="mock-tour" />,
-}));
-
 jest.mock('../components/table_tab_setting_button', () => ({
   TableTabSettingButton: () => <div data-test-subj="mock-setting" />,
 }));
@@ -104,11 +100,10 @@ describe('<TableTab /> (shared document)', () => {
     mockStorage.get.mockReturnValue(undefined);
   });
 
-  it('renders the base table and the pinning tour', () => {
+  it('renders the base table', () => {
     const { getByTestId } = renderTableTab();
 
     expect(getByTestId('mock-base-table')).toBeInTheDocument();
-    expect(getByTestId('mock-tour')).toBeInTheDocument();
   });
 
   it('builds table items from hit.flattened, sorted by field name', () => {
