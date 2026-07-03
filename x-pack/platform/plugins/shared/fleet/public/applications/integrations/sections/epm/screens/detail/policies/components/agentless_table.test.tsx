@@ -166,9 +166,7 @@ describe('AgentlessPackagePoliciesTable', () => {
     await act(async () => {
       expect(result.getByText('Unable to load agentless integration policies')).toBeInTheDocument();
       expect(result.getByText('boom')).toBeInTheDocument();
-      expect(
-        result.queryByText('No agentless integration policies')
-      ).not.toBeInTheDocument();
+      expect(result.queryByText('No agentless integration policies')).not.toBeInTheDocument();
     });
   });
 
