@@ -137,6 +137,33 @@ describe('createAiRuleCreationHandler', () => {
       expect(service.clearSaving).toHaveBeenCalled();
     });
 
+    it('runs saves for different cards concurrently and clears each card by id', async () => {
+      let resolveFirst!: (rule: RuleResponse) => void;
+      mockCreateRule
+        .mockImplementationOnce(() => new Promise<RuleResponse>((res) => (resolveFirst = res)))
+        .mockResolvedValueOnce(savedRule);
+      const service = makeService();
+      const notifications = makeNotifications();
+
+      createAiRuleCreationHandler({
+        aiRuleCreation: service,
+        notifications: notifications as never,
+      });
+
+      emit(service as never, { rule: makeRule(), attachmentId: 'air:aaa' });
+      emit(service as never, { rule: makeRule(), attachmentId: 'air:bbb' });
+      await flush();
+
+      // The second save is not dropped or queued behind the first in-flight one.
+      expect(mockCreateRule).toHaveBeenCalledTimes(2);
+      expect(service.clearSaving).toHaveBeenCalledWith('air:bbb');
+      expect(service.clearSaving).not.toHaveBeenCalledWith('air:aaa');
+
+      resolveFirst(savedRule);
+      await flush();
+      expect(service.clearSaving).toHaveBeenCalledWith('air:aaa');
+    });
+
     it('calls updateOrigin with the saved rule id', async () => {
       mockCreateRule.mockResolvedValue(savedRule);
       const service = makeService();

@@ -28,10 +28,14 @@ export interface SaveRuleRequest {
   updateOrigin?: UpdateAttachmentOriginFn;
 }
 
+/** Key for save requests that carry no attachment id. */
+const UNATTACHED_SAVE_KEY = '__saving__';
+const NO_SAVES: ReadonlySet<string> = new Set();
+
 export class AiRuleCreationService {
   private readonly saveRuleSubject = new Subject<SaveRuleRequest>();
-  // Tracks the attachment ID currently being saved, or null when idle.
-  private readonly savingSubject = new BehaviorSubject<string | null>(null);
+  // Attachment IDs with a save in flight; saves for different cards run concurrently.
+  private readonly savingSubject = new BehaviorSubject<ReadonlySet<string>>(NO_SAVES);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
   private readonly formSyncSubject = new BehaviorSubject<boolean>(false);
   // Which attachment card this form is syncing into; null when unbound.
@@ -39,8 +43,8 @@ export class AiRuleCreationService {
   private session: AiRuleCreationSession | null = null;
 
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
-  /** Emits the attachment ID currently being saved, or null when idle. */
-  public readonly saving$ = this.savingSubject.pipe(distinctUntilChanged());
+  /** Emits the set of attachment IDs with saves in flight; empty when idle. */
+  public readonly saving$ = this.savingSubject.asObservable();
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
   public readonly formSyncActive$ = this.formSyncSubject.pipe(distinctUntilChanged());
 
@@ -70,7 +74,12 @@ export class AiRuleCreationService {
       updateOrigin?: UpdateAttachmentOriginFn;
     }
   ): void => {
-    this.savingSubject.next(options?.attachmentId ?? '__saving__');
+    const key = options?.attachmentId ?? UNATTACHED_SAVE_KEY;
+    // Same-card double-submit guard; the handler saves each card's request concurrently.
+    if (this.savingSubject.getValue().has(key)) {
+      return;
+    }
+    this.savingSubject.next(new Set([...this.savingSubject.getValue(), key]));
     this.saveRuleSubject.next({
       rule,
       attachmentId: options?.attachmentId,
@@ -78,14 +87,21 @@ export class AiRuleCreationService {
     });
   };
 
-  public clearSaving = (): void => {
-    this.savingSubject.next(null);
+  public clearSaving = (attachmentId?: string): void => {
+    const key = attachmentId ?? UNATTACHED_SAVE_KEY;
+    const current = this.savingSubject.getValue();
+    if (!current.has(key)) {
+      return;
+    }
+    const next = new Set(current);
+    next.delete(key);
+    this.savingSubject.next(next);
   };
 
   /** Returns true if the given attachment is currently being saved, or (no arg) if any save is in progress. */
   public getIsSaving = (attachmentId?: string): boolean => {
     const current = this.savingSubject.getValue();
-    return attachmentId !== undefined ? current === attachmentId : current !== null;
+    return attachmentId !== undefined ? current.has(attachmentId) : current.size > 0;
   };
 
   public setAiCreatedRule = (rule: RuleResponse, attachmentId?: string): void => {
@@ -124,7 +140,7 @@ export class AiRuleCreationService {
   };
 
   public reset = (): void => {
-    this.savingSubject.next(null);
+    this.savingSubject.next(NO_SAVES);
     this.aiRuleSubject.next(null);
     this.formSyncSubject.next(false);
     this.boundAttachmentId = null;

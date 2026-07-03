@@ -6,7 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { exhaustMap } from 'rxjs';
+import { mergeMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -83,13 +83,15 @@ export const createAiRuleCreationHandler = ({
 
   const saveSub = aiRuleCreation.saveRuleRequest$
     .pipe(
-      exhaustMap(async ({ rule, attachmentId, updateOrigin }) => {
+      // Saves for different cards run concurrently; requestSaveRule drops a re-click on a card
+      // whose save is already in flight, so same-card requests can't overlap.
+      mergeMap(async ({ rule, attachmentId, updateOrigin }) => {
         const parseResult = EsqlRuleCreateProps.safeParse(rule);
         if (!parseResult.success) {
           const summary = parseResult.error.issues
             .map((e) => `${e.path.join('.')}: ${e.message}`)
             .join('; ');
-          aiRuleCreation.clearSaving();
+          aiRuleCreation.clearSaving(attachmentId);
           notifications.toasts.addDanger({
             title: i18n.translate('xpack.securitySolution.saveRuleHandler.saveFailedTitle', {
               defaultMessage: 'Failed to save rule',
@@ -197,9 +199,9 @@ export const createAiRuleCreationHandler = ({
 
           // Cleared LAST: the save button stays disabled until origin linking has settled, so a
           // rapid second click can't fire another create while the card still reads "Create rule".
-          aiRuleCreation.clearSaving();
+          aiRuleCreation.clearSaving(attachmentId);
         } catch (err) {
-          aiRuleCreation.clearSaving();
+          aiRuleCreation.clearSaving(attachmentId);
           const message =
             (err as { body?: { message?: string } })?.body?.message ??
             (err as Error)?.message ??

@@ -41,6 +41,52 @@ describe('AiRuleCreationService', () => {
     });
   });
 
+  describe('saving state (per card)', () => {
+    it('tracks saves per attachment id', () => {
+      service.requestSaveRule(mockRule, { attachmentId: ATT_A });
+      expect(service.getIsSaving(ATT_A)).toBe(true);
+      expect(service.getIsSaving(ATT_B)).toBe(false);
+      expect(service.getIsSaving()).toBe(true);
+    });
+
+    it('allows concurrent saves on different cards and clears them independently', () => {
+      service.requestSaveRule(mockRule, { attachmentId: ATT_A });
+      service.requestSaveRule(mockRule, { attachmentId: ATT_B });
+      expect(service.getIsSaving(ATT_A)).toBe(true);
+      expect(service.getIsSaving(ATT_B)).toBe(true);
+
+      service.clearSaving(ATT_A);
+      expect(service.getIsSaving(ATT_A)).toBe(false);
+      expect(service.getIsSaving(ATT_B)).toBe(true);
+    });
+
+    it('drops a re-request for a card whose save is already in flight', () => {
+      const seen: unknown[] = [];
+      service.saveRuleRequest$.subscribe((request) => seen.push(request));
+
+      service.requestSaveRule(mockRule, { attachmentId: ATT_A });
+      service.requestSaveRule(mockRule, { attachmentId: ATT_A });
+      expect(seen).toHaveLength(1);
+
+      service.clearSaving(ATT_A);
+      service.requestSaveRule(mockRule, { attachmentId: ATT_A });
+      expect(seen).toHaveLength(2);
+    });
+
+    it('tracks an id-less save under the shared key', () => {
+      service.requestSaveRule(mockRule);
+      expect(service.getIsSaving()).toBe(true);
+      service.clearSaving();
+      expect(service.getIsSaving()).toBe(false);
+    });
+
+    it('reset clears all in-flight saves', () => {
+      service.requestSaveRule(mockRule, { attachmentId: ATT_A });
+      service.reset();
+      expect(service.getIsSaving()).toBe(false);
+    });
+  });
+
   describe('boundAttachmentId', () => {
     it('starts null', () => {
       expect(service.getBoundAttachmentId()).toBeNull();
