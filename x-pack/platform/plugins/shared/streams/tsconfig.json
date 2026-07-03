@@ -12,7 +12,8 @@
     "server/**/*",
     "public/**/*",
     "types/**/*",
-    "test/**/*"
+    "test/**/*",
+    "../significant_events/server/register_significant_events_inference_features.ts"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [

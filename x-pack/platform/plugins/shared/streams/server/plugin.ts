@@ -73,7 +73,7 @@ import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer'
 import { createMemoryToolsOptions, registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
 import { registerStreamsMemoryAgentBuilder } from './agent_builder/skills/register_memory_skills';
-import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
+import { registerSignificantEventsInferenceFeatures } from '../../significant_events/server/register_significant_events_inference_features';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
 import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
