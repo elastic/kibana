@@ -11,6 +11,7 @@ import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { FunctionNames } from '@kbn/esql-language';
 import type { ExternalServices } from './context/external_services';
 
 interface ChartSectionActions {
@@ -22,7 +23,28 @@ interface ChartSectionActions {
   updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
 }
 
-export type SimpleAggregation = 'avg' | 'sum' | 'min' | 'max';
+/**
+ * Derived from `@kbn/esql-language`'s `FunctionNames` enum (rather than a
+ * hand-rolled string union) so this type tracks the canonical ES|QL function
+ * names. Using a template-literal type (instead of the enum members
+ * themselves) keeps the resulting type a plain string literal union --
+ * assignable from either `FunctionNames.AVG` or the literal `'avg'` -- since
+ * TypeScript string enums are otherwise nominally typed.
+ */
+export type SimpleAggregation =
+  | `${FunctionNames.AVG}`
+  | `${FunctionNames.SUM}`
+  | `${FunctionNames.MIN}`
+  | `${FunctionNames.MAX}`;
+
+/**
+ * Which percentile bucket to use when the metric's aggregation is
+ * `PERCENTILE(field, N)`. There is no per-percentile ES|QL function name to
+ * derive this from (only `FunctionNames.PERCENTILE` itself, which names the
+ * function, not the requested percentile), so these remain their own
+ * literal union; the function name itself is sourced from `FunctionNames`
+ * wherever it's used to build the aggregation expression.
+ */
 export type HistogramPercentile = 'p50' | 'p75' | 'p90' | 'p95' | 'p99';
 
 export interface MetricsAggregationSettings {

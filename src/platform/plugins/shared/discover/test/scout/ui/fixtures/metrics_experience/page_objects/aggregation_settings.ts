@@ -15,19 +15,34 @@ export type HistogramPercentileOption = 'p50' | 'p75' | 'p90' | 'p95' | 'p99';
 export interface AggregationSettings {
   readonly editButton: Locator;
   readonly flyout: Locator;
+  readonly counterSelect: Locator;
+  readonly gaugeSelect: Locator;
+  readonly histogramSelect: Locator;
+  readonly applyButton: Locator;
+  readonly cancelButton: Locator;
   readonly open: () => Promise<void>;
+  /** Opens the counter dropdown and clicks the given option; does not apply it. */
   readonly selectCounterAggregation: (option: SimpleAggregationOption) => Promise<void>;
+  /** Opens the gauge dropdown and clicks the given option; does not apply it. */
   readonly selectGaugeAggregation: (option: SimpleAggregationOption) => Promise<void>;
+  /** Opens the histogram percentile dropdown and clicks the given option; does not apply it. */
   readonly selectHistogramPercentile: (option: HistogramPercentileOption) => Promise<void>;
-  readonly close: () => Promise<void>;
-  readonly getCounterOption: (option: SimpleAggregationOption) => Locator;
-  readonly getGaugeOption: (option: SimpleAggregationOption) => Locator;
-  readonly getHistogramOption: (option: HistogramPercentileOption) => Locator;
+  /** Clicks "Apply and close": commits the staged selections and closes the flyout. */
+  readonly apply: () => Promise<void>;
+  /** Clicks "Cancel": discards the staged selections and closes the flyout. */
+  readonly cancel: () => Promise<void>;
 }
 
 export function createAggregationSettings(page: ScoutPage): AggregationSettings {
   const editButton = page.testSubj.locator('metricsExperienceEditAggregationsButton');
   const flyout = page.testSubj.locator('metricsExperienceAggregationSettingsFlyout');
+  const counterSelect = page.testSubj.locator('metricsExperienceAggregationSettingsCounterSelect');
+  const gaugeSelect = page.testSubj.locator('metricsExperienceAggregationSettingsGaugeSelect');
+  const histogramSelect = page.testSubj.locator(
+    'metricsExperienceAggregationSettingsHistogramSelect'
+  );
+  const applyButton = page.testSubj.locator('metricsExperienceAggregationSettingsApplyButton');
+  const cancelButton = page.testSubj.locator('metricsExperienceAggregationSettingsCancelButton');
 
   const open = async () => {
     if (!(await flyout.isVisible())) {
@@ -36,30 +51,42 @@ export function createAggregationSettings(page: ScoutPage): AggregationSettings 
     }
   };
 
-  const selectOption = async (testSubj: string) => {
+  const selectFromDropdown = async (trigger: Locator, optionTestSubj: string) => {
     await open();
-    await page.testSubj.click(testSubj);
+    await trigger.click();
+    const option = page.testSubj.locator(optionTestSubj);
+    await option.waitFor({ state: 'visible' });
+    await option.click();
   };
 
   return {
     editButton,
     flyout,
+    counterSelect,
+    gaugeSelect,
+    histogramSelect,
+    applyButton,
+    cancelButton,
     open,
     selectCounterAggregation: (option) =>
-      selectOption(`metricsExperienceAggregationSettingsCounterOption-${option}`),
+      selectFromDropdown(
+        counterSelect,
+        `metricsExperienceAggregationSettingsCounterOption-${option}`
+      ),
     selectGaugeAggregation: (option) =>
-      selectOption(`metricsExperienceAggregationSettingsGaugeOption-${option}`),
+      selectFromDropdown(gaugeSelect, `metricsExperienceAggregationSettingsGaugeOption-${option}`),
     selectHistogramPercentile: (option) =>
-      selectOption(`metricsExperienceAggregationSettingsHistogramOption-${option}`),
-    close: async () => {
-      await page.testSubj.click('euiFlyoutCloseButton');
+      selectFromDropdown(
+        histogramSelect,
+        `metricsExperienceAggregationSettingsHistogramOption-${option}`
+      ),
+    apply: async () => {
+      await applyButton.click();
       await flyout.waitFor({ state: 'hidden' });
     },
-    getCounterOption: (option) =>
-      page.testSubj.locator(`metricsExperienceAggregationSettingsCounterOption-${option}`),
-    getGaugeOption: (option) =>
-      page.testSubj.locator(`metricsExperienceAggregationSettingsGaugeOption-${option}`),
-    getHistogramOption: (option) =>
-      page.testSubj.locator(`metricsExperienceAggregationSettingsHistogramOption-${option}`),
+    cancel: async () => {
+      await cancelButton.click();
+      await flyout.waitFor({ state: 'hidden' });
+    },
   };
 }

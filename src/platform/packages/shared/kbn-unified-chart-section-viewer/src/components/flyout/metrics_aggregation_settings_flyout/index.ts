@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MetricInsightsFlyout } from './metrics_insights_flyout';
-export { AggregationSettingsFlyout } from './metrics_aggregation_settings_flyout';
+export * from './constants';
+export * from './options';
+export { AggregationSettingsFlyout } from './aggregation_settings_flyout';

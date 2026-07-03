@@ -34,4 +34,4 @@ export {
   SIMPLE_AGGREGATION_OPTIONS,
   HISTOGRAM_PERCENTILE_OPTIONS,
   HISTOGRAM_PERCENTILE_VALUES,
-} from './src/common/utils/aggregation_settings';
+} from './src/components/flyout/metrics_aggregation_settings_flyout';

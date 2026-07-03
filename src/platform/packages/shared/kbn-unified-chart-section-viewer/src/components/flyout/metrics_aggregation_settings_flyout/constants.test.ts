@@ -12,9 +12,9 @@ import {
   SIMPLE_AGGREGATION_OPTIONS,
   HISTOGRAM_PERCENTILE_OPTIONS,
   HISTOGRAM_PERCENTILE_VALUES,
-} from './aggregation_settings';
+} from './constants';
 
-describe('aggregation_settings', () => {
+describe('aggregation_settings constants', () => {
   it('exposes defaults matching the pre-existing hardcoded aggregation behavior', () => {
     expect(METRICS_AGGREGATION_SETTINGS_DEFAULTS).toEqual({
       counterAggregation: 'sum',

@@ -7,23 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { FunctionNames } from '@kbn/esql-language';
 import type {
   HistogramPercentile,
   MetricsAggregationSettings,
   SimpleAggregation,
-} from '../../types';
+} from '../../../types';
 
-/**
- * Reproduces today's hardcoded aggregation behavior exactly:
- * counter -> SUM(RATE(...)), gauge -> AVG(...), histogram -> PERCENTILE(..., 95).
- */
 export const METRICS_AGGREGATION_SETTINGS_DEFAULTS: MetricsAggregationSettings = {
-  counterAggregation: 'sum',
-  gaugeAggregation: 'avg',
+  counterAggregation: FunctionNames.SUM,
+  gaugeAggregation: FunctionNames.AVG,
   histogramPercentile: 'p95',
 };
 
-export const SIMPLE_AGGREGATION_OPTIONS: SimpleAggregation[] = ['avg', 'sum', 'min', 'max'];
+export const SIMPLE_AGGREGATION_OPTIONS: SimpleAggregation[] = [
+  FunctionNames.AVG,
+  FunctionNames.SUM,
+  FunctionNames.MIN,
+  FunctionNames.MAX,
+];
 
 export const HISTOGRAM_PERCENTILE_OPTIONS: HistogramPercentile[] = [
   'p50',

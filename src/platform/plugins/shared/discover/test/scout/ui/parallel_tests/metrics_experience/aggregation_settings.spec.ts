@@ -10,10 +10,11 @@
 /**
  * Aggregation settings tests.
  *
- * These tests validate the toolbar edit button opens the aggregation
- * settings flyout, that selecting an option marks it active, and that the
- * selection persists across a page reload via Discover's persistent
- * profile state.
+ * These tests validate that the toolbar edit button opens the aggregation
+ * settings flyout, that selections are only staged (not applied) until
+ * "Apply and close" is clicked, that "Cancel" discards a staged selection,
+ * and that an applied selection persists across a page reload via
+ * Discover's persistent profile state.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -42,7 +43,7 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'opens the flyout and marks the selected counter aggregation as active',
+      'stages a counter selection without applying it until "Apply and close" is clicked',
       async ({ pageObjects }) => {
         const { aggregationSettings } = pageObjects.metricsExperience;
 
@@ -51,46 +52,84 @@ spaceTest.describe(
           await expect(aggregationSettings.flyout).toBeVisible();
         });
 
-        await spaceTest.step('select MAX for counters', async () => {
-          await aggregationSettings.selectCounterAggregation('max');
-          await expect(aggregationSettings.getCounterOption('max')).toHaveAttribute(
-            'aria-pressed',
-            'true'
-          );
+        await spaceTest.step(
+          '"Apply and close" starts disabled with no pending changes',
+          async () => {
+            await expect(aggregationSettings.applyButton).toBeDisabled();
+          }
+        );
+
+        await spaceTest.step(
+          'selecting MAX for counters enables "Apply and close" but does not change the dropdown label yet',
+          async () => {
+            await aggregationSettings.selectCounterAggregation('max');
+            await expect(aggregationSettings.applyButton).toBeEnabled();
+            await expect(aggregationSettings.counterSelect).toContainText('Maximum');
+          }
+        );
+
+        await spaceTest.step('applying commits the change and closes the flyout', async () => {
+          await aggregationSettings.apply();
+          await expect(aggregationSettings.flyout).toBeHidden();
         });
 
-        await spaceTest.step('close the flyout', async () => {
-          await aggregationSettings.close();
-          await expect(aggregationSettings.flyout).toBeHidden();
+        await spaceTest.step('reopening the flyout still shows the applied value', async () => {
+          await aggregationSettings.open();
+          await expect(aggregationSettings.counterSelect).toContainText('Maximum');
         });
       }
     );
 
     spaceTest(
-      'persists the selected histogram percentile across a page reload',
+      'discards a staged gauge selection when "Cancel" is clicked',
+      async ({ pageObjects }) => {
+        const { aggregationSettings } = pageObjects.metricsExperience;
+
+        await spaceTest.step('open the flyout and note the current gauge value', async () => {
+          await aggregationSettings.open();
+          await expect(aggregationSettings.gaugeSelect).toContainText('Average');
+        });
+
+        await spaceTest.step('select MINIMUM for gauges without applying', async () => {
+          await aggregationSettings.selectGaugeAggregation('min');
+          await expect(aggregationSettings.gaugeSelect).toContainText('Minimum');
+        });
+
+        await spaceTest.step('cancel discards the staged change and closes', async () => {
+          await aggregationSettings.cancel();
+          await expect(aggregationSettings.flyout).toBeHidden();
+        });
+
+        await spaceTest.step('reopening the flyout still shows the original value', async () => {
+          await aggregationSettings.open();
+          await expect(aggregationSettings.gaugeSelect).toContainText('Average');
+        });
+      }
+    );
+
+    spaceTest(
+      'persists an applied histogram percentile selection across a page reload',
       async ({ pageObjects, page }) => {
         const { aggregationSettings } = pageObjects.metricsExperience;
 
-        await spaceTest.step('select P50 for histogram percentile', async () => {
-          await aggregationSettings.selectHistogramPercentile('p50');
-          await expect(aggregationSettings.getHistogramOption('p50')).toHaveAttribute(
-            'aria-pressed',
-            'true'
-          );
-        });
+        await spaceTest.step(
+          'select and apply the 50th percentile for the histogram aggregation',
+          async () => {
+            await aggregationSettings.selectHistogramPercentile('p50');
+            await expect(aggregationSettings.histogramSelect).toContainText('50th percentile');
+            await aggregationSettings.apply();
+            await expect(aggregationSettings.flyout).toBeHidden();
+          }
+        );
 
-        await spaceTest.step('close the flyout and reload the page', async () => {
-          await aggregationSettings.close();
+        await spaceTest.step('reload the page', async () => {
           await page.reload();
           await expect(pageObjects.metricsExperience.grid).toBeVisible();
         });
 
-        await spaceTest.step('reopening the flyout still shows P50 selected', async () => {
+        await spaceTest.step('reopening the flyout still shows the applied value', async () => {
           await aggregationSettings.open();
-          await expect(aggregationSettings.getHistogramOption('p50')).toHaveAttribute(
-            'aria-pressed',
-            'true'
-          );
+          await expect(aggregationSettings.histogramSelect).toContainText('50th percentile');
         });
       }
     );

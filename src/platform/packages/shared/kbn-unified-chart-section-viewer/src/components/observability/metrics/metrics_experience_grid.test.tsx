@@ -32,7 +32,8 @@ import {
 import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
-import { METRICS_AGGREGATION_SETTINGS_DEFAULTS } from '../../../common/utils/aggregation_settings';
+import { METRICS_AGGREGATION_SETTINGS_DEFAULTS } from '../../flyout/metrics_aggregation_settings_flyout/constants';
+import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('@kbn/ebt-tools', () => ({
@@ -638,7 +639,7 @@ describe('MetricsExperienceGrid', () => {
   });
 
   describe('aggregation settings flyout', () => {
-    it('opens the flyout when the edit button is clicked and forwards a selection change', () => {
+    it('opens the flyout when the edit button is clicked and forwards a selection change on Apply', async () => {
       const onAggregationSettingsChange = jest.fn();
 
       useMetricsExperienceStateMock.mockReturnValue({
@@ -670,11 +671,19 @@ describe('MetricsExperienceGrid', () => {
 
       expect(getByTestId('metricsExperienceAggregationSettingsFlyout')).toBeInTheDocument();
 
+      const counterSelect = new EuiSuperSelectTestHarness(
+        'metricsExperienceAggregationSettingsCounterSelect'
+      );
+      await counterSelect.select('metricsExperienceAggregationSettingsCounterOption-max');
+
+      expect(onAggregationSettingsChange).not.toHaveBeenCalled();
+
       act(() => {
-        getByTestId('metricsExperienceAggregationSettingsCounterOption-max').click();
+        getByTestId('metricsExperienceAggregationSettingsApplyButton').click();
       });
 
       expect(onAggregationSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
+      expect(queryByTestId('metricsExperienceAggregationSettingsFlyout')).not.toBeInTheDocument();
     });
   });
 });

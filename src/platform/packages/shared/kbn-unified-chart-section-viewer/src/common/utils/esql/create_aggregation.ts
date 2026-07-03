@@ -15,7 +15,10 @@ import { FunctionNames } from '@kbn/esql-language';
 import { isLegacyHistogram } from '../legacy_histogram';
 import { resolveConflictingFieldTypes } from './resolve_conflicting_field_types';
 import type { MetricsAggregationSettings } from '../../../types';
-import { HISTOGRAM_PERCENTILE_VALUES } from '../aggregation_settings';
+import {
+  HISTOGRAM_PERCENTILE_VALUES,
+  METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+} from '../../../components/flyout/metrics_aggregation_settings_flyout/constants';
 
 /**
  * Gets the appropriate casting function name for a field type.
@@ -51,6 +54,10 @@ function applyCastIfNeeded(types: ES_FIELD_TYPES[], field: ESQLAstExpression): E
   return field;
 }
 
+function resolvePercentileValue(settings: MetricsAggregationSettings): number {
+  return HISTOGRAM_PERCENTILE_VALUES[settings.histogramPercentile];
+}
+
 /**
  * Builds an ES|QL aggregation expression AST node using `synth.exp` template
  * literals. Accepts any expression node -- a resolved column (`synth.col`) or
@@ -65,30 +72,34 @@ function buildAggregationNode(
   aggregationSettings?: MetricsAggregationSettings
 ): ESQLAstExpression | undefined {
   const resolvedField = applyCastIfNeeded(types, field);
+  const settings = aggregationSettings ?? METRICS_AGGREGATION_SETTINGS_DEFAULTS;
   const primaryType = types[0];
-  if (customFunction) return synth.exp`${synth.kwd(customFunction)}(${resolvedField})`;
+
+  if (customFunction) {
+    return synth.exp`${synth.kwd(customFunction)}(${resolvedField})`;
+  }
+
   if (isLegacyHistogram(primaryType, instrument)) {
-    const percentile = aggregationSettings
-      ? HISTOGRAM_PERCENTILE_VALUES[aggregationSettings.histogramPercentile]
-      : 95;
-    return synth.exp`PERCENTILE(TO_TDIGEST(${resolvedField}), ${percentile})`;
+    const percentile = resolvePercentileValue(settings);
+    return synth.exp`${synth.kwd(
+      FunctionNames.PERCENTILE.toUpperCase()
+    )}(TO_TDIGEST(${resolvedField}), ${percentile})`;
   }
+
   if (primaryType === 'exponential_histogram' || primaryType === 'tdigest') {
-    const percentile = aggregationSettings
-      ? HISTOGRAM_PERCENTILE_VALUES[aggregationSettings.histogramPercentile]
-      : 95;
-    return synth.exp`PERCENTILE(${resolvedField}, ${percentile})`;
+    const percentile = resolvePercentileValue(settings);
+    return synth.exp`${synth.kwd(
+      FunctionNames.PERCENTILE.toUpperCase()
+    )}(${resolvedField}, ${percentile})`;
   }
+
   if (instrument === 'counter') {
-    const counterFunction = aggregationSettings
-      ? aggregationSettings.counterAggregation.toUpperCase()
-      : 'SUM';
-    return synth.exp`${synth.kwd(counterFunction)}(RATE(${resolvedField}))`;
+    const fn = settings.counterAggregation.toUpperCase();
+    return synth.exp`${synth.kwd(fn)}(RATE(${resolvedField}))`;
   }
-  const gaugeFunction = aggregationSettings
-    ? aggregationSettings.gaugeAggregation.toUpperCase()
-    : 'AVG';
-  return synth.exp`${synth.kwd(gaugeFunction)}(${resolvedField})`;
+
+  const fn = settings.gaugeAggregation.toUpperCase();
+  return synth.exp`${synth.kwd(fn)}(${resolvedField})`;
 }
 
 /**

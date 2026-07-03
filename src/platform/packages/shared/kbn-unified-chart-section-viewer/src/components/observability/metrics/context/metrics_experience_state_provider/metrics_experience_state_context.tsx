@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import { createContext } from 'react';
 import type { Dimension, MetricsAggregationSettings } from '../../../../../types';
-import { METRICS_AGGREGATION_SETTINGS_DEFAULTS } from '../../../../../common/utils/aggregation_settings';
+import { METRICS_AGGREGATION_SETTINGS_DEFAULTS } from '../../../../flyout/metrics_aggregation_settings_flyout/constants';
 import {
   type FlyoutState,
   type FlyoutTabId,

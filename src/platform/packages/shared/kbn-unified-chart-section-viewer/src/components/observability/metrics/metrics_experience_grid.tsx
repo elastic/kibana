@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiButtonIcon, EuiToolTip, keys } from '@elastic/eui';
+import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
@@ -67,10 +67,6 @@ export const MetricsExperienceGrid = ({
     () => setIsAggregationSettingsFlyoutOpen(false),
     []
   );
-
-  const editAggregationsLabel = i18n.translate('metricsExperience.editAggregationsButton', {
-    defaultMessage: 'Edit metric aggregations',
-  });
 
   const {
     metricItems,
@@ -146,6 +142,7 @@ export const MetricsExperienceGrid = ({
     renderToggleActions,
     onDimensionsChange: onToolbarDimensionsChange,
     isLoading: isDiscoverLoading,
+    onOpenAggregationSettings: openAggregationSettingsFlyout,
   });
 
   const onKeyDown = useCallback(
@@ -187,25 +184,13 @@ export const MetricsExperienceGrid = ({
           rightSide: rightSideActions,
           additionalControls: {
             prependRight: (
-              <>
-                <SearchButton
-                  isFullscreen={isFullscreen}
-                  value={searchTerm}
-                  onSearchTermChange={onSearchTermChange}
-                  onKeyDown={onKeyDown}
-                  data-test-subj="metricsExperienceGridToolbarSearch"
-                />
-                <EuiToolTip content={editAggregationsLabel} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="pencil"
-                    aria-label={editAggregationsLabel}
-                    onClick={openAggregationSettingsFlyout}
-                    data-test-subj="metricsExperienceEditAggregationsButton"
-                    size="s"
-                    color="text"
-                  />
-                </EuiToolTip>
-              </>
+              <SearchButton
+                isFullscreen={isFullscreen}
+                value={searchTerm}
+                onSearchTermChange={onSearchTermChange}
+                onKeyDown={onKeyDown}
+                data-test-subj="metricsExperienceGridToolbarSearch"
+              />
             ),
           },
         }}
