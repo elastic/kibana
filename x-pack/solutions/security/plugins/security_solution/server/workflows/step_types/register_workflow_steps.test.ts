@@ -33,8 +33,8 @@ const REGISTRATIONS = [
   { definition: renderAlertNarrativeStepDefinition, kind: 'loader' as const },
   { definition: buildAlertEntityGraphStepDefinition, kind: 'loader' as const },
   { definition: setAlertStatusStepDefinition, kind: 'sync' as const },
-  { definition: assignAlertStepDefinition, kind: 'sync' as const },
   { definition: setAlertTagsStepDefinition, kind: 'sync' as const },
+  { definition: assignAlertStepDefinition, kind: 'sync' as const },
   { definition: enableRuleStepDefinition, kind: 'sync' as const },
   { definition: disableRuleStepDefinition, kind: 'sync' as const },
 ];
