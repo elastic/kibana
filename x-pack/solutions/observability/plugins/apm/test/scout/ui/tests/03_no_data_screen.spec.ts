@@ -51,7 +51,9 @@ test.describe('APM no data screen', { tag: tags.stateful.classic }, () => {
     pageObjects: { navigationPage },
   }) => {
     await navigationPage.gotoApm('/');
-    await expect(page.getByTestId('noDataDefaultActionButton')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    await expect(page.getByTestId('noDataDefaultActionButton')).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
   });
 
   test('bypasses the no data screen on settings pages', async ({
