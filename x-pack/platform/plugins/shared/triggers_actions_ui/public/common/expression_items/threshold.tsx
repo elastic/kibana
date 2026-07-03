@@ -99,6 +99,9 @@ export const ThresholdExpression = ({
     }
   );
 
+  const thresholdText =
+    (threshold || []).slice(0, numRequiredThresholds).join(` ${andThresholdText} `) + unit;
+
   useEffect(() => {
     const updateThresholdValue = comparators[comparator].requiredValues !== numRequiredThresholds;
     if (updateThresholdValue) {
@@ -120,11 +123,14 @@ export const ThresholdExpression = ({
           data-test-subj="thresholdPopover"
           description={comparators[comparator].text}
           value={
-            <span style={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs }}>
-              {(threshold || []).slice(0, numRequiredThresholds).join(` ${andThresholdText} `) +
-                unit}
-              {badge}
-            </span>
+            hasBadge ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs }}>
+                {thresholdText}
+                {badge}
+              </span>
+            ) : (
+              thresholdText
+            )
           }
           isActive={Boolean(alertThresholdPopoverOpen || hasThresholdError)}
           onClick={() => {
