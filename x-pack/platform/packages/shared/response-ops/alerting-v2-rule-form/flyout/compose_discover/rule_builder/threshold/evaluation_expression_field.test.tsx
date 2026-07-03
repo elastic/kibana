@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EvaluationExpressionField } from './evaluation_expression_field';
-import { Aggregation } from './form_types';
+import { Aggregation, EvaluationDefinition } from './form_types';
 
 const stats = [
   { id: 's1', label: 'count', aggregation: Aggregation.COUNT },
@@ -16,32 +16,31 @@ const stats = [
 ];
 const evaluations = [{ id: 'e1', label: 'error_rate', expression: 'errors / count' }];
 
-const ControlledField: React.FC<{ ownLabel: string; initialValue?: string }> = ({
-  ownLabel,
-  initialValue = '',
+const ControlledField: React.FC<{ evaluation: EvaluationDefinition }> = ({
+  evaluation,
 }) => {
-  const [value, setValue] = useState(initialValue);
+  const [value, setValue] = useState(evaluation.expression);
   return (
     <EvaluationExpressionField
       index={0}
-      value={value}
+      currentEvaluation={{ ...evaluation, expression: value }}
       onChange={setValue}
-      ownLabel={ownLabel}
       stats={stats}
       evaluations={evaluations}
+      evaluationInvalidRefs={new Map()}
     />
   );
 };
 
 describe('EvaluationExpressionField', () => {
   it('renders the expression input', () => {
-    render(<ControlledField ownLabel="error_rate" />);
+    render(<ControlledField evaluation={evaluations[0]} />);
 
     expect(screen.getByTestId('ruleBuilderEvalExpression-0')).toBeInTheDocument();
   });
 
   it('suggests stat and other evaluation labels while typing, excluding its own label', async () => {
-    render(<ControlledField ownLabel="error_rate" />);
+    render(<ControlledField evaluation={evaluations[0]} />);
     const input = screen.getByTestId('ruleBuilderEvalExpression-0') as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: 'e', selectionStart: 1, selectionEnd: 1 } });
@@ -55,7 +54,7 @@ describe('EvaluationExpressionField', () => {
   });
 
   it('inserts the clicked suggestion into the expression', async () => {
-    render(<ControlledField ownLabel="error_rate" initialValue="" />);
+    render(<ControlledField evaluation={{ label: 'error_rate', expression: '', id: 'e1' }} />);
     const input = screen.getByTestId('ruleBuilderEvalExpression-0') as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: 'c', selectionStart: 1, selectionEnd: 1 } });

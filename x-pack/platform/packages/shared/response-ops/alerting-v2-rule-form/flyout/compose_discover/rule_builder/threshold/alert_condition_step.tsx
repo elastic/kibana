@@ -756,9 +756,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                 <EvaluationExpressionField
                   index={idx}
                   currentEvaluation={ev}
-                  // value={ev.expression}
                   onChange={(expression) => updateEvaluation(idx, { expression })}
-                  // ownLabel={ev.label}
                   stats={thresholdValues.stats}
                   evaluations={thresholdValues.evaluations}
                   evaluationInvalidRefs={evaluationInvalidRefs}

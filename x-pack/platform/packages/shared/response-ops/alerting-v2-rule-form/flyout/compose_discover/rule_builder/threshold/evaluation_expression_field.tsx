@@ -16,8 +16,8 @@ import { EXPRESSION_UNKNOWN_REFERENCE_WARNING } from './translations';
 
 export interface EvaluationExpressionFieldProps {
   readonly index: number;
-  readonly currentEvaluation: EvaluationDefinition;  
-  readonly onChange: (value: string) => void;  
+  readonly currentEvaluation: EvaluationDefinition;
+  readonly onChange: (value: string) => void;
   readonly stats: StatDefinition[];
   readonly evaluations: EvaluationDefinition[];
   readonly evaluationInvalidRefs: Map<string, string[]>;
@@ -25,8 +25,8 @@ export interface EvaluationExpressionFieldProps {
 
 export const EvaluationExpressionField: React.FC<EvaluationExpressionFieldProps> = ({
   index,
-  currentEvaluation: ev,  
-  onChange,  
+  currentEvaluation: ev,
+  onChange,
   stats,
   evaluations,
   evaluationInvalidRefs,
