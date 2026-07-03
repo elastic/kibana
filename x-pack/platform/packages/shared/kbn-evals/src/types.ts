@@ -16,6 +16,7 @@ import type {
   EvaluatorDisplayGroup,
 } from './utils/reporting/report_table';
 import type { EvalsClient, EvaluatorStats } from './utils/evals_client';
+import type { EvaluatorApiClient } from './utils/evaluator_api_client';
 import type { AgentBuilderClient } from './utils/agent_builder_client';
 
 export interface EvaluationDataset<TExample extends Example = Example> {
@@ -99,12 +100,14 @@ type EvaluatorCallback<TExample extends Example, TTaskOutput extends TaskOutput>
  *
  * @see TraceBasedEvaluatorConfig for the trace-first evaluator factory configuration
  */
+export type EvaluatorKind = 'LLM' | 'CODE';
+
 export interface Evaluator<
   TExample extends Example = Example,
   TTaskOutput extends TaskOutput = TaskOutput
 > {
   name: string;
-  kind: 'LLM' | 'CODE';
+  kind: EvaluatorKind;
   evaluate: EvaluatorCallback<TExample, TTaskOutput>;
 }
 export interface DefaultEvaluators {
@@ -256,6 +259,7 @@ export interface EvaluationSpecificWorkerFixtures {
   inferenceClient: BoundInferenceClient;
   agentBuilderClient: AgentBuilderClient;
   evalsClient: EvalsClient;
+  evaluatorClient: EvaluatorApiClient;
   /**
    * Executor client used to run experiments.
    */
