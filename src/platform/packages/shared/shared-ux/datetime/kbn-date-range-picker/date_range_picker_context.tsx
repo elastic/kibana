@@ -117,6 +117,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   width: NonNullable<DateRangePickerProps['width']>;
   /** Whether the picker is disabled. */
   disabled: boolean;
+  /** Whether the picker shows its value but can't be edited. */
+  readOnly: boolean;
   /** Whether a loading spinner is shown inside the form control. */
   isLoading: boolean;
   /** Calendar-specific options (e.g. first day of week). */
@@ -168,6 +170,7 @@ export function DateRangePickerProvider({
   locale,
   isInvalid = false,
   disabled = false,
+  readOnly = false,
   isLoading = false,
   compressed = true,
   collapsed = false,
@@ -353,6 +356,7 @@ export function DateRangePickerProvider({
       onInputChange,
       width,
       disabled,
+      readOnly,
       isLoading,
       calendarOptions,
       settings,
@@ -386,6 +390,7 @@ export function DateRangePickerProvider({
       onInputChange,
       width,
       disabled,
+      readOnly,
       isLoading,
       calendarOptions,
       settings,
