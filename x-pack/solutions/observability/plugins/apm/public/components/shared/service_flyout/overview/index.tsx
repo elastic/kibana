@@ -145,7 +145,7 @@ export function ServiceFlyoutOverview({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { dataView } = useAdHocApmDataView();
   const indexes = dataView?.getIndexPattern();
-  const hasSystemMetrics = useServiceHasSystemMetrics({
+  const { hasSystemMetrics, isLoading: isSystemMetricsLoading } = useServiceHasSystemMetrics({
     serviceName: service.id,
     environment,
     rangeFrom,
@@ -199,7 +199,7 @@ export function ServiceFlyoutOverview({
             refreshToken={refreshToken}
           />
         </EuiFlexItem>
-        {hasSystemMetrics === undefined ? (
+        {isSystemMetricsLoading ? (
           <EuiFlexItem data-test-subj="serviceFlyoutSection-infrastructureMetricsSkeleton">
             <>
               <EuiSkeletonTitle size="xs" />

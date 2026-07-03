@@ -12,7 +12,10 @@ import type { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { ServiceFlyoutOverview } from '.';
 
-const mockUseServiceHasSystemMetrics = jest.fn<boolean | undefined, []>();
+const mockUseServiceHasSystemMetrics = jest.fn<
+  { hasSystemMetrics: boolean | undefined; isLoading: boolean },
+  []
+>();
 let transactionsSectionProps: React.ComponentProps<typeof ServiceFlyoutTransactionsSection> | null =
   null;
 
@@ -84,7 +87,7 @@ beforeEach(() => {
 
 describe('ServiceFlyoutOverview transactions section props', () => {
   it('passes resolved ISO timestamps to ServiceFlyoutTransactionsSection, not raw relative date strings', () => {
-    mockUseServiceHasSystemMetrics.mockReturnValue(false);
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
     renderOverview();
 
     expect(transactionsSectionProps?.start).toMatch(/^\d{4}-\d{2}-\d{2}T/);
@@ -96,7 +99,10 @@ describe('ServiceFlyoutOverview transactions section props', () => {
 
 describe('ServiceFlyoutOverview infrastructure section visibility', () => {
   it('hides the infrastructure section while system metrics data is loading', () => {
-    mockUseServiceHasSystemMetrics.mockReturnValue(undefined);
+    mockUseServiceHasSystemMetrics.mockReturnValue({
+      hasSystemMetrics: undefined,
+      isLoading: true,
+    });
 
     renderOverview();
 
@@ -106,7 +112,10 @@ describe('ServiceFlyoutOverview infrastructure section visibility', () => {
   });
 
   it('renders a skeleton placeholder while system metrics data is loading', () => {
-    mockUseServiceHasSystemMetrics.mockReturnValue(undefined);
+    mockUseServiceHasSystemMetrics.mockReturnValue({
+      hasSystemMetrics: undefined,
+      isLoading: true,
+    });
 
     renderOverview();
 
@@ -115,8 +124,24 @@ describe('ServiceFlyoutOverview infrastructure section visibility', () => {
     ).toBeInTheDocument();
   });
 
+  it('hides both skeleton and infrastructure section when the fetch fails', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({
+      hasSystemMetrics: undefined,
+      isLoading: false,
+    });
+
+    renderOverview();
+
+    expect(
+      screen.queryByTestId('serviceFlyoutSection-infrastructureMetricsSkeleton')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('serviceFlyoutSection-infrastructureMetrics')
+    ).not.toBeInTheDocument();
+  });
+
   it('hides the infrastructure section when the service has no system metrics', () => {
-    mockUseServiceHasSystemMetrics.mockReturnValue(false);
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
 
     renderOverview();
 
@@ -126,7 +151,7 @@ describe('ServiceFlyoutOverview infrastructure section visibility', () => {
   });
 
   it('shows the infrastructure section when the service has system metrics', () => {
-    mockUseServiceHasSystemMetrics.mockReturnValue(true);
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: true, isLoading: false });
 
     renderOverview();
 
@@ -134,7 +159,7 @@ describe('ServiceFlyoutOverview infrastructure section visibility', () => {
   });
 
   it('always renders the key metrics section regardless of system metrics', () => {
-    mockUseServiceHasSystemMetrics.mockReturnValue(false);
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
 
     renderOverview();
 
