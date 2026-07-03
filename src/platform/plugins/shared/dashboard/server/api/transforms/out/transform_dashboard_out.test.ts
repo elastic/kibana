@@ -324,8 +324,8 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
     });
   });
 
-  describe('isApproximate', () => {
-    test('should include isApproximate in dashboardState when set to true', () => {
+  describe('is_approximate', () => {
+    test('should map isApproximate attribute to is_approximate in dashboardState', () => {
       const input: DashboardSavedObjectAttributes = {
         panelsJSON: JSON.stringify([]),
         optionsJSON: JSON.stringify({}),
@@ -339,10 +339,10 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         undefined,
         getDashboardStateSchema(false)
       );
-      expect(dashboardState.isApproximate).toBe(true);
+      expect(dashboardState.is_approximate).toBe(true);
     });
 
-    test('should not include isApproximate when it is undefined', () => {
+    test('should not include is_approximate when isApproximate attribute is undefined', () => {
       const input: DashboardSavedObjectAttributes = {
         panelsJSON: JSON.stringify([]),
         optionsJSON: JSON.stringify({}),
@@ -355,7 +355,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         undefined,
         getDashboardStateSchema(false)
       );
-      expect(dashboardState).not.toHaveProperty('isApproximate');
+      expect(dashboardState).not.toHaveProperty('is_approximate');
     });
   });
 });

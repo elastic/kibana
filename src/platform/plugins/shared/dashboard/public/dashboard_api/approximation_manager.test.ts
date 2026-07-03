@@ -13,9 +13,9 @@ import type { DashboardState } from '../../common';
 import { initializeApproximationManager } from './approximation_manager';
 
 describe('approximationManager', () => {
-  const createLastSavedState = (isApproximate?: boolean) =>
+  const createLastSavedState = (is_approximate?: boolean) =>
     new BehaviorSubject<DashboardState>({
-      ...getSampleDashboardState({ isApproximate }),
+      ...getSampleDashboardState({ is_approximate }),
     });
 
   test('initializes with false when isApproximate is not set', () => {
@@ -24,7 +24,7 @@ describe('approximationManager', () => {
   });
 
   test('initializes with the value from initial state', () => {
-    const manager = initializeApproximationManager(getSampleDashboardState({ isApproximate: true }));
+    const manager = initializeApproximationManager(getSampleDashboardState({ is_approximate: true }));
     expect(manager.api.isApproximate$.value).toBe(true);
   });
 
@@ -39,7 +39,7 @@ describe('approximationManager', () => {
   });
 
   test('setIsApproximate does not emit when value is unchanged', () => {
-    const manager = initializeApproximationManager(getSampleDashboardState({ isApproximate: true }));
+    const manager = initializeApproximationManager(getSampleDashboardState({ is_approximate: true }));
     const emissions: boolean[] = [];
     manager.api.isApproximate$.subscribe((v) => emissions.push(v));
 
@@ -51,16 +51,16 @@ describe('approximationManager', () => {
     const manager = initializeApproximationManager(getSampleDashboardState());
 
     manager.api.setIsApproximate(true);
-    expect(manager.internalApi.getState()).toEqual({ isApproximate: true });
+    expect(manager.internalApi.getState()).toEqual({ is_approximate: true });
   });
 
   test('reset restores isApproximate from last saved state', () => {
-    const manager = initializeApproximationManager(getSampleDashboardState({ isApproximate: true }));
+    const manager = initializeApproximationManager(getSampleDashboardState({ is_approximate: true }));
 
     manager.api.setIsApproximate(false);
     expect(manager.api.isApproximate$.value).toBe(false);
 
-    manager.internalApi.reset(getSampleDashboardState({ isApproximate: true }));
+    manager.internalApi.reset(getSampleDashboardState({ is_approximate: true }));
     expect(manager.api.isApproximate$.value).toBe(true);
   });
 
@@ -69,7 +69,7 @@ describe('approximationManager', () => {
     const lastSavedState$ = createLastSavedState(false);
 
     manager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-      expect(changes).toEqual({ isApproximate: true });
+      expect(changes).toEqual({ is_approximate: true });
       done();
     });
 
@@ -77,7 +77,7 @@ describe('approximationManager', () => {
   });
 
   test('startComparing emits empty object when value matches saved state', (done) => {
-    const manager = initializeApproximationManager(getSampleDashboardState({ isApproximate: true }));
+    const manager = initializeApproximationManager(getSampleDashboardState({ is_approximate: true }));
     const lastSavedState$ = createLastSavedState(true);
 
     manager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {

@@ -276,7 +276,7 @@ export function getDashboardStateSchema(
           },
         })
       ),
-      isApproximate: schema.maybe(
+      is_approximate: schema.maybe(
         schema.boolean({
           meta: {
             description:

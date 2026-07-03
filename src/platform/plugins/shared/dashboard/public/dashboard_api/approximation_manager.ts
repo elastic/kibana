@@ -13,7 +13,7 @@ import { BehaviorSubject, combineLatestWith, debounceTime, map, skip, startWith 
 import type { DashboardState } from '../../common';
 
 export function initializeApproximationManager(initialState: DashboardState) {
-  const isApproximate$ = new BehaviorSubject<boolean>(initialState.isApproximate ?? false);
+  const isApproximate$ = new BehaviorSubject<boolean>(initialState.is_approximate ?? false);
 
   function setIsApproximate(value: boolean) {
     if (value !== isApproximate$.value) {
@@ -21,12 +21,12 @@ export function initializeApproximationManager(initialState: DashboardState) {
     }
   }
 
-  const comparators: StateComparators<Pick<DashboardState, 'isApproximate'>> = {
-    isApproximate: 'referenceEquality',
+  const comparators: StateComparators<Pick<DashboardState, 'is_approximate'>> = {
+    is_approximate: 'referenceEquality',
   };
 
-  const getState = (): Pick<DashboardState, 'isApproximate'> => ({
-    isApproximate: isApproximate$.value,
+  const getState = (): Pick<DashboardState, 'is_approximate'> => ({
+    is_approximate: isApproximate$.value,
   });
 
   const anyStateChange$ = isApproximate$.pipe(
@@ -50,7 +50,7 @@ export function initializeApproximationManager(initialState: DashboardState) {
           map(([latestState, lastSavedState]) => {
             return diffComparators(
               comparators,
-              { isApproximate: lastSavedState.isApproximate ?? false },
+              { is_approximate: lastSavedState.is_approximate ?? false },
               latestState
             );
           })
@@ -59,7 +59,7 @@ export function initializeApproximationManager(initialState: DashboardState) {
       comparators,
       getState,
       reset: (lastSavedState: DashboardState) => {
-        setIsApproximate(lastSavedState.isApproximate ?? false);
+        setIsApproximate(lastSavedState.is_approximate ?? false);
       },
     },
   };

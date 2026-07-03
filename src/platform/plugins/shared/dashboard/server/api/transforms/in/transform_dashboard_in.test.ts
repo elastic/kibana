@@ -141,12 +141,12 @@ describe('transformDashboardIn', () => {
     expect(output.attributes).not.toHaveProperty('projectRouting');
   });
 
-  it('should transform isApproximate to attributes', () => {
-    const output = transformDashboardIn({ title: 'title', isApproximate: true });
+  it('should transform is_approximate to isApproximate attribute', () => {
+    const output = transformDashboardIn({ title: 'title', is_approximate: true });
     expect(output.attributes.isApproximate).toBe(true);
   });
 
-  it('should not include isApproximate in attributes when it is undefined', () => {
+  it('should not include isApproximate in attributes when is_approximate is undefined', () => {
     const output = transformDashboardIn({ title: 'title' });
     expect(output.attributes).not.toHaveProperty('isApproximate');
   });
