@@ -328,10 +328,6 @@ export const OneDrive: ConnectorSpec = {
     'Using the top-level `id` without `driveId` will return a 404 — this is a Graph API limitation.',
     "Items from `search` and `getItemChildren` are always on the user's own drive and need no `driveId`.",
     '',
-    '### Authentication',
-    'Requires OAuth 2.0 Authorization Code flow with tenant-specific Microsoft Entra ID URLs.',
-    'The user must supply the authorization URL and token URL with their Azure AD tenant ID.',
-    '',
     '### Common gotchas',
     '- Item IDs are stable within a drive but are not portable across drives or tenants.',
     '- `@microsoft.graph.downloadUrl` fields in responses are time-limited pre-authenticated URLs — ' +
