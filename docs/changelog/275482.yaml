@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/275482
+issues:
+- https://github.com/elastic/obs-ai-team/issues/672
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+title: Skip suite-owner Slack notification on non-main weekly runs

@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/275632
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+areas:
+- Dashboards and visualizations
+title: Disable broken deferBelowFold experimental setting
+description: Disabled the broken experimental "Defer loading panels below the fold" (`labs:dashboard:deferBelowFold`) dashboard setting; the toggle remains but currently has no effect.
