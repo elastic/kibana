@@ -35,6 +35,15 @@ jest.mock('./converters/convert_rule_response_to_alerting_rule', () => ({
   ),
 }));
 
+// bulkCreatePrebuiltRules always supplies options.id (see methods/bulk_create_prebuilt_rules.ts),
+// even though the alerting plugin's public types mark it optional.
+const getOptionsId = (rule: { options?: { id?: string } }): string => {
+  if (!rule.options?.id) {
+    throw new Error('Expected rule.options.id to be set by bulkCreatePrebuiltRules');
+  }
+  return rule.options.id;
+};
+
 describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
@@ -149,14 +158,14 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     const params = { ...getCreateRulesSchemaMock(), version: 3, rule_id: 'my-rule' };
 
     rulesClient.bulkCreateRules.mockImplementation(async ({ rules: inputRules }) => ({
-      successfulIds: inputRules.map((r) => r.options.id),
+      successfulIds: inputRules.map((r) => getOptionsId(r)),
       errors: [],
       total: inputRules.length,
     }));
 
     const result = await detectionRulesClient.bulkCreatePrebuiltRules({ rules: [params] });
 
-    const passedId = rulesClient.bulkCreateRules.mock.calls[0][0].rules[0].options.id;
+    const passedId = getOptionsId(rulesClient.bulkCreateRules.mock.calls[0][0].rules[0]);
     expect(result.results).toEqual([
       {
         id: passedId,
