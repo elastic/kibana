@@ -371,12 +371,14 @@ const AgentDetailsPageContent: React.FunctionComponent<{
           }}
         />
       )}
-      <Route
-        path={FLEET_ROUTING_PATHS.agent_details_settings}
-        render={() => {
-          return <AgentSettings agent={agent} agentPolicy={agentPolicy} />;
-        }}
-      />
+      {!isCollector && (
+        <Route
+          path={FLEET_ROUTING_PATHS.agent_details_settings}
+          render={() => {
+            return <AgentSettings agent={agent} agentPolicy={agentPolicy} />;
+          }}
+        />
+      )}
       <Route
         path={FLEET_ROUTING_PATHS.agent_details}
         render={() => {
