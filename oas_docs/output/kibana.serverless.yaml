@@ -26145,6 +26145,7 @@ paths:
                 value:
                   cloud_connector:
                     cloud_connector_id: existing-aws-connector-id
+                    enabled: true
                     target_csp: aws
                   description: CSPM integration for AWS reusing existing cloud connector
                   inputs:
@@ -26179,6 +26180,7 @@ paths:
                 description: Example request to create agentless policy with AWS cloud connector
                 value:
                   cloud_connector:
+                    enabled: true
                     target_csp: aws
                   description: CSPM integration for AWS with cloud connector
                   inputs:
@@ -26213,6 +26215,7 @@ paths:
                 description: Example request to create agentless policy with Azure cloud connector
                 value:
                   cloud_connector:
+                    enabled: true
                     target_csp: azure
                   description: CSPM integration for Azure with cloud connector
                   inputs:
@@ -26668,6 +26671,348 @@ paths:
                   - message
           description: Not Found
       summary: Get an agentless policy
+      tags:
+        - Fleet agentless policies
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies/{policyId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update an agentless policy by ID. Uses full-replace semantics: the policy is rebuilt entirely from the request body, so any omitted optional field (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is cleared or reset to its default. The integration package name is immutable and the runtime-managed `cluster_id` is preserved from the existing policy.
+      operationId: put-fleet-agentless-policies-policyid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The ID of the agentless policy to update.
+          in: path
+          name: policyId
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateAgentlessPolicyAttachAWSCloudConnectorRequestExample:
+                description: Example request to attach an AWS cloud connector to an agentless policy on update. Because `PUT` is full-replace, the `cloud_connector` block must be present on every subsequent update or the connector is detached.
+                value:
+                  cloud_connector:
+                    enabled: true
+                    target_csp: aws
+                  description: CSPM integration for AWS with cloud connector
+                  inputs:
+                    cspm-cloudbeat/cis_aws:
+                      enabled: true
+                      streams:
+                        cloud_security_posture.findings:
+                          enabled: true
+                          vars:
+                            aws.account_type: organization-account
+                            aws.credentials.type: cloud_connector
+                            aws.supports_cloud_connectors: true
+                            external_id:
+                              id: ABCDEFGHIJKLMNOPQRST
+                              isSecretRef: true
+                            role_arn: arn:aws:iam::123456789012:role/TestRole
+                      vars:
+                        cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                    cspm-cloudbeat/cis_azure:
+                      enabled: false
+                    cspm-cloudbeat/cis_gcp:
+                      enabled: false
+                  name: cspm-aws-policy
+                  namespace: default
+                  package:
+                    name: cloud_security_posture
+                    version: 3.1.1
+                  vars:
+                    deployment: aws
+                    posture: cspm
+              updateAgentlessPolicyClearFieldsRequestExample:
+                description: Example showing full-replace clearing semantics. Compared to the prior state, this request omits `description` (clearing it) and provides only the minimal required fields. Any optional field not present in the body (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is dropped from the resulting policy.
+                value:
+                  inputs:
+                    ESS Billing-cel:
+                      enabled: true
+                      streams:
+                        ess_billing.billing:
+                          enabled: true
+                        ess_billing.credits:
+                          enabled: true
+                      vars:
+                        api_key: <REPLACE_WITH_YOUR_API_KEY>
+                        organization_id: '1234'
+                  name: ess_billing-1
+                  namespace: default
+                  package:
+                    name: ess_billing
+                    version: 1.6.0
+              updateAgentlessPolicyRequestExample:
+                description: 'Example request to update an agentless policy. `PUT` uses full-replace semantics: the policy is rebuilt entirely from this body, so any omitted optional field is cleared or reset to its default rather than preserved. For example, omitting `description` clears it, omitting `vars` or `global_data_tags` removes them, and omitting `cloud_connector` detaches any previously attached connector. Detaching or swapping a cloud connector only removes the reference; the connector itself is not deleted, as connectors have an independent, shareable lifecycle and are managed through the cloud connector API. Two fields are exceptions that cannot be changed using `PUT`: the integration `package.name` is immutable, and the runtime-managed `cluster_id` is preserved from the existing agent policy.'
+                value:
+                  description: updated description
+                  inputs:
+                    ESS Billing-cel:
+                      enabled: true
+                      streams:
+                        ess_billing.billing:
+                          enabled: true
+                          vars:
+                            hide_sensitive: true
+                            http_client_timeout: 30s
+                            lookbehind: 180
+                            tags:
+                              - forwarded
+                              - billing
+                        ess_billing.credits:
+                          enabled: true
+                      vars:
+                        api_key: <REPLACE_WITH_YOUR_API_KEY>
+                        organization_id: '1234'
+                  name: ess_billing-1
+                  namespace: default
+                  package:
+                    name: ess_billing
+                    version: 1.6.0
+              updateAgentlessPolicyReuseAWSCloudConnectorRequestExample:
+                description: Example request to update an agentless policy reusing an existing AWS cloud connector by ID instead of creating a new one.
+                value:
+                  cloud_connector:
+                    cloud_connector_id: existing-aws-connector-id
+                    enabled: true
+                    target_csp: aws
+                  description: CSPM integration for AWS reusing existing cloud connector
+                  inputs:
+                    cspm-cloudbeat/cis_aws:
+                      enabled: true
+                      streams:
+                        cloud_security_posture.findings:
+                          enabled: true
+                          vars:
+                            aws.account_type: organization-account
+                            aws.credentials.type: cloud_connector
+                            aws.supports_cloud_connectors: true
+                            external_id:
+                              id: ABCDEFGHIJKLMNOPQRST
+                              isSecretRef: true
+                            role_arn: arn:aws:iam::123456789012:role/TestRole
+                      vars:
+                        cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                    cspm-cloudbeat/cis_azure:
+                      enabled: false
+                    cspm-cloudbeat/cis_gcp:
+                      enabled: false
+                  name: cspm-aws-policy
+                  namespace: default
+                  package:
+                    name: cloud_security_posture
+                    version: 3.1.1
+                  vars:
+                    deployment: aws
+                    posture: cspm
+              updateAgentlessPolicyVersionChangeRequestExample:
+                description: Example request to update an agentless policy to a different package version. The package name is immutable, but the version may change.
+                value:
+                  description: bumped to a newer package version
+                  inputs:
+                    ESS Billing-cel:
+                      enabled: true
+                      streams:
+                        ess_billing.billing:
+                          enabled: true
+                        ess_billing.credits:
+                          enabled: false
+                      vars:
+                        api_key: <REPLACE_WITH_YOUR_API_KEY>
+                        organization_id: '1234'
+                  name: ess_billing-1
+                  namespace: default
+                  package:
+                    name: ess_billing
+                    version: 1.7.0
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_create_agentless_policy_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateAgentlessPolicyResponseExample:
+                  description: Example response for updating an agentless policy
+                  value:
+                    item:
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: updated description
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      inputs:
+                        ESS Billing-cel:
+                          enabled: true
+                          streams:
+                            ess_billing.billing:
+                              enabled: true
+                              vars:
+                                hide_sensitive: true
+                                http_client_timeout: 30s
+                                lookbehind: 180
+                                tags:
+                                  - forwarded
+                                  - billing
+                            ess_billing.credits:
+                              enabled: true
+                          vars:
+                            api_key:
+                              id: QY1sWpoBbWcMW-edr0Ee
+                              isSecretRef: true
+                            organization_id: '1234'
+                            url: https://billing.elastic-cloud.com
+                      name: ess_billing-1
+                      namespace: default
+                      package:
+                        name: ess_billing
+                        title: Elasticsearch Service Billing
+                        version: 1.6.0
+                      updated_at: '2025-11-07T09:14:02.118Z'
+                      updated_by: test_user
+                updateAgentlessPolicyWithAWSCloudConnectorResponseExample:
+                  description: Example response after attaching an AWS cloud connector on update
+                  value:
+                    item:
+                      cloud_connector:
+                        cloud_connector_id: aws-connector-67890
+                        enabled: true
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: CSPM integration for AWS with cloud connector
+                      id: aws-policy-12345
+                      inputs:
+                        cspm-cloudbeat/cis_aws:
+                          enabled: true
+                          streams:
+                            cloud_security_posture.findings:
+                              enabled: true
+                              vars:
+                                aws.account_type: organization-account
+                                aws.credentials.type: cloud_connector
+                                external_id:
+                                  id: secret-external-id-123
+                                  isSecretRef: true
+                                role_arn: arn:aws:iam::123456789012:role/TestRole
+                          vars:
+                            cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                        cspm-cloudbeat/cis_azure:
+                          enabled: false
+                        cspm-cloudbeat/cis_gcp:
+                          enabled: false
+                      name: cspm-aws-policy
+                      namespace: default
+                      package:
+                        name: cloud_security_posture
+                        title: Cloud Security Posture Management
+                        version: 3.1.1
+                      updated_at: '2025-11-07T09:14:02.118Z'
+                      updated_by: test_user
+                      vars:
+                        deployment: aws
+                        posture: cspm
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_response'
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+                packageNameChangeErrorResponseExample:
+                  description: The integration package name cannot be changed on update
+                  value:
+                    error: Bad Request
+                    message: Cannot change the integration package of an agentless policy (from "ess_billing" to "cloud_security_posture").
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              examples:
+                conflictErrorResponseExample:
+                  description: Example of a name-conflict error response
+                  value:
+                    error: Conflict
+                    message: An integration policy with the name my-agentless-policy already exists. Please rename it or choose a different name.
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Conflict — for example, the requested name is already used by another integration policy.
+      summary: Update an agentless policy
       tags:
         - Fleet agentless policies
       x-state: Experimental
@@ -71898,22 +72243,24 @@ components:
           type: array
         cloud_connector:
           additionalProperties: false
+          nullable: true
           type: object
           properties:
             cloud_connector_id:
-              description: ID of an existing cloud connector to reuse. If not provided, a new connector is created.
+              description: 'ID of an existing cloud connector to reuse. If not provided, a new connector is created. Requires `enabled: true` and cannot be combined with `name`.'
+              maxLength: 256
               type: string
             enabled:
               default: false
-              description: Set to `true` to enable cloud connectors for this policy.
+              description: Set to `true` to attach a cloud connector to this policy. Must be `true` to set any of `cloud_connector_id`, `name`, or `target_csp`.
               type: boolean
             name:
-              description: Name for the cloud connector. If not provided, a name is generated automatically from the credentials.
+              description: 'Name for a new cloud connector. If not provided, a name is generated automatically from the credentials. Requires `enabled: true` and only applies when creating a new connector (cannot be combined with `cloud_connector_id`).'
               maxLength: 255
               minLength: 1
               type: string
             target_csp:
-              description: Target cloud service provider. If not provided, the provider is detected automatically from the inputs.
+              description: 'Target cloud service provider. If not provided, the provider is detected automatically from the inputs. Requires `enabled: true`.'
               enum:
                 - aws
                 - azure
@@ -72054,6 +72401,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
         policy_template:
           description: The policy template to use for the agentless package policy. If not provided, the default policy template is used.
+          maxLength: 256
           type: string
         var_group_selections:
           additionalProperties:
