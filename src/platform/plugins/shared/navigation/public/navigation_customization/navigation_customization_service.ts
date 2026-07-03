@@ -109,7 +109,10 @@ export class NavigationCustomizationService {
       chrome.project.registerCustomizeNavigationHandler(() => this.openModal(core, chrome));
     }
 
-    // Keep track of the resolved solution so the save handler can stamp it on events.
+    // Track that the space has resolved to a known project-nav solution. The value is not
+    // stamped on events (Spaces already adds `context.spaceSolution` to the analytics
+    // context); its presence gates event emission so that context is populated at report
+    // time.
     if (solution) {
       this.activeSolution = solution;
     }
@@ -118,7 +121,8 @@ export class NavigationCustomizationService {
     // This carries the current customized-vs-default state so adoption can be derived
     // from a single event: the denominator is all loads and the numerator is the
     // `nav_customize_state: true` subset, both deduped at query time by the
-    // platform-provided `userId`. No User Storage write is performed.
+    // platform-provided `context.userId` and broken down by `context.spaceSolution`.
+    // No User Storage write is performed.
     if (solution && !this.loadedReported) {
       this.loadedReported = true;
       const savedCustomization = core.userStorage.get<NavigationCustomization>(
@@ -128,7 +132,6 @@ export class NavigationCustomizationService {
         savedCustomization !== undefined &&
         (savedCustomization.moves.length > 0 || savedCustomization.hidden.length > 0);
       reportNavigationLoaded(core.analytics, {
-        solution_type: solution,
         nav_customize_state: navCustomizeState,
       });
     }
@@ -188,7 +191,8 @@ export class NavigationCustomizationService {
 
           persist
             .then(() => {
-              // Report persisted customizations, gated on the write succeeding.
+              // Report persisted customizations, gated on the write succeeding and on the
+              // space having resolved (so `context.spaceSolution` is populated).
               if (!this.activeSolution) return;
               const hiddenSet = new Set(hiddenIds);
 
@@ -197,7 +201,6 @@ export class NavigationCustomizationService {
               // applied — so it does not count as a customization.
               const didCustomize = c.moves.length > 0 || c.hidden.length > 0;
               reportNavigationCustomization(core.analytics, {
-                solution_type: this.activeSolution,
                 action: didCustomize ? 'customization_saved' : 'default_saved',
                 did_customize: didCustomize,
                 ...buildNavItemsProperties(order.map((id) => ({ id, hidden: hiddenSet.has(id) }))),

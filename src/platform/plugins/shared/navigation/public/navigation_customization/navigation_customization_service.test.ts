@@ -237,7 +237,6 @@ describe('NavigationCustomizationService', () => {
 
       expect(reportEvent).toHaveBeenCalledTimes(1);
       expect(reportEvent).toHaveBeenCalledWith(NAV_LOADED_EVENT_TYPE, {
-        solution_type: 'es',
         nav_customize_state: false,
       });
     });
@@ -253,7 +252,6 @@ describe('NavigationCustomizationService', () => {
 
       expect(reportEvent).toHaveBeenCalledTimes(1);
       expect(reportEvent).toHaveBeenCalledWith(NAV_LOADED_EVENT_TYPE, {
-        solution_type: 'es',
         nav_customize_state: true,
       });
     });
@@ -266,7 +264,6 @@ describe('NavigationCustomizationService', () => {
       service.enableUi({ core, chrome, solution: 'es' });
 
       expect(reportEvent).toHaveBeenCalledWith(NAV_LOADED_EVENT_TYPE, {
-        solution_type: 'es',
         nav_customize_state: false,
       });
     });
@@ -424,7 +421,6 @@ describe('NavigationCustomizationService', () => {
       expect(reportEvent).toHaveBeenCalledWith(
         NAV_CUSTOMIZATION_EVENT_TYPE,
         expect.objectContaining({
-          solution_type: 'es',
           action: 'default_saved',
           did_customize: false,
           visible_item_ids: ['a', 'b'],

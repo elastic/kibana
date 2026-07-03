@@ -8,7 +8,6 @@
  */
 
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core/public';
-import type { SolutionId } from '@kbn/core-chrome-browser';
 
 /** Fired once per page load with the current customized-vs-default state. */
 export const NAV_LOADED_EVENT_TYPE = 'navigation_loaded';
@@ -18,18 +17,22 @@ export const NAV_CUSTOMIZATION_EVENT_TYPE = 'navigation_customization';
 
 export type NavCustomizationAction = 'customization_saved' | 'default_saved';
 
+/**
+ * The active solution is not stamped on these events: Spaces already adds it to the
+ * analytics context as `context.spaceSolution` (a keyword on every browser event), which
+ * is the dimension analysts break down by. Events are still emitted only once the space
+ * has resolved, so that context is populated.
+ */
 export interface NavLoadedEventProps {
-  solution_type: SolutionId;
   /**
    * Whether a non-default customization is currently stored for this user/space.
-   * Deduped at query time by the platform-provided `userId`, so no per-user write
+   * Deduped at query time by the platform-provided `context.userId`, so no per-user write
    * is needed to derive an adoption denominator/numerator from this event.
    */
   nav_customize_state: boolean;
 }
 
 export interface NavCustomizationEventProps {
-  solution_type: SolutionId;
   action: NavCustomizationAction;
   did_customize: boolean;
   /** Visible nav item IDs in display order (array index = position). */
@@ -55,18 +58,11 @@ export function registerNavigationCustomizationEvents(analytics: AnalyticsServic
   analytics.registerEventType({
     eventType: NAV_LOADED_EVENT_TYPE,
     schema: {
-      solution_type: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'The solution type of the active space (one of the Kibana solution/project ids, e.g. es, oblt, security, workplaceai, vectordb).',
-        },
-      },
       nav_customize_state: {
         type: 'boolean',
         _meta: {
           description:
-            'True if a non-default navigation customization is stored for this user/space at page load. Dedupe by the platform userId at query time; this event is not deduped at emit time.',
+            'True if a non-default navigation customization is stored for this user/space at page load. Dedupe by context.userId at query time and break down by context.spaceSolution; this event is not deduped at emit time.',
         },
       },
     },
@@ -75,13 +71,6 @@ export function registerNavigationCustomizationEvents(analytics: AnalyticsServic
   analytics.registerEventType({
     eventType: NAV_CUSTOMIZATION_EVENT_TYPE,
     schema: {
-      solution_type: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'The solution type of the active space (one of the Kibana solution/project ids, e.g. es, oblt, security, workplaceai, vectordb).',
-        },
-      },
       action: {
         type: 'keyword',
         _meta: {
