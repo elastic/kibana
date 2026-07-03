@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
-import pRetry from 'p-retry';
 import type { TraceAccessor } from './types';
 import { createTraceAccessor } from './trace_accessor';
 import { rowsFromEsqlResponse } from './esql_utils';
@@ -33,50 +31,23 @@ const AGENT_RESPONSE_PIPELINE = `| WHERE event_name == "gen_ai.choice"
 | LIMIT 1`;
 
 export const extractChatEvidence = async (
-  traceAccessor: TraceAccessor,
-  log: Logger
+  traceAccessor: TraceAccessor
 ): Promise<{ user_query: string; agent_response: string }> => {
   const accessor = createTraceAccessor(traceAccessor);
 
-  return pRetry(
-    async () => {
-      const userMsgResponse = await accessor.runEsql('logs', USER_MESSAGE_PIPELINE);
-      const userMsgRows = rowsFromEsqlResponse<UserMessageRow>(userMsgResponse);
+  const userMsgResponse = await accessor.runEsql('logs', USER_MESSAGE_PIPELINE);
+  const userMsgRows = rowsFromEsqlResponse<UserMessageRow>(userMsgResponse);
 
-      if (userMsgRows.length === 0) {
-        throw new Error(`No user message span events found for trace ${accessor.traceId}`);
-      }
+  if (userMsgRows.length === 0) {
+    throw new Error(`No user message span events found for trace ${accessor.traceId}`);
+  }
 
-      const userQuery = userMsgRows[0][USER_MESSAGE_CONTENT_COLUMN] ?? '';
+  const userQuery = userMsgRows[0][USER_MESSAGE_CONTENT_COLUMN] ?? '';
 
-      const agentRespResponse = await accessor.runEsql('logs', AGENT_RESPONSE_PIPELINE);
-      const agentRespRows = rowsFromEsqlResponse<AgentResponseRow>(agentRespResponse);
-      const agentResponse =
-        agentRespRows.length > 0 ? agentRespRows[0][AGENT_RESPONSE_CONTENT_COLUMN] ?? '' : '';
+  const agentRespResponse = await accessor.runEsql('logs', AGENT_RESPONSE_PIPELINE);
+  const agentRespRows = rowsFromEsqlResponse<AgentResponseRow>(agentRespResponse);
+  const agentResponse =
+    agentRespRows.length > 0 ? agentRespRows[0][AGENT_RESPONSE_CONTENT_COLUMN] ?? '' : '';
 
-      return { user_query: userQuery, agent_response: agentResponse };
-    },
-    {
-      retries: 2,
-      factor: 2,
-      minTimeout: 2000,
-      maxTimeout: 10000,
-      onFailedAttempt: (error) => {
-        const isLastAttempt = error.retriesLeft === 0;
-        if (isLastAttempt) {
-          log.error(
-            new Error(
-              `Failed to extract chat evidence for trace ${traceAccessor.traceId} after ${error.attemptNumber} attempts`,
-              { cause: error }
-            )
-          );
-          return;
-        }
-
-        log.warn(
-          `Chat evidence query failed for trace ${traceAccessor.traceId} on attempt ${error.attemptNumber}; retrying`
-        );
-      },
-    }
-  );
+  return { user_query: userQuery, agent_response: agentResponse };
 };

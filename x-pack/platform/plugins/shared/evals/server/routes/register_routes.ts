@@ -38,7 +38,7 @@ export interface RouteDependencies {
   router: EvalsRouter;
   logger: Logger;
   canEncrypt: boolean;
-  evaluatorRegistry?: EvaluatorRegistry;
+  evaluatorRegistry: EvaluatorRegistry;
   getInferenceStart: () => Promise<InferenceServerStart>;
   getEncryptedSavedObjectsStart: () => Promise<EncryptedSavedObjectsPluginStart>;
   getInternalRemoteConfigsSoClient: () => Promise<SavedObjectsClientContract>;

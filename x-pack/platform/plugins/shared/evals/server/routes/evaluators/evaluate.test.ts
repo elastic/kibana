@@ -15,7 +15,11 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
+import { awaitTraceReady } from '../../evaluators/trace_readiness';
 import { registerEvaluateRoute } from './evaluate';
+
+jest.mock('../../evaluators/trace_readiness');
+const awaitTraceReadyMock = awaitTraceReady as jest.MockedFunction<typeof awaitTraceReady>;
 
 describe('POST /internal/evals/_evaluate', () => {
   const buildEvaluator = ({
@@ -86,6 +90,14 @@ describe('POST /internal/evals/_evaluate', () => {
 
     return { handler, routeConfig, logger };
   };
+
+  beforeEach(() => {
+    awaitTraceReadyMock.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('registers manage privilege authz requirement', () => {
     const { routeConfig } = setup();
@@ -442,5 +454,37 @@ describe('POST /internal/evals/_evaluate', () => {
         ],
       }),
     ]);
+  });
+
+  it('returns 404 when trace readiness check fails', async () => {
+    awaitTraceReadyMock.mockRejectedValueOnce(
+      new Error('Trace abc123 is not ready: agent response not yet available')
+    );
+    const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
+    const latency = buildEvaluator({ name: 'latency', kind: 'code' });
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([groundedness, latency]),
+      inferenceStart: {
+        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+      } as unknown as InferenceServerStart,
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }] },
+          evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.payload).toEqual({
+      message: 'Error: Trace abc123 is not ready: agent response not yet available',
+    });
+    expect(groundedness.evaluate).not.toHaveBeenCalled();
+    expect(latency.evaluate).not.toHaveBeenCalled();
   });
 });

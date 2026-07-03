@@ -17,6 +17,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
+import { awaitTraceReady } from '../../evaluators/trace_readiness';
 import type { EvaluatorDefinition } from '../../evaluators/types';
 import type { RouteDependencies } from '../register_routes';
 
@@ -46,14 +47,6 @@ export const registerEvaluateRoute = ({
         },
       },
       async (context, request, response) => {
-        if (!evaluatorRegistry) {
-          logger.error('Evaluator registry is not configured');
-          return response.customError({
-            statusCode: 500,
-            body: { message: 'Evaluator registry is not configured' },
-          });
-        }
-
         const { subject, evaluators } = request.body;
         if (subject.mode === 'multi-turn') {
           return response.badRequest({
@@ -120,6 +113,12 @@ export const registerEvaluateRoute = ({
           traceId,
           esClient: coreContext.elasticsearch.client.asInternalUser,
         });
+
+        try {
+          await awaitTraceReady(traceAccessor, logger);
+        } catch (error) {
+          return response.notFound({ body: { message: String(error) } });
+        }
 
         let inferenceStartPromise: ReturnType<RouteDependencies['getInferenceStart']> | undefined;
         const inferenceClientByConnectorId = new Map<string, BoundInferenceClient>();

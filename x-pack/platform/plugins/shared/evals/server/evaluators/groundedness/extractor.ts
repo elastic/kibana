@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import pRetry from 'p-retry';
 import { extractChatEvidence } from '../chat_evidence';
 import type { TraceAccessor } from '../types';
 import { createTraceAccessor } from '../trace_accessor';
@@ -68,82 +67,37 @@ export const extractGroundednessEvidence = async (
   log: Logger
 ): Promise<GroundednessEvidence> => {
   const accessor = createTraceAccessor(traceAccessor);
-  let lastPartialEvidence: GroundednessEvidence | undefined;
 
-  const fetchGroundednessEvidence = async (): Promise<GroundednessEvidence> => {
-    const chatEvidence = await extractChatEvidence(traceAccessor, log);
+  const chatEvidence = await extractChatEvidence(traceAccessor);
 
-    const baseEvidence: GroundednessEvidence = {
-      user_query: chatEvidence.user_query,
-      agent_response: chatEvidence.agent_response,
-      tool_call_history: [],
-    };
-
-    if (!chatEvidence.agent_response.trim()) {
-      lastPartialEvidence = {
-        ...baseEvidence,
-        agent_response: '',
-      };
-      throw new Error(`Missing agent response for trace ${accessor.traceId}`);
-    }
-
-    const toolResponse = await accessor.runEsql('traces', TOOL_SPANS_PIPELINE);
-    const toolRows = rowsFromEsqlResponse<ToolSpanRow>(toolResponse);
-
-    const toolCallHistory = toolRows.map((toolRow) => {
-      return {
-        tool_call_id: toolRow[TOOL_CALL_ID_COLUMN] ?? undefined,
-        tool_id: toolRow[TOOL_NAME_COLUMN] ?? undefined,
-        arguments: parseJsonIfPossible(toolRow[TOOL_ARGUMENTS_COLUMN]),
-        result: parseJsonIfPossible(toolRow[TOOL_RESULT_COLUMN]),
-      };
-    });
-
-    const evidence: GroundednessEvidence = {
-      ...baseEvidence,
-      tool_call_history: toolCallHistory,
-    };
-
-    lastPartialEvidence = evidence;
-    return evidence;
+  const baseEvidence: GroundednessEvidence = {
+    user_query: chatEvidence.user_query,
+    agent_response: chatEvidence.agent_response,
+    tool_call_history: [],
   };
 
-  try {
-    return await pRetry(fetchGroundednessEvidence, {
-      retries: 2,
-      factor: 2,
-      minTimeout: 2000,
-      maxTimeout: 10000,
-      onFailedAttempt: (error) => {
-        const isLastAttempt = error.retriesLeft === 0;
-        if (isLastAttempt) {
-          log.error(
-            new Error(
-              `Failed to extract groundedness evidence for trace ${traceAccessor.traceId} after ${error.attemptNumber} attempts`,
-              { cause: error }
-            )
-          );
-          return;
-        }
-
-        log.warn(
-          `Groundedness evidence query failed for trace ${traceAccessor.traceId} on attempt ${error.attemptNumber}; retrying`
-        );
-      },
-    });
-  } catch (error) {
-    if (lastPartialEvidence) {
-      const incompleteEvidence = {
-        ...lastPartialEvidence,
-        agent_response: '',
-        tool_call_history: [],
-      };
-      log.warn(
-        `Returning incomplete groundedness evidence for trace ${traceAccessor.traceId}; evaluator should treat as potentially incomplete`
-      );
-      throw new IncompleteGroundednessEvidenceError(incompleteEvidence, { cause: error });
-    }
-
-    throw error;
+  if (!chatEvidence.agent_response.trim()) {
+    const incompleteEvidence: GroundednessEvidence = {
+      ...baseEvidence,
+      agent_response: '',
+      tool_call_history: [],
+    };
+    log.warn(`Returning incomplete groundedness evidence for trace ${traceAccessor.traceId}.`);
+    throw new IncompleteGroundednessEvidenceError(incompleteEvidence);
   }
+
+  const toolResponse = await accessor.runEsql('traces', TOOL_SPANS_PIPELINE);
+  const toolRows = rowsFromEsqlResponse<ToolSpanRow>(toolResponse);
+
+  const toolCallHistory = toolRows.map((toolRow) => ({
+    tool_call_id: toolRow[TOOL_CALL_ID_COLUMN] ?? undefined,
+    tool_id: toolRow[TOOL_NAME_COLUMN] ?? undefined,
+    arguments: parseJsonIfPossible(toolRow[TOOL_ARGUMENTS_COLUMN]),
+    result: parseJsonIfPossible(toolRow[TOOL_RESULT_COLUMN]),
+  }));
+
+  return {
+    ...baseEvidence,
+    tool_call_history: toolCallHistory,
+  };
 };

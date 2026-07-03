@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pRetry from 'p-retry';
 import type { EvaluatorDefinition, EvaluatorResult } from '../types';
 import { createTraceAccessor } from '../trace_accessor';
 import type { TraceSource } from '../trace_accessor';
@@ -32,37 +31,27 @@ const getTraceMetricResult = async ({
   log: Parameters<EvaluatorDefinition['evaluate']>[0]['log'];
 }): Promise<EvaluatorResult> => {
   try {
-    const score = await pRetry(
-      async () => {
-        const response = await runEsql(source, pipeline);
-        const rows = rowsFromEsqlResponse<Record<string, number | null>>(response);
-        const firstRow = rows[0];
-        if (!firstRow) {
-          throw new Error(
-            `No trace metric rows returned for evaluator "${evaluatorName}" and trace "${traceId}"`
-          );
-        }
+    const response = await runEsql(source, pipeline);
+    const rows = rowsFromEsqlResponse<Record<string, number | null>>(response);
+    const firstRow = rows[0];
+    if (!firstRow) {
+      throw new Error(
+        `No trace metric rows returned for evaluator "${evaluatorName}" and trace "${traceId}"`
+      );
+    }
 
-        const metricValue = firstRow[columnName];
-        if (metricValue == null || !Number.isFinite(metricValue)) {
-          throw new Error(
-            `Metric "${columnName}" is not numeric for evaluator "${evaluatorName}" and trace "${traceId}"`
-          );
-        }
-
-        return metricValue;
-      },
-      {
-        retries: 5,
-        factor: 2,
-      }
-    );
+    const metricValue = firstRow[columnName];
+    if (metricValue == null || !Number.isFinite(metricValue)) {
+      throw new Error(
+        `Metric "${columnName}" is not numeric for evaluator "${evaluatorName}" and trace "${traceId}"`
+      );
+    }
 
     return {
       scores: [
         {
           name: evaluatorName,
-          score,
+          score: metricValue,
         },
       ],
     };

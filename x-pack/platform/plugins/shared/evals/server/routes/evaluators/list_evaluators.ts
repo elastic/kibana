@@ -9,11 +9,7 @@ import { API_VERSIONS, EVALS_EVALUATORS_URL, INTERNAL_API_ACCESS } from '@kbn/ev
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
-export const registerListEvaluatorsRoute = ({
-  router,
-  logger,
-  evaluatorRegistry,
-}: RouteDependencies) => {
+export const registerListEvaluatorsRoute = ({ router, evaluatorRegistry }: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_EVALUATORS_URL,
@@ -29,14 +25,6 @@ export const registerListEvaluatorsRoute = ({
         validate: false,
       },
       async (_context, _request, response) => {
-        if (!evaluatorRegistry) {
-          logger.error('Evaluator registry is not configured');
-          return response.customError({
-            statusCode: 500,
-            body: { message: 'Evaluator registry is not configured' },
-          });
-        }
-
         const evaluators = evaluatorRegistry.list().map((evaluator) => ({
           name: evaluator.name,
           version: evaluator.version,

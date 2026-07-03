@@ -131,7 +131,13 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
 
   evaluate(
     'smoke tests: trace-based evaluators',
-    async ({ executorClient, agentBuilderClient, evaluatorClient, evaluationConnector }) => {
+    async ({ executorClient, agentBuilderClient, evaluatorClient }) => {
+      const connectorId = process.env.SMOKE_TEST_EVALUATION_CONNECTOR_ID;
+      evaluate.skip(
+        !connectorId,
+        'Set SMOKE_TEST_EVALUATION_CONNECTOR_ID to run the trace-based evaluator smoke test'
+      );
+
       const result = await executorClient.runExperiment(
         {
           datasets: [
@@ -163,11 +169,11 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
           },
         },
         evaluatorClient.toEvaluators([
-          { name: 'groundedness', kind: 'LLM', connectorId: 'azure-gpt4_1' },
+          { name: 'groundedness', kind: 'LLM', connectorId: connectorId! },
           {
             name: 'correctness',
             kind: 'LLM',
-            connectorId: 'azure-gpt4_1',
+            connectorId: connectorId!,
             subScores: [
               { key: 'factuality', evaluatorName: 'Factuality' },
               { key: 'relevance', evaluatorName: 'Relevance' },

@@ -50,7 +50,7 @@ export const correctnessEvaluator: EvaluatorDefinition = {
       throw new Error('reference_data.expected is required for correctness evaluator');
     }
 
-    const chatEvidence = await extractChatEvidence(trace, log);
+    const chatEvidence = await extractChatEvidence(trace);
 
     const response = await pRetry(
       async () => {

@@ -73,7 +73,7 @@ describe('GET /internal/evals/evaluators', () => {
     get: jest.fn((_name: string, _version?: string) => undefined),
   });
 
-  const setup = ({ evaluatorRegistry }: { evaluatorRegistry?: EvaluatorRegistry | null } = {}) => {
+  const setup = ({ evaluatorRegistry }: { evaluatorRegistry?: EvaluatorRegistry } = {}) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
     const versionedRouter = router.versioned as MockedVersionedRouter;
@@ -81,10 +81,7 @@ describe('GET /internal/evals/evaluators', () => {
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry:
-        evaluatorRegistry === undefined
-          ? (buildEvaluatorRegistry() as EvaluatorRegistry)
-          : (evaluatorRegistry as unknown as EvaluatorRegistry),
+      evaluatorRegistry: evaluatorRegistry ?? buildEvaluatorRegistry(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
@@ -139,23 +136,5 @@ describe('GET /internal/evals/evaluators', () => {
         },
       },
     });
-  });
-
-  it('returns 500 when evaluator registry is unavailable', async () => {
-    const { handler, logger } = setup({
-      evaluatorRegistry: null,
-    });
-
-    const response = await handler(
-      {} as Parameters<typeof handler>[0],
-      {} as Parameters<typeof handler>[1],
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(500);
-    expect(response.payload).toEqual({
-      message: 'Evaluator registry is not configured',
-    });
-    expect(logger.error).toHaveBeenCalledWith('Evaluator registry is not configured');
   });
 });
