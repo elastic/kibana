@@ -16,6 +16,18 @@ jest.mock('../components/ai_summary_section', () => ({
   ),
 }));
 
+jest.mock('../components/visualizations_section', () => ({
+  VisualizationsSection: ({ hit }: { hit: DataTableRecord }) => (
+    <div data-test-subj="mock-visualizations-section" data-hit-id={(hit as { id: string }).id} />
+  ),
+}));
+
+jest.mock('../components/insights_section', () => ({
+  InsightsSection: ({ hit }: { hit: DataTableRecord }) => (
+    <div data-test-subj="mock-insights-section" data-hit-id={(hit as { id: string }).id} />
+  ),
+}));
+
 const buildHit = (extra: Record<string, unknown> = {}): DataTableRecord =>
   ({
     id: 'attack-1',
@@ -49,6 +61,38 @@ describe('<OverviewTab />', () => {
     const hit = buildHit();
     render(<OverviewTab hit={hit} />);
     expect(screen.getByTestId('mock-ai-summary-section')).toHaveAttribute(
+      'data-hit-id',
+      'attack-1'
+    );
+  });
+
+  it('renders VisualizationsSection', () => {
+    render(<OverviewTab hit={buildHit()} />);
+    expect(screen.getByTestId('mock-visualizations-section')).toBeInTheDocument();
+  });
+
+  it('renders both AISummarySection and VisualizationsSection', () => {
+    render(<OverviewTab hit={buildHit()} />);
+    expect(screen.getByTestId('mock-ai-summary-section')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-visualizations-section')).toBeInTheDocument();
+  });
+
+  it('renders InsightsSection', () => {
+    render(<OverviewTab hit={buildHit()} />);
+    expect(screen.getByTestId('mock-insights-section')).toBeInTheDocument();
+  });
+
+  it('renders all three sections: summary, visualizations, and insights', () => {
+    render(<OverviewTab hit={buildHit()} />);
+    expect(screen.getByTestId('mock-ai-summary-section')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-visualizations-section')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-insights-section')).toBeInTheDocument();
+  });
+
+  it('passes hit to VisualizationsSection', () => {
+    const hit = buildHit();
+    render(<OverviewTab hit={hit} />);
+    expect(screen.getByTestId('mock-visualizations-section')).toHaveAttribute(
       'data-hit-id',
       'attack-1'
     );

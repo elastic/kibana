@@ -18,6 +18,11 @@ spec:
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/upload_pipeline.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/upload_pipeline.yml
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: false
         build_pull_requests: false

@@ -38,13 +38,11 @@ import { useStoredAssistantConnectorId } from '../../onboarding/components/hooks
 import { EntityAnalyticsRecentAnomalies } from '../components/home/anomalies_panel';
 import { WatchlistFilter } from '../components/watchlists/watchlist_filter';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
-import {
-  ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
-  ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY,
-} from '../components/home/constants';
+import { ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY } from '../components/home/constants';
 import {
   DataViewContext,
   useEntityURLState,
+  DEFAULT_ENTITIES_TABLE_CONFIG,
   DEFAULT_ENTITIES_TABLE_SORT,
   type EntitiesBaseURLQuery,
   EntitiesTableSection,
@@ -65,6 +63,7 @@ import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analytics_read_privileges_callout';
 import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
+import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
 import { NoPrivileges } from '../../common/components/no_privileges';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
@@ -93,7 +92,9 @@ export const EntityAnalyticsHomePage = () => {
   const isEnterprise = useLicense().isEnterprise();
   const leadGenerationEnabled =
     useIsExperimentalFeatureEnabled('leadGenerationEnabled') && isEnterprise;
+  const anomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
   const leadGenerationPrivilegesQuery = useLeadGenerationPrivileges(leadGenerationEnabled);
+  const anomalyPrivilegesQuery = useAnomalyPrivileges(anomalyDetailsEnabled);
 
   if (entityEnginePrivilegesQuery.isLoading || riskEngineReadPrivileges.isLoading) {
     return <PageLoader />;
@@ -108,6 +109,8 @@ export const EntityAnalyticsHomePage = () => {
         riskEngineReadPrivileges={riskEngineReadPrivileges}
         entityEnginePrivileges={entityEnginePrivilegesQuery.data}
         leadGenerationPrivileges={leadGenerationPrivilegesQuery.data}
+        anomalyPrivileges={anomalyPrivilegesQuery.data}
+        id="entity-analytics-home"
       />
       <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsHomePage">
         {noPrivileges ? (
@@ -376,7 +379,6 @@ const EntityAnalyticsEntitiesTable = ({
 const EntityAnalyticsEntitiesTableContent = ({ watchlistId }: { watchlistId?: string }) => {
   const urlState = useEntityURLState({
     paginationLocalStorageKey: ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY,
-    columnsLocalStorageKey: ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
     defaultQuery: getDefaultQuery,
   });
 
@@ -398,5 +400,5 @@ const EntityAnalyticsEntitiesTableContent = ({ watchlistId }: { watchlistId?: st
     };
   }, [urlState, watchlistId]);
 
-  return <EntitiesTableSection state={state} />;
+  return <EntitiesTableSection state={state} config={DEFAULT_ENTITIES_TABLE_CONFIG} />;
 };
