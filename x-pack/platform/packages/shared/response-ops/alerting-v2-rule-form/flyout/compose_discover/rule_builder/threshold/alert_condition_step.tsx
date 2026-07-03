@@ -369,7 +369,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   }, [thresholdValues.stats, thresholdValues.evaluations]);
 
   // Debounced so warnings don't flash on every keystroke while the user is still typing.
-  const debouncedEvaluations = useDebouncedValue(thresholdValues.evaluations);
+  const debouncedEvaluations = useDebouncedValue(thresholdValues.evaluations, 500);
 
   const evaluationInvalidRefs = useMemo(() => {
     const map = new Map<string, string[]>();

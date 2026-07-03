@@ -12,31 +12,31 @@ import { SuggestionsDropdown } from '../shared/suggestions/suggestions_dropdown'
 import { useSuggestionsInput } from '../shared/suggestions/use_suggestions_input';
 import type { EvaluationDefinition, StatDefinition } from './form_types';
 import { createMetricSuggestionsProvider } from './suggestions_provider';
+import { EXPRESSION_UNKNOWN_REFERENCE_WARNING } from './translations';
 
 export interface EvaluationExpressionFieldProps {
   readonly index: number;
-  readonly value: string;
-  readonly onChange: (value: string) => void;
-  /** The evaluation's own label, excluded from its own suggestions to avoid self-reference. */
-  readonly ownLabel: string;
+  readonly currentEvaluation: EvaluationDefinition;  
+  readonly onChange: (value: string) => void;  
   readonly stats: StatDefinition[];
   readonly evaluations: EvaluationDefinition[];
+  readonly evaluationInvalidRefs: Map<string, string[]>;
 }
 
 export const EvaluationExpressionField: React.FC<EvaluationExpressionFieldProps> = ({
   index,
-  value,
-  onChange,
-  ownLabel,
+  currentEvaluation: ev,  
+  onChange,  
   stats,
   evaluations,
+  evaluationInvalidRefs,
 }) => {
   const provider = useMemo(
-    () => createMetricSuggestionsProvider(stats, evaluations, ownLabel),
-    [stats, evaluations, ownLabel]
+    () => createMetricSuggestionsProvider(stats, evaluations, ev.label),
+    [stats, evaluations, ev.label]
   );
   const { inputProps, dropdownProps } = useSuggestionsInput({
-    value,
+    value: ev.expression,
     onChange,
     provider,
     listId: `ruleBuilderEvalExpressionSuggestions-${index}`,
@@ -48,6 +48,11 @@ export const EvaluationExpressionField: React.FC<EvaluationExpressionFieldProps>
         defaultMessage: 'Expression',
       })}
       fullWidth
+      helpText={
+        evaluationInvalidRefs.has(ev.id)
+          ? EXPRESSION_UNKNOWN_REFERENCE_WARNING(evaluationInvalidRefs.get(ev.id)!)
+          : undefined
+      }
     >
       <SuggestionsDropdown
         {...dropdownProps}
