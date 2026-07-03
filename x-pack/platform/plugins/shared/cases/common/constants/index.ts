@@ -152,6 +152,14 @@ export const MAX_BULK_GET_CASES = 1000 as const;
 export const MAX_COMMENTS_PER_PAGE = 100 as const;
 export const MAX_CASES_PER_PAGE = 100 as const;
 export const MAX_USER_ACTIONS_PER_PAGE = 100 as const;
+/**
+ * Upper bound on how many user actions are pulled into memory when performing a
+ * free-text `search` over a case's user actions (see `UserActionFinder.findAll`).
+ * This keeps the request bounded for cases with very large activity logs; cases
+ * with more user actions than this will only be searched over their most recently
+ * fetched actions.
+ */
+export const MAX_USER_ACTIONS_FOR_SEARCH = 5000 as const;
 export const MAX_CATEGORY_FILTER_LENGTH = 100 as const;
 export const MAX_TAGS_FILTER_LENGTH = 100 as const;
 export const MAX_ASSIGNEES_FILTER_LENGTH = 100 as const;
@@ -189,6 +197,8 @@ export const MAX_TAGS_PER_TEMPLATE = 10 as const;
 export const MAX_FIELD_DEFINITIONS_PER_OWNER = 200 as const;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
+export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
+export const MAX_USER_ACTION_AUTHOR_LENGTH = 256 as const;
 
 /**
  * Cases features
@@ -280,6 +290,7 @@ export const LOCAL_STORAGE_KEYS = {
   templatesYamlEditorEditState: 'templates.yaml.editor.edit',
   userActivitySortOrder: 'cases.userActivity.sortOrder',
   casesUtilityBarHideMaxLimitWarning: 'cases.utilityBar.hideMaxLimitWarning',
+  caseViewSidebarOpen: 'cases.caseView.sidebarOpen',
 };
 
 /**

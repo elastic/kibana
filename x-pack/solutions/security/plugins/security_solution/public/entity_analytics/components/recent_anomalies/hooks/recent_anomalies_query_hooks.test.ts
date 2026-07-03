@@ -74,8 +74,11 @@ const baseParams = {
 let resolvedEntityIds: string[] | undefined;
 let resolveLoading: boolean;
 let topRowsRecords: Array<Record<string, string>>;
+let mlIndexExists: boolean | undefined;
+let mlIndexLoading: boolean;
 
 const RESOLUTION_KEY = 'recent-anomalies-filtered-entity-ids';
+const ML_INDEX_EXISTS_KEY = 'recent-anomalies-ml-index-exists';
 const callFor = (predicate: (key: unknown) => boolean) =>
   mockUseQuery.mock.calls.find(([key]) => predicate(key));
 const resolutionCall = () => callFor((key) => Array.isArray(key) && key[0] === RESOLUTION_KEY);
@@ -89,8 +92,14 @@ describe('useRecentAnomaliesQuery', () => {
     resolvedEntityIds = undefined;
     resolveLoading = false;
     topRowsRecords = [];
+    mlIndexExists = true;
+    mlIndexLoading = false;
 
-    mockUseKibana.mockReturnValue({ services: { data: { search: { search: jest.fn() } } } });
+    mockUseKibana.mockReturnValue({
+      services: {
+        data: { search: { search: jest.fn() }, dataViews: { getExistingIndices: jest.fn() } },
+      },
+    });
     mockUseGlobalTime.mockReturnValue({ from: 'global-from', to: 'global-to' });
     mockUseEsqlTimeRangeFilter.mockReturnValue(TIME_FILTER);
     mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: EMPTY_BOOL });
@@ -103,6 +112,9 @@ describe('useRecentAnomaliesQuery', () => {
       const key = queryKey as unknown[];
       if (key[0] === RESOLUTION_KEY) {
         return { data: resolvedEntityIds, isLoading: resolveLoading };
+      }
+      if (key[0] === ML_INDEX_EXISTS_KEY) {
+        return { data: mlIndexExists, isLoading: mlIndexLoading };
       }
       if (key[1] === TOP_ROWS_SQL) {
         return {
@@ -201,6 +213,41 @@ describe('useRecentAnomaliesQuery', () => {
 
       expect(result).toEqual({ anomalyRecords: [], rowLabels: [] });
       expect(mockGetESQLResults).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when the ML anomalies index does not exist', () => {
+    it('short-circuits the top rows query to an empty result without querying ES|QL', async () => {
+      mlIndexExists = false;
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      mockGetESQLResults.mockClear();
+      const result = await topRowsCall()![1]({ signal: undefined });
+
+      expect(result).toEqual({ records: [], rawResponse: undefined });
+      expect(mockGetESQLResults).not.toHaveBeenCalled();
+    });
+
+    it('runs the ES|QL query as normal when the index does exist', async () => {
+      mlIndexExists = true;
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      mockGetESQLResults.mockClear();
+      await topRowsCall()![1]({ signal: undefined });
+
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: TOP_ROWS_SQL })
+      );
+    });
+  });
+
+  describe('while checking whether the ML anomalies index exists', () => {
+    it('disables the top rows query and keeps the result loading', () => {
+      mlIndexLoading = true;
+      const { result } = renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      expect(topRowsCall()![2].enabled).toBe(false);
+      expect(result.current.isLoading).toBe(true);
     });
   });
 });
