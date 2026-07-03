@@ -18,9 +18,8 @@ import type {
   PublicStepDefinition,
   WorkflowsExtensionsPublicPluginStart,
 } from '@kbn/workflows-extensions/public';
-import { getBaseConnectorType } from './get_base_connector_type';
+import { getStepIconType, getTriggerTypeIconType } from '@kbn/workflows-ui';
 import { getConnectorSpecIcon } from './get_connector_spec_icon';
-import { getStepIconType, getTriggerTypeIconType } from './get_step_icon_type';
 import { HardcodedIcons } from './hardcoded_icons';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../status_badge';
@@ -69,46 +68,7 @@ export const StepIcon = React.memo(
       );
     }
 
-    let iconType: IconType;
-    if (stepType.startsWith('trigger_')) {
-      iconType = getTriggerTypeIconType(stepType);
-    } else if (BASE_TYPE_AGGREGATE_ICONS[stepType]) {
-      iconType = BASE_TYPE_AGGREGATE_ICONS[stepType];
-    } else {
-      const stepDefinition =
-        workflowsExtensions.getStepDefinition(stepType) ??
-        findStepDefinitionByBaseType(stepType, workflowsExtensions);
-      if (stepDefinition?.icon) {
-        return withTooltip(
-          <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-            <EuiIcon type={stepDefinition.icon} size="m" {...rest} aria-hidden={true} />
-          </Suspense>,
-          title
-        );
-      }
-
-      const connectorSpecIcon = getConnectorSpecIcon(stepType);
-      if (connectorSpecIcon) {
-        return withTooltip(
-          <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-            <EuiIcon type={connectorSpecIcon} size="m" {...rest} aria-hidden={true} />
-          </Suspense>,
-          title
-        );
-      }
-
-      const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
-      if (actionTypeIcon) {
-        return withTooltip(
-          <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-            <EuiIcon type={actionTypeIcon} size="m" {...rest} aria-hidden={true} />
-          </Suspense>,
-          title
-        );
-      }
-
-      iconType = getStepIconType(getBaseConnectorType(stepType));
-    }
+    const iconType = resolveStepIconType(stepType, workflowsExtensions, actionTypeRegistry);
 
     if (typeof iconType === 'string' && iconType.startsWith('data:')) {
       const statusColor = shouldApplyColorToIcon
@@ -124,7 +84,7 @@ export const StepIcon = React.memo(
             mask-size: contain;
             mask-repeat: no-repeat;
             mask-position: center;
-            background-color: ${statusColor ?? euiTheme.colors.textParagraph};
+            background-color: ${statusColor ?? 'currentColor'};
           `}
           onClick={onClick}
           aria-hidden={true}
@@ -151,34 +111,74 @@ export const StepIcon = React.memo(
     }
 
     return withTooltip(
-      <EuiIcon
-        type={iconType}
-        size="m"
-        color={
-          shouldApplyColorToIcon
-            ? getExecutionStatusColors(euiTheme, executionStatus).color
-            : undefined
-        }
-        css={
-          // change fill and color of the icon for non-completed statuses, for multi-color logos
-          shouldApplyColorToIcon &&
-          executionStatus !== ExecutionStatus.COMPLETED &&
-          css`
-            & * {
-              fill: ${getExecutionStatusColors(euiTheme, executionStatus).color};
-              color: ${getExecutionStatusColors(euiTheme, executionStatus).color};
-            }
-          `
-        }
-        onClick={onClick}
-        {...rest}
-        aria-hidden={true}
-      />,
+      <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+        <EuiIcon
+          type={iconType}
+          size="m"
+          color={
+            shouldApplyColorToIcon
+              ? getExecutionStatusColors(euiTheme, executionStatus).color
+              : undefined
+          }
+          css={
+            // change fill and color of the icon for non-completed statuses, for multi-color logos
+            shouldApplyColorToIcon &&
+            executionStatus !== ExecutionStatus.COMPLETED &&
+            css`
+              & * {
+                fill: ${getExecutionStatusColors(euiTheme, executionStatus).color};
+                color: ${getExecutionStatusColors(euiTheme, executionStatus).color};
+              }
+            `
+          }
+          onClick={onClick}
+          {...rest}
+          aria-hidden={true}
+        />
+      </Suspense>,
       title
     );
   }
 );
 StepIcon.displayName = 'StepIcon';
+
+function resolveStepIconType(
+  stepType: string,
+  workflowsExtensions: WorkflowsExtensionsPublicPluginStart,
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>
+): IconType {
+  if (stepType.startsWith('trigger_')) {
+    return getTriggerTypeIconType(stepType);
+  }
+
+  if (BASE_TYPE_AGGREGATE_ICONS[stepType]) {
+    return BASE_TYPE_AGGREGATE_ICONS[stepType];
+  }
+
+  const stepDefinition =
+    workflowsExtensions.getStepDefinition(stepType) ??
+    findStepDefinitionByBaseType(stepType, workflowsExtensions);
+  if (stepDefinition?.icon) {
+    return stepDefinition.icon;
+  }
+
+  const hardcodedIcon = HardcodedIcons[stepType];
+  if (hardcodedIcon) {
+    return hardcodedIcon;
+  }
+
+  const connectorSpecIcon = getConnectorSpecIcon(stepType);
+  if (connectorSpecIcon) {
+    return connectorSpecIcon;
+  }
+
+  const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
+  if (actionTypeIcon) {
+    return actionTypeIcon;
+  }
+
+  return getStepIconType(stepType);
+}
 
 // stepType is in the format of `.actionTypeId.actionTypeSubtype`
 function getActionTypeIcon(

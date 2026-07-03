@@ -22,6 +22,7 @@ import React, { memo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
+import { getStepIconType, getTriggerTypeIconType } from './step_icon_types';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
 
 export interface WorkflowGraphNodeData extends Record<string, unknown> {
@@ -55,29 +56,11 @@ function getStepMaxAttempts(step: WorkflowGraphNodeData['step']): number | undef
   return typeof value === 'number' && value > 0 ? value : undefined;
 }
 
-const STEP_TYPE_ICON: Record<string, string> = {
-  if: 'branch',
-  foreach: 'refresh',
-  parallel: 'visGoal',
-  merge: 'merge',
-  atomic: 'package',
-  manual: 'bolt',
-  alert: 'bell',
-  scheduled: 'clock',
-  wait: 'clock',
-  http: 'globe',
-  elasticsearch: 'logoElasticsearch',
-  kibana: 'logoKibana',
-};
-
-function getNodeIcon(stepType: string): string {
-  const base = stepType.split('.')[0];
-  return STEP_TYPE_ICON[base] ?? 'package';
-}
-
 // Branded multi-color icons keep their natural palette; everything else is
 // tinted with the trigger/step accent color.
-const LOGO_ICONS = new Set(['logoElasticsearch', 'logoKibana']);
+function isLogoStepType(stepType: string): boolean {
+  return stepType.startsWith('elasticsearch') || stepType.startsWith('kibana');
+}
 
 // Figma step/trigger state colors (light mode). Hardcoded to match Figma tokens
 // exactly; EUI does not expose equivalents for these specific tints.
@@ -104,14 +87,16 @@ const FIGMA_TRIGGER_ICON_COLOR = '#ee72a6';
 const FIGMA_STEP_SELECTED_BORDER = '#a3c4ff';
 const FIGMA_TRIGGER_SELECTED_BORDER = '#ffddea';
 
-function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
-  const { stepType, label, isTrigger, stepExecution, preview, step } = node.data;
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
-  const isTriggerNode = isTrigger || TRIGGER_STEP_TYPES.has(stepType);
+interface NodePalette {
+  outerBorder: string;
+  iconAreaBg: string;
+  innerBoxBorder: string;
+  iconColor: string;
+  selectedBorder: string;
+}
 
-  // Theme-derived palettes — adapt to dark/light mode automatically.
-  const palette = isTriggerNode
+function getNodePalette(isTriggerNode: boolean): NodePalette {
+  return isTriggerNode
     ? {
         outerBorder: FIGMA_STEP_OUTER_BORDER,
         iconAreaBg: FIGMA_TRIGGER_ICON_AREA_BG,
@@ -126,20 +111,9 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
         iconColor: FIGMA_STEP_ICON_COLOR,
         selectedBorder: FIGMA_STEP_SELECTED_BORDER,
       };
+}
 
-  const statusSuccessColor = FIGMA_SUCCESS_COLOR;
-  const statusSuccessBg = FIGMA_SUCCESS_BG;
-  const statusFailColor = euiTheme.colors.danger;
-  const statusFailBg = euiTheme.colors.backgroundBaseDanger;
-
-  const iconType = getNodeIcon(stepType);
-  const maxAttempts = getStepMaxAttempts(step);
-  const targetHandlePos = node.targetPosition ?? Position.Top;
-  const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
-
-  const isActive = node.selected;
-  const [isHovered, setIsHovered] = useState(false);
-  const { onStepRun, canRunSteps, renderStepIcon, onStepSelect } = useWorkflowGraphActions();
+function getNodeExecutionState(stepExecution?: WorkflowStepExecutionDto) {
   const execStatus = stepExecution?.status;
   const isRunning =
     execStatus === ExecutionStatus.RUNNING ||
@@ -151,23 +125,240 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
     execStatus === ExecutionStatus.FAILED ||
     execStatus === ExecutionStatus.TIMED_OUT ||
     execStatus === ExecutionStatus.CANCELLED;
+
+  return { execStatus, isRunning, isSuccess, isFailed };
+}
+
+function getBorderColor({
+  isActive,
+  isFailed,
+  isSuccess,
+  isRunning,
+  palette,
+  statusFailColor,
+  statusSuccessColor,
+}: {
+  isActive: boolean;
+  isFailed: boolean;
+  isSuccess: boolean;
+  isRunning: boolean;
+  palette: NodePalette;
+  statusFailColor: string;
+  statusSuccessColor: string;
+}) {
+  if (isActive) {
+    if (isFailed) return statusFailColor;
+    if (isSuccess) return statusSuccessColor;
+    if (isRunning) return FIGMA_RUNNING_BORDER;
+    return palette.selectedBorder;
+  }
+
+  return isRunning ? FIGMA_RUNNING_BORDER : palette.outerBorder;
+}
+
+function WorkflowGraphNodePreview({
+  isTrigger,
+  isTriggerNode,
+  targetHandlePos,
+  sourceHandlePos,
+  stepType,
+  label,
+  palette,
+  renderStepIcon,
+  iconType,
+}: {
+  isTrigger?: boolean;
+  isTriggerNode: boolean;
+  targetHandlePos: Position;
+  sourceHandlePos: Position;
+  stepType: string;
+  label: string;
+  palette: NodePalette;
+  renderStepIcon?: ReturnType<typeof useWorkflowGraphActions>['renderStepIcon'];
+  iconType: string | React.ComponentType<unknown>;
+}) {
+  return (
+    <>
+      {!isTrigger && <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />}
+      <div
+        aria-label={`${stepType}: ${label}`}
+        css={{
+          width: '100%',
+          height: '100%',
+          background: palette.iconAreaBg,
+          border: `1px solid ${palette.outerBorder}`,
+          borderRadius: 6,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {renderStepIcon ? (
+          <div
+            css={[
+              { color: palette.iconColor, display: 'flex' },
+              isTriggerNode && {
+                '& svg, & svg *': { fill: FIGMA_TRIGGER_ICON_COLOR },
+              },
+            ]}
+          >
+            {renderStepIcon({ stepType, isTrigger: isTrigger ?? false, size: 'm' })}
+          </div>
+        ) : (
+          <EuiIcon
+            type={iconType}
+            size="m"
+            color={
+              isTriggerNode
+                ? FIGMA_TRIGGER_ICON_COLOR
+                : isLogoStepType(stepType)
+                ? undefined
+                : palette.iconColor
+            }
+            aria-hidden={true}
+          />
+        )}
+      </div>
+      <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
+    </>
+  );
+}
+
+function WorkflowGraphNodeStatusIcon({
+  isRunning,
+  isSuccess,
+  statusSuccessColor,
+  statusFailColor,
+}: {
+  isRunning: boolean;
+  isSuccess: boolean;
+  statusSuccessColor: string;
+  statusFailColor: string;
+}) {
+  return (
+    <div
+      css={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 16,
+        height: 16,
+      }}
+      aria-label={
+        isRunning
+          ? i18n.translate('workflowsUi.graphNode.statusRunning', {
+              defaultMessage: 'Running',
+            })
+          : isSuccess
+          ? i18n.translate('workflowsUi.graphNode.statusSuccess', {
+              defaultMessage: 'Completed successfully',
+            })
+          : i18n.translate('workflowsUi.graphNode.statusFailed', {
+              defaultMessage: 'Failed',
+            })
+      }
+    >
+      {isRunning ? (
+        <EuiLoadingSpinner size="m" />
+      ) : isSuccess ? (
+        <EuiIcon
+          type="checkInCircleFilled"
+          color={statusSuccessColor}
+          size="m"
+          aria-hidden={true}
+        />
+      ) : (
+        <EuiIcon type="errorFill" color={statusFailColor} size="m" aria-hidden={true} />
+      )}
+    </div>
+  );
+}
+
+function WorkflowGraphNodeRetryBadge({
+  maxAttempts,
+  euiTheme,
+}: {
+  maxAttempts: number;
+  euiTheme: ReturnType<typeof useEuiTheme>['euiTheme'];
+}) {
+  return (
+    <EuiToolTip
+      content={i18n.translate('workflowsUi.graphNode.retryBadgeTooltip', {
+        defaultMessage:
+          'Retries on failure up to {count, plural, one {# attempt} other {# attempts}}',
+        values: { count: maxAttempts },
+      })}
+      disableScreenReaderOutput
+    >
+      <div
+        tabIndex={0}
+        data-test-subj="workflowGraphNodeRetryBadge"
+        aria-label={i18n.translate('workflowsUi.graphNode.retryBadgeAria', {
+          defaultMessage: '{count, plural, one {# retry} other {# retries}} on failure',
+          values: { count: maxAttempts },
+        })}
+        css={{
+          flex: '0 0 auto',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 2,
+          paddingLeft: 8,
+          paddingRight: 8,
+          paddingTop: 4,
+          paddingBottom: 4,
+          borderRadius: 999,
+          background: euiTheme.colors.warningSubdued,
+          color: euiTheme.colors.warningText,
+          fontFamily: euiTheme.font.family,
+          fontSize: 12,
+          fontWeight: 400,
+          lineHeight: 1,
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        <EuiIcon type="refresh" size="s" color={euiTheme.colors.warningText} aria-hidden />
+        <span>{maxAttempts}</span>
+      </div>
+    </EuiToolTip>
+  );
+}
+
+function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
+  const { stepType, label, isTrigger, stepExecution, preview, step } = node.data;
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+  const isTriggerNode = isTrigger || TRIGGER_STEP_TYPES.has(stepType);
+  const palette = getNodePalette(isTriggerNode);
+
+  const statusSuccessColor = FIGMA_SUCCESS_COLOR;
+  const statusSuccessBg = FIGMA_SUCCESS_BG;
+  const statusFailColor = euiTheme.colors.danger;
+  const statusFailBg = euiTheme.colors.backgroundBaseDanger;
+
+  const iconType = isTriggerNode ? getTriggerTypeIconType(stepType) : getStepIconType(stepType);
+  const maxAttempts = getStepMaxAttempts(step);
+  const targetHandlePos = node.targetPosition ?? Position.Top;
+  const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
+
+  const isActive = node.selected;
+  const [isHovered, setIsHovered] = useState(false);
+  const { onStepRun, canRunSteps, renderStepIcon, onStepSelect } = useWorkflowGraphActions();
+  const { isRunning, isSuccess, isFailed } = getNodeExecutionState(stepExecution);
   // Outer border (Figma 11142:2638): a successfully-run step keeps the
   // DEFAULT gray outer border — the status reads from the icon area /
   // inner box / icon. Only when the row is selected does the border take
   // on the status colour. Running is its own state and always shows the
   // Working border (`#bfdbff`) since that's how the in-progress signal is
   // expressed in the design system.
-  const borderColor = isActive
-    ? isFailed
-      ? statusFailColor
-      : isSuccess
-      ? statusSuccessColor
-      : isRunning
-      ? FIGMA_RUNNING_BORDER
-      : palette.selectedBorder
-    : isRunning
-    ? FIGMA_RUNNING_BORDER
-    : palette.outerBorder;
+  const borderColor = getBorderColor({
+    isActive,
+    isFailed,
+    isSuccess,
+    isRunning,
+    palette,
+    statusFailColor,
+    statusSuccessColor,
+  });
   const iconAreaBg = isSuccess ? statusSuccessBg : isFailed ? statusFailBg : palette.iconAreaBg;
   // Inner box border keeps its default neutral colour when only selection
   // is active (Figma "Selected" leaves the inner box border at #e4e7f1);
@@ -177,9 +368,6 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
     : isFailed
     ? statusFailColor
     : palette.innerBoxBorder;
-  // Retry badge — Warning variant (Figma 11107:6610)
-  const FIGMA_RETRY_BADGE_BG = '#fde9b5';
-  const FIGMA_RETRY_BADGE_COLOR = '#825803';
 
   // Figma: 10px for static/executed, 8px for working/running
   const borderRadius = isRunning ? 8 : 10;
@@ -193,49 +381,17 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   // above are still called every render, so the early return is safe.
   if (preview) {
     return (
-      <>
-        {!isTrigger && <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />}
-        <div
-          aria-label={`${stepType}: ${label}`}
-          css={{
-            width: '100%',
-            height: '100%',
-            background: palette.iconAreaBg,
-            border: `1px solid ${palette.outerBorder}`,
-            borderRadius: 6,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {renderStepIcon ? (
-            <div
-              css={[
-                { color: palette.iconColor, display: 'flex' },
-                isTriggerNode && {
-                  '& svg, & svg *': { fill: FIGMA_TRIGGER_ICON_COLOR },
-                },
-              ]}
-            >
-              {renderStepIcon({ stepType, isTrigger: isTrigger ?? false, size: 'm' })}
-            </div>
-          ) : (
-            <EuiIcon
-              type={iconType}
-              size="m"
-              color={
-                isTriggerNode
-                  ? FIGMA_TRIGGER_ICON_COLOR
-                  : LOGO_ICONS.has(iconType)
-                  ? undefined
-                  : palette.iconColor
-              }
-              aria-hidden={true}
-            />
-          )}
-        </div>
-        <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
-      </>
+      <WorkflowGraphNodePreview
+        isTrigger={isTrigger}
+        isTriggerNode={isTriggerNode}
+        targetHandlePos={targetHandlePos}
+        sourceHandlePos={sourceHandlePos}
+        stepType={stepType}
+        label={label}
+        palette={palette}
+        renderStepIcon={renderStepIcon}
+        iconType={iconType}
+      />
     );
   }
 
@@ -342,7 +498,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
                 <EuiIcon
                   type={iconType}
                   size="m"
-                  color={LOGO_ICONS.has(iconType) ? undefined : iconColor}
+                  color={isLogoStepType(stepType) ? undefined : iconColor}
                   aria-hidden={true}
                 />
               );
@@ -372,80 +528,15 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             either `step.retry` or `step['on-failure'].retry`. Mirrors the
             badge in the execution detail step list. See Figma 10735:23813. */}
         {maxAttempts != null && (
-          <EuiToolTip
-            content={i18n.translate('workflowsUi.graphNode.retryBadgeTooltip', {
-              defaultMessage:
-                'Retries on failure up to {count, plural, one {# attempt} other {# attempts}}',
-              values: { count: maxAttempts },
-            })}
-            disableScreenReaderOutput
-          >
-            <div
-              data-test-subj="workflowGraphNodeRetryBadge"
-              aria-label={i18n.translate('workflowsUi.graphNode.retryBadgeAria', {
-                defaultMessage: '{count, plural, one {# retry} other {# retries}} on failure',
-                values: { count: maxAttempts },
-              })}
-              css={{
-                flex: '0 0 auto',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 2,
-                paddingLeft: 8,
-                paddingRight: 8,
-                paddingTop: 4,
-                paddingBottom: 4,
-                borderRadius: 999,
-                background: FIGMA_RETRY_BADGE_BG,
-                color: FIGMA_RETRY_BADGE_COLOR,
-                fontFamily: euiTheme.font.family,
-                fontSize: 12,
-                fontWeight: 400,
-                lineHeight: 1,
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            >
-              <EuiIcon type="refresh" size="s" color={FIGMA_RETRY_BADGE_COLOR} aria-hidden />
-              <span>{maxAttempts}</span>
-            </div>
-          </EuiToolTip>
+          <WorkflowGraphNodeRetryBadge maxAttempts={maxAttempts} euiTheme={euiTheme} />
         )}
         {hasStatusIcon && (
-          <div
-            css={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 16,
-              height: 16,
-            }}
-            aria-label={
-              isRunning
-                ? i18n.translate('workflowsUi.graphNode.statusRunning', {
-                    defaultMessage: 'Running',
-                  })
-                : isSuccess
-                ? i18n.translate('workflowsUi.graphNode.statusSuccess', {
-                    defaultMessage: 'Completed successfully',
-                  })
-                : i18n.translate('workflowsUi.graphNode.statusFailed', {
-                    defaultMessage: 'Failed',
-                  })
-            }
-          >
-            {isRunning ? (
-              <EuiLoadingSpinner size="m" />
-            ) : isSuccess ? (
-              <EuiIcon
-                type="checkInCircleFilled"
-                color={statusSuccessColor}
-                size="m"
-                aria-hidden={true}
-              />
-            ) : (
-              <EuiIcon type="errorFill" color={statusFailColor} size="m" aria-hidden={true} />
-            )}
-          </div>
+          <WorkflowGraphNodeStatusIcon
+            isRunning={isRunning}
+            isSuccess={isSuccess}
+            statusSuccessColor={statusSuccessColor}
+            statusFailColor={statusFailColor}
+          />
         )}
         {showActions && (
           <div

@@ -159,6 +159,12 @@ export function WorkflowVisualEditorFlyout({
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
+                // Figma step/trigger accent colors — same tokens as the graph
+                // node. Builtin icons (HardcodedIcons SVG masks and EUI icon
+                // strings) pick this up via `currentColor`. Extension-registered
+                // and connector-spec icons use their own hardcoded palette and
+                // are unaffected.
+                color: isTrigger ? '#ee72a6' : '#61a2ff',
               }}
             >
               <StepIcon stepType={iconStepType} executionStatus={undefined} size="m" />
