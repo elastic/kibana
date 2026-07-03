@@ -124,7 +124,7 @@ export class AiRuleCreationService {
   };
 
   public reset = (): void => {
-    this.savingSubject.next(false);
+    this.savingSubject.next(null);
     this.aiRuleSubject.next(null);
     this.formSyncSubject.next(false);
     this.boundAttachmentId = null;
