@@ -55,6 +55,7 @@ import {
   generateId,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
+import { EvaluationExpressionField } from './evaluation_expression_field';
 import { splitQuery } from '../../use_heuristic_split';
 import {
   AGGREGATION_OPTIONS,
@@ -739,25 +740,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={4}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.alertingV2.ruleBuilder.evaluations.expressionLabel',
-                    { defaultMessage: 'Expression' }
-                  )}
-                  fullWidth
-                >
-                  <EuiFieldText
-                    fullWidth
-                    compressed
-                    value={ev.expression}
-                    onChange={(e) => updateEvaluation(idx, { expression: e.target.value })}
-                    placeholder={i18n.translate(
-                      'xpack.alertingV2.ruleBuilder.evaluations.expressionPlaceholder',
-                      { defaultMessage: 'e.g. errors / total * 100' }
-                    )}
-                    data-test-subj={`ruleBuilderEvalExpression-${idx}`}
-                  />
-                </EuiFormRow>
+                <EvaluationExpressionField
+                  index={idx}
+                  value={ev.expression}
+                  onChange={(expression) => updateEvaluation(idx, { expression })}
+                  ownLabel={ev.label}
+                  stats={thresholdValues.stats}
+                  evaluations={thresholdValues.evaluations}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
