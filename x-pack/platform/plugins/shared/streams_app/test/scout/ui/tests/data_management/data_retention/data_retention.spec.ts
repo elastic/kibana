@@ -139,44 +139,6 @@ test.describe(
       await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('∞');
     });
 
-    test(
-      'adds and removes a delete phase via the Add delete phase flyout (serverless)',
-      { tag: tags.serverless.observability.complete },
-      async ({ page }) => {
-        const deleteFlyout = page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout);
-
-        await test.step('add a delete phase', async () => {
-          await page.getByTestId(RETENTION_TEST_IDS.addDeletePhaseButton).click();
-          await deleteFlyout.waitFor({ state: 'visible' });
-
-          const value = deleteFlyout.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseValue);
-          await value.fill('');
-          await value.fill('7');
-          await deleteFlyout
-            .getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseUnit)
-            .selectOption('d');
-
-          await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseApplyButton).click();
-          await deleteFlyout.waitFor({ state: 'hidden' });
-
-          await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText(
-            '7 days'
-          );
-        });
-
-        await test.step('remove the delete phase (reset to indefinite)', async () => {
-          await page.getByTestId(RETENTION_TEST_IDS.deletePhaseTimelineButton).click();
-          await page.getByTestId(RETENTION_TEST_IDS.deletePhaseTimelineEditButton).click();
-          await deleteFlyout.waitFor({ state: 'visible' });
-
-          await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseRemoveButton).click();
-          await deleteFlyout.waitFor({ state: 'hidden' });
-
-          await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('∞');
-        });
-      }
-    );
-
     // Smoke test: Verifies the retention value persists across a page refresh. Seeded via the API
     // since this asserts the display, not the add-delete UI.
     test('should persist retention value across page refresh', async ({
