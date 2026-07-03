@@ -244,10 +244,14 @@ describe('Pack saved object model version 4 — schedule_id/start_date/id backfi
   // The runner passes the full document and a context object; only `attributes`
   // is read by our backfillFn. Build minimally-typed doc/context stubs rather
   // than casting through `any`.
-  const runBackfill = (attributes: BackfillAttributes) => {
+  const runBackfill = (
+    attributes: BackfillAttributes,
+    { id = 'pack-id', createdAt }: { id?: string; createdAt?: string } = {}
+  ) => {
     const doc = {
-      id: 'pack-id',
+      id,
       type: 'osquery-pack',
+      ...(createdAt ? { created_at: createdAt } : {}),
       attributes,
     } as Parameters<typeof backfillFn>[0];
     const context = {} as Parameters<typeof backfillFn>[1];
@@ -285,8 +289,47 @@ describe('Pack saved object model version 4 — schedule_id/start_date/id backfi
     // A no-id row's stamped `id` is its array-position key.
     expect(queries[0].id).toBe('0');
     expect(queries[1].id).toBe('1');
-    // Both rows share the same migration-run start_date.
+    // Both rows share the same default start_date.
     expect(queries[0].start_date).toBe(queries[1].start_date);
+  });
+
+  it('(a2) determinism — repeated runs on the same bare doc mint identical schedule_id/start_date', () => {
+    // data_backfill runs on the read path too (get/find of an un-reindexed doc),
+    // without write-back, so a non-deterministic mint would return different
+    // values on every read and across nodes — severing the schedule_id join.
+    // The mint must be a pure function of stable per-document inputs.
+    const bare: BackfillAttributes = {
+      queries: [
+        { query: 'SELECT 1', interval: 60 },
+        { id: 'named', query: 'SELECT 2', interval: 120 },
+      ],
+    };
+
+    const first = queriesOf(
+      runBackfill(bare, { id: 'pack-A', createdAt: '2024-03-04T05:06:07.000Z' })
+    );
+    const second = queriesOf(
+      runBackfill(bare, { id: 'pack-A', createdAt: '2024-03-04T05:06:07.000Z' })
+    );
+
+    // Byte-for-byte identical across invocations.
+    expect(first[0].schedule_id).toBe(second[0].schedule_id);
+    expect(first[1].schedule_id).toBe(second[1].schedule_id);
+    expect(first[0].start_date).toBe(second[0].start_date);
+
+    // start_date is derived from the SO's own created_at (never `new Date()`).
+    expect(first[0].start_date).toBe('2024-03-04T05:06:07.000Z');
+
+    // schedule_id is a valid UUID, unique per query, and keyed to the pack id:
+    // a different pack id yields a different schedule_id for the same query key.
+    const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    expect(first[0].schedule_id).toMatch(UUID);
+    expect(first[0].schedule_id).not.toBe(first[1].schedule_id);
+
+    const otherPack = queriesOf(
+      runBackfill(bare, { id: 'pack-B', createdAt: '2024-03-04T05:06:07.000Z' })
+    );
+    expect(otherPack[0].schedule_id).not.toBe(first[0].schedule_id);
   });
 
   it('(b) idempotency — existing id/schedule_id/start_date preserved byte-for-byte', () => {

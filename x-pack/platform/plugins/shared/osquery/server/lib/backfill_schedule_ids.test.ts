@@ -12,7 +12,9 @@ import type {
 import { reconcileScheduleIdsToWire } from './backfill_schedule_ids';
 import { packSavedObjectModelVersion4 } from './saved_query/saved_object_model_versions';
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+// Version-agnostic: V4 mints deterministic UUIDv5 schedule_ids (was v4), and
+// any pre-existing value is preserved as-is, so match any valid UUID version.
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const createMockLogger = () => ({
   debug: jest.fn(),

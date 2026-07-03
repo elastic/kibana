@@ -274,11 +274,20 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           }
         }
 
-        const { items: packagePolicies } = (await packagePolicyService?.list(spaceScopedClient, {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-          perPage: 1000,
-          page: 1,
-        })) ?? { items: [] };
+        // Drain ALL policies via keyset `fetchAllItems`; an offset-capped
+        // `list({ perPage: 1000 })` would drop the pack from policies past 1000.
+        const packagePolicies: PackagePolicy[] = [];
+        if (packagePolicyService) {
+          for await (const policyBatch of await packagePolicyService.fetchAllItems(
+            spaceScopedClient,
+            {
+              kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+            }
+          )) {
+            packagePolicies.push(...policyBatch);
+          }
+        }
+
         const currentPackagePolicies = filter(packagePolicies, (packagePolicy) =>
           policyHasPack(packagePolicy, currentPackSO.attributes.name, spaceId)
         );

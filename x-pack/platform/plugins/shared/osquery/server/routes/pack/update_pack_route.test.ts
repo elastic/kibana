@@ -26,6 +26,22 @@ jest.mock('../../lib/get_user_info', () => ({
   getUserInfo: jest.fn(),
 }));
 
+const mockFetchAllItems = (items: unknown[] = []) =>
+  jest.fn().mockResolvedValue(
+    (async function* () {
+      yield items;
+    })()
+  );
+
+const fetchAllItemsFromListMock = (listMock: jest.Mock) =>
+  jest.fn().mockImplementation(async () => {
+    const { items = [] } = await listMock();
+
+    return (async function* () {
+      yield items;
+    })();
+  });
+
 const buildMockContext = () => ({
   core: Promise.resolve({
     elasticsearch: {
@@ -100,6 +116,7 @@ describe('updatePackRoute', () => {
         }),
         getPackagePolicyService: jest.fn().mockReturnValue({
           list: jest.fn().mockResolvedValue({ items: [] }),
+          fetchAllItems: mockFetchAllItems([]),
         }),
       },
     } as unknown as OsqueryAppContext;
@@ -568,6 +585,7 @@ describe('updatePackRoute', () => {
           }),
           getPackagePolicyService: jest.fn().mockReturnValue({
             list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
           }),
         },
@@ -688,6 +706,7 @@ describe('updatePackRoute', () => {
           }),
           getPackagePolicyService: jest.fn().mockReturnValue({
             list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
           }),
         },
@@ -1251,6 +1270,7 @@ describe('updatePackRoute', () => {
           }),
           getPackagePolicyService: jest.fn().mockReturnValue({
             list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
           }),
         },
       } as unknown as OsqueryAppContext;
@@ -1276,6 +1296,98 @@ describe('updatePackRoute', () => {
       expect(responseBody.data.policy_ids).toEqual(['policy-a', 'policy-b']);
       expect(responseBody.data.policy_ids).not.toContain('stale-attrs-only-policy');
       expect(responseBody.data.policy_ids).not.toContain('asset-1');
+    });
+
+    it('drains ALL package-policy pages, not just the first batch (>1000-policy scale)', async () => {
+      // Regression: the edit path used to read package policies via an
+      // offset-capped `list({ perPage: 1000, page: 1 })`. A deployment with
+      // >1000 osquery package policies would then only ever see the first page,
+      // silently treating a pack attached via a later-page policy as invalid.
+      // The route now drains `fetchAllItems` (keyset). Split the two policies
+      // across two batches: if only the first batch were read, `policy-b` would
+      // fail validation and the route would 400 instead of 200.
+      const currentSO = {
+        ...basePackSO,
+        references: [
+          { id: 'policy-a', name: 'policy-a', type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE },
+          { id: 'policy-b', name: 'policy-b', type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE },
+        ],
+        attributes: { ...basePackSO.attributes },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+      mockClient.get = jest.fn().mockResolvedValue(currentSO);
+      mockClient.update = jest.fn().mockResolvedValue({
+        id: 'pack-id',
+        attributes: currentSO.attributes,
+        references: currentSO.references,
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const firstBatch = [
+        {
+          id: 'package-policy-a',
+          policy_ids: ['policy-a'],
+          package: { name: 'osquery_manager', version: '1.0.0' },
+          inputs: [],
+        },
+      ];
+      // `policy-b`'s package policy lives on the SECOND page only.
+      const secondBatch = [
+        {
+          id: 'package-policy-b',
+          policy_ids: ['policy-b'],
+          package: { name: 'osquery_manager', version: '1.0.0' },
+          inputs: [],
+        },
+      ];
+      const fetchAllItems = jest.fn().mockResolvedValue(
+        (async function* () {
+          yield firstBatch;
+          yield secondBatch;
+        })()
+      );
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([
+              { id: 'policy-a', name: 'policy-a' },
+              { id: 'policy-b', name: 'policy-b' },
+            ]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            fetchAllItems,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'multi-page-drain-probe' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      // Both policies (one from each page) resolved → 200, not a 400 that would
+      // reject the second-page policy as unknown.
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
+      expect(responseBody.data.policy_ids).toEqual(['policy-a', 'policy-b']);
     });
 
     it('returns shards as object map (Record<policyId, percent>), not SO array form', async () => {
