@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { Parser, isSubQuery } from '@elastic/esql';
-import { getIndexFromPromQLParams } from '@kbn/esql-language';
+import { esqlCommandRegistry, getIndexFromPromQLParams } from '@kbn/esql-language';
 import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
 
 const INDEX_SOURCE_COMMANDS = new Set(['FROM', 'TS']);
+const ALL_SOURCE_COMMANDS = new Set(
+  esqlCommandRegistry.getSourceCommandNames().map((commandName) => commandName.toUpperCase())
+);
 const SOURCE_SELECTOR_SEPARATOR = '::';
 
 export interface ESQLIndexPatterns {
@@ -102,16 +105,22 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
 
 /**
  * @param esql - The ES|QL query string to parse
+ * @param supportedSourceCommands - Source command set to match, or '*' to match all registered source commands
  * @returns The source command name, or an empty string if not found
  */
-export function getSourceCommandFromESQLQuery(esql?: string): string {
+export function getSourceCommandFromESQLQuery(
+  esql: string | undefined,
+  supportedSourceCommands: Set<string> | '*' = INDEX_SOURCE_COMMANDS
+): string {
   if (!esql?.trim()) {
     return '';
   }
 
   const { root } = Parser.parse(esql);
+  const sourceCommandNames =
+    supportedSourceCommands === '*' ? ALL_SOURCE_COMMANDS : supportedSourceCommands;
   const sourceCommand = root.commands.find(({ name }) =>
-    INDEX_SOURCE_COMMANDS.has(name.toUpperCase())
+    sourceCommandNames.has(name.toUpperCase())
   );
 
   return sourceCommand?.name.toUpperCase() ?? '';

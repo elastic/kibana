@@ -10,14 +10,16 @@
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { Parser } from '@elastic/esql';
-import { esqlCommandRegistry } from '@kbn/esql-language';
 import {
   getKqlFieldNamesFromExpression,
   isOfAggregateQueryType,
   getIsKqlFreeTextExpression,
 } from '@kbn/es-query';
-import { getQueryColumnsFromESQLQuery, getKqlSearchQueries } from '@kbn/esql-utils';
+import {
+  getQueryColumnsFromESQLQuery,
+  getKqlSearchQueries,
+  getSourceCommandFromESQLQuery,
+} from '@kbn/esql-utils';
 import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
 import { TabsEventDataKeys, type TabsEBTEvent, type TabsEventName } from '@kbn/unified-tabs';
 import { LRUCache } from 'lru-cache';
@@ -109,24 +111,6 @@ interface QueryPerformanceEventData {
   [DISCOVER_QUERY_PERFORMANCE_FETCH_TYPE]?: string;
   [DISCOVER_QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND]?: string;
 }
-
-const getQuerySourceCommand = (query: Query | AggregateQuery | undefined) => {
-  if (!isOfAggregateQueryType(query)) {
-    return undefined;
-  }
-
-  try {
-    const { root, errors } = Parser.parse(query.esql);
-    if (errors.length > 0) {
-      return undefined;
-    }
-
-    const sourceCommandNames = esqlCommandRegistry.getSourceCommandNames();
-    return root.commands.find(({ name }) => sourceCommandNames.includes(name))?.name.toUpperCase();
-  } catch (e) {
-    return undefined;
-  }
-};
 
 export class ScopedDiscoverEBTManager {
   private lastResolvedContextProfiles: {
@@ -415,7 +399,6 @@ export class ScopedDiscoverEBTManager {
 
   public trackQueryPerformanceEvent(eventName: string, query: Query | AggregateQuery | undefined) {
     const startTime = window.performance.now();
-    const querySourceCommand = getQuerySourceCommand(query);
     let reported = false;
 
     return {
@@ -435,14 +418,17 @@ export class ScopedDiscoverEBTManager {
         }
 
         reported = true;
-        const duration = window.performance.now() - startTime;
 
+        const duration = window.performance.now() - startTime;
         const queryAnalyses = requests.map((request) =>
           this.queryAnalysisCache.memo(request.id, { context: { request } })
         );
         const mergedAnalysis = mergeMultiMatchAnalyses(queryAnalyses);
         const phraseQueryCount = mergedAnalysis.typeCounts.get('match_phrase') ?? 0;
         const fetchType = otherEventData?.meta?.fetchType;
+        const querySourceCommand = isOfAggregateQueryType(query)
+          ? getSourceCommandFromESQLQuery(query.esql, '*') || undefined
+          : undefined;
 
         this.reportPerformanceEvent?.({
           key1: 'query_range_secs',

@@ -166,6 +166,25 @@ describe('getSourceCommandFromESQLQuery', () => {
     expect(getSourceCommandFromESQLQuery('STATS count()')).toBe('');
   });
 
+  it('should support all registered source commands', () => {
+    expect(
+      getSourceCommandFromESQLQuery(
+        'PROMQL index=metrics step=1m start=?_tstart end=?_tend (avg(cpu_usage))',
+        '*'
+      )
+    ).toBe('PROMQL');
+  });
+
+  it('should only match the provided source commands', () => {
+    expect(getSourceCommandFromESQLQuery('FROM metrics-*', new Set(['PROMQL']))).toBe('');
+    expect(
+      getSourceCommandFromESQLQuery(
+        'PROMQL index=metrics step=1m start=?_tstart end=?_tend (avg(cpu_usage))',
+        new Set(['PROMQL'])
+      )
+    ).toBe('PROMQL');
+  });
+
   it('should return FROM when the query starts with SET and then FROM', () => {
     expect(
       getSourceCommandFromESQLQuery(
