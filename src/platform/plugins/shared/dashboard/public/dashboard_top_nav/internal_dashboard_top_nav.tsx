@@ -9,7 +9,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { map } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs';
 import UseUnmount from 'react-use/lib/useUnmount';
 
 import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
@@ -140,6 +140,7 @@ export function InternalDashboardTopNav({
     return !deepEqual(publishedEsqlVariables, unpublishedEsqlVariables);
   }, [publishedEsqlVariables, unpublishedEsqlVariables]);
 
+  // temporary flag — will be removed once the feature is fully enabled
   const isEsqlApproximationEnabled = useMemo(
     () => coreServices.featureFlags.getBooleanValue(ESQL_APPROXIMATION_FEATURE_FLAG_KEY, false),
     []
@@ -151,7 +152,10 @@ export function InternalDashboardTopNav({
       PublishesUnifiedSearch,
       (Query | AggregateQuery | undefined)[]
     >(dashboardApi, 'query$', apiPublishesUnifiedSearch, [])
-      .pipe(map((queries) => queries.some((q) => isOfAggregateQueryType(q))))
+      .pipe(
+        map((queries) => queries.some((q) => isOfAggregateQueryType(q))),
+        distinctUntilChanged()
+      )
       .subscribe(setHasEsqlPanel);
     return () => subscription.unsubscribe();
   }, [dashboardApi]);
