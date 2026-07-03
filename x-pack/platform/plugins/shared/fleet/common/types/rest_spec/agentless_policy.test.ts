@@ -55,21 +55,18 @@ describe('agentless policy request schemas', () => {
     it.each([
       ['create', CreateAgentlessPolicyRequestSchema.body],
       ['update', UpdateAgentlessPolicyRequestSchema.body],
-    ])(
-      'should reject attach-only fields when enabled is not true on %s',
-      (_name, bodySchema) => {
-        for (const cloudConnector of [
-          { cloud_connector_id: 'cc-1' },
-          { enabled: false, cloud_connector_id: 'cc-1' },
-          { name: 'my-connector' },
-          { target_csp: 'aws' },
-        ]) {
-          expect(() =>
-            bodySchema.validate({ ...validBody, cloud_connector: cloudConnector })
-          ).toThrow(/enabled must be true/);
-        }
+    ])('should reject attach-only fields when enabled is not true on %s', (_name, bodySchema) => {
+      for (const cloudConnector of [
+        { cloud_connector_id: 'cc-1' },
+        { enabled: false, cloud_connector_id: 'cc-1' },
+        { name: 'my-connector' },
+        { target_csp: 'aws' },
+      ]) {
+        expect(() =>
+          bodySchema.validate({ ...validBody, cloud_connector: cloudConnector })
+        ).toThrow(/enabled must be true/);
       }
-    );
+    });
 
     it.each([
       ['create', CreateAgentlessPolicyRequestSchema.body],
