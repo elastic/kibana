@@ -305,6 +305,77 @@ describe('Lens inline editing helpers', () => {
         expect(trendlineEsql).not.toContain('COUNT(*)');
       });
 
+      it('preserves trendline metric binding when the edited query has no STATS', async () => {
+        const metricAccessor = 'metric-accessor';
+        const trendlineMetricAccessor = 'trend-metric-1';
+        const newQuery = { esql: 'FROM index1 | KEEP bytes' };
+
+        mockSuggestionApi.mockReturnValueOnce([
+          {
+            title: 'Metric',
+            score: 1,
+            visualizationId: 'lnsMetric',
+            previewIcon: 'metric',
+            visualizationState: {
+              layerId: mainLayerId,
+              layerType: 'data',
+              metricAccessor,
+              trendlineLayerId,
+              trendlineMetricAccessor,
+              trendlineTimeAccessor: 'trend-time-1',
+            },
+            keptLayerIds: [mainLayerId],
+            datasourceState: {
+              layers: {
+                [mainLayerId]: {
+                  index: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+                  query: newQuery,
+                  columns: [
+                    {
+                      columnId: metricAccessor,
+                      fieldName: 'bytes',
+                      meta: { type: 'number' },
+                    },
+                  ],
+                  timeField: '@timestamp',
+                },
+              },
+              fieldList: [],
+              indexPatternRefs: [],
+              initialContext: {},
+            },
+            datasourceId: 'textBased',
+            columns: 1,
+            changeType: 'initial',
+          },
+        ]);
+
+        const result = await getSuggestions(
+          newQuery,
+          startDependencies.data,
+          httpMock,
+          uiSettingsMock,
+          mockDatasourceMap(),
+          mockVisualizationMap(),
+          dataviewSpecArr,
+          jest.fn(),
+          undefined,
+          undefined,
+          [],
+          true,
+          prevAttributes
+        );
+
+        const trendlineLayer = getTextBasedLayers(result)[trendlineLayerId];
+
+        expect(trendlineLayer.query?.esql).toContain('AVG(bytes)');
+        expect(trendlineLayer.query?.esql).not.toContain('COUNT(*)');
+        expect(
+          trendlineLayer.columns.find((column) => column.columnId === trendlineMetricAccessor)
+            ?.fieldName
+        ).toBe('AVG(bytes)');
+      });
+
       it('does not add a trendline layer when none existed', async () => {
         const attrsWithoutTrendline: TypedLensSerializedState['attributes'] = {
           ...prevAttributes,
