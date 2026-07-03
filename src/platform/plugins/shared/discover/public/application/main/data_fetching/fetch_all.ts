@@ -121,7 +121,7 @@ export function fetchAll(
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
           esqlVariables: currentTab.esqlVariables,
           searchSessionId: params.searchSessionId,
-          useApproximation: currentTab.appState.useApproximation,
+          isApproximate: currentTab.appState.isApproximate,
         })
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
