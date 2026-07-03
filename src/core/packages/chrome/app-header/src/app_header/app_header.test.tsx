@@ -179,6 +179,66 @@ describe('AppHeaderView', () => {
     expect(screen.getByText('3')).toBeInTheDocument();
   });
 
+  it('renders tab actions in an ellipsis popover without triggering tab navigation', () => {
+    const onTabClick = jest.fn();
+    const onCopy = jest.fn();
+
+    renderAppHeader(
+      <AppHeaderView
+        tabs={[
+          {
+            id: 'lifecycle',
+            label: 'Data lifecycle',
+            'data-test-subj': 'lifecycleTab',
+            isSelected: true,
+            onClick: onTabClick,
+            actions: {
+              ariaLabel: 'Data lifecycle tab actions',
+              'data-test-subj': 'lifecycleTabActionsButton',
+              items: [
+                {
+                  id: 'copy',
+                  label: 'Copy API request',
+                  iconType: 'copy',
+                  onClick: onCopy,
+                  'data-test-subj': 'lifecycleTabCopy',
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('lifecycleTabActionsButton'));
+    expect(onTabClick).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('lifecycleTabCopy'));
+    expect(onCopy).toHaveBeenCalledTimes(1);
+    expect(onTabClick).not.toHaveBeenCalled();
+  });
+
+  it('only renders tab actions for the selected tab', () => {
+    renderAppHeader(
+      <AppHeaderView
+        tabs={[
+          {
+            id: 'lifecycle',
+            label: 'Data lifecycle',
+            isSelected: false,
+            actions: {
+              ariaLabel: 'More actions',
+              'data-test-subj': 'lifecycleTabActionsButton',
+              items: [{ id: 'copy', label: 'Copy API request', onClick: jest.fn() }],
+            },
+          },
+        ]}
+      />
+    );
+
+    expect(screen.queryByTestId('lifecycleTabActionsButton')).not.toBeInTheDocument();
+  });
+
   it('only treats exact base path prefixes as already prepended for back links', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.componentDeps.basePath.get.mockReturnValue('/base');
