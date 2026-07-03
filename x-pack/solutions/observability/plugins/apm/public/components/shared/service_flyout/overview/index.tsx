@@ -73,6 +73,7 @@ function ServiceFlyoutChartsSection({
   title,
   description,
   charts,
+  columns = 2,
   rangeFrom,
   rangeTo,
   refreshToken,
@@ -81,6 +82,7 @@ function ServiceFlyoutChartsSection({
   title: string;
   description?: string;
   charts: FlyoutLensChartDefinition[];
+  columns?: 2 | 3;
   rangeFrom: string;
   rangeTo: string;
   refreshToken: number;
@@ -105,7 +107,7 @@ function ServiceFlyoutChartsSection({
         ) : null}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGrid columns={2} responsive={false} gutterSize="m">
+      <EuiFlexGrid columns={columns} responsive={false} gutterSize="m">
         {charts.map((chart) => (
           <EuiFlexItem key={chart.id}>
             <ServiceFlyoutLensChart
@@ -189,6 +191,7 @@ export function ServiceFlyoutOverview({
             id="keyMetrics"
             title={KEY_METRICS_SECTION_TITLE}
             charts={keyMetrics}
+            columns={3}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             refreshToken={refreshToken}
