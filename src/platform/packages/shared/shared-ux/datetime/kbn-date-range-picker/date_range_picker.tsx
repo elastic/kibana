@@ -85,6 +85,14 @@ export interface DateRangePickerProps {
    */
   disabled?: boolean;
   /**
+   * Shows the current value but prevents changing it: the control and time
+   * window buttons can't be interacted with, but (unlike `disabled`) the
+   * control isn't visually dimmed. The auto-refresh play/pause button is
+   * unaffected.
+   * @default false
+   */
+  readOnly?: boolean;
+  /**
    * Called when the editing input text changes.
    * @beta
    */
