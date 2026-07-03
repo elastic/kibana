@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const docs = await waitForAttachmentForCase(es, created.id, 1);
       const userDoc = docs.find((d) => d.attachment.type === AttachmentType.user);
       expect(userDoc).to.be.an('object');
-      expect(userDoc!.cases.id).to.eql(created.id);
+      expect(userDoc!.case.id).to.eql(created.id);
       expect(userDoc!.space_id).to.eql('default');
       // Curated extract: the user comment text round-trips via the
       // legacy → unified normalization (legacy `comment` field →

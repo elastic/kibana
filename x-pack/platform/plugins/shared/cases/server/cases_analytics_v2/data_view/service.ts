@@ -141,8 +141,8 @@ interface BootstrapEntry {
  * nothing until usage.
  *
  * Runtime fields rather than mapped fields. Extended-field values land as
- * keywords under `cases.extended_fields.<snake>`; the data view publishes
- * a typed runtime field at `cases.<snake>` that parses at query time. See
+ * keywords under `case.extended_fields.<snake>`; the data view publishes
+ * a typed runtime field at `case.<snake>` that parses at query time. See
  * `runtime_fields.ts` for the snake-key → Painless transform.
  *
  * Template change → data view propagation:

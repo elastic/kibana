@@ -34,7 +34,7 @@ export interface AttachmentAnalyticsDoc {
   // and activity surfaces. `space_id` is singular — an attachment lives in
   // exactly one space. See `mappings/attachments.ts`.
   space_id: string;
-  cases: {
+  case: {
     id: string;
   };
   owner: string;
@@ -132,7 +132,7 @@ export function buildAttachmentDoc(
     // Top-level singular scoping field for implicit-privileges DLS. Attachment
     // SOs are space-isolated, so take the first namespace (default `default`).
     space_id: so.namespaces?.[0] ?? 'default',
-    cases: { id: caseId },
+    case: { id: caseId },
     owner: unified.owner,
     created_at: unified.created_at,
     created_by: toUser(unified.created_by),
