@@ -9,13 +9,10 @@ tags:
   - scheduled
   - review
 settings:
-  timeout: "40m"
   concurrency:
     key: "significant-events-scheduled-review"
     strategy: drop
     max: 1
-  on-failure:
-    continue: true
 triggers:
   - type: scheduled
     with:
@@ -24,10 +21,17 @@ triggers:
 steps:
   - name: run_review_until_drained
     type: while
-    condition: "${{ steps.discover.error != null or steps.triage.error != null or steps.discover.output.hasRemaining == true or steps.triage.output.hasRemaining == true }}"
+    # Re-run only while a child still reports queued work. A child error is
+    # deliberately NOT part of this condition and the child steps have no
+    # `on-failure: continue`, so the first failing pass bails out of the loop and
+    # fails the run — surfacing the error instead of spinning until
+    # `max-iterations` is exhausted.
+    condition: "${{ steps.discover.output.hasRemaining == true or steps.triage.output.hasRemaining == true }}"
     max-iterations: __MAX_REVIEW_PASSES__
-    iteration-on-failure:
-      continue: true
+    # Bound each pass to discovery (20m) + triage (30m) worst case instead of
+    # capping the whole loop with a single, necessarily-too-small workflow-level
+    # timeout.
+    iteration-timeout: "50m"
     steps:
       - name: discover
         type: workflow.execute
@@ -35,8 +39,6 @@ steps:
           workflow-id: "system-significant-events-discovery"
           inputs:
             detectionBatchMax: __DISCOVERY_BATCH_SIZE__
-        on-failure:
-          continue: true
 
       - name: triage
         type: workflow.execute
@@ -44,5 +46,3 @@ steps:
           workflow-id: "system-significant-events-triage"
           inputs:
             discoveryBatchMax: __TRIAGE_BATCH_SIZE__
-        on-failure:
-          continue: true

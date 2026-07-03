@@ -17,7 +17,7 @@ import { pollUntil } from './poll_until';
 
 const RUNNING_EXECUTIONS_PAGE_SIZE = 1000;
 
-export interface SignificantEventsScheduledDiscoveryConfig {
+export interface SignificantEventsScheduledWorkflowsConfig {
   detectionIntervalMinutes: number;
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
@@ -25,7 +25,7 @@ export interface SignificantEventsScheduledDiscoveryConfig {
   maxReviewPasses: number;
 }
 
-export interface SignificantEventsScheduledDiscoveryWorkflowService {
+export interface SignificantEventsScheduledWorkflowsService {
   /**
    * Reconciles scheduled Significant Events workflows for one Kibana space.
    *
@@ -41,11 +41,11 @@ export interface SignificantEventsScheduledDiscoveryWorkflowService {
     enabled: boolean;
     request: KibanaRequest;
     spaceId: string;
-    config: SignificantEventsScheduledDiscoveryConfig;
+    config: SignificantEventsScheduledWorkflowsConfig;
   }): Promise<void>;
 }
 
-export const createSignificantEventsScheduledDiscoveryWorkflowService = ({
+export const createSignificantEventsScheduledWorkflowsService = ({
   logger,
   managementApi,
   getManagedWorkflowsClient,
@@ -53,8 +53,8 @@ export const createSignificantEventsScheduledDiscoveryWorkflowService = ({
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
   getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
-}): SignificantEventsScheduledDiscoveryWorkflowService => {
-  const log = logger.get('significant-events-scheduled-discovery-workflow');
+}): SignificantEventsScheduledWorkflowsService => {
+  const log = logger.get('significant-events-scheduled-workflows');
 
   const getNonTerminalExecutions = async ({
     workflowId,
@@ -110,7 +110,7 @@ export const createSignificantEventsScheduledDiscoveryWorkflowService = ({
   }: {
     client: PluginScopedManagedWorkflowsApi;
     spaceId: string;
-    config: SignificantEventsScheduledDiscoveryConfig;
+    config: SignificantEventsScheduledWorkflowsConfig;
   }) => {
     await Promise.all([
       client.install(SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
