@@ -79,6 +79,8 @@ function toAnomalyOverviewQuery(
     kuery: '',
     anomalyThreshold: severity === ML_ANOMALY_SEVERITY.UNKNOWN ? undefined : severity,
     environment: anomalyEnvironment,
+    comparisonEnabled: true,
+    offset: 'expected_bounds',
   };
 }
 
