@@ -98,7 +98,6 @@ class TaskHandlerImpl implements TaskHandler {
       // 6. Deliver success callback if configured
       await makeSuccessCallbackIfConfigured({
         callbackUrl: execution.metadata?.callback_url,
-        callbackSigningSecret: execution.metadata?.callback_signing_secret,
         executionId,
         events,
       });
@@ -138,7 +137,6 @@ class TaskHandlerImpl implements TaskHandler {
       try {
         await makeFailureCallbackIfConfigured({
           callbackUrl: execution.metadata?.callback_url,
-          callbackSigningSecret: execution.metadata?.callback_signing_secret,
           executionId,
           conversationId,
           error: serializedError,

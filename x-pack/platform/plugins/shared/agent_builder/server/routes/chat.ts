@@ -315,7 +315,6 @@ export const callbackConversePayloadSchema = conversePayloadSchema.extends({
         }
       },
     }),
-    signing_secret: schema.string({ minLength: 1, maxLength: 1024 }),
   }),
 });
 
@@ -585,7 +584,6 @@ export function registerChatRoutes({
           source: payload.source,
           metadata: {
             callback_url: payload.callback.url,
-            callback_signing_secret: payload.callback.signing_secret,
           },
           useTaskManagerOverride: true,
         });

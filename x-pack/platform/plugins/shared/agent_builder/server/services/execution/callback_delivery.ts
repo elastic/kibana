@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHmac } from 'crypto';
 import pRetry, { AbortError } from 'p-retry';
 import {
   ExecutionStatus,
@@ -32,27 +31,24 @@ const callbackRetryOptions = {
 } as const;
 
 /**
- * Delivers a success callback for a completed execution when a callback URL and
- * signing secret are configured. No-op otherwise.
+ * Delivers a success callback for a completed execution when a callback URL is configured.
+ * No-op otherwise.
  */
 export const makeSuccessCallbackIfConfigured = async ({
   executionId,
   events,
   callbackUrl,
-  callbackSigningSecret,
 }: {
   executionId: string;
   events: ChatEvent[];
   callbackUrl: string | undefined;
-  callbackSigningSecret: string | undefined;
 }): Promise<void> => {
-  if (!callbackUrl || !callbackSigningSecret) {
+  if (!callbackUrl) {
     return;
   }
 
   await makeCallbackRequest({
     url: callbackUrl,
-    secret: callbackSigningSecret,
     payload: {
       execution_id: executionId,
       status: ExecutionStatus.completed,
@@ -62,8 +58,8 @@ export const makeSuccessCallbackIfConfigured = async ({
 };
 
 /**
- * Delivers a failure callback for a failed or aborted execution when a callback URL and
- * signing secret are configured. No-op otherwise.
+ * Delivers a failure callback for a failed or aborted execution when a callback URL is
+ * configured. No-op otherwise.
  */
 export const makeFailureCallbackIfConfigured = async ({
   executionId,
@@ -71,22 +67,19 @@ export const makeFailureCallbackIfConfigured = async ({
   error,
   status,
   callbackUrl,
-  callbackSigningSecret,
 }: {
   executionId: string;
   conversationId?: string;
   error: SerializedExecutionError;
   status: ExecutionStatus.failed | ExecutionStatus.aborted;
   callbackUrl: string | undefined;
-  callbackSigningSecret: string | undefined;
 }): Promise<void> => {
-  if (!callbackUrl || !callbackSigningSecret) {
+  if (!callbackUrl) {
     return;
   }
 
   await makeCallbackRequest({
     url: callbackUrl,
-    secret: callbackSigningSecret,
     payload: {
       execution_id: executionId,
       ...(conversationId ? { conversation_id: conversationId } : {}),
@@ -98,18 +91,14 @@ export const makeFailureCallbackIfConfigured = async ({
 
 export const makeCallbackRequest = async ({
   url,
-  secret,
   payload,
 }: {
   url: string;
-  secret: string;
   payload: CallbackPayload;
 }): Promise<void> => {
   const body = JSON.stringify(payload);
-  const signature = createHmac('sha256', secret).update(body).digest('hex');
   const headers = {
     'Content-Type': 'application/json',
-    'X-Signature': `hmac-sha256=${signature}`,
   };
 
   await pRetry(async () => {

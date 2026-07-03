@@ -91,11 +91,10 @@ describe('callbackConversePayloadSchema', () => {
     },
     callback: {
       url: 'https://relay.example.com/events?token=abc',
-      signing_secret: 'signing-secret',
     },
   };
 
-  it('accepts source and callback signing fields', () => {
+  it('accepts source and callback URL', () => {
     expect(() => callbackConversePayloadSchema.validate(basePayload)).not.toThrow();
   });
 
@@ -132,48 +131,12 @@ describe('callbackConversePayloadSchema', () => {
     ).toThrow(/external_conversation_id/);
   });
 
-  it('requires callback signing secret for HMAC signing', () => {
-    expect(() =>
-      callbackConversePayloadSchema.validate({
-        ...basePayload,
-        callback: {
-          url: 'https://relay.example.com/events?token=abc',
-        },
-      })
-    ).toThrow(/signing_secret/);
-  });
-
-  it('does not accept legacy callback secret field', () => {
-    expect(() =>
-      callbackConversePayloadSchema.validate({
-        ...basePayload,
-        callback: {
-          url: 'https://relay.example.com/events?token=abc',
-          secret: 'signing-secret',
-        },
-      })
-    ).toThrow(/signing_secret/);
-  });
-
-  it('limits callback signing secret length', () => {
-    expect(() =>
-      callbackConversePayloadSchema.validate({
-        ...basePayload,
-        callback: {
-          url: 'https://relay.example.com/events?token=abc',
-          signing_secret: 'x'.repeat(1025),
-        },
-      })
-    ).toThrow(/signing_secret/);
-  });
-
   it('limits callback URL length', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
         callback: {
           url: `https://relay.example.com/events?token=${'x'.repeat(2048)}`,
-          signing_secret: 'signing-secret',
         },
       })
     ).toThrow(/url/);
@@ -185,7 +148,6 @@ describe('callbackConversePayloadSchema', () => {
         ...basePayload,
         callback: {
           url: 'ftp://relay.example.com/events',
-          signing_secret: 'signing-secret',
         },
       })
     ).toThrow(/url/);
@@ -289,7 +251,6 @@ describe('registerChatRoutes', () => {
           source,
           callback: {
             url: 'https://relay.example.com/events?token=abc',
-            signing_secret: 'secret-1',
           },
         },
       },
@@ -306,7 +267,6 @@ describe('registerChatRoutes', () => {
         useTaskManager: true,
         metadata: {
           callback_url: 'https://relay.example.com/events?token=abc',
-          callback_signing_secret: 'secret-1',
         },
         params: expect.objectContaining({
           conversationId: undefined,
@@ -374,7 +334,6 @@ describe('registerChatRoutes', () => {
           source,
           callback: {
             url: 'https://relay.example.com/events?token=abc',
-            signing_secret: 'secret-1',
           },
         },
       },

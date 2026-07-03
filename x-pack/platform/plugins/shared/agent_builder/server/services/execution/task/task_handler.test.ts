@@ -95,7 +95,6 @@ describe('TaskHandler callback finalization', () => {
     events: [],
     metadata: {
       callback_url: 'https://relay.example.com/events?token=abc',
-      callback_signing_secret: 'secret-1',
     },
     executionMode: AgentExecutionMode.conversation,
     agentParams: {
@@ -140,7 +139,6 @@ describe('TaskHandler callback finalization', () => {
 
     expect(makeSuccessCallbackIfConfiguredMock).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
-      callbackSigningSecret: 'secret-1',
       executionId: 'execution-1',
       events,
     });
@@ -161,7 +159,6 @@ describe('TaskHandler callback finalization', () => {
 
     expect(makeFailureCallbackIfConfiguredMock).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
-      callbackSigningSecret: 'secret-1',
       executionId: 'execution-1',
       conversationId: 'conversation-1',
       error: { code: 'internal_error', message: 'agent failed' },
@@ -191,7 +188,6 @@ describe('TaskHandler callback finalization', () => {
 
     expect(makeFailureCallbackIfConfiguredMock).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
-      callbackSigningSecret: 'secret-1',
       executionId: 'execution-1',
       conversationId: 'conversation-1',
       error: {

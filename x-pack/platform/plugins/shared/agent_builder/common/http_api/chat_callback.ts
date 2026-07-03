@@ -16,7 +16,6 @@ export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
   source: ConversationSource;
   callback: {
     url: string;
-    signing_secret: string;
   };
 }
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHmac } from 'crypto';
 import {
   AgentBuilderErrorCode,
   ChatEventType,
@@ -51,22 +50,19 @@ describe('makeCallbackRequest', () => {
     jest.restoreAllMocks();
   });
 
-  it('posts the exact serialized JSON body with an HMAC signature', async () => {
+  it('posts the exact serialized JSON body without a signature', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
 
     await makeCallbackRequest({
       url: 'https://relay.example.com/events?token=abc',
-      secret: 'secret-1',
       payload,
     });
 
     const body = JSON.stringify(payload);
-    const signature = createHmac('sha256', 'secret-1').update(body).digest('hex');
     expect(fetchMock).toHaveBeenCalledWith('https://relay.example.com/events?token=abc', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Signature': `hmac-sha256=${signature}`,
       },
       body,
     });
@@ -82,7 +78,6 @@ describe('makeCallbackRequest', () => {
 
     const delivery = makeCallbackRequest({
       url: 'https://relay.example.com/events?token=abc',
-      secret: 'secret-1',
       payload,
     });
     const deliveryExpectation = expect(delivery).resolves.toBeUndefined();
@@ -99,7 +94,6 @@ describe('makeCallbackRequest', () => {
     await expect(
       makeCallbackRequest({
         url: 'https://relay.example.com/events?token=abc',
-        secret: 'secret-1',
         payload,
       })
     ).rejects.toThrow('Callback delivery failed with status 400');
@@ -113,7 +107,6 @@ describe('makeCallbackRequest', () => {
 
     const delivery = makeCallbackRequest({
       url: 'https://relay.example.com/events?token=abc',
-      secret: 'secret-1',
       payload,
     });
     const deliveryExpectation = expect(delivery).rejects.toThrow(
@@ -127,10 +120,7 @@ describe('makeCallbackRequest', () => {
   });
 });
 
-const callbackMetadata = {
-  callback_url: 'https://relay.example.com/events?token=abc',
-  callback_signing_secret: 'secret-1',
-};
+const callbackUrl = 'https://relay.example.com/events?token=abc';
 
 describe('makeSuccessCallbackIfConfigured', () => {
   const events: ChatEvent[] = [
@@ -174,7 +164,6 @@ describe('makeSuccessCallbackIfConfigured', () => {
 
     await makeSuccessCallbackIfConfigured({
       callbackUrl: undefined,
-      callbackSigningSecret: undefined,
       executionId: 'execution-1',
       events,
     });
@@ -186,8 +175,7 @@ describe('makeSuccessCallbackIfConfigured', () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
 
     await makeSuccessCallbackIfConfigured({
-      callbackUrl: callbackMetadata.callback_url,
-      callbackSigningSecret: callbackMetadata.callback_signing_secret,
+      callbackUrl,
       executionId: 'execution-1',
       events,
     });
@@ -217,7 +205,6 @@ describe('makeFailureCallbackIfConfigured', () => {
 
     await makeFailureCallbackIfConfigured({
       callbackUrl: undefined,
-      callbackSigningSecret: undefined,
       executionId: 'execution-1',
       error,
       status: ExecutionStatus.failed,
@@ -230,8 +217,7 @@ describe('makeFailureCallbackIfConfigured', () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
 
     await makeFailureCallbackIfConfigured({
-      callbackUrl: callbackMetadata.callback_url,
-      callbackSigningSecret: callbackMetadata.callback_signing_secret,
+      callbackUrl,
       executionId: 'execution-1',
       conversationId: 'conversation-1',
       error,
@@ -251,8 +237,7 @@ describe('makeFailureCallbackIfConfigured', () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
 
     await makeFailureCallbackIfConfigured({
-      callbackUrl: callbackMetadata.callback_url,
-      callbackSigningSecret: callbackMetadata.callback_signing_secret,
+      callbackUrl,
       executionId: 'execution-1',
       error,
       status: ExecutionStatus.aborted,
