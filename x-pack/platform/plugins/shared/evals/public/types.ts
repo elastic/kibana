@@ -6,6 +6,8 @@
  */
 
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 export type EvalsPublicSetup = Record<string, never>;
 
@@ -91,4 +93,7 @@ export interface EvalsSetupDependencies {
   management?: ManagementSetup;
 }
 
-export type EvalsStartDependencies = Record<string, never>;
+export interface EvalsStartDependencies {
+  dataViews: DataViewsPublicPluginStart;
+  lens: LensPublicStart;
+}

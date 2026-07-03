@@ -16,6 +16,43 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+export const EvaluateResultEvaluator = lazySchema(() =>
+  z.object({
+    name: z.string().max(256),
+    version: z.string().max(64),
+    kind: z.enum(['llm', 'code']),
+  })
+);
+export type EvaluateResultEvaluator = z.infer<typeof EvaluateResultEvaluator>;
+
+export const EvaluateResultScore = lazySchema(() =>
+  z.object({
+    name: z.string().max(256),
+    score: z.number().nullable().optional(),
+    label: z.string().max(1024).optional(),
+    explanation: z.string().max(8192).optional(),
+    metadata: z.object({}).catchall(z.unknown()).optional(),
+  })
+);
+export type EvaluateResultScore = z.infer<typeof EvaluateResultScore>;
+
+export const EvaluateResultError = lazySchema(() =>
+  z.object({
+    message: z.string().max(8192),
+  })
+);
+export type EvaluateResultError = z.infer<typeof EvaluateResultError>;
+
+export const EvaluateResult = lazySchema(() =>
+  z.object({
+    status: z.enum(['ok', 'error']),
+    evaluator: EvaluateResultEvaluator,
+    scores: z.array(EvaluateResultScore).optional(),
+    error: EvaluateResultError.optional(),
+  })
+);
+export type EvaluateResult = z.infer<typeof EvaluateResult>;
+
 export const EvaluateRequestBody = lazySchema(() =>
   z.object({
     subject: z.object({
@@ -47,32 +84,7 @@ export type EvaluateRequestBodyInput = z.input<typeof EvaluateRequestBody>;
 
 export const EvaluateResponse = lazySchema(() =>
   z.object({
-    results: z.array(
-      z.object({
-        status: z.enum(['ok', 'error']),
-        evaluator: z.object({
-          name: z.string().max(256),
-          version: z.string().max(64),
-          kind: z.enum(['llm', 'code']),
-        }),
-        scores: z
-          .array(
-            z.object({
-              name: z.string().max(256),
-              score: z.number().nullable().optional(),
-              label: z.string().max(1024).optional(),
-              explanation: z.string().max(8192).optional(),
-              metadata: z.object({}).catchall(z.unknown()).optional(),
-            })
-          )
-          .optional(),
-        error: z
-          .object({
-            message: z.string().max(8192),
-          })
-          .optional(),
-      })
-    ),
+    results: z.array(EvaluateResult),
   })
 );
 export type EvaluateResponse = z.infer<typeof EvaluateResponse>;

@@ -12,12 +12,14 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { DatasetService } from './storage/dataset_service';
 import type { EvaluationScoreService } from './storage/evaluation_score_service';
+import type { OnlineScoreService } from './storage/online_score_service';
 import type { EvaluatorRegistry } from './evaluators/types';
 
 export type EvalsPluginSetup = Record<string, never>;
 export interface EvalsPluginStart {
   datasetService?: DatasetService;
   evaluationScoreService?: EvaluationScoreService;
+  onlineScoreService?: OnlineScoreService;
 }
 
 export interface EvalsSetupDependencies {
@@ -34,6 +36,7 @@ export interface EvalsStartDependencies {
 export interface EvalsRouteHandlerContext {
   datasetService: DatasetService;
   evaluationScoreService: EvaluationScoreService;
+  onlineScoreService: OnlineScoreService;
   evaluatorRegistry: EvaluatorRegistry;
 }
 
