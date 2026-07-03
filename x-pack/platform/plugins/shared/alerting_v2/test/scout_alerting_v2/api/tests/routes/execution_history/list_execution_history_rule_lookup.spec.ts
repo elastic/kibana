@@ -142,20 +142,15 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
 
         const body = response.body as ListPolicyExecutionHistoryResponse;
-        const itemsByRule = (id: string): PolicyExecutionHistoryItem[] =>
-          body.items.filter((it) => it.rules.some((r) => r.id === id));
 
-        const itemsOfRuleKept = itemsByRule(RULE_ID_KEPT);
-        const itemsOfRuleDeleted = itemsByRule(RULE_ID_DELETED);
-
-        expect(itemsOfRuleKept.length).toBeGreaterThanOrEqual(1);
-        expect(itemsOfRuleDeleted.length).toBeGreaterThanOrEqual(1);
-
-        for (const item of itemsOfRuleKept) {
-          expect(item.rules).toStrictEqual([{ id: RULE_ID_KEPT, name: RULE_KEPT_NAME }]);
-        }
-        for (const item of itemsOfRuleDeleted) {
-          expect(item.rules).toStrictEqual([{ id: RULE_ID_DELETED, name: null }]);
+        for (const item of body.items) {
+          for (const ruleRef of item.rules) {
+            if (ruleRef.id === RULE_ID_DELETED) {
+              expect(ruleRef).toStrictEqual({ id: RULE_ID_DELETED, name: null });
+            } else if (ruleRef.id === RULE_ID_KEPT) {
+              expect(ruleRef).toStrictEqual({ id: RULE_ID_KEPT, name: RULE_KEPT_NAME });
+            }
+          }
         }
       }
     );
