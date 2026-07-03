@@ -19,28 +19,30 @@ const mockStreamsRepositoryClient = { fetch: mockFetch };
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 
+const mockKibana = {
+  core: {
+    application: {
+      navigateToApp: jest.fn(),
+    },
+    notifications: {
+      toasts: {
+        addSuccess: mockAddSuccess,
+        addError: mockAddError,
+      },
+    },
+  },
+  dependencies: {
+    start: {
+      streams: {
+        streamsRepositoryClient: mockStreamsRepositoryClient,
+      },
+    },
+  },
+  isServerless: false,
+};
+
 jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: {
-      application: {
-        navigateToApp: jest.fn(),
-      },
-      notifications: {
-        toasts: {
-          addSuccess: mockAddSuccess,
-          addError: mockAddError,
-        },
-      },
-    },
-    dependencies: {
-      start: {
-        streams: {
-          streamsRepositoryClient: mockStreamsRepositoryClient,
-        },
-      },
-    },
-    isServerless: false,
-  }),
+  useKibana: () => mockKibana,
 }));
 
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
@@ -100,6 +102,23 @@ describe('LifecycleSummary', () => {
       },
     } as unknown as Streams.ingest.all.GetResponse);
 
+  const createFrozenDslDefinition = (frozenAfter: string, dataRetention?: string) =>
+    ({
+      stream: {
+        name: 'test-stream',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [], updated_at: '2023-10-31' },
+        },
+      },
+      privileges: {
+        lifecycle: true,
+      },
+      effective_lifecycle: {
+        dsl: { frozen_after: frozenAfter, data_retention: dataRetention },
+      },
+    } as unknown as Streams.ingest.all.GetResponse);
+
   const createWiredDslDefinition = ({
     name,
     isRoot,
@@ -150,7 +169,6 @@ describe('LifecycleSummary', () => {
       inherited_fields: {},
       data_stream_exists: true,
       dashboards: [],
-      queries: [],
       rules: [],
     } as unknown as Streams.WiredStream.GetResponse);
 
@@ -178,6 +196,7 @@ describe('LifecycleSummary', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockKibana.isServerless = false;
 
     // Default: avoid noisy async errors from useSnapshotRepositories
     mockFetch.mockImplementation((endpoint: string) => {
@@ -215,6 +234,99 @@ describe('LifecycleSummary', () => {
       );
     });
 
+    it('should disable "Add data phase" when the DSL downsample flyout is open', async () => {
+      const definition = createDslDefinition(undefined, [{ after: '1d', fixed_interval: '1d' }]);
+
+      renderWithSync(
+        <LifecycleSummary definition={definition} isMetricsStream onAddDataPhase={jest.fn()} />
+      );
+
+      // On stateful DLM the "Add data phase" popover replaces the dedicated "Add delete phase" button.
+      const addDataPhaseButton = screen.getByTestId('dataLifecycleSummaryAddDataPhaseButton');
+      expect(addDataPhaseButton).toBeEnabled();
+
+      fireEvent.click(screen.getByTestId('downsamplingPhase-1d-label'));
+      await waitFor(() =>
+        expect(screen.getByTestId('downsamplingPopover-step1-editButton')).toBeInTheDocument()
+      );
+      fireEvent.click(screen.getByTestId('downsamplingPopover-step1-editButton'));
+
+      await waitFor(() =>
+        expect(screen.getByTestId('streamsEditDslStepsFlyoutFromSummary')).toBeInTheDocument()
+      );
+
+      // Re-query: a disabled IlmPhaseSelect button is re-wrapped in a tooltip, replacing the node.
+      await waitFor(() =>
+        expect(screen.getByTestId('dataLifecycleSummaryAddDataPhaseButton')).toBeDisabled()
+      );
+    });
+
+    it('keeps "Add data phase" enabled when only a frozen phase is configured', () => {
+      const definition = createFrozenDslDefinition('10d');
+
+      renderWithSync(
+        <LifecycleSummary
+          definition={definition}
+          isMetricsStream={false}
+          onAddDataPhase={jest.fn()}
+        />
+      );
+
+      // Delete is still addable, so the popover stays enabled.
+      expect(screen.getByTestId('dataLifecycleSummaryAddDataPhaseButton')).toBeEnabled();
+    });
+
+    it('disables "Add data phase" when both frozen and delete phases are configured', () => {
+      const definition = createFrozenDslDefinition('10d', '30d');
+
+      renderWithSync(
+        <LifecycleSummary
+          definition={definition}
+          isMetricsStream={false}
+          onAddDataPhase={jest.fn()}
+        />
+      );
+
+      expect(screen.getByTestId('dataLifecycleSummaryAddDataPhaseButton')).toBeDisabled();
+    });
+
+    it('shows edit and remove actions in the frozen phase popover', async () => {
+      const definition = createFrozenDslDefinition('10d');
+
+      renderWithSync(
+        <LifecycleSummary
+          definition={definition}
+          isMetricsStream={false}
+          onAddDataPhase={jest.fn()}
+          refreshDefinition={jest.fn()}
+        />
+      );
+
+      // The frozen phase's timeline label is the localized, capitalized "Frozen".
+      fireEvent.click(screen.getByTestId('lifecyclePhase-Frozen-button'));
+
+      expect(await screen.findByTestId('lifecyclePhase-Frozen-editButton')).toBeInTheDocument();
+      expect(screen.getByTestId('lifecyclePhase-Frozen-removeButton')).toBeInTheDocument();
+    });
+
+    it('should disable "Add delete phase" and show tooltip when delete phase already exists (serverless)', async () => {
+      // The dedicated "Add delete phase" button only exists in serverless (stateful uses the
+      // "Add data phase" popover instead).
+      mockKibana.isServerless = true;
+      const definition = createDslDefinition('30d');
+
+      renderWithSync(
+        <LifecycleSummary definition={definition} isMetricsStream onAddDeletePhase={jest.fn()} />
+      );
+
+      const addDeletePhaseButton = screen.getByTestId('dataLifecycleSummaryAddDeletePhase');
+      expect(addDeletePhaseButton).toBeDisabled();
+
+      fireEvent.mouseOver(addDeletePhaseButton.parentElement ?? addDeletePhaseButton);
+
+      expect(await screen.findByText('Delete phase is already in use')).toBeInTheDocument();
+    });
+
     it('should disable "Add downsample step" button when there are 10 steps', () => {
       const manySteps = Array.from({ length: 10 }, (_, i) => ({
         after: `${i + 1}d`,
@@ -223,6 +335,16 @@ describe('LifecycleSummary', () => {
       const definition = createDslDefinition('60d', manySteps);
 
       renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
+
+      expect(screen.getByTestId('dataLifecycleSummaryAddDownsampleStep')).toBeDisabled();
+    });
+
+    it('should disable "Add downsample step" button while the data phases flyout is open', () => {
+      const definition = createDslDefinition('60d', [{ after: '10d', fixed_interval: '1h' }]);
+
+      renderWithSync(
+        <LifecycleSummary definition={definition} isMetricsStream isDataPhaseFlyoutOpen />
+      );
 
       expect(screen.getByTestId('dataLifecycleSummaryAddDownsampleStep')).toBeDisabled();
     });
@@ -383,6 +505,25 @@ describe('LifecycleSummary', () => {
       renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.queryByText('Inherited')).not.toBeInTheDocument();
+    });
+
+    it('does not show edit lifecycle method button for serverless wired root streams', async () => {
+      mockKibana.isServerless = true;
+      const definition = createWiredDslDefinition({ name: 'logs', isRoot: true });
+
+      renderWithSync(
+        <LifecycleSummary
+          definition={definition}
+          isMetricsStream
+          onAddDeletePhase={jest.fn()}
+          onEditSuccessfulLifecycle={jest.fn()}
+        />
+      );
+
+      expect(
+        screen.queryByTestId('dataLifecycleSummaryEditLifecycleMethod')
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('dataLifecycleSummaryAddDeletePhase')).toBeInTheDocument();
     });
 
     it('should require override confirmation for wired root streams when lifecycle is inherited', async () => {

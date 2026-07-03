@@ -52,26 +52,28 @@ interface OptionsListProps {
 
 /** Renders a list of time range options as selectable `PanelListItem` entries. */
 const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListProps) => {
-  const { applyRange, onPresetDelete, settings } = useDateRangePickerContext();
-  const timePrecision = settings.timePrecision ?? 's';
+  const { applyRange, onPresetDelete, transformOptions } = useDateRangePickerContext();
   const euiThemeContext = useEuiTheme();
   const styles = mainPanelStyles(euiThemeContext);
 
   const handleSelect = useCallback(
     (option: TimeRangeBoundsOption) => {
-      applyRange({ start: option.start, end: option.end }, getOptionInputText(option));
+      applyRange(
+        { start: option.start, end: option.end },
+        getOptionInputText(option, transformOptions)
+      );
     },
-    [applyRange]
+    [applyRange, transformOptions]
   );
 
   return (
-    <ul css={styles.list}>
+    <ul css={[styles.list, styles.scroller]}>
       {options.map((option, index) => (
         <PanelListItem
           key={`${option.start}-${option.end}-${index}`}
           data-test-subj={toTestSubj(
             'dateRangePickerPresetItem',
-            getOptionDisplayLabel(option, { timePrecision })
+            getOptionDisplayLabel(option, transformOptions)
           )}
           onClick={() => handleSelect(option)}
           suffix={showShorthand ? getOptionShorthand(option) ?? undefined : undefined}
@@ -90,7 +92,7 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
             ) : undefined
           }
         >
-          {getOptionDisplayLabel(option, { timePrecision })}
+          {getOptionDisplayLabel(option, transformOptions)}
         </PanelListItem>
       ))}
     </ul>
@@ -202,12 +204,12 @@ export function MainPanel() {
 
   return (
     <PanelContainer data-test-subj="dateRangePickerMainPanel">
-      <PanelBody>
-        <PanelBodySection spacingSide="none">
+      <PanelBody fill>
+        <PanelBodySection spacingSide="none" css={styles.presetsArea}>
           {timeRange.value === '' && <DocumentationButton />}
           <PresetsRecentTabs />
         </PanelBodySection>
-        <PanelBodySection spacingSide="none" css={styles.stickyBottom}>
+        <PanelBodySection spacingSide="none" css={styles.bottomSection}>
           <hr css={dividerStyles.root} />
           <SubPanelMenu />
         </PanelBodySection>

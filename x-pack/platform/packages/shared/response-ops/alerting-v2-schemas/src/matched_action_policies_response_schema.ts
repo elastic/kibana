@@ -32,9 +32,9 @@ export const matchActionPoliciesForRuleBodySchema = z.object({
 export type MatchActionPoliciesForRuleBody = z.infer<typeof matchActionPoliciesForRuleBodySchema>;
 
 export const matchedActionPolicyCategorySchema = z
-  .enum(['direct', 'global', 'global-filtered'])
+  .enum(['global', 'global-filtered'])
   .describe(
-    'Why this action policy matches the rule: "direct" (linked directly by rule ID), "global" (applies to all rules, no filter), or "global-filtered" (applies to all rules, KQL filter evaluated to true).'
+    'Why this action policy matches the rule: "global" (applies to all rules, no filter), or "global-filtered" (applies to all rules, KQL filter evaluated to true).'
   );
 
 export type MatchedActionPolicyCategory = z.infer<typeof matchedActionPolicyCategorySchema>;

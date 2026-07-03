@@ -17,11 +17,21 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 import { QueryAlertsBodyParams } from '../../signals/query_signals/query_signals_route.gen';
+import { AlertIds } from '../../../model/alert.gen';
+
+export const SearchAttacksBodyParams = lazySchema(() =>
+  QueryAlertsBodyParams.merge(
+    z.object({
+      ids: AlertIds.optional(),
+    })
+  )
+);
+export type SearchAttacksBodyParams = z.infer<typeof SearchAttacksBodyParams>;
 
 /**
  * Elasticsearch query and aggregation request
  */
-export const SearchAttacksRequestBody = lazySchema(() => QueryAlertsBodyParams);
+export const SearchAttacksRequestBody = lazySchema(() => SearchAttacksBodyParams);
 export type SearchAttacksRequestBody = z.infer<typeof SearchAttacksRequestBody>;
 export type SearchAttacksRequestBodyInput = z.input<typeof SearchAttacksRequestBody>;
 

@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/247279
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Alerting and reporting
+title: Fix rule response schema on public and internal APIs
+description: Fix a bug in the Rule Find API and Get Rule API where some fields were not returned even if documented in the OpenAPI spec.

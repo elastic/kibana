@@ -37,6 +37,7 @@
     "@kbn/rule-data-utils",
     "@kbn/zod",
     "@kbn/streams-schema",
+    "@kbn/significant-events-schema",
     "@kbn/server-route-repository",
     "@kbn/es-errors",
     "@kbn/lock-manager",
@@ -47,7 +48,6 @@
     "@kbn/es-query",
     "@kbn/zod-helpers",
     "@kbn/inference-common",
-    "@kbn/inference-prompt-utils",
     "@kbn/std",
     "@kbn/core-http-server",
     "@kbn/core-saved-objects-api-server",
@@ -101,6 +101,7 @@
     "@kbn/elastic-agent-utils",
     "@kbn/sample-log-parser",
     "@kbn/workflows-extensions",
-    "@kbn/agent-context-layer-plugin"
+    "@kbn/agent-context-layer-plugin",
+    "@kbn/traced-es-client"
   ]
 }
