@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { isSurfaceConnected, useRelayTenants } from './use_relay_tenants';
 
 interface App {
   id: string;
@@ -28,12 +29,6 @@ interface App {
   // a placeholder button until their flow is implemented.
   connector?: 'slack';
 }
-
-// App names are proper nouns and are intentionally not translated.
-const APPS: App[] = [
-  { id: 'slack', name: 'Slack', icon: 'logoSlack', connected: false, connector: 'slack' },
-  { id: 'github', name: 'GitHub', icon: 'logoGithub', connected: false },
-];
 
 export const AppsPanel = () => {
   const {
@@ -46,12 +41,25 @@ export const AppsPanel = () => {
   } = useKibana();
   const { signal } = useAbortController();
   const [connectingId, setConnectingId] = useState<string | null>(null);
+  const { tenants } = useRelayTenants();
+
+  // App names are proper nouns and are intentionally not translated.
+  const apps: App[] = [
+    {
+      id: 'slack',
+      name: 'Slack',
+      icon: 'logoSlack',
+      connected: isSurfaceConnected(tenants, 'slack'),
+      connector: 'slack',
+    },
+    { id: 'github', name: 'GitHub', icon: 'logoGithub', connected: false },
+  ];
 
   const handleConnectSlack = useCallback(async () => {
     setConnectingId('slack');
     try {
       const { authorizeUrl } = await streamsRepositoryClient.fetch(
-        'POST /internal/streams/apps/slack/connect',
+        'POST /internal/streams/relay/slack/connect',
         { signal }
       );
       window.open(authorizeUrl, '_blank', 'noopener,noreferrer');
@@ -80,7 +88,7 @@ export const AppsPanel = () => {
       </EuiPanel>
       <EuiPanel hasShadow={false} hasBorder={false}>
         <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-          {APPS.map((app) => (
+          {apps.map((app) => (
             <EuiFlexItem key={app.id} grow={false}>
               <EuiPanel hasBorder={true} hasShadow={false} paddingSize="m">
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">

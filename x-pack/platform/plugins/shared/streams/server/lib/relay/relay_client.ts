@@ -7,13 +7,48 @@
 
 import type { Logger } from '@kbn/core/server';
 import type {
+  Binding,
+  BindingsResponseBody,
+  BindingViewBody,
+  ListBindingsResult,
+  ListPageInput,
+  ListTenantsResult,
   RelayClient,
   StartInstallRequestBody,
   StartInstallResponseBody,
   StartSlackInstallInput,
   StartSlackInstallResult,
+  Tenant,
+  TenantsResponseBody,
+  TenantViewBody,
 } from './types';
 import { RelayResponseError, RelayUnreachableError } from './errors';
+
+const buildListQueryString = ({ limit, cursor }: ListPageInput): string => {
+  const params = new URLSearchParams();
+  if (limit !== undefined) {
+    params.set('limit', String(limit));
+  }
+  if (cursor !== undefined) {
+    params.set('cursor', cursor);
+  }
+  const query = params.toString();
+  return query ? `?${query}` : '';
+};
+
+const tenantFromWire = (tenant: TenantViewBody): Tenant => ({
+  surface: tenant.surface,
+  tenantKey: tenant.tenant_key,
+  deploymentRef: tenant.deployment_ref,
+  status: tenant.status,
+});
+
+const bindingFromWire = (binding: BindingViewBody): Binding => ({
+  surface: binding.surface,
+  tenantKey: binding.tenant_key,
+  scope: binding.scope,
+  deploymentRef: binding.deployment_ref,
+});
 
 export interface RelayClientOptions {
   /** Base URL of the relay-service, e.g. `https://relay.elastic.co`. */
@@ -65,23 +100,11 @@ export class RelayClientImpl implements RelayClient {
     throw new RelayUnreachableError(`Failed to reach the relay service: ${message}`, { cause });
   }
 
-  async startSlackInstall(input: StartSlackInstallInput): Promise<StartSlackInstallResult> {
-    const url = `${this.baseUrl}/v1/slack/install`;
-    const body: StartInstallRequestBody = {
-      kibana_api_key: input.kibanaApiKey,
-      created_by_user_key: input.createdByUserKey,
-    };
-
+  /** Sends the request and parses the JSON body, routing any failure through `handleError`. */
+  private async request<T>(url: string, init: RequestInit): Promise<T> {
     let response: Response;
     try {
-      response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          ...this.headers,
-        },
-        body: JSON.stringify(body),
-      });
+      response = await fetch(url, init);
     } catch (error) {
       return this.handleError(url, error instanceof Error ? error : new Error(String(error)));
     }
@@ -90,7 +113,50 @@ export class RelayClientImpl implements RelayClient {
       return this.handleError(url, response);
     }
 
-    const responseBody = (await response.json()) as StartInstallResponseBody;
+    return (await response.json()) as T;
+  }
+
+  async startSlackInstall(input: StartSlackInstallInput): Promise<StartSlackInstallResult> {
+    const url = `${this.baseUrl}/v1/slack/install`;
+    const body: StartInstallRequestBody = {
+      kibana_api_key: input.kibanaApiKey,
+      created_by_user_key: input.createdByUserKey,
+    };
+
+    const responseBody = await this.request<StartInstallResponseBody>(url, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        ...this.headers,
+      },
+      body: JSON.stringify(body),
+    });
     return { authorizeUrl: responseBody.authorize_url };
+  }
+
+  async listTenants(input: ListPageInput = {}): Promise<ListTenantsResult> {
+    const url = `${this.baseUrl}/v1/tenants${buildListQueryString(input)}`;
+
+    const responseBody = await this.request<TenantsResponseBody>(url, {
+      method: 'GET',
+      headers: { ...this.headers },
+    });
+    return {
+      tenants: responseBody.tenants.map(tenantFromWire),
+      nextCursor: responseBody.next_cursor,
+    };
+  }
+
+  async listBindings(input: ListPageInput = {}): Promise<ListBindingsResult> {
+    const url = `${this.baseUrl}/v1/bindings${buildListQueryString(input)}`;
+
+    const responseBody = await this.request<BindingsResponseBody>(url, {
+      method: 'GET',
+      headers: { ...this.headers },
+    });
+    return {
+      bindings: responseBody.bindings.map(bindingFromWire),
+      nextCursor: responseBody.next_cursor,
+    };
   }
 }

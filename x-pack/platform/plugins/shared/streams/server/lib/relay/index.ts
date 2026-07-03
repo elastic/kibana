@@ -7,7 +7,17 @@
 
 export { RelayClientImpl } from './relay_client';
 export type { RelayClientOptions } from './relay_client';
-export type { RelayClient, StartSlackInstallInput, StartSlackInstallResult } from './types';
+export type {
+  RelayClient,
+  StartSlackInstallInput,
+  StartSlackInstallResult,
+  ListPageInput,
+  ListTenantsResult,
+  ListBindingsResult,
+  Tenant,
+  Binding,
+  BindingScope,
+} from './types';
 export {
   RelayServiceError,
   RelayUnreachableError,

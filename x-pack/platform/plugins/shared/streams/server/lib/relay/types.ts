@@ -24,6 +24,42 @@ export interface StartInstallResponseBody {
 }
 
 /**
+ * `BindingScope` mirrors the relay-service's discriminated union of the same
+ * name; it is identical on the wire and in the domain model, so it is not
+ * duplicated per-layer like the other types below.
+ */
+export type BindingScope =
+  | { type: 'DEFAULT' }
+  | { type: 'SUB'; id: string }
+  | { type: 'USER'; id: string };
+
+export interface TenantViewBody {
+  surface: string;
+  tenant_key: string;
+  deployment_ref: string;
+  status: string;
+}
+
+export interface BindingViewBody {
+  surface: string;
+  tenant_key: string;
+  scope: BindingScope;
+  deployment_ref: string;
+}
+
+export interface TenantsResponseBody {
+  ok: true;
+  tenants: TenantViewBody[];
+  next_cursor?: string;
+}
+
+export interface BindingsResponseBody {
+  ok: true;
+  bindings: BindingViewBody[];
+  next_cursor?: string;
+}
+
+/**
  * Domain types (camelCase) are what the rest of Kibana consumes. For the
  * initiate-only scope we only surface the authorize URL.
  */
@@ -36,6 +72,38 @@ export interface StartSlackInstallResult {
   authorizeUrl: string;
 }
 
+/** `cursor` is the opaque `next_cursor` returned by a previous page. */
+export interface ListPageInput {
+  limit?: number;
+  cursor?: string;
+}
+
+export interface Tenant {
+  surface: string;
+  tenantKey: string;
+  deploymentRef: string;
+  status: string;
+}
+
+export interface Binding {
+  surface: string;
+  tenantKey: string;
+  scope: BindingScope;
+  deploymentRef: string;
+}
+
+export interface ListTenantsResult {
+  tenants: Tenant[];
+  nextCursor?: string;
+}
+
+export interface ListBindingsResult {
+  bindings: Binding[];
+  nextCursor?: string;
+}
+
 export interface RelayClient {
   startSlackInstall(input: StartSlackInstallInput): Promise<StartSlackInstallResult>;
+  listTenants(input?: ListPageInput): Promise<ListTenantsResult>;
+  listBindings(input?: ListPageInput): Promise<ListBindingsResult>;
 }
