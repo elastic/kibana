@@ -26452,7 +26452,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Upgrade multiple agentless policies to their installed package version, migrating each package policy's config onto the new schema. Always returns 200 with a per-policy result array; a missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch, so valid ids are still upgraded. A successful result means the policy's saved object was upgraded, while the agentless deployment is reconciled asynchronously in the background. Note: agent-policy-level agentless settings (resources, ownership tags) are not re-derived from the new package version — use the update (PUT) endpoint for those.
+        Upgrade multiple agentless policies to their installed package version, migrating each package policy's config onto the new schema. Always returns 200 with a per-policy result array; a missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch, so valid ids are still upgraded. A successful result means the policy's saved object was upgraded, while the agentless deployment is reconciled asynchronously in the background. Policies already at the installed version are a genuine no-op: they still report `success: true` (calls stay idempotent) but nothing is re-persisted or redeployed. Note: agent-policy-level agentless settings (resources, ownership tags) are not re-derived from the new package version — use the update (PUT) endpoint for those.
       operationId: post-fleet-agentless-policies-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -70120,11 +70120,13 @@ components:
           properties:
             message:
               description: Error message when the dry-run failed for this policy.
+              maxLength: 4096
               type: string
           required:
             - message
         currentVersion:
           description: The current installed package version of the policy.
+          maxLength: 256
           type: string
         errors:
           description: Migration errors encountered while computing the upgrade.
@@ -70134,23 +70136,28 @@ components:
             properties:
               message:
                 description: Human-readable migration error.
+                maxLength: 4096
                 type: string
             required:
               - message
+          maxItems: 1000
           type: array
         hasErrors:
           description: Whether the dry-run migration produced any errors.
           type: boolean
         id:
           description: The ID of the agentless policy.
+          maxLength: 256
           type: string
         name:
           description: The name of the agentless policy.
+          maxLength: 256
           type: string
         proposedPolicy:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy'
         proposedVersion:
           description: The package version the policy would be upgraded to.
+          maxLength: 256
           type: string
         statusCode:
           description: HTTP-like status code when the dry-run failed for this policy.
@@ -71497,14 +71504,17 @@ components:
           properties:
             message:
               description: Error message when the upgrade failed for this policy.
+              maxLength: 4096
               type: string
           required:
             - message
         id:
           description: The ID of the agentless policy.
+          maxLength: 256
           type: string
         name:
           description: The name of the agentless policy.
+          maxLength: 256
           type: string
         statusCode:
           description: HTTP-like status code when the upgrade failed for this policy.
