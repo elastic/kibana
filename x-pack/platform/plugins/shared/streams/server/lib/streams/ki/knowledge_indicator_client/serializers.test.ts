@@ -21,11 +21,7 @@ function makeQuery(overrides: Partial<StreamQuery> = {}): StreamQuery {
 
 describe('toStoredQuery', () => {
   it('normalizes feature ids so they match the stored feature slug', () => {
-    const stored = toStoredQuery(
-      'logs.test',
-      makeQuery({ features: [{ id: ' Svc-F ' }] }),
-      false
-    );
+    const stored = toStoredQuery('logs.test', makeQuery({ features: [{ id: ' Svc-F ' }] }), false);
 
     expect(stored.query.features).toEqual([{ id: 'svc-f' }]);
   });

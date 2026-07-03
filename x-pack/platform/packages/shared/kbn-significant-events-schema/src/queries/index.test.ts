@@ -6,7 +6,7 @@
  */
 
 import type { Feature } from '../feature';
-import { isDurable, isExpired } from './index';
+import { isDurable, isExpired } from '.';
 
 function makeFeature(expiresAt: string | undefined): Feature {
   return { expires_at: expiresAt } as unknown as Feature;
