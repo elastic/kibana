@@ -143,14 +143,18 @@ apiTest.describe(
 
         const body = response.body as ListPolicyExecutionHistoryResponse;
 
-        for (const item of body.items) {
-          for (const ruleRef of item.rules) {
-            if (ruleRef.id === RULE_ID_DELETED) {
-              expect(ruleRef).toStrictEqual({ id: RULE_ID_DELETED, name: null });
-            } else if (ruleRef.id === RULE_ID_KEPT) {
-              expect(ruleRef).toStrictEqual({ id: RULE_ID_KEPT, name: RULE_KEPT_NAME });
-            }
-          }
+        const rulesRefs = body.items.flatMap((it) => it.rules);
+        const keptRuleRefs = rulesRefs.filter((r) => r.id === RULE_ID_KEPT);
+        const deletedRuleRefs = rulesRefs.filter((r) => r.id === RULE_ID_DELETED);
+
+        expect(keptRuleRefs.length).toBeGreaterThan(0);
+        expect(deletedRuleRefs.length).toBeGreaterThan(0);
+
+        for (const rule of keptRuleRefs) {
+          expect(rule).toStrictEqual({ id: RULE_ID_KEPT, name: RULE_KEPT_NAME });
+        }
+        for (const rule of deletedRuleRefs) {
+          expect(rule).toStrictEqual({ id: RULE_ID_DELETED, name: null });
         }
       }
     );
