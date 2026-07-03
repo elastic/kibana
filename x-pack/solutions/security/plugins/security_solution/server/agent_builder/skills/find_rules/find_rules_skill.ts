@@ -48,6 +48,15 @@ Use this skill when the user wants to **inventory, list, count, filter, sort, or
 
 Do **not** use this skill when the user wants to **create or edit** a rule (use detection rule creation / detection-rule-edit) or hunt **raw events** with ES|QL (use threat-hunting).
 
+## Routing (read first)
+
+For **every** rule-inventory question the FIRST tool call is \`security.discover_rule_tags\`, immediately followed by \`security.find_rules\`. Detection rules are Kibana **saved objects**, not documents in any index — so \`platform.core.search\`, \`natural_language_search\`, \`platform.core.list_indices\`, \`platform.core.generate_esql\`, and \`platform.core.execute_esql\` **cannot** answer them: an ES|QL/search path over \`.alerts-*\`/\`.siem-signals-*\` returns fired alerts or nothing, never rule definitions, and wastes the turn.
+
+- ❌ WRONG: "List all enabled detection rules tagged with MITRE" → \`platform.core.list_indices\` → \`platform.core.generate_esql\` → \`platform.core.execute_esql\` (queries indices; rule definitions are not there)
+- ✅ RIGHT: "List all enabled detection rules tagged with MITRE" → \`security.discover_rule_tags({})\` → \`security.find_rules({ enabled: true, tags: ["MITRE"] })\`
+- ❌ WRONG: "How many custom rules are enabled?" → \`generate_esql\` / \`execute_esql\` (no index holds rule metadata)
+- ✅ RIGHT: "How many custom rules are enabled?" → \`security.discover_rule_tags({})\` → \`security.find_rules({ enabled: true, ruleSource: "custom", perPage: 1 })\` (answer from \`total\`)
+
 ## Process
 
 **Allowed tools for rule inventory:** ONLY \`security.discover_rule_tags\`, \`security.find_rules\`, and (for noisy-rule ranking) \`security.alerts\`. Once this skill is loaded, do **not** call \`platform.core.search\`, \`platform.core.list_indices\`, \`platform.core.sml_search\`, \`platform.core.generate_esql\`, or \`platform.core.execute_esql\` — detection rules are not indexed documents you query with ES|QL.
