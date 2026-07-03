@@ -25,14 +25,9 @@ import { threatDefault } from '../step_about_rule/default_value';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackTechniqueFields } from './technique_fields';
-import type {
-  MitreSubTechnique,
-  MitreTactic,
-  MitreTechnique,
-} from '../../../../../common/detection_engine/mitre/types';
+import type { MitreTactic } from '../../../../../common/detection_engine/mitre/types';
 import { createUnsupportedMitreOption } from './unsupported_mitre_option';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { normalizeThreatsToCurrentMitre } from './normalize_threats_to_current_mitre';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -62,67 +57,41 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
     'mitreAttackUpdatesUIEnabled'
   );
 
-  const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
-  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechnique[]>([]);
-  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
-
-  useEffect(() => {
-    async function getMitre() {
-      const mitreConfig = await lazyMitreConfiguration();
-      setTacticsOptions(mitreConfig.tactics);
-      setTechniquesOptions(mitreConfig.techniques);
-      setSubtechniquesOptions(mitreConfig.subtechniques);
-    }
-
-    getMitre();
-  }, []);
-
-  /**
-   * Persists a new threats value, snapping any drifted (renamed) MITRE entries to the
-   * currently bundled dataset. Because this only runs on an actual interaction with the
-   * section, an untouched (pristine) section is never rewritten on save.
-   */
-  const setThreatsValue = useCallback(
-    (threats: Threats) => {
-      field.setValue(
-        isMitreAttackUpdatesUIEnabled
-          ? normalizeThreatsToCurrentMitre(threats, {
-              tactics: tacticsOptions,
-              techniques: techniquesOptions,
-              subtechniques: subtechniquesOptions,
-            })
-          : threats
-      );
-    },
-    [field, isMitreAttackUpdatesUIEnabled, subtechniquesOptions, tacticsOptions, techniquesOptions]
-  );
-
   const removeTactic = useCallback(
     (index: number) => {
       const values = [...(field.value as Threats)];
       values.splice(index, 1);
       if (isEmpty(values)) {
-        setThreatsValue(threatDefault);
+        field.setValue(threatDefault);
       } else {
-        setThreatsValue(values);
+        field.setValue(values);
       }
     },
-    [field, setThreatsValue]
+    [field]
   );
 
   const addMitreAttackTactic = useCallback(() => {
     const values = [...(field.value as Threats)];
-    const emptyTactic: Threat = {
-      framework: 'MITRE ATT&CK',
-      tactic: { id: 'none', name: 'none', reference: 'none' },
-      technique: [],
-    };
     if (!isEmpty(values[values.length - 1])) {
-      setThreatsValue([...values, emptyTactic]);
+      field.setValue([
+        ...values,
+        { tactic: { id: 'none', name: 'none', reference: 'none' }, technique: [] },
+      ]);
     } else {
-      setThreatsValue([emptyTactic]);
+      field.setValue([{ tactic: { id: 'none', name: 'none', reference: 'none' }, technique: [] }]);
     }
-  }, [field, setThreatsValue]);
+  }, [field]);
+
+  const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
+
+  useEffect(() => {
+    async function getMitre() {
+      const mitreConfig = await lazyMitreConfiguration();
+      setTacticsOptions(mitreConfig.tactics);
+    }
+
+    getMitre();
+  }, []);
 
   const updateTactic = useCallback(
     (index: number, value: string) => {
@@ -137,9 +106,9 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
         tactic: { id, reference, name },
         technique: [],
       });
-      setThreatsValue([...values]);
+      field.setValue([...values]);
     },
-    [field, setThreatsValue, tacticsOptions]
+    [field, tacticsOptions]
   );
 
   const values = useMemo(() => {
@@ -254,9 +223,9 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
    */
   const onFieldChange = useCallback(
     (threats: Threats) => {
-      setThreatsValue(threats);
+      field.setValue(threats);
     },
-    [setThreatsValue]
+    [field]
   );
 
   return (
