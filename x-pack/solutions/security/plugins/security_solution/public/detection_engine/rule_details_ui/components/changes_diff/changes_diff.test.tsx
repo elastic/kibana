@@ -120,21 +120,45 @@ describe('RuleChangesDiff', () => {
     expect(getByTestId('ruleChangesHistoryNoDiffCallout')).toBeInTheDocument();
   });
 
-  it('renders insertion without no-diff callout for rule_upgrade with matching timestamps (created_at === updated_at)', () => {
+  it('renders normal diff without callout for rule_upgrade of a tracked rule (has prior history)', () => {
     const item = createRuleChangeHistoryItem({
       action: 'rule_upgrade',
       rule: {
-        name: 'Upgraded Rule',
+        name: 'New Name',
         created_at: '2024-01-01T00:00:00.000Z',
-        updated_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-06-01T00:00:00.000Z',
       } as RuleResponse,
-      old_values: null,
+      old_values: { name: 'Old Name' },
     });
 
     const { getByTestId, queryByTestId } = renderComponent({ item });
 
+    expect(getByTestId('ruleChangesHistoryDiff')).toBeInTheDocument();
     expect(queryByTestId('ruleChangesHistoryNoDiffCallout')).not.toBeInTheDocument();
-    expect(getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('Upgraded Rule');
+    expect(getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('Old Name');
+    expect(getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('New Name');
+  });
+
+  it('renders normal diff without callout for rule_upgrade rule-type change (recreation with preceding delete)', () => {
+    // A rule-type change deletes and recreates the rule, so the preceding rule_delete
+    // provides prior state — old_values is non-null and it renders as a normal diff, not green.
+    const item = createRuleChangeHistoryItem({
+      action: 'rule_upgrade',
+      rule: {
+        name: 'Recreated Rule',
+        type: 'query',
+        created_at: '2024-06-01T00:00:00.000Z',
+        updated_at: '2024-06-01T00:00:01.000Z',
+      } as RuleResponse,
+      old_values: { type: 'eql' },
+    });
+
+    const { getByTestId, queryByTestId } = renderComponent({ item });
+
+    expect(getByTestId('ruleChangesHistoryDiff')).toBeInTheDocument();
+    expect(queryByTestId('ruleChangesHistoryNoDiffCallout')).not.toBeInTheDocument();
+    expect(getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('eql');
+    expect(getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('query');
   });
 
   it('renders no-diff callout for rule_revert action with no old_values', () => {
