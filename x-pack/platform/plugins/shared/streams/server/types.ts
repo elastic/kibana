@@ -49,6 +49,7 @@ import type {
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
 import type { StreamsConfig } from '../common/config';
+import type { RelayClient } from './lib/relay';
 
 export interface StreamsServer {
   core: CoreStart;
@@ -66,6 +67,8 @@ export interface StreamsServer {
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
+  /** Built once at plugin start when `xpack.streams.relayService.url` is configured. */
+  relayClient?: RelayClient;
 }
 
 export interface ElasticsearchAccessorOptions {

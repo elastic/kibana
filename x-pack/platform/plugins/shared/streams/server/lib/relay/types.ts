@@ -60,6 +60,19 @@ export interface BindingsResponseBody {
 }
 
 /**
+ * Outbound TLS settings for the `fetch` connection to the relay-service (client
+ * certificate for mTLS, a custom CA, etc). Field names mirror
+ * `xpack.security.uiam.ssl` for consistency with Kibana's other `fetch`-based
+ * outbound clients. All fields are file paths, read at client construction time.
+ */
+export interface RelayClientTlsOptions {
+  verificationMode: 'none' | 'certificate' | 'full';
+  certificateAuthorities?: string | string[];
+  certificate?: string;
+  key?: string;
+}
+
+/**
  * Domain types (camelCase) are what the rest of Kibana consumes. For the
  * initiate-only scope we only surface the authorize URL.
  */

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import fs from 'fs';
+import undici from 'undici';
+import type { Agent } from 'undici';
 import { loggerMock } from '@kbn/logging-mocks';
 import { RelayClientImpl } from './relay_client';
 import { RelayResponseError, RelayUnreachableError } from './errors';
@@ -59,7 +62,7 @@ describe('RelayClientImpl', () => {
       expect(result).toEqual({ authorizeUrl: relayResponse.authorize_url });
     });
 
-    it('sends only the content-type header when no headers are configured', async () => {
+    it('sends the content-type header', async () => {
       fetchMock.mockResolvedValue(okResponse(relayResponse));
       const client = new RelayClientImpl({ baseUrl: 'https://relay.example', logger });
 
@@ -67,23 +70,6 @@ describe('RelayClientImpl', () => {
 
       const [, init] = fetchMock.mock.calls[0];
       expect(init.headers).toEqual({ 'content-type': 'application/json' });
-    });
-
-    it('sends configured headers, e.g. x-forwarded-client-cert', async () => {
-      fetchMock.mockResolvedValue(okResponse(relayResponse));
-      const client = new RelayClientImpl({
-        baseUrl: 'https://relay.example',
-        headers: { 'x-forwarded-client-cert': 'DeploymentID=dev-deployment;OrgID=someorg' },
-        logger,
-      });
-
-      await client.startSlackInstall({ kibanaApiKey });
-
-      const [, init] = fetchMock.mock.calls[0];
-      expect(init.headers).toEqual({
-        'content-type': 'application/json',
-        'x-forwarded-client-cert': 'DeploymentID=dev-deployment;OrgID=someorg',
-      });
     });
 
     it('trims a trailing slash from the base URL', async () => {
@@ -235,22 +221,6 @@ describe('RelayClientImpl', () => {
       expect(url).toBe('https://relay.example/v1/bindings?limit=5&cursor=prev-cursor');
     });
 
-    it('sends configured headers, e.g. x-forwarded-client-cert', async () => {
-      fetchMock.mockResolvedValue(okResponse(bindingsResponse));
-      const client = new RelayClientImpl({
-        baseUrl: 'https://relay.example',
-        headers: { 'x-forwarded-client-cert': 'DeploymentID=dev-deployment;OrgID=someorg' },
-        logger,
-      });
-
-      await client.listBindings();
-
-      const [, init] = fetchMock.mock.calls[0];
-      expect(init.headers).toEqual({
-        'x-forwarded-client-cert': 'DeploymentID=dev-deployment;OrgID=someorg',
-      });
-    });
-
     it('throws a RelayResponseError when the relay responds with a non-2xx status', async () => {
       fetchMock.mockResolvedValue({
         ok: false,
@@ -267,6 +237,122 @@ describe('RelayClientImpl', () => {
       const client = new RelayClientImpl({ baseUrl: 'https://relay.example', logger });
 
       await expect(client.listBindings()).rejects.toThrow(RelayUnreachableError);
+    });
+  });
+
+  describe('TLS dispatcher', () => {
+    const AGENT_MOCK = { name: 'mock-undici-agent' };
+    const emptyTenantsResponse: TenantsResponseBody = { ok: true, tenants: [] };
+    let readFileSyncSpy: jest.SpyInstance;
+    let agentSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      fetchMock.mockResolvedValue(okResponse(emptyTenantsResponse));
+      readFileSyncSpy = jest
+        .spyOn(fs, 'readFileSync')
+        .mockImplementation((path) => `mocked file content for ${path}`);
+      agentSpy = jest
+        .spyOn(undici, 'Agent')
+        .mockImplementation(() => AGENT_MOCK as unknown as Agent);
+    });
+
+    afterEach(() => {
+      readFileSyncSpy.mockRestore();
+      agentSpy.mockRestore();
+    });
+
+    it('does not build a dispatcher for verificationMode "full" with no custom TLS settings', async () => {
+      const client = new RelayClientImpl({ baseUrl: 'https://relay.example', logger });
+
+      await client.listTenants();
+
+      expect(agentSpy).not.toHaveBeenCalled();
+      const [, init] = fetchMock.mock.calls[0];
+      expect(init.dispatcher).toBeUndefined();
+    });
+
+    it('builds a dispatcher with rejectUnauthorized: false for verificationMode "none"', async () => {
+      const client = new RelayClientImpl({
+        baseUrl: 'https://relay.example',
+        tls: { verificationMode: 'none' },
+        logger,
+      });
+
+      await client.listTenants();
+
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: { allowPartialTrustChain: true, rejectUnauthorized: false },
+      });
+      const [, init] = fetchMock.mock.calls[0];
+      expect(init.dispatcher).toBe(AGENT_MOCK);
+    });
+
+    it('builds a dispatcher with checkServerIdentity overridden for verificationMode "certificate"', async () => {
+      const client = new RelayClientImpl({
+        baseUrl: 'https://relay.example',
+        tls: { verificationMode: 'certificate', certificateAuthorities: '/some/ca/path' },
+        logger,
+      });
+
+      await client.listTenants();
+
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          ca: ['mocked file content for /some/ca/path'],
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+          checkServerIdentity: expect.any(Function),
+        },
+      });
+    });
+
+    it('reads the client certificate and key files for mTLS', async () => {
+      const client = new RelayClientImpl({
+        baseUrl: 'https://relay.example',
+        tls: {
+          verificationMode: 'full',
+          certificate: '/path/to/cert.pem',
+          key: '/path/to/key.pem',
+        },
+        logger,
+      });
+
+      await client.listTenants();
+
+      expect(readFileSyncSpy).toHaveBeenCalledWith('/path/to/cert.pem', 'utf8');
+      expect(readFileSyncSpy).toHaveBeenCalledWith('/path/to/key.pem', 'utf8');
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          cert: 'mocked file content for /path/to/cert.pem',
+          key: 'mocked file content for /path/to/key.pem',
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
+      });
+    });
+
+    it('reads every CA file path when certificateAuthorities is an array', async () => {
+      const client = new RelayClientImpl({
+        baseUrl: 'https://relay.example',
+        tls: {
+          verificationMode: 'full',
+          certificateAuthorities: ['/some/ca/path-1', '/some/ca/path-2'],
+        },
+        logger,
+      });
+
+      await client.listTenants();
+
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          ca: [
+            'mocked file content for /some/ca/path-1',
+            'mocked file content for /some/ca/path-2',
+          ],
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
+      });
     });
   });
 });

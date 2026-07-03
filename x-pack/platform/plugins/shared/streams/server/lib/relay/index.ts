@@ -9,6 +9,7 @@ export { RelayClientImpl } from './relay_client';
 export type { RelayClientOptions } from './relay_client';
 export type {
   RelayClient,
+  RelayClientTlsOptions,
   StartSlackInstallInput,
   StartSlackInstallResult,
   ListPageInput,

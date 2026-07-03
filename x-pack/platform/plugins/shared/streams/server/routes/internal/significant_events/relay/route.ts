@@ -7,16 +7,16 @@
 
 import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import type { ListTenantsResult } from '../../../../lib/relay';
+import type { ListTenantsResult, RelayClient } from '../../../../lib/relay';
 import type { StreamsServer } from '../../../../types';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG } from '../../../../../common/feature_flags';
 import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
-import { RelayClientImpl, createDeploymentToken } from '../../../../lib/relay';
+import { createDeploymentToken } from '../../../../lib/relay';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
-const assertRelayEnabled = ({ server }: { server: StreamsServer }) => {
+const assertRelayEnabled = ({ server }: { server: StreamsServer }): RelayClient => {
   const isAppsEnabled = server.core.featureFlags.getBooleanValue(
     STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
     false
@@ -27,12 +27,11 @@ const assertRelayEnabled = ({ server }: { server: StreamsServer }) => {
     );
   }
 
-  const relayUrl = server.config.relayService?.url;
-  if (!relayUrl) {
+  if (!server.relayClient) {
     throw serverUnavailable('Relay is not configured (set xpack.streams.relayService.url).');
   }
 
-  return relayUrl;
+  return server.relayClient;
 };
 
 const connectSlackRoute = createServerRoute({
@@ -54,7 +53,7 @@ const connectSlackRoute = createServerRoute({
   }): Promise<{ authorizeUrl: string }> => {
     // Cheap synchronous guards first, so a disabled/unconfigured instance skips
     // the scoped-clients init and the async access assertion below.
-    const relayUrl = assertRelayEnabled({ server });
+    const relay = assertRelayEnabled({ server });
 
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -70,11 +69,6 @@ const connectSlackRoute = createServerRoute({
       logger,
     });
 
-    const relay = new RelayClientImpl({
-      baseUrl: relayUrl,
-      headers: server.config.relayService?.headers,
-      logger,
-    });
     return relay.startSlackInstall({ kibanaApiKey, createdByUserKey });
   },
 });
@@ -98,23 +92,18 @@ const listTenantsRoute = createServerRoute({
   },
   handler: async ({
     params,
+    response,
     request,
     server,
-    logger,
     getScopedClients,
   }): Promise<ListTenantsResult> => {
     // Cheap synchronous guards first, so a disabled/unconfigured instance skips
     // the scoped-clients init and the async access assertion below.
-    const relayUrl = assertRelayEnabled({ server });
+    const relay = assertRelayEnabled({ server });
 
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const relay = new RelayClientImpl({
-      baseUrl: relayUrl,
-      headers: server.config.relayService?.headers,
-      logger,
-    });
     return relay.listTenants(params.query);
   },
 });

@@ -6,12 +6,7 @@
  */
 /* eslint-disable max-classes-per-file */
 
-export class StatusError extends Error {
-  public data?: unknown;
-  constructor(message: string, public readonly statusCode: number) {
-    super(message);
-  }
-}
+import { StatusError } from '../streams/errors/status_error';
 
 export class RelayServiceError extends StatusError {
   constructor(message: string, options?: { cause?: Error }) {

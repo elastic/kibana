@@ -28,6 +28,7 @@ import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
+import { RelayClientImpl } from './lib/relay';
 import type { StreamsConfig } from '../common/config';
 import { installWorkflows } from './lib/workflows/setup/install_workflows';
 import {
@@ -602,6 +603,14 @@ export class StreamsPlugin
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
+
+      if (this.server.config.relayService?.url) {
+        this.server.relayClient = new RelayClientImpl({
+          baseUrl: this.server.config.relayService.url,
+          tls: this.server.config.relayService.tls,
+          logger: this.logger,
+        });
+      }
     }
 
     initializeSignificantEventsTemplates({

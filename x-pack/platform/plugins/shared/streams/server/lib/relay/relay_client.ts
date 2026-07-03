@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { Agent } from 'undici';
 import type { Logger } from '@kbn/core/server';
 import type {
   Binding,
@@ -14,6 +16,7 @@ import type {
   ListPageInput,
   ListTenantsResult,
   RelayClient,
+  RelayClientTlsOptions,
   StartInstallRequestBody,
   StartInstallResponseBody,
   StartSlackInstallInput,
@@ -53,14 +56,8 @@ const bindingFromWire = (binding: BindingViewBody): Binding => ({
 export interface RelayClientOptions {
   /** Base URL of the relay-service, e.g. `https://relay.elastic.co`. */
   baseUrl: string;
-  /**
-   * Extra headers sent with every request, e.g. the `x-forwarded-client-cert`
-   * header a local dev proxy would otherwise inject. Configured via
-   * `xpack.streams.relayService.headers`. May override the default
-   * `content-type` header.
-   */
-  headers?: Record<string, string>;
-  // TODO tls options
+  /** Outbound TLS settings for the `fetch` connection, e.g. an mTLS client certificate. */
+  tls?: RelayClientTlsOptions;
   logger: Logger;
 }
 
@@ -68,19 +65,61 @@ export interface RelayClientOptions {
  * Thin HTTP client for the Elastic relay-service. In production the relay
  * derives the deployment identity from the mTLS proxy's XFCC header, injected
  * by the cloud egress proxy downstream — this client sends no auth header
- * itself. For local development, the XFCC header (or any other header) can be
- * supplied via the `headers` option / `xpack.streams.relayService.headers`.
+ * itself.
  */
 export class RelayClientImpl implements RelayClient {
   private readonly baseUrl: string;
-  private readonly headers: Record<string, string>;
   private readonly logger: Logger;
+  private readonly dispatcher: Agent | undefined;
 
-  constructor({ baseUrl, headers, logger }: RelayClientOptions) {
+  constructor({ baseUrl, tls, logger }: RelayClientOptions) {
     // Trim a trailing slash so `${this.baseUrl}/v1/...` never doubles up.
     this.baseUrl = baseUrl.replace(/\/+$/, '');
-    this.headers = headers ?? {};
     this.logger = logger;
+    this.dispatcher = this.createDispatcher(tls);
+  }
+
+  /**
+   * Builds a custom dispatcher for the native `fetch` to use custom TLS
+   * connection settings. Mirrors `UiamService#createFetchDispatcher`
+   * (`x-pack/platform/plugins/shared/security/server/uiam/uiam_service.ts`).
+   */
+  private createDispatcher(tls?: RelayClientTlsOptions): Agent | undefined {
+    const verificationMode = tls?.verificationMode ?? 'full';
+
+    const readFile = (file: string) => readFileSync(file, 'utf8');
+
+    // Read the client certificate and key for mTLS from PEM files.
+    const cert = tls?.certificate ? readFile(tls.certificate) : undefined;
+    const key = tls?.key ? readFile(tls.key) : undefined;
+
+    // Read CA certificate(s) from the file path(s) defined in the config.
+    const ca = tls?.certificateAuthorities
+      ? (Array.isArray(tls.certificateAuthorities)
+          ? tls.certificateAuthorities
+          : [tls.certificateAuthorities]
+        ).map((caPath) => readFile(caPath))
+      : undefined;
+
+    // If we don't have any custom TLS settings and full verification is
+    // requested, we don't need a custom dispatcher — that's the default
+    // `fetch` behavior.
+    if (!ca && !cert && !key && verificationMode === 'full') {
+      return undefined;
+    }
+
+    return new Agent({
+      connect: {
+        ca,
+        cert,
+        key,
+        allowPartialTrustChain: true,
+        rejectUnauthorized: verificationMode !== 'none',
+        // By default, Node.js checks the server identity against the SAN/CN
+        // in the certificate.
+        ...(verificationMode === 'certificate' ? { checkServerIdentity: () => undefined } : {}),
+      },
+    });
   }
 
   private async handleError(url: string, cause: Error | Response): Promise<never> {
@@ -104,7 +143,13 @@ export class RelayClientImpl implements RelayClient {
   private async request<T>(url: string, init: RequestInit): Promise<T> {
     let response: Response;
     try {
-      response = await fetch(url, init);
+      response = await fetch(url, {
+        ...init,
+        // Undici's `fetch` supports a non-standard `dispatcher` option (not part of
+        // the DOM `RequestInit` type) to route the request through a custom TLS
+        // connection, see https://github.com/nodejs/undici/pull/1411.
+        ...(this.dispatcher ? { dispatcher: this.dispatcher } : {}),
+      });
     } catch (error) {
       return this.handleError(url, error instanceof Error ? error : new Error(String(error)));
     }
@@ -127,7 +172,6 @@ export class RelayClientImpl implements RelayClient {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        ...this.headers,
       },
       body: JSON.stringify(body),
     });
@@ -139,7 +183,7 @@ export class RelayClientImpl implements RelayClient {
 
     const responseBody = await this.request<TenantsResponseBody>(url, {
       method: 'GET',
-      headers: { ...this.headers },
+      headers: {},
     });
     return {
       tenants: responseBody.tenants.map(tenantFromWire),
@@ -152,7 +196,7 @@ export class RelayClientImpl implements RelayClient {
 
     const responseBody = await this.request<BindingsResponseBody>(url, {
       method: 'GET',
-      headers: { ...this.headers },
+      headers: {},
     });
     return {
       bindings: responseBody.bindings.map(bindingFromWire),

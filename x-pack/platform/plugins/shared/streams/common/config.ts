@@ -29,7 +29,35 @@ export const configSchema = schema.object({
   relayService: schema.maybe(
     schema.object({
       url: schema.string(),
-      headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+      // Outbound TLS settings for the `fetch` connection to the relay-service, e.g. a
+      // client certificate for mTLS or a custom CA. Mirrors
+      // `xpack.security.uiam.ssl` naming/semantics for consistency across Kibana's
+      // `fetch`-based outbound clients.
+      tls: schema.maybe(
+        schema.object(
+          {
+            verificationMode: schema.oneOf(
+              [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+              { defaultValue: 'full' }
+            ),
+            certificateAuthorities: schema.maybe(
+              schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+            ),
+            certificate: schema.maybe(schema.string()),
+            key: schema.maybe(schema.string()),
+          },
+          {
+            validate: (rawConfig) => {
+              if (rawConfig.certificate && !rawConfig.key) {
+                return 'must specify [tls.key] when [tls.certificate] is specified';
+              }
+              if (rawConfig.key && !rawConfig.certificate) {
+                return 'must specify [tls.certificate] when [tls.key] is specified';
+              }
+            },
+          }
+        )
+      ),
     })
   ),
 });
