@@ -31,11 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UseEuiTheme } from '@elastic/eui';
 import type { CspRegion } from '../../../common/types';
-import {
-  useRegionPolicy,
-  useSaveRegionPolicy,
-  useDeleteRegionPolicy,
-} from '../../hooks/use_region_policy';
+import { useRegionPolicy, useSaveRegionPolicy } from '../../hooks/use_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
 import {
   getAvailableRegions,
@@ -86,7 +82,6 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     isError: isEndpointsError,
   } = useEisModels();
   const { mutate: savePolicy, isLoading: isSaving } = useSaveRegionPolicy();
-  const { mutate: deletePolicy, isLoading: isDeleting } = useDeleteRegionPolicy();
 
   const availableRegions = useMemo(() => getAvailableRegions(eisEndpoints ?? []), [eisEndpoints]);
 
@@ -195,17 +190,16 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     const allowedRegions = availableRegions
       .filter((r) => checkedKeys.has(regionKey(r)))
       .map(({ csp, region }) => ({ csp, region }));
-    // All regions selected == no restrictions; use delete to clear any existing policy
-    if (allowedRegions.length === availableRegions.length) {
-      deletePolicy(undefined, { onSuccess: onClose });
-    } else {
-      savePolicy({ allowed_regions: allowedRegions }, { onSuccess: onClose });
-    }
-  }, [availableRegions, checkedKeys, savePolicy, deletePolicy, onClose]);
+    // Always PUT the explicit list — even when all regions are selected.
+    // DELETE means "no policy, any future regions are also allowed by default",
+    // whereas PUT with the full list means only those explicit regions are allowed
+    // and newly added regions won't be permitted until the user updates preferences.
+    savePolicy({ allowed_regions: allowedRegions }, { onSuccess: onClose });
+  }, [availableRegions, checkedKeys, savePolicy, onClose]);
 
   const isLoading = isPolicyLoading || isEndpointsLoading;
   const isError = isPolicyError || isEndpointsError;
-  const isBusy = isSaving || isDeleting;
+  const isBusy = isSaving;
   const isAllExpanded = expandedZones.size === zoneGroups.length;
 
   return (
