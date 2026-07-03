@@ -9,7 +9,7 @@ import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { WORKFLOW_SML_TYPE, WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { WORKFLOW_INDEX_NAME } from '@kbn/workflows';
+import { WORKFLOW_INDEX_NAME, WorkflowsManagementApiActions } from '@kbn/workflows';
 import type { WorkflowProperties } from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
@@ -105,10 +105,6 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
             type: WORKFLOW_SML_TYPE,
             title,
             content: buildSearchContent(source),
-            permissions: {
-              kibana: { privileges: [{ name: 'api:workflowsManagement:read' }] },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       };
@@ -119,6 +115,18 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
       return undefined;
     }
   },
+
+  /**
+   * Workflow chunks are gated by the Workflows Management read API privilege —
+   * the same gate the workflows API checks when surfacing or running a
+   * workflow. Hand-rolled rather than going through `kibanaSavedObjectPermissions`
+   * because workflows are stored in a dedicated Elasticsearch index, not as
+   * Kibana saved objects.
+   */
+  getPermissions: () => ({
+    kibana: { privileges: [{ name: `api:${WorkflowsManagementApiActions.read}` }] },
+    elasticsearch: { indices: [] },
+  }),
 
   toAttachment: async (item, context) => {
     const workflow = await api.getWorkflow(item.origin_id ?? '', context.spaceId);
