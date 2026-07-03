@@ -130,10 +130,6 @@ safe-outputs:
     target: ${{ env.PR_NUMBER }}
   resolve-pull-request-review-thread:
     max: 10
-    # The default GITHUB_TOKEN (a GitHub App integration token) cannot resolve
-    # review threads via the GraphQL `resolveReviewThread` mutation and fails with
-    # "Resource not accessible by integration". Use the kibanamachine user PAT,
-    # which authenticates as a real user with write access and can resolve threads.
     github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
 # Codex engine does not expose workflow env vars like PR_NUMBER and REVIEWER_COMMENT_ID to shell tools through -c `include_only [...]`, so render this follow-up context directly in the prompt.
 ---
