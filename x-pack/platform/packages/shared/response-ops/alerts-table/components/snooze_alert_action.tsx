@@ -50,8 +50,8 @@ export const SnoozeAlertAction = typedMemo(
     const { snoozeAlert, unsnoozeAlert } = useAlertSnooze({
       http,
       notifications,
-      ruleId: ruleId ?? undefined,
-      instanceId: alertInstanceId ?? undefined,
+      ruleId,
+      instanceId: alertInstanceId,
       isMuted: isMuted ?? undefined,
       isSnoozed,
       onSuccess: handleActionDone,
