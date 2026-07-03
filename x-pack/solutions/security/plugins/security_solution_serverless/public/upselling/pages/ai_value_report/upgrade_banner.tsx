@@ -28,17 +28,21 @@ export const AIValueReportUpgradeBanner: React.FC = () => {
       headingElement="h3"
       text={i18n.UPGRADE_TEXT(requiredTier)}
       media={<EuiIcon type={analyticsSpeedAcceleration} size="original" aria-hidden={true} />}
-      actionProps={{
-        primary: {
-          children: i18n.UPGRADE_CTA,
-          ...(upgradeHref ? { href: upgradeHref } : {}),
-          iconType: 'popout',
-          iconSide: 'left' as const,
-          target: '_blank',
-          rel: 'noopener noreferrer',
-          'data-test-subj': 'aiValueEssentialsUpgradeCtaButton',
-        },
-      }}
+      actionProps={
+        upgradeHref
+          ? {
+              primary: {
+                children: i18n.UPGRADE_CTA,
+                href: upgradeHref,
+                iconType: 'popout',
+                iconSide: 'left' as const,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                'data-test-subj': 'aiValueEssentialsUpgradeCtaButton',
+              },
+            }
+          : undefined
+      }
     />
   );
 };

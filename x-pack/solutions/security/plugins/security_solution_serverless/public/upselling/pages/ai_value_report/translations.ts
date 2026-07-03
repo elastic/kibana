@@ -23,7 +23,7 @@ export const UPGRADE_TITLE = (requiredProduct: string) =>
 export const UPGRADE_TEXT = (requiredProduct: string) =>
   i18n.translate('xpack.securitySolutionServerless.upselling.aiValueReport.upgradeText', {
     defaultMessage:
-      'See how Elastic AI SOC saves your team time and money through AI triage, including estimated analyst hours reclaimed, reduced costs, and real threats surfaced faster. Available on the {requiredProduct} plan.',
+      "See how Elastic's AI SOC saves your team time and money through AI triage, including estimated analyst hours reclaimed, reduced costs, and real threats surfaced faster. Available on the {requiredProduct} plan.",
     values: { requiredProduct },
   });
 

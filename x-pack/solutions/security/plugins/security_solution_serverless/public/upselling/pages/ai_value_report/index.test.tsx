@@ -55,12 +55,12 @@ describe('AIValueReportUpgradeBanner', () => {
     expect(screen.getByTestId('aiValueEssentialsUpgradeBanner')).toBeInTheDocument();
   });
 
-  it('always renders the CTA button', () => {
+  it('does not render the CTA button if getProjectFeaturesUrl returns undefined', () => {
     mockGetProjectFeaturesUrl.mockReturnValue(undefined);
 
     render(<AIValueReportUpgradeBanner />);
 
-    expect(screen.getByTestId('aiValueEssentialsUpgradeCtaButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('aiValueEssentialsUpgradeCtaButton')).not.toBeInTheDocument();
   });
 
   it('renders the CTA button with href when getProjectFeaturesUrl returns a URL', () => {
