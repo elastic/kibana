@@ -10,11 +10,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ManageRegionsModal } from './manage_regions_modal';
-import {
-  useRegionPolicy,
-  useSaveRegionPolicy,
-  useDeleteRegionPolicy,
-} from '../../hooks/use_region_policy';
+import { useRegionPolicy, useSaveRegionPolicy } from '../../hooks/use_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
 import * as eisUtils from '../../utils/eis_utils';
 
@@ -28,11 +24,9 @@ jest.mock('../../utils/eis_utils', () => ({
 const mockGetAvailableRegions = jest.mocked(eisUtils.getAvailableRegions);
 const mockUseRegionPolicy = useRegionPolicy as jest.Mock;
 const mockUseSaveRegionPolicy = useSaveRegionPolicy as jest.Mock;
-const mockUseDeleteRegionPolicy = useDeleteRegionPolicy as jest.Mock;
 const mockUseEisModels = useEisModels as jest.Mock;
 
 const mockSaveMutate = jest.fn();
-const mockDeleteMutate = jest.fn();
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiThemeProvider>
@@ -67,10 +61,6 @@ describe('ManageRegionsModal', () => {
 
     mockUseSaveRegionPolicy.mockReturnValue({
       mutate: mockSaveMutate,
-      isLoading: false,
-    });
-    mockUseDeleteRegionPolicy.mockReturnValue({
-      mutate: mockDeleteMutate,
       isLoading: false,
     });
   });
@@ -319,12 +309,12 @@ describe('ManageRegionsModal', () => {
   });
 
   describe('Save preferences button', () => {
-    it('calls deletePolicy when all regions are selected (no restrictions)', async () => {
+    it('calls savePolicy with the full region list when all regions are selected', async () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
       mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
 
-      mockDeleteMutate.mockImplementation(
-        (_arg: unknown, { onSuccess }: { onSuccess: () => void }) => {
+      mockSaveMutate.mockImplementation(
+        (_body: unknown, { onSuccess }: { onSuccess: () => void }) => {
           onSuccess();
         }
       );
@@ -335,15 +325,22 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      // All selected by default → save should call deletePolicy
+      // All selected by default
       await waitFor(() => {
         expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
 
-      expect(mockDeleteMutate).toHaveBeenCalled();
-      expect(mockSaveMutate).not.toHaveBeenCalled();
+      expect(mockSaveMutate).toHaveBeenCalledWith(
+        {
+          allowed_regions: [
+            { csp: 'aws', region: 'us-east-1' },
+            { csp: 'gcp', region: 'europe-west1' },
+          ],
+        },
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
       expect(onClose).toHaveBeenCalled();
     });
 

@@ -8,7 +8,7 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
-import { useRegionPolicy, useSaveRegionPolicy, useDeleteRegionPolicy } from './use_region_policy';
+import { useRegionPolicy, useSaveRegionPolicy } from './use_region_policy';
 import { useKibana } from './use_kibana';
 import { APIRoutes } from '../../common/types';
 import { REGION_POLICY_QUERY_KEY, ROUTE_VERSIONS } from '../../common/constants';
@@ -188,85 +188,6 @@ describe('useSaveRegionPolicy', () => {
 
     expect(mockAddDanger).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Failed to save region preferences' })
-    );
-  });
-});
-
-describe('useDeleteRegionPolicy', () => {
-  const mockDelete = jest.fn();
-  const mockAddSuccess = jest.fn();
-  const mockAddDanger = jest.fn();
-  const mockSetQueryData = jest.fn();
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseKibana.mockReturnValue({
-      services: {
-        http: { delete: mockDelete },
-        notifications: { toasts: { addSuccess: mockAddSuccess, addDanger: mockAddDanger } },
-      },
-    });
-  });
-
-  it('calls DELETE with the correct path and version', async () => {
-    mockDelete.mockResolvedValue(undefined);
-
-    const { queryClient } = createWrapper();
-    jest.spyOn(queryClient, 'setQueryData').mockImplementation(mockSetQueryData);
-
-    const { result } = renderHook(() => useDeleteRegionPolicy(), {
-      wrapper: ({ children }) =>
-        React.createElement(QueryClientProvider, { client: queryClient }, children),
-    });
-
-    act(() => {
-      result.current.mutate();
-    });
-
-    await waitFor(() => expect(mockDelete).toHaveBeenCalledTimes(1));
-
-    expect(mockDelete).toHaveBeenCalledWith(APIRoutes.REGION_POLICY, {
-      version: ROUTE_VERSIONS.v1,
-    });
-  });
-
-  it('shows success toast and clears query cache to null on success', async () => {
-    mockDelete.mockResolvedValue(undefined);
-
-    const { queryClient } = createWrapper();
-    jest.spyOn(queryClient, 'setQueryData').mockImplementation(mockSetQueryData);
-
-    const { result } = renderHook(() => useDeleteRegionPolicy(), {
-      wrapper: ({ children }) =>
-        React.createElement(QueryClientProvider, { client: queryClient }, children),
-    });
-
-    act(() => {
-      result.current.mutate();
-    });
-
-    await waitFor(() => expect(mockAddSuccess).toHaveBeenCalledTimes(1));
-
-    expect(mockAddSuccess).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Region restrictions removed' })
-    );
-    expect(mockSetQueryData).toHaveBeenCalledWith([REGION_POLICY_QUERY_KEY], null);
-  });
-
-  it('shows danger toast on error', async () => {
-    mockDelete.mockRejectedValue(new Error('server error'));
-
-    const { Wrapper } = createWrapper();
-    const { result } = renderHook(() => useDeleteRegionPolicy(), { wrapper: Wrapper });
-
-    act(() => {
-      result.current.mutate();
-    });
-
-    await waitFor(() => expect(mockAddDanger).toHaveBeenCalledTimes(1));
-
-    expect(mockAddDanger).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Failed to remove region restrictions' })
     );
   });
 });

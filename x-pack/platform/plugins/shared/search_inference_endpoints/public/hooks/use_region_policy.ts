@@ -61,31 +61,3 @@ export const useSaveRegionPolicy = () => {
     },
   });
 };
-
-export const useDeleteRegionPolicy = () => {
-  const { services } = useKibana();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      return services.http.delete(APIRoutes.REGION_POLICY, {
-        version: ROUTE_VERSIONS.v1,
-      });
-    },
-    onSuccess: () => {
-      queryClient.setQueryData([REGION_POLICY_QUERY_KEY], null);
-      services.notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.searchInferenceEndpoints.regionPolicy.deleteSuccess', {
-          defaultMessage: 'Region restrictions removed',
-        }),
-      });
-    },
-    onError: () => {
-      services.notifications.toasts.addDanger({
-        title: i18n.translate('xpack.searchInferenceEndpoints.regionPolicy.deleteError', {
-          defaultMessage: 'Failed to remove region restrictions',
-        }),
-      });
-    },
-  });
-};
