@@ -85,6 +85,30 @@ describe('TimeWindowButtons', () => {
     expect(screen.queryByTestId('dateRangePickerTimeWindowButtons')).not.toBeInTheDocument();
   });
 
+  describe('dynamic tooltip', () => {
+    it('shows the current window duration in the previous button tooltip', () => {
+      renderPicker();
+
+      fireEvent.mouseOver(screen.getByTestId('dateRangePickerPreviousButton'));
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Previous 15 minutes');
+    });
+
+    it('shows the current window duration in the next button tooltip', () => {
+      renderPicker();
+
+      fireEvent.mouseOver(screen.getByTestId('dateRangePickerNextButton'));
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Next 15 minutes');
+    });
+
+    it('reflects the window duration after stepping forward', () => {
+      renderPicker();
+
+      fireEvent.click(screen.getByTestId('dateRangePickerNextButton'));
+      fireEvent.mouseOver(screen.getByTestId('dateRangePickerNextButton'));
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Next 15 minutes');
+    });
+  });
+
   describe('disabled prop', () => {
     it('disables all time window buttons when disabled is true', () => {
       renderPicker({ disabled: true });

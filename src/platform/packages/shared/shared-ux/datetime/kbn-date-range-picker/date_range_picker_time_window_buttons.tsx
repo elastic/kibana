@@ -14,6 +14,7 @@ import moment from 'moment';
 import { EuiButtonGroup, type EuiButtonGroupOptionProps } from '@elastic/eui';
 
 import { useDateRangePickerContext } from './date_range_picker_context';
+import { durationToDisplayFullText } from './format';
 import { formatDateRange } from './utils';
 import { timeWindowButtonsTexts as translations } from './translations';
 
@@ -68,15 +69,22 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
     zoomFactor = DEFAULT_ZOOM_FACTOR,
   } = config;
 
-  const { stepForward, stepBackward, expandWindow, shrinkWindow, isWindowDurationZero, isInvalid } =
-    useTimeWindow(
-      timeRange.start,
-      timeRange.end,
-      timeRange.startDate,
-      timeRange.endDate,
-      applyRange,
-      { zoomFactor, timePrecision }
-    );
+  const {
+    stepForward,
+    stepBackward,
+    expandWindow,
+    shrinkWindow,
+    isWindowDurationZero,
+    isInvalid,
+    durationText,
+  } = useTimeWindow(
+    timeRange.start,
+    timeRange.end,
+    timeRange.startDate,
+    timeRange.endDate,
+    applyRange,
+    { zoomFactor, timePrecision }
+  );
 
   const onChange = useCallback(
     (id: string) => {
@@ -104,7 +112,9 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         title: '',
         iconType: 'chevronSingleLeft',
         isDisabled: isDisabled || isInvalid || isWindowDurationZero,
-        toolTipContent: isInvalid ? translations.cannotShiftInvalid : translations.previousTooltip,
+        toolTipContent: isInvalid
+          ? translations.cannotShiftInvalid
+          : translations.previousTooltip(durationText),
         'data-test-subj': 'dateRangePickerPreviousButton',
       });
     }
@@ -144,13 +154,23 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         title: '',
         iconType: 'chevronSingleRight',
         isDisabled: isDisabled || isInvalid || isWindowDurationZero,
-        toolTipContent: isInvalid ? translations.cannotShiftInvalid : translations.nextTooltip,
+        toolTipContent: isInvalid
+          ? translations.cannotShiftInvalid
+          : translations.nextTooltip(durationText),
         'data-test-subj': 'dateRangePickerNextButton',
       });
     }
 
     return items;
-  }, [showShiftArrows, showZoomOut, showZoomIn, isDisabled, isInvalid, isWindowDurationZero]);
+  }, [
+    showShiftArrows,
+    showZoomOut,
+    showZoomIn,
+    isDisabled,
+    isInvalid,
+    isWindowDurationZero,
+    durationText,
+  ]);
 
   if (options.length === 0) {
     return null;
@@ -220,6 +240,7 @@ function useTimeWindow(
   const isInvalid = !min || !min.isValid() || !max || !max.isValid();
   const windowDuration = isInvalid ? -1 : max.diff(min);
   const isWindowDurationZero = windowDuration === 0;
+  const durationText = isInvalid ? '' : durationToDisplayFullText(min.toDate(), max.toDate());
   const zoomMultiplier = parseZoomFactor(options.zoomFactor);
   const zoomDelta = windowDuration * (zoomMultiplier / 2);
   const { timePrecision } = options;
@@ -255,5 +276,13 @@ function useTimeWindow(
     applyDates(moment(min).add(zoomDelta, 'ms'), moment(max).subtract(zoomDelta, 'ms'));
   }, [isInvalid, isWindowDurationZero, min, max, zoomDelta, applyDates]);
 
-  return { stepForward, stepBackward, expandWindow, shrinkWindow, isWindowDurationZero, isInvalid };
+  return {
+    stepForward,
+    stepBackward,
+    expandWindow,
+    shrinkWindow,
+    isWindowDurationZero,
+    isInvalid,
+    durationText,
+  };
 }

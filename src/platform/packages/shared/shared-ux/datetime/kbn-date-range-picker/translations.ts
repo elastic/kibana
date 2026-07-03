@@ -18,10 +18,11 @@ export const timeWindowButtonsTexts = {
     'sharedUXPackages.dateRangePicker.timeWindowButtons.previousLabel',
     { defaultMessage: 'Previous' }
   ),
-  previousTooltip: i18n.translate(
-    'sharedUXPackages.dateRangePicker.timeWindowButtons.previousTooltip',
-    { defaultMessage: 'Previous time window' }
-  ),
+  previousTooltip: (duration: string) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.timeWindowButtons.previousTooltip', {
+      defaultMessage: 'Previous {duration}',
+      values: { duration },
+    }),
   cannotShiftInvalid: i18n.translate(
     'sharedUXPackages.dateRangePicker.timeWindowButtons.cannotShiftInvalid',
     { defaultMessage: 'Cannot shift invalid time window' }
@@ -30,9 +31,11 @@ export const timeWindowButtonsTexts = {
   nextLabel: i18n.translate('sharedUXPackages.dateRangePicker.timeWindowButtons.nextLabel', {
     defaultMessage: 'Next',
   }),
-  nextTooltip: i18n.translate('sharedUXPackages.dateRangePicker.timeWindowButtons.nextTooltip', {
-    defaultMessage: 'Next time window',
-  }),
+  nextTooltip: (duration: string) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.timeWindowButtons.nextTooltip', {
+      defaultMessage: 'Next {duration}',
+      values: { duration },
+    }),
 
   zoomOutLabel: i18n.translate('sharedUXPackages.dateRangePicker.timeWindowButtons.zoomOutLabel', {
     defaultMessage: 'Zoom out',
