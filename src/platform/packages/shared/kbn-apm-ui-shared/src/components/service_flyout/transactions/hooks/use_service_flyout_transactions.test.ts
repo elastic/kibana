@@ -242,6 +242,40 @@ describe('useServiceFlyoutTransactions', () => {
     );
   });
 
+  it('does not trigger additional fetches when server-side search returns maxCountExceeded: false', async () => {
+    const http = {
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({
+          transactionGroups: [],
+          maxCountExceeded: true,
+          hasActiveAlerts: false,
+        })
+        .mockResolvedValueOnce({
+          transactionGroups: [],
+          maxCountExceeded: false,
+          hasActiveAlerts: false,
+        }),
+    } as unknown as HttpStart;
+
+    const { rerender } = renderHook(
+      ({ searchQuery }: { searchQuery: string }) =>
+        useServiceFlyoutTransactions({ http, ...BASE_PARAMS, searchQuery }),
+      { initialProps: { searchQuery: '' } }
+    );
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(1));
+
+    rerender({ searchQuery: 'checkout' });
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+
+    // maxCountExceeded must stay true (sticky) so serverSearchQuery remains 'checkout'
+    // and no third fetch is triggered
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(http.get).toHaveBeenCalledTimes(2);
+  });
+
   it('returns isLoading true while the request is in flight', async () => {
     let resolveRequest!: (value: object) => void;
     const http = {

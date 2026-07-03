@@ -115,7 +115,7 @@ export function useServiceFlyoutTransactions({
           },
         }
       );
-      setMaxCountExceeded(result.maxCountExceeded);
+      setMaxCountExceeded((prev) => prev || result.maxCountExceeded);
       return result;
     },
     [
