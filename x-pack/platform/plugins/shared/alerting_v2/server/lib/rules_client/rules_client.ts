@@ -32,6 +32,10 @@ import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import {
   RulesSavedObjectServiceInternalToken,
@@ -106,7 +110,8 @@ export class RulesClient {
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config'],
     @inject(RulesSavedObjectServiceInternalToken)
     private readonly rulesSavedObjectServiceInternal: RulesSavedObjectServiceContract,
-    @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher
+    @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {
     this.config = pluginConfigAccessor.get<PluginConfig>();
   }
@@ -766,9 +771,17 @@ export class RulesClient {
         try {
           await this.taskManager.bulkSchedule(tasksToSchedule, {
             request: this.request as unknown as CoreKibanaRequest,
+            cloneApiKey: true,
           });
-        } catch {
-          // Task scheduling failure is non-fatal for bulk operations
+        } catch (e) {
+          // Task scheduling failure is non-fatal for the bulk response, but the rules were
+          // already persisted as enabled. Key provisioning (clone / UIAM grant) is per task
+          // type, so a single failure drops the whole batch: those rules stay enabled with no
+          // executor task. Log so the silent drop is observable.
+          const failure = e instanceof Error ? e.message : String(e);
+          this.logger.warn({
+            message: `Failed to schedule executor tasks for ${tasksToSchedule.length} enabled rule(s); they are enabled but will not run: ${failure}`,
+          });
         }
       }
 
