@@ -19,6 +19,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
+import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 interface EvalDocSource {
   experiment_name?: string;
@@ -128,6 +129,14 @@ export const registerGetExperimentRoute = ({ router, logger }: RouteDependencies
             },
           });
         } catch (error) {
+          const tooLarge = handleMaximumResponseSizeExceededError({
+            error,
+            response,
+            logger,
+            context: 'Get evaluation experiment',
+          });
+          if (tooLarge) return tooLarge;
+
           logger.error(`Failed to get evaluation experiment: ${error}`);
           return response.customError({
             statusCode: 500,

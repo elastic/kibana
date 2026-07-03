@@ -16,6 +16,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
+import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 import { escapeWildcard } from './utils';
 
 interface RootSpanSource {
@@ -324,6 +325,14 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
             },
           });
         } catch (error) {
+          const tooLarge = handleMaximumResponseSizeExceededError({
+            error,
+            response,
+            logger,
+            context: 'Get project traces',
+          });
+          if (tooLarge) return tooLarge;
+
           logger.error(
             `Failed to get project traces: ${error instanceof Error ? error.message : error}`
           );
