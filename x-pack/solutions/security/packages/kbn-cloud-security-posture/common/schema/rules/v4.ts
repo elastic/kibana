@@ -37,6 +37,12 @@ const RULE_SEARCH_MAX_LENGTH = 2_048;
 // Saved-object field name strings ("metadata.name", "metadata.section", etc.).
 const FIELD_NAME_MAX_LENGTH = 256;
 
+// Rule state record key is the composite `benchmark_id;benchmark_version;rule_number`
+// (see buildRuleKey). It must fit the largest key the bulk-action request schema can
+// produce, so it sums the component ceilings plus the two `;` separators — otherwise a
+// request that passes validation could build a key that fails cspSettingsSchema.
+const RULE_STATE_KEY_MAX_LENGTH = RULE_ID_MAX_LENGTH + RULE_VERSION_MAX_LENGTH + RULE_ID_MAX_LENGTH + 2;
+
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
 export type RulesToUpdate = TypeOf<typeof rulesToUpdate>;
@@ -178,9 +184,10 @@ const ruleStateAttributes = schema.object({
   rule_id: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
 });
 
-// Rule state key is a composite of benchmark_id and rule_id — bounded to RULE_ID_MAX_LENGTH.
+// Rule state key is the composite `benchmark_id;benchmark_version;rule_number` built by
+// buildRuleKey — bounded to the sum of its component ceilings (see RULE_STATE_KEY_MAX_LENGTH).
 const rulesStates = schema.recordOf(
-  schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
+  schema.string({ maxLength: RULE_STATE_KEY_MAX_LENGTH }),
   ruleStateAttributes
 );
 
