@@ -76,6 +76,35 @@ describe('ElasticInferenceServiceModelsHeader', () => {
       const { queryByTestId } = render(<ElasticInferenceServiceModelsHeader />);
       expect(queryByTestId('eisManageRegionsButton')).not.toBeInTheDocument();
     });
+
+    it('opens the ManageRegionsModal when Manage regions button is clicked', () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          cloud: { isCloudEnabled: false },
+          uiSettings: mockUiSettings(true),
+        },
+      });
+      const { getByTestId, queryByTestId } = render(<ElasticInferenceServiceModelsHeader />);
+      expect(queryByTestId('mockManageRegionsModal')).not.toBeInTheDocument();
+
+      fireEvent.click(getByTestId('eisManageRegionsButton'));
+      expect(getByTestId('mockManageRegionsModal')).toBeInTheDocument();
+    });
+
+    it('closes the ManageRegionsModal when modal calls onClose', () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          cloud: { isCloudEnabled: false },
+          uiSettings: mockUiSettings(true),
+        },
+      });
+      const { getByTestId, queryByTestId } = render(<ElasticInferenceServiceModelsHeader />);
+      fireEvent.click(getByTestId('eisManageRegionsButton'));
+      expect(getByTestId('mockManageRegionsModal')).toBeInTheDocument();
+
+      fireEvent.click(getByTestId('mockManageRegionsClose'));
+      expect(queryByTestId('mockManageRegionsModal')).not.toBeInTheDocument();
+    });
   });
 
   describe('Cloud usage button', () => {
@@ -116,30 +145,6 @@ describe('ElasticInferenceServiceModelsHeader', () => {
       await waitFor(() => {
         expect(queryByText('View Cloud usage')).not.toBeInTheDocument();
       });
-    });
-  });
-
-  describe('Manage regions button', () => {
-    it('renders the Manage regions button', () => {
-      const { getByTestId } = render(<ElasticInferenceServiceModelsHeader />);
-      expect(getByTestId('eisManageRegionsButton')).toBeInTheDocument();
-    });
-
-    it('opens the ManageRegionsModal when Manage regions button is clicked', () => {
-      const { getByTestId, queryByTestId } = render(<ElasticInferenceServiceModelsHeader />);
-      expect(queryByTestId('mockManageRegionsModal')).not.toBeInTheDocument();
-
-      fireEvent.click(getByTestId('eisManageRegionsButton'));
-      expect(getByTestId('mockManageRegionsModal')).toBeInTheDocument();
-    });
-
-    it('closes the ManageRegionsModal when modal calls onClose', () => {
-      const { getByTestId, queryByTestId } = render(<ElasticInferenceServiceModelsHeader />);
-      fireEvent.click(getByTestId('eisManageRegionsButton'));
-      expect(getByTestId('mockManageRegionsModal')).toBeInTheDocument();
-
-      fireEvent.click(getByTestId('mockManageRegionsClose'));
-      expect(queryByTestId('mockManageRegionsModal')).not.toBeInTheDocument();
     });
   });
 });

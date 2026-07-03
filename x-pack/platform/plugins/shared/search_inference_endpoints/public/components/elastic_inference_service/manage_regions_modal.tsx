@@ -25,11 +25,11 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { UseEuiTheme } from '@elastic/eui';
 import type { CspRegion } from '../../../common/types';
 import {
   useRegionPolicy,
@@ -37,13 +37,33 @@ import {
   useDeleteRegionPolicy,
 } from '../../hooks/use_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
-import { getAvailableRegions, GEO_TO_DISPLAY_NAME, GEO_ORDER } from '../../utils/eis_utils';
+import { getAvailableRegions, getGeoDisplayName, GEO_ORDER } from '../../utils/eis_utils';
 
 interface ManageRegionsModalProps {
   onClose: () => void;
 }
 
 const regionKey = (r: CspRegion) => `${r.csp}::${r.region}`;
+
+const modalStyles = ({ euiTheme }: UseEuiTheme) => css`
+  min-width: ${euiTheme.base * 35}px;
+`;
+
+const zoneRowStyles = ({ euiTheme }: UseEuiTheme) => css`
+  padding: ${euiTheme.size.s} ${euiTheme.size.s};
+  border: ${euiTheme.border.thin};
+  border-radius: ${euiTheme.border.radius.medium};
+  margin-bottom: ${euiTheme.size.xs};
+`;
+
+const regionRowStyles = ({ euiTheme }: UseEuiTheme) => css`
+  padding: ${euiTheme.size.xs} 0;
+`;
+
+const regionListStyles = ({ euiTheme }: UseEuiTheme) => css`
+  padding: ${euiTheme.size.s} ${euiTheme.size.xl};
+  border-top: ${euiTheme.border.thin};
+`;
 
 interface ZoneGroup {
   geo: string;
@@ -52,11 +72,14 @@ interface ZoneGroup {
 }
 
 export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose }) => {
-  const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
 
-  const { data: policy, isLoading: isPolicyLoading } = useRegionPolicy();
-  const { data: eisEndpoints, isLoading: isEndpointsLoading } = useEisModels();
+  const { data: policy, isLoading: isPolicyLoading, isError: isPolicyError } = useRegionPolicy();
+  const {
+    data: eisEndpoints,
+    isLoading: isEndpointsLoading,
+    isError: isEndpointsError,
+  } = useEisModels();
   const { mutate: savePolicy, isLoading: isSaving } = useSaveRegionPolicy();
   const { mutate: deletePolicy, isLoading: isDeleting } = useDeleteRegionPolicy();
 
@@ -93,7 +116,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
       .filter((geo) => byGeo.has(geo))
       .map((geo) => ({
         geo,
-        displayName: GEO_TO_DISPLAY_NAME[geo] ?? geo,
+        displayName: getGeoDisplayName(geo),
         regions: byGeo.get(geo)!,
       }));
   }, [availableRegions]);
@@ -176,29 +199,14 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
   }, [availableRegions, checkedKeys, savePolicy, deletePolicy, onClose]);
 
   const isLoading = isPolicyLoading || isEndpointsLoading;
+  const isError = isPolicyError || isEndpointsError;
   const isBusy = isSaving || isDeleting;
   const isAllExpanded = expandedZones.size === zoneGroups.length;
 
-  const zoneRowStyles = css`
-    padding: ${euiTheme.size.s} ${euiTheme.size.s};
-    border: ${euiTheme.border.thin};
-    border-radius: ${euiTheme.border.radius.medium};
-    margin-bottom: ${euiTheme.size.xs};
-  `;
-
-  const regionRowStyles = css`
-    padding: ${euiTheme.size.xs} 0;
-  `;
-
-  const regionListStyles = css`
-    padding: ${euiTheme.size.s} ${euiTheme.size.xl};
-    border-top: ${euiTheme.border.thin};
-  `;
-
   return (
     <EuiModal
+      css={modalStyles}
       onClose={onClose}
-      style={{ minWidth: 560 }}
       aria-labelledby={modalTitleId}
       data-test-subj="manageRegionsModal"
     >
@@ -211,6 +219,27 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
       </EuiModalHeader>
 
       <EuiModalBody>
+        {isError && (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.searchInferenceEndpoints.manageRegions.errorCallout.title',
+                { defaultMessage: 'Failed to load region data' }
+              )}
+              color="danger"
+              iconType="error"
+              data-test-subj="manageRegionsErrorCallout"
+            >
+              <p>
+                {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.errorCallout.body', {
+                  defaultMessage:
+                    'An error occurred while fetching region or policy data. Close and reopen this panel to retry.',
+                })}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiText size="s">
           <p>
             <FormattedMessage
@@ -480,7 +509,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
         <EuiButton
           fill
           onClick={handleSave}
-          isDisabled={isBusy || isLoading}
+          isDisabled={isBusy || isLoading || totalSelected === 0}
           isLoading={isSaving || isDeleting}
           data-test-subj="manageRegionsSaveButton"
         >

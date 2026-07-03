@@ -16,6 +16,7 @@ import {
   useDeleteRegionPolicy,
 } from '../../hooks/use_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
+import * as eisUtils from '../../utils/eis_utils';
 
 jest.mock('../../hooks/use_region_policy');
 jest.mock('../../hooks/use_eis_models');
@@ -24,11 +25,7 @@ jest.mock('../../utils/eis_utils', () => ({
   getAvailableRegions: jest.fn(),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { getAvailableRegions: mockGetAvailableRegions } = require('../../utils/eis_utils') as {
-  getAvailableRegions: jest.Mock;
-};
-
+const mockGetAvailableRegions = jest.mocked(eisUtils.getAvailableRegions);
 const mockUseRegionPolicy = useRegionPolicy as jest.Mock;
 const mockUseSaveRegionPolicy = useSaveRegionPolicy as jest.Mock;
 const mockUseDeleteRegionPolicy = useDeleteRegionPolicy as jest.Mock;
@@ -137,6 +134,8 @@ describe('ManageRegionsModal', () => {
       // us-east-1 → North America zone, europe-west1 → Europe zone
       expect(screen.getByTestId('manageRegionsZone-us')).toBeInTheDocument();
       expect(screen.getByTestId('manageRegionsZone-eu')).toBeInTheDocument();
+      expect(screen.getByText('North America')).toBeInTheDocument();
+      expect(screen.getByText('Europe')).toBeInTheDocument();
     });
 
     it('shows the correct "X of Y selected" summary', async () => {
@@ -237,6 +236,57 @@ describe('ManageRegionsModal', () => {
           'manageRegionsCheckbox-aws::us-east-1'
         ) as HTMLInputElement;
         expect(checkbox.checked).toBe(false);
+      });
+    });
+  });
+
+  describe('Zone-level checkbox toggle', () => {
+    it('unchecks all regions in a zone when zone checkbox is clicked while all are checked', async () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
+      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+      });
+
+      // Click North America zone checkbox — should uncheck us-east-1
+      fireEvent.click(screen.getByTestId('manageRegionsZoneCheckbox-us'));
+
+      await waitFor(() => {
+        expect(screen.getByText('1 of 2 selected')).toBeInTheDocument();
+      });
+    });
+
+    it('checks all regions in a zone when zone checkbox is clicked while none are checked', async () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
+      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      // Start by deselecting all
+      await waitFor(() => {
+        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
+      await waitFor(() => {
+        expect(screen.getByText('0 of 2 selected')).toBeInTheDocument();
+      });
+
+      // Click North America zone checkbox — should check us-east-1
+      fireEvent.click(screen.getByTestId('manageRegionsZoneCheckbox-us'));
+
+      await waitFor(() => {
+        expect(screen.getByText('1 of 2 selected')).toBeInTheDocument();
       });
     });
   });
@@ -353,6 +403,32 @@ describe('ManageRegionsModal', () => {
 
       fireEvent.click(screen.getByTestId('manageRegionsCancelButton'));
       expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe('Save button disabled state', () => {
+    it('disables Save when all regions are deselected', async () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
+      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+      });
+
+      // Deselect all via the "Deselect all" button
+      fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
+
+      await waitFor(() => {
+        expect(screen.getByText('0 of 2 selected')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('manageRegionsSaveButton')).toBeDisabled();
     });
   });
 
