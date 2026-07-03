@@ -37,7 +37,12 @@ import {
   useDeleteRegionPolicy,
 } from '../../hooks/use_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
-import { getAvailableRegions, getGeoDisplayName, GEO_ORDER } from '../../utils/eis_utils';
+import {
+  getAvailableRegions,
+  getGeoDisplayName,
+  GEO_ORDER,
+  REGION_DISPLAY_NAMES,
+} from '../../utils/eis_utils';
 
 interface ManageRegionsModalProps {
   onClose: () => void;
@@ -470,7 +475,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
                       <div css={regionListStyles}>
                         {zone.regions.map((r) => {
                           const key = regionKey(r);
-                          const displayName = r.region;
+                          const displayName = REGION_DISPLAY_NAMES[key] ?? r.region;
                           return (
                             <div key={key} css={regionRowStyles}>
                               <EuiCheckbox

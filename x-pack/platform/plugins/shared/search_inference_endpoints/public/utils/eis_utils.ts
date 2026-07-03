@@ -308,6 +308,21 @@ export function getModelDeprecatedMessage(deprecatedFormattedDate: string | null
 }
 
 /**
+ * Maps a `csp::region` key to a human-readable region name.
+ * Based on the EIS inference locations list provided by the EIS team.
+ * Falls back to the raw region code if not found.
+ */
+export const REGION_DISPLAY_NAMES: Record<string, string> = {
+  'aws::eu-central-1': 'EU Central (Frankfurt)',
+  'aws::eu-west-1': 'EU West (Ireland)',
+  'aws::us-east-1': 'US East (N. Virginia)',
+  'gcp::asia-southeast1': 'Asia Southeast (Singapore)',
+  'gcp::europe-west1': 'EU West (Belgium)',
+  'gcp::us-east4': 'US East (N. Virginia)',
+  'gcp::us-east5': 'US East (Columbus)',
+};
+
+/**
  * Returns the i18n display name for an EIS `geo` code.
  * EIS uses short codes ("us", "eu", "apac"); unknown values fall back to the raw code.
  */
@@ -336,10 +351,13 @@ export interface RegionZoneCount {
   geo: string;
   modelCount: number;
   totalCount: number;
+  modelRegions: CspRegion[];
 }
 
-const countRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, Set<string>> => {
-  const byGeo = new Map<string, Set<string>>();
+const collectRegionsPerGeo = (
+  endpoints: EisInferenceEndpoint[]
+): Map<string, { regions: CspRegion[]; keys: Set<string> }> => {
+  const byGeo = new Map<string, { regions: CspRegion[]; keys: Set<string> }>();
   for (const ep of endpoints) {
     if (!ep.metadata) continue;
     const regions = (ep.metadata as Record<string, unknown>).regions;
@@ -347,9 +365,13 @@ const countRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, Set<
     for (const r of regions) {
       if (!isCspRegion(r)) continue;
       const geo = r.geo ?? 'other';
-      const set = byGeo.get(geo) ?? new Set<string>();
-      set.add(`${r.csp}::${r.region}`);
-      byGeo.set(geo, set);
+      const entry = byGeo.get(geo) ?? { regions: [], keys: new Set<string>() };
+      const key = `${r.csp}::${r.region}`;
+      if (!entry.keys.has(key)) {
+        entry.keys.add(key);
+        entry.regions.push(r);
+      }
+      byGeo.set(geo, entry);
     }
   }
   return byGeo;
@@ -365,13 +387,14 @@ export const getRegionZoneCounts = (
   modelEndpoints: EisInferenceEndpoint[],
   allEisEndpoints: EisInferenceEndpoint[]
 ): RegionZoneCount[] => {
-  const modelByGeo = countRegionsPerGeo(modelEndpoints);
-  const allByGeo = countRegionsPerGeo(allEisEndpoints);
+  const modelByGeo = collectRegionsPerGeo(modelEndpoints);
+  const allByGeo = collectRegionsPerGeo(allEisEndpoints);
 
   return GEO_ORDER.map((geo) => ({
     geo,
-    modelCount: modelByGeo.get(geo)?.size ?? 0,
-    totalCount: allByGeo.get(geo)?.size ?? 0,
+    modelRegions: modelByGeo.get(geo)?.regions ?? [],
+    modelCount: modelByGeo.get(geo)?.keys.size ?? 0,
+    totalCount: allByGeo.get(geo)?.keys.size ?? 0,
   })).filter(({ modelCount }) => modelCount > 0);
 };
 

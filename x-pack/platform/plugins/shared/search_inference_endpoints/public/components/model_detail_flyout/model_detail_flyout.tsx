@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiToolTip,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHorizontalRule,
@@ -44,6 +45,7 @@ import {
   getModelReleaseDate,
   getModelStatus,
   getRegionZoneCounts,
+  REGION_DISPLAY_NAMES,
 } from '../../utils/eis_utils';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { useKibana } from '../../hooks/use_kibana';
@@ -179,10 +181,24 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
             }),
             description: (
               <EuiBadgeGroup data-test-subj="flyoutRegionBadges">
-                {regionZoneCounts.map(({ geo, modelCount, totalCount }) => (
-                  <EuiBadge key={geo} data-test-subj={`flyoutRegionBadge-${geo}`}>
-                    {`${geo.toUpperCase()} (${modelCount}/${totalCount})`}
-                  </EuiBadge>
+                {regionZoneCounts.map(({ geo, modelCount, totalCount, modelRegions }) => (
+                  <EuiToolTip
+                    key={geo}
+                    title={i18n.translate(
+                      'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.title',
+                      {
+                        defaultMessage: '{count} of {total} available regions',
+                        values: { count: modelCount, total: totalCount },
+                      }
+                    )}
+                    content={modelRegions
+                      .map((r) => REGION_DISPLAY_NAMES[`${r.csp}::${r.region}`] ?? r.region)
+                      .join(', ')}
+                  >
+                    <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
+                      {`${geo.toUpperCase()} (${modelCount}/${totalCount})`}
+                    </EuiBadge>
+                  </EuiToolTip>
                 ))}
               </EuiBadgeGroup>
             ),
