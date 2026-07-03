@@ -40,13 +40,21 @@ export const legacySearchRequestParamsSchema = schema.object({
       },
     })
   ),
-  tags: getAsCodeTagsSchema(
-    'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are included.',
-    100
+  tags: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+      meta: {
+        description:
+          'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are included.',
+      },
+    })
   ),
-  excluded_tags: getAsCodeTagsSchema(
-    'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are excluded.',
-    100
+  excluded_tags: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+      meta: {
+        description:
+          'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are excluded.',
+      },
+    })
   ),
 });
 
@@ -60,7 +68,7 @@ export const legacySearchResponseBodySchema = schema.object({
         description: schema.maybe(
           schema.string({ meta: { description: 'A short description of the dashboard.' } })
         ),
-        tags: getAsCodeTagsSchema('Tag IDs associated with this dashboard.'),
+        tags: schema.maybe(getAsCodeTagsSchema('Tag IDs associated with this dashboard.')),
         time_range: schema.maybe(timeRangeSchema),
         title: schema.string({ meta: { description: 'The dashboard title.' } }),
         access_control: accessControlSchema,
@@ -96,12 +104,7 @@ export const searchResponseBodySchema = schema.object({
         description: schema.maybe(
           schema.string({ meta: { description: 'A short description of the dashboard.' } })
         ),
-        tags: schema.maybe(
-          schema.arrayOf(schema.string(), {
-            maxSize: 100,
-            meta: { description: 'Tag IDs associated with this dashboard.' },
-          })
-        ),
+        tags: schema.maybe(getAsCodeTagsSchema('Tag IDs associated with this dashboard.', 100)),
         time_range: schema.maybe(timeRangeSchema),
         title: schema.string({ meta: { description: 'The dashboard title.' } }),
         access_control: accessControlSchema,

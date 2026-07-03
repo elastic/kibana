@@ -8,9 +8,8 @@
  */
 
 import { schema, type Type, type TypeOf } from '@kbn/config-schema';
-import { MAX_ID_LENGTH } from '../../constants';
 import { asCodePaginationParamsSchema } from '../pagination';
-import { MAX_TAG_C0UNT } from '../tags/schema';
+import { getAsCodeTagsSchema } from '../tags/schema';
 
 type PaginationParamsSchema = ReturnType<typeof asCodePaginationParamsSchema.getPropSchemas>;
 type PartialPaginationParamsSchema = {
@@ -20,7 +19,6 @@ type PartialPaginationParamsSchema = {
 export const asCodeSearchRequestSchema = schema.object({
   query: schema.maybe(
     schema.string({
-      maxLength: 500,
       meta: {
         description:
           'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.',
@@ -29,10 +27,7 @@ export const asCodeSearchRequestSchema = schema.object({
   ),
   tags: schema.maybe(
     schema.oneOf(
-      [
-        schema.string({ maxLength: MAX_ID_LENGTH }),
-        schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), { maxSize: MAX_TAG_C0UNT }),
-      ],
+      [schema.string(), getAsCodeTagsSchema('Tag IDs associated with this dashboard.', 100)],
       {
         meta: {
           description:
@@ -43,10 +38,7 @@ export const asCodeSearchRequestSchema = schema.object({
   ),
   excluded_tags: schema.maybe(
     schema.oneOf(
-      [
-        schema.string({ maxLength: MAX_ID_LENGTH }),
-        schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), { maxSize: MAX_TAG_C0UNT }),
-      ],
+      [schema.string(), getAsCodeTagsSchema('Tag IDs associated with this dashboard.', 100)],
       {
         meta: {
           description:

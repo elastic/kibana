@@ -13,10 +13,8 @@ import { MAX_ID_LENGTH } from '../../constants';
 export const MAX_TAG_C0UNT = 1_000;
 
 export const getAsCodeTagsSchema = (customDescrption?: string, customMaxSize?: number) =>
-  schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
-      maxSize: customMaxSize ?? MAX_TAG_C0UNT,
-      defaultValue: [] as string[],
-      meta: { description: customDescrption ?? 'Tag IDs associated with this library item.' },
-    })
-  );
+  schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
+    maxSize: customMaxSize ?? MAX_TAG_C0UNT,
+    defaultValue: [] as string[],
+    meta: { description: customDescrption ?? 'Tag IDs associated with this library item.' },
+  });

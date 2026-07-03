@@ -280,9 +280,11 @@ export function getDashboardStateSchema(
       ),
       query: schema.maybe(asCodeQuerySchema),
       refresh_interval: schema.maybe(refreshIntervalSchema),
-      tags: getAsCodeTagsSchema(
-        'Tag IDs to associate with this dashboard.',
-        isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : undefined
+      tags: schema.maybe(
+        getAsCodeTagsSchema(
+          'Tag IDs to associate with this dashboard.',
+          isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : undefined
+        )
       ),
       time_range: schema.maybe(timeRangeSchema),
       title: schema.string({
