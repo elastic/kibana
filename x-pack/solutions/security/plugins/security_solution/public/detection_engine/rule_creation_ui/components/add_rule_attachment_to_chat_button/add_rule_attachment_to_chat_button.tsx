@@ -74,6 +74,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
     rule,
   } = props;
 
+  // Format rule for AI assistant attachment from either form state or an existing rule response.
   const isFormBased =
     defineStepData != null &&
     aboutStepData != null &&

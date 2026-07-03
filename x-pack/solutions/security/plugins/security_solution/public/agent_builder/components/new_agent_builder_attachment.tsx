@@ -16,15 +16,35 @@ import * as i18n from './translations';
 import { useAgentBuilderAvailability } from '../hooks/use_agent_builder_availability';
 
 export interface NewAgentBuilderAttachmentProps {
+  /**
+   * Optionally specify color of empty button.
+   * @default 'primary'
+   */
   color?: EuiButtonColor;
+  /**
+   * Callback when button is clicked
+   */
   onClick: () => void;
+  /**
+   * Size of the button
+   */
   size?: EuiButtonEmptySizes;
+  /**
+   * Whether the button is disabled
+   */
   disabled?: boolean;
   /** Shown when disabled for a caller-controlled reason; the license tooltip takes precedence. */
   disabledTooltip?: string;
+  /**
+   * Telemetry data for tracking "Add to Chat" clicks
+   */
   telemetry?: AgentBuilderAddToChatTelemetry;
 }
 
+/**
+ * `NewAgentBuilderAttachment` displays a button that opens the agent builder flyout
+ * with attachment data. You may optionally override the default text.
+ */
 export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment({
   color = 'primary',
   onClick,
