@@ -67,6 +67,13 @@ export const RESTORE_ERROR_TOAST = i18n.translate(
   }
 );
 
+export const RESTORE_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleChangesHistory.restoreErrorMessage',
+  {
+    defaultMessage: 'Internal server error',
+  }
+);
+
 export const RESTORE_CONFLICT_TOAST = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleChangesHistory.restoreConflictToast',
   {
