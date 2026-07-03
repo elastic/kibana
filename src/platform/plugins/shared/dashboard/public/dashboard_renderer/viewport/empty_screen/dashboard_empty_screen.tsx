@@ -15,18 +15,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiImage,
+  EuiIllustration,
   EuiPageTemplate,
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
+import { dashboard } from '@elastic/eui-illustrations';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { useFeaturedItems } from '../../../dashboard_app/top_nav/add_panel_button/use_featured_items';
 
@@ -46,16 +45,10 @@ export function DashboardEmptyScreen() {
 
   const dashboardApi = useDashboardApi();
   const { featuredItems } = useFeaturedItems({ dashboardApi });
-  const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = viewMode === 'edit';
 
   const styles = useMemoCss(emptyScreenStyles);
-
-  // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
-  const imageUrl = coreServices.http.basePath.prepend(
-    `/plugins/dashboard/assets/${isDarkTheme ? 'dashboards_dark' : 'dashboards_light'}.svg`
-  );
 
   // If the user ends up in edit mode without write privileges, we shouldn't show the edit prompt.
   const showEditPrompt = showWriteControls && isEditMode;
@@ -143,7 +136,7 @@ export function DashboardEmptyScreen() {
     <div css={emptyScreenStyles.parent}>
       <EuiPageTemplate grow={false} data-test-subj={emptyPromptTestSubject} css={styles.template}>
         <EuiPageTemplate.EmptyPrompt
-          icon={<EuiImage size="fullWidth" src={imageUrl} alt="" />}
+          icon={<EuiIllustration type={dashboard} />}
           title={title}
           body={body}
           actions={actions}
