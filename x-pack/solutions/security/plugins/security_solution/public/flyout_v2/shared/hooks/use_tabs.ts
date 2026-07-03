@@ -68,11 +68,10 @@ export const useTabs = <T extends string>({
       validTabIds[0]
   );
 
-  // Sync to initialTabId changes during the render phase (no post-paint flash).
-  // This covers URL-driven panels where `path?.tab` changes when `openRightPanel`
-  // is called by the parent component. This sync intentionally does not write to
-  // localStorage — only an explicit `setSelectedTabId` call persists the choice, so
-  // URL-driven navigation never overwrites the user's stored tab preference.
+  // If `initialTabId` changes (e.g. the v1 expandable flyouts pass the URL-persisted
+  // `path.tab`), sync the selected tab during render to avoid a post-paint flash.
+  // This does not write to localStorage — only an explicit `setSelectedTabId` does —
+  // so an externally-driven change never overwrites the user's stored preference.
   const prevInitialTabIdRef = useRef(initialTabId);
   if (prevInitialTabIdRef.current !== initialTabId) {
     prevInitialTabIdRef.current = initialTabId;
