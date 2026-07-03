@@ -385,9 +385,9 @@ export const AgentlessPolicyUpgradeDryRunRequestSchema = {
  */
 export const BulkUpgradeAgentlessPolicyResultSchema = schema.object(
   {
-    id: schema.string({ meta: { description: 'The ID of the agentless policy.' } }),
+    id: schema.string({ maxLength: 256, meta: { description: 'The ID of the agentless policy.' } }),
     name: schema.maybe(
-      schema.string({ meta: { description: 'The name of the agentless policy.' } })
+      schema.string({ maxLength: 256, meta: { description: 'The name of the agentless policy.' } })
     ),
     success: schema.boolean({
       meta: {
@@ -403,6 +403,7 @@ export const BulkUpgradeAgentlessPolicyResultSchema = schema.object(
     body: schema.maybe(
       schema.object({
         message: schema.string({
+          maxLength: 4096,
           meta: { description: 'Error message when the upgrade failed for this policy.' },
         }),
       })
@@ -426,20 +427,22 @@ export const BulkUpgradeAgentlessPoliciesResponseSchema = schema.arrayOf(
  */
 export const AgentlessPolicyUpgradeDryRunResultSchema = schema.object(
   {
-    id: schema.string({ meta: { description: 'The ID of the agentless policy.' } }),
+    id: schema.string({ maxLength: 256, meta: { description: 'The ID of the agentless policy.' } }),
     name: schema.maybe(
-      schema.string({ meta: { description: 'The name of the agentless policy.' } })
+      schema.string({ maxLength: 256, meta: { description: 'The name of the agentless policy.' } })
     ),
     hasErrors: schema.boolean({
       meta: { description: 'Whether the dry-run migration produced any errors.' },
     }),
     currentVersion: schema.maybe(
       schema.string({
+        maxLength: 256,
         meta: { description: 'The current installed package version of the policy.' },
       })
     ),
     proposedVersion: schema.maybe(
       schema.string({
+        maxLength: 256,
         meta: { description: 'The package version the policy would be upgraded to.' },
       })
     ),
@@ -450,9 +453,15 @@ export const AgentlessPolicyUpgradeDryRunResultSchema = schema.object(
     errors: schema.maybe(
       schema.arrayOf(
         schema.object({
-          message: schema.string({ meta: { description: 'Human-readable migration error.' } }),
+          message: schema.string({
+            maxLength: 4096,
+            meta: { description: 'Human-readable migration error.' },
+          }),
         }),
-        { meta: { description: 'Migration errors encountered while computing the upgrade.' } }
+        {
+          maxSize: 1000,
+          meta: { description: 'Migration errors encountered while computing the upgrade.' },
+        }
       )
     ),
     statusCode: schema.maybe(
@@ -463,6 +472,7 @@ export const AgentlessPolicyUpgradeDryRunResultSchema = schema.object(
     body: schema.maybe(
       schema.object({
         message: schema.string({
+          maxLength: 4096,
           meta: { description: 'Error message when the dry-run failed for this policy.' },
         }),
       })
