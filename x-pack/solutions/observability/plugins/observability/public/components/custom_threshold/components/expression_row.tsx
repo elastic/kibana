@@ -296,9 +296,22 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               <>
                 {criticalThresholdExpression}
                 <EuiSpacer size="xs" />
-                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow>{warningThresholdExpression}</EuiFlexItem>
-                  <EuiFlexItem grow={false}>
+                {/* Not a flex sibling: EuiExpression's "columns" display sizes its
+                    description column as a percentage of its OWN container, so
+                    sharing this row with another flex item (even grow={false})
+                    narrows that container and shifts the text left relative to
+                    the other rows. Overlaying keeps this box's width identical
+                    to the others. */}
+                <div style={{ position: 'relative' }}>
+                  {warningThresholdExpression}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      right: 8,
+                      transform: 'translateY(-50%)',
+                    }}
+                  >
                     <EuiToolTip
                       content={i18n.translate(
                         'xpack.observability.customThreshold.rule.alertFlyout.removeWarningThreshold',
@@ -318,8 +331,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                         onClick={toggleWarningThreshold}
                       />
                     </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                  </div>
+                </div>
               </>
             )}
             <EuiSpacer size={'s'} />
