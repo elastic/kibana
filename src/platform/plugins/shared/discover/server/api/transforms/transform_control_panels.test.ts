@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlValuesSource, ESQL_CONTROL } from '@kbn/controls-constants';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { transformControlPanelsIn, transformControlPanelsOut } from './transform_control_panels';
 
 describe('control panel transforms', () => {
@@ -15,14 +15,8 @@ describe('control panel transforms', () => {
     it('maps stored controlGroupJson to API control_panels and normalizes legacy type', () => {
       const result = transformControlPanelsOut(
         JSON.stringify({
-          c: {
-            order: 0,
-            type: 'optionsListControl',
-            data_view_id: 'logs-*',
-            field_name: 'host.name',
-          },
           b: {
-            order: 2,
+            order: 1,
             type: 'esqlControl',
             width: 'small',
             grow: false,
@@ -34,7 +28,7 @@ describe('control panel transforms', () => {
             single_select: true,
           },
           a: {
-            order: 1,
+            order: 0,
             type: ESQL_CONTROL,
             width: 'medium',
             grow: true,
@@ -49,29 +43,6 @@ describe('control panel transforms', () => {
       );
 
       expect(result).toEqual([
-        {
-          id: 'c',
-          type: 'options_list_control',
-          width: 'medium',
-          grow: false,
-          config: {
-            data_view_id: 'logs-*',
-            field_name: 'host.name',
-            values_source: ControlValuesSource.FIELD,
-            use_global_filters: true,
-            ignore_validations: false,
-            exclude: false,
-            exists_selected: false,
-            run_past_timeout: false,
-            selected_options: [],
-            single_select: false,
-            search_technique: 'wildcard',
-            sort: {
-              by: '_count',
-              direction: 'desc',
-            },
-          },
-        },
         {
           id: 'a',
           type: ESQL_CONTROL,

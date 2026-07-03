@@ -8,13 +8,13 @@
  */
 
 import { isObject } from 'lodash';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
-import { getControlsGroupSchema } from '@kbn/controls-schemas';
 import { transformType } from '@kbn/embeddable-plugin/server';
+import type { DiscoverSessionControlPanels } from '../schema';
+import { discoverSessionControlPanelsSchema } from '../schema';
 
 export const transformControlPanelsOut = (
   controlGroupJson: string | undefined
-): ControlsGroupState | undefined => {
+): DiscoverSessionControlPanels | undefined => {
   if (!controlGroupJson) {
     return undefined;
   }
@@ -48,13 +48,13 @@ export const transformControlPanelsOut = (
     return undefined;
   }
 
-  return getControlsGroupSchema().validate(panels, undefined, undefined, {
+  return discoverSessionControlPanelsSchema.validate(panels, undefined, undefined, {
     stripUnknownKeys: true,
   });
 };
 
 export const transformControlPanelsIn = (
-  controlPanels: ControlsGroupState | undefined
+  controlPanels: DiscoverSessionControlPanels | undefined
 ): string | undefined => {
   if (!controlPanels?.length) {
     return undefined;

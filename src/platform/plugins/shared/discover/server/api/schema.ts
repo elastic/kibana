@@ -10,7 +10,14 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { asCodeIdSchema, asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
-import { getControlsGroupSchema } from '@kbn/controls-schemas';
+import { optionsListESQLControlSchema } from '@kbn/controls-schemas';
+import {
+  CONTROL_WIDTH_LARGE,
+  CONTROL_WIDTH_MEDIUM,
+  CONTROL_WIDTH_SMALL,
+  DEFAULT_PINNED_CONTROL_STATE,
+  ESQL_CONTROL,
+} from '@kbn/controls-constants';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
@@ -22,6 +29,7 @@ export const MAX_SESSION_DESCRIPTION_LENGTH = 1000;
 export const MAX_TAB_LABEL_LENGTH = 120;
 export const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
 export const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
+export const MAX_DISCOVER_SESSION_CONTROL_PANELS = 100;
 
 const visContextSchema = schema.object({
   suggestion_type: schema.oneOf(
@@ -47,6 +55,60 @@ const visContextSchema = schema.object({
     }
   ),
 });
+
+const discoverSessionControlWidthSchema = schema.oneOf(
+  [
+    schema.literal(CONTROL_WIDTH_SMALL),
+    schema.literal(CONTROL_WIDTH_MEDIUM),
+    schema.literal(CONTROL_WIDTH_LARGE),
+  ],
+  {
+    defaultValue: DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM,
+    meta: {
+      description: 'Minimum width of the control panel.',
+    },
+  }
+);
+
+const discoverSessionControlPanelSchema = schema.object(
+  {
+    id: schema.string({
+      minLength: 1,
+      meta: { description: 'The unique ID of the control.' },
+    }),
+    type: schema.literal(ESQL_CONTROL),
+    width: discoverSessionControlWidthSchema,
+    grow: schema.boolean({
+      defaultValue: DEFAULT_PINNED_CONTROL_STATE.grow,
+      meta: {
+        description:
+          'When `true`, the control expands to fill any available horizontal space. ' +
+          'Defaults to `false`.',
+      },
+    }),
+    config: optionsListESQLControlSchema,
+  },
+  {
+    meta: {
+      id: 'kbn-discover-session-api-esql-control-panel',
+      title: ESQL_CONTROL,
+      description:
+        'An ES|QL variable control whose selected value is injected into Discover ES|QL ' +
+        'queries using the `?variable_name` syntax.',
+    },
+  }
+);
+
+export const discoverSessionControlPanelsSchema = schema.arrayOf(
+  discoverSessionControlPanelSchema,
+  {
+    defaultValue: [],
+    maxSize: MAX_DISCOVER_SESSION_CONTROL_PANELS,
+    meta: {
+      description: 'An array of Discover ES|QL control panels.',
+    },
+  }
+);
 
 const discoverSessionTabPresentationSchema = schema.object({
   hide_chart: schema.boolean({
@@ -98,7 +160,7 @@ const discoverSessionTabPresentationSchema = schema.object({
   time_range: schema.maybe(timeRangeSchema),
   refresh_interval: schema.maybe(refreshIntervalSchema),
   vis_context: schema.maybe(visContextSchema),
-  control_panels: schema.maybe(getControlsGroupSchema()),
+  control_panels: schema.maybe(discoverSessionControlPanelsSchema),
 });
 
 const discoverSessionTabIdentitySchema = schema.object({
@@ -170,3 +232,4 @@ export type DiscoverSessionApiResponse = TypeOf<typeof discoverSessionApiRespons
 export type DiscoverSessionApiClassicTab = TypeOf<typeof discoverSessionClassicTabSchema>;
 export type DiscoverSessionApiEsqlTab = TypeOf<typeof discoverSessionEsqlTabSchema>;
 export type DiscoverSessionApiTab = TypeOf<typeof discoverSessionApiTabSchema>;
+export type DiscoverSessionControlPanels = TypeOf<typeof discoverSessionControlPanelsSchema>;

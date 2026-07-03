@@ -11,6 +11,7 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import {
   discoverSessionApiRequestBodySchema,
@@ -233,7 +234,7 @@ describe('discoverSessionApiDataSchema', () => {
     ).toThrow();
   });
 
-  it('validates control_panels using the controls group array schema', () => {
+  it('validates ES|QL control_panels', () => {
     const validated = discoverSessionApiDataSchema.validate({
       title: 'With controls',
       tabs: [
@@ -273,6 +274,33 @@ describe('discoverSessionApiDataSchema', () => {
         },
       },
     ]);
+  });
+
+  it('rejects non-ES|QL control_panels', () => {
+    expect(() =>
+      discoverSessionApiDataSchema.validate({
+        title: 'With non-ESQL controls',
+        tabs: [
+          {
+            ...esqlTab,
+            control_panels: [
+              {
+                type: OPTIONS_LIST_CONTROL,
+                id: 'panel-1',
+                config: {
+                  control_type: 'STATIC_VALUES',
+                  variable_name: 'foo',
+                  variable_type: 'values',
+                  available_options: ['bar'],
+                  selected_options: ['bar'],
+                  single_select: true,
+                },
+              },
+            ],
+          },
+        ],
+      })
+    ).toThrow();
   });
 
   it('rejects an invalid data source type', () => {
