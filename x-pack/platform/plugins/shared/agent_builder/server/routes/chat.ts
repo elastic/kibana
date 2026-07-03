@@ -296,10 +296,12 @@ export const conversePayloadSchema = schema.object({
 });
 
 export const callbackConversePayloadSchema = conversePayloadSchema.extends({
-  source: schema.object({
-    type: schema.literal(ConversationSourceType.Slack),
-    external_conversation_id: schema.string({ minLength: 1, maxLength: 1024 }),
-  }),
+  source: schema.maybe(
+    schema.object({
+      type: schema.literal(ConversationSourceType.Slack),
+      external_conversation_id: schema.string({ minLength: 1, maxLength: 1024 }),
+    })
+  ),
   callback: schema.object({
     url: schema.string({
       minLength: 1,

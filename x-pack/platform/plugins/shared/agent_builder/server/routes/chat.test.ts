@@ -99,13 +99,13 @@ describe('callbackConversePayloadSchema', () => {
     expect(() => callbackConversePayloadSchema.validate(basePayload)).not.toThrow();
   });
 
-  it('requires source for stateless conversation resolution', () => {
+  it('accepts callback payloads without source', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
         source: undefined,
       })
-    ).toThrow(/source/);
+    ).not.toThrow();
   });
 
   it('rejects unsupported source types', () => {
