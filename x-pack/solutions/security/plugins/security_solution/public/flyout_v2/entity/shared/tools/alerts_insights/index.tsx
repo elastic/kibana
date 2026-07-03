@@ -45,11 +45,11 @@ export interface AlertsInsightsProps {
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
   /** Opens the originating entity flyout as a child. */
-  onOpenEntity?: () => void;
+  onShowEntity?: () => void;
 }
 
 export const AlertsInsights = memo(
-  ({ entityType, value, entityId, onOpenEntity }: AlertsInsightsProps) => {
+  ({ entityType, value, entityId, onShowEntity }: AlertsInsightsProps) => {
     const { services } = useKibana();
     const store = useStore();
     const history = useHistory();
@@ -88,7 +88,7 @@ export const AlertsInsights = memo(
         <EuiFlyoutHeader hasBorder>
           <ToolsFlyoutHeader
             title={TITLE}
-            onTitleClick={onOpenEntity}
+            onTitleClick={onShowEntity}
             label={value}
             iconType={ICON_TYPE[entityType]}
           />

@@ -11,6 +11,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import type { Entity } from '../../../../../common/api/entity_analytics';
 import { ObservedDataSection } from '../../shared/components/observed_data_section';
 import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
+import { useAnomalyPrivileges } from '../../../../entity_analytics/api/hooks/use_anomaly_privileges';
 import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { EntityInsight } from '../../../../cloud_security_posture/components/entity_insight';
@@ -93,11 +94,13 @@ export const Content = ({
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
   const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
-
+  const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
+  const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
+  const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
   const anomalyOverview = useAnomalyOverview({
     entityId: entityStoreEntityId ?? '',
     entityType: EntityType.host,
-    enabled: isAnomalyDetailsEnabled && !!entityStoreEntityId,
+    enabled: loadAnomalies,
   });
 
   // Extract hostName from identityFields for components that need a string
@@ -132,19 +135,16 @@ export const Content = ({
             <EuiHorizontalRule />
           </>
         )}
-      {isAnomalyDetailsEnabled &&
-        entityStoreEntityId &&
-        anomalyOverview.data &&
-        anomalyOverview.data.totalAnomaliesCount > 0 && (
-          <>
-            <AnomaliesSection
-              data={anomalyOverview.data}
-              entityId={entityStoreEntityId}
-              isPreviewMode={isPreviewMode}
-              openDetailsPanel={openDetailsPanel}
-            />
-          </>
-        )}
+      {loadAnomalies && anomalyOverview.data && anomalyOverview.data.totalAnomaliesCount > 0 && (
+        <>
+          <AnomaliesSection
+            data={anomalyOverview.data}
+            entityId={entityStoreEntityId}
+            isPreviewMode={isPreviewMode}
+            openDetailsPanel={openDetailsPanel}
+          />
+        </>
+      )}
       {entityStoreEntityId && (
         <>
           <VisualizationsSection

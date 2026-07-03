@@ -24,6 +24,7 @@ import type { IdentityFields } from '../../../../flyout/document_details/shared/
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { UsersType } from '../../../../explore/users/store/model';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export type ObservedData<T> = Omit<ObservedEntityData<T>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -89,6 +90,8 @@ const resolveEntityAnomalyConfig = ({
 
 export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps) => {
   const { entityType, observedData, identityFields, entityRecord, contextID, scopeId } = props;
+
+  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
 
   const { to, from, isInitializing } = useGlobalTime();
 
@@ -159,7 +162,7 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
       contextID={contextID}
       scopeId={scopeId}
       observedFields={typedFields}
-      entityLink={renderFlyoutLink}
+      entityLink={newFlyoutSystemEnabled ? renderFlyoutLink : undefined}
     />
   );
 });

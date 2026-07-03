@@ -136,13 +136,13 @@ describe('<AlertsInsights /> host', () => {
     expect(table).toHaveAttribute('data-entity-type', 'host');
   });
 
-  it('forwards onOpenEntity to the header click handler', () => {
-    const onOpenEntity = jest.fn();
+  it('forwards onShowEntity to the header click handler', () => {
+    const onShowEntity = jest.fn();
     const { getByTestId } = render(
-      <AlertsInsights entityType={EntityType.host} value="my-host" onOpenEntity={onOpenEntity} />
+      <AlertsInsights entityType={EntityType.host} value="my-host" onShowEntity={onShowEntity} />
     );
     getByTestId('mockToolsFlyoutHeader').click();
-    expect(onOpenEntity).toHaveBeenCalledTimes(1);
+    expect(onShowEntity).toHaveBeenCalledTimes(1);
   });
 
   it('opens a child system flyout when an alert row is expanded', () => {

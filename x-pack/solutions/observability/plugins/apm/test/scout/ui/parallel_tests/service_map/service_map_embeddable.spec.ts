@@ -63,7 +63,7 @@ test.describe(
       });
 
       await test.step('set time range to last 24 hours so synth data stays in range vs globalSetup', async () => {
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24 hours');
         await expect(page.getByTestId('dateRangePickerControlButton')).toContainText(
           'Last 24 hours'
         );
@@ -180,19 +180,22 @@ test.describe(
         expect(horizontalFill).toBeGreaterThan(0.95);
       });
 
-      await test.step('click on a service node and verify popover contents', async () => {
-        await pageObjects.serviceMapPage.openServiceNodePopover(SERVICE_MAP_TEST_SERVICE);
+      await test.step('click on a service node and verify flyout contents', async () => {
+        await pageObjects.serviceMapPage.openServiceNodeFlyout(SERVICE_MAP_TEST_SERVICE);
 
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverContent).toBeVisible({
+        await expect(pageObjects.serviceFlyoutPage.flyout).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toHaveText(
-          SERVICE_MAP_TEST_SERVICE
-        );
-        await expect(pageObjects.serviceMapPage.serviceMapServiceDetailsButton).toBeVisible();
+        await expect(pageObjects.serviceFlyoutPage.title).toHaveText(SERVICE_MAP_TEST_SERVICE);
+        await expect(pageObjects.serviceFlyoutPage.actions).toBeVisible();
+        await pageObjects.serviceFlyoutPage.expectChartsRendered([
+          'latency',
+          'throughput',
+          'failedTransactionRate',
+        ]);
 
         await page.keyboard.press('Escape');
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toBeHidden();
+        await expect(pageObjects.serviceFlyoutPage.flyout).toBeHidden();
       });
 
       await test.step('click on a service map edge and verify popover contents', async () => {
@@ -260,7 +263,7 @@ test.describe(
 
       await test.step('open a new dashboard with a 24h time range', async () => {
         await pageObjects.dashboard.openNewDashboard({ timeout: EXTENDED_TIMEOUT * 2 });
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24 hours');
         await page.getByTestId('dateRangePickerControlButton').blur();
       });
 
@@ -371,7 +374,7 @@ test.describe(
       await test.step('the panel reflects dashboard global time range changes', async () => {
         // The dashboard's global time isn't stored with the saved object, so pin it to a
         // window that covers the synth data before the panel starts inheriting it.
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24 hours');
         await page.getByTestId('dateRangePickerControlButton').blur();
 
         // Drop the panel-level custom time range so the panel inherits the dashboard's

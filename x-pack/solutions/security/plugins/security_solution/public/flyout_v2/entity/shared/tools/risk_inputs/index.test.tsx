@@ -131,13 +131,13 @@ describe('<RiskInputs /> host', () => {
     expect(tab).toHaveAttribute('data-entity-id', 'euid-123');
   });
 
-  it('forwards onOpenEntity to the header click handler for host', () => {
-    const onOpenEntity = jest.fn();
+  it('forwards onShowEntity to the header click handler for host', () => {
+    const onShowEntity = jest.fn();
     const { getByTestId } = render(
-      <RiskInputs entityType={EntityType.host} entityName="my-host" onOpenEntity={onOpenEntity} />
+      <RiskInputs entityType={EntityType.host} entityName="my-host" onShowEntity={onShowEntity} />
     );
     getByTestId('mockToolsFlyoutHeader').click();
-    expect(onOpenEntity).toHaveBeenCalledTimes(1);
+    expect(onShowEntity).toHaveBeenCalledTimes(1);
   });
 
   it('opens a child system flyout when a risk-input alert is expanded', () => {
@@ -182,12 +182,12 @@ describe('<RiskInputs /> user', () => {
     expect(tab).toHaveAttribute('data-entity-id', 'euid-456');
   });
 
-  it('forwards onOpenEntity to the header click handler for user', () => {
-    const onOpenEntity = jest.fn();
+  it('forwards onShowEntity to the header click handler for user', () => {
+    const onShowEntity = jest.fn();
     const { getByTestId } = render(
-      <RiskInputs entityType={EntityType.user} entityName="my-user" onOpenEntity={onOpenEntity} />
+      <RiskInputs entityType={EntityType.user} entityName="my-user" onShowEntity={onShowEntity} />
     );
     getByTestId('mockToolsFlyoutHeader').click();
-    expect(onOpenEntity).toHaveBeenCalledTimes(1);
+    expect(onShowEntity).toHaveBeenCalledTimes(1);
   });
 });
