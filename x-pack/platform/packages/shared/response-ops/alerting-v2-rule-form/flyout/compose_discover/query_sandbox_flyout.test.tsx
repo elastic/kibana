@@ -10,7 +10,8 @@ import { render, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
-import type { RuleQuery } from '../../form/types';
+import type { ComposedQuery, RuleQuery } from '../../form/types';
+import { getBreachQuery, getRecoverQuery } from '../../form/utils/query_helpers';
 import { QuerySandboxFlyout, type QuerySandboxFlyoutProps } from './query_sandbox_flyout';
 
 jest.mock('@kbn/esql-utils', () => ({
@@ -34,18 +35,19 @@ jest.mock('../../form/contexts/rule_form_context', () => ({
 const mockColumns: never[] = [];
 const mockRows: never[] = [];
 const mockRun = jest.fn();
+const mockUseQueryExecution = jest.fn((_params: unknown) => ({
+  columns: mockColumns,
+  rows: mockRows,
+  totalRowCount: 0,
+  isLoading: false,
+  isError: false,
+  error: null,
+  run: mockRun,
+  hasRun: false,
+  lastExecutedQuery: null,
+}));
 jest.mock('./use_query_execution', () => ({
-  useQueryExecution: () => ({
-    columns: mockColumns,
-    rows: mockRows,
-    totalRowCount: 0,
-    isLoading: false,
-    isError: false,
-    error: null,
-    run: mockRun,
-    hasRun: false,
-    lastExecutedQuery: null,
-  }),
+  useQueryExecution: (params: unknown) => mockUseQueryExecution(params),
 }));
 
 jest.mock('./compose_discover_chart', () => ({
@@ -61,6 +63,7 @@ jest.mock('./compose_discover_tabs', () => ({
   ComposeDiscoverTabs: () => null,
   TAB_DEFINITIONS: [],
   visibleTabIds: () => [],
+  isAlertTabDisabled: () => false,
 }));
 
 const mockField = (name: string, type: string) =>
@@ -69,6 +72,13 @@ const mockField = (name: string, type: string) =>
 const standaloneQuery = (breach = 'FROM test-index | LIMIT 10'): RuleQuery => ({
   format: 'standalone',
   breach: { query: breach },
+});
+
+const composedQuery = (): ComposedQuery => ({
+  format: 'composed',
+  base: 'FROM test-index',
+  breach: { segment: '| WHERE cpu > 70' },
+  recovery: { segment: '| WHERE cpu <= 70' },
 });
 
 const defaultProps: QuerySandboxFlyoutProps = {
@@ -173,5 +183,63 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
     });
 
     expect(onTimeFieldChange).toHaveBeenCalledWith('created_at');
+  });
+});
+
+describe('QuerySandboxFlyout — per-tab query execution', () => {
+  beforeEach(() => {
+    mockFieldMap = {};
+    jest.clearAllMocks();
+  });
+
+  it('runs the base-only query when the Base tab is active', () => {
+    const query = composedQuery();
+    renderSandbox({
+      query,
+      tabs: ['base', 'alert', 'recovery'],
+      activeTab: 'base',
+      onTabChange: jest.fn(),
+    });
+
+    expect(mockUseQueryExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ query: query.base })
+    );
+  });
+
+  it('runs the base+breach query when the Alert tab is active', () => {
+    const query = composedQuery();
+    renderSandbox({
+      query,
+      tabs: ['base', 'alert', 'recovery'],
+      activeTab: 'alert',
+      onTabChange: jest.fn(),
+    });
+
+    expect(mockUseQueryExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ query: getBreachQuery(query) })
+    );
+  });
+
+  it('runs the base+recover query when the Recovery tab is active', () => {
+    const query = composedQuery();
+    renderSandbox({
+      query,
+      tabs: ['base', 'alert', 'recovery'],
+      activeTab: 'recovery',
+      onTabChange: jest.fn(),
+    });
+
+    expect(mockUseQueryExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ query: getRecoverQuery(query) })
+    );
+  });
+
+  it('runs the base+breach query in unified (no-tabs) mode regardless of activeTab', () => {
+    const query = composedQuery();
+    renderSandbox({ query, tabs: undefined, activeTab: 'recovery' });
+
+    expect(mockUseQueryExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ query: getBreachQuery(query) })
+    );
   });
 });
