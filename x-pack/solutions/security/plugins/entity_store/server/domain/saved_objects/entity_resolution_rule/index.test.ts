@@ -34,12 +34,7 @@ describe('EntityResolutionRuleType', () => {
     expect(EntityResolutionRuleType.hiddenFromHttpApis).toBe(true);
     expect(EntityResolutionRuleType.mappings).toEqual({
       dynamic: false,
-      properties: {
-        id: { type: 'keyword' },
-        kind: { type: 'keyword' },
-        managed: { type: 'boolean' },
-        enabled: { type: 'boolean' },
-      },
+      properties: {},
     });
   });
 

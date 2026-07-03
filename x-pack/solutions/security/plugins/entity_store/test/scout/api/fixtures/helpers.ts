@@ -17,6 +17,7 @@ import {
   LATEST_ALIAS,
   LATEST_INDEX,
   UPDATES_INDEX,
+  ENTRA_SOURCE_INDEX,
 } from './constants';
 
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
@@ -88,6 +89,7 @@ interface SeedUserEntityOptions {
   entityId: string;
   namespace: string;
   email: string | string[];
+  userName?: string;
   timestamp?: string;
 }
 
@@ -102,7 +104,7 @@ interface SeedUserEntityOptions {
  */
 export const seedUserEntity = async (
   esClient: EsClient,
-  { entityId, namespace, email, timestamp }: SeedUserEntityOptions
+  { entityId, namespace, email, userName, timestamp }: SeedUserEntityOptions
 ) => {
   const ts = timestamp ?? new Date().toISOString();
   await esClient.index({
@@ -123,9 +125,40 @@ export const seedUserEntity = async (
       },
       user: {
         email,
-        name: entityId,
+        name: userName ?? entityId,
       },
       '@timestamp': ts,
+    },
+  });
+};
+
+interface SeedEntityAnalyticsSourceOptions {
+  email: string;
+  relatedUsers: string[];
+  timestamp?: string;
+}
+
+export const seedEntityAnalyticsSource = async (
+  esClient: EsClient,
+  { email, relatedUsers, timestamp }: SeedEntityAnalyticsSourceOptions
+) => {
+  const ts = timestamp ?? new Date().toISOString();
+  await esClient.index({
+    index: ENTRA_SOURCE_INDEX,
+    refresh: 'wait_for',
+    body: {
+      '@timestamp': ts,
+      event: {
+        kind: 'asset',
+        module: 'entityanalytics_entra_id',
+      },
+      user: {
+        email,
+        name: email,
+      },
+      related: {
+        user: relatedUsers,
+      },
     },
   });
 };

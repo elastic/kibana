@@ -6,7 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { RESOLUTION_RULE_IDS } from '../../../../../common';
 
 export const ruleIdParamsSchema = z.object({
-  id: z.string().describe('The stable identifier of the entity resolution rule.'),
+  id: z
+    .enum([RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH, RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE])
+    .describe('The stable identifier of the entity resolution rule.'),
 });

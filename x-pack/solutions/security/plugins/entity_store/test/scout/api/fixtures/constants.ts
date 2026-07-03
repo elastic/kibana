@@ -87,3 +87,5 @@ export const HISTORY_INDEX_PATTERN = `${getEntityIndexPattern({
   dataset: ENTITY_HISTORY,
   namespace: 'default',
 })}*`;
+
+export const ENTRA_SOURCE_INDEX = 'logs-entityanalytics_entra_id.entity-default';

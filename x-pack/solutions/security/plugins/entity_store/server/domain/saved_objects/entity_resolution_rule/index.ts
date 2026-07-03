@@ -38,12 +38,8 @@ export const EntityResolutionRuleType: SavedObjectsType = {
   namespaceType: 'multiple-isolated',
   mappings: {
     dynamic: false,
-    properties: {
-      id: { type: 'keyword' },
-      kind: { type: 'keyword' },
-      managed: { type: 'boolean' },
-      enabled: { type: 'boolean' },
-    },
+    // Not searching by any attributes; rule id is the saved object id.
+    properties: {},
   },
   modelVersions: { 1: version1 },
   hiddenFromHttpApis: true,

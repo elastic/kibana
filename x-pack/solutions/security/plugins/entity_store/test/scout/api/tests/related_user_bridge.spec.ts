@@ -7,7 +7,6 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import type { EsClient } from '@kbn/scout-security';
 import {
   PUBLIC_HEADERS,
   INTERNAL_HEADERS,
@@ -16,17 +15,17 @@ import {
   LATEST_ALIAS,
   LATEST_INDEX,
   UPDATES_INDEX,
+  ENTRA_SOURCE_INDEX,
 } from '../fixtures/constants';
 import { RESOLUTION_RULE_IDS, FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { hashEuid } from '../../../../common/domain/euid';
 import {
   assertNotResolved,
   clearEntityStoreIndices,
+  seedEntityAnalyticsSource,
+  seedUserEntity,
   triggerMaintainerRun,
   waitForResolution,
 } from '../fixtures/helpers';
-
-const ENTRA_SOURCE_INDEX = 'logs-entityanalytics_entra_id.entity-default';
 
 apiTest.describe(
   'Related user bridge resolution integration tests',
@@ -109,13 +108,13 @@ apiTest.describe(
         const seedId = 'user:seed@example.com@entra_id';
         const adId = 'user:T03KX1Z@active_directory';
 
-        await seedLatestUser(esClient, {
+        await seedUserEntity(esClient, {
           entityId: seedId,
           namespace: 'entra_id',
           email: 'seed@example.com',
           userName: 'seed@example.com',
         });
-        await seedLatestUser(esClient, {
+        await seedUserEntity(esClient, {
           entityId: adId,
           namespace: 'active_directory',
           email: 'ad@example.com',
@@ -154,7 +153,7 @@ apiTest.describe(
       async ({ apiClient, esClient }) => {
         const seedId = 'user:no-link@example.com@entra_id';
 
-        await seedLatestUser(esClient, {
+        await seedUserEntity(esClient, {
           entityId: seedId,
           namespace: 'entra_id',
           email: 'no-link@example.com',
@@ -190,25 +189,25 @@ apiTest.describe(
         const oktaId = 'user:cascade-okta@okta';
         const oktaAliasId = 'user:cascade-okta-alias@okta';
 
-        await seedLatestUser(esClient, {
+        await seedUserEntity(esClient, {
           entityId: seedId,
           namespace: 'entra_id',
           email: 'cascade@example.com',
           userName: 'cascade@example.com',
         });
-        await seedLatestUser(esClient, {
+        await seedUserEntity(esClient, {
           entityId: adId,
           namespace: 'active_directory',
           email: 'cascade-ad@example.com',
           userName: 'CASCADE_AD',
         });
-        await seedLatestUser(esClient, {
+        await seedUserEntity(esClient, {
           entityId: oktaId,
           namespace: 'okta',
           email: 'cascade-okta@example.com',
           userName: 'cascade-okta-login',
         });
-        await seedLatestUser(esClient, {
+        await seedUserEntity(esClient, {
           entityId: oktaAliasId,
           namespace: 'okta',
           email: 'cascade-okta-alias@example.com',
@@ -238,74 +237,3 @@ apiTest.describe(
     );
   }
 );
-
-const seedLatestUser = async (
-  esClient: EsClient,
-  {
-    entityId,
-    namespace,
-    email,
-    userName,
-  }: {
-    entityId: string;
-    namespace: string;
-    email: string;
-    userName: string;
-  }
-) => {
-  const timestamp = new Date().toISOString();
-  await esClient.index({
-    index: LATEST_ALIAS,
-    id: hashEuid(entityId),
-    refresh: 'wait_for',
-    pipeline: '_none',
-    body: {
-      entity: {
-        id: entityId,
-        name: entityId,
-        EngineMetadata: { Type: 'user' },
-        namespace,
-        lifecycle: {
-          first_seen: timestamp,
-          last_seen: timestamp,
-        },
-      },
-      user: {
-        email,
-        name: userName,
-      },
-      '@timestamp': timestamp,
-    },
-  });
-};
-
-const seedEntityAnalyticsSource = async (
-  esClient: EsClient,
-  {
-    email,
-    relatedUsers,
-  }: {
-    email: string;
-    relatedUsers: string[];
-  }
-) => {
-  const timestamp = new Date().toISOString();
-  await esClient.index({
-    index: ENTRA_SOURCE_INDEX,
-    refresh: 'wait_for',
-    body: {
-      '@timestamp': timestamp,
-      event: {
-        kind: 'asset',
-        module: 'entityanalytics_entra_id',
-      },
-      user: {
-        email,
-        name: email,
-      },
-      related: {
-        user: relatedUsers,
-      },
-    },
-  });
-};
