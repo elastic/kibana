@@ -9,6 +9,7 @@ import type { Conversation } from '@kbn/agent-builder-common';
 import {
   ConversationAccessControlMode,
   ConversationRoundStatus,
+  ConversationSourceType,
   ToolOrigin,
 } from '@kbn/agent-builder-common';
 import {
@@ -493,7 +494,7 @@ describe('conversation model converters', () => {
     it('deserializes first-class source', () => {
       const serialized = documentBase();
       serialized._source!.source = {
-        type: 'slack',
+        type: ConversationSourceType.Slack,
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       };
 
@@ -694,7 +695,7 @@ describe('conversation model converters', () => {
     it('serializes first-class source', () => {
       const conversation = conversationBase();
       conversation.source = {
-        type: 'slack',
+        type: ConversationSourceType.Slack,
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       };
 
@@ -790,7 +791,7 @@ describe('conversation model converters', () => {
         title: 'conv_title',
         rounds: [],
         source: {
-          type: 'slack',
+          type: ConversationSourceType.Slack,
           external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
         },
       };

@@ -184,14 +184,13 @@ describe('registerChatRoutes', () => {
     );
   });
 
-  it('schedules callback converse without a conversation id when source is new', async () => {
+  it('schedules callback converse with source for conversation resolution', async () => {
     const callbackPath = `${internalApiPath}/converse/callback`;
     let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const executeAgent = jest.fn().mockResolvedValue({
       executionId: 'execution-1',
       events$: of(),
     });
-    const findBySource = jest.fn().mockResolvedValue(undefined);
     const source = {
       type: ConversationSourceType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -220,9 +219,6 @@ describe('registerChatRoutes', () => {
       router,
       getInternalServices: jest.fn().mockReturnValue({
         execution: { executeAgent },
-        conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({ findBySource }),
-        },
       }),
       coreSetup: {} as never,
       logger: loggingSystemMock.createLogger(),
@@ -261,7 +257,6 @@ describe('registerChatRoutes', () => {
       status: 202,
       payload: { execution_id: 'execution-1', status: ExecutionStatus.scheduled },
     });
-    expect(findBySource).toHaveBeenCalledWith(source);
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
         useTaskManager: true,
@@ -270,86 +265,6 @@ describe('registerChatRoutes', () => {
         },
         params: expect.objectContaining({
           conversationId: undefined,
-          source,
-        }),
-      })
-    );
-  });
-
-  it('schedules callback converse with the existing conversation id when source is found', async () => {
-    const callbackPath = `${internalApiPath}/converse/callback`;
-    let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
-    const executeAgent = jest.fn().mockResolvedValue({
-      executionId: 'execution-1',
-      events$: of(),
-    });
-    const findBySource = jest.fn().mockResolvedValue({ id: 'conversation-1' });
-    const source = {
-      type: ConversationSourceType.Slack,
-      external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-    };
-
-    const router = {
-      versioned: {
-        post: jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest
-            .fn()
-            .mockImplementation(
-              (
-                _versionConfig: unknown,
-                handler: (ctx: any, req: any, res: any) => Promise<any>
-              ) => {
-                if (config.path === callbackPath) {
-                  callbackHandler = handler;
-                }
-              }
-            ),
-        })),
-      },
-    };
-
-    registerChatRoutes({
-      router,
-      getInternalServices: jest.fn().mockReturnValue({
-        execution: { executeAgent },
-        conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({ findBySource }),
-        },
-      }),
-      coreSetup: {} as never,
-      logger: loggingSystemMock.createLogger(),
-    } as never);
-
-    await callbackHandler!(
-      {
-        core: Promise.resolve({}),
-        licensing: Promise.resolve({
-          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
-        }),
-      },
-      {
-        body: {
-          agent_id: 'agent-1',
-          input: 'Hello',
-          source,
-          callback: {
-            url: 'https://relay.example.com/events?token=abc',
-          },
-        },
-      },
-      {
-        accepted: jest.fn(({ body }) => ({ status: 202, payload: body })),
-        forbidden: jest.fn(),
-        customError: jest.fn(),
-        notFound: jest.fn(),
-      }
-    );
-
-    expect(findBySource).toHaveBeenCalledWith(source);
-    expect(executeAgent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        params: expect.objectContaining({
-          conversationId: 'conversation-1',
           source,
         }),
       })

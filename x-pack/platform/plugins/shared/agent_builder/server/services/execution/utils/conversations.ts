@@ -136,8 +136,11 @@ export type ConversationOperation = 'CREATE' | 'UPDATE';
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
 
 /**
- * Get a conversation by ID, or create a placeholder for new conversations.
- * Determines the operation type (CREATE or UPDATE) based on conversationId presence.
+ * Resolves the conversation to update, or returns a placeholder for one to create.
+ * conversationId takes precedence over source. When no conversationId is provided,
+ * source is used to find an existing conversation before creating a new placeholder.
+ * autoCreateConversationWithId only applies when conversationId is provided: missing
+ * conversations are created with that ID when enabled, and rejected by get() otherwise.
  * Note: Validation and manipulation for regenerate is handled in runDefaultAgentMode.
  */
 export const getConversation = async ({
@@ -157,6 +160,15 @@ export const getConversation = async ({
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
+    const conversation = source ? await conversationClient.findBySource(source) : undefined;
+
+    if (conversation) {
+      return {
+        ...conversation,
+        operation: 'UPDATE',
+      };
+    }
+
     return {
       ...placeholderConversation({ agentId, accessControl, source }),
       operation: 'CREATE',

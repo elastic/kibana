@@ -371,7 +371,6 @@ export function registerChatRoutes({
     payload,
     request,
     executionService,
-    conversationIdOverride,
     source,
     metadata,
     useTaskManagerOverride,
@@ -379,7 +378,6 @@ export function registerChatRoutes({
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
     executionService: AgentExecutionService;
-    conversationIdOverride?: string;
     source?: ConversationSource;
     metadata?: Record<string, string>;
     useTaskManagerOverride?: boolean;
@@ -414,7 +412,7 @@ export function registerChatRoutes({
       params: {
         agentId,
         connectorId,
-        conversationId: conversationIdOverride ?? conversationId,
+        conversationId,
         autoCreateConversationWithId: true,
         accessControl,
         source,
@@ -567,20 +565,16 @@ export function registerChatRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { execution: executionService, conversations } = getInternalServices();
+        const { execution: executionService } = getInternalServices();
         const payload = request.body as ChatCallbackRequestBodyPayload;
 
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
-        const conversationClient = await conversations.getScopedClient({ request });
-        const existingConversation = await conversationClient.findBySource(payload.source);
-
         const { executionId } = await executeAgent({
           payload,
           request,
           executionService,
-          conversationIdOverride: existingConversation?.id,
           source: payload.source,
           metadata: {
             callback_url: payload.callback.url,
