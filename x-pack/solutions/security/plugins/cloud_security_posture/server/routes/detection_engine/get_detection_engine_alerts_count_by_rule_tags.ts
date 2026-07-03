@@ -17,6 +17,11 @@ import type { CspRouter } from '../../types';
 
 const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts-default' as const;
 
+// A rule tag is a short free-text label; 1024 chars is a generous per-tag ceiling for DoS protection.
+const RULE_TAG_MAX_LENGTH = 1024;
+// It's not expected to have more than 100 tags in a single query.
+const RULE_TAGS_MAX_SIZE = 100;
+
 export const getDetectionEngineAlertsCountByRuleTags = async (
   esClient: ElasticsearchClient,
   tags: string[]
@@ -65,8 +70,9 @@ export const defineGetDetectionEngineAlertsStatus = (router: CspRouter) =>
         validate: {
           request: {
             query: schema.object({
-              // maxSize is set to 100 as it's not expected to have more than 100 tags; tags are labels capped at 1024 chars
-              tags: schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100 }),
+              tags: schema.arrayOf(schema.string({ maxLength: RULE_TAG_MAX_LENGTH }), {
+                maxSize: RULE_TAGS_MAX_SIZE,
+              }),
             }),
           },
         },
