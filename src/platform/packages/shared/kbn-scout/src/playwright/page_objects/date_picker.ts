@@ -246,6 +246,11 @@ export class DatePicker {
     await this.page.testSubj.locator('dateRangePickerPopoverPanel').waitFor({ state: 'hidden' });
   }
 
+  private async openLegacyQuickMenu() {
+    await this.quickMenuButton.click();
+    await this.refreshIntervalInput.waitFor({ state: 'visible' });
+  }
+
   // ---------------------------------------------------------------------------
   // Public API (dual-path)
   // ---------------------------------------------------------------------------
@@ -372,7 +377,7 @@ export class DatePicker {
       };
     }
 
-    await this.quickMenuButton.click();
+    await this.openLegacyQuickMenu();
     const interval = (await this.refreshIntervalInput.getAttribute('value')) ?? '';
     const unit = (await this.refreshIntervalUnitSelect.inputValue()) as DateUnitSelector;
     const toggleChecked = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'true';
@@ -439,7 +444,7 @@ export class DatePicker {
 
       await this.closeDateRangePickerSettingsPanel();
     } else {
-      await this.quickMenuButton.click();
+      await this.openLegacyQuickMenu();
       const isPaused = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'false';
       if (isPaused) {
         await this.toggleRefreshButton.click();
@@ -465,7 +470,7 @@ export class DatePicker {
 
       await this.closeDateRangePickerSettingsPanel();
     } else {
-      await this.quickMenuButton.click();
+      await this.openLegacyQuickMenu();
       const isRunning = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'true';
 
       if (isRunning) {
