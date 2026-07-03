@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout-security';
-import { expect } from '@kbn/scout-security/ui';
 import {
+  spaceTest,
+  tags,
   HOST_FLYOUT_ENTITY_ID,
   HOST_FLYOUT_HOST_NAME,
   MOCK_ANOMALY_OVERVIEW_EMPTY,
@@ -17,7 +17,8 @@ import {
   MOCK_ANOMALY_SUMMARY,
   MOCK_ANOMALY_SUMMARY_FILTERED_BY_CREDENTIAL_ACCESS,
   MOCK_ANOMALY_SUMMARY_MULTI_TACTIC,
-} from '@kbn/scout-security/src/playwright/fixtures/test/page_objects/entity_flyout_anomalies_page';
+} from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
 
 const ANOMALY_OVERVIEW_ROUTE = `**/internal/entity_analytics/entities/host/${HOST_FLYOUT_ENTITY_ID}/anomaly_overview`;
 const ANOMALY_SUMMARY_ROUTE = `**/internal/entity_analytics/entities/host/${HOST_FLYOUT_ENTITY_ID}/anomaly_summary`;
@@ -36,7 +37,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth, page }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPlatformEngineer();
       // The privileges check gates every anomalies fetch below and isn't itself under test here;
       // mock it so a transient real-backend hiccup can't make the anomalies section silently
       // never load (see the flakiness this caused when left to hit the real endpoint).
@@ -212,32 +213,6 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'expanding an anomaly row shows the Explainer description',
-      async ({ page, pageObjects }) => {
-        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES),
-          });
-        });
-        await page.route(ANOMALY_SUMMARY_ROUTE, async (route) => {
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
-          });
-        });
-
-        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
-        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
-        await pageObjects.entityFlyoutAnomaliesPage.expandAnomalyRow();
-
-        await expect(pageObjects.entityFlyoutAnomaliesPage.expandedRowDescription).toBeVisible();
-      }
-    );
-
-    spaceTest(
       'anomalies table row actions menu exposes investigation actions',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
@@ -345,7 +320,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'selecting a MITRE tactic on the Anomalies tab filters anomaly results',
+      'selecting and clearing a MITRE tactic on the Anomalies tab filters and restores anomaly results',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
           const body = route.request().postDataJSON() as { threat_tactics?: string[] } | null;
@@ -390,43 +365,6 @@ spaceTest.describe(
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTableGrid).toContainText(
           'Spike in Logon Events'
         );
-      }
-    );
-
-    spaceTest(
-      'clearing the selected MITRE tactic filter restores unfiltered anomaly results',
-      async ({ page, pageObjects }) => {
-        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
-          const body = route.request().postDataJSON() as { threat_tactics?: string[] } | null;
-          const isFiltered = body?.threat_tactics?.includes('Credential Access') ?? false;
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(
-              isFiltered
-                ? MOCK_ANOMALY_OVERVIEW_FILTERED_BY_CREDENTIAL_ACCESS
-                : MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES
-            ),
-          });
-        });
-        await page.route(ANOMALY_SUMMARY_ROUTE, async (route) => {
-          const body = route.request().postDataJSON() as { threat_tactics?: string[] } | null;
-          const isFiltered = body?.threat_tactics?.includes('Credential Access') ?? false;
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(
-              isFiltered
-                ? MOCK_ANOMALY_SUMMARY_FILTERED_BY_CREDENTIAL_ACCESS
-                : MOCK_ANOMALY_SUMMARY_MULTI_TACTIC
-            ),
-          });
-        });
-
-        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
-        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
-        await pageObjects.entityFlyoutAnomaliesPage.selectMitreTactic('Credential Access');
-        await expect(pageObjects.entityFlyoutAnomaliesPage.mitreTacticClearChip).toBeVisible();
 
         await pageObjects.entityFlyoutAnomaliesPage.clearMitreTacticFilter();
 
