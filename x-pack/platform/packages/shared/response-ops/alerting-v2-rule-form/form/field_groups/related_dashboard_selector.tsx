@@ -333,7 +333,7 @@ export const RelatedDashboardSelector: React.FC = () => {
           </span>
         }
         fullWidth
-        labelAppend={OptionalFieldLabel}
+        labelAppend={<OptionalFieldLabel />}
       >
         <RelatedDashboardsComboBox
           dashboard={dashboard}

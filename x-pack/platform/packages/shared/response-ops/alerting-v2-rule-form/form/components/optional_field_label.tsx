@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const OptionalFieldLabel = (
+export const OptionalFieldLabel: React.FC = () => (
   <EuiText color="subdued" size="xs" data-test-subj="form-optional-field-label">
     {i18n.translate('xpack.alertingV2.ruleForm.optionalFieldLabel', {
       defaultMessage: 'optional',

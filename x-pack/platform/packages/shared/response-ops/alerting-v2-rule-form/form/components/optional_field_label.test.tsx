@@ -11,7 +11,7 @@ import { OptionalFieldLabel } from './optional_field_label';
 
 describe('OptionalFieldLabel', () => {
   it('renders the optional label with consistent styling', () => {
-    render(<>{OptionalFieldLabel}</>);
+    render(<OptionalFieldLabel />);
 
     expect(screen.getByTestId('form-optional-field-label')).toHaveTextContent('optional');
   });

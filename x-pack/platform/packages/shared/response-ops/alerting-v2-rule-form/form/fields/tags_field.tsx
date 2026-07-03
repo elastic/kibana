@@ -42,7 +42,7 @@ export const TagsField = () => {
             label={i18n.translate('xpack.alertingV2.ruleForm.tagsLabel', {
               defaultMessage: 'Tags',
             })}
-            labelAppend={OptionalFieldLabel}
+            labelAppend={<OptionalFieldLabel />}
             isInvalid={!!error}
             error={error?.message}
             fullWidth

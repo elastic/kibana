@@ -29,7 +29,7 @@ export const DescriptionField = () => {
           label={i18n.translate('xpack.alertingV2.ruleForm.descriptionLabel', {
             defaultMessage: 'Description',
           })}
-          labelAppend={OptionalFieldLabel}
+          labelAppend={<OptionalFieldLabel />}
           fullWidth
           isInvalid={!!error}
           error={error?.message}
