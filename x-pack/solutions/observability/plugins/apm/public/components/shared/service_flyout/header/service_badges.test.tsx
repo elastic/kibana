@@ -22,11 +22,14 @@ jest.mock('../hooks/use_service_badges_data', () => ({
   useServiceBadgesData: (...args: unknown[]) => mockUseServiceBadgesData(...args),
 }));
 
-jest.mock('../hooks/use_service_links', () => ({
-  useServiceLinks: () => ({
-    overviewHref: '/app/apm/overview-href',
-    alertsHref: '/app/apm/alerts-href',
-  }),
+const mockLink = jest.fn(
+  (path: string, { path: pathParams, query }: { path: Record<string, string>; query: unknown }) =>
+    `${path.replace('{serviceName}', pathParams.serviceName)}?${new URLSearchParams(
+      query as Record<string, string>
+    ).toString()}`
+);
+jest.mock('../../../../hooks/use_apm_router', () => ({
+  useApmRouter: () => ({ link: mockLink }),
 }));
 
 const mockUseManageSlosUrl = jest.fn();
@@ -99,7 +102,9 @@ describe('ServiceBadges', () => {
       expect(badge).toHaveAttribute('data-ebt-element', 'serviceFlyoutAlertsBadge');
 
       fireEvent.click(badge);
-      expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/apm/alerts-href');
+      expect(mockNavigateToUrl).toHaveBeenCalled();
+      const href = mockNavigateToUrl.mock.calls[0][0] as string;
+      expect(href).toContain('/services/opbeans-java/alerts');
     });
 
     it('hides the alerts badge when the hook returns no count', () => {
