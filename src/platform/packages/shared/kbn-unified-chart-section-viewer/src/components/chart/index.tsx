@@ -102,7 +102,7 @@ export const Chart = ({
       css={css`
         height: ${ChartSizes[size]}px;
         outline: ${isSelected
-          ? `${euiTheme.border.width.thick} solid ${euiTheme.colors.primary}`
+          ? `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`
           : `${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade}`};
         border-radius: ${euiTheme.border.radius.medium};
       `}
