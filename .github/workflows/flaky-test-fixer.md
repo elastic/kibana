@@ -122,7 +122,7 @@ Kibana is already bootstrapped for you — `node_modules` and `@kbn/setup-node-e
 1. Read the investigator's comment on the issue for the suspected root cause and proposed fix. If no action is needed, skip to step 6.
 2. Read the failing test and the helpers, fixtures, and page objects it imports.
 3. Apply the smallest test-side patch that addresses the root cause.
-4. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here — the Flaky Fix Verifier runs those against your PR, so rely on lint/type checks for those.
+4. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 5. Open the PR (see "PR format" below).
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 
