@@ -15,7 +15,7 @@ import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } fr
 import {
   applyColorToSchema,
   colorByValueAbsoluteSchema,
-  colorByValueNamedPaletteSchema,
+  colorByValuePaletteSchema,
   legacyColorByValueAbsoluteSchema,
   autoColorSchema,
   AUTO_COLOR,
@@ -85,7 +85,7 @@ const legacyMetricConfigMetricOptionsSchema = {
     schema.oneOf(
       [
         colorByValueAbsoluteSchema,
-        colorByValueNamedPaletteSchema,
+        colorByValuePaletteSchema,
         legacyColorByValueAbsoluteSchema,
         autoColorSchema,
       ],

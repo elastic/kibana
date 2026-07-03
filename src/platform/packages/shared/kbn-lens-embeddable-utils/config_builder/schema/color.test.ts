@@ -10,7 +10,7 @@
 import { freeze, produce } from 'immer';
 
 import type {
-  ColorByValueNamedPaletteType,
+  ColorByValuePaletteType,
   ColorByValueStep,
   ColorByValueType,
   ColorMappingCategoricalType,
@@ -211,7 +211,7 @@ describe('Color Schema', () => {
       }
     );
 
-    describe('colorByValueNamedPalette schema', () => {
+    describe('colorByValuePalette schema', () => {
       it('applies default bounds for a minimal config', () => {
         const input = {
           type: 'dynamic_palette',
@@ -227,13 +227,13 @@ describe('Color Schema', () => {
         });
       });
 
-      it.each<[string, Pick<ColorByValueNamedPaletteType, 'open_below' | 'open_above'>]>([
+      it.each<[string, Pick<ColorByValuePaletteType, 'open_below' | 'open_above'>]>([
         ['closed on both ends', { open_below: false, open_above: false }],
         ['open above only', { open_below: false, open_above: true }],
         ['open below only', { open_below: true, open_above: false }],
         ['open on both ends', { open_below: true, open_above: true }],
       ])('validates explicit bounds - %s', (_, bounds) => {
-        const input: ColorByValueNamedPaletteType = {
+        const input: ColorByValuePaletteType = {
           type: 'dynamic_palette',
           palette: 'temperature',
           ...bounds,

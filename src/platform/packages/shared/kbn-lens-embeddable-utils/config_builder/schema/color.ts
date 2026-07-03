@@ -196,7 +196,7 @@ export const colorByValuePercentageSchema = colorByValueBaseSchema.extends(
   }
 );
 
-export const colorByValueNamedPaletteSchema = schema.object(
+export const colorByValuePaletteSchema = schema.object(
   {
     type: schema.literal('dynamic_palette'),
     palette: schema.string({
@@ -233,7 +233,7 @@ export const colorByValueSchema = schema.oneOf(
   [
     colorByValueAbsoluteSchema,
     colorByValuePercentageSchema,
-    colorByValueNamedPaletteSchema,
+    colorByValuePaletteSchema,
     legacyColorByValueSchema,
   ],
   {
@@ -425,7 +425,7 @@ export const allColoringTypeSchema = schema.oneOf(
 
 export type StaticColorType = TypeOf<typeof staticColorSchema>;
 export type ColorByValueType = TypeOf<typeof colorByValueSchema>;
-export type ColorByValueNamedPaletteType = TypeOf<typeof colorByValueNamedPaletteSchema>;
+export type ColorByValuePaletteType = TypeOf<typeof colorByValuePaletteSchema>;
 export type ColorByValueAbsolute =
   | TypeOf<typeof colorByValueAbsoluteSchema>
   | TypeOf<typeof legacyColorByValueAbsoluteSchema>;
