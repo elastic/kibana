@@ -4,82 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  SignificantEventsGetResponse,
-  SignificantEventsWorkflowStatusResult,
-} from '@kbn/significant-events-schema';
+import type { SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
-import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
-import { fetchQueryOccurrencesFromAlerts } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { resolveConnectorForSignificantEventsDiscovery } from '../../../utils/resolve_connector_for_feature';
-
-// Make sure strings are expected for input, but still converted to a
-// Date, without breaking the OpenAPI generator
-const dateFromString = z.string().transform((input) => new Date(input));
-
-const readAllSignificantEventsRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/_significant_events',
-  params: z.object({
-    query: z.object({
-      from: dateFromString.describe('Start of the time range'),
-      to: dateFromString.describe('End of the time range'),
-      bucketSize: z
-        .string()
-        .regex(BUCKET_SIZE_PATTERN)
-        .describe('Size of time buckets for aggregation'),
-      query: z.string().optional().describe('Query string to filter significant events queries'),
-      streamNames: z
-        .union([z.string().transform((val) => [val]), z.array(z.string())])
-        .optional()
-        .describe('Stream names to filter significant events'),
-      searchMode: searchModeSchema,
-    }),
-  }),
-  options: {
-    access: 'internal',
-    summary: 'Read all significant events',
-    description: 'Read all significant events',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<SignificantEventsGetResponse> => {
-    const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
-
-    const [kiClient, { alertsReader }] = await Promise.all([
-      scopedClients.getKnowledgeIndicatorClient(),
-      scopedClients.getSignificantEventsAlertingContext(),
-    ]);
-    return fetchQueryOccurrencesFromAlerts(
-      {
-        from,
-        to,
-        bucketSize,
-        query,
-        streamNames,
-        searchMode,
-        alertsReader,
-      },
-      { kiClient, scopedClusterClient }
-    );
-  },
-});
 
 const significantEventsDiscoveryExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
@@ -181,8 +112,7 @@ const significantEventsDiscoveryStatusRoute = createServerRoute({
   },
 });
 
-export const internalSignificantEventsRoutes = {
-  ...readAllSignificantEventsRoute,
+export const internalSignificantEventsDiscoveryRoutes = {
   ...significantEventsDiscoveryExecuteRoute,
   ...significantEventsDiscoveryStatusRoute,
 };

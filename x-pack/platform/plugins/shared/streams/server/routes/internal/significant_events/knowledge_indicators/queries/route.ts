@@ -12,24 +12,24 @@ import type {
   SignificantEventsQueriesGenerationResult,
 } from '@kbn/significant-events-schema';
 import { generatedSignificantEventQuerySchema } from '@kbn/significant-events-schema';
-import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
-import { createServerRoute } from '../../../create_server_route';
-import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
-import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
-import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
+import { sortQueryLinksForTable } from '../../../../../lib/significant_events/utils';
+import { STREAMS_API_PRIVILEGES } from '../../../../../../common/constants';
+import { generateKIQueries } from '../../../../../lib/significant_events/ki_queries_generation_service';
+import { createServerRoute } from '../../../../create_server_route';
+import { assertSignificantEventsAccess } from '../../../../utils/assert_significant_events_access';
+import { getRequestAbortSignal } from '../../../../utils/get_request_abort_signal';
+import { queryStatusSchema, toRuleUnbackedFilter } from '../../../../utils/query_status';
+import { BUCKET_SIZE_PATTERN } from '../../../../../lib/significant_events/helpers/fill_bucket_gaps';
 import {
   computeOccurrences,
   fetchQueryLinks,
   getQueryOccurrences,
-  toSignificantEventResponse,
+  toQueryWithOccurrences,
   type QueryOccurrences,
-} from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
-import { searchModeSchema } from '../../../utils/search_mode';
-import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
-import { persistQueries } from '../../../../lib/significant_events/persist_queries';
+} from '../../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
+import { searchModeSchema } from '../../../../utils/search_mode';
+import type { PersistQueriesResult } from '../../../../../lib/significant_events/persist_queries';
+import { persistQueries } from '../../../../../lib/significant_events/persist_queries';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -351,7 +351,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
     );
     const queryOccurrences: QueryOccurrences = { queryLinks: pageLinks, ...occurrences };
     const queriesPage = pageLinks.map((queryLink) =>
-      toSignificantEventResponse({ queryLink, queryOccurrences })
+      toQueryWithOccurrences({ queryLink, queryOccurrences })
     );
 
     return { queries: queriesPage, page, perPage, total };
@@ -545,7 +545,7 @@ const persistQueriesRoute = createServerRoute({
   },
 });
 
-export const internalQueriesRoutes = {
+export const internalSignificantEventsKIQueriesRoutes = {
   ...promoteUnbackedQueriesRoute,
   ...demoteBackedQueriesRoute,
   ...bulkDeleteQueriesRoute,
