@@ -97,6 +97,7 @@ export interface GetWorkflowsParams {
   tags?: string[];
   query?: string;
   managedFilter?: 'all' | 'managed' | 'unmanaged';
+  visibilityContext?: string[];
   _full?: boolean;
   sortField?: WorkflowSortField;
   sortOrder?: 'asc' | 'desc';
