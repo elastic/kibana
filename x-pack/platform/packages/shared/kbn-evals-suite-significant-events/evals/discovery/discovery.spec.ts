@@ -46,7 +46,7 @@ import { buildAvailableSnapshotsBySource } from '../shared';
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 evaluate.describe(
-  'Significant Events Discovery - Investigator',
+  'Significant Events Discovery - Discovery Agent',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
