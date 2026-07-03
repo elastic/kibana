@@ -37,10 +37,6 @@ export const STACK_ALERTS_ONLY_FEATURE: KibanaFeatureConfig = {
       },
       savedObject: { all: [], read: [] },
       api: ['rac'],
-      // `write` unlocks the per-alert modify actions (acknowledge, mark as untracked,
-      // mute/unmute, edit tags) in the UI. The underlying RAC `alert:all` /
-      // `rule:mute_alerts` privileges are not exposed as browser capabilities, so we
-      // declare an explicit `write` UI capability that the alerts table reads.
       ui: ['show', 'write'],
     },
     read: {
@@ -51,6 +47,7 @@ export const STACK_ALERTS_ONLY_FEATURE: KibanaFeatureConfig = {
       },
       alerting: {
         alert: { read: alertingFeatures },
+        rule: { read_muted_alerts: alertingFeatures },
       },
       savedObject: { all: [], read: [] },
       api: ['rac'],

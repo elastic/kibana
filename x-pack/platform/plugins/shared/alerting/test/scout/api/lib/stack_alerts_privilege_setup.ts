@@ -8,7 +8,11 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { ApiClientFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import {
+  COMMON_HEADERS,
+  ES_QUERY_DEFAULT_INSTANCE_ID,
+  ES_QUERY_DEFAULT_INSTANCE_ID_ENCODED,
+} from '../fixtures/constants';
 import { waitForSuccessfulEventLogEntry } from './wait_for_successful_event_log';
 
 const ES_QUERY_PARAMS = {
@@ -108,19 +112,23 @@ export const setupStackAlertsPrivilegeTests = async (
   expect(enabledRuleId, 'expected at least one enabled rule spec').toBeDefined();
 
   const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-  await waitForSuccessfulEventLogEntry(apiClient, enabledRuleId!, {
-    ...COMMON_HEADERS,
-    ...cookieHeader,
-  });
+  const adminSessionHeaders = { ...COMMON_HEADERS, ...cookieHeader };
+  await waitForSuccessfulEventLogEntry(apiClient, enabledRuleId!, adminSessionHeaders);
+
+  // .es-query with groupBy: 'all' always uses this instance id (see constants.ts).
+  const muteResponse = await apiClient.post(
+    `api/alerting/rule/${enabledRuleId!}/alert/${ES_QUERY_DEFAULT_INSTANCE_ID_ENCODED}/_mute?validate_alerts_existence=true`,
+    { headers: { ...COMMON_HEADERS, ...adminCreds.apiKeyHeader } }
+  );
+  expect(muteResponse).toHaveStatusCode(204);
 
   let realAlertId: string | undefined;
   let realAlertIndex: string | undefined;
-  let mutedAlertInstanceId: string | undefined;
   const pollIntervalMs = 2000;
-  const maxAttempts = 15;
+  const maxAttempts = 60; // ~120s; alert indexing can lag rule execution on serverless
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const findResponse = await apiClient.post('internal/rac/alerts/find', {
-      headers: { ...COMMON_HEADERS, ...adminCreds.apiKeyHeader },
+      headers: adminSessionHeaders,
       body: {
         rule_type_ids: ['.es-query'],
         consumers: ['stackAlerts'],
@@ -136,34 +144,20 @@ export const setupStackAlertsPrivilegeTests = async (
       },
       responseType: 'json',
     });
+    expect(findResponse).toHaveStatusCode(200);
     const findBody = findResponse.body as {
-      hits?: { hits?: Array<{ _id: string; _index: string; _source?: Record<string, unknown> }> };
+      hits?: { hits?: Array<{ _id: string; _index: string }> };
     };
     const alertDoc = findBody?.hits?.hits?.[0];
     if (alertDoc) {
-      const instanceId = alertDoc._source?.['kibana.alert.instance.id'];
-      if (typeof instanceId !== 'string') {
-        await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
-        continue;
-      }
       realAlertId = alertDoc._id;
       realAlertIndex = alertDoc._index;
-      mutedAlertInstanceId = instanceId;
       break;
     }
     await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
   }
   expect(realAlertId, 'expected an alert to be generated for the enabled rule').toBeDefined();
   expect(realAlertIndex, 'expected an alert index for the enabled rule').toBeDefined();
-  expect(mutedAlertInstanceId, 'expected kibana.alert.instance.id on the alert doc').toBeDefined();
-
-  const muteResponse = await apiClient.post(
-    `api/alerting/rule/${enabledRuleId!}/alert/${encodeURIComponent(
-      mutedAlertInstanceId!
-    )}/_mute?validate_alerts_existence=true`,
-    { headers: { ...COMMON_HEADERS, ...adminCreds.apiKeyHeader } }
-  );
-  expect(muteResponse).toHaveStatusCode(204);
 
   return {
     adminCreds,
@@ -171,7 +165,7 @@ export const setupStackAlertsPrivilegeTests = async (
     enabledRuleId: enabledRuleId!,
     realAlertId: realAlertId!,
     realAlertIndex: realAlertIndex!,
-    mutedAlertInstanceId: mutedAlertInstanceId!,
+    mutedAlertInstanceId: ES_QUERY_DEFAULT_INSTANCE_ID,
   };
 };
 

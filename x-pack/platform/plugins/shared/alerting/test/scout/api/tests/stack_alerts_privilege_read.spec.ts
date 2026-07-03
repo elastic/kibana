@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { nodeBuilder } from '@kbn/es-query';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
@@ -16,6 +17,9 @@ import {
   teardownStackAlertsPrivilegeTests,
   type StackAlertsPrivilegeState,
 } from '../lib/stack_alerts_privilege_setup';
+
+const buildRuleFilter = (ruleId: string): string =>
+  JSON.stringify(nodeBuilder.or([nodeBuilder.is('alert.id', `alert:${ruleId}`)]));
 
 apiTest.describe(
   'Stack alerts privilege - read privilege',
@@ -69,8 +73,12 @@ apiTest.describe(
 
     apiTest('can read muted alert state via _find_muted_alerts', async ({ apiClient }) => {
       const response = await apiClient.post('internal/alerting/rules/_find_muted_alerts', {
-        headers: { ...COMMON_HEADERS, ...withReadPrivilegeCookieHeader },
-        body: { page: 1, per_page: 100 },
+        headers: { ...COMMON_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
+        body: {
+          filter: buildRuleFilter(state.enabledRuleId),
+          page: 1,
+          per_page: 100,
+        },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
