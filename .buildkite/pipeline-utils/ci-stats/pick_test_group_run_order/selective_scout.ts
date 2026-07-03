@@ -34,7 +34,9 @@ const SCOUT_TESTS_ONLY_IGNORE_PATTERNS: readonly string[] = [
 
 const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
   '**/test/scout{_*,}/{api,ui}/**',
+  '**/test/scout{_*,}/*/{api,ui}/**',
   '**/test/scout{_*,}/.meta/{api,ui}/**',
+  '**/test/scout{_*,}/*/.meta/{api,ui}/**',
 ];
 
 const SCOUT_TESTS_ONLY_EXCLUDE_GLOBS: readonly string[] = [

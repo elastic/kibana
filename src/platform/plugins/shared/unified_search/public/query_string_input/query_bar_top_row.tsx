@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { EMPTY, delay, mergeMap, of } from 'rxjs';
+import { EMPTY, delay, distinctUntilChanged, mergeMap, of } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle, debounce } from 'lodash';
 
@@ -263,8 +263,8 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * When provided, renders the ES|QL approximate execution toggle (bolt icon) before the date picker.
    */
   esqlApproximation?: {
-    useApproximation: boolean;
-    onChange: (useApproximation: boolean) => void;
+    isApproximate: boolean;
+    onChange: (isApproximate: boolean) => void;
     additionalText?: string;
     disabled?: boolean;
   };
@@ -398,11 +398,25 @@ export const QueryBarTopRow = React.memo(
       http,
       dataViews,
       application,
+      featureFlags,
     } = kibana.services;
 
+    const isDateRangePickerFeatureFlagEnabled$ = useMemo(
+      () =>
+        enableDateRangePicker && featureFlags
+          ? featureFlags
+              .getBooleanValue$(DATE_RANGE_PICKER_FEATURE_FLAG, true)
+              .pipe(distinctUntilChanged())
+          : of(true),
+      [enableDateRangePicker, featureFlags]
+    );
+    const isDateRangePickerFeatureFlagEnabled = useObservable(
+      isDateRangePickerFeatureFlagEnabled$,
+      true
+    );
+
     const shouldUseLegacyTimePicker =
-      !enableDateRangePicker ||
-      !kibana.services.featureFlags?.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true);
+      !enableDateRangePicker || !isDateRangePickerFeatureFlagEnabled;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
     const shouldRenderESQLUi = Boolean(showQueryInput && isQueryLangSelected);
@@ -1053,7 +1067,7 @@ export const QueryBarTopRow = React.memo(
                   {shouldRenderUpdateButton() ? button : null}
                   {props.esqlApproximation && (
                     <EsqlApproximationToggle
-                      useApproximation={props.esqlApproximation.useApproximation}
+                      isApproximate={props.esqlApproximation.isApproximate}
                       onChange={props.esqlApproximation.onChange}
                       additionalText={props.esqlApproximation.additionalText}
                       disabled={props.esqlApproximation.disabled}
@@ -1320,7 +1334,7 @@ export const QueryBarTopRow = React.memo(
                 {shouldShowDatePickerAsBadge() && props.filterBar}
                 {props.esqlApproximation && (
                   <EsqlApproximationToggle
-                    useApproximation={props.esqlApproximation.useApproximation}
+                    isApproximate={props.esqlApproximation.isApproximate}
                     onChange={props.esqlApproximation.onChange}
                     additionalText={props.esqlApproximation.additionalText}
                     disabled={props.esqlApproximation.disabled}
