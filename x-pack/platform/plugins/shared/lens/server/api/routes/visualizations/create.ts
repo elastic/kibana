@@ -20,10 +20,10 @@ import {
   LENS_API_ACCESS,
   LENS_API_TAG,
 } from '../../../../common/constants';
+import { findInvalidDurationFormat } from '../../../../common/transforms/ga_schema_validator';
 import type { LensCreateIn, LensSavedObject } from '../../../content_management';
 import type { RegisterAPIRouteFn } from '../../types';
 import type { LensCreateResponseBody } from './types';
-import { findInvalidDurationFormat } from './ga_schema_validator';
 import { getLensRequestConfig, getLensResponseItem } from './utils';
 import { lensCreateRequestBodySchema, lensCreateResponseBodySchema } from './schema';
 

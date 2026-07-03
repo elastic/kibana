@@ -23,6 +23,7 @@ import type {
 import { findLensReference } from './utils';
 import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
 import { stripInheritedContext } from './helpers';
+import { toLegacyDurationUnits } from './ga_schema_validator';
 
 /**
  * Transform from Lens Stored State to Lens API format
@@ -32,7 +33,7 @@ export const getTransformOut = (
   transformDrilldownsOut: DrilldownTransforms['transformOut'],
   isDashboardAppRequest: boolean
 ): LensTransformOut => {
-  return function transformOut(storedState, panelReferences) {
+  return function transformOut(storedState, panelReferences, containerReferences, useGASchemas) {
     const transformsFlow = flow(
       transformTitlesOut<LensSerializedState>,
       transformTimeRangeOut<LensSerializedState>,
@@ -96,12 +97,18 @@ export const getTransformOut = (
         ? { description: attributesDescription }
         : {};
 
-    return {
+    let apiPanelConfig = {
       ...titleFallback,
       ...descriptionFallback,
       ...state,
       ...apiConfig,
     } satisfies LensByValueTransformOutResult;
+
+    if (!useGASchemas) {
+      apiPanelConfig = toLegacyDurationUnits(apiPanelConfig);
+    }
+
+    return apiPanelConfig;
   };
 };
 

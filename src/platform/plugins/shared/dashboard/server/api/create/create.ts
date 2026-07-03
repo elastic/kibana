@@ -20,6 +20,7 @@ export async function create(
   requestCtx: RequestHandlerContext,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardState,
+  useGASchemas: boolean,
   serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false,
   id?: string
@@ -30,7 +31,8 @@ export async function create(
   const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
     restOfData,
     isDashboardAppRequest,
-    serverTiming
+    serverTiming,
+    useGASchemas
   );
 
   const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
@@ -56,6 +58,7 @@ export async function create(
     'create',
     strictValidationSchema,
     isDashboardAppRequest,
-    serverTiming
+    serverTiming,
+    useGASchemas
   );
 }

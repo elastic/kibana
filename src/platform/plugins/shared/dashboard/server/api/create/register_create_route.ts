@@ -20,6 +20,7 @@ import { getRouteConfig } from '../get_route_config';
 import { writeErrorHandler } from '../write_error_handler';
 import { create } from './create';
 import { getCreateResponseBodySchema } from './schemas';
+import { getUseGASchemas } from '../get_use_ga_schemas';
 
 export function registerCreateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -70,10 +71,13 @@ export function registerCreateRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
         try {
+          const { core } = await ctx.resolve(['core']);
+          const useGASchemas = await getUseGASchemas(core);
           const result = await create(
             ctx,
             getCachedDashboardStateSchema(),
             req.body,
+            useGASchemas,
             req.serverTiming,
             isDashboardAppRequest
           );

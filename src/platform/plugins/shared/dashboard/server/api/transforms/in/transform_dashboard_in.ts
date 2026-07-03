@@ -22,7 +22,8 @@ import { transformOptionsIn } from './transform_options_in';
 export const transformDashboardIn = (
   dashboardState: Partial<DashboardState>,
   isDashboardAppRequest: boolean = false,
-  serverTiming?: RequestTiming
+  serverTiming?: RequestTiming,
+  useGASchemas?: boolean
 ): {
   attributes: DashboardSavedObjectAttributes;
   references: SavedObjectReference[];
@@ -50,7 +51,7 @@ export const transformDashboardIn = (
       sections,
       references: panelReferences,
     } = panels
-      ? transformPanelsIn(panels, isDashboardAppRequest)
+      ? transformPanelsIn(panels, isDashboardAppRequest, useGASchemas)
       : {
           panelsJSON: '',
           sections: undefined,

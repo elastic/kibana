@@ -31,7 +31,7 @@ import {
   lensUpdateRequestParamsSchema,
   lensUpdateResponseBodySchema,
 } from './schema';
-import { findInvalidDurationFormat } from './ga_schema_validator';
+import { findInvalidDurationFormat } from '../../../../common/transforms/ga_schema_validator';
 import { getLensRequestConfig, getLensResponseItem } from './utils';
 
 export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (

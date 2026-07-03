@@ -16,6 +16,7 @@ import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_objec
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardOut } from '../transforms';
 import type { DashboardSearchRequestParams, DashboardSearchResponseBody } from './types';
+import { getUseGASchemas } from '../get_use_ga_schemas';
 
 export async function search(
   requestCtx: RequestHandlerContext,
@@ -49,11 +50,19 @@ export async function search(
     ...tagsToFindOptions({ included: includedTags, excluded: excludedTags }),
   });
 
+  const useGASchemas = await getUseGASchemas(core);
+
   return {
     dashboards: soResponse.saved_objects.map((so) => {
       const {
         dashboardState: { description, tags, time_range, title },
-      } = transformDashboardOut(so.attributes, so.references, undefined, strictValidationSchema);
+      } = transformDashboardOut(
+        so.attributes,
+        so.references,
+        undefined,
+        strictValidationSchema,
+        useGASchemas
+      );
 
       return {
         id: so.id,

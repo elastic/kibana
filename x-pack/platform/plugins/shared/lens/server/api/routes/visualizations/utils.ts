@@ -11,7 +11,7 @@ import { getMeta, type AsCodeMeta } from '@kbn/as-code-shared-schemas';
 
 import type { LensSavedObject, LensUpdateIn } from '../../../content_management';
 import type { LensCreateRequestBody, LensResponseItem, LensUpdateRequestBody } from './types';
-import { toLegacyDurationUnits } from './ga_schema_validator';
+import { toLegacyDurationUnits } from '../../../../common/transforms/ga_schema_validator';
 
 /**
  * Converts Lens request data to Lens Config
