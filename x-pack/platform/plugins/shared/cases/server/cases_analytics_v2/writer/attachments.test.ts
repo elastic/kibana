@@ -8,10 +8,7 @@
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-} from '../../../common/constants';
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import { ATTACHMENTS_INDEX_NAME } from '../constants';
 import type { AttachmentPersistedAttributes } from '../../common/types/attachments_v2';
 import { CasesAttachmentsV2Writer } from './attachments';
@@ -76,7 +73,10 @@ describe('CasesAttachmentsV2Writer', () => {
       const { writer, esClient } = buildWriterUnderTest();
       (esClient.bulk as unknown as jest.Mock).mockResolvedValue({ errors: false, items: [] });
 
-      writer.bulkUpsertAttachments([makeLegacyAttachmentSO('att-1'), makeLegacyAttachmentSO('att-2')]);
+      writer.bulkUpsertAttachments([
+        makeLegacyAttachmentSO('att-1'),
+        makeLegacyAttachmentSO('att-2'),
+      ]);
       await new Promise((r) => setImmediate(r));
 
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
@@ -136,9 +136,7 @@ describe('CasesAttachmentsV2Writer', () => {
       const { writer, esClient, logger } = buildWriterUnderTest();
       (esClient.bulk as unknown as jest.Mock).mockResolvedValue({
         errors: true,
-        items: [
-          { delete: { _id: 'att-1', status: 500, error: { reason: 'cluster busy' } } },
-        ],
+        items: [{ delete: { _id: 'att-1', status: 500, error: { reason: 'cluster busy' } } }],
       });
 
       writer.bulkDeleteAttachments(['att-1']);

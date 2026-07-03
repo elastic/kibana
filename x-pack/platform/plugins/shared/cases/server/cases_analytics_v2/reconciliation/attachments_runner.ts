@@ -8,18 +8,12 @@
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
-import {
-  CASE_ATTACHMENT_SAVED_OBJECT,
-  CASE_COMMENT_SAVED_OBJECT,
-} from '../../../common/constants';
+import { CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
 } from '../../common/types/attachments_v2';
-import type {
-  AttachmentSource,
-  CasesAttachmentsV2WriterContract,
-} from '../writer/attachments';
+import type { AttachmentSource, CasesAttachmentsV2WriterContract } from '../writer/attachments';
 
 /**
  * Number of attachment SOs fetched per ES round-trip. Matched to the

@@ -387,8 +387,7 @@ function composeReconciliationError(errors: {
   const failing: string[] = [];
   if (errors.cases != null) failing.push(`cases (${asMessage(errors.cases)})`);
   if (errors.activity != null) failing.push(`activity (${asMessage(errors.activity)})`);
-  if (errors.attachments != null)
-    failing.push(`attachments (${asMessage(errors.attachments)})`);
+  if (errors.attachments != null) failing.push(`attachments (${asMessage(errors.attachments)})`);
   return new Error(`${failing.join(' AND ')} reconciliation failed`);
 }
 

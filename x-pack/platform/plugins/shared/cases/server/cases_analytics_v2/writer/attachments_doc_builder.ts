@@ -189,7 +189,9 @@ function pickCaseId(
 }
 
 /** Null-safe projection of the unified `created_by` user shape. */
-function toUser(user: UnifiedAttachmentAttributes['created_by'] | null | undefined): AttachmentUserDoc {
+function toUser(
+  user: UnifiedAttachmentAttributes['created_by'] | null | undefined
+): AttachmentUserDoc {
   if (user == null) return {};
   return {
     username: user.username,
@@ -297,11 +299,12 @@ function extractCurated(
   if (commentValue != null) out.comment = commentValue;
 
   // ----- Alert metadata (alert / event subtypes) -----
-  const unifiedMetadata = (unified as unknown as {
-    metadata?: { rule?: { id?: unknown; name?: unknown } | null; index?: unknown };
-  }).metadata;
-  const legacyRule = (source as unknown as { rule?: { id?: unknown; name?: unknown } | null })
-    .rule;
+  const unifiedMetadata = (
+    unified as unknown as {
+      metadata?: { rule?: { id?: unknown; name?: unknown } | null; index?: unknown };
+    }
+  ).metadata;
+  const legacyRule = (source as unknown as { rule?: { id?: unknown; name?: unknown } | null }).rule;
   const legacyIndex = (source as unknown as { index?: unknown }).index;
   const rule = unifiedMetadata?.rule ?? legacyRule;
   const indexField = unifiedMetadata?.index ?? legacyIndex;
@@ -327,9 +330,8 @@ function extractCurated(
   //      case any plugin-registered subtype carries it that way.
   //   3. Legacy `attributes.actions.type` — top-level on the
   //      `cases-comments` SO for the `actions` subtype.
-  const unifiedMetadataActionType = (
-    unified as unknown as { metadata?: { actionType?: unknown } }
-  ).metadata?.actionType;
+  const unifiedMetadataActionType = (unified as unknown as { metadata?: { actionType?: unknown } })
+    .metadata?.actionType;
   const unifiedActions = (unified as unknown as { data?: { actions?: { type?: unknown } } }).data
     ?.actions;
   const legacyActions = (source as unknown as { actions?: { type?: unknown } }).actions;
@@ -346,9 +348,11 @@ function extractCurated(
   // ----- External reference (unmigrated legacy subtype) -----
   const externalRefTypeId = (source as unknown as { externalReferenceAttachmentTypeId?: unknown })
     .externalReferenceAttachmentTypeId;
-  const externalRefStorage = (source as unknown as {
-    externalReferenceStorage?: { type?: unknown };
-  }).externalReferenceStorage;
+  const externalRefStorage = (
+    source as unknown as {
+      externalReferenceStorage?: { type?: unknown };
+    }
+  ).externalReferenceStorage;
   const externalRef: NonNullable<AttachmentAnalyticsDoc['attachment']['external_reference']> = {};
   if (typeof externalRefTypeId === 'string') externalRef.type_id = externalRefTypeId;
   if (typeof externalRefStorage?.type === 'string')
@@ -356,9 +360,11 @@ function extractCurated(
   if (Object.keys(externalRef).length > 0) out.external_reference = externalRef;
 
   // ----- Persistable state (unmigrated legacy subtype) -----
-  const persistableTypeId = (source as unknown as {
-    persistableStateAttachmentTypeId?: unknown;
-  }).persistableStateAttachmentTypeId;
+  const persistableTypeId = (
+    source as unknown as {
+      persistableStateAttachmentTypeId?: unknown;
+    }
+  ).persistableStateAttachmentTypeId;
   if (typeof persistableTypeId === 'string') {
     out.persistable_state = { type_id: persistableTypeId };
   }

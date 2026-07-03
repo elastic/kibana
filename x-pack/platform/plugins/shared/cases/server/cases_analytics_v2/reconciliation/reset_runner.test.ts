@@ -51,7 +51,10 @@ const buildDeps = (overrides: Partial<Parameters<typeof runFullReset>[0]> = {}) 
 describe('runFullReset', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    runReconciliationMock.mockResolvedValue({ newLastRunAt: '2026-05-01T00:00:00.000Z', processed: 5 });
+    runReconciliationMock.mockResolvedValue({
+      newLastRunAt: '2026-05-01T00:00:00.000Z',
+      processed: 5,
+    });
     runActivityReconciliationMock.mockResolvedValue({
       newLastRunAt: '2026-05-01T00:00:01.000Z',
       processed: 9,
@@ -119,7 +122,9 @@ describe('runFullReset', () => {
     expect(result.attachments).toBeNull();
     expect(result.attachmentsError).toBe(attachmentsErr);
     expect(result.attachmentsCursor).toBeNull();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('full attachments re-walk failed'));
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('full attachments re-walk failed')
+    );
 
     // The seeded cursor state omits the failed surface so the next periodic
     // tick re-walks attachments from scratch.

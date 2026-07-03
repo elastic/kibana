@@ -683,11 +683,10 @@ export class AttachmentService {
         // ends up with only the patched-in fields. Reconciliation
         // walks the source SO every tick and re-emits the full shape,
         // so the gap closes within one reconciliation interval.
-        this.context.analyticsV2AttachmentsWriter.upsertAttachment(
-          Object.assign({}, res, {
-            attributes: unifiedAttributes,
-          }) as unknown as SavedObject<UnifiedAttachmentAttributes>
-        );
+        this.context.analyticsV2AttachmentsWriter.upsertAttachment({
+          ...res,
+          attributes: unifiedAttributes,
+        } as unknown as SavedObject<UnifiedAttachmentAttributes>);
         return Object.assign(res, { attributes: decodedAttributes });
       }
 
@@ -736,11 +735,10 @@ export class AttachmentService {
       // branch above: SO `update` is a partial; the analytics doc
       // re-indexes with whatever the patch carried. Reconciliation
       // closes the gap on the next tick.
-      this.context.analyticsV2AttachmentsWriter.upsertAttachment(
-        Object.assign({}, res, {
-          attributes: stripUnifiedOnlyFields(extractedAttributes),
-        }) as unknown as SavedObject<AttachmentPersistedAttributes>
-      );
+      this.context.analyticsV2AttachmentsWriter.upsertAttachment({
+        ...res,
+        attributes: stripUnifiedOnlyFields(extractedAttributes),
+      } as unknown as SavedObject<AttachmentPersistedAttributes>);
 
       return Object.assign(transformedAttachment, { attributes: validatedAttributes });
     } catch (error) {
@@ -945,11 +943,10 @@ export class AttachmentService {
         const validatedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
           comments[i].updatedAttributes
         );
-        successesToMirror.push(
-          Object.assign({}, attachment, {
-            attributes: validatedAttributes,
-          }) as unknown as SavedObject<UnifiedAttachmentAttributes>
-        );
+        successesToMirror.push({
+          ...attachment,
+          attributes: validatedAttributes,
+        } as unknown as SavedObject<UnifiedAttachmentAttributes>);
         validatedAttachments.push(Object.assign(attachment, { attributes: validatedAttributes }));
       } else {
         const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
@@ -969,11 +966,10 @@ export class AttachmentService {
           transformedAttachment.attributes
         );
 
-        successesToMirror.push(
-          Object.assign({}, attachment, {
-            attributes: legacyAttributes,
-          }) as unknown as SavedObject<AttachmentPersistedAttributes>
-        );
+        successesToMirror.push({
+          ...attachment,
+          attributes: legacyAttributes,
+        } as unknown as SavedObject<AttachmentPersistedAttributes>);
         validatedAttachments.push(
           Object.assign(transformedAttachment, { attributes: validatedAttributes })
         );

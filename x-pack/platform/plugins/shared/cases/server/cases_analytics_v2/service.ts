@@ -371,9 +371,7 @@ export class CasesAnalyticsV2Service {
       getActivityWriter: () =>
         this.activityWriter === V2_NOOP_ACTIVITY_WRITER ? null : this.activityWriterProxy,
       getAttachmentsWriter: () =>
-        this.attachmentsWriter === V2_NOOP_ATTACHMENTS_WRITER
-          ? null
-          : this.attachmentsWriterProxy,
+        this.attachmentsWriter === V2_NOOP_ATTACHMENTS_WRITER ? null : this.attachmentsWriterProxy,
       clearDataViewBootstrapCache: () => this.dataViewService?.clearBootstrapCache(),
       enabled: this.enabled,
       enableAdminRoutes: this.enableAdminRoutes,
