@@ -63,22 +63,36 @@ export const useSuggestionsInput = ({
 }: UseSuggestionsInputParams): UseSuggestionsInputResult => {
   const inputElementRef = useRef<HTMLInputElement | null>(null);
   const pendingCursorRef = useRef<number | null>(null);
+  // `setSelectionRange` below fires a native `select` event, same as the user moving the
+  // cursor themselves — this flag lets `handleSelectionChange` tell our own restoration apart
+  // from a real user action, so it doesn't immediately reopen the dropdown right after closing
+  // it (e.g. selecting "foo" would otherwise re-suggest "foo" to itself once the cursor lands
+  // right after it, since the just-inserted text is trivially a prefix of itself).
+  const suppressNextSelectionEventRef = useRef(false);
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [suggestions, setSuggestions] = useState<readonly ExpressionSuggestion[]>([]);
+  // Bumped on every suggestion selection to force the cursor-restoration effect below to run.
+  // It can't key off of `value` instead: selecting a suggestion that exactly matches what was
+  // already typed (e.g. typing the full "foo" and pressing Enter) produces the same string, so
+  // React sees no change and skips the effect — leaving `pendingCursorRef` stale until the next
+  // *real* value change (e.g. typing a space right after) wrongly consumes it, snapping the
+  // cursor back to the old position instead of after the space.
+  const [cursorRestoreToken, setCursorRestoreToken] = useState(0);
 
-  // Restores the cursor position after a suggestion changes `value`, once the input has
-  // re-rendered with the new text (setSelectionRange on the old text would be a no-op/wrong).
+  // Restores the cursor position after a suggestion is applied, once the input has re-rendered
+  // with the new text (setSelectionRange on the old text would be a no-op/wrong).
   useEffect(() => {
     if (pendingCursorRef.current !== null) {
+      suppressNextSelectionEventRef.current = true;
       inputElementRef.current?.setSelectionRange(
         pendingCursorRef.current,
         pendingCursorRef.current
       );
       pendingCursorRef.current = null;
     }
-  }, [value]);
+  }, [cursorRestoreToken]);
 
   const updateSuggestions = useCallback(
     (nextValue: string, selectionStart: number, selectionEnd: number) => {
@@ -107,6 +121,10 @@ export const useSuggestionsInput = ({
   // cursor position without changing the text itself.
   const handleSelectionChange = useCallback(
     (event: SyntheticEvent<HTMLInputElement> | FocusEvent<HTMLInputElement>) => {
+      if (suppressNextSelectionEventRef.current) {
+        suppressNextSelectionEventRef.current = false;
+        return;
+      }
       const target = event.currentTarget;
       updateSuggestions(
         target.value,
@@ -123,6 +141,7 @@ export const useSuggestionsInput = ({
     (suggestion: ExpressionSuggestion) => {
       const { value: nextValue, cursor } = insertSuggestion(value, suggestion);
       pendingCursorRef.current = cursor;
+      setCursorRestoreToken((token) => token + 1);
       onChange(nextValue);
       setIsOpen(false);
       setSuggestions([]);

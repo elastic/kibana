@@ -6,7 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createLabelSuggestionsProvider } from './create_label_suggestions_provider';
 import { useSuggestionsInput } from './use_suggestions_input';
 import type { SuggestionsProvider } from './types';
@@ -73,6 +74,48 @@ describe('useSuggestionsInput', () => {
 
     expect(input.value).toBe('foo');
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('does not reopen when selecting a suggestion triggers a native selectionchange event', () => {
+    render(<TestInput provider={provider} />);
+    const input = screen.getByTestId('testInput') as HTMLInputElement;
+
+    // React's `onSelect` isn't driven by the native `select` event — it derives it from other
+    // native events, including the document-level `selectionchange` event that real browsers
+    // fire when `setSelectionRange` is called programmatically (as our cursor-restoration
+    // effect does). That derivation only kicks in while the input genuinely has focus.
+    act(() => {
+      input.focus();
+    });
+    setCursor(input, 'f', 1);
+    fireEvent.click(screen.getByRole('option', { name: 'foo' }));
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+
+    act(() => {
+      document.dispatchEvent(new Event('selectionchange', { bubbles: true }));
+    });
+
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('keeps typing working after selecting a suggestion identical to what was already typed', async () => {
+    // Selecting a suggestion that exactly matches the fully-typed text (e.g. typing "foo" in
+    // full, then pressing Enter) produces the same string as before — React sees no `value`
+    // change and, if the cursor-restoration effect were keyed on `value`, would skip it,
+    // leaving a stale pending cursor that then corrupts the *next* real keystroke.
+    render(<TestInput provider={provider} />);
+    const input = screen.getByTestId('testInput') as HTMLInputElement;
+    const user = userEvent.setup();
+
+    await user.click(input);
+    await user.type(input, 'foo');
+    await user.keyboard('{Enter}');
+    expect(input.value).toBe('foo');
+
+    await user.keyboard(' ');
+
+    expect(input.value).toBe('foo ');
+    expect(input.selectionStart).toBe(4);
   });
 
   it('navigates suggestions with arrow keys and selects the active one on Enter', () => {
