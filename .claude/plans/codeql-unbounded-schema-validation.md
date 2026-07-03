@@ -52,4 +52,4 @@ in the flagged schemas. This is hardening — PRs are `backport:skip`, `release_
 - [x] Validate (targeted — fast): `node scripts/eslint --fix <changed files>` and `node scripts/type_check --project x-pack/solutions/security/plugins/security_solution/tsconfig.json`. Run `node scripts/jest` on any co-located `*.test.ts` you touched. Fix all errors before marking done.
 
 ### Task 6: Final validation
-- [ ] Run `node scripts/check --scope branch` and fix all failures (catches cross-task regressions the per-task checks can't see)
+- [x] Run `node scripts/check --scope branch` and fix all failures (catches cross-task regressions the per-task checks can't see)
