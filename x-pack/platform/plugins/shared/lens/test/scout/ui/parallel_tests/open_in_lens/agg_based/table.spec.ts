@@ -37,7 +37,9 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.stateful
   });
 
   spaceTest.beforeAll(openInLensSuite.beforeAll);
+
   spaceTest.beforeEach(openInLensSuite.beforeEach);
+
   spaceTest.afterAll(openInLensSuite.afterAll);
 
   spaceTest('should not allow converting of unsupported aggregations', async ({ pageObjects }) => {

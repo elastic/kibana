@@ -16,7 +16,9 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
   });
 
   spaceTest.beforeAll(openInLensSuite.beforeAll);
+
   spaceTest.beforeEach(openInLensSuite.beforeEach);
+
   spaceTest.afterAll(openInLensSuite.afterAll);
 
   // Negative cases grouped — these don't navigate away from the dashboard,

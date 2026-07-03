@@ -24,7 +24,9 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful
   });
 
   spaceTest.beforeAll(openInLensSuite.beforeAll);
+
   spaceTest.beforeEach(openInLensSuite.beforeEach);
+
   spaceTest.afterAll(openInLensSuite.afterAll);
 
   spaceTest('should convert to Lens', async ({ page, pageObjects }) => {

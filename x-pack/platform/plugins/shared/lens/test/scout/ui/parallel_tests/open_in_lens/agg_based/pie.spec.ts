@@ -45,7 +45,9 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.stateful.c
   });
 
   spaceTest.beforeAll(openInLensSuite.beforeAll);
+
   spaceTest.beforeEach(openInLensSuite.beforeEach);
+
   spaceTest.afterAll(openInLensSuite.afterAll);
 
   spaceTest('should check Convert to Lens action availability', async ({ pageObjects }) => {

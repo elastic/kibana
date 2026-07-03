@@ -10,8 +10,9 @@ import { expect } from '@kbn/scout/ui';
 import { testData, createOpenInLensSuiteSetup } from '../../../fixtures';
 
 // FLAKY: https://github.com/elastic/kibana/issues/179307
-// These tests were historically skipped in stateful FTR (describe.skip).
-// Using test.fixme() until stability is confirmed in Scout.
+// Tracks known stateful FTR flakiness during the Scout migration. Serverless FTR also
+// covered these dashboard conversion scenarios, so keep this temporary while follow-up
+// coverage is confirmed.
 spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
     archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.TSVB.DASHBOARD,
@@ -23,7 +24,9 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
   });
 
   spaceTest.beforeAll(openInLensSuite.beforeAll);
+
   spaceTest.beforeEach(openInLensSuite.beforeEach);
+
   spaceTest.afterAll(openInLensSuite.afterAll);
 
   // https://github.com/elastic/kibana/issues/179307
