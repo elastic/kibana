@@ -99,6 +99,7 @@ export async function getESQLQueryColumnsRaw({
             query: `${esqlQuery} | limit 0`,
             ...(dropNullColumns ? { dropNullColumns: true } : {}),
             ...(namedParams.length ? { params: namedParams } : {}),
+            settings: { column_metadata: true },
           },
         },
         {
@@ -212,6 +213,7 @@ export async function getESQLResults({
           ...(dropNullColumns ? { dropNullColumns: true } : {}),
           ...(namedParams.length ? { params: namedParams } : {}),
           ...(timezone ? { time_zone: getTimeZoneFromSettings(timezone) } : {}),
+          settings: { column_metadata: true },
         },
       },
       {

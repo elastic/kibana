@@ -6,8 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { of } from 'rxjs';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import { getStartEndParams, getNamedParams } from './run_query';
+import {
+  getStartEndParams,
+  getNamedParams,
+  getESQLQueryColumnsRaw,
+  getESQLResults,
+} from './run_query';
 
 describe('run query helpers', () => {
   describe('getStartEndParams', () => {
@@ -146,5 +153,47 @@ describe('run query helpers', () => {
     expect(params[0]).toHaveProperty('_tstart');
     expect(params[1]).toHaveProperty('_tend');
     expect(params[0]._tstart).not.toEqual(params[1]._tend);
+  });
+
+  describe('column metadata request setting', () => {
+    let search: jest.MockedFunction<ISearchGeneric>;
+
+    beforeEach(() => {
+      search = jest.fn();
+    });
+
+    it('getESQLQueryColumnsRaw requests column_metadata', async () => {
+      search.mockReturnValue(
+        of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
+      );
+
+      await getESQLQueryColumnsRaw({ esqlQuery: 'FROM foo', search });
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            settings: { column_metadata: true },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('getESQLResults requests column_metadata', async () => {
+      search.mockReturnValue(
+        of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
+      );
+
+      await getESQLResults({ esqlQuery: 'FROM foo', search });
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            settings: { column_metadata: true },
+          }),
+        }),
+        expect.anything()
+      );
+    });
   });
 });
