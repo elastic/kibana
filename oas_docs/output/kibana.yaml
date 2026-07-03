@@ -104069,6 +104069,13 @@ components:
                     type: number
                   timeUnit:
                     type: string
+                  warningComparator:
+                    type: string
+                  warningThreshold:
+                    items:
+                      description: The threshold value that is used with the `warningComparator`. If the `warningComparator` is `between`, you must specify the boundary values.
+                      type: number
+                    type: array
                 required:
                   - threshold
                   - comparator
