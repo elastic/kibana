@@ -105,6 +105,13 @@ export const CopyPackagePolicyPage = memo(() => {
   // Without this, a failed source-policy read leaves `isLoading` false and `sourcePolicy`
   // undefined, which would otherwise render the loading spinner forever with no recovery path.
   if (isError) {
+    // Ensure the error is typed as `string | Error` for the Error component.
+    const displayError: string | Error =
+      error instanceof Error
+        ? error
+        : i18n.translate('xpack.fleet.copyPackagePolicyPage.loadingErrorGenericMessage', {
+            defaultMessage: 'An error occurred while loading the integration policy.',
+          });
     return (
       <ContentWrapper justifyContent="center" alignItems="center">
         <Error
@@ -114,13 +121,7 @@ export const CopyPackagePolicyPage = memo(() => {
               defaultMessage="Unable to load the integration policy to copy"
             />
           }
-          error={
-            error instanceof Error
-              ? error
-              : i18n.translate('xpack.fleet.copyPackagePolicyPage.loadingErrorGenericMessage', {
-                  defaultMessage: 'An error occurred while loading the integration policy.',
-                })
-          }
+          error={displayError}
         />
       </ContentWrapper>
     );
