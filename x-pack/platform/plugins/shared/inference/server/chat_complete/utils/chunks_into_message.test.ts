@@ -272,7 +272,11 @@ describe('chunksIntoMessage', () => {
     // malformed calls; throwing 500-ed the whole converse request). The
     // malformed call is dropped and the message resolves with no tool calls.
     const message = await getMessage();
-    expect(message.toolCalls).toEqual([]);
+    expect(message).toEqual({
+      content: '',
+      toolCalls: [],
+      type: ChatCompletionEventType.ChatCompletionMessage,
+    });
   });
 
   it('concatenates multiple tool calls into a single message', async () => {
