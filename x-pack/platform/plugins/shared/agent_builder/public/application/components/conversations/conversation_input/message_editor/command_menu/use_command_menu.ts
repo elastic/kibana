@@ -49,8 +49,13 @@ export const useCommandMenu = (options: UseCommandMenuOptions = {}): CommandMenu
         return;
       }
       const textBeforeCursor = getTextBeforeCursor(element);
-      const nextMatch = matchCommand(textBeforeCursor, definitions);
-      setMatch(nextMatch);
+      setMatch((prev) =>
+        matchCommand(
+          textBeforeCursor,
+          definitions,
+          prev.isActive ? prev.activeCommand?.command.id : undefined
+        )
+      );
     },
     [enabled, definitions]
   );

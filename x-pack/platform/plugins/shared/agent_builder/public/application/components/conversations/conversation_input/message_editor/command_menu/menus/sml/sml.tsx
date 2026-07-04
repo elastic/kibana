@@ -26,6 +26,25 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
     const { euiTheme } = useEuiTheme();
     const { results, isLoading } = useSmlAutocomplete(query, { constraints });
     const { type, title } = useMemo(() => getSmlMenuHighlightSearchStrings(query), [query]);
+    // A "type/name" query's name is a single token, so Space can safely commit it.
+    const canSelectOnSpace = query.includes('/') && title.length > 0;
+    // Sort an exact name match to the front so it's the one Space (or Enter)
+    // commits, rather than whatever the API happened to rank first.
+    const orderedResults = useMemo(() => {
+      if (!canSelectOnSpace) {
+        return results;
+      }
+      const lowerName = title.toLowerCase();
+      const exactIndex = results.findIndex((item) => item.title.toLowerCase() === lowerName);
+      if (exactIndex <= 0) {
+        return results;
+      }
+      return [
+        results[exactIndex],
+        ...results.slice(0, exactIndex),
+        ...results.slice(exactIndex + 1),
+      ];
+    }, [results, title, canSelectOnSpace]);
 
     const smlMenuLabelStyles = useMemo(
       () => ({
@@ -41,7 +60,7 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
 
     const options: CommandMenuListOption[] = useMemo(
       () =>
-        results.map((item) => {
+        orderedResults.map((item) => {
           const typeLabel = item.type;
           const titlePlain = item.title;
 
@@ -63,7 +82,7 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
             ),
           };
         }),
-      [results, title, type, smlMenuLabelStyles]
+      [orderedResults, title, type, smlMenuLabelStyles]
     );
 
     const handleSelect = useCallback(
@@ -84,6 +103,7 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
         options={options}
         isLoading={isLoading}
         onSelect={handleSelect}
+        spaceSelection={canSelectOnSpace}
         data-test-subj="smlMenu"
       />
     );

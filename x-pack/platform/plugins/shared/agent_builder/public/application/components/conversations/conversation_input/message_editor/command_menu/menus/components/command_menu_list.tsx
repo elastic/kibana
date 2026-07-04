@@ -58,6 +58,8 @@ interface CommandMenuListProps {
   readonly onSelect: (option: CommandMenuListOption) => void;
   readonly width?: number;
   readonly 'data-test-subj'?: string;
+  /** When true, Space also selects the highlighted option, like Enter. */
+  readonly spaceSelection?: boolean;
 }
 
 export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProps>(
@@ -68,6 +70,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       onSelect,
       width: menuWidth = MENU_WIDTH,
       'data-test-subj': dataTestSubj = 'commandMenuList',
+      spaceSelection,
     },
     ref
   ) => {
@@ -120,6 +123,11 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           keys.ENTER,
           keys.TAB,
         ];
+        // Always claim Space, even with zero options: results can lag a
+        // keystroke behind, and a leaked space would type as plain text.
+        if (spaceSelection && event.key === keys.SPACE) {
+          return true;
+        }
         return handledKeys.includes(event.key);
       },
       handleKeyDown: (event: React.KeyboardEvent): void => {
@@ -127,7 +135,11 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           handleSetActive((prev) => Math.min(prev + 1, options.length - 1));
         } else if (event.key === keys.ARROW_UP || (event.ctrlKey && event.key === 'p')) {
           handleSetActive((prev) => Math.max(prev - 1, 0));
-        } else if (event.key === keys.ENTER || event.key === keys.TAB) {
+        } else if (
+          event.key === keys.ENTER ||
+          event.key === keys.TAB ||
+          (spaceSelection && event.key === keys.SPACE)
+        ) {
           handleSelectOption();
         }
       },
