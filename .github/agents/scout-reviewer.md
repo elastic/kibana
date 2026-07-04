@@ -21,6 +21,8 @@ Do not run this check on backport PRs (they usually have `backport` label and/or
 
 Follow `.claude/skills/scout-best-practices-reviewer/SKILL.md` for the checklist, reuse rules, and migration parity. Ignore any output formatting in that file — use the format below. Use the GitHub tools and local file inspection to explore as needed.
 
+If any changed files match `x-pack/solutions/security/**/test/scout*/**` or `**/kbn-scout-security/**`, also apply `x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md` for Security Solution-specific checks. Apply it after the general skill — do not run the general skill a second time.
+
 On PR updates, review only the new changes and stay high-signal — not nitpicky.
 
 ## Non-negotiable checks
@@ -28,6 +30,7 @@ On PR updates, review only the new changes and stay high-signal — not nitpicky
 These rules must be verified on every applicable Scout test file (UI and API). Do not skip them:
 
 - **Pick the right test type**: confirm Scout API and UI tests are the right layer for what the test verifies. Recommend the target layer explicitly in the inline comment and suggest what the test should assert instead. See complete guidance in `docs/extend/scout/best-practices.md#pick-the-right-test-type`. Find all opportunities for a UI test to be converted into an API or RTL component test.
+- **Don't circumvent the linter**: flag any attempt to silence a lint rule rather than fix it — `eslint-disable` comments, or swapping a flagged pattern for a hack that hides the root cause. Sanctioned escape hatches (e.g. `dispatchEvent('click')` for a documented app bug) are acceptable only with an explicit documented justification. Do not re-flag plain lint violations themselves — CI already gates those.
 
 ## Review process
 

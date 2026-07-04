@@ -11,10 +11,11 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { InferenceClient } from '@kbn/inference-common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import type { SignificantEventsTuningConfig } from '@kbn/significant-events-schema';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
-import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { SignificantEventsAlertingContext } from '../lib/significant_events/alerting/significant_events_alerting_context';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
 import type { StreamsClient } from '../lib/streams/client';
@@ -29,7 +30,6 @@ import type { StreamsTaskType } from '../lib/tasks/task_definitions';
 import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
 import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
 import type { WorkflowClients } from '../lib/workflows/create_workflow_clients';
-import type { SignificantEventsTuningConfig } from '../../common/significant_events_tuning_config';
 
 export type GetScopedClients = (params: {
   request: KibanaRequest;
@@ -41,10 +41,10 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   soClient: SavedObjectsClientContract;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
+  getSignificantEventsAlertingContext: () => Promise<SignificantEventsAlertingContext>;
   getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
-  getAlertingV2RulesClient: () => Promise<RulesClientApi | undefined>;
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;
   globalUiSettingsClient: IUiSettingsClient;

@@ -10,7 +10,7 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
-import { ChangeHistoryTelemetryEventTypes } from '@kbn/change-history-ui/src/telemetry/types';
+import { ChangeHistoryTelemetryEventTypes } from '@kbn/change-history-ui';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import {
   WorkflowChangeHistoryListItem,
@@ -89,11 +89,65 @@ beforeAll(() => {
     configurable: true,
     value: IntersectionObserverMock,
   });
+
+  jest.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+    callback(0);
+    return 1;
+  });
 });
 
 jest.mock('./use_workflow_change_history', () => ({
   ...jest.requireActual('./use_workflow_change_history'),
   useWorkflowChangeHistoryEnabled: jest.fn(),
+}));
+
+jest.mock('./apply_workflow_yaml_validation_to_editor', () => ({
+  applyWorkflowYamlValidationToEditor: jest.fn(() => Promise.resolve({ validationResults: [] })),
+}));
+
+const { applyWorkflowYamlValidationToEditor } = jest.requireMock(
+  './apply_workflow_yaml_validation_to_editor'
+);
+
+jest.mock('@kbn/code-editor', () => ({
+  monaco: {
+    MarkerSeverity: { Error: 8 },
+    editor: {
+      createModel: jest.fn(() => ({ dispose: jest.fn() })),
+      create: jest.fn(() => ({
+        dispose: jest.fn(),
+        getModel: jest.fn(() => ({ dispose: jest.fn() })),
+        createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
+      })),
+      createDiffEditor: jest.fn(() => ({
+        setModel: jest.fn(),
+        dispose: jest.fn(),
+        updateOptions: jest.fn(),
+        getLineChanges: jest.fn(() => [
+          {
+            originalStartLineNumber: 1,
+            originalEndLineNumber: 1,
+            modifiedStartLineNumber: 1,
+            modifiedEndLineNumber: 1,
+          },
+        ]),
+        onDidUpdateDiff: jest.fn(() => ({ dispose: jest.fn() })),
+        getOriginalEditor: jest.fn(() => ({ updateOptions: jest.fn() })),
+        getModifiedEditor: jest.fn(() => ({
+          updateOptions: jest.fn(),
+          revealLineInCenter: jest.fn(),
+          getModel: jest.fn(() => ({ dispose: jest.fn() })),
+          createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
+        })),
+      })),
+      setModelMarkers: jest.fn(),
+    },
+  },
+}));
+
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsMonacoTheme: jest.fn(),
+  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
 }));
 
 jest.mock('../../hooks/use_kibana', () => ({
@@ -156,13 +210,29 @@ const openHistoryModal = async () => {
   await waitFor(() => {
     expect(screen.getByTestId('changeHistoryModal')).toBeInTheDocument();
   });
+
+  await waitFor(() => {
+    expect(screen.getByTestId('changeHistoryTimeline')).toBeInTheDocument();
+  });
 };
 
-const selectHistoricalVersion = async (changeId = 'evt-previous') => {
+const selectHistoryItem = async (changeId = 'evt-previous') => {
+  await waitFor(() => {
+    expect(screen.getByTestId(`changeHistoryItem-${changeId}`)).toBeInTheDocument();
+  });
+
   fireEvent.click(screen.getByTestId(`changeHistoryItem-${changeId}`));
 
   await waitFor(() => {
     expect(screen.getByTestId('changeHistoryPreview')).toBeInTheDocument();
+  });
+};
+
+const selectHistoricalVersion = async (changeId = 'evt-previous') => {
+  await selectHistoryItem(changeId);
+
+  await waitFor(() => {
+    expect(screen.getByTestId('changeHistoryRestoreButton')).toBeInTheDocument();
   });
 };
 
@@ -253,9 +323,10 @@ describe('WorkflowChangeHistoryListItem', () => {
       expect(screen.getByTestId('changeHistoryPreview')).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId('workflowChangeHistoryYamlPreview')).toHaveTextContent(
-      'name: current'
-    );
+    expect(screen.getByTestId('workflowChangeHistoryMonacoPreview')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(applyWorkflowYamlValidationToEditor).toHaveBeenCalled();
+    });
     expect(services.http.get).toHaveBeenCalledWith(
       expect.stringContaining('/internal/workflows/workflow/workflow-1/history'),
       expect.objectContaining({
@@ -370,7 +441,7 @@ describe('WorkflowChangeHistoryListItem', () => {
     );
 
     await openHistoryModal();
-    await selectHistoricalVersion();
+    await selectHistoryItem();
 
     expect(screen.queryByTestId('changeHistoryRestoreButton')).not.toBeInTheDocument();
   });
