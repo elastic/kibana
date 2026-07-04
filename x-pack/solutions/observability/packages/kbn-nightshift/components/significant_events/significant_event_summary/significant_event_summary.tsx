@@ -21,17 +21,27 @@ import { i18n } from '@kbn/i18n';
 
 /**
  * The four fixed buckets the Nightshift summary surfaces. The order
- * matches the visual order (left → right) in the design. Kept internal
- * because the component is presentation-only — consumers don't need to
- * reference category ids from the outside.
+ * matches the visual order (left → right) in the design.
  *
  * Mapping to `SigEventStatus` (`@kbn/streams-schema`):
  * - `requireAction` ↔ `promoted`
  * - `inProgress`    ↔ `acknowledged`
  * - `resolved`      ↔ `resolved`
  * - `demoted`       ↔ `demoted`
+ *
+ * Exported (previously internal-only) so consumers can pass `visibleCategories`
+ * — e.g. the v0 Nightshift landing page only shows `requireAction`/`resolved`
+ * per the 2026-07-02 design decision to hide `acknowledged`/`demoted` from users
+ * for now. Defaults to all four so this is additive, not a behavior change.
  */
-type SignificantEventSummaryCategory = 'requireAction' | 'inProgress' | 'resolved' | 'demoted';
+export type SignificantEventSummaryCategory = 'requireAction' | 'inProgress' | 'resolved' | 'demoted';
+
+const ALL_CATEGORIES: SignificantEventSummaryCategory[] = [
+  'requireAction',
+  'inProgress',
+  'resolved',
+  'demoted',
+];
 
 export interface SignificantEventSummaryProps {
   /** Count of events requiring action (maps to `promoted` status). */
@@ -42,6 +52,21 @@ export interface SignificantEventSummaryProps {
   resolved: number;
   /** Count of events that have been demoted (maps to `demoted` status). */
   demoted: number;
+  /**
+   * Which of the four buckets to render, in this order. Defaults to all
+   * four. Pass a subset (e.g. `['requireAction', 'resolved']`) to hide the
+   * others without changing how counts are computed by the caller.
+   */
+  visibleCategories?: SignificantEventSummaryCategory[];
+  /**
+   * When provided, each card becomes a toggle button (Kate Sosedova's
+   * prototype uses the summary cards as an active filter for the list
+   * below, not just a static count) and calls back with the clicked
+   * category's id. Omit to keep the original read-only behavior.
+   */
+  onCategoryClick?: (category: SignificantEventSummaryCategory) => void;
+  /** When `onCategoryClick` is set, which category (if any) is currently active/selected. */
+  activeCategory?: SignificantEventSummaryCategory;
   /** Test subject hook. Defaults to `"significantEventSummary"`. */
   'data-test-subj'?: string;
 }
@@ -134,6 +159,9 @@ export function SignificantEventSummary({
   inProgress,
   resolved,
   demoted,
+  visibleCategories = ALL_CATEGORIES,
+  onCategoryClick,
+  activeCategory,
   'data-test-subj': dataTestSubj = 'significantEventSummary',
 }: SignificantEventSummaryProps) {
   const euiThemeContext = useEuiTheme();
@@ -195,26 +223,41 @@ export function SignificantEventSummary({
     },
   ];
 
+  const visibleCategoryConfigs = categories.filter((category) =>
+    visibleCategories.includes(category.id)
+  );
+
   return (
     <EuiFlexGroup gutterSize="s" responsive={true} data-test-subj={dataTestSubj}>
-      {categories.map((category) => (
-        <EuiFlexItem key={category.id}>
-          <EuiPanel hasBorder paddingSize="s" data-test-subj={`${dataTestSubj}-${category.id}`}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>{category.renderAvatar()}</EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <EuiStat
-                  title={category.value}
-                  description={category.label}
-                  titleSize="xs"
-                  textAlign="left"
-                  data-test-subj={`${dataTestSubj}-${category.id}-stat`}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      ))}
+      {visibleCategoryConfigs.map((category) => {
+        const isClickable = Boolean(onCategoryClick);
+        const isActive = isClickable && activeCategory === category.id;
+        return (
+          <EuiFlexItem key={category.id}>
+            <EuiPanel
+              hasBorder
+              paddingSize="s"
+              data-test-subj={`${dataTestSubj}-${category.id}`}
+              onClick={isClickable ? () => onCategoryClick!(category.id) : undefined}
+              color={isActive ? 'subdued' : 'plain'}
+              css={isClickable ? { cursor: 'pointer' } : undefined}
+            >
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>{category.renderAvatar()}</EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <EuiStat
+                    title={category.value}
+                    description={category.label}
+                    titleSize="xs"
+                    textAlign="left"
+                    data-test-subj={`${dataTestSubj}-${category.id}-stat`}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 }

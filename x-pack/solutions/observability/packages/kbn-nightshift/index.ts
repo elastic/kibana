@@ -25,3 +25,6 @@ export type {
 
 export { SignificantEventSummary } from './components/significant_events/significant_event_summary/significant_event_summary';
 export type { SignificantEventSummaryProps } from './components/significant_events/significant_event_summary/significant_event_summary';
+
+export { RootCauseCard } from './components/root_cause_card/root_cause_card';
+export type { RootCauseCardProps } from './components/root_cause_card/root_cause_card';

@@ -40,4 +40,13 @@ describe('SignificantEventSummary', () => {
     render(<SignificantEventSummary requireAction={0} inProgress={0} resolved={0} demoted={0} />);
     expect(screen.getAllByText('0')).toHaveLength(4);
   });
+
+  it('renders only the requested categories when visibleCategories is provided', () => {
+    render(<SignificantEventSummary {...baseProps} visibleCategories={['requireAction', 'resolved']} />);
+
+    expect(screen.getByText('Require action')).toBeInTheDocument();
+    expect(screen.getByText('Resolved')).toBeInTheDocument();
+    expect(screen.queryByText('In progress')).not.toBeInTheDocument();
+    expect(screen.queryByText('Demoted')).not.toBeInTheDocument();
+  });
 });
