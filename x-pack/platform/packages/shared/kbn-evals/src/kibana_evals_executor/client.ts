@@ -233,7 +233,18 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                       const _traceId = getCurrentTraceId();
                       const _result = await evaluator.evaluate({
                         input: example.input,
-                        output: { ...taskOutput, traceId },
+                        // Prefer the traceId the task itself produced (e.g. the agent-builder
+                        // converse RESPONSE body `trace_id`, which points at the server-side
+                        // inference trace where ChatComplete / gen_ai.usage.* token + duration spans
+                        // live). Fall back to the eval's client task-span trace id only when the task
+                        // did not surface its own. Previously `traceId` (the client task-span id) was
+                        // spread last and always won, so trace-based token/latency/toolCalls
+                        // evaluators queried the eval client trace (no inference spans) → null.
+                        // (elastic/kibana#276308)
+                        output: {
+                          ...taskOutput,
+                          traceId: (taskOutput as { traceId?: string })?.traceId ?? traceId,
+                        },
                         expected: example.output ?? null,
                         metadata: example.metadata ?? {},
                       });
