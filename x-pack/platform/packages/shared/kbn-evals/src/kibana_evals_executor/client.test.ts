@@ -246,6 +246,69 @@ describe('KibanaEvalsClient', () => {
     expect(exp.evaluationRuns.length).toBeGreaterThan(0);
   });
 
+  it('prefers a task-provided traceId over the client task-span id for evaluator output', async () => {
+    const client = createClient();
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+    // The task surfaces its own trace id (e.g. the agent-builder converse response body
+    // `trace_id`, which points at the server-side inference trace where the token / latency /
+    // tool spans live). It must win over the eval's client task-span trace id. (#276308)
+    const task = async () => ({ value: 1, traceId: 'task-response-trace' });
+
+    let seenOutputTraceId: string | undefined;
+    const evaluators: Array<
+      Evaluator<EvaluationDataset['examples'][number], { value: number; traceId?: string }>
+    > = [
+      {
+        name: 'CapturesTraceId',
+        kind: 'CODE',
+        evaluate: async ({ output }) => {
+          seenOutputTraceId = output?.traceId;
+          return { score: 1 };
+        },
+      },
+    ];
+
+    (getCurrentTraceId as jest.Mock).mockReturnValue('client-task-span-trace');
+
+    await client.runExperiment({ datasets: [dataset], task }, evaluators);
+
+    expect(seenOutputTraceId).toBe('task-response-trace');
+  });
+
+  it('falls back to the client task-span id when the task does not surface a traceId', async () => {
+    const client = createClient();
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+    const task = async () => ({ value: 1 });
+
+    let seenOutputTraceId: string | undefined;
+    const evaluators: Array<
+      Evaluator<EvaluationDataset['examples'][number], { value: number; traceId?: string }>
+    > = [
+      {
+        name: 'CapturesTraceId',
+        kind: 'CODE',
+        evaluate: async ({ output }) => {
+          seenOutputTraceId = output?.traceId;
+          return { score: 1 };
+        },
+      },
+    ];
+
+    (getCurrentTraceId as jest.Mock).mockReturnValue('client-task-span-trace');
+
+    await client.runExperiment({ datasets: [dataset], task }, evaluators);
+
+    expect(seenOutputTraceId).toBe('client-task-span-trace');
+  });
+
   it('limits concurrent task execution using the concurrency option', async () => {
     const client = createClient();
 
