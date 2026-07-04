@@ -7,6 +7,9 @@
 
 import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
+import { waitForEndpointPackage } from '../../src/data_generators/endpoint_data';
+import { seedForensicTimeline } from '../../src/data_generators/forensic_data';
+import { cleanupSeededData } from '../../src/data_generators/cleanup';
 
 /**
  * Slice 1 minimum-sufficient trajectory golden: ES|QL generate → execute.
@@ -22,12 +25,24 @@ evaluate.describe(
   'Endpoint Forensic Analysis — slice 1 smoke',
   { tag: tags.stateful.classic },
   () => {
-    evaluate.beforeAll(async ({ chatClient, log }) => {
+    // Seed an ordered ransomware kill chain (WKSTN-RECV01 → SRV-DC01) so `execute_esql`
+    // returns rows the model can sort into a real timeline. Without seeded events the
+    // "produces a chronological narrative or ordered event list" criterion is
+    // unsatisfiable and pins the timeline example at partial credit.
+    evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, chatClient, log }) => {
+      await waitForEndpointPackage(kbnClient, esClient, log);
+      await cleanupSeededData({ esClient, internalEsClient });
+      await seedForensicTimeline({ esClient }, log);
+
       try {
         await chatClient.converse({ message: 'hello' });
       } catch (e) {
         log.warning(`Warmup failed: ${e}`);
       }
+    });
+
+    evaluate.afterAll(async ({ esClient, internalEsClient }) => {
+      await cleanupSeededData({ esClient, internalEsClient });
     });
 
     evaluate('patient zero happy path', async ({ evaluateForensicDataset }) => {
