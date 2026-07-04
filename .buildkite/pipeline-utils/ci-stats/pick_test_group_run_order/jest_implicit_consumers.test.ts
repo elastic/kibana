@@ -22,6 +22,15 @@ describe('expandJestImplicitConsumers', () => {
     expect(expanded.has('@kbn/alerting-plugin')).toBe(true);
   });
 
+  it('adds encrypted_saved_objects when an upstream plugin changes SO registration', () => {
+    const affected = new Set(['@kbn/fleet-plugin']);
+    const changedFiles = ['x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts'];
+
+    const expanded = expandJestImplicitConsumers(affected, changedFiles);
+
+    expect(expanded.has('@kbn/encrypted-saved-objects-plugin')).toBe(true);
+  });
+
   it('does not add encrypted_saved_objects for unrelated changes', () => {
     const affected = new Set(['@kbn/alerting-plugin']);
     const changedFiles = ['x-pack/platform/plugins/shared/alerting/server/routes/foo.ts'];

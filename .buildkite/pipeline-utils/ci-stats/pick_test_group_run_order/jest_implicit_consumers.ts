@@ -28,10 +28,13 @@ const ENCRYPTED_SAVED_OBJECTS_PLUGIN = '@kbn/encrypted-saved-objects-plugin';
 
 const IMPLICIT_JEST_CONSUMERS: readonly ImplicitConsumerRule[] = [
   {
-    reason: 'Encrypted SO model-version/schema changes must refresh the ESO ci_checks snapshot.',
+    reason:
+      'Encrypted SO registration, model-version, or schema changes must refresh the ESO ci_checks snapshot.',
     patterns: [
+      '**/server/saved_objects/index.{ts,tsx}',
       '**/server/saved_objects/model_versions/**/*.{ts,tsx}',
       '**/server/saved_objects/schemas/**/*.{ts,tsx}',
+      '**/packages/**/server/saved_objects/index.{ts,tsx}',
       '**/packages/**/server/saved_objects/model_versions/**/*.{ts,tsx}',
       '**/packages/**/server/saved_objects/schemas/**/*.{ts,tsx}',
     ],
