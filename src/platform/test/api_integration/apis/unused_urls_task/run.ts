@@ -20,6 +20,14 @@ const shouldFailSmartRetryProbe = () => {
   return (process.env.BUILDKITE_RETRY_COUNT ?? '0') === '0';
 };
 
+const shouldFailSecondSmartRetryAttemptProbe = () => {
+  if (!isSmartRetryEnabled()) {
+    return false;
+  }
+
+  return process.env.BUILDKITE_RETRY_COUNT === '1';
+};
+
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
@@ -57,6 +65,13 @@ export default function ({ getService }: FtrProviderContext) {
       // Probe FTR_SMART_RETRY by failing only on the first smart-retry-enabled attempt.
       if (shouldFailSmartRetryProbe()) {
         throw new Error('FTR smart retry probe failed intentionally on the first attempt');
+      }
+    });
+
+    it('fails on the smart retry attempt', () => {
+      // Probe FTR_SMART_RETRY by failing only on the first retry attempt.
+      if (shouldFailSecondSmartRetryAttemptProbe()) {
+        throw new Error('FTR smart retry probe failed intentionally on the second attempt');
       }
     });
   });
