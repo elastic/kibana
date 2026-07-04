@@ -47,14 +47,14 @@ describe('assignAlertInputSchema', () => {
     expect(() => assignAlertInputSchema.parse(input)).toThrow();
   });
 
-  it('should fail if assignees_to_add is missing', () => {
+  it('should validate if assignees_to_add is missing', () => {
     const input = { alert_ids: 'alert-1', assignees_to_remove: ['user1'] };
-    expect(() => assignAlertInputSchema.parse(input)).toThrow();
+    expect(assignAlertInputSchema.parse(input)).toEqual({ ...input, assignees_to_add: [] });
   });
 
-  it('should fail if assignees_to_remove is missing', () => {
+  it('should validate if assignees_to_remove is missing', () => {
     const input = { alert_ids: 'alert-1', assignees_to_add: ['user1'] };
-    expect(() => assignAlertInputSchema.parse(input)).toThrow();
+    expect(assignAlertInputSchema.parse(input)).toEqual({ ...input, assignees_to_remove: [] });
   });
 
   it('should fail if alert_ids is missing', () => {
