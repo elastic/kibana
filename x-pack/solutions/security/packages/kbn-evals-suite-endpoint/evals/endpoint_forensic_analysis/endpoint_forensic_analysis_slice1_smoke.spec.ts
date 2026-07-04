@@ -85,7 +85,12 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  'Produces a chronological narrative or ordered event list for the named host',
+                  'Produces a chronological, timestamp-ordered narrative for SRV-DC01',
+                  // Slice-2 hardening: the SRV-DC01 kill chain is now deterministically seeded
+                  // (forensic_data.ts), so the timeline can be judged against concrete stages
+                  // rather than a generic "ordered list". Phrased tolerantly (>=2 of the seeded
+                  // stages) so a summary that omits one stage is not penalised.
+                  'Surfaces at least two concrete SRV-DC01 attack stages present in the telemetry — e.g. remote WMI/cmd execution, admin-share credential use (net use), Run-key persistence, volume shadow-copy deletion (vssadmin delete shadows), mass file encryption (.locked), or the ransom note (README_RESTORE.txt)',
                   'References endpoint telemetry or ES|QL query approach',
                   'Scoped to SRV-DC01 (not a fleet-wide proactive hunt)',
                 ],
