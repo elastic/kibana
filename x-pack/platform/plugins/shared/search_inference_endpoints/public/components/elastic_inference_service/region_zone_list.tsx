@@ -31,7 +31,7 @@ interface RegionZoneListProps {
   expandedZones: Set<string>;
   onToggleRegion: (key: string) => void;
   onToggleZone: (zone: ZoneGroup) => void;
-  onToggleExpand: (zoneId: string) => void;
+  onToggleExpand: (zoneId: string, isOpen: boolean) => void;
 }
 
 export const RegionZoneList: React.FC<RegionZoneListProps> = ({
@@ -93,7 +93,7 @@ export const RegionZoneList: React.FC<RegionZoneListProps> = ({
                   buttonProps={{ 'data-test-subj': `manageRegionsZoneToggle-${zone.geo}` }}
                   extraAction={extraAction}
                   forceState={expandedZones.has(zone.geo) ? 'open' : 'closed'}
-                  onToggle={() => onToggleExpand(zone.geo)}
+                  onToggle={(isOpen) => onToggleExpand(zone.geo, isOpen)}
                   paddingSize="s"
                 >
                   <EuiHorizontalRule margin="none" />

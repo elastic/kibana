@@ -107,13 +107,13 @@ export const useManageRegionsState = (onClose: () => void) => {
     [checkedKeys]
   );
 
-  const handleToggleExpand = useCallback((zoneId: string) => {
+  const handleToggleExpand = useCallback((zoneId: string, isOpen: boolean) => {
     setExpandedZones((prev) => {
       const next = new Set(prev);
-      if (next.has(zoneId)) {
-        next.delete(zoneId);
-      } else {
+      if (isOpen) {
         next.add(zoneId);
+      } else {
+        next.delete(zoneId);
       }
       return next;
     });
