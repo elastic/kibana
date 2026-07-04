@@ -724,3 +724,15 @@ export const INVALID_YAML_DEFINITION = i18n.translate(
   'xpack.cases.templates.invalidYamlDefinition',
   { defaultMessage: 'Invalid YAML definition' }
 );
+
+export const CONNECTOR_TITLE = i18n.translate('xpack.cases.templates.preview.connectorTitle', {
+  defaultMessage: 'Connector',
+});
+
+export const CONNECTOR_NOT_FOUND = i18n.translate(
+  'xpack.cases.templates.preview.connectorNotFound',
+  {
+    defaultMessage:
+      'Connector not found. Cases created from this template will fall back to no connector.',
+  }
+);
