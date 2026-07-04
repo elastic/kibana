@@ -76,21 +76,23 @@ export const createContextAwarenessToolkit = ({
         return {
           getState,
           getState$: () => state$,
-          setState: (profileState) => {
+          setState: (profileState, options) => {
             internalState.dispatch(
               internalStateActions.setProfileState({
                 tabId,
-                key: definition.key,
+                profileStateDefinition: definition,
                 profileState,
+                historyMethod: options?.historyMethod,
               })
             );
           },
-          updateState: (stateUpdate) => {
+          updateState: (stateUpdate, options) => {
             internalState.dispatch(
               internalStateActions.setProfileState({
                 tabId,
-                key: definition.key,
+                profileStateDefinition: definition,
                 profileState: { ...getState(), ...stateUpdate },
+                historyMethod: options?.historyMethod,
               })
             );
           },

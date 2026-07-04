@@ -13,11 +13,13 @@ import { ProfileStateType } from '../../profile_state';
 
 export interface ExampleProfileState {
   timestampColor: string;
+  docViewMode: 'summary' | 'details';
   rowControlColor: NonNullable<RowControlProps['color']>;
 }
 
 export const EXAMPLE_PROFILE_STATE_DEFAULTS: ExampleProfileState = {
   timestampColor: 'hollow',
+  docViewMode: 'summary',
   rowControlColor: 'text',
 };
 
@@ -25,6 +27,7 @@ export const EXAMPLE_PROFILE_STATE_DEF: ProfileStateDefinition<ExampleProfileSta
   key: 'exampleProfileState',
   descriptor: {
     timestampColor: { type: ProfileStateType.Ui },
+    docViewMode: { type: ProfileStateType.Url },
     rowControlColor: { type: ProfileStateType.Persistent },
   },
   defaultState: EXAMPLE_PROFILE_STATE_DEFAULTS,

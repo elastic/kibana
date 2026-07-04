@@ -10,6 +10,13 @@
 import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 
+export interface ProfileStateMutationOptions {
+  /**
+   * Controls how URL-backed hosts update browser history for this mutation.
+   */
+  historyMethod?: 'push' | 'replace';
+}
+
 /**
  * Host-backed profile state API exposed to profile extension point implementations.
  */
@@ -26,11 +33,11 @@ export interface ProfileStateAdapter<TState extends object> {
   /**
    * Replaces the full state value.
    */
-  setState: (state: TState) => void;
+  setState: (state: TState, options?: ProfileStateMutationOptions) => void;
   /**
    * Applies a shallow immutable update to the current state.
    */
-  updateState: (stateUpdate: Partial<TState>) => void;
+  updateState: (stateUpdate: Partial<TState>, options?: ProfileStateMutationOptions) => void;
 }
 
 /**

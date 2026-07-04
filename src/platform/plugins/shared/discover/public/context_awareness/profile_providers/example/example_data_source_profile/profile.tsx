@@ -95,6 +95,28 @@ const getRowControlColor = (value: string) =>
   rowControlColorOptions.find((option) => option.value === value)?.value ??
   EXAMPLE_PROFILE_STATE_DEFAULTS.rowControlColor;
 
+const docViewModeOptions: Array<{
+  value: ExampleProfileState['docViewMode'];
+  text: string;
+}> = [
+  {
+    value: 'summary',
+    text: i18n.translate('discover.exampleProfile.docViewModeSummaryDropDownOptionLabel', {
+      defaultMessage: 'Summary',
+    }),
+  },
+  {
+    value: 'details',
+    text: i18n.translate('discover.exampleProfile.docViewModeDetailsDropDownOptionLabel', {
+      defaultMessage: 'Details',
+    }),
+  },
+];
+
+const getDocViewMode = (value: string) =>
+  docViewModeOptions.find((option) => option.value === value)?.value ??
+  EXAMPLE_PROFILE_STATE_DEFAULTS.docViewMode;
+
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
 }> => ({
@@ -171,6 +193,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             function ProfileStateExample() {
               const profileState = useObservable(profileState$, stateAdapter.getState());
               const timestampColor = profileState.timestampColor;
+              const docViewMode = profileState.docViewMode;
               const rowControlColor = profileState.rowControlColor;
 
               return (
@@ -196,6 +219,35 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
                       value={timestampColor}
                       onChange={(event) => {
                         stateAdapter.updateState({ timestampColor: event.target.value });
+                      }}
+                    />
+                  </EuiFormRow>
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="discover.exampleProfile.docViewModeLabel"
+                        defaultMessage="Document view mode"
+                      />
+                    }
+                    helpText={
+                      <FormattedMessage
+                        id="discover.exampleProfile.docViewModeUrlStateDescription"
+                        defaultMessage="This URL-backed field is synced through the _p URL parameter for the active data source profile."
+                      />
+                    }
+                  >
+                    <EuiSelect
+                      data-test-subj="exampleProfileStateDocViewModeSelect"
+                      aria-label={i18n.translate('discover.exampleProfile.docViewModeAriaLabel', {
+                        defaultMessage: 'Select document view mode',
+                      })}
+                      options={docViewModeOptions}
+                      value={docViewMode}
+                      onChange={(event) => {
+                        stateAdapter.updateState(
+                          { docViewMode: getDocViewMode(event.target.value) },
+                          { historyMethod: 'replace' }
+                        );
                       }}
                     />
                   </EuiFormRow>
@@ -462,6 +514,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       context: {
         category: DataSourceCategory.Logs,
         formatRecord: (record) => JSON.stringify(record, null, 2),
+        profileState: EXAMPLE_PROFILE_STATE_DEF,
       },
     };
   },

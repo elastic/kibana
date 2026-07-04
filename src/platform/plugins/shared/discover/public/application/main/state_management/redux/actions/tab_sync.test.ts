@@ -25,11 +25,14 @@ import * as tabSyncApi from './tab_sync';
 import * as createTabPersistableStateObservableModule from '../../utils/create_tab_persistable_state_observable';
 import * as resolveDataViewModule from '../../utils/resolve_data_view';
 import type { TabPersistableState } from '../../utils/create_tab_persistable_state_observable';
+import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 
 const { initializeAndSync, stopSyncing } = tabSyncApi;
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
+  services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
   const toolkit = getDiscoverInternalStateMock({
     services,
     persistedDataViews: [dataViewMockWithTimeField],
@@ -51,6 +54,28 @@ const setup = async () => {
     tabId: persistedTab.id,
     persistedDiscoverSession,
   };
+};
+
+const setActiveDataSourceProfileState = ({
+  runtimeStateManager,
+  tabId,
+}: {
+  runtimeStateManager: Awaited<ReturnType<typeof setup>>['runtimeStateManager'];
+  tabId: string;
+}) => {
+  const scopedProfilesManager = selectTabRuntimeState(
+    runtimeStateManager,
+    tabId
+  ).scopedProfilesManager$.getValue();
+  const contexts = scopedProfilesManager.getContexts();
+
+  jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+    ...contexts,
+    dataSourceContext: {
+      ...contexts.dataSourceContext,
+      profileState: TEST_PROFILE_STATE_DEF,
+    },
+  });
 };
 
 describe('tab_sync actions', () => {
@@ -268,6 +293,32 @@ describe('tab_sync actions', () => {
 
       // Verify the action creator was called with the correct tabId
       expect(syncLocallyPersistedTabStateSpy).toHaveBeenCalledWith({ tabId });
+    });
+
+    it('should sync profile URL state changes into Redux', async () => {
+      const {
+        tabId,
+        initializeSingleTab,
+        internalState,
+        runtimeStateManager,
+        stateStorageContainer,
+      } = await setup();
+
+      await initializeSingleTab({ tabId });
+      setActiveDataSourceProfileState({ runtimeStateManager, tabId });
+
+      await stateStorageContainer.set(PROFILE_STATE_URL_KEY, {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'nextUrl',
+        },
+      });
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+        [TEST_PROFILE_STATE_DEF.key]: {
+          ...TEST_PROFILE_STATE_DEF.defaultState,
+          urlValue: 'nextUrl',
+        },
+      });
     });
 
     it('should unsubscribe from tabStateSubscription when stopSyncing is called', async () => {

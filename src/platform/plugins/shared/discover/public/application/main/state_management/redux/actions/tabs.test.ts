@@ -19,11 +19,13 @@ import {
   createRuntimeStateManager,
   selectAllTabs,
   selectTab,
+  selectTabRuntimeState,
   internalStateActions,
   DEFAULT_TAB_STATE,
 } from '..';
 import * as runtimeStateModule from '../runtime_state';
 import * as contextAwarenessToolkitModule from '../context_awareness_toolkit';
+import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
@@ -48,6 +50,28 @@ const setup = async () => {
   });
 
   return toolkit;
+};
+
+const setActiveDataSourceProfileState = ({
+  runtimeStateManager,
+  tabId,
+}: {
+  runtimeStateManager: Awaited<ReturnType<typeof setup>>['runtimeStateManager'];
+  tabId: string;
+}) => {
+  const scopedProfilesManager = selectTabRuntimeState(
+    runtimeStateManager,
+    tabId
+  ).scopedProfilesManager$.getValue();
+  const contexts = scopedProfilesManager.getContexts();
+
+  jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+    ...contexts,
+    dataSourceContext: {
+      ...contexts.dataSourceContext,
+      profileState: TEST_PROFILE_STATE_DEF,
+    },
+  });
 };
 
 describe('tabs actions', () => {
@@ -127,7 +151,7 @@ describe('tabs actions', () => {
       internalState.dispatch(
         internalStateActions.setProfileState({
           tabId: currentTab.id,
-          key: 'testProfileState',
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
           profileState,
         })
       );
@@ -147,6 +171,68 @@ describe('tabs actions', () => {
       expect(selectTab(internalState.getState(), duplicatedTab.id).profileState).toEqual({
         testProfileState: profileState,
       });
+    });
+
+    it('replaces profile URL state when switching selected tabs', async () => {
+      const {
+        internalState,
+        runtimeStateManager,
+        stateStorageContainer,
+        initializeSingleTab,
+        getCurrentTab,
+      } = await setup();
+      const currentTab = getCurrentTab();
+      const profileState = {
+        ...TEST_PROFILE_STATE_DEF.defaultState,
+        uiValue: 'ui',
+        urlValue: 'urlFromOtherTab',
+      };
+
+      await initializeSingleTab({ tabId: currentTab.id, skipWaitForDataFetching: true });
+
+      const otherTab = {
+        ...DEFAULT_TAB_STATE,
+        ...createTabItem(selectAllTabs(internalState.getState())),
+        id: 'other-tab',
+        profileState: {
+          [TEST_PROFILE_STATE_DEF.key]: profileState,
+        },
+      };
+
+      await internalState.dispatch(
+        internalStateActions.updateTabs({
+          items: [...selectAllTabs(internalState.getState()), otherTab],
+          selectedItem: otherTab,
+        })
+      );
+      await initializeSingleTab({ tabId: otherTab.id, skipWaitForDataFetching: true });
+      setActiveDataSourceProfileState({ runtimeStateManager, tabId: otherTab.id });
+
+      await internalState.dispatch(
+        internalStateActions.updateTabs({
+          items: selectAllTabs(internalState.getState()),
+          selectedItem: selectTab(internalState.getState(), currentTab.id),
+        })
+      );
+
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+
+      await internalState.dispatch(
+        internalStateActions.updateTabs({
+          items: selectAllTabs(internalState.getState()),
+          selectedItem: selectTab(internalState.getState(), otherTab.id),
+        })
+      );
+
+      expect(setUrlStateSpy).toHaveBeenCalledWith(
+        PROFILE_STATE_URL_KEY,
+        {
+          [TEST_PROFILE_STATE_DEF.key]: {
+            urlValue: 'urlFromOtherTab',
+          },
+        },
+        { replace: true }
+      );
     });
 
     it('starts fresh tabs with empty profile state', async () => {
@@ -183,7 +269,7 @@ describe('tabs actions', () => {
       internalState.dispatch(
         internalStateActions.setProfileState({
           tabId: currentTab.id,
-          key: 'testProfileState',
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
           profileState: { uiValue: 'ui', persistentValue: 'persistent' },
         })
       );

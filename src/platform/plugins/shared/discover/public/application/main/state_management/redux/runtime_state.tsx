@@ -130,6 +130,15 @@ export const selectDataSourceProfileId = (
     .getContexts().dataSourceContext.profileId;
 };
 
+export const selectDataSourceProfileState = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string
+) => {
+  return selectTabRuntimeState(runtimeStateManager, tabId)
+    .scopedProfilesManager$.getValue()
+    .getContexts().dataSourceContext.profileState;
+};
+
 export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
   runtimeStateManager: RuntimeStateManager,
   dataViewId: string

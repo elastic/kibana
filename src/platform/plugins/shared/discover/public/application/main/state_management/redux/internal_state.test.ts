@@ -28,9 +28,13 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createTabsStorageManager } from '../tabs_storage_manager';
 import { DiscoverSearchSessionManager } from '../discover_search_session';
 import { selectDataSourceProfileId } from './runtime_state';
+import { PROFILE_STATE_URL_KEY } from '../../../../../common/constants';
+import { TEST_PROFILE_STATE_DEF } from '../../../../context_awareness/__mocks__/profile_state';
 
 describe('InternalStateStore', () => {
   const services = createDiscoverServicesMock();
+
+  services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
 
   const createTestStore = async () => {
     const urlStateStorage = createKbnUrlStateStorage();
@@ -53,7 +57,26 @@ describe('InternalStateStore', () => {
     });
     await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
 
-    return { store, runtimeStateManager };
+    return { store, runtimeStateManager, urlStateStorage };
+  };
+
+  const setActiveDataSourceProfileState = (
+    runtimeStateManager: ReturnType<typeof createRuntimeStateManager>,
+    tabId: string
+  ) => {
+    const scopedProfilesManager = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    ).scopedProfilesManager$.getValue();
+    const contexts = scopedProfilesManager.getContexts();
+
+    jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+      ...contexts,
+      dataSourceContext: {
+        ...contexts.dataSourceContext,
+        profileState: TEST_PROFILE_STATE_DEF,
+      },
+    });
   };
 
   it('should set data view', async () => {
@@ -65,6 +88,37 @@ describe('InternalStateStore', () => {
     store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
     expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value).toBe(
       dataViewMock
+    );
+  });
+
+  it('should write active profile URL state when profile state changes', async () => {
+    const { store, runtimeStateManager, urlStateStorage } = await createTestStore();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const setUrlStateSpy = jest.spyOn(urlStateStorage, 'set');
+    setActiveDataSourceProfileState(runtimeStateManager, tabId);
+
+    store.dispatch(
+      internalStateActions.setProfileState({
+        tabId,
+        profileStateDefinition: TEST_PROFILE_STATE_DEF,
+        profileState: {
+          uiValue: 'ui',
+          urlValue: 'nextUrl',
+          persistentValue: 'persistent',
+          nestedValue: { count: 1 },
+        },
+        historyMethod: 'replace',
+      })
+    );
+
+    expect(setUrlStateSpy).toHaveBeenCalledWith(
+      PROFILE_STATE_URL_KEY,
+      {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'nextUrl',
+        },
+      },
+      { replace: true }
     );
   });
 

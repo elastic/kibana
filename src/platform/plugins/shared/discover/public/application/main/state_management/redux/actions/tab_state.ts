@@ -23,19 +23,26 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   getDefaultSort,
 } from '@kbn/discover-utils';
-import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { isEqualState } from '../../utils/state_comparators';
+import { getProfileUrlState } from '../../utils/profile_state_url';
 import {
   internalStateSlice,
+  type InternalStateDependencies,
   type InternalStateThunkActionCreator,
   type TabActionPayload,
   transitionedFromEsqlToDataView,
   transitionedFromDataViewToEsql,
 } from '../internal_state';
+import { ProfileStateType, type ProfileStateDefinition } from '../../../../../context_awareness';
 import { selectTab } from '../selectors';
-import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
+import {
+  selectDataSourceProfileId,
+  selectDataSourceProfileState,
+  selectTabRuntimeState,
+} from '../runtime_state';
 import type {
   DiscoverAppState,
   DiscoverInternalState,
@@ -152,6 +159,30 @@ export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayl
     }
   };
 
+/**
+ * Partially update the tab global state, merging with existing state and replacing URL history
+ */
+export const updateGlobalStateAndReplaceUrl: InternalStateThunkActionCreator<
+  [GlobalStatePayload],
+  Promise<void>
+> = (payload) =>
+  async function updateGlobalStateAndReplaceUrlThunkFn(dispatch, getState, { urlStateStorage }) {
+    const currentState = getState();
+
+    if (currentState.tabs.unsafeCurrentId !== payload.tabId) {
+      return dispatch(updateGlobalState(payload));
+    }
+
+    const { mergedGlobalState } = mergeGlobalState(currentState, payload);
+    const globalUrlState: GlobalQueryStateFromUrl = {
+      time: mergedGlobalState.timeRange,
+      refreshInterval: mergedGlobalState.refreshInterval,
+      filters: mergedGlobalState.filters,
+    };
+
+    await urlStateStorage.set(GLOBAL_STATE_URL_KEY, globalUrlState, { replace: true });
+  };
+
 type AttributesPayload = TabActionPayload<{ attributes: Partial<TabState['attributes']> }>;
 
 const mergeAttributes = (
@@ -183,28 +214,193 @@ export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayloa
     }
   };
 
-/**
- * Partially update the tab global state, merging with existing state and replacing URL history
- */
-export const updateGlobalStateAndReplaceUrl: InternalStateThunkActionCreator<
-  [GlobalStatePayload],
-  Promise<void>
-> = (payload) =>
-  async function updateGlobalStateAndReplaceUrlThunkFn(dispatch, getState, { urlStateStorage }) {
-    const currentState = getState();
+type ProfileStatePayload = TabActionPayload<{
+  profileStateDefinition: ProfileStateDefinition<object>;
+  profileState: object;
+  historyMethod?: 'push' | 'replace';
+}>;
 
-    if (currentState.tabs.unsafeCurrentId !== payload.tabId) {
-      return dispatch(updateGlobalState(payload));
+const getCurrentProfileState = (
+  currentState: DiscoverInternalState,
+  { tabId, profileStateDefinition }: ProfileStatePayload
+) => {
+  return (
+    selectTab(currentState, tabId).profileState[profileStateDefinition.key] ??
+    profileStateDefinition.defaultState
+  );
+};
+
+const mergeProfileState = (currentState: DiscoverInternalState, payload: ProfileStatePayload) => {
+  const currentProfileState = getCurrentProfileState(currentState, payload);
+  const mergedProfileState = { ...currentProfileState, ...payload.profileState };
+
+  return {
+    mergedProfileState,
+    hasStateChanges: !isEqual(currentProfileState, mergedProfileState),
+  };
+};
+
+const getActiveProfileStateDefinition = ({
+  runtimeStateManager,
+  tabId,
+}: {
+  runtimeStateManager: InternalStateDependencies['runtimeStateManager'];
+  tabId: string;
+}) => {
+  if (!runtimeStateManager.tabs.byId[tabId]) {
+    return;
+  }
+
+  return selectDataSourceProfileState(runtimeStateManager, tabId);
+};
+
+const getUrlProfileState = ({
+  profileState,
+  profileStateDefinition,
+  services,
+}: {
+  profileState: object;
+  profileStateDefinition: ProfileStateDefinition<object>;
+  services: InternalStateDependencies['services'];
+}) => {
+  return getProfileUrlState({
+    profileState: { [profileStateDefinition.key]: profileState },
+    profileStateDefinition,
+    profileStateRegistry: services.profileStateRegistry,
+  });
+};
+
+const writeProfileUrlState = ({
+  payload,
+  services,
+  urlStateStorage,
+}: {
+  payload: ProfileStatePayload;
+  services: InternalStateDependencies['services'];
+  urlStateStorage: InternalStateDependencies['urlStateStorage'];
+}) => {
+  const profileUrlState = getUrlProfileState({
+    profileState: payload.profileState,
+    profileStateDefinition: payload.profileStateDefinition,
+    services,
+  });
+
+  void urlStateStorage.set(PROFILE_STATE_URL_KEY, profileUrlState ?? null, {
+    replace: payload.historyMethod === 'replace',
+  });
+  urlStateStorage.kbnUrlControls.flush();
+};
+
+const getProfileStateWithUpdatedNonUrlFields = ({
+  currentProfileState,
+  nextProfileState,
+  profileStateDefinition,
+}: {
+  currentProfileState: object;
+  nextProfileState: object;
+  profileStateDefinition: ProfileStateDefinition<object>;
+}) => {
+  const profileStateForRedux: Record<string, unknown> = { ...currentProfileState };
+
+  for (const [key, descriptor] of Object.entries(profileStateDefinition.descriptor)) {
+    if (descriptor.type === ProfileStateType.Url) {
+      continue;
     }
 
-    const { mergedGlobalState } = mergeGlobalState(currentState, payload);
-    const globalUrlState: GlobalQueryStateFromUrl = {
-      time: mergedGlobalState.timeRange,
-      refreshInterval: mergedGlobalState.refreshInterval,
-      filters: mergedGlobalState.filters,
-    };
+    const nextEntry = Object.entries(nextProfileState).find(([nextKey]) => nextKey === key);
 
-    await urlStateStorage.set(GLOBAL_STATE_URL_KEY, globalUrlState, { replace: true });
+    if (nextEntry) {
+      profileStateForRedux[key] = nextEntry[1];
+    }
+  }
+
+  return profileStateForRedux;
+};
+
+export const setProfileState: InternalStateThunkActionCreator<[ProfileStatePayload]> = (payload) =>
+  function setProfileStateThunkFn(
+    dispatch,
+    getState,
+    { runtimeStateManager, services, urlStateStorage }
+  ) {
+    const currentState = getState();
+    const currentProfileState = getCurrentProfileState(currentState, payload);
+    const activeProfileStateDefinition = getActiveProfileStateDefinition({
+      runtimeStateManager,
+      tabId: payload.tabId,
+    });
+
+    if (isEqual(currentProfileState, payload.profileState)) {
+      return;
+    }
+
+    if (
+      currentState.tabs.unsafeCurrentId !== payload.tabId ||
+      activeProfileStateDefinition?.key !== payload.profileStateDefinition.key
+    ) {
+      dispatch(
+        internalStateSlice.actions.setProfileState({
+          tabId: payload.tabId,
+          key: payload.profileStateDefinition.key,
+          profileState: payload.profileState,
+          historyMethod: payload.historyMethod,
+        })
+      );
+      return;
+    }
+
+    const currentProfileUrlState = getUrlProfileState({
+      profileState: currentProfileState,
+      profileStateDefinition: payload.profileStateDefinition,
+      services,
+    });
+    const nextProfileUrlState = getUrlProfileState({
+      profileState: payload.profileState,
+      profileStateDefinition: payload.profileStateDefinition,
+      services,
+    });
+    const profileStateForRedux = getProfileStateWithUpdatedNonUrlFields({
+      currentProfileState,
+      nextProfileState: payload.profileState,
+      profileStateDefinition: payload.profileStateDefinition,
+    });
+
+    if (!isEqual(currentProfileState, profileStateForRedux)) {
+      dispatch(
+        internalStateSlice.actions.setProfileState({
+          tabId: payload.tabId,
+          key: payload.profileStateDefinition.key,
+          profileState: profileStateForRedux,
+          historyMethod: payload.historyMethod,
+        })
+      );
+    }
+
+    if (!isEqual(currentProfileUrlState, nextProfileUrlState)) {
+      writeProfileUrlState({
+        payload,
+        services,
+        urlStateStorage,
+      });
+    }
+  };
+
+export const updateProfileState: InternalStateThunkActionCreator<[ProfileStatePayload]> = (
+  payload
+) =>
+  function updateProfileStateThunkFn(
+    dispatch,
+    getState,
+    { runtimeStateManager, services, urlStateStorage }
+  ) {
+    const currentState = getState();
+    const { mergedProfileState, hasStateChanges } = mergeProfileState(currentState, payload);
+
+    if (!hasStateChanges) {
+      return;
+    }
+
+    dispatch(setProfileState({ ...payload, profileState: mergedProfileState }));
   };
 
 /**
@@ -214,7 +410,28 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
   [TabActionPayload],
   Promise<void>
 > = ({ tabId }) =>
-  async function pushCurrentTabStateToUrlThunkFn(dispatch) {
+  async function pushCurrentTabStateToUrlThunkFn(
+    dispatch,
+    getState,
+    { runtimeStateManager, services, urlStateStorage }
+  ) {
+    const profileStateDefinition = getActiveProfileStateDefinition({ runtimeStateManager, tabId });
+
+    if (profileStateDefinition) {
+      const profileState = selectTab(getState(), tabId).profileState[profileStateDefinition.key];
+
+      writeProfileUrlState({
+        payload: {
+          tabId,
+          profileStateDefinition,
+          profileState: profileState ?? profileStateDefinition.defaultState,
+          historyMethod: 'replace',
+        },
+        services,
+        urlStateStorage,
+      });
+    }
+
     await Promise.all([
       dispatch(updateGlobalStateAndReplaceUrl({ tabId, globalState: {} })),
       dispatch(updateAppStateAndReplaceUrl({ tabId, appState: {} })),

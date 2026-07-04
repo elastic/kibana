@@ -45,6 +45,7 @@ export const internalStateActions = {
     'disconnectTab',
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
+    'setProfileState',
     'syncProfileStateSnapshot'
   ),
   ...actions,

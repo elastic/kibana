@@ -11,16 +11,18 @@ import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_
 import { type DiscoverAppState, internalStateActions, selectTab } from '..';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
-import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
-import { selectDataSourceProfileId } from '../runtime_state';
+import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
+import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
+  services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
   const toolkit = getDiscoverInternalStateMock({
     services,
     persistedDataViews: [dataViewMockWithTimeField],
@@ -49,6 +51,28 @@ const setup = async () => {
     ...toolkit,
     tabId: persistedTab.id,
   };
+};
+
+const setActiveDataSourceProfileState = ({
+  runtimeStateManager,
+  tabId,
+}: {
+  runtimeStateManager: Awaited<ReturnType<typeof setup>>['runtimeStateManager'];
+  tabId: string;
+}) => {
+  const scopedProfilesManager = selectTabRuntimeState(
+    runtimeStateManager,
+    tabId
+  ).scopedProfilesManager$.getValue();
+  const contexts = scopedProfilesManager.getContexts();
+
+  jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+    ...contexts,
+    dataSourceContext: {
+      ...contexts.dataSourceContext,
+      profileState: TEST_PROFILE_STATE_DEF,
+    },
+  });
 };
 
 describe('tab_state actions', () => {
@@ -112,6 +136,159 @@ describe('tab_state actions', () => {
       expect(currentSnapshotsByProfileId[profileId]).not.toBeUndefined();
       expect(currentSnapshotsByProfileId[profileId]?.columns).toEqual(['message']);
       expect(currentSnapshotsByProfileId[profileId]?.hideChart).toBe(true);
+    });
+  });
+
+  describe('setProfileState', () => {
+    it('replaces profile state and synchronously writes active profile URL state', async () => {
+      const { internalState, runtimeStateManager, stateStorageContainer, tabId } = await setup();
+      const profileState = {
+        ...TEST_PROFILE_STATE_DEF.defaultState,
+        uiValue: 'ui',
+        urlValue: 'nextUrl',
+        persistentValue: 'persistent',
+      };
+      const expectedUrlState = {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'nextUrl',
+        },
+      };
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const flushSpy = jest.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
+
+      setActiveDataSourceProfileState({ runtimeStateManager, tabId });
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState,
+        })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+        [TEST_PROFILE_STATE_DEF.key]: profileState,
+      });
+      expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, expectedUrlState, {
+        replace: false,
+      });
+      expect(flushSpy).toHaveBeenCalledWith();
+      expect(stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toEqual(expectedUrlState);
+    });
+
+    it('does not dispatch or write URL state when profile state is unchanged', async () => {
+      const { internalState, runtimeStateManager, stateStorageContainer, tabId } = await setup();
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const flushSpy = jest.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
+
+      setActiveDataSourceProfileState({ runtimeStateManager, tabId });
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState: TEST_PROFILE_STATE_DEF.defaultState,
+        })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({});
+      expect(setUrlStateSpy).not.toHaveBeenCalled();
+      expect(flushSpy).not.toHaveBeenCalled();
+    });
+
+    it('updates Redux state without writing URL state when profile state is not active', async () => {
+      const { internalState, stateStorageContainer, tabId } = await setup();
+      const profileState = {
+        ...TEST_PROFILE_STATE_DEF.defaultState,
+        urlValue: 'nextUrl',
+      };
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const flushSpy = jest.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
+
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState,
+        })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+        [TEST_PROFILE_STATE_DEF.key]: profileState,
+      });
+      expect(setUrlStateSpy).not.toHaveBeenCalled();
+      expect(flushSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateProfileState', () => {
+    it('merges partial profile state with defaults', async () => {
+      const { internalState, tabId } = await setup();
+
+      internalState.dispatch(
+        internalStateActions.updateProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState: {
+            urlValue: 'nextUrl',
+          },
+        })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+        [TEST_PROFILE_STATE_DEF.key]: {
+          ...TEST_PROFILE_STATE_DEF.defaultState,
+          urlValue: 'nextUrl',
+        },
+      });
+    });
+
+    it('shallow merges partial profile state and synchronously replaces active profile URL state', async () => {
+      const { internalState, runtimeStateManager, stateStorageContainer, tabId } = await setup();
+      const currentProfileState = {
+        uiValue: 'ui',
+        urlValue: 'oldUrl',
+        persistentValue: 'persistent',
+        nestedValue: { count: 1 },
+      };
+      const expectedUrlState = {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'nextUrl',
+        },
+      };
+
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState: currentProfileState,
+        })
+      );
+
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const flushSpy = jest.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
+
+      setActiveDataSourceProfileState({ runtimeStateManager, tabId });
+      internalState.dispatch(
+        internalStateActions.updateProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState: {
+            urlValue: 'nextUrl',
+          },
+          historyMethod: 'replace',
+        })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+        [TEST_PROFILE_STATE_DEF.key]: {
+          ...currentProfileState,
+          urlValue: 'nextUrl',
+        },
+      });
+      expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, expectedUrlState, {
+        replace: true,
+      });
+      expect(flushSpy).toHaveBeenCalledWith();
+      expect(stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toEqual(expectedUrlState);
     });
   });
 
@@ -222,6 +399,37 @@ describe('tab_state actions', () => {
       expect(stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY)).toEqual(
         currentTab.appState
       );
+    });
+
+    it('should write the current active profile URL state to the URL even when state is unchanged', async () => {
+      const { internalState, runtimeStateManager, stateStorageContainer, tabId } = await setup();
+      const profileState = {
+        ...TEST_PROFILE_STATE_DEF.defaultState,
+        urlValue: 'nextUrl',
+      };
+      const expectedUrlState = {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'nextUrl',
+        },
+      };
+
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState,
+        })
+      );
+      setActiveDataSourceProfileState({ runtimeStateManager, tabId });
+
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+
+      await internalState.dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId }));
+
+      expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, expectedUrlState, {
+        replace: true,
+      });
+      expect(stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toEqual(expectedUrlState);
     });
   });
 

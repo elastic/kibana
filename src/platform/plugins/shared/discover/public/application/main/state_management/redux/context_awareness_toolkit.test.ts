@@ -238,4 +238,29 @@ describe('createContextAwarenessToolkit', () => {
     expect(otherTabStateAdapter.getState()).toEqual(TEST_PROFILE_STATE_DEF.defaultState);
     expect(selectTab(internalState.getState(), otherTab.id).profileState).toEqual({});
   });
+
+  it('forwards profile state history options to Redux', async () => {
+    const { internalState, profileStateRegistry, tabId } = await setup();
+    const setProfileStateSpy = jest.spyOn(internalStateActions, 'setProfileState');
+    profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    const stateAdapter = createContextAwarenessToolkit({
+      internalState,
+      profileStateRegistry,
+      tabId,
+    }).getStateAdapter(TEST_PROFILE_STATE_DEF);
+
+    const profileState = {
+      ...TEST_PROFILE_STATE_DEF.defaultState,
+      urlValue: 'nextUrl',
+    };
+    stateAdapter.setState(profileState, { historyMethod: 'replace' });
+
+    expect(setProfileStateSpy).toHaveBeenCalledWith({
+      tabId,
+      key: TEST_PROFILE_STATE_DEF.key,
+      profileState,
+      historyMethod: 'replace',
+    });
+  });
 });

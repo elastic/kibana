@@ -302,6 +302,8 @@ When state needs to be shared across multiple extension point implementations, o
 state. Profile state is accessed through the host-provided toolkit and is scoped to the current host surface. In the
 main Discover app it is scoped to the current tab; in simplified hosts like the document route, surrounding documents
 page, and embeddables it is kept in memory for the lifetime of that host instance.
+Fields marked as `ProfileStateType.Url` are synced to the `_p` URL parameter in the main Discover app when their
+definition is exposed by the active data source profile context.
 
 Define a `ProfileStateDefinition<TState>` near the profile provider that uses it:
 
@@ -317,6 +319,7 @@ import { ProfileStateType } from '../../profile_state';
 // Define the state shape shared across profiles and extension point implementations
 interface ExampleProfileState {
   timestampColor: string;
+  docViewMode: 'summary' | 'details';
   rowControlColor: NonNullable<RowControlProps['color']>;
 }
 
@@ -325,10 +328,12 @@ const EXAMPLE_PROFILE_STATE_DEF: ProfileStateDefinition<ExampleProfileState> = {
   key: 'exampleProfileState',
   descriptor: {
     timestampColor: { type: ProfileStateType.Ui },
+    docViewMode: { type: ProfileStateType.Url },
     rowControlColor: { type: ProfileStateType.Persistent },
   },
   defaultState: {
     timestampColor: 'hollow',
+    docViewMode: 'summary',
     rowControlColor: 'text',
   },
 };
@@ -342,6 +347,20 @@ export const registerExampleProfileStateDefinitions = (registry: ProfileStateReg
 Register the definition from [`register_profile_state_definitions.ts`](./profile_providers/register_profile_state_definitions.ts)
 before using it in profile code. The `key` must be unique, the `descriptor` describes the intended lifetime of each
 field, and `defaultState` is returned until state has been written.
+
+To opt into URL sync, return the definition from the active data source profile context:
+
+```ts
+resolve: () => ({
+  isMatch: true,
+  context: {
+    profileState: EXAMPLE_PROFILE_STATE_DEF,
+  },
+});
+```
+
+Only the active data source profile's URL fields are read from and written to `_p`. Default-equivalent URL fields are
+omitted from `_p`, and removing `_p` resets those fields to their definition defaults.
 
 Use `toolkit.getStateAdapter()` inside extension point implementations to read, observe, and update the state:
 
@@ -366,8 +385,10 @@ const getCellRenderers = (prev, { toolkit }) => {
 
 `ProfileStateAdapter<TState>` provides `getState()`, `getState$()`, `setState()`, and shallow `updateState()`. Treat the
 state as immutable: replace it with `setState()` or update it with `updateState()` rather than mutating returned objects
-in place. Host lifetime details should stay out of profile code; the adapter decides whether the state is tab-backed or
-in-memory for the current host.
+in place. `setState()` and `updateState()` accept `{ historyMethod: 'push' | 'replace' }` for URL-backed hosts; use
+`replace` for high-frequency UI controls that should not create browser history entries. Host lifetime details should
+stay out of profile code; the adapter decides whether the state is tab-backed, URL-backed, persistent, or in-memory for
+the current host.
 
 ### Custom `context` objects
 

@@ -207,9 +207,10 @@ Definitions live near the providers that use them and are registered from `profi
 
 ### State types and lifetime
 
-`ProfileStateType` is a field-level lifetime preference: `Ui` for ephemeral UI state, `Url` for future URL sync, and `Persistent` for local tab storage. The current implementation locally persists only `Persistent` fields.
+`ProfileStateType` is a field-level lifetime preference: `Ui` for ephemeral UI state, `Url` for Discover URL sync, and `Persistent` for local tab storage.
 
 - Main Discover stores state in `TabState.profileState`, scoped to a tab. Fresh tabs start with raw `profileState: {}`, duplicated tabs copy full profile state, and restored or locally reloaded tabs hydrate only `Persistent` fields from local tab storage merged over the definition `defaultState`.
+- Main Discover syncs `Url` fields to the `_p` URL parameter for the definition exposed by the active data source profile context (`context.profileState`). Default-equivalent URL fields are omitted from `_p`, and clearing `_p` resets URL fields to definition defaults.
 - Simplified hosts (document route, surrounding documents page, embeddables) use `createInMemoryContextAwarenessToolkit()`, storing all profile state in memory for that scoped host instance. `Url` and `Persistent` fields are accepted there but do not change the lifetime.
 - Adapters return `definition.defaultState` until state has been written.
 
@@ -226,6 +227,8 @@ stateAdapter.getState$().subscribe((nextState) => {});
 ```
 
 `ProfileStateAdapter<TState>` exposes synchronous reads, an observable stream, full replacement via `setState()`, and shallow immutable updates via `updateState()`. Adapters assume consumers do not mutate returned state objects in place.
+
+`setState()` and `updateState()` also accept `{ historyMethod: 'push' | 'replace' }`. The Redux-backed main Discover toolkit uses this option when writing URL-backed state to `_p`; in-memory hosts ignore it.
 
 The main Discover app uses the Redux-backed toolkit from `application/main/state_management/redux/context_awareness_toolkit.ts`; non-tab hosts use `createInMemoryContextAwarenessToolkit()` with their supported `actions` on the same toolkit object.
 
