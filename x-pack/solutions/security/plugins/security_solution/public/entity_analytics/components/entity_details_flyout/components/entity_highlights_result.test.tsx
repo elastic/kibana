@@ -456,8 +456,12 @@ describe('EntityHighlightsResult', () => {
         { wrapper: TestProviders }
       );
 
-      expect(screen.getByText('Risk score changed from 70.00 to 90.00').closest('li')).not.toBeNull();
-      expect(screen.getByText('Risk score changed from 50.00 to 80.00').closest('li')).not.toBeNull();
+      expect(
+        screen.getByText('Risk score changed from 70.00 to 90.00').closest('li')
+      ).not.toBeNull();
+      expect(
+        screen.getByText('Risk score changed from 50.00 to 80.00').closest('li')
+      ).not.toBeNull();
     });
 
     it('calls onRefresh when the callout regenerate button is clicked', () => {
