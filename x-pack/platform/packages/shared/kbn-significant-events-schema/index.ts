@@ -28,9 +28,9 @@ export type {
   EventLifecycleResponse,
   GeneratedSignificantEventQuery,
   LifecycleDetection,
-  SignificantEventsGetResponse,
+  QueryWithOccurrences,
+  QueryOccurrencesResponse,
   SignificantEventsQueriesGenerationResult,
-  SignificantEventsResponse,
 } from './src/api/significant_events';
 
 export { generatedSignificantEventQuerySchema } from './src/api/significant_events';
