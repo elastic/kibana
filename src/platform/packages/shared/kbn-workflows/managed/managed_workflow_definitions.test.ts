@@ -10,11 +10,13 @@
 import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
-import type { ManagedWorkflowTemplateValuesById, TemplatedManagedWorkflowId } from '.';
+import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+  SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
@@ -46,6 +48,15 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     autoCloseConfidenceScoreMaxThreshold: 1,
     connectorId: '',
     createConversation: true,
+  },
+  [SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
+    detectionIntervalMinutes: 30,
+  },
+  [SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID]: {
+    reviewIntervalMinutes: 10,
+    discoveryBatchSize: 3,
+    triageBatchSize: 5,
+    maxReviewPasses: 3,
   },
 };
 
@@ -289,11 +300,7 @@ describe('managedWorkflowDefinitions', () => {
   it.each(managedTemplateDefinitionsById)(
     '%s yamlTemplate renders cleanly with representative values',
     (id, definition) => {
-      const representativeValues =
-        templateRepresentativeValuesById[id as TemplatedManagedWorkflowId];
-      const renderedYaml = (
-        definition as unknown as YamlTemplateManagedWorkflowDefinition
-      ).yamlTemplate(representativeValues);
+      const renderedYaml = renderWorkflowYaml(definition);
 
       expect(typeof renderedYaml).toBe('string');
       expect(renderedYaml.trim()).not.toHaveLength(0);
