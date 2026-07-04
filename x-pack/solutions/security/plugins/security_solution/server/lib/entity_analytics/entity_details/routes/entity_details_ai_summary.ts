@@ -11,7 +11,15 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { AiSummaryMetadataDoc } from '@kbn/entity-store/common';
-import { capEntitySummaryContent } from '@kbn/entity-store/common';
+import {
+  capEntitySummaryContent,
+  MAX_ENTITY_ID_LENGTH,
+  MAX_ENTITY_TYPE_LENGTH,
+  MAX_SUMMARY_HIGHLIGHT_TITLE_LENGTH,
+  MAX_SUMMARY_TEXT_LENGTH,
+  MAX_SUMMARY_ANOMALY_JOB_ID_LENGTH,
+  MAX_SUMMARY_VARIANT_ID_LENGTH,
+} from '@kbn/entity-store/common';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -19,8 +27,8 @@ import { withLicense } from '../../../siem_migrations/common/api/util/with_licen
 import { ENTITY_AI_SUMMARY_PERSISTED_EVENT } from '../../../telemetry/event_based/events';
 
 const AiSummaryHighlightItem = z.object({
-  title: z.string(),
-  text: z.string(),
+  title: z.string().max(MAX_SUMMARY_HIGHLIGHT_TITLE_LENGTH),
+  text: z.string().max(MAX_SUMMARY_TEXT_LENGTH),
 });
 
 const EntitySummaryStalenessSnapshotSchema = z.object({
@@ -33,16 +41,16 @@ const EntitySummaryStalenessSchema = z.object({
 });
 
 const SaveAiSummaryRequestBody = z.object({
-  entityId: z.string(),
-  entityType: z.string(),
+  entityId: z.string().max(MAX_ENTITY_ID_LENGTH),
+  entityType: z.string().max(MAX_ENTITY_TYPE_LENGTH),
   summary: z.object({
     highlights: z.array(AiSummaryHighlightItem),
-    recommendedActions: z.array(z.string()).nullable().optional(),
+    recommendedActions: z.array(z.string().max(MAX_SUMMARY_TEXT_LENGTH)).nullable().optional(),
     generated_at: z.number(),
     // generated_by is intentionally excluded from the request body —
     // it is derived server-side from the authenticated user to prevent spoofing.
-    anomaly_job_ids: z.array(z.string()).optional(),
-    variant_id: z.string().optional(),
+    anomaly_job_ids: z.array(z.string().max(MAX_SUMMARY_ANOMALY_JOB_ID_LENGTH)).optional(),
+    variant_id: z.string().max(MAX_SUMMARY_VARIANT_ID_LENGTH).optional(),
     staleness: EntitySummaryStalenessSchema,
   }),
   // Raw counts of what the model produced, captured client-side before capping. Used only

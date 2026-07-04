@@ -15,15 +15,16 @@ import type {
   GetPersistedAiSummaryResponse,
   PersistedEntityAiSummary,
 } from '@kbn/entity-store/common';
+import { MAX_ENTITY_ID_LENGTH, MAX_ENTITY_TYPE_LENGTH } from '@kbn/entity-store/common';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { withLicense } from '../../../siem_migrations/common/api/util/with_license';
 
 const GetAiSummaryRequestQuery = z.object({
-  entityId: z.string(),
+  entityId: z.string().max(MAX_ENTITY_ID_LENGTH),
   // Not used server-side (the read filters by entity.id); accepted for symmetry with the write route.
-  entityType: z.string().optional(),
+  entityType: z.string().max(MAX_ENTITY_TYPE_LENGTH).optional(),
 });
 
 /** The discriminator that identifies AI-summary docs in the shared metadata datastream. */

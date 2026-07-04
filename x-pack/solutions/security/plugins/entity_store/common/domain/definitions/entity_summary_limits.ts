@@ -19,6 +19,30 @@ export const MAX_ENTITY_SUMMARY_HIGHLIGHTS = 4;
 /** Max recommended actions persisted/displayed for an entity AI summary. */
 export const MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS = 3;
 
+/**
+ * Per-field character caps for the entity AI summary request payloads. These bound
+ * untrusted string input at the validation boundary so a malicious/oversized request
+ * cannot cause a Denial of Service. They are generous relative to the prompt's soft
+ * character budget — the authoritative "keep it a summary" trimming is done by the
+ * count caps above; these are purely a safety ceiling.
+ */
+export const MAX_ENTITY_ID_LENGTH = 1024;
+
+/** Max length of an entity type identifier (e.g. `user`, `host`). */
+export const MAX_ENTITY_TYPE_LENGTH = 128;
+
+/** Max length of a single highlight title. */
+export const MAX_SUMMARY_HIGHLIGHT_TITLE_LENGTH = 256;
+
+/** Max length of a single highlight body / recommended action prose. */
+export const MAX_SUMMARY_TEXT_LENGTH = 2000;
+
+/** Max length of an ML anomaly detection job id. */
+export const MAX_SUMMARY_ANOMALY_JOB_ID_LENGTH = 256;
+
+/** Max length of the prompt variant identifier. */
+export const MAX_SUMMARY_VARIANT_ID_LENGTH = 256;
+
 /** The LLM-produced content subject to the structural caps. */
 export interface EntitySummaryContent {
   highlights: EntitySummaryHighlight[];
