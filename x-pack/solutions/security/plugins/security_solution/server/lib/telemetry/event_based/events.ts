@@ -749,8 +749,6 @@ export const ENTITY_AI_SUMMARY_PERSISTED_EVENT: EventTypeOpts<{
   spaceId: string;
   highlightsCount: number;
   recommendedActionsCount: number;
-  highlightsDropped: number;
-  recommendedActionsDropped: number;
 }> = {
   eventType: 'entity_ai_summary_persisted',
   schema: {
@@ -769,25 +767,15 @@ export const ENTITY_AI_SUMMARY_PERSISTED_EVENT: EventTypeOpts<{
     highlightsCount: {
       type: 'long',
       _meta: {
-        description: 'Number of highlights the model produced, before structural capping',
+        description:
+          'Number of highlights the model produced (pre-cap), captured client-side before capping. Compare against MAX_ENTITY_SUMMARY_HIGHLIGHTS to see how often/by how much the model overshoots.',
       },
     },
     recommendedActionsCount: {
       type: 'long',
       _meta: {
-        description: 'Number of recommended actions the model produced, before structural capping',
-      },
-    },
-    highlightsDropped: {
-      type: 'long',
-      _meta: {
-        description: 'Number of highlights dropped by the cap (0 when within budget)',
-      },
-    },
-    recommendedActionsDropped: {
-      type: 'long',
-      _meta: {
-        description: 'Number of recommended actions dropped by the cap (0 when within budget)',
+        description:
+          'Number of recommended actions the model produced (pre-cap), captured client-side before capping. Compare against MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS to gauge overshoot.',
       },
     },
   },

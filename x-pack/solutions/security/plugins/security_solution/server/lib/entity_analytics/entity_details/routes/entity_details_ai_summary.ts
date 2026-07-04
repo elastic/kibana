@@ -45,6 +45,15 @@ const SaveAiSummaryRequestBody = z.object({
     variant_id: z.string().optional(),
     staleness: EntitySummaryStalenessSchema,
   }),
+  // Raw counts of what the model produced, captured client-side before capping. Used only
+  // for overshoot telemetry — the persisted `summary` above is already capped by the client
+  // and re-capped here, so the server cannot observe overshoot on its own.
+  modelOutputCounts: z
+    .object({
+      highlights: z.number(),
+      recommendedActions: z.number(),
+    })
+    .optional(),
 });
 
 type SaveAiSummaryRequestBody = z.infer<typeof SaveAiSummaryRequestBody>;
@@ -76,7 +85,7 @@ export const entityDetailsAiSummaryRoute = ({
       withLicense(async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { entityId, entityType, summary } = request.body;
+          const { entityId, entityType, summary, modelOutputCounts } = request.body;
 
           const [coreStart, { entityStore }] = await getStartServices();
           const coreContext = await context.core;
@@ -90,14 +99,7 @@ export const entityDetailsAiSummaryRoute = ({
           // consumer of the datastream (flyout reopen, other users, Agent Builder) sees a
           // bounded summary regardless of how much the model produced. Counts are capped
           // rather than the prose truncated, so nothing is cut mid-sentence.
-          const {
-            highlights,
-            recommendedActions,
-            highlightsCount,
-            recommendedActionsCount,
-            highlightsDropped,
-            recommendedActionsDropped,
-          } = capEntitySummaryContent({
+          const { highlights, recommendedActions } = capEntitySummaryContent({
             highlights: summary.highlights,
             recommendedActions: summary.recommendedActions,
           });
@@ -144,15 +146,17 @@ export const entityDetailsAiSummaryRoute = ({
 
           await metadataClient.bulkAppendMetadata([doc]);
 
-          // Emit the model's pre-cap output sizes so we can measure how often (and by how
-          // much) it overshoots the intended summary length and tune the prompt from data.
+          // Emit the model's raw (pre-cap) output sizes so we can measure how often and by how
+          // much it overshoots the caps, and tune the prompt from data. These counts are
+          // captured on the client before capping and passed through: the server only ever
+          // sees the already-capped `summary`, so it cannot observe overshoot itself. Falls
+          // back to the persisted (capped) counts if a caller omits them.
           securitySolution.getAnalytics().reportEvent(ENTITY_AI_SUMMARY_PERSISTED_EVENT.eventType, {
             entityType,
             spaceId,
-            highlightsCount,
-            recommendedActionsCount,
-            highlightsDropped,
-            recommendedActionsDropped,
+            highlightsCount: modelOutputCounts?.highlights ?? highlights.length,
+            recommendedActionsCount:
+              modelOutputCounts?.recommendedActions ?? recommendedActions?.length ?? 0,
           });
 
           return response.ok({ body: { created: true } });

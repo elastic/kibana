@@ -47,6 +47,16 @@ export interface SaveEntityAiSummaryParams {
   entityId: string;
   entityType: string;
   summary: SaveEntityAiSummarySummary;
+  /**
+   * Raw counts of what the model produced, captured client-side *before* structural capping.
+   * The persisted summary is capped, so it can't reveal how much the model overshot — these
+   * counts let telemetry measure that. Optional: callers that don't generate client-side
+   * (or a future server-side flow) can omit them.
+   */
+  modelOutputCounts?: {
+    highlights: number;
+    recommendedActions: number;
+  };
 }
 
 /**

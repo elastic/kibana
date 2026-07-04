@@ -215,22 +215,14 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     );
   });
 
-  it('reports the pre-cap counts and dropped amounts via telemetry', async () => {
-    const overshootHighlights = Array.from(
-      { length: MAX_ENTITY_SUMMARY_HIGHLIGHTS + 2 },
-      (_, i) => ({ title: `h${i}`, text: `t${i}` })
-    );
-    const overshootActions = Array.from(
-      { length: MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS + 3 },
-      (_, i) => `action ${i}`
-    );
-
+  it('reports the model pre-cap counts supplied by the client (independent of the capped doc)', async () => {
+    // The client sends raw model counts that exceed the caps; the persisted doc is still
+    // capped, but telemetry must reflect the raw (pre-cap) numbers to reveal overshoot.
     const request = buildRequest({
       ...BASE_REQUEST_BODY,
-      summary: {
-        ...BASE_REQUEST_BODY.summary,
-        highlights: overshootHighlights,
-        recommendedActions: overshootActions,
+      modelOutputCounts: {
+        highlights: MAX_ENTITY_SUMMARY_HIGHLIGHTS + 2,
+        recommendedActions: MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS + 3,
       },
     });
     await server.inject(request, context);
@@ -240,12 +232,10 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
       spaceId: 'default',
       highlightsCount: MAX_ENTITY_SUMMARY_HIGHLIGHTS + 2,
       recommendedActionsCount: MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS + 3,
-      highlightsDropped: 2,
-      recommendedActionsDropped: 3,
     });
   });
 
-  it('reports zero dropped when within budget', async () => {
+  it('falls back to the persisted counts when the client omits modelOutputCounts', async () => {
     const request = buildRequest();
     await server.inject(request, context);
 
@@ -254,8 +244,6 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
       spaceId: 'default',
       highlightsCount: 1,
       recommendedActionsCount: 1,
-      highlightsDropped: 0,
-      recommendedActionsDropped: 0,
     });
   });
 

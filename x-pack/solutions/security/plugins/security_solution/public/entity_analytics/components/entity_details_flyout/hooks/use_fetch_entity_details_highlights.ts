@@ -196,6 +196,11 @@ export const useFetchEntityDetailsHighlights = ({
       const generatedAt = Date.now();
       const generatedBy = currentUser?.username ?? 'unknown';
 
+      // Capture the raw counts the model produced before capping, so persist-time telemetry
+      // can measure overshoot (the persisted/capped doc can't reveal it on its own).
+      const modelHighlightsCount = typedOutput.highlights.length;
+      const modelRecommendedActionsCount = typedOutput.recommendedActions?.length ?? 0;
+
       // Apply the structural caps up front so the in-session view matches the persisted
       // document (which the server also caps) — avoids showing more items now than after
       // a reopen. Caps counts rather than truncating prose.
@@ -227,9 +232,19 @@ export const useFetchEntityDetailsHighlights = ({
             riskScoreNorm: entitySnapshot?.riskScoreNorm ?? null,
           }),
         },
+        modelOutputCounts: {
+          highlights: modelHighlightsCount,
+          recommendedActions: modelRecommendedActionsCount,
+        },
       })
         .then(() => {
-          setGenerationBaseline(null);
+          // Keep `generationBaseline` as the staleness-suppression source for this session.
+          // The metadata write isn't immediately searchable (index refresh latency), so
+          // clearing the baseline here and leaning on the read-back below would flash the
+          // staleness nudge back on right after a successful regeneration (the read-back
+          // still returns the pre-regeneration snapshot). The baseline is reset on entity
+          // change and superseded by the next generation; genuine later drift still surfaces
+          // via the drift-since-generation check.
           refetchEntityRecord?.();
           // Pull the just-persisted summary from the metadata datastream so a
           // reopen (or another user) reads the same document, not a stale cache.
