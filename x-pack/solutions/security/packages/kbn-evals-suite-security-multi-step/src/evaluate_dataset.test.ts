@@ -53,6 +53,7 @@ describe('buildMultiStepEvaluators', () => {
     'Output Tokens',
     'Cached Tokens',
     'Skill Invoked',
+    'ExpectedToolCalled',
     'Trajectory',
   ];
 
