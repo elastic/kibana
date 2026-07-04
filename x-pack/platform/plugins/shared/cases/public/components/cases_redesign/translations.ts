@@ -58,3 +58,24 @@ export const SHOW_FIELDS = i18n.translate('xpack.cases.casesRedesign.details.sho
 export const HIDE_FIELDS = i18n.translate('xpack.cases.casesRedesign.details.hideFields', {
   defaultMessage: 'Hide fields',
 });
+
+export const ATTRIBUTES_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.details.attributesTitle',
+  {
+    defaultMessage: 'Attributes',
+  }
+);
+
+export const TEMPLATE_FIELDS_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.details.templateFieldsTitle',
+  {
+    defaultMessage: 'Template fields',
+  }
+);
+
+export const SECTION_SETTINGS_ARIA = i18n.translate(
+  'xpack.cases.casesRedesign.details.sectionSettingsAria',
+  {
+    defaultMessage: 'Section settings',
+  }
+);

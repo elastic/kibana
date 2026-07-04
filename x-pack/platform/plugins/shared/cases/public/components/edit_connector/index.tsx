@@ -37,6 +37,7 @@ export interface EditConnectorProps {
   supportedActionConnectors: ActionConnector[];
   isLoading: boolean;
   onSubmit: (connector: CaseConnector) => void;
+  showHeader?: boolean;
 }
 
 export const EditConnector = React.memo(
@@ -46,6 +47,7 @@ export const EditConnector = React.memo(
     supportedActionConnectors,
     isLoading,
     onSubmit,
+    showHeader = true,
   }: EditConnectorProps) => {
     const caseConnectorFields = caseData.connector.fields;
     const caseActionConnector = getConnectorById(caseData.connector.id, supportedActionConnectors);
@@ -104,15 +106,17 @@ export const EditConnector = React.memo(
         <EuiFlexGroup
           alignItems="center"
           gutterSize="xs"
-          justifyContent="spaceBetween"
+          justifyContent={showHeader ? 'spaceBetween' : 'flexEnd'}
           responsive={false}
           data-test-subj="case-view-edit-connector"
         >
-          <EuiFlexItem grow={false} data-test-subj="connector-edit-header">
-            <EuiTitle size="xs">
-              <h3>{i18n.CONNECTORS}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
+          {showHeader ? (
+            <EuiFlexItem grow={false} data-test-subj="connector-edit-header">
+              <EuiTitle size="xs">
+                <h3>{i18n.CONNECTORS}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+          ) : null}
           {!isLoading && !isEdit && hasPushPermissions && canUseConnectors ? (
             <EuiFlexItem data-test-subj="connector-edit" grow={false}>
               <EuiToolTip content={i18n.EDIT_CONNECTOR_ARIA} disableScreenReaderOutput>

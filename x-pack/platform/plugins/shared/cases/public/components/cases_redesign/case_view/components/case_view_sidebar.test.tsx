@@ -40,6 +40,10 @@ jest.mock('../../../case_view/components/template_fields', () => ({
   TemplateFields: () => <div data-test-subj="case-view-template-fields" />,
 }));
 
+jest.mock('../../../templates_v2/hooks/use_get_template', () => ({
+  useGetTemplate: jest.fn().mockReturnValue({ data: undefined }),
+}));
+
 jest.mock('../../../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../../../common/navigation/hooks');
 jest.mock('../../../../containers/use_get_tags');
@@ -125,9 +129,15 @@ describe('CaseViewSidebar (redesign)', () => {
     });
 
     const caseViewSidebar = await screen.findByTestId('case-view-page-sidebar');
+    expect(caseViewSidebar).toHaveClass('euiPanel');
+    expect(screen.getByTestId('case-view-sidebar-attributes')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-sidebar-template-fields')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-sidebar-connectors')).toBeInTheDocument();
     expect(await within(caseViewSidebar).findByTestId('case-tags')).toBeInTheDocument();
     expect(await within(caseViewSidebar).findByTestId('cases-categories')).toBeInTheDocument();
-    expect(await within(caseViewSidebar).findByTestId('connector-edit-header')).toBeInTheDocument();
+    expect(
+      await within(caseViewSidebar).findByTestId('case-view-edit-connector')
+    ).toBeInTheDocument();
 
     await waitForComponentToUpdate();
   });
@@ -199,6 +209,7 @@ describe('CaseViewSidebar (redesign)', () => {
       wrapperProps: { license: basicLicense },
     });
 
+    expect(screen.queryByTestId('case-view-sidebar-connectors')).not.toBeInTheDocument();
     expect(screen.queryByTestId('case-view-edit-connector')).not.toBeInTheDocument();
   });
 
@@ -207,7 +218,9 @@ describe('CaseViewSidebar (redesign)', () => {
       wrapperProps: { license: platinumLicense },
     });
 
+    expect(await screen.findByTestId('case-view-sidebar-connectors')).toBeInTheDocument();
     expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-view-sidebar-connectors-settings')).toBeInTheDocument();
   });
 
   it('should call useReplaceCustomField correctly', async () => {
@@ -282,6 +295,7 @@ describe('CaseViewSidebar (redesign)', () => {
       });
 
       expect(screen.queryByTestId('case-view-template-fields')).not.toBeInTheDocument();
+      expect(screen.getByTestId('case-view-sidebar-template-fields-settings')).toBeInTheDocument();
     });
 
     it('renders TemplateFields when templates v2 is enabled', async () => {
@@ -294,6 +308,7 @@ describe('CaseViewSidebar (redesign)', () => {
       renderWithTestingProviders(<CaseViewSidebar caseData={caseData} />);
 
       expect(await screen.findByTestId('case-view-template-fields')).toBeInTheDocument();
+      expect(screen.getByTestId('case-view-sidebar-template-fields-settings')).toBeInTheDocument();
     });
   });
 });
