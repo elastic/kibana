@@ -64,8 +64,6 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
   const [expandedZones, setExpandedZones] = useState<Set<string>>(new Set());
   const [isCallOutDismissed, setIsCallOutDismissed] = useState(false);
 
-  // Seed checkbox state once the policy finishes loading.
-  // No policy (null/empty allowed_regions) means no restrictions — all regions selected.
   React.useEffect(() => {
     if (!isPolicyLoading && !isEndpointsLoading && !syncedFromPolicy) {
       const existing = policy?.region_policy?.allowed_regions ?? [];
