@@ -322,27 +322,26 @@ export const REGION_DISPLAY_NAMES: Record<string, string> = {
   'gcp::us-east5': 'US East (Columbus)',
 };
 
+const GEO_DISPLAY_NAMES: Record<string, string> = {
+  apac: i18n.translate('xpack.searchInferenceEndpoints.geo.asiaPacific', {
+    defaultMessage: 'Asia Pacific',
+  }),
+  eu: i18n.translate('xpack.searchInferenceEndpoints.geo.europe', {
+    defaultMessage: 'Europe',
+  }),
+  us: i18n.translate('xpack.searchInferenceEndpoints.geo.northAmerica', {
+    defaultMessage: 'North America',
+  }),
+  other: i18n.translate('xpack.searchInferenceEndpoints.geo.other', {
+    defaultMessage: 'Other',
+  }),
+};
+
 /**
  * Returns the i18n display name for an EIS `geo` code.
  * EIS uses short codes ("us", "eu", "apac"); unknown values fall back to the raw code.
  */
-export const getGeoDisplayName = (geo: string): string => {
-  const names: Record<string, string> = {
-    apac: i18n.translate('xpack.searchInferenceEndpoints.geo.asiaPacific', {
-      defaultMessage: 'Asia Pacific',
-    }),
-    eu: i18n.translate('xpack.searchInferenceEndpoints.geo.europe', {
-      defaultMessage: 'Europe',
-    }),
-    us: i18n.translate('xpack.searchInferenceEndpoints.geo.northAmerica', {
-      defaultMessage: 'North America',
-    }),
-    other: i18n.translate('xpack.searchInferenceEndpoints.geo.other', {
-      defaultMessage: 'Other',
-    }),
-  };
-  return names[geo] ?? geo;
-};
+export const getGeoDisplayName = (geo: string): string => GEO_DISPLAY_NAMES[geo] ?? geo;
 
 /** Ordered list of EIS geo codes for display in the region picker. */
 export const GEO_ORDER = ['apac', 'eu', 'us', 'other'] as const;

@@ -28,7 +28,7 @@ export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
   onExpandAll,
   onResetToDefault,
 }) => (
-  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>

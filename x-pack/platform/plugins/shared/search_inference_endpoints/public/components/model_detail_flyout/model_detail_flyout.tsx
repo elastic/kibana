@@ -55,7 +55,7 @@ import { ModelStatusBadge } from '../model_status/model_status_badge';
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
-  allEndpoints: InferenceAPIConfigResponse[];
+  allEndpoints: EisInferenceEndpoint[];
   onClose: () => void;
   onSaveEndpoint: () => void;
   onDeleteEndpoint?: (endpoint: InferenceAPIConfigResponse) => void;
@@ -113,10 +113,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       modelMetadata: endpointModelMetadata,
       modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('l') ?? '--',
       modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('l') ?? '--',
-      regionZoneCounts: getRegionZoneCounts(
-        filtered as EisInferenceEndpoint[],
-        allEndpoints as EisInferenceEndpoint[]
-      ),
+      regionZoneCounts: getRegionZoneCounts(filtered, allEndpoints),
     };
   }, [allEndpoints, modelId]);
 

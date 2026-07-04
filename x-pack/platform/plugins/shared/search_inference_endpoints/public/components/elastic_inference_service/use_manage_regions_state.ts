@@ -66,7 +66,7 @@ export const useManageRegionsState = (onClose: () => void) => {
   const totalSelected = checkedKeys.size;
   const totalRegions = availableRegions.length;
   const allSelected = totalSelected === totalRegions;
-  const isAllExpanded = expandedZones.size === zoneGroups.length;
+  const isAllExpanded = zoneGroups.length > 0 && expandedZones.size === zoneGroups.length;
   const isLoading = isPolicyLoading || isEndpointsLoading;
   const isError = isPolicyError || isEndpointsError;
 

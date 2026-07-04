@@ -63,6 +63,10 @@ describe('ManageRegionsModal', () => {
       mutate: mockSaveMutate,
       isLoading: false,
     });
+
+    // Default hook returns — individual tests override as needed
+    mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false, isError: false });
+    mockUseEisModels.mockReturnValue({ data: [], isLoading: false, isError: false });
   });
 
   describe('loading state', () => {
@@ -453,6 +457,35 @@ describe('ManageRegionsModal', () => {
       await waitFor(() => {
         expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('error state', () => {
+    it('renders a danger callout when the region policy fetch fails', () => {
+      mockUseRegionPolicy.mockReturnValue({ data: undefined, isLoading: false, isError: true });
+      mockUseEisModels.mockReturnValue({ data: [], isLoading: false, isError: false });
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('manageRegionsErrorCallout')).toBeInTheDocument();
+      expect(screen.getByText('Failed to load region data')).toBeInTheDocument();
+    });
+
+    it('renders a danger callout when the EIS models fetch fails', () => {
+      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false, isError: false });
+      mockUseEisModels.mockReturnValue({ data: undefined, isLoading: false, isError: true });
+
+      render(
+        <Wrapper>
+          <ManageRegionsModal onClose={onClose} />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('manageRegionsErrorCallout')).toBeInTheDocument();
     });
   });
 
