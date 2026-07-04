@@ -11,50 +11,49 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { InferenceClient } from '@kbn/inference-common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
+import type { SignificantEventsTuningConfig } from '@kbn/significant-events-schema';
+import type { StreamsClient } from '@kbn/streams-plugin/server'; from '@kbn/streams-plugin/server/lib/streams/client';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
-import type { ContentClient } from '../lib/content/content_client';
-import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
-import type { StreamsClient } from '../lib/streams/client';
+import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { AttachmentClient } from '@kbn/streams-plugin/server';
+import type { SignificantEventsAlertingContext } from '../lib/significant_events/alerting/significant_events_alerting_context';
 import type { EbtTelemetryClient } from '../lib/telemetry';
-import type { StreamsServer } from '../types';
-import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
-import type { IPatternExtractionService } from '../lib/pattern_extraction/pattern_extraction_service';
-import type { TaskClient } from '../lib/tasks/task_client';
-import type { StreamsTaskType } from '../lib/tasks/task_definitions';
-import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
+import type { KnowledgeIndicatorClient } from '../lib/ki';
+import type { SignificantEventsClients } from '../lib/significant_events/significant_events_clients';
+import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
+import type { WorkflowClients } from '../lib/workflows/create_workflow_clients';
 
 export type GetScopedClients = (params: {
   request: KibanaRequest;
   rulesClientOptions?: RulesClientCreateOptions;
 }) => Promise<RouteHandlerScopedClients>;
 
-export interface RouteHandlerScopedClients {
+export interface RouteHandlerScopedClients extends SignificantEventsClients {
   scopedClusterClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
   attachmentClient: AttachmentClient;
-  streamsClient: StreamsClient;
-  getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClientContract>;
+  getSignificantEventsAlertingContext: () => Promise<SignificantEventsAlertingContext>;
+  getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>;
   inferenceClient: InferenceClient;
-  contentClient: ContentClient;
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;
   globalUiSettingsClient: IUiSettingsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
-  taskClient: TaskClient<StreamsTaskType>;
-  streamsSettingsStorageClient: StreamsSettingsStorageClient;
+  streamsClient: StreamsClient;
   isSecurityEnabled: boolean;
+  tuningConfig: SignificantEventsTuningConfig;
 }
 
 export interface RouteDependencies {
   server: StreamsServer;
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
-  processorSuggestions: ProcessorSuggestionsService;
-  patternExtractionService: IPatternExtractionService;
+  continuousKiOnboardingWorkflowService?: ContinuousKiOnboardingWorkflowService;
+  workflowClients: WorkflowClients;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
 }
 
-export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;
+export type SignificantEventsRouteHandlerResources = RouteDependencies &
+  DefaultRouteHandlerResources;
