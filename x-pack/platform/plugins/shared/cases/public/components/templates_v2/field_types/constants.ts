@@ -22,6 +22,25 @@ category: General
 # tags are optional
 tags:
   - example
+# connector is optional — it pre-selects an external connector (Jira, ServiceNow, ...) on
+# cases created from this template, along with its per-type fields. Uncomment and set id to
+# one of your configured connectors (Stack Management > Connectors). If the id can't be
+# resolved when the case is created, the case falls back to no connector.
+# type is one of: .none, .jira, .servicenow, .servicenow-sir, .resilient, .swimlane, .thehive, .cases-webhook
+# fields depend on the connector type — the example below is for Jira (.jira).
+# connector:
+#   type: .jira
+#   id: my-jira-connector-id
+#   fields:
+#     issueType: "10001"
+#     priority: High
+#     parent: null
+# settings is optional — it applies default case options when a case is created from this template
+settings:
+  # keep case alerts in sync with the selected connector's external system
+  syncAlerts: true
+  # automatically extract observables (IPs, hashes, URLs, ...) from case data
+  extractObservables: true
 fields:
   - name: start_date
     control: DATE_PICKER
