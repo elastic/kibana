@@ -9,12 +9,14 @@ import type { AnonymizationFieldResponse, Replacements } from '@kbn/elastic-assi
 import type { ToolSchema } from '@kbn/inference-common';
 import { isInferenceRequestAbortedError } from '@kbn/inference-common';
 import { i18n } from '@kbn/i18n';
+import type {
+  PersistedEntityAiSummary,
+  EntitySummaryStalenessEntitySnapshot,
+} from '@kbn/entity-store/common';
 import {
-  type PersistedEntityAiSummary,
-  type EntitySummaryStalenessEntitySnapshot,
   buildEntitySummaryStaleness,
   capEntitySummaryContent,
-} from '@kbn/entity-store/common';
+} from '@kbn/entity-store/common/entity_summary';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useCurrentUser } from '../../../../common/lib/kibana';

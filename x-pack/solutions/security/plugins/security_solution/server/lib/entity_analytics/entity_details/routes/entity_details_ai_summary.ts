@@ -19,7 +19,7 @@ import {
   MAX_SUMMARY_TEXT_LENGTH,
   MAX_SUMMARY_ANOMALY_JOB_ID_LENGTH,
   MAX_SUMMARY_VARIANT_ID_LENGTH,
-} from '@kbn/entity-store/common';
+} from '@kbn/entity-store/common/entity_summary';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';

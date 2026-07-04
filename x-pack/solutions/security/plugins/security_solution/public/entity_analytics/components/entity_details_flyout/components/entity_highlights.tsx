@@ -28,11 +28,11 @@ import { AddConnectorModal } from '@kbn/elastic-assistant/impl/connectorland/add
 import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
 import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLoadConnectors } from '@kbn/inference-connectors';
+import type { EntitySummaryStalenessReason } from '@kbn/entity-store/common';
 import {
   buildEntitySummaryStaleness,
   computeEntitySummaryStalenessReasons,
-  type EntitySummaryStalenessReason,
-} from '@kbn/entity-store/common';
+} from '@kbn/entity-store/common/entity_summary';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';

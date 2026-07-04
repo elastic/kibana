@@ -9,7 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   MAX_ENTITY_SUMMARY_HIGHLIGHTS,
   MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS,
-} from '@kbn/entity-store/common';
+} from '@kbn/entity-store/common/entity_summary';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { ENTITY_AI_SUMMARY_PERSISTED_EVENT } from '../../../telemetry/event_based/events';
 import {

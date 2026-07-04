@@ -122,28 +122,14 @@ export type {
   PersistedEntityAiSummary,
   GetPersistedAiSummaryResponse,
 } from './domain/definitions/entity_summary_staleness';
-export {
-  ENTITY_SUMMARY_STALENESS_SIGNALS,
-  DEFAULT_ENTITY_SUMMARY_STALENESS_SIGNALS,
-  buildEntitySummaryStaleness,
-  computeEntitySummaryStalenessReasons,
-  getChangedStalenessSignals,
-} from './domain/definitions/entity_summary_staleness';
+// Entity AI summary runtime helpers (staleness detection, structural caps, request-length
+// caps) intentionally live behind the `@kbn/entity-store/common/entity_summary` subpath, NOT
+// this page-load barrel, so they only ship in the chunks that use them (lazy flyout / server)
+// rather than on every page load. Only the erased-at-build-time types stay in the barrel.
 export { buildEntityListSourceFilter } from './domain/definitions/entity_list_source';
 export type {
   EntitySummaryContent,
   CappedEntitySummaryContent,
-} from './domain/definitions/entity_summary_limits';
-export {
-  MAX_ENTITY_SUMMARY_HIGHLIGHTS,
-  MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS,
-  MAX_ENTITY_ID_LENGTH,
-  MAX_ENTITY_TYPE_LENGTH,
-  MAX_SUMMARY_HIGHLIGHT_TITLE_LENGTH,
-  MAX_SUMMARY_TEXT_LENGTH,
-  MAX_SUMMARY_ANOMALY_JOB_ID_LENGTH,
-  MAX_SUMMARY_VARIANT_ID_LENGTH,
-  capEntitySummaryContent,
 } from './domain/definitions/entity_summary_limits';
 
 export interface IdentitySourceFields {

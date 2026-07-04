@@ -28,11 +28,11 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  getChangedStalenessSignals,
-  type EntitySummaryStalenessReason,
-  type EntitySummaryStalenessSignal,
+import type {
+  EntitySummaryStalenessReason,
+  EntitySummaryStalenessSignal,
 } from '@kbn/entity-store/common';
+import { getChangedStalenessSignals } from '@kbn/entity-store/common/entity_summary';
 import moment from 'moment';
 import { formatRiskScore } from '../../../common/utils';
 import type { EntityHighlightsResponse } from '../types';

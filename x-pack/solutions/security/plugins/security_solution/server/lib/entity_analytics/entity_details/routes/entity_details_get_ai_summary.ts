@@ -15,7 +15,10 @@ import type {
   GetPersistedAiSummaryResponse,
   PersistedEntityAiSummary,
 } from '@kbn/entity-store/common';
-import { MAX_ENTITY_ID_LENGTH, MAX_ENTITY_TYPE_LENGTH } from '@kbn/entity-store/common';
+import {
+  MAX_ENTITY_ID_LENGTH,
+  MAX_ENTITY_TYPE_LENGTH,
+} from '@kbn/entity-store/common/entity_summary';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
