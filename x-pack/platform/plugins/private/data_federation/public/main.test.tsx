@@ -82,4 +82,41 @@ describe('Main', () => {
       expect(getByTestId('dataSetsSetsCreateButton')).toBeDisabled();
     });
   });
+
+  it('disables the edit action for a data source with an unsupported type', async () => {
+    const http = createHttpMock();
+    (http.get as jest.Mock).mockImplementation(async (path: string) => {
+      if (path === DATA_SOURCES_LIST_ROUTE_PATH) {
+        return {
+          data_sources: [
+            { name: 'supported', type: 's3', description: '', settings: {} },
+            // The backend can return a type outside DataSourceType (e.g. added on the ES
+            // side before the UI knows about it), which is what the edit action guards against.
+            { name: 'unsupported', type: 'http', description: '', settings: {} },
+          ],
+        };
+      }
+      if (path === DATA_SETS_LIST_ROUTE_PATH) {
+        return { data_sets: [] };
+      }
+      throw new Error(`Unexpected GET: ${path}`);
+    });
+
+    const { getByRole, getAllByTestId } = render(
+      <EuiProvider>
+        <Main httpClient={http as unknown as HttpSetup} toasts={createToastsMock()} />
+      </EuiProvider>
+    );
+
+    fireEvent.click(getByRole('tab', { name: mainTranslations.tabs.sources }));
+
+    let editButtons: HTMLElement[] = [];
+    await waitFor(() => {
+      editButtons = getAllByTestId('dataSetsEditButton');
+      expect(editButtons).toHaveLength(2);
+    });
+
+    expect(editButtons[0]).toBeEnabled();
+    expect(editButtons[1]).toBeDisabled();
+  });
 });
