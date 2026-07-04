@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { trace } from '@opentelemetry/api';
+import { trace, isSpanContextValid } from '@opentelemetry/api';
 import { toArray, map, firstValueFrom } from 'rxjs';
 import type {
   ChatCompleteResponse,
@@ -35,8 +35,16 @@ export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>
         }
 
         const messageEventWithTrace = messageEvent as typeof messageEvent & { traceId?: string };
+        // Only surface a trace id when there is a *valid* active span. Without
+        // real tracing configured, getActiveSpan() returns a no-op span whose
+        // trace id is the all-zeros INVALID_TRACEID; emitting that would
+        // pollute every inference response with a junk id.
+        const activeSpanContext = trace.getActiveSpan()?.spanContext();
         const traceId =
-          messageEventWithTrace.traceId ?? trace.getActiveSpan()?.spanContext().traceId;
+          messageEventWithTrace.traceId ??
+          (activeSpanContext && isSpanContextValid(activeSpanContext)
+            ? activeSpanContext.traceId
+            : undefined);
 
         return {
           content: messageEvent.content,

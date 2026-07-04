@@ -23,7 +23,7 @@ import {
   isChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
 import type { Span } from '@opentelemetry/api';
-import { SpanKind } from '@opentelemetry/api';
+import { SpanKind, isSpanContextValid } from '@opentelemetry/api';
 import { isObservable, tap } from 'rxjs';
 import { isPromise } from 'util/types';
 import { withActiveInferenceSpan } from './with_active_inference_span';
@@ -235,9 +235,13 @@ export function withChatCompleteSpan(
                   content: value.content,
                   toolCalls: value.toolCalls,
                 });
-                const traceId = span.spanContext().traceId;
-                if (traceId) {
-                  Object.assign(value, { traceId });
+                // Attach the trace id only for a *valid* span context. No-op
+                // spans (no real tracing configured, e.g. unit tests) report
+                // the all-zeros INVALID_TRACEID, which would otherwise pollute
+                // every inference response with a junk id.
+                const spanContext = span.spanContext();
+                if (isSpanContextValid(spanContext)) {
+                  Object.assign(value, { traceId: spanContext.traceId });
                 }
               } else if (isChatCompletionTokenCountEvent(value)) {
                 setTokens(span, value.tokens);
