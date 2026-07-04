@@ -58,7 +58,7 @@ export class AlertingNavigation {
   }
 
   pageHeading(app: AlertingApp): Locator {
-    return this.page.getByRole('heading', { name: ALERTING_APP_META[app].heading });
+    return this.page.getByRole('heading', { name: ALERTING_APP_META[app].heading, level: 1 });
   }
 
   requiredPrivilegeItem(app: AlertingApp): Locator {

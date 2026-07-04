@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { detectionSchema, type Detection } from '@kbn/streams-schema';
+import { detectionSchema, type Detection } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { PaginatedResponse } from '../../../../lib/significant_events/query_utils';
@@ -105,7 +105,7 @@ const detectionsBulkCreateRoute = createServerRoute({
   },
 });
 
-export const internalSigEventsDetectionsRoutes = {
+export const internalSignificantEventsDetectionsRoutes = {
   ...detectionsSearchRoute,
   ...detectionsHistoryRoute,
   ...detectionsBulkCreateRoute,
