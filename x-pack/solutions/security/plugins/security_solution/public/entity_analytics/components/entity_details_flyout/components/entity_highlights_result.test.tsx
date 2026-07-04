@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { EntityHighlightsResult } from './entity_highlights_result';
+import { EntityHighlightsResult, joinSignalLabels } from './entity_highlights_result';
 import { TestProviders } from '../../../../common/mock';
 
 describe('EntityHighlightsResult', () => {
@@ -401,7 +401,7 @@ describe('EntityHighlightsResult', () => {
           assistantResult={defaultAssistantResult}
           showAnonymizedValues={false}
           generatedAt={null}
-          stalenessReasons={['Risk score changed from 70 to 90']}
+          stalenessReasons={[{ signal: 'risk_score', previousScore: 70, currentScore: 90 }]}
           onRefresh={mockOnRefresh}
         />,
         { wrapper: TestProviders }
@@ -427,15 +427,37 @@ describe('EntityHighlightsResult', () => {
           assistantResult={defaultAssistantResult}
           showAnonymizedValues={false}
           generatedAt={null}
-          stalenessReasons={['Risk score changed from 70 to 90']}
+          stalenessReasons={[
+            { signal: 'risk_score', previousScore: 87.1264933848, currentScore: 62.8525224705 },
+          ]}
           onRefresh={mockOnRefresh}
         />,
         { wrapper: TestProviders }
       );
 
-      const reason = screen.getByText('Risk score changed from 70 to 90');
+      // Scores are rounded to 2 decimals via formatRiskScore, not shown raw.
+      const reason = screen.getByText('Risk score changed from 87.13 to 62.85');
       expect(reason.tagName).toBe('P');
       expect(reason.closest('li')).toBeNull();
+    });
+
+    it('lists multiple reasons as a bulleted list', () => {
+      render(
+        <EntityHighlightsResult
+          assistantResult={defaultAssistantResult}
+          showAnonymizedValues={false}
+          generatedAt={null}
+          stalenessReasons={[
+            { signal: 'risk_score', previousScore: 70, currentScore: 90 },
+            { signal: 'risk_score', previousScore: 50, currentScore: 80 },
+          ]}
+          onRefresh={mockOnRefresh}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      expect(screen.getByText('Risk score changed from 70.00 to 90.00').closest('li')).not.toBeNull();
+      expect(screen.getByText('Risk score changed from 50.00 to 80.00').closest('li')).not.toBeNull();
     });
 
     it('calls onRefresh when the callout regenerate button is clicked', () => {
@@ -444,7 +466,7 @@ describe('EntityHighlightsResult', () => {
           assistantResult={defaultAssistantResult}
           showAnonymizedValues={false}
           generatedAt={null}
-          stalenessReasons={['Risk score changed from 70 to 90']}
+          stalenessReasons={[{ signal: 'risk_score', previousScore: 70, currentScore: 90 }]}
           onRefresh={mockOnRefresh}
         />,
         { wrapper: TestProviders }
@@ -454,5 +476,25 @@ describe('EntityHighlightsResult', () => {
 
       expect(mockOnRefresh).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe('joinSignalLabels', () => {
+  it('returns an empty string for no labels', () => {
+    expect(joinSignalLabels([])).toBe('');
+  });
+
+  it('returns the single label unchanged', () => {
+    expect(joinSignalLabels(['Entity risk'])).toBe('Entity risk');
+  });
+
+  it('joins two labels with "and"', () => {
+    expect(joinSignalLabels(['Entity risk', 'Anomalies'])).toBe('Entity risk and Anomalies');
+  });
+
+  it('joins three or more labels with commas and a trailing "and"', () => {
+    expect(joinSignalLabels(['Entity risk', 'Anomalies', 'Rules'])).toBe(
+      'Entity risk, Anomalies, and Rules'
+    );
   });
 });

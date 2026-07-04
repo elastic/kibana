@@ -8,6 +8,7 @@
 import {
   buildEntitySummaryStaleness,
   computeEntitySummaryStalenessReasons,
+  getChangedStalenessSignals,
 } from './entity_summary_staleness';
 
 describe('entity_summary_staleness', () => {
@@ -51,7 +52,11 @@ describe('entity_summary_staleness', () => {
       };
 
       expect(computeEntitySummaryStalenessReasons(summary, { riskScoreNorm: 82.97 })).toEqual([
-        'Risk score changed from 70 to 82.97',
+        {
+          signal: 'risk_score',
+          previousScore: 70,
+          currentScore: 82.97,
+        },
       ]);
     });
 
@@ -84,6 +89,27 @@ describe('entity_summary_staleness', () => {
       };
 
       expect(computeEntitySummaryStalenessReasons(summary, {})).toEqual([]);
+    });
+  });
+
+  describe('getChangedStalenessSignals', () => {
+    it('returns an empty array when there are no reasons', () => {
+      expect(getChangedStalenessSignals([])).toEqual([]);
+    });
+
+    it('returns the distinct signal ids in first-seen order', () => {
+      expect(
+        getChangedStalenessSignals([{ signal: 'risk_score', previousScore: 70, currentScore: 90 }])
+      ).toEqual(['risk_score']);
+    });
+
+    it('dedupes when a signal contributes multiple reasons', () => {
+      expect(
+        getChangedStalenessSignals([
+          { signal: 'risk_score', previousScore: 70, currentScore: 90 },
+          { signal: 'risk_score', previousScore: 50, currentScore: 80 },
+        ])
+      ).toEqual(['risk_score']);
     });
   });
 });

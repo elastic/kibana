@@ -31,6 +31,7 @@ import { useLoadConnectors } from '@kbn/inference-connectors';
 import {
   buildEntitySummaryStaleness,
   computeEntitySummaryStalenessReasons,
+  type EntitySummaryStalenessReason,
 } from '@kbn/entity-store/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
@@ -143,7 +144,7 @@ export const EntityHighlightsAccordion: React.FC<{
   // This is computed client-side using already-loaded entity data (no extra API call).
   // NOTE: Per the RFC, this should move to a dedicated server-side endpoint
   // before GA so all surfaces (Agent Builder, external clients) share the same logic.
-  const stalenessReasons = useMemo((): string[] => {
+  const stalenessReasons = useMemo((): EntitySummaryStalenessReason[] => {
     if (!storedSummary) return [];
 
     // After in-session generation the entity record is not refetched immediately, so

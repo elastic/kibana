@@ -28,7 +28,13 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import {
+  getChangedStalenessSignals,
+  type EntitySummaryStalenessReason,
+  type EntitySummaryStalenessSignal,
+} from '@kbn/entity-store/common';
 import moment from 'moment';
+import { formatRiskScore } from '../../../common/utils';
 import type { EntityHighlightsResponse } from '../types';
 
 interface EntityHighlightsResultProps {
@@ -39,9 +45,58 @@ interface EntityHighlightsResultProps {
   showAnonymizedValues: boolean;
   generatedAt: number | null;
   generatedBy?: string;
-  stalenessReasons?: string[];
+  stalenessReasons?: EntitySummaryStalenessReason[];
   onRefresh: () => void;
 }
+
+/**
+ * Translated header label per staleness signal. Adding a signal to the shared registry
+ * forces a new entry here via the `satisfies Record<...>` exhaustiveness check.
+ */
+const stalenessSignalLabel = (signal: EntitySummaryStalenessSignal): string => {
+  const labels = {
+    risk_score: i18n.translate(
+      'xpack.securitySolution.flyout.entityDetails.highlights.stalenessSignal.riskScore',
+      { defaultMessage: 'Entity risk' }
+    ),
+  } satisfies Record<EntitySummaryStalenessSignal, string>;
+  return labels[signal];
+};
+
+/**
+ * Fully-translated detail line for a staleness change, composed from the structured
+ * change data. The `switch` is exhaustive over the signal union: adding a signal without
+ * a case here is a compile error (the function would no longer always return a string).
+ */
+const stalenessReasonMessage = (reason: EntitySummaryStalenessReason): string => {
+  switch (reason.signal) {
+    case 'risk_score':
+      return i18n.translate(
+        'xpack.securitySolution.flyout.entityDetails.highlights.stalenessReason.riskScore',
+        {
+          defaultMessage: 'Risk score changed from {previousScore} to {currentScore}',
+          values: {
+            previousScore: formatRiskScore(reason.previousScore),
+            currentScore: formatRiskScore(reason.currentScore),
+          },
+        }
+      );
+  }
+};
+
+/**
+ * Joins the changed-signal labels into a subject for the staleness header
+ * (e.g. "Entity risk", "Entity risk and Anomalies").
+ */
+export const joinSignalLabels = (labels: string[]): string => {
+  if (labels.length <= 1) {
+    return labels[0] ?? '';
+  }
+  if (labels.length === 2) {
+    return `${labels[0]} and ${labels[1]}`;
+  }
+  return `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
+};
 
 export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   assistantResult,
@@ -60,30 +115,41 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
 
   const isStale = Boolean(stalenessReasons && stalenessReasons.length > 0);
   const isSingleReason = stalenessReasons?.length === 1;
+  // Header subject is derived from whichever signals changed, so new registry signals
+  // (anomalies, rules, …) surface here automatically once given a translated label.
+  const changedSignalLabels = stalenessReasons
+    ? getChangedStalenessSignals(stalenessReasons).map(stalenessSignalLabel)
+    : [];
+  const stalenessMessages = stalenessReasons?.map(stalenessReasonMessage) ?? [];
 
   return (
     <EuiPanel hasBorder={true}>
       {isStale && stalenessReasons && (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="warning"
             data-test-subj="entity-highlights-staleness-callout"
             title={
               <FormattedMessage
                 id="xpack.securitySolution.flyout.entityDetails.highlights.stalenessTitle"
-                defaultMessage="Entity risk has changed since this summary was generated"
+                defaultMessage="{signals} {signalCount, plural, one {has} other {have}} changed since this summary was generated"
+                values={{
+                  signals: joinSignalLabels(changedSignalLabels),
+                  signalCount: changedSignalLabels.length,
+                }}
               />
             }
           >
             {/* Single reason reads as plain prose; only fall back to a list for multiple reasons. */}
             <EuiText size="s">
               {isSingleReason ? (
-                <p>{stalenessReasons[0]}</p>
+                <p>{stalenessMessages[0]}</p>
               ) : (
                 <ul>
-                  {stalenessReasons.map((reason, i) => (
-                    <li key={i}>{reason}</li>
+                  {stalenessMessages.map((message) => (
+                    <li key={message}>{message}</li>
                   ))}
                 </ul>
               )}
@@ -91,7 +157,6 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
             <EuiSpacer size="s" />
             <EuiButton
               color="warning"
-              size="s"
               iconType="refresh"
               onClick={onRefresh}
               data-test-subj="entity-highlights-staleness-regenerate"

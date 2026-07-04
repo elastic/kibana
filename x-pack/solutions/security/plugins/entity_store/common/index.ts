@@ -116,6 +116,7 @@ export type {
   EntitySummaryStalenessSignal,
   EntitySummaryStalenessSnapshot,
   EntitySummaryStalenessEntitySnapshot,
+  EntitySummaryStalenessReason,
   SaveEntityAiSummaryParams,
   SaveEntityAiSummarySummary,
   PersistedEntityAiSummary,
@@ -126,6 +127,7 @@ export {
   DEFAULT_ENTITY_SUMMARY_STALENESS_SIGNALS,
   buildEntitySummaryStaleness,
   computeEntitySummaryStalenessReasons,
+  getChangedStalenessSignals,
 } from './domain/definitions/entity_summary_staleness';
 export { buildEntityListSourceFilter } from './domain/definitions/entity_list_source';
 export type {

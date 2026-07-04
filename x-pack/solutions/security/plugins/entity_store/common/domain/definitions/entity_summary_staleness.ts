@@ -95,27 +95,44 @@ export interface EntitySummaryStalenessEntitySnapshot {
 
 const RISK_SCORE_EPSILON = 0.01;
 
+/** Risk-score staleness change, carrying the before/after normalized scores. */
+export interface RiskScoreStalenessReason {
+  signal: 'risk_score';
+  previousScore: number;
+  currentScore: number;
+}
+
+/**
+ * A single detected staleness change. Discriminated on `signal` and carrying the raw
+ * values that changed — deliberately NOT a display string.
+ *
+ * This shared domain module is server + client safe and i18n-free, so all presentation copy
+ * (header labels AND detail messages) is composed and translated at the UI layer from this
+ * structured data. Add a variant here (and a matching registry entry) per new signal.
+ */
+export type EntitySummaryStalenessReason = RiskScoreStalenessReason;
+
 interface EntitySummaryStalenessSignalDefinition {
   capture: (entity: EntitySummaryStalenessEntitySnapshot) => EntitySummaryStalenessSnapshot;
-  staleReason: (
+  detectChange: (
     stored: EntitySummaryStalenessSnapshot,
     current: EntitySummaryStalenessEntitySnapshot
-  ) => string | undefined;
+  ) => EntitySummaryStalenessReason | undefined;
 }
 
 /**
  * Scalar signals (e.g. risk score) are only compared when both stored and current values are
  * present. Null/missing on either side is not stale (e.g. risk not loaded yet).
  */
-const staleReasonWhenBothPresent = <T>(
+const detectChangeWhenBothPresent = <T, R>(
   baseline: T | null | undefined,
   current: T | null | undefined,
-  format: (stored: T, value: T) => string | undefined
-): string | undefined => {
+  detect: (stored: T, value: T) => R | undefined
+): R | undefined => {
   if (baseline == null || current == null) {
     return undefined;
   }
-  return format(baseline, current);
+  return detect(baseline, current);
 };
 
 const isKnownStalenessSignal = (signal: string): signal is EntitySummaryStalenessSignal =>
@@ -128,11 +145,14 @@ const isKnownStalenessSignal = (signal: string): signal is EntitySummaryStalenes
 const ENTITY_SUMMARY_STALENESS_SIGNALS_REGISTRY = {
   risk_score: {
     capture: (entity) => ({ risk_score: entity.riskScoreNorm ?? null }),
-    staleReason: (stored, current) =>
-      staleReasonWhenBothPresent(stored.risk_score, current.riskScoreNorm, (baseline, score) =>
-        Math.abs(score - baseline) <= RISK_SCORE_EPSILON
-          ? undefined
-          : `Risk score changed from ${baseline} to ${score}`
+    detectChange: (stored, current) =>
+      detectChangeWhenBothPresent(
+        stored.risk_score,
+        current.riskScoreNorm,
+        (previousScore, currentScore) =>
+          Math.abs(currentScore - previousScore) <= RISK_SCORE_EPSILON
+            ? undefined
+            : { signal: 'risk_score', previousScore, currentScore }
       ),
   },
 } as const satisfies Record<EntitySummaryStalenessSignal, EntitySummaryStalenessSignalDefinition>;
@@ -154,7 +174,7 @@ export const buildEntitySummaryStaleness = (
 export const computeEntitySummaryStalenessReasons = (
   summary: { staleness?: EntitySummaryStaleness | null },
   entitySnapshot: EntitySummaryStalenessEntitySnapshot
-): string[] => {
+): EntitySummaryStalenessReason[] => {
   const staleness = summary.staleness;
   if (!staleness?.enabled_signals?.length || !staleness.snapshot) {
     return [];
@@ -168,10 +188,26 @@ export const computeEntitySummaryStalenessReasons = (
       return [];
     }
 
-    const reason = ENTITY_SUMMARY_STALENESS_SIGNALS_REGISTRY[signal].staleReason(
-      storedSnapshot,
-      entitySnapshot
-    );
+    const definition = ENTITY_SUMMARY_STALENESS_SIGNALS_REGISTRY[signal];
+    const reason = definition.detectChange(storedSnapshot, entitySnapshot);
     return reason ? [reason] : [];
   });
+};
+
+/**
+ * Distinct signal ids for the changed signals, preserving first-seen order. Drives the
+ * dynamic staleness header instead of hard-coding a single signal: the UI maps each id to a
+ * translated label, so adding a signal to the registry flows through automatically.
+ */
+export const getChangedStalenessSignals = (
+  reasons: EntitySummaryStalenessReason[]
+): EntitySummaryStalenessSignal[] => {
+  const seen = new Set<EntitySummaryStalenessSignal>();
+  return reasons.reduce<EntitySummaryStalenessSignal[]>((signals, { signal }) => {
+    if (!seen.has(signal)) {
+      seen.add(signal);
+      signals.push(signal);
+    }
+    return signals;
+  }, []);
 };
