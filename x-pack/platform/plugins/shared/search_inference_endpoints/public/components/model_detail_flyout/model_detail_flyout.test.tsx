@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { EisInferenceEndpoint } from '../../../common/types';
 
 import { ModelDetailFlyout } from './model_detail_flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -26,9 +26,7 @@ const mockUiSettings = (inferencePreferencesEnabled: boolean = false) => ({
 
 const MODEL_ID = 'test-model';
 
-const createEndpoint = (
-  overrides: Partial<InferenceAPIConfigResponse> = {}
-): InferenceAPIConfigResponse => ({
+const createEndpoint = (overrides: Partial<EisInferenceEndpoint> = {}): EisInferenceEndpoint => ({
   inference_id: 'my-endpoint',
   task_type: 'text_embedding',
   service: 'elastic',
@@ -49,7 +47,7 @@ describe('ModelDetailFlyout', () => {
 
   const renderFlyout = (
     modelId = MODEL_ID,
-    allEndpoints: InferenceAPIConfigResponse[] = [createEndpoint()]
+    allEndpoints: EisInferenceEndpoint[] = [createEndpoint()]
   ) =>
     render(
       <ModelDetailFlyout
