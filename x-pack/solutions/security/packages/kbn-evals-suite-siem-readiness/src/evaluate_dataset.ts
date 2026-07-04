@@ -18,7 +18,6 @@ import {
   createTrajectoryEvaluator,
   getToolCallSteps,
 } from '@kbn/evals';
-import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { SiemReadinessEvalChatClient } from './chat_client';
 

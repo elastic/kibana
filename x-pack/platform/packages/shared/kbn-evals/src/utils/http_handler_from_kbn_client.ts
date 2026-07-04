@@ -176,9 +176,9 @@ export function httpHandlerFromKbnClient({
         log.warning(
           `${
             typeof status === 'number' ? `HTTP ${status}` : `transport error (${error.message})`
-          } from Kibana; retrying in ${Math.round(delayMs / 1000)}s (attempt ${
-            attempt + 1
-          }/${maxRetries + 1})`
+          } from Kibana; retrying in ${Math.round(delayMs / 1000)}s (attempt ${attempt + 1}/${
+            maxRetries + 1
+          })`
         );
         await sleep(delayMs);
       }
