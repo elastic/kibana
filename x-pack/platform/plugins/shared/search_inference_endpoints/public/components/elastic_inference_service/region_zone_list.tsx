@@ -43,7 +43,7 @@ export const RegionZoneList: React.FC<RegionZoneListProps> = ({
   onToggleExpand,
 }) => {
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="s">
       {zoneGroups.map((zone) => {
         const zoneKeys = zone.regions.map(regionKey);
         const checkedCount = zoneKeys.filter((k) => checkedKeys.has(k)).length;
@@ -75,6 +75,13 @@ export const RegionZoneList: React.FC<RegionZoneListProps> = ({
                   indeterminate={isZoneIndeterminate}
                   onChange={() => onToggleZone(zone)}
                   label=""
+                  aria-label={i18n.translate(
+                    'xpack.searchInferenceEndpoints.manageRegions.zoneCheckboxAriaLabel',
+                    {
+                      defaultMessage: 'Toggle all regions in {zone}',
+                      values: { zone: zone.displayName },
+                    }
+                  )}
                   data-test-subj={`manageRegionsZoneCheckbox-${zone.geo}`}
                 />
               </EuiFlexItem>
@@ -109,6 +116,6 @@ export const RegionZoneList: React.FC<RegionZoneListProps> = ({
           </EuiPanel>
         );
       })}
-    </>
+    </EuiFlexGroup>
   );
 };
