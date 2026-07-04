@@ -404,7 +404,8 @@ export const PREVIEW_EMPTY_BODY = i18n.translate('xpack.cases.templates.previewE
 export const PREVIEW_TEMPLATE_DESCRIPTION = i18n.translate(
   'xpack.cases.templates.previewTemplateDescription',
   {
-    defaultMessage: 'See how this template appears and set default field values when creating a case.',
+    defaultMessage:
+      'See how this template appears and set default field values when creating a case.',
   }
 );
 
