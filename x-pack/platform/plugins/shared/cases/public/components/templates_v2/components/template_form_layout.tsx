@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
@@ -61,7 +61,6 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   initialIsEnabled = true,
 }) => {
   const styles = useMemoCss(componentStyles);
-  const { euiTheme } = useEuiTheme();
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
   const defaultPreviewWidth = Math.floor(window.innerWidth * 0.3);
@@ -189,11 +188,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        // Reserve room for the surrounding page padding (size.l) plus the Security
-        // Solution timeline bottom bar (57px, same value used by the validation
-        // accordion) so the page fills the viewport exactly and never scrolls the
-        // header underneath the sticky app top bar.
-        css={[kbnFullBodyHeightCss(`calc(${euiTheme.size.l} + 57px)`), styles.wrapper]}
+        // The wrapper cancels the page-section padding via negative margins, so the only
+        // extra vertical space to reserve is the Security Solution timeline bottom bar
+        // (57px, the same value used by the validation accordion). This makes the page
+        // fill the viewport exactly and never scroll the header under the sticky top bar.
+        css={[kbnFullBodyHeightCss('57px'), styles.wrapper]}
       >
         <EuiFlexItem grow={false} css={styles.header}>
           <TemplateFormHeader

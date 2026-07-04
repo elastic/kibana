@@ -377,6 +377,30 @@ export const PREVIEW_TEMPLATE = i18n.translate('xpack.cases.templates.previewTem
   defaultMessage: 'Preview',
 });
 
+export const PREVIEW_UNAVAILABLE_TITLE = i18n.translate(
+  'xpack.cases.templates.previewUnavailableTitle',
+  {
+    defaultMessage: "Can't preview this template",
+  }
+);
+
+export const PREVIEW_UNAVAILABLE_BODY = i18n.translate(
+  'xpack.cases.templates.previewUnavailableBody',
+  {
+    defaultMessage:
+      'The template definition has errors. Fix the issues highlighted in the editor to preview the fields.',
+  }
+);
+
+export const PREVIEW_EMPTY_TITLE = i18n.translate('xpack.cases.templates.previewEmptyTitle', {
+  defaultMessage: 'Nothing to preview yet',
+});
+
+export const PREVIEW_EMPTY_BODY = i18n.translate('xpack.cases.templates.previewEmptyBody', {
+  defaultMessage:
+    'Add a template definition in the editor to see how it will appear when creating a case.',
+});
+
 export const PREVIEW_TEMPLATE_DESCRIPTION = i18n.translate(
   'xpack.cases.templates.previewTemplateDescription',
   {

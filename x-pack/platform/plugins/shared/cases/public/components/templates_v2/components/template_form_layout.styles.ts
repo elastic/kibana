@@ -11,9 +11,10 @@ import { css } from '@emotion/react';
 export const componentStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
-      // Cancel the surrounding EuiPageSection padding (paddingSize="l") so the
-      // editor/preview split and the header divider run edge-to-edge (full width).
-      marginBlockEnd: `-${euiTheme.size.l}`,
+      // Cancel the surrounding EuiPageSection padding (paddingSize="l") on all sides so
+      // the header runs edge-to-edge and sits close to the top bar (no wasted vertical
+      // space), and the editor/preview split is full width.
+      marginBlock: `-${euiTheme.size.l}`,
       marginInline: `-${euiTheme.size.l}`,
       overflow: 'hidden',
     }),
