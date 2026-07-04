@@ -28,12 +28,12 @@ import { agentlessPolicyToPackagePolicy } from '../../../../../../../common/serv
 export function useCopyPackagePolicyData(
   packagePolicyId: string,
   { isAgentless }: { isAgentless: boolean }
-): { item?: PackagePolicy; isLoading: boolean; isError: boolean; error: unknown } {
+): { item?: PackagePolicy; isLoading: boolean; isError: boolean; error: Error | null } {
   const packagePolicyQuery = useGetOnePackagePolicyQuery(packagePolicyId, {
     enabled: !isAgentless,
   });
 
-  const agentlessPolicyQuery = useQuery(
+  const agentlessPolicyQuery = useQuery<PackagePolicy, Error>(
     ['copyAgentlessPolicy', packagePolicyId],
     async () => {
       const { item: agentlessPolicy } = await sendGetAgentlessPolicy(packagePolicyId);
@@ -59,14 +59,18 @@ export function useCopyPackagePolicyData(
       item: agentlessPolicyQuery.data,
       isLoading: agentlessPolicyQuery.isLoading,
       isError: agentlessPolicyQuery.isError,
-      error: agentlessPolicyQuery.error,
+      error: agentlessPolicyQuery.error ?? null,
     };
   }
+
+  // Normalize the error to Error | null for consistent typing with the agentless path.
+  const packagePolicyError =
+    packagePolicyQuery.error instanceof Error ? packagePolicyQuery.error : null;
 
   return {
     item: packagePolicyQuery.data?.item,
     isLoading: packagePolicyQuery.isLoading,
     isError: packagePolicyQuery.isError,
-    error: packagePolicyQuery.error,
+    error: packagePolicyError,
   };
 }

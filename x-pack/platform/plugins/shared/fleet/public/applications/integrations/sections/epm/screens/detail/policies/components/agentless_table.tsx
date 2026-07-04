@@ -158,7 +158,7 @@ export const AgentlessPackagePoliciesTable = ({
   // Polls every 30 seconds
   useEffect(() => {
     const fetchAgents = async () => {
-      const { data: agentsData, error } = await sendGetAgents({
+      const { data: agentsData, error: agentsError } = await sendGetAgents({
         perPage: SO_SEARCH_LIMIT,
         kuery: agentsKuery,
       });
@@ -172,8 +172,8 @@ export const AgentlessPackagePoliciesTable = ({
         }, {} as Record<string, Agent>)
       );
 
-      if (error) {
-        notifications.toasts.addError(error, {
+      if (agentsError) {
+        notifications.toasts.addError(agentsError, {
           title: i18n.translate(
             'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusError',
             {
