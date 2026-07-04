@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   ResizableLayout,
@@ -19,6 +25,7 @@ import { TemplateYamlEditor } from './template_form';
 import { TemplatePreview } from './template_preview';
 import { componentStyles } from './template_form_layout.styles';
 import { MIN_EDITOR_WIDTH, MIN_PREVIEW_WIDTH } from '../constants';
+import * as i18n from '../translations';
 
 interface TemplateEditorLayoutProps {
   isLoading?: boolean;
@@ -69,7 +76,14 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
       }
       minFlexPanelSize={MIN_EDITOR_WIDTH}
       fixedPanel={
-        <div css={styles.previewPanel}>
+        <div css={styles.previewPanel} data-test-subj="templatePreviewPanel">
+          <EuiTitle size="xxs" css={styles.previewHeaderTitle}>
+            <h2>{i18n.PREVIEW_TEMPLATE}</h2>
+          </EuiTitle>
+          <EuiText size="xs" color="subdued">
+            {i18n.PREVIEW_TEMPLATE_DESCRIPTION}
+          </EuiText>
+          <EuiHorizontalRule margin="m" />
           <TemplatePreview onFieldDefaultChange={onFieldDefaultChange} />
         </div>
       }

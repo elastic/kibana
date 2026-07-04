@@ -39,6 +39,18 @@ export const TEMPLATE_SAVED = i18n.translate('xpack.cases.templates.templateSave
   defaultMessage: 'Saved',
 });
 
+export const RESET = i18n.translate('xpack.cases.templates.reset', {
+  defaultMessage: 'Reset',
+});
+
+export const DRAFT_SAVED = i18n.translate('xpack.cases.templates.draftSaved', {
+  defaultMessage: 'Draft saved',
+});
+
+export const SAVING_DRAFT = i18n.translate('xpack.cases.templates.savingDraft', {
+  defaultMessage: 'Saving…',
+});
+
 export const VALIDATION_LOADING_EDITOR = i18n.translate(
   'xpack.cases.templates.validation.loadingEditor',
   {
@@ -364,6 +376,13 @@ export const EXPORT_TEMPLATE = i18n.translate('xpack.cases.templates.exportTempl
 export const PREVIEW_TEMPLATE = i18n.translate('xpack.cases.templates.previewTemplate', {
   defaultMessage: 'Preview',
 });
+
+export const PREVIEW_TEMPLATE_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.previewTemplateDescription',
+  {
+    defaultMessage: 'See how this template appears and set default field values when creating a case.',
+  }
+);
 
 export const DELETE_TEMPLATE = i18n.translate('xpack.cases.templates.deleteTemplate', {
   defaultMessage: 'Delete',
