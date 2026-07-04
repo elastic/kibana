@@ -578,7 +578,7 @@ const RiskInputsTabContent = <T extends EntityType>({
         />
       )}
       <EuiSpacer size="m" />
-      {pitSelectionActive && selectedTimestamp !== undefined && (
+      {pitSelectionActive && (
         <>
           <EuiCallOut
             announceOnMount

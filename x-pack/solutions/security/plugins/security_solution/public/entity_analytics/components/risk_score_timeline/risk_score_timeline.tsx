@@ -17,6 +17,7 @@ import {
   Position,
   ScaleType,
   Settings,
+  type PointStyleAccessor,
   type ProjectedValues,
 } from '@elastic/charts';
 import {
@@ -53,6 +54,7 @@ export interface RiskScoreTimelineProps {
 
 const CHART_HEIGHT = 180;
 const CHART_PAGE_SIZE = 1000;
+const X_DOMAIN_RIGHT_PADDING = 0.03;
 
 export const RANGE_PRESETS = [
   {
@@ -252,7 +254,12 @@ const TimelineChart: React.FC<TimelineChartProps> = ({
   const xDomain = useMemo(() => {
     const min = dateMath.parse(from)?.valueOf();
     const max = dateMath.parse(to, { roundUp: true })?.valueOf();
-    return min !== undefined && max !== undefined ? { min, max } : undefined;
+    if (min === undefined || max === undefined) {
+      return undefined;
+    }
+    // points at the domain boundary (`to` is usually `now`) get half-clipped and
+    // are hard to click, so pad the right edge past the newest scores
+    return { min, max: max + (max - min) * X_DOMAIN_RIGHT_PADDING };
   }, [from, to]);
 
   const timeFormatter = useMemo(() => {
@@ -280,6 +287,12 @@ const TimelineChart: React.FC<TimelineChartProps> = ({
   );
 
   const selectedMs = selectedTimestamp === undefined ? undefined : toEpochMs(selectedTimestamp);
+
+  const pointStyleAccessor = useCallback<PointStyleAccessor>(
+    ({ x }) =>
+      x === selectedMs ? { fill: euiTheme.colors.primary, stroke: euiTheme.colors.primary } : null,
+    [selectedMs, euiTheme.colors.primary]
+  );
 
   return (
     <Chart size={{ height: CHART_HEIGHT }}>
@@ -337,6 +350,7 @@ const TimelineChart: React.FC<TimelineChartProps> = ({
         yAccessors={[1]}
         data={chartData}
         curve={CurveType.CURVE_STEP_AFTER}
+        pointStyleAccessor={pointStyleAccessor}
       />
     </Chart>
   );
