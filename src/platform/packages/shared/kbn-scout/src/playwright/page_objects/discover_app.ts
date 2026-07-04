@@ -686,6 +686,11 @@ export class DiscoverApp {
     return this.codeEditor.getCodeEditorValue(nthIndex);
   }
 
+  async openSidebar() {
+    await this.page.testSubj.locator('dscShowSidebarButton').click();
+    await this.waitUntilFieldListHasCountOfFields();
+  }
+
   async addBreakdownFieldFromSidebar(
     field: string,
     section: 'selected' | 'available' = 'available'
