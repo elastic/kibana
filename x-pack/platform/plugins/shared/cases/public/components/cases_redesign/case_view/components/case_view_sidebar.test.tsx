@@ -186,7 +186,7 @@ describe('CaseViewSidebar (redesign)', () => {
       wrapperProps: { license: basicLicense },
     });
 
-    expect(screen.queryByTestId('case-view-assignees')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('case-view-assignees-field-panel')).not.toBeInTheDocument();
   });
 
   it('should render the assignees on platinum license', async () => {
@@ -194,7 +194,7 @@ describe('CaseViewSidebar (redesign)', () => {
       wrapperProps: { license: platinumLicense },
     });
 
-    expect(await screen.findByTestId('case-view-assignees')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-view-assignees-field-panel')).toBeInTheDocument();
 
     await waitForComponentToUpdate();
   });
@@ -275,12 +275,21 @@ describe('CaseViewSidebar (redesign)', () => {
         }
       );
 
-      const assigneesSection = within(await screen.findByTestId('case-view-assignees'));
+      const assigneesPanel = within(await screen.findByTestId('case-view-assignees-field-panel'));
 
-      expect(await assigneesSection.findByText('Unknown')).toBeInTheDocument();
-      expect(await assigneesSection.findByText('Fuzzy Marten')).toBeInTheDocument();
-      expect(await assigneesSection.findByText('elastic')).toBeInTheDocument();
-      expect(await assigneesSection.findByText('Misty Mackerel')).toBeInTheDocument();
+      expect(await assigneesPanel.findByText('Assigned')).toBeInTheDocument();
+      expect(
+        await assigneesPanel.findByTestId('case-user-profile-avatar-unknown-user')
+      ).toBeInTheDocument();
+      expect(
+        await assigneesPanel.findByTestId('case-user-profile-avatar-elastic')
+      ).toBeInTheDocument();
+      expect(
+        await assigneesPanel.findByTestId('case-user-profile-avatar-fuzzy_marten')
+      ).toBeInTheDocument();
+      expect(
+        await assigneesPanel.findByTestId('case-user-profile-avatar-misty_mackerel')
+      ).toBeInTheDocument();
     });
   });
 

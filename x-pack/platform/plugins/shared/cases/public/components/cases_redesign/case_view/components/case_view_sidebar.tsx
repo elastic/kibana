@@ -25,7 +25,7 @@ import { useCasesContext } from '../../../cases_context/use_cases_context';
 import * as i18n from '../../../case_view/translations';
 import { CONNECTORS } from '../../../../common/translations';
 import { SeveritySidebarSelector } from '../../../severity/sidebar_selector';
-import { AssignUsers } from '../../../case_view/components/assign_users';
+import { AssigneesFieldPanel } from './user_picker_field/assignees_field_panel';
 import type { Assignee } from '../../../user_profiles/types';
 import { EditCategory } from '../../../case_view/components/edit_category';
 import { parseCaseUsers } from '../../../utils';
@@ -143,7 +143,7 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
         >
           <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
             {caseAssignmentAuthorized ? (
-              <AssignUsers
+              <AssigneesFieldPanel
                 caseAssignees={caseData.assignees}
                 currentUserProfile={currentUserProfile}
                 onAssigneesChanged={onUpdateAssignees}

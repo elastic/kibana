@@ -79,3 +79,7 @@ export const SECTION_SETTINGS_ARIA = i18n.translate(
     defaultMessage: 'Section settings',
   }
 );
+
+export const ASSIGNED_TITLE = i18n.translate('xpack.cases.casesRedesign.details.assignedTitle', {
+  defaultMessage: 'Assigned',
+});
