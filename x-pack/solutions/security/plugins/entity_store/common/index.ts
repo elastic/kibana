@@ -126,7 +126,6 @@ export type {
 // caps) intentionally live behind the `@kbn/entity-store/common/entity_summary` subpath, NOT
 // this page-load barrel, so they only ship in the chunks that use them (lazy flyout / server)
 // rather than on every page load. Only the erased-at-build-time types stay in the barrel.
-export { buildEntityListSourceFilter } from './domain/definitions/entity_list_source';
 export type {
   EntitySummaryContent,
   CappedEntitySummaryContent,
