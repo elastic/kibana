@@ -20,7 +20,7 @@ import type {
 import {
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 
 export interface WorkflowExecutionQueryParams {
   size?: number;
@@ -75,6 +75,7 @@ export class WorkflowExecutionService<TInput extends object = {}> {
   > {
     switch (status) {
       case ExecutionStatus.PENDING:
+      case ExecutionStatus.QUEUED:
       case ExecutionStatus.RUNNING:
       case ExecutionStatus.WAITING:
       case ExecutionStatus.WAITING_FOR_INPUT:
