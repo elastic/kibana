@@ -12,11 +12,9 @@
     "server/**/*",
     "public/**/*",
     "types/**/*",
-    "test/**/*"
+    "test/**/*",
+    "../streams/server/agent_builder/tools/read"
   ],
   "exclude": ["target/**/*"],
-  "kbn_references": [
-    "@kbn/streams-plugin",
-    "@kbn/core",
-  ]
+  "kbn_references": ["@kbn/streams-plugin", "@kbn/core"]
 }

@@ -11,6 +11,9 @@ export const ASSET_VERSION = 1;
 
 export const ATTACHMENT_SUGGESTIONS_LIMIT = 50;
 
+export const STREAMS_PRODUCER = 'streams';
+export const STREAMS_RULE_REGISTRATION_CONTEXT = 'streams';
+
 export const STREAMS_API_PRIVILEGES = {
   read: 'read_stream',
   manage: 'manage_stream',
@@ -24,17 +27,13 @@ export const STREAMS_UI_PRIVILEGES = {
 /**
  * Tiered features
  */
-export const SIGNIFICANT_EVENTS_TIERED_SIGNIFICANT_EVENT_FEATURE: PricingProductFeature = {
+export const SIGNIFICANT_EVENTS_TIERED_FEATURE: PricingProductFeature = {
   id: 'streams:significant-events',
   description: 'Enable significant events feature for streams',
   products: [{ name: 'observability', tier: 'complete' }],
 };
 
-export const SIGNIFICANT_EVENT_TIERED_FEATURES = [
-  SIGNIFICANT_EVENTS_TIERED_SIGNIFICANT_EVENT_FEATURE,
-];
-
-export const FAILURE_STORE_SELECTOR = '::failures';
+export const SIGNIFICANT_EVENT_TIERED_FEATURES = [SIGNIFICANT_EVENTS_TIERED_FEATURE];
 
 /**
  * Continuous KI extraction workflow
