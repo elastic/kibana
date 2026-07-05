@@ -107,7 +107,7 @@ safe-outputs:
   add-labels:
     allowed:
       - failure:ai-fixable
-      - failure:test-design
+      - failure:test-needs-update
       - failure:test-environment
       - failure:application
       - failure:ci-environment
@@ -146,7 +146,7 @@ Every conclusion must cite specific evidence. Do not guess.
 
 Set `classification` based on where the evidence points:
 
-- **`test-design`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
+- **`test-needs-update`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
 - **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference).
 - **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug).
 - **`ci-environment`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
@@ -168,7 +168,7 @@ Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong in
 
 Add exactly one classification label to the issue that matches the chosen `classification`:
 
-- `failure:test-design`: when `classification` is `test-design`
+- `failure:test-needs-update`: when `classification` is `test-needs-update`
 - `failure:test-environment`: when `classification` is `test-environment`
 - `failure:application`: when `classification` is `application`
 - `failure:ci-environment`: when `classification` is `ci-environment`
