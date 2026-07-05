@@ -41,6 +41,23 @@ export const platformCoreTools = {
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
 } as const;
 
+const casesTool = <TName extends string>(
+  toolName: TName
+): `${typeof internalNamespaces.platformCore}.cases.${TName}` => {
+  return `${internalNamespaces.platformCore}.cases.${toolName}`;
+};
+
+/**
+ * Ids of built-in Cases cluster tools, registered by the Cases plugin.
+ * All live under `platform.core.cases.*`.
+ * The read/search tool uses `platformCoreTools.cases` (`platform.core.cases`).
+ */
+export const platformCoreCasesTools = {
+  manage: casesTool('manage'),
+  attachments: casesTool('attachments'),
+  observables: casesTool('observables'),
+} as const;
+
 /**
  * Sig Events tools should try to follow this naming convention when possible:
  * {namespace}.sig_events.{feature}_{entity}_{action}
@@ -56,6 +73,7 @@ export const platformStreamsSigEventsTools = {
   searchEvent: `${internalNamespaces.platformSignificantEvents}.event_search`,
   createEvent: `${internalNamespaces.platformSignificantEvents}.event_create`,
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
+  attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
 } as const;
 
 export const attachmentTools = {
@@ -118,6 +136,8 @@ export const defaultAgentToolIds = [
   platformCoreTools.getWorkflowExecutionStatus,
   platformCoreTools.resumeWorkflowExecution,
   platformCoreTools.listWorkflowExecutions,
+  platformCoreTools.generateWorkflow,
+  platformCoreTools.executeWorkflow,
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,

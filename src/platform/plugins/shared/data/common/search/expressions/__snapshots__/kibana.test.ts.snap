@@ -15,6 +15,7 @@ Object {
       },
     },
   ],
+  "isApproximate": undefined,
   "now": 0,
   "projectRouting": undefined,
   "query": Array [
