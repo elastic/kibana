@@ -711,7 +711,7 @@ const parallelModeRefinement = (value: unknown): boolean => {
   if (hasForeach) return Array.isArray(step.steps) && step.steps.length > 0;
   return step.steps === undefined;
 };
-const PARALLEL_MODE_REFINEMENT_MESSAGE =
+export const PARALLEL_MODE_REFINEMENT_MESSAGE =
   'A "parallel" step must use either dynamic fan-out (`foreach` + `steps`) or static ' +
   '`branches`, but not both. With `foreach`, provide `steps`; with `branches`, omit `steps`.';
 
@@ -726,7 +726,7 @@ const parallelBranchNamesUniqueRefinement = (value: unknown): boolean => {
     .filter((name): name is string => typeof name === 'string');
   return new Set(names).size === names.length;
 };
-const PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE =
+export const PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE =
   'Static `parallel` branch names must be unique within a step; each `name` is used as the ' +
   'result `key` in the aggregate output.';
 

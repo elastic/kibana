@@ -16,6 +16,8 @@ import {
   LIQUID_MEMORY_LIMIT_MAX,
   LIQUID_PARSE_LIMIT_MAX,
   LIQUID_RENDER_LIMIT_MAX,
+  PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE,
+  PARALLEL_MODE_REFINEMENT_MESSAGE,
   ParallelStepSchema,
   WorkflowOutputStepSchema,
   WorkflowSchema,
@@ -1055,27 +1057,87 @@ describe('ParallelStepSchema', () => {
     expect(ParallelStepSchema.safeParse(staticParallel).success).toBe(true);
   });
 
-  it('rejects mixing foreach and branches', () => {
-    const result = ParallelStepSchema.safeParse({
-      name: 'fan-out',
-      type: 'parallel',
-      foreach: '{{ steps.list.output }}',
-      steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
-      branches: staticParallel.branches,
-    });
-    expect(result.success).toBe(false);
+  // Returns true when the parse failed specifically on the mode refinement,
+  // so we don't accidentally accept a rejection that fired for another reason.
+  const failedWithModeMessage = (value: unknown): boolean => {
+    const result = ParallelStepSchema.safeParse(value);
+    return (
+      !result.success &&
+      result.error.issues.some((issue) => issue.message === PARALLEL_MODE_REFINEMENT_MESSAGE)
+    );
+  };
+
+  it('rejects mixing foreach and branches (with steps) via the mode refinement', () => {
+    expect(
+      failedWithModeMessage({
+        name: 'fan-out',
+        type: 'parallel',
+        foreach: '{{ steps.list.output }}',
+        steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+        branches: staticParallel.branches,
+      })
+    ).toBe(true);
   });
 
-  it('rejects a step with neither foreach nor branches', () => {
-    const result = ParallelStepSchema.safeParse({ name: 'fan-out', type: 'parallel' });
-    expect(result.success).toBe(false);
+  it('rejects mixing foreach and branches even when no top-level steps are given', () => {
+    expect(
+      failedWithModeMessage({
+        name: 'fan-out',
+        type: 'parallel',
+        foreach: '{{ steps.list.output }}',
+        branches: staticParallel.branches,
+      })
+    ).toBe(true);
+  });
+
+  it('rejects mixing foreach (with empty steps) and branches', () => {
+    expect(
+      failedWithModeMessage({
+        name: 'fan-out',
+        type: 'parallel',
+        foreach: '{{ steps.list.output }}',
+        steps: [],
+        branches: staticParallel.branches,
+      })
+    ).toBe(true);
+  });
+
+  it('rejects a step with neither foreach nor branches via the mode refinement', () => {
+    expect(failedWithModeMessage({ name: 'fan-out', type: 'parallel' })).toBe(true);
+  });
+
+  it('rejects foreach without steps via the mode refinement', () => {
+    expect(
+      failedWithModeMessage({
+        name: 'fan-out',
+        type: 'parallel',
+        foreach: '{{ steps.list.output }}',
+      })
+    ).toBe(true);
   });
 
   it('rejects top-level steps alongside branches (static mode must omit steps)', () => {
+    expect(
+      failedWithModeMessage({
+        ...staticParallel,
+        steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+      })
+    ).toBe(true);
+  });
+
+  it('reports duplicate static branch names via the branch-names refinement', () => {
     const result = ParallelStepSchema.safeParse({
-      ...staticParallel,
-      steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+      name: 'fan-out',
+      type: 'parallel',
+      branches: [
+        { name: 'dup', steps: [{ name: 'a', type: 'console', with: { message: 'x' } }] },
+        { name: 'dup', steps: [{ name: 'b', type: 'console', with: { message: 'y' } }] },
+      ],
     });
     expect(result.success).toBe(false);
+    expect(
+      !result.success &&
+        result.error.issues.some((issue) => issue.message === PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE)
+    ).toBe(true);
   });
 });
