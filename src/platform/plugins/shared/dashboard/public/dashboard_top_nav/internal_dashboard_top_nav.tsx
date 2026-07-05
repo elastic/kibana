@@ -10,6 +10,7 @@
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
+import useObservable from 'react-use/lib/useObservable';
 
 import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
 import {
@@ -32,6 +33,8 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
@@ -76,12 +79,23 @@ export function InternalDashboardTopNav({
   embedSettings,
   forceHideUnifiedSearch,
   redirectTo,
+  setCustomHeaderActionMenu,
   showBorderBottom = true,
   showResetChange = true,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
+
+  const chromeStyle = useObservable(
+    coreServices.chrome.getChromeStyle$(),
+    coreServices.chrome.getChromeStyle()
+  );
+  // When the dashboard is embedded in another application (e.g. Security Solution) or rendered in
+  // embed mode, the host owns the header, so the inline AppHeader must not be used. In those cases
+  // we keep mounting the app menu into the chrome header and render badges via the badge API.
+  const isEmbedded = Boolean(embedSettings || setCustomHeaderActionMenu);
+  const useAppHeader = chromeStyle !== 'classic' && !isEmbedded;
 
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
   const { onAppLeave } = useDashboardMountContext();
@@ -362,12 +376,33 @@ export function InternalDashboardTopNav({
     return allBadges;
   }, [isPopoverOpen, dashboardApi, maybeRedirect]);
 
+  const appHeaderBadges = useMemo<AppHeaderBadge[]>(
+    () =>
+      (badges ?? []).map((badge) => ({
+        label: badge.badgeText,
+        renderCustomBadge: badge.renderCustomBadge,
+      })),
+    [badges]
+  );
+
+  const appMenuConfig = useMemo(() => {
+    if (!visibilityProps.showTopNavMenu) {
+      return undefined;
+    }
+    return viewMode === 'edit' ? editModeTopNavConfig : viewModeTopNavConfig;
+  }, [visibilityProps.showTopNavMenu, viewMode, editModeTopNavConfig, viewModeTopNavConfig]);
+
   useEffect(() => {
+    // In solution view the badges are rendered by AppHeader via the `badges` prop.
+    // Otherwise AppHeader is not rendered, so badges are set on the chrome header instead.
+    if (useAppHeader) {
+      return;
+    }
     coreServices.chrome.setBreadcrumbsBadges(badges);
     return () => {
       coreServices.chrome.setBreadcrumbsBadges([]);
     };
-  }, [badges]);
+  }, [badges, useAppHeader]);
 
   useEffect(() => {
     return coreServices.chrome.setBreadcrumbsAppendExtension({
@@ -384,16 +419,11 @@ export function InternalDashboardTopNav({
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
-      <AppMenu
-        setAppMenu={coreServices.chrome.setAppMenu}
-        config={
-          visibilityProps.showTopNavMenu
-            ? viewMode === 'edit'
-              ? editModeTopNavConfig
-              : viewModeTopNavConfig
-            : undefined
-        }
-      />
+      {useAppHeader ? (
+        <AppHeader title={dashboardTitle} menu={appMenuConfig} badges={appHeaderBadges} />
+      ) : (
+        <AppMenu setAppMenu={coreServices.chrome.setAppMenu} config={appMenuConfig} />
+      )}
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
