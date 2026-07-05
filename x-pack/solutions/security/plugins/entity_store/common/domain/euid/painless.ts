@@ -313,6 +313,17 @@ function destinationToVarName(destination: string): string {
   return destination.replace(/\./g, '_');
 }
 
+/**
+ * Generates a Painless block that implements a `{ field, mapping }` when-clause arm.
+ *
+ * The block is guarded by `varName == null` (first-match-wins: once a prior arm set the
+ * destination variable, all subsequent arms are skipped) and by the caller-supplied `cond`
+ * (the stringified condition that must be true for this arm to fire).
+ *
+ * Inside the block, `then.field` is read from `doc` with a null-safe accessor.
+ * If the value is present and found in `then.mapping`, `varName` is assigned the mapped value;
+ * otherwise `varName` remains `null` and the next when-clause arm is tried.
+ */
 function buildFieldMappingPainless(
   varName: string,
   cond: string,

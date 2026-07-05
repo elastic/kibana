@@ -35,12 +35,27 @@ function isConditionClause(
   return 'condition' in clause;
 }
 
+/**
+ * Narrows `then` to the field-mapping variant (`{ field, mapping }`).
+ * The alternative is a plain string literal, which needs no further resolution.
+ */
 function isFieldMappingThen(
   then: string | FieldEvaluationWhenClauseFieldMappingThen
 ): then is FieldEvaluationWhenClauseFieldMappingThen {
   return typeof then === 'object';
 }
 
+/**
+ * Resolves the `then` clause of a condition-based when-clause against `doc`.
+ *
+ * - String literal: returned immediately as `{ value }`.
+ * - Field-mapping (`{ field, mapping }`): reads `doc[then.field]`, looks it up in `mapping`,
+ *   and returns `{ value: mappedTo, matchedKey: rawFieldValue }`.  `matchedKey` is the raw
+ *   source field value (e.g. `"aws"`) and is carried back to `buildEvaluationSourceMatchSpec`
+ *   so it can synthesize a compound condition that pins the exact provider that was matched.
+ * - Returns `undefined` when the field is absent or its value is not in the mapping, which
+ *   causes `matchFirstWhenClause` to skip this clause and try the next one.
+ */
 function resolveConditionThen(
   then: string | FieldEvaluationWhenClauseFieldMappingThen,
   doc: any
@@ -133,7 +148,21 @@ function resolveFinalFieldValue(
   return rawValueFromSources === undefined ? fallbackValue : rawValueFromSources;
 }
 
-/** Builds `SourceMatchSpec` for filter construction without re-evaluating the document. */
+/**
+ * Builds the `SourceMatchSpec` that DSL/KQL/ESQL filter builders use to narrow results to
+ * documents that would resolve to the same entity — without re-evaluating the document.
+ *
+ * Condition-based specs:
+ * - If the winning when-clause was a plain condition, the spec is `{ type: 'condition', condition }`.
+ * - If it was a field-mapping (`{ field, mapping }`), the spec wraps the outer condition in an
+ *   `and` with an equality check on the specific field value that was matched (e.g.
+ *   `cloud.provider == "aws"`).  This prevents a filter built for `user:alice@aws` from also
+ *   matching `user:alice@gcp` documents.
+ *
+ * Source-value-based specs:
+ * - `{ type: 'values', values }` when the source value or `sourceMatchesAny` list is known.
+ * - `{ type: 'unknown' }` when no source value was found (generates "field missing or empty" guards).
+ */
 function buildEvaluationSourceMatchSpec(
   rawValueFromSources: string | undefined,
   whenMatch:

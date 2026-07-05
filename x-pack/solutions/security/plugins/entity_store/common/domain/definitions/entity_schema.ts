@@ -38,6 +38,7 @@ const euidSeparatorSchema = z.object({
   sep: z.string(),
 });
 
+// DoS guard: cap every user-supplied string in the whenClause schema before it reaches Painless/ESQL generation.
 const MAX_FIELD_EVALUATION_STRING_LENGTH = 1000;
 
 // Field evaluation: pre-evaluate a field before euid generation (first match wins; fallback to source value or fallbackValue).
