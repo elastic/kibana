@@ -15,6 +15,7 @@ import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
 import { ENGINE_STATUS } from '../../domain/constants';
+import { mergeCadenceOverrides } from '../../domain/logs_extraction/cadence_overrides';
 
 const bodySchema = z.object({
   entityTypes: z
@@ -63,13 +64,21 @@ export function registerStart(router: EntityStorePluginRouter) {
         logger.debug('Start API invoked');
 
         const { engines } = await assetManager.getStatus();
-        const stoppedTypes = new Set(
-          engines.filter((e) => e.status === ENGINE_STATUS.STOPPED).map((e) => e.type)
-        );
+        const stoppedEngines = engines.filter((e) => e.status === ENGINE_STATUS.STOPPED);
+        const stoppedTypes = new Set(stoppedEngines.map((e) => e.type));
         const toStart = entityTypes.filter((type) => stoppedTypes.has(type));
 
         const logsExtraction = await assetManager.getLogExtractionConfig();
-        await Promise.all(toStart.map((type) => assetManager.start(req, type, logsExtraction)));
+        await Promise.all(
+          toStart.map((type) => {
+            const engine = stoppedEngines.find((e) => e.type === type);
+            const effectiveConfig = mergeCadenceOverrides(
+              logsExtraction,
+              engine?.logExtractionOverrides
+            );
+            return assetManager.start(req, type, effectiveConfig);
+          })
+        );
 
         if (toStart.length > 0) {
           await entityMaintainersClient.startAll(req);

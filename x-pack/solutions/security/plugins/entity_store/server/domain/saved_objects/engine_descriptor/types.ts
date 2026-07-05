@@ -42,9 +42,9 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
     },
     logExtractionOverrides: {
       properties: {
-        frequency: { type: 'keyword' },
-        delay: { type: 'keyword' },
-        lookbackPeriod: { type: 'keyword' },
+        frequency: { type: 'keyword', ignore_above: 1024 },
+        delay: { type: 'keyword', ignore_above: 1024 },
+        lookbackPeriod: { type: 'keyword', ignore_above: 1024 },
       },
     },
     error: {
@@ -328,9 +328,9 @@ const version6: SavedObjectsFullModelVersion = {
 };
 
 const logExtractionOverridesSchemaV7 = schema.object({
-  frequency: schema.nullable(schema.string()),
-  delay: schema.nullable(schema.string()),
-  lookbackPeriod: schema.nullable(schema.string()),
+  frequency: schema.nullable(schema.string({ maxLength: 32 })),
+  delay: schema.nullable(schema.string({ maxLength: 32 })),
+  lookbackPeriod: schema.nullable(schema.string({ maxLength: 32 })),
 });
 
 const engineDescriptorSchemaV7 = engineDescriptorSchemaV6.extends({
@@ -344,9 +344,9 @@ const version7: SavedObjectsFullModelVersion = {
       addedMappings: {
         logExtractionOverrides: {
           properties: {
-            frequency: { type: 'keyword' as const },
-            delay: { type: 'keyword' as const },
-            lookbackPeriod: { type: 'keyword' as const },
+            frequency: { type: 'keyword' as const, ignore_above: 1024 },
+            delay: { type: 'keyword' as const, ignore_above: 1024 },
+            lookbackPeriod: { type: 'keyword' as const, ignore_above: 1024 },
           },
         },
       },

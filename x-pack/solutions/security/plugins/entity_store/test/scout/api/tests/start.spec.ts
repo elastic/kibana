@@ -99,4 +99,27 @@ apiTest.describe('Entity Store Start API tests', { tag: ENTITY_STORE_TAGS }, () 
     const status = await getStatus(apiClient, defaultHeaders);
     expect(status.body.status).toBe('not_installed');
   });
+
+  apiTest(
+    'Should reschedule the extraction task at its per-type cadence when restarting a stopped engine',
+    async ({ apiClient, kbnClient }) => {
+      // Service installs at its built-in 10m default, distinct from the shared 1m default.
+      await installAllEntityTypes(apiClient, defaultHeaders);
+      await stopEntityTypes(apiClient, defaultHeaders, ['service']);
+
+      const startResponse = await startEntityTypes(apiClient, defaultHeaders, ['service']);
+      expect(startResponse.statusCode).toBe(200);
+
+      const status = await getStatus(apiClient, defaultHeaders);
+      const serviceEngine = status.body.engines.find((e) => e.type === 'service');
+      expect(serviceEngine?.status).toBe('started');
+      expect(serviceEngine?.frequency).toBe('10m');
+
+      // The actual Task Manager schedule must match the reported cadence, not the shared
+      // global frequency (1m) that `start` would use if it didn't merge the per-type override.
+      const taskId = 'entity_store:v2:extract_entity_task:service:default';
+      const task = await kbnClient.savedObjects.get({ type: 'task', id: taskId });
+      expect(task.attributes.schedule.interval).toBe('10m');
+    }
+  );
 });

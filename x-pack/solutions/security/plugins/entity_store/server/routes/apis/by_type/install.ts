@@ -18,7 +18,7 @@ import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privil
 import { LogExtractionInstallSchema } from '../utils/log_extraction_validator';
 
 const paramsSchema = z.object({
-  entityType: EntityType,
+  entityType: EntityType.describe('The entity type to install.'),
 });
 
 const bodySchema = z.object({

@@ -16,7 +16,7 @@ import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { EntityType } from '../../../../common/domain/definitions/entity_schema';
 
 const paramsSchema = z.object({
-  entityType: EntityType,
+  entityType: EntityType.describe('The entity type to uninstall.'),
 });
 
 export function registerUninstallByType(router: EntityStorePluginRouter) {

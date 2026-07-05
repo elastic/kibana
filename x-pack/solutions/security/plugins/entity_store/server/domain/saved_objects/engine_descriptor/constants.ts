@@ -27,9 +27,9 @@ export const EngineLogExtractionState = z.object({
  */
 export type EngineLogExtractionOverrides = z.infer<typeof EngineLogExtractionOverrides>;
 export const EngineLogExtractionOverrides = z.object({
-  frequency: z.string().nullable().default(null),
-  delay: z.string().nullable().default(null),
-  lookbackPeriod: z.string().nullable().default(null),
+  frequency: z.string().max(32).nullable().default(null),
+  delay: z.string().max(32).nullable().default(null),
+  lookbackPeriod: z.string().max(32).nullable().default(null),
 });
 
 /**

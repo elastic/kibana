@@ -57650,7 +57650,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The entity type to install.
+          in: path
           name: entityType
           required: true
           schema:
@@ -58505,7 +58506,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The entity type to uninstall.
+          in: path
           name: entityType
           required: true
           schema:
@@ -58564,7 +58566,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The entity type to update.
+          in: path
           name: entityType
           required: true
           schema:

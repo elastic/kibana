@@ -344,3 +344,37 @@ export const stopAllEntityTypes = (apiClient: ApiClientFixture, headers: Record<
     responseType: 'json',
     body: {},
   });
+
+export const installEntityType = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  entityType: EntityType,
+  body: Record<string, unknown> = {}
+) =>
+  apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL_BY_TYPE(entityType), {
+    headers,
+    responseType: 'json',
+    body,
+  });
+
+export const updateEntityType = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  entityType: EntityType,
+  body: Record<string, unknown>
+) =>
+  apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE_BY_TYPE(entityType), {
+    headers,
+    responseType: 'json',
+    body,
+  });
+
+export const uninstallEntityType = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  entityType: EntityType
+) =>
+  apiClient.delete(ENTITY_STORE_ROUTES.public.UNINSTALL_BY_TYPE(entityType), {
+    headers,
+    responseType: 'json',
+  });

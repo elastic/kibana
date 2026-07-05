@@ -19,7 +19,7 @@ import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privil
 import { CadenceOverrideSchema } from '../utils/log_extraction_validator';
 
 const paramsSchema = z.object({
-  entityType: EntityType,
+  entityType: EntityType.describe('The entity type to update.'),
 });
 
 const bodySchema = z.object({
