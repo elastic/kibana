@@ -38,6 +38,7 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
       return results.findIndex((item) => item.title.toLowerCase() === lowerName);
     }, [results, title, canSelectOnSpace]);
     const spaceSelection = exactMatchIndex !== -1;
+    const noMatch = canSelectOnSpace && results.length === 0 && !isLoading;
 
     // Sort the exact match to the front so it's the one Space (or Enter)
     // commits, rather than whatever the API happened to rank first.
@@ -103,6 +104,24 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
       [onSelect]
     );
 
+    const handleCommitNoMatch = useCallback(() => {
+      // Cap the badge at the first space after the "/" — a real name can't
+      // contain one, so anything past it (e.g. sentence text accidentally
+      // absorbed from a paste) is left untouched as plain text instead of
+      // getting swallowed into the badge too.
+      const slashIndex = query.indexOf('/');
+      const spaceIndex = query.indexOf(' ', slashIndex + 1);
+      const consumedQuery = spaceIndex === -1 ? query : query.slice(0, spaceIndex);
+      onSelect({
+        commandId: CommandId.Sml,
+        label: consumedQuery,
+        id: '',
+        metadata: {},
+        matched: false,
+        consumedLength: consumedQuery.length,
+      });
+    }, [onSelect, query]);
+
     return (
       <CommandMenuList
         ref={ref}
@@ -110,6 +129,7 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
         isLoading={isLoading}
         onSelect={handleSelect}
         spaceSelection={spaceSelection}
+        onSpaceNoMatch={noMatch ? handleCommitNoMatch : undefined}
         data-test-subj="smlMenu"
       />
     );

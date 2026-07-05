@@ -21,6 +21,7 @@ import type { CommandMenuHandle } from './command_menu';
 import {
   COMMAND_BADGE_ATTRIBUTE,
   COMMAND_BADGE_LABEL_ATTRIBUTE,
+  COMMAND_BADGE_MATCHED_ATTRIBUTE,
   COMMAND_BADGE_MAX_WIDTH_CH,
   isElementCommandBadge,
 } from './command_badge';
@@ -164,6 +165,11 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       min-width: 0;
       ${euiTextTruncate('100%')}
     }
+    [${COMMAND_BADGE_ATTRIBUTE}][${COMMAND_BADGE_MATCHED_ATTRIBUTE}='false'] {
+      color: ${euiTheme.colors.textDanger};
+      background-color: ${euiTheme.colors.backgroundLightDanger};
+      border: ${euiTheme.border.width.thin} dashed ${euiTheme.colors.textDanger};
+    }
   `;
   const editorStyles = [
     heightStyles,
@@ -205,6 +211,15 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         onBlur={messageEditor.dismissActionMenu}
         onCompositionStart={handleCompositionStart}
         onCompositionEnd={handleCompositionEnd}
+        onClick={(event) => {
+          const badge = (event.target as HTMLElement).closest(
+            `[${COMMAND_BADGE_ATTRIBUTE}][${COMMAND_BADGE_MATCHED_ATTRIBUTE}='false']`
+          );
+          if (badge instanceof HTMLElement) {
+            event.preventDefault();
+            messageEditor.unwrapUnmatchedBadge(badge);
+          }
+        }}
         onPaste={(event) => {
           event.preventDefault();
 

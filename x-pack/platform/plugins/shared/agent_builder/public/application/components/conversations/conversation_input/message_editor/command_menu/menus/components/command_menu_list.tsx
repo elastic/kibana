@@ -60,6 +60,8 @@ interface CommandMenuListProps {
   readonly 'data-test-subj'?: string;
   /** When true, Space also selects the highlighted option, like Enter. */
   readonly spaceSelection?: boolean;
+  /** Called instead of selecting when Space is pressed with no `spaceSelection`. */
+  readonly onSpaceNoMatch?: () => void;
 }
 
 export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProps>(
@@ -71,6 +73,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       width: menuWidth = MENU_WIDTH,
       'data-test-subj': dataTestSubj = 'commandMenuList',
       spaceSelection,
+      onSpaceNoMatch,
     },
     ref
   ) => {
@@ -126,7 +129,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         ];
         // Always claim Space, even with zero options: results can lag a
         // keystroke behind, and a leaked space would type as plain text.
-        if (spaceSelection && event.key === keys.SPACE) {
+        if (event.key === keys.SPACE && (spaceSelection || onSpaceNoMatch)) {
           return true;
         }
         return handledKeys.includes(event.key);
@@ -136,12 +139,14 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           handleSetActive((prev) => Math.min(prev + 1, options.length - 1));
         } else if (event.key === keys.ARROW_UP || (event.ctrlKey && event.key === 'p')) {
           handleSetActive((prev) => Math.max(prev - 1, 0));
-        } else if (
-          event.key === keys.ENTER ||
-          event.key === keys.TAB ||
-          (spaceSelection && event.key === keys.SPACE)
-        ) {
+        } else if (event.key === keys.ENTER || event.key === keys.TAB) {
           handleSelectOption();
+        } else if (event.key === keys.SPACE) {
+          if (spaceSelection) {
+            handleSelectOption();
+          } else if (onSpaceNoMatch) {
+            onSpaceNoMatch();
+          }
         }
       },
     }));

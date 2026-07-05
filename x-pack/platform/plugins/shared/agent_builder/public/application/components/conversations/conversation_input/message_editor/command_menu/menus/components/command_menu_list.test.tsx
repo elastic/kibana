@@ -362,5 +362,63 @@ describe('CommandMenuList', () => {
         expect(onSelect).not.toHaveBeenCalled();
       });
     });
+
+    describe('onSpaceNoMatch', () => {
+      it('claims Space and calls onSpaceNoMatch instead of onSelect when there is no spaceSelection', () => {
+        const ref = createRef<CommandMenuHandle>();
+        const onSelect = jest.fn();
+        const onSpaceNoMatch = jest.fn();
+        renderWithProvider(
+          <CommandMenuList
+            ref={ref}
+            options={[]}
+            isLoading={false}
+            onSelect={onSelect}
+            onSpaceNoMatch={onSpaceNoMatch}
+          />
+        );
+
+        expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(true);
+
+        act(() => {
+          ref.current!.handleKeyDown({ key: ' ' } as React.KeyboardEvent);
+        });
+
+        expect(onSpaceNoMatch).toHaveBeenCalledTimes(1);
+        expect(onSelect).not.toHaveBeenCalled();
+      });
+
+      it('prefers spaceSelection over onSpaceNoMatch when both are provided and a match exists', () => {
+        const ref = createRef<CommandMenuHandle>();
+        const onSelect = jest.fn();
+        const onSpaceNoMatch = jest.fn();
+        renderWithProvider(
+          <CommandMenuList
+            ref={ref}
+            options={mockOptions}
+            isLoading={false}
+            onSelect={onSelect}
+            spaceSelection
+            onSpaceNoMatch={onSpaceNoMatch}
+          />
+        );
+
+        act(() => {
+          ref.current!.handleKeyDown({ key: ' ' } as React.KeyboardEvent);
+        });
+
+        expect(onSelect).toHaveBeenCalledWith({ key: '1', label: 'Alpha' });
+        expect(onSpaceNoMatch).not.toHaveBeenCalled();
+      });
+
+      it('does not claim Space when neither spaceSelection nor onSpaceNoMatch is provided', () => {
+        const ref = createRef<CommandMenuHandle>();
+        renderWithProvider(
+          <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={jest.fn()} />
+        );
+
+        expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
+      });
+    });
   });
 });

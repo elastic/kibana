@@ -19,6 +19,7 @@ import {
   placeCursorAfter,
   placeCursorAtEnd,
   stripZeroWidthSpaces,
+  unwrapBadge,
 } from './utils';
 
 export interface MessageEditorInstance {
@@ -30,6 +31,8 @@ export interface MessageEditorInstance {
   dismissActionMenu: () => void;
   /** Handle selection of an item from the command menu */
   handleCommandSelect: (selection: CommandBadgeData) => void;
+  /** Replace a no-match badge with its plain text, editable and live-matched again */
+  unwrapUnmatchedBadge: (badge: HTMLElement) => void;
 }
 
 export interface MessageEditorController {
@@ -104,18 +107,37 @@ const useMessageEditorInstance = ({
           return;
         }
 
-        const commandRange = createCommandRange(ref.current, commandMatch.activeCommand);
+        const commandRange = createCommandRange(
+          ref.current,
+          commandMatch.activeCommand,
+          selection.consumedLength
+        );
         commandRange.deleteContents();
 
         const badge = createCommandBadgeElement(selection);
         commandRange.insertNode(badge);
         ensureCaretTargetBeforeFirstBadge(ref.current);
 
-        const space = insertSpaceAfter(badge, ref.current);
-        placeCursorAfter(space, sel);
+        if (selection.consumedLength != null) {
+          // Only a prefix of the query was consumed — the rest is leftover
+          // text that already starts with the space we stopped at, so land
+          // the cursor right after the badge instead of adding another one.
+          placeCursorAfter(badge, sel);
+        } else {
+          const space = insertSpaceAfter(badge, ref.current);
+          placeCursorAfter(space, sel);
+        }
 
         syncIsEmpty();
         dismissCommandMenu();
+      },
+      unwrapUnmatchedBadge: (badge: HTMLElement) => {
+        if (!ref.current) {
+          return;
+        }
+        unwrapBadge(badge);
+        syncIsEmpty();
+        checkInputForCommand(ref.current);
       },
     }),
     [
