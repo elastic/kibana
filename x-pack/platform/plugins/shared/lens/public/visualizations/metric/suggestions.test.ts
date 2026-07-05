@@ -156,6 +156,7 @@ describe('metric suggestions', () => {
               layerId: 'first',
               layerType: LayerTypes.DATA,
               metricAccessor: metricColumn.columnId,
+              spacing: 'large',
               // should ignore bucketed column for initial drag
             },
             title: 'Metric',
@@ -187,6 +188,7 @@ describe('metric suggestions', () => {
               layerId: 'first',
               layerType: LayerTypes.DATA,
               breakdownByAccessor: bucketColumn.columnId,
+              spacing: 'large',
             },
             title: 'Metric',
             hide: true,
@@ -219,6 +221,7 @@ describe('metric suggestions', () => {
               layerType: LayerTypes.DATA,
               metricAccessor: undefined,
               breakdownByAccessor: bucketColumn.columnId,
+              spacing: 'large',
             },
             title: 'Metric',
             hide: true,
@@ -292,6 +295,7 @@ describe('metric suggestions', () => {
               layerType: LayerTypes.DATA,
               metricAccessor: metricColumn.columnId,
               breakdownByAccessor: bucketColumn.columnId,
+              spacing: 'large',
             },
             title: 'Metric',
             hide: true,
@@ -324,6 +328,7 @@ describe('metric suggestions', () => {
               layerType: LayerTypes.DATA,
               metricAccessor: metricColumn.columnId,
               breakdownByAccessor: bucketColumn.columnId,
+              spacing: 'large',
             },
             title: 'Metric',
             hide: true,
@@ -355,6 +360,7 @@ describe('metric suggestions', () => {
             layerType: LayerTypes.DATA,
             metricAccessor: metricColumn.columnId,
             breakdownByAccessor: bucketColumn.columnId,
+            spacing: 'large',
           },
           title: 'Metric',
           hide: true,
@@ -362,6 +368,60 @@ describe('metric suggestions', () => {
           score: 0.52,
         },
       ]);
+    });
+  });
+
+  describe('spacing default', () => {
+    test('applies the default `large` spacing when switching from another vis type (no incoming state)', () => {
+      const [suggestion] = getSuggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [metricColumn],
+          changeType: 'unchanged',
+        },
+        state: undefined,
+        keptLayerIds: ['first'],
+      });
+
+      expect(suggestion.state.spacing).toBe('large');
+    });
+
+    test('applies the default `large` spacing when active state has no spacing yet', () => {
+      const [suggestion] = getSuggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [metricColumn],
+          changeType: 'initial',
+        },
+        state: {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+        } as MetricVisualizationState,
+        keptLayerIds: ['first'],
+      });
+
+      expect(suggestion.state.spacing).toBe('large');
+    });
+
+    test('preserves explicit `small` spacing on the incoming state (legacy chart being edited)', () => {
+      const [suggestion] = getSuggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [metricColumn],
+          changeType: 'initial',
+        },
+        state: {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          spacing: 'small',
+        } as MetricVisualizationState,
+        keptLayerIds: ['first'],
+      });
+
+      expect(suggestion.state.spacing).toBe('small');
     });
   });
 });
