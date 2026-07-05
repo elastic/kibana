@@ -193,7 +193,7 @@ describe('ModelDetailFlyout', () => {
             end_of_life_date: '2026-04-15',
           },
         },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       expect(valueForLabel(releaseLabel)).not.toHaveTextContent('--');
@@ -211,7 +211,7 @@ describe('ModelDetailFlyout', () => {
       const endpoint = {
         ...createEndpoint(),
         metadata: { heuristics: { status: 'ga' } },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       expect(valueForLabel(releaseLabel)).toHaveTextContent('--');
@@ -222,7 +222,7 @@ describe('ModelDetailFlyout', () => {
       const endpoint = {
         ...createEndpoint(),
         metadata: { heuristics: { release_date: '2025-01-10' } },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       expect(valueForLabel(releaseLabel)).not.toHaveTextContent('--');
@@ -233,7 +233,7 @@ describe('ModelDetailFlyout', () => {
       const endpoint = {
         ...createEndpoint(),
         metadata: { heuristics: { end_of_life_date: '2026-04-15' } },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       expect(valueForLabel(releaseLabel)).toHaveTextContent('--');
