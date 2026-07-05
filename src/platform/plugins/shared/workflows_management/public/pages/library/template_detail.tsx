@@ -25,7 +25,8 @@ type LibraryTemplateDetailPageProps = RouteComponentProps<{ slug: string }>;
  * Workflow Template Library template detail page (`/app/workflows/library/:slug`).
  * Currently a placeholder — the read-only YAML preview and install flow land in
  * a follow-up session (see `TemplateDetail`'s TODO in `@kbn/workflows-ui`). The
- * route is only registered when the library is enabled (see `routes.tsx`).
+ * route is always registered (see `routes.tsx`); this page redirects to the
+ * workflows list when the library is disabled.
  */
 export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPageProps>(({ match }) => {
   const slug = match.params.slug;
