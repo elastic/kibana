@@ -14,8 +14,16 @@ import { TemplateConnectorPreview } from './template_connector_preview';
 
 jest.mock('../../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../connectors/fields_preview_form', () => ({
-  ConnectorFieldsPreviewForm: ({ connector, fields }: { connector: { name: string }; fields: unknown }) => (
-    <div data-test-subj="mock-fields-preview-form">{`${connector?.name}:${JSON.stringify(fields)}`}</div>
+  ConnectorFieldsPreviewForm: ({
+    connector,
+    fields,
+  }: {
+    connector: { name: string };
+    fields: unknown;
+  }) => (
+    <div data-test-subj="mock-fields-preview-form">{`${connector?.name}:${JSON.stringify(
+      fields
+    )}`}</div>
   ),
 }));
 

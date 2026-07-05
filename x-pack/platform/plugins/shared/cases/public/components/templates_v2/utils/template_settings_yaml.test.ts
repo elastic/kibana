@@ -100,7 +100,11 @@ describe('template_settings_yaml', () => {
       const fieldsYaml = 'name: My template\nfields: []';
 
       const merged = mergeTemplateDefinition(fieldsYaml, {
-        connector: { type: ConnectorTypes.none, id: 'none', fields: null } as CaseConnectorWithoutName,
+        connector: {
+          type: ConnectorTypes.none,
+          id: 'none',
+          fields: null,
+        } as CaseConnectorWithoutName,
         settings: {},
       });
 
