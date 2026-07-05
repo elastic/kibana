@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
+import React, { createRef } from 'react';
+import { render, screen, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { Skills } from './skills';
+import { CommandId } from '../../types';
+import type { CommandMenuHandle } from '../../types';
 
 const mockSkills = [
   { id: 'skill-1', name: 'Summarize', description: 'Summarize text' },
@@ -76,5 +78,69 @@ describe('Skills', () => {
     expect(screen.getByTestId('skillsMenu-loading')).toBeInTheDocument();
 
     useAgentSkillsMock.useAgentSkills = originalImpl;
+  });
+
+  describe('mark as invalid on Escape for no-match queries', () => {
+    it('does not claim Escape while there are still matching skills', () => {
+      const ref = createRef<CommandMenuHandle>();
+      renderWithProvider(<Skills ref={ref} query="sum" onSelect={jest.fn()} />);
+
+      expect(ref.current!.isKeyDownEventHandled({ key: 'Escape' } as React.KeyboardEvent)).toBe(
+        false
+      );
+    });
+
+    it('commits an invalid badge on Escape when nothing matches the query', () => {
+      const ref = createRef<CommandMenuHandle>();
+      const onSelect = jest.fn();
+      renderWithProvider(<Skills ref={ref} query="nosuchskill" onSelect={onSelect} />);
+
+      expect(ref.current!.isKeyDownEventHandled({ key: 'Escape' } as React.KeyboardEvent)).toBe(
+        true
+      );
+
+      act(() => {
+        ref.current!.handleKeyDown({ key: 'Escape' } as React.KeyboardEvent);
+      });
+
+      expect(onSelect).toHaveBeenCalledWith({
+        commandId: CommandId.Skill,
+        label: 'nosuchskill',
+        id: '',
+        metadata: {},
+        matched: false,
+        consumedLength: 'nosuchskill'.length,
+      });
+    });
+
+    it('caps the invalid badge at the first space, since a skill name can legitimately contain one', () => {
+      const ref = createRef<CommandMenuHandle>();
+      const onSelect = jest.fn();
+      renderWithProvider(
+        <Skills ref={ref} query="nosuchskill and then more text" onSelect={onSelect} />
+      );
+
+      act(() => {
+        ref.current!.handleKeyDown({ key: 'Escape' } as React.KeyboardEvent);
+      });
+
+      expect(onSelect).toHaveBeenCalledWith({
+        commandId: CommandId.Skill,
+        label: 'nosuchskill',
+        id: '',
+        metadata: {},
+        matched: false,
+        consumedLength: 'nosuchskill'.length,
+      });
+    });
+
+    it('does not claim Escape for an empty query', () => {
+      const ref = createRef<CommandMenuHandle>();
+      renderWithProvider(<Skills ref={ref} query="" onSelect={jest.fn()} />);
+
+      expect(ref.current!.isKeyDownEventHandled({ key: 'Escape' } as React.KeyboardEvent)).toBe(
+        false
+      );
+    });
   });
 });

@@ -85,6 +85,45 @@ describe('useMessageEditor handleCommandSelect', () => {
     expect(badge!.nextSibling?.textContent?.startsWith(' is the best')).toBe(true);
   });
 
+  it('with consumedLength, places the cursor at the end of the leftover text rather than jumping it backward', () => {
+    // e.g. typing "use the /no-match skill for" and hitting Escape: the
+    // invalid badge only covers "no-match", but the cursor should stay
+    // where the user was actually typing (end of "for"), not snap back to
+    // right after the badge (before "skill for").
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+
+    div.textContent = 'use the /no-match skill for';
+    setCursorAtEnd(div);
+
+    act(() => {
+      result.current.messageEditor.onChange();
+    });
+
+    const activeCommand = result.current.messageEditor.commandMatch.activeCommand;
+    expect(activeCommand?.command.id).toBe(CommandId.Skill);
+    expect(activeCommand?.query).toBe('no-match skill for');
+
+    act(() => {
+      result.current.messageEditor.handleCommandSelect({
+        commandId: CommandId.Skill,
+        label: 'no-match',
+        id: '',
+        metadata: {},
+        matched: false,
+        consumedLength: 'no-match'.length,
+      });
+    });
+
+    const badge = div.querySelector('[data-command-badge]');
+    expect(badge).not.toBeNull();
+    expect(badge!.nextSibling?.textContent).toBe(' skill for');
+
+    const range = window.getSelection()!.getRangeAt(0);
+    expect(range.startContainer).toBe(badge!.nextSibling);
+    expect(range.startOffset).toBe(' skill for'.length);
+  });
+
   it('without consumedLength, consumes the full query and inserts a trailing space', () => {
     const { result } = renderHook(() => useMessageEditor());
     attachRef(result.current.messageEditor, div);

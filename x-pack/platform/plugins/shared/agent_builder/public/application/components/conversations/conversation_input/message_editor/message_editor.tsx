@@ -166,9 +166,9 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       ${euiTextTruncate('100%')}
     }
     [${COMMAND_BADGE_ATTRIBUTE}][${COMMAND_BADGE_MATCHED_ATTRIBUTE}='false'] {
-      color: ${euiTheme.colors.textDanger};
-      background-color: ${euiTheme.colors.backgroundLightDanger};
-      border: ${euiTheme.border.width.thin} dashed ${euiTheme.colors.textDanger};
+      color: inherit;
+      background-color: transparent;
+      padding: 0;
     }
   `;
   const editorStyles = [
@@ -267,14 +267,20 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
           // If no badges, let the browser handle cut natively
         }}
         onKeyDown={(event) => {
-          if (event.key === keys.ESCAPE) {
-            event.stopPropagation();
-            messageEditor.dismissActionMenu();
-            return;
-          }
+          // Let the active menu claim Escape first (e.g. to commit a
+          // no-match badge for a skill query); otherwise fall back to
+          // just dismissing the menu, as Escape always did before.
           if (commandMatch.isActive && commandMenuRef.current?.isKeyDownEventHandled(event)) {
             commandMenuRef.current.handleKeyDown(event);
             event.preventDefault();
+            if (event.key === keys.ESCAPE) {
+              event.stopPropagation();
+            }
+            return;
+          }
+          if (event.key === keys.ESCAPE) {
+            event.stopPropagation();
+            messageEditor.dismissActionMenu();
             return;
           }
           if (!event.shiftKey && event.key === keys.ENTER && !isComposing) {

@@ -87,6 +87,20 @@ export const placeCursorAfter = (node: Node, sel: Selection): void => {
 };
 
 /**
+ * Collapses the selection to a cursor position at `offset` within `node`,
+ * instead of always jumping to the node's end. Used when leftover text
+ * follows the caret's original position (e.g. text the user typed after
+ * a since-invalidated mention) that must stay past the cursor, not before it.
+ */
+export const placeCursorInText = (node: Text, offset: number, sel: Selection): void => {
+  const range = document.createRange();
+  range.setStart(node, Math.min(offset, node.length));
+  range.collapse(true);
+  sel.removeAllRanges();
+  sel.addRange(range);
+};
+
+/**
  * Replaces a badge element with a plain text node holding its display text,
  * and places the cursor at the end of the restored text. Used to let the
  * user click a no-match badge and correct it back into a live, editable

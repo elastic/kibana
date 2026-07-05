@@ -62,6 +62,8 @@ interface CommandMenuListProps {
   readonly spaceSelection?: boolean;
   /** Called instead of selecting when Space is pressed with no `spaceSelection`. */
   readonly onSpaceNoMatch?: () => void;
+  /** Called when Escape is pressed with no candidates, instead of just dismissing. */
+  readonly onEscapeNoMatch?: () => void;
 }
 
 export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProps>(
@@ -74,6 +76,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       'data-test-subj': dataTestSubj = 'commandMenuList',
       spaceSelection,
       onSpaceNoMatch,
+      onEscapeNoMatch,
     },
     ref
   ) => {
@@ -132,6 +135,9 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         if (event.key === keys.SPACE && (spaceSelection || onSpaceNoMatch)) {
           return true;
         }
+        if (event.key === keys.ESCAPE && onEscapeNoMatch) {
+          return true;
+        }
         return handledKeys.includes(event.key);
       },
       handleKeyDown: (event: React.KeyboardEvent): void => {
@@ -147,6 +153,8 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           } else if (onSpaceNoMatch) {
             onSpaceNoMatch();
           }
+        } else if (event.key === keys.ESCAPE) {
+          onEscapeNoMatch?.();
         }
       },
     }));

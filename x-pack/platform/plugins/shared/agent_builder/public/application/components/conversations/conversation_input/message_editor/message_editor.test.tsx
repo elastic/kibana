@@ -53,6 +53,20 @@ const ClickableMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuCo
   )
 );
 
+const EscapeClaimingMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
+  ({ onSelect }, ref) => {
+    React.useImperativeHandle(ref, () => ({
+      isKeyDownEventHandled: (event) => event.key === 'Escape',
+      handleKeyDown: (event) => {
+        if (event.key === 'Escape') {
+          onSelect(mockBadgeData);
+        }
+      },
+    }));
+    return <div />;
+  }
+);
+
 const mockOnSubmit = jest.fn();
 
 const createMockMessageEditor = (): {
@@ -395,6 +409,38 @@ describe('MessageEditor', () => {
     fireEvent.click(screen.getByTestId('menuOption'));
 
     expect(messageEditor.handleCommandSelect).toHaveBeenCalledWith(mockBadgeData);
+  });
+
+  it('lets the active menu claim Escape instead of just dismissing (e.g. to commit a no-match badge)', () => {
+    const { messageEditor } = createMockMessageEditor();
+    messageEditor.commandMatch = {
+      isActive: true,
+      activeCommand: {
+        command: {
+          id: CommandId.Skill,
+          sequence: '/',
+          name: 'Skill',
+          scheme: 'skill',
+          menuComponent: EscapeClaimingMenuComponent,
+        },
+        commandStartOffset: 0,
+        query: 'nosuchskill',
+      },
+    };
+
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    fireEvent.keyDown(editor, { key: 'Escape' });
+
+    expect(messageEditor.handleCommandSelect).toHaveBeenCalledWith(mockBadgeData);
+    expect(messageEditor.dismissActionMenu).not.toHaveBeenCalled();
   });
 
   it('unwraps a no-match badge into editable text when clicked', () => {

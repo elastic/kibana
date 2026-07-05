@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef, useMemo } from 'react';
+import React, { forwardRef, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { useAgentSkills } from '../../../../../../../hooks/skills/use_agent_skills';
@@ -64,19 +64,45 @@ export const Skills = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
         });
     }, [skills, query, skillRowStyles]);
 
+    const noMatch = query.length > 0 && options.length === 0 && !isLoading;
+
+    const handleSelect = useCallback(
+      (option: CommandMenuListOption) => {
+        onSelect({
+          commandId: CommandId.Skill,
+          label: option.label,
+          id: option.key,
+          metadata: {},
+        });
+      },
+      [onSelect]
+    );
+
+    const handleCommitInvalid = useCallback(() => {
+      // Unlike a connector name, a skill name can legitimately contain
+      // spaces, so capping at the first space is a best-effort guess at
+      // what the user meant to reference, not a guarantee like it is for
+      // a single-token connector name. Escape (rather than Space) is the
+      // trigger here precisely because Space can't double as "done typing".
+      const spaceIndex = query.indexOf(' ');
+      const consumedQuery = spaceIndex === -1 ? query : query.slice(0, spaceIndex);
+      onSelect({
+        commandId: CommandId.Skill,
+        label: consumedQuery,
+        id: '',
+        metadata: {},
+        matched: false,
+        consumedLength: consumedQuery.length,
+      });
+    }, [onSelect, query]);
+
     return (
       <CommandMenuList
         ref={ref}
         options={options}
         isLoading={isLoading}
-        onSelect={(option: CommandMenuListOption) => {
-          onSelect({
-            commandId: CommandId.Skill,
-            label: option.label,
-            id: option.key,
-            metadata: {},
-          });
-        }}
+        onSelect={handleSelect}
+        onEscapeNoMatch={noMatch ? handleCommitInvalid : undefined}
         width={SKILLS_MENU_WIDTH}
         data-test-subj="skillsMenu"
       />

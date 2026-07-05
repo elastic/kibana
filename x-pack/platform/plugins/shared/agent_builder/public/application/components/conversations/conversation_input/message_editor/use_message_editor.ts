@@ -18,6 +18,7 @@ import {
   insertSpaceAfter,
   placeCursorAfter,
   placeCursorAtEnd,
+  placeCursorInText,
   stripZeroWidthSpaces,
   unwrapBadge,
 } from './utils';
@@ -120,9 +121,17 @@ const useMessageEditorInstance = ({
 
         if (selection.consumedLength != null) {
           // Only a prefix of the query was consumed — the rest is leftover
-          // text that already starts with the space we stopped at, so land
-          // the cursor right after the badge instead of adding another one.
-          placeCursorAfter(badge, sel);
+          // text already sitting right after the badge. Land the cursor at
+          // the end of that leftover (where it originally was) rather than
+          // snapping it back to right after the badge, which would jump the
+          // cursor backward past anything the user kept typing.
+          const leftoverLength = commandMatch.activeCommand.query.length - selection.consumedLength;
+          const leftover = badge.nextSibling;
+          if (leftoverLength > 0 && leftover instanceof Text) {
+            placeCursorInText(leftover, leftoverLength, sel);
+          } else {
+            placeCursorAfter(badge, sel);
+          }
         } else {
           const space = insertSpaceAfter(badge, ref.current);
           placeCursorAfter(space, sel);

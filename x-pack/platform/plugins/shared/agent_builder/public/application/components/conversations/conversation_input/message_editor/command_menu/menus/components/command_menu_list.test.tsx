@@ -420,5 +420,44 @@ describe('CommandMenuList', () => {
         expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
       });
     });
+
+    describe('onEscapeNoMatch', () => {
+      it('does not treat Escape as handled by default', () => {
+        const ref = createRef<CommandMenuHandle>();
+        renderWithProvider(
+          <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={jest.fn()} />
+        );
+
+        expect(ref.current!.isKeyDownEventHandled({ key: 'Escape' } as React.KeyboardEvent)).toBe(
+          false
+        );
+      });
+
+      it('claims Escape and calls onEscapeNoMatch when provided', () => {
+        const ref = createRef<CommandMenuHandle>();
+        const onSelect = jest.fn();
+        const onEscapeNoMatch = jest.fn();
+        renderWithProvider(
+          <CommandMenuList
+            ref={ref}
+            options={[]}
+            isLoading={false}
+            onSelect={onSelect}
+            onEscapeNoMatch={onEscapeNoMatch}
+          />
+        );
+
+        expect(ref.current!.isKeyDownEventHandled({ key: 'Escape' } as React.KeyboardEvent)).toBe(
+          true
+        );
+
+        act(() => {
+          ref.current!.handleKeyDown({ key: 'Escape' } as React.KeyboardEvent);
+        });
+
+        expect(onEscapeNoMatch).toHaveBeenCalledTimes(1);
+        expect(onSelect).not.toHaveBeenCalled();
+      });
+    });
   });
 });
