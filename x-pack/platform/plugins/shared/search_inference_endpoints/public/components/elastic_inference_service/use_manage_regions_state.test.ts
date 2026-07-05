@@ -218,9 +218,9 @@ describe('useManageRegionsState', () => {
 
     it('toggles a single zone', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleToggleExpand('us'));
+      act(() => result.current.handleToggleExpand('us', true));
       expect(result.current.expandedZones.has('us')).toBe(true);
-      act(() => result.current.handleToggleExpand('us'));
+      act(() => result.current.handleToggleExpand('us', false));
       expect(result.current.expandedZones.has('us')).toBe(false);
     });
   });

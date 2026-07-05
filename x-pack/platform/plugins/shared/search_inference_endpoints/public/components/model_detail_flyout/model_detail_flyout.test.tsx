@@ -69,7 +69,7 @@ describe('ModelDetailFlyout', () => {
     const endpoint = {
       ...createEndpoint(),
       metadata: { display: { name: 'Anthropic Claude Opus 4.5', model_creator: 'Anthropic' } },
-    } as unknown as InferenceAPIConfigResponse;
+    } as unknown as EisInferenceEndpoint;
     renderFlyout(MODEL_ID, [endpoint]);
 
     expect(screen.getByText('Anthropic Claude Opus 4.5')).toBeInTheDocument();
@@ -135,7 +135,7 @@ describe('ModelDetailFlyout', () => {
         metadata: {
           heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' },
         },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       const badges = screen.getByTestId('flyoutTaskBadges');
@@ -148,7 +148,7 @@ describe('ModelDetailFlyout', () => {
         metadata: {
           heuristics: { status: 'deprecated' },
         },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       const badges = screen.getByTestId('flyoutTaskBadges');
@@ -159,7 +159,7 @@ describe('ModelDetailFlyout', () => {
       const endpoint = {
         ...createEndpoint(),
         metadata: { heuristics: { status: 'preview' } },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       const badges = screen.getByTestId('flyoutTaskBadges');
