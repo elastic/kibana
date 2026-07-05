@@ -7,7 +7,28 @@
 
 import type { CorrectnessAnalysis } from './types';
 
-// Scoring weights based on the severity of each error type
+// Scoring weights based on the severity of each error type.
+//
+// `CONTRADICTED` is a *verified* factual error — the ground truth says otherwise
+// — and stays a hard fail (central 0.0) so a single wrong central claim still
+// collapses the geometric mean to 0.
+//
+// `NOT_IN_GROUND_TRUTH` is NOT a verified error: it means the claim could not be
+// confirmed against the ground truth. When the dataset's ground-truth reference
+// is deliberately thin / data-agnostic (as in several agent-builder + alerts-rag
+// suites), a rich, correct, retrieval-grounded answer NECESSARILY contains
+// central claims absent from the reference. The previous central=0.1 weight,
+// combined with the geometric mean, forced such answers to ~0 Factuality
+// ("MAJOR_INACCURACIES") even though they passed Groundedness — a scoring
+// artifact, not a model failure. Whether an answer invents unsupported facts is
+// what the Groundedness evaluator (answer vs retrieved context) measures; it is
+// not Factuality's job to punish "richer than a thin reference". So an
+// unverifiable claim scores high-but-not-perfect rather than near-zero.
+//
+// NOTE: these two weights are the fix for that artifact; the exact values are
+// pending calibration against a real eval run (see the validation plan on the
+// tracking issue) — a run with/without this change should show Factuality track
+// Groundedness on grounded answers while genuine CONTRADICTED cases stay at 0.
 const CLAIM_FACTUAL_SCORE_MAP = {
   FULLY_SUPPORTED: 1.0,
   PARTIALLY_SUPPORTED: {
@@ -19,8 +40,8 @@ const CLAIM_FACTUAL_SCORE_MAP = {
     peripheral: 0.1,
   },
   NOT_IN_GROUND_TRUTH: {
-    central: 0.1,
-    peripheral: 0.5,
+    central: 0.8,
+    peripheral: 0.9,
   },
 } as const;
 
