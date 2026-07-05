@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CommandMatchResult, ActiveCommand, CommandDefinition } from './types';
+import type { CommandMatchResult, ActiveCommand, CommandDefinition, CommandId } from './types';
 
 /**
  * Determines if the character at the given position is at a word boundary.
@@ -25,17 +25,24 @@ const INACTIVE_RESULT: CommandMatchResult = {
 };
 
 /**
- * Given the text preceding the cursor, checks if any registered command
- * is active. Returns the command whose sequence appears closest to the cursor.
+ * Given the text preceding the cursor, checks if any registered command is
+ * active.
  *
- * The algorithm checks every registered command, finds the last word-boundary
- * occurrence of each sequence, and picks the one nearest to the cursor position.
+ * Every registered command is checked for its last word-boundary occurrence.
+ * If a command is already active (`activeCommandId`) and it still has a
+ * match, that command is kept active, even if another command's sequence
+ * appears closer to the cursor — otherwise a trigger character typed as
+ * plain text inside an in-progress command's query (e.g. "/" typed while
+ * writing an "@" mention) would hijack the active command. Absent an active
+ * command, the sequence closest to the cursor starts a new one.
  */
 export const matchCommand = (
   textBeforeCursor: string,
-  definitions: readonly CommandDefinition[]
+  definitions: readonly CommandDefinition[],
+  activeCommandId?: CommandId
 ): CommandMatchResult => {
   let best: ActiveCommand | null = null;
+  let active: ActiveCommand | null = null;
 
   for (const command of definitions) {
     const { sequence } = command;
@@ -49,17 +56,25 @@ export const matchCommand = (
       continue;
     }
 
+    const candidate: ActiveCommand = {
+      command,
+      commandStartOffset: lastIndex,
+      query: textBeforeCursor.substring(lastIndex + sequence.length),
+    };
+
+    if (command.id === activeCommandId) {
+      active = candidate;
+    }
+
     if (best === null || lastIndex > best.commandStartOffset) {
-      best = {
-        command,
-        commandStartOffset: lastIndex,
-        query: textBeforeCursor.substring(lastIndex + sequence.length),
-      };
+      best = candidate;
     }
   }
 
-  if (best) {
-    return { isActive: true, activeCommand: best };
+  const result = active ?? best;
+
+  if (result) {
+    return { isActive: true, activeCommand: result };
   }
 
   return INACTIVE_RESULT;

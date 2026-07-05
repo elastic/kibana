@@ -18,7 +18,9 @@ import {
   insertSpaceAfter,
   placeCursorAfter,
   placeCursorAtEnd,
+  placeCursorInText,
   stripZeroWidthSpaces,
+  unwrapBadge,
 } from './utils';
 
 export interface MessageEditorInstance {
@@ -30,6 +32,8 @@ export interface MessageEditorInstance {
   dismissActionMenu: () => void;
   /** Handle selection of an item from the command menu */
   handleCommandSelect: (selection: CommandBadgeData) => void;
+  /** Replace a no-match badge with its plain text, editable and live-matched again */
+  unwrapUnmatchedBadge: (badge: HTMLElement) => void;
 }
 
 export interface MessageEditorController {
@@ -104,18 +108,42 @@ const useMessageEditorInstance = ({
           return;
         }
 
-        const commandRange = createCommandRange(ref.current, commandMatch.activeCommand);
+        const commandRange = createCommandRange(
+          ref.current,
+          commandMatch.activeCommand,
+          selection.consumedLength
+        );
         commandRange.deleteContents();
 
         const badge = createCommandBadgeElement(selection);
         commandRange.insertNode(badge);
         ensureCaretTargetBeforeFirstBadge(ref.current);
 
-        const space = insertSpaceAfter(badge, ref.current);
-        placeCursorAfter(space, sel);
+        if (selection.consumedLength != null) {
+          // Land the cursor at the end of the leftover text, not right after
+          // the badge — otherwise it would jump backward past anything typed since.
+          const leftoverLength = commandMatch.activeCommand.query.length - selection.consumedLength;
+          const leftover = badge.nextSibling;
+          if (leftoverLength > 0 && leftover instanceof Text) {
+            placeCursorInText(leftover, leftoverLength, sel);
+          } else {
+            placeCursorAfter(badge, sel);
+          }
+        } else {
+          const space = insertSpaceAfter(badge, ref.current);
+          placeCursorAfter(space, sel);
+        }
 
         syncIsEmpty();
         dismissCommandMenu();
+      },
+      unwrapUnmatchedBadge: (badge: HTMLElement) => {
+        if (!ref.current) {
+          return;
+        }
+        unwrapBadge(badge);
+        syncIsEmpty();
+        checkInputForCommand(ref.current);
       },
     }),
     [

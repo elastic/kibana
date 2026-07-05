@@ -15,6 +15,7 @@ import type { CommandMenuComponentProps, CommandMenuHandle } from '../../types';
 import { CommandId } from '../../types';
 import { getSmlMenuHighlightSearchStrings } from '../../utils/sml_command_menu_highlight';
 import { buildSmlScopingFromAgent } from '../../utils/sml_filters';
+import { capAtFirstSpace, buildNoMatchSelection } from '../../utils/no_match_badge';
 import { CommandMenuList } from '../components/command_menu_list';
 import type { CommandMenuListOption } from '../components/command_menu_list';
 
@@ -26,6 +27,32 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
     const { euiTheme } = useEuiTheme();
     const { results, isLoading } = useSmlAutocomplete(query, { constraints });
     const { type, title } = useMemo(() => getSmlMenuHighlightSearchStrings(query), [query]);
+    const canSelectOnSpace = query.includes('/') && title.length > 0;
+    // Only commit on Space once there's a confirmed exact name match — not
+    // just "some results exist" or "more might arrive" — so Space is free to
+    // be typed normally the rest of the time instead of being swallowed.
+    const exactMatchIndex = useMemo(() => {
+      if (!canSelectOnSpace) {
+        return -1;
+      }
+      const lowerName = title.toLowerCase();
+      return results.findIndex((item) => item.title.toLowerCase() === lowerName);
+    }, [results, title, canSelectOnSpace]);
+    const spaceSelection = exactMatchIndex !== -1;
+    const noMatch = canSelectOnSpace && results.length === 0 && !isLoading;
+
+    // Sort the exact match to the front so it's the one Space (or Enter)
+    // commits, rather than whatever the API happened to rank first.
+    const orderedResults = useMemo(() => {
+      if (exactMatchIndex <= 0) {
+        return results;
+      }
+      return [
+        results[exactMatchIndex],
+        ...results.slice(0, exactMatchIndex),
+        ...results.slice(exactMatchIndex + 1),
+      ];
+    }, [results, exactMatchIndex]);
 
     const smlMenuLabelStyles = useMemo(
       () => ({
@@ -41,7 +68,7 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
 
     const options: CommandMenuListOption[] = useMemo(
       () =>
-        results.map((item) => {
+        orderedResults.map((item) => {
           const typeLabel = item.type;
           const titlePlain = item.title;
 
@@ -63,7 +90,7 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
             ),
           };
         }),
-      [results, title, type, smlMenuLabelStyles]
+      [orderedResults, title, type, smlMenuLabelStyles]
     );
 
     const handleSelect = useCallback(
@@ -78,12 +105,22 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
       [onSelect]
     );
 
+    const handleCommitNoMatch = useCallback(() => {
+      // A real name can't contain a space, so capping there separates it
+      // from any trailing sentence text (e.g. accidentally pasted) instead
+      // of swallowing that text into the badge too.
+      const consumedQuery = capAtFirstSpace(query, query.indexOf('/') + 1);
+      onSelect(buildNoMatchSelection(CommandId.Sml, consumedQuery));
+    }, [onSelect, query]);
+
     return (
       <CommandMenuList
         ref={ref}
         options={options}
         isLoading={isLoading}
         onSelect={handleSelect}
+        spaceSelection={spaceSelection}
+        onSpaceNoMatch={noMatch ? handleCommitNoMatch : undefined}
         data-test-subj="smlMenu"
       />
     );
