@@ -91,9 +91,7 @@ describe('calculateFactualScore', () => {
 describe('calculateRelevanceScore', () => {
   it('is the proportion of central claims', () => {
     expect(
-      calculateRelevanceScore(
-        analysisOf([{ centrality: 'central' }, { centrality: 'peripheral' }])
-      )
+      calculateRelevanceScore(analysisOf([{ centrality: 'central' }, { centrality: 'peripheral' }]))
     ).toBeCloseTo(0.5, 5);
   });
 });
