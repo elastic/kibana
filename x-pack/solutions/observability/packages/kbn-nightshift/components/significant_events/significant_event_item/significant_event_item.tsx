@@ -395,7 +395,11 @@ export function SignificantEventItem({
   const detectedAtNode = formatDetectedAt ? (
     formatDetectedAt(detectedAt)
   ) : (
-    <FormattedRelative value={detectedAt} updateIntervalInSeconds={30} />
+    // No updateIntervalInSeconds: react-intl's FormattedRelativeTime throws
+    // ("Cannot schedule update with unit longer than hour") once an event is
+    // more than an hour old and selectUnit picks 'day'/'week'/etc, which
+    // crashed the whole page for any event older than a day.
+    <FormattedRelative value={detectedAt} />
   );
 
   const triggerContent = loading ? (
