@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiAccordion, EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
+import { EuiAccordion, EuiFormRow, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { hasIcon, IconSelect } from '@kbn/visualization-ui-components';
@@ -271,7 +271,7 @@ export function MetricAppearanceSettings({
             />
             <AppearanceOption
               label={i18n.translate('xpack.lens.metric.appearancePopover.spacing', {
-                defaultMessage: 'Spacing & size',
+                defaultMessage: 'Spacing and size',
               })}
               value={state.spacing ?? LENS_METRIC_STATE_DEFAULTS.spacing}
               options={spacingOptions}
@@ -282,6 +282,7 @@ export function MetricAppearanceSettings({
               dataTestSubj="lens-metric-appearance-other-spacing-btn"
             />
           </AppearanceOptionGroup>
+          <EuiSpacer size="s" />
         </div>
       </EuiAccordion>
     </>
