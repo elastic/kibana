@@ -362,14 +362,14 @@ const collectRegionsPerGeo = (
     if (!ep.metadata) continue;
     const regions = (ep.metadata as Record<string, unknown>).regions;
     if (!Array.isArray(regions)) continue;
-    for (const r of regions) {
-      if (!isCspRegion(r)) continue;
-      const geo = r.geo ?? 'other';
+    for (const region of regions) {
+      if (!isCspRegion(region)) continue;
+      const geo = region.geo ?? 'other';
       const entry = byGeo.get(geo) ?? { regions: [], keys: new Set<string>() };
-      const key = `${r.csp}::${r.region}`;
+      const key = `${region.csp}::${region.region}`;
       if (!entry.keys.has(key)) {
         entry.keys.add(key);
-        entry.regions.push(r);
+        entry.regions.push(region);
       }
       byGeo.set(geo, entry);
     }
@@ -417,12 +417,12 @@ export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegio
     const regions = (ep.metadata as Record<string, unknown>).regions;
     if (!Array.isArray(regions)) continue;
 
-    for (const r of regions) {
-      if (!isCspRegion(r)) continue;
-      const key = `${r.csp}::${r.region}`;
+    for (const region of regions) {
+      if (!isCspRegion(region)) continue;
+      const key = `${region.csp}::${region.region}`;
       if (!seen.has(key)) {
         seen.add(key);
-        result.push(r);
+        result.push(region);
       }
     }
   }
@@ -433,4 +433,4 @@ export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegio
   });
 };
 
-export const regionKey = (r: CspRegion): string => `${r.csp}::${r.region}`;
+export const regionKey = (region: CspRegion): string => `${region.csp}::${region.region}`;
