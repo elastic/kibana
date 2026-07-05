@@ -274,9 +274,16 @@ export const createRecommendPrebuiltRulesSkill = ({
     name: 'recommend-prebuilt-rules',
     basePath: 'skills/security/rules',
     description:
-      'Discover and recommend Elastic prebuilt detection rules to install on this deployment. ' +
-      'Handles install recommendations and browse/coverage questions about the installable ' +
-      'catalog (by tag, MITRE, rule type, integration, or keyword). Read-only.',
+      'Recommend Elastic prebuilt detection rules to INSTALL — rules not yet installed on this ' +
+      'deployment that the user can add. Activate for: "what rules should I install", "which ' +
+      'prebuilt rules can I add for <integration/data source>", "how many <severity/type> rules ' +
+      'are available to install", "which MITRE tactics am I missing and what can I install to ' +
+      'close the gaps", and browsing the installable rule catalog. Covers install recommendations ' +
+      'and browse/count/coverage questions over the installable catalog (by tag, MITRE ' +
+      'tactic/technique, rule type, integration, severity, or keyword). Read-only — recommends ' +
+      'what to install, never installs. Do NOT use for rules already installed or enabled ' +
+      '(listing, counting, filtering installed rules -> find-security-rules), nor for creating or ' +
+      'editing one specific rule -> detection-rule-edit.',
     content: RECOMMEND_PREBUILT_RULES_CONTENT,
     getInlineTools: () => [
       createFindPrebuiltRulesInlineTool({ getStartServices, logger, ml }),
