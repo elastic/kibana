@@ -49854,7 +49854,7 @@ paths:
           application/json:
             examples:
               appliesFrequencyToAllTypesExample:
-                description: 'Setting frequency here is a request for the whole store: it applies to every entity type (including types with a different default cadence, such as Service/Generic''s reduced cadence, and any value set individually via PUT /update/{entityType}) so all types run at 5 minutes.'
+                description: "Setting frequency here is a request for the whole store: it applies to every entity type (including types with a different default cadence, such as Service/Generic's reduced cadence, and any value set individually via PUT /update/{entityType}) so all types run at 5 minutes."
                 summary: Applies a frequency to every entity type
                 value:
                   logExtraction:
@@ -58226,7 +58226,7 @@ paths:
                     engines: []
                     status: not_installed
                 runningStatusExample:
-                  description: 'The Entity Store is running with all four engines started. `frequency`, `delay`, and `lookbackPeriod` reflect each engine''s effective cadence: Service and Generic use their built-in reduced-cadence defaults (10m and 30m), while Host and User use the shared global default (30s in this example).'
+                  description: "The Entity Store is running with all four engines started. `frequency`, `delay`, and `lookbackPeriod` reflect each engine's effective cadence: Service and Generic use their built-in reduced-cadence defaults (10m and 30m), while Host and User use the shared global default (30s in this example)."
                   summary: Entity Store running
                   value:
                     engines:
@@ -58521,7 +58521,7 @@ paths:
             application/json:
               examples:
                 uninstallByTypeSuccessExample:
-                  description: 'The entity type''s engine and associated resources were removed. Idempotent: returns ok even if the type was not installed.'
+                  description: "The entity type's engine and associated resources were removed. Idempotent: returns ok even if the type was not installed."
                   summary: Entity type uninstalled
                   value:
                     ok: true
