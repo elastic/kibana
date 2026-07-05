@@ -276,6 +276,7 @@ export const RulesListPage = () => {
         <RuleCreateOptionsPanel
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={navigateToAgentBuilder}
+          createWithAgentDisabled={!isRuleManagementABSkillAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
           onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
@@ -330,6 +331,7 @@ export const RulesListPage = () => {
           onClose={closeCreateOptionsFlyout}
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
+          createWithAgentDisabled={!isRuleManagementABSkillAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
           onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />

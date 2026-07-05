@@ -225,6 +225,7 @@ describe('CreateRuleOptionsFlyout', () => {
         expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       });
 
+      expect(capturedSelectorProps.createWithAgentDisabled).toBe(false);
       expect(capturedSelectorProps.createWithAgentTooltipText).toBeUndefined();
 
       fireEvent.click(screen.getByTestId('agentBtn'));
@@ -256,6 +257,7 @@ describe('CreateRuleOptionsFlyout', () => {
       });
 
       expect(capturedSelectorProps.onCreateWithAgent).toEqual(expect.any(Function));
+      expect(capturedSelectorProps.createWithAgentDisabled).toBe(true);
       expect(capturedSelectorProps.createWithAgentTooltipText).toEqual(expect.any(String));
     });
 
@@ -269,6 +271,7 @@ describe('CreateRuleOptionsFlyout', () => {
       });
 
       expect(capturedSelectorProps.onCreateWithAgent).toEqual(expect.any(Function));
+      expect(capturedSelectorProps.createWithAgentDisabled).toBe(true);
       expect(capturedSelectorProps.createWithAgentTooltipText).toEqual(expect.any(String));
     });
   });

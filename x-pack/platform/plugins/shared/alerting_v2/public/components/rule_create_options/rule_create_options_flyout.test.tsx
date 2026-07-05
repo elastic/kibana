@@ -83,13 +83,14 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(onCreateThresholdAlert).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the AI Agent option disabled and does not fire onCreateWithAgent when createWithAgentTooltipText is set', () => {
+  it('renders the AI Agent option disabled and does not fire onCreateWithAgent when createWithAgentDisabled is set', () => {
     render(
       <I18nProvider>
         <RuleCreateOptionsFlyout
           onClose={onClose}
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabled
           createWithAgentTooltipText="Missing privileges"
           onCreateThresholdAlert={onCreateThresholdAlert}
         />

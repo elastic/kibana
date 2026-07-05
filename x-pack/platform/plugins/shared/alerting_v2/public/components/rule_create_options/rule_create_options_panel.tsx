@@ -40,9 +40,14 @@ interface RuleCreateOptionsPanelProps {
   layout?: 'vertical' | 'horizontal';
   onCreateWithAgent: () => void;
   /**
-   * Optional tooltip text for the "Create with AI Agent" option. When set, the option is always
-   * rendered but disabled, with this text shown as a tooltip explaining why (e.g. a missing
-   * prerequisite). When unset, the option is enabled and `onCreateWithAgent` fires on click.
+   * When `true`, the "Create with AI Agent" option is rendered disabled (click is a no-op). Independent
+   * of `createWithAgentTooltipText` — a disabled option need not have a tooltip, and a tooltip can be
+   * shown without disabling.
+   */
+  createWithAgentDisabled?: boolean;
+  /**
+   * Optional tooltip text for the "Create with AI Agent" option (e.g. explaining a missing
+   * prerequisite). Shown on hover/focus regardless of whether the option is disabled.
    */
   createWithAgentTooltipText?: string;
   onCreateThresholdAlert?: () => void;
@@ -103,7 +108,9 @@ interface RuleCreateOptionItem {
   title: string;
   description: string;
   onClick: () => void;
-  /** When set, the option is disabled and this string is shown as a hover tooltip. */
+  /** When `true`, the option is rendered disabled and its click is a no-op. */
+  disabled?: boolean;
+  /** When set, this string is shown as a hover/focus tooltip, independent of `disabled`. */
   tooltipText?: string;
   'data-test-subj'?: string;
 }
@@ -184,7 +191,8 @@ const RuleCreateOptionActionPanel: React.FC<{
   item: RuleCreateOptionItem;
   actionPanelStyle: React.ComponentProps<typeof EuiPanel>['css'];
 }> = ({ item, actionPanelStyle }) => {
-  const isDisabled = item.tooltipText !== undefined;
+  const isDisabled = item.disabled === true;
+  const hasTooltip = item.tooltipText !== undefined;
   const panel = (
     <EuiPanel
       element="button"
@@ -214,7 +222,7 @@ const RuleCreateOptionActionPanel: React.FC<{
     </EuiPanel>
   );
 
-  if (isDisabled) {
+  if (hasTooltip) {
     return (
       <EuiToolTip content={item.tooltipText} display="block">
         {panel}
@@ -252,6 +260,7 @@ const RuleBuilderSectionDivider: React.FC = () => (
 const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
+  createWithAgentDisabled,
   createWithAgentTooltipText,
   onCreateThresholdAlert,
 }) => {
@@ -273,11 +282,12 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
         title: AI_AGENT_TITLE,
         description: AI_AGENT_DESCRIPTION,
         onClick: onCreateWithAgent,
+        disabled: createWithAgentDisabled,
         tooltipText: createWithAgentTooltipText,
         'data-test-subj': 'createWithAgentCard',
       },
     ],
-    [onCreateEsqlRule, onCreateWithAgent, createWithAgentTooltipText]
+    [onCreateEsqlRule, onCreateWithAgent, createWithAgentDisabled, createWithAgentTooltipText]
   );
 
   const thresholdCreateOption = useMemo<RuleCreateOptionItem>(
@@ -385,11 +395,13 @@ const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ ite
 const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
+  createWithAgentDisabled,
   createWithAgentTooltipText,
   onCreateThresholdAlert,
   legacyRuleTypes,
 }) => {
-  const isAgentDisabled = createWithAgentTooltipText !== undefined;
+  const isAgentDisabled = createWithAgentDisabled === true;
+  const hasAgentTooltip = createWithAgentTooltipText !== undefined;
   const agentCard = (
     <EuiCard
       layout="horizontal"
@@ -430,7 +442,7 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          {isAgentDisabled ? (
+          {hasAgentTooltip ? (
             <EuiToolTip content={createWithAgentTooltipText} display="block">
               {agentCard}
             </EuiToolTip>

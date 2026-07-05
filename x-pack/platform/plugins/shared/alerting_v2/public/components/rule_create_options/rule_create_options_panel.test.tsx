@@ -75,12 +75,13 @@ describe('RuleCreateOptionsPanel', () => {
     expect(onCreateThresholdAlert).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the agent card disabled and does not fire onCreateWithAgent when createWithAgentTooltipText is set', () => {
+  it('renders the agent card disabled and does not fire onCreateWithAgent when createWithAgentDisabled is set', () => {
     render(
       <I18nProvider>
         <RuleCreateOptionsPanel
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabled
           createWithAgentTooltipText="Missing privileges"
           onCreateThresholdAlert={onCreateThresholdAlert}
         />
@@ -95,12 +96,13 @@ describe('RuleCreateOptionsPanel', () => {
     expect(onCreateWithAgent).not.toHaveBeenCalled();
   });
 
-  it('shows the disabled reason as a tooltip when the disabled agent card is hovered', async () => {
+  it('shows the tooltip text on hover regardless of the disabled state', async () => {
     render(
       <I18nProvider>
         <RuleCreateOptionsPanel
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabled
           createWithAgentTooltipText="Missing privileges"
           onCreateThresholdAlert={onCreateThresholdAlert}
         />
@@ -119,6 +121,7 @@ describe('RuleCreateOptionsPanel', () => {
           layout="vertical"
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabled
           createWithAgentTooltipText="Missing privileges"
           onCreateThresholdAlert={onCreateThresholdAlert}
         />
@@ -133,6 +136,47 @@ describe('RuleCreateOptionsPanel', () => {
 
     fireEvent.mouseOver(agentCard);
     expect(await screen.findByText('Missing privileges')).toBeInTheDocument();
+  });
+
+  it('disables the agent card without a tooltip when createWithAgentDisabled is set alone', () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsPanel
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabled
+          onCreateThresholdAlert={onCreateThresholdAlert}
+        />
+      </I18nProvider>
+    );
+
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(agentCard);
+    expect(onCreateWithAgent).not.toHaveBeenCalled();
+  });
+
+  it('shows a tooltip without disabling the agent card when only createWithAgentTooltipText is set', async () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsPanel
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          createWithAgentTooltipText="Extra context"
+          onCreateThresholdAlert={onCreateThresholdAlert}
+        />
+      </I18nProvider>
+    );
+
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).not.toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(agentCard);
+    expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
+
+    fireEvent.mouseOver(agentCard);
+    expect(await screen.findByText('Extra context')).toBeInTheDocument();
   });
 });
 

@@ -26,7 +26,10 @@ import { Context } from '@kbn/core-di-browser';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { getCreateWithAgentTooltipText } from './components/rule_create_options/rule_create_options_panel';
-import { getRuleManagementABSkillRequirements } from './hooks/use_is_rule_management_ab_skill_available';
+import {
+  getIsRuleManagementABSkillAvailable,
+  getRuleManagementABSkillRequirements,
+} from './hooks/use_is_rule_management_ab_skill_available';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
 
@@ -243,8 +246,12 @@ const CreateRuleOptionsFlyoutInner = ({
     services.application,
     services.uiSettings
   );
-  // Always render the "Create with agent" option; disable it with a tooltip naming the missing
-  // prerequisite when unavailable.
+  // Always render the "Create with agent" option; disable it (and show a tooltip naming the missing
+  // prerequisite) when unavailable.
+  const createWithAgentDisabled = !getIsRuleManagementABSkillAvailable(
+    services.application,
+    services.uiSettings
+  );
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);
 
   if (step.type === 'esql') {
@@ -292,6 +299,7 @@ const CreateRuleOptionsFlyoutInner = ({
       onClose={onClose}
       onCreateEsqlRule={() => setStep({ type: 'esql' })}
       onCreateWithAgent={navigateToAgentBuilder}
+      createWithAgentDisabled={createWithAgentDisabled}
       createWithAgentTooltipText={createWithAgentTooltipText}
       onCreateThresholdAlert={() => setStep({ type: 'threshold' })}
       legacyRuleTypes={legacyPanelItems}
