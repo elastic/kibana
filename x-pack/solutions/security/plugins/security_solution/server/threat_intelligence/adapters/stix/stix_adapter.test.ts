@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { stixAdapter } from './stix_adapter';
-import { normalizedReportSchema } from '../../../../../common/threat_intelligence/workflows/step_types/fetch_source/fetch_source_common';
+import { normalizedReportSchema } from '../../../../common/threat_intelligence/workflows/step_types/fetch_source/fetch_source_common';
 import type { AdapterRunContext, SourceHit } from '../types';
 
 const URL = 'https://stix.example/bundle.json';

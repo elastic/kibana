@@ -139,12 +139,18 @@ export const installBuiltinWorkflows = async ({
     if (attempt < INSTALL_MAX_ATTEMPTS) {
       const delayMs = INSTALL_BASE_DELAY_MS * Math.pow(2, attempt - 1);
       log.warn(
-        `${missingIds.length} built-in workflow(s) not registered after attempt ${attempt}; retrying in ${delayMs}ms. Missing: ${missingIds.join(', ')}`
+        `${
+          missingIds.length
+        } built-in workflow(s) not registered after attempt ${attempt}; retrying in ${delayMs}ms. Missing: ${missingIds.join(
+          ', '
+        )}`
       );
       await _delayFn(delayMs);
     } else {
       log.error(
-        `Built-in workflow registration failed after ${INSTALL_MAX_ATTEMPTS} attempts. Missing: ${missingIds.join(', ')}. The threat intelligence dashboard will not run autonomously until workflows are manually re-registered or Kibana is restarted.`
+        `Built-in workflow registration failed after ${INSTALL_MAX_ATTEMPTS} attempts. Missing: ${missingIds.join(
+          ', '
+        )}. The threat intelligence dashboard will not run autonomously until workflows are manually re-registered or Kibana is restarted.`
       );
     }
   }

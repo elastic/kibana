@@ -1119,7 +1119,9 @@ const migrateExistingExternalReferencesMapping = async (
     );
   } catch (err) {
     log.debug(
-      `external-references-mapping-migration: data stream not found — skipping (${(err as Error).message})`
+      `external-references-mapping-migration: data stream not found — skipping (${
+        (err as Error).message
+      })`
     );
     return;
   }
@@ -1158,7 +1160,9 @@ const migrateExistingExternalReferencesMapping = async (
       }
     } catch (err) {
       log.error(
-        `Failed to migrate external_references mapping on ${indexName}: ${(err as Error).message}. ` +
+        `Failed to migrate external_references mapping on ${indexName}: ${
+          (err as Error).message
+        }. ` +
           `The content.external_references field will be rejected by dynamic: strict until the ` +
           `mapping is updated manually.`
       );

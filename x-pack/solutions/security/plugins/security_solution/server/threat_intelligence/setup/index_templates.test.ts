@@ -26,7 +26,7 @@ describe('index_templates — mapping coverage guard', () => {
   });
 
   it('content.external_references is declared as nested with the expected property shape', () => {
-    expect(src).toContain("external_references: {");
+    expect(src).toContain('external_references: {');
     expect(src).toContain("type: 'nested' as const,");
     expect(src).toContain("source_name: { type: 'keyword' as const }");
     expect(src).toContain("url: { type: 'keyword' as const }");

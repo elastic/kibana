@@ -226,10 +226,7 @@ const resolveReportContext = async (
       size: 1,
       query: {
         bool: {
-          filter: [
-            buildSpaceFilterTerms(params.spaceId),
-            { ids: { values: [params.report_id] } },
-          ],
+          filter: [buildSpaceFilterTerms(params.spaceId), { ids: { values: [params.report_id] } }],
         },
       },
       _source: ['content.body_text', 'rank_score'],

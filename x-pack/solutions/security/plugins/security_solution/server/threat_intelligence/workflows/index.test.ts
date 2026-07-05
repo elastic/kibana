@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { BUILTIN_WORKFLOWS, installBuiltinWorkflows } from './index';
+import { BUILTIN_WORKFLOWS, installBuiltinWorkflows } from '.';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { Logger } from '@kbn/core/server';
 
 // ---------------------------------------------------------------------------
@@ -59,7 +60,9 @@ describe('installBuiltinWorkflows', () => {
   };
 
   const allCreated = () => ({
-    created: BUILTIN_WORKFLOWS.map((wf) => ({ id: wf.id, name: wf.id } as any)),
+    created: BUILTIN_WORKFLOWS.map(
+      (wf) => ({ id: wf.id, name: wf.id } as unknown as WorkflowDetailDto)
+    ),
     failed: [],
   });
 
@@ -80,7 +83,12 @@ describe('installBuiltinWorkflows', () => {
   it('retries when the first N calls partially fail, then succeeds', async () => {
     // First 2 calls: only the first workflow registers; attempts 3+ succeed.
     const partial = {
-      created: [{ id: BUILTIN_WORKFLOWS[0].id, name: BUILTIN_WORKFLOWS[0].id } as any],
+      created: [
+        {
+          id: BUILTIN_WORKFLOWS[0].id,
+          name: BUILTIN_WORKFLOWS[0].id,
+        } as unknown as WorkflowDetailDto,
+      ],
       failed: BUILTIN_WORKFLOWS.slice(1).map((wf, i) => ({
         index: i + 1,
         id: wf.id,
@@ -199,4 +207,3 @@ describe('nl_extraction_behavioral — STIX isolation boundary', () => {
     });
   }
 });
-
