@@ -28,13 +28,16 @@ export const createFindRulesSkill = ({
     name: 'find-security-rules',
     basePath: 'skills/security/rules',
     description:
-      'List, count, filter, and rank Security detection rules (read-only inventory). Use for ' +
-      '"list all enabled detection rules tagged with MITRE", "show rules for T1059", ' +
-      '"how many custom rules are enabled", or any list/count/filter over the rule catalog — ' +
-      'by tags (including MITRE), MITRE technique/tactic ID, severity, enabled state, or name. ' +
+      'List, count, filter, rank, and find the noisiest Security detection rules (read-only ' +
+      'inventory). Use for "list all enabled detection rules tagged with MITRE", "show rules for ' +
+      'T1059", "show rules for the Execution tactic", "show my disabled rules", "how many custom ' +
+      'rules are enabled", "which rules generated the most alerts" or "my noisiest rules", or any ' +
+      'list/count/filter/rank over the rule catalog — by tags (including MITRE), MITRE ' +
+      'technique/tactic (ID or name), severity, enabled/disabled state, name, or alert volume. ' +
       'Prefer this over detection-rule-edit when the user lists or counts rules without a rule ' +
-      'attachment. Tools: security.discover_rule_tags then security.find_rules only — never ES|QL ' +
-      'or platform.core search. Not for creating, editing, or hunting raw events.',
+      'attachment. Tools: security.discover_rule_tags then security.find_rules (plus ' +
+      'security.alerts for alert-volume ranking) — never ES|QL or platform.core search. Not for ' +
+      'creating, editing, or hunting raw events.',
     content: `# Find Detection Rules
 
 ## When to Use
@@ -43,8 +46,11 @@ Use this skill when the user wants to **inventory, list, count, filter, sort, or
 
 - "List detection rules tagged with MITRE" or "rules with the MITRE tag"
 - "Show rules covering MITRE technique T1059" or a tactic name/ID
+- "Show rules for the Execution tactic" (a MITRE tactic **by name**, not just an ID)
+- "Show my disabled rules" or "which rules are enabled vs disabled" (enabled/disabled inventory)
 - "How many custom (non-prebuilt) detection rules are enabled?"
 - "Find enabled critical rules" or "rules named PowerShell"
+- "Which detection rules generated the most alerts?" / "show my noisiest rules this week" — **rank rules by alert volume**. This skill owns alert-volume ranking: call \`security.alerts\` to aggregate alerts by rule, then \`security.find_rules\` to look up rule details. Do **not** hand this off to raw ES|QL / \`platform.core.generate_esql\`.
 
 Do **not** use this skill when the user wants to **create or edit** a rule (use detection rule creation / detection-rule-edit) or hunt **raw events** with ES|QL (use threat-hunting).
 
