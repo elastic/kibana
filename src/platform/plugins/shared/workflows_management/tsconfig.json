@@ -28,7 +28,9 @@
     "@kbn/navigation-plugin",
     "@kbn/config-schema",
     "@kbn/workflows",
+    "@kbn/workflows-library",
     "@kbn/human-readable-id",
+    "@kbn/dag-layout",
     "@kbn/workflows-ui",
     "@kbn/workflows-yaml",
     "@kbn/zod",
@@ -56,6 +58,9 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/react-field",
     "@kbn/storage-adapter",
+    "@kbn/occ",
+    "@kbn/change-history",
+    "@kbn/change-history-ui",
     "@kbn/core-i18n-browser-mocks",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/serverless",
@@ -109,7 +114,10 @@
     "@kbn/esql-utils",
     "@kbn/inbox-plugin",
     "@kbn/inbox-common",
-    "@kbn/datemath"
+    "@kbn/presentation-publishing",
+    "@kbn/datemath",
+    "@kbn/controls-plugin",
+    "@kbn/controls-schemas"
   ],
   "exclude": ["target/**/*"]
 }

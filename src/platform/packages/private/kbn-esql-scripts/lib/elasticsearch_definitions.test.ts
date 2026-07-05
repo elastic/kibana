@@ -11,6 +11,7 @@ import * as fs from 'fs';
 import { join } from 'path';
 import {
   ELASTICSEARCH_ESQL_KIBANA_ROOT,
+  findDefinitionFileByName,
   readElasticsearchDefinitions,
 } from './elasticsearch_definitions';
 
@@ -26,6 +27,16 @@ const mockReaddir = (...entries: Array<{ name: string; dir: boolean }>) =>
     isDirectory: () => dir,
     isFile: () => !dir,
   })) as unknown as ReturnType<typeof fs.readdirSync>;
+
+/**
+ * Mocks `fs.readdirSync` against a directory tree keyed by absolute path, so recursive
+ * traversals resolve deterministically regardless of order.
+ */
+const mockReaddirByPath = (tree: Record<string, Array<{ name: string; dir: boolean }>>) => {
+  mockedFs.readdirSync.mockImplementation(
+    (dir) => mockReaddir(...(tree[dir as string] ?? [])) as any
+  );
+};
 
 /** Mocks similar structure to the Elasticsearch scaffolding.
  * - x-pack-esql
@@ -97,24 +108,113 @@ describe('readElasticsearchDefinitions', () => {
     ]);
   });
 
-  it('exits when pathToElasticsearch is missing', () => {
-    // process.exit normally halts execution; in the test we make it throw so the function
-    // aborts the same way and we can assert it never reached the filesystem read.
-    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((() => {
-      throw new Error('process.exit called');
-    }) as typeof process.exit);
-    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
-
+  it('throws when pathToElasticsearch is missing', () => {
     expect(() =>
       readElasticsearchDefinitions({
         pathToElasticsearch: '',
         keywordType: 'functions',
         language: 'esql',
       })
-    ).toThrow('process.exit called');
+    ).toThrow('Path to Elasticsearch is required');
 
-    expect(errorSpy).toHaveBeenCalledWith('Error: Path to Elasticsearch is required.');
-    expect(exitSpy).toHaveBeenCalledWith(1);
     expect(mockedFs.readdirSync).not.toHaveBeenCalled();
+  });
+
+  it('throws when the generated definitions directory is missing', () => {
+    mockedFs.existsSync.mockReturnValue(false);
+
+    expect(() =>
+      readElasticsearchDefinitions({
+        pathToElasticsearch,
+        keywordType: 'functions',
+        language: 'esql',
+      })
+    ).toThrow('Could not find the Elasticsearch generated definitions directory');
+  });
+
+  it('throws when no definitions are found', () => {
+    mockedFs.existsSync.mockReturnValue(true);
+    mockedFs.statSync.mockReturnValue({ isDirectory: () => true } as fs.Stats);
+    // Generated root exists but contains no projects.
+    mockedFs.readdirSync.mockReturnValue(mockReaddir());
+
+    expect(() =>
+      readElasticsearchDefinitions({
+        pathToElasticsearch,
+        keywordType: 'functions',
+        language: 'esql',
+      })
+    ).toThrow('No esql functions definitions found');
+  });
+});
+
+describe('findDefinitionFileByName', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('locates a file nested under any project directory', () => {
+    mockedFs.existsSync.mockReturnValue(true);
+    mockReaddirByPath({
+      [generatedRoot]: [
+        { name: 'x-pack-esql-function-math', dir: true },
+        { name: 'x-pack-esql', dir: true },
+      ],
+      [join(generatedRoot, 'x-pack-esql-function-math')]: [{ name: 'definition', dir: true }],
+      [join(generatedRoot, 'x-pack-esql-function-math', 'definition')]: [
+        { name: 'functions', dir: true },
+      ],
+      [join(generatedRoot, 'x-pack-esql-function-math', 'definition', 'functions')]: [
+        { name: 'abs.json', dir: false },
+      ],
+      [join(generatedRoot, 'x-pack-esql')]: [{ name: 'definition', dir: true }],
+      [join(generatedRoot, 'x-pack-esql', 'definition')]: [
+        { name: 'inline_cast.json', dir: false },
+      ],
+    });
+
+    expect(
+      findDefinitionFileByName({
+        pathToElasticsearch,
+        language: 'esql',
+        fileName: 'inline_cast.json',
+      })
+    ).toBe(join(generatedRoot, 'x-pack-esql', 'definition', 'inline_cast.json'));
+  });
+
+  it('throws when the generated definitions directory is missing', () => {
+    mockedFs.existsSync.mockReturnValue(false);
+
+    expect(() =>
+      findDefinitionFileByName({
+        pathToElasticsearch,
+        language: 'esql',
+        fileName: 'inline_cast.json',
+      })
+    ).toThrow('Could not find the Elasticsearch generated definitions directory');
+  });
+
+  it('throws when the file cannot be found anywhere under the generated root', () => {
+    mockedFs.existsSync.mockReturnValue(true);
+    mockReaddirByPath({
+      [generatedRoot]: [{ name: 'x-pack-esql', dir: true }],
+      [join(generatedRoot, 'x-pack-esql')]: [{ name: 'definition', dir: true }],
+      [join(generatedRoot, 'x-pack-esql', 'definition')]: [{ name: 'functions', dir: true }],
+      [join(generatedRoot, 'x-pack-esql', 'definition', 'functions')]: [
+        { name: 'abs.json', dir: false },
+      ],
+    });
+
+    expect(() =>
+      findDefinitionFileByName({
+        pathToElasticsearch,
+        language: 'esql',
+        fileName: 'inline_cast.json',
+      })
+    ).toThrow('Could not find "inline_cast.json"');
   });
 });

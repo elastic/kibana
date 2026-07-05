@@ -134,6 +134,15 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 
   const newMessages = langChainMessages.slice(-1); // this is the message that was just added
 
+  // Persist the user message before any setup that might fail so it's always present after refetch
+  const conversationMessages = await getConversationWithNewMessage({
+    logger,
+    conversationsDataClient: dataClients?.conversationsDataClient,
+    conversationId,
+    replacements,
+    newMessages,
+  });
+
   // Check if KB is available (not feature flag related)
   const isEnabledKnowledgeBase =
     (await dataClients?.kbDataClient?.isInferenceEndpointExists()) ?? false;
@@ -238,14 +247,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
     contentReferencesStore,
     checkpointSaver: await assistantContext.getCheckpointSaver(),
-  });
-
-  const conversationMessages = await getConversationWithNewMessage({
-    logger,
-    conversationsDataClient: dataClients?.conversationsDataClient,
-    conversationId,
-    replacements,
-    newMessages,
   });
 
   const chatPrompt = await chatPromptFactory(DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE, {

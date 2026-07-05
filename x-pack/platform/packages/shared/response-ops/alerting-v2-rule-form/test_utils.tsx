@@ -44,7 +44,10 @@ export const createTestQueryClient = () =>
 export const createMockDashboardStart = (): DashboardStart =>
   ({
     findDashboardsService: jest.fn().mockResolvedValue({
-      search: jest.fn().mockResolvedValue({ total: 0, dashboards: [] }),
+      search: jest.fn().mockResolvedValue({
+        data: [],
+        meta: { page: 1, per_page: 100, total: 0 },
+      }),
       findById: jest.fn(),
       findByIds: jest.fn().mockResolvedValue([]),
       findByTitle: jest.fn(),
@@ -61,10 +64,6 @@ export const createMockServices = (): RuleFormServices => ({
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
   lens: lensPluginMock.createStartContract(),
-  workflowForm: {
-    Component: () => null,
-    defaultValue: () => ({}),
-  },
   uiActions: uiActionsPluginMock.createStartContract(),
   dashboard: createMockDashboardStart(),
 });
@@ -91,14 +90,7 @@ export const defaultTestFormValues: FormValues = {
   },
   timeField: '@timestamp',
   schedule: { every: '5m', lookback: '1m' },
-  evaluation: {
-    query: {
-      base: '',
-    },
-  },
-  recoveryPolicy: {
-    type: 'no_breach',
-  },
+  query: { format: 'standalone', breach: { query: '' } },
   stateTransitionAlertDelayMode: DELAY_MODE.immediate,
   stateTransitionRecoveryDelayMode: DELAY_MODE.immediate,
 };

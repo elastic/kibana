@@ -569,6 +569,33 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     });
   });
 
+  it('should reject invalid HTTP method without calling fetch', async () => {
+    const stepWith = {
+      method: 'POSTs',
+      path: '/api/status',
+    };
+    const step = {
+      id: 'test_step',
+      type: 'kibana.request',
+      stepId: 'test_step',
+      stepType: 'kibana.request',
+      configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
+    } as unknown as KibanaGraphNode;
+
+    const kibanaStep = new KibanaActionStepImpl(
+      step,
+      mockStepExecutionRuntime,
+      mockWorkflowRuntime,
+      mockWorkflowLogger
+    );
+
+    const result = await runStep(kibanaStep, stepWith);
+
+    expect(result.error).toBeDefined();
+    expect(result.error!.message).toContain('Invalid HTTP method "POSTs"');
+    expect(mockedFetch).not.toHaveBeenCalled();
+  });
+
   describe('debug option', () => {
     it('should include _debug with fullUrl in output when debug is true', async () => {
       const stepWith = {

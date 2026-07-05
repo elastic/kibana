@@ -184,4 +184,29 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
         }
       })
     );
+
+  // MCP Streamable HTTP clients open a standalone GET "listening stream" on the MCP
+  // endpoint to receive server-initiated messages. Kibana doesn't register a GET here,
+  // so the request falls through to the SPA catch-all (`GET /{path*}`), which still
+  // authenticates and rejects the UIAM OAuth token with a 401. Clients treat a 401 on
+  // that stream as an auth failure and retry the OAuth flow instead of issuing POST
+  // requests. A 405, by contrast, is ignored. Shadow the catch-all with an
+  // unauthenticated 405 so clients fall back to POST. (Kibana intentionally does not
+  // support server-initiated SSE -- see KibanaMcpHttpTransport.)
+  //
+  // Non-versioned and excluded from the OAS: this is a protocol-level stub, not a
+  // documented API.
+  router.get(
+    {
+      path: MCP_SERVER_PATH,
+      security: {
+        authz: { enabled: false, reason: 'Returns a static 405; nothing to authorize.' },
+        authc: { enabled: false, reason: 'Returns a static 405; no identity required.' },
+      },
+      options: { access: 'public', excludeFromOAS: true },
+      validate: false,
+    },
+    async (ctx, request, response) =>
+      response.customError({ statusCode: 405, body: { message: 'Method Not Allowed' } })
+  );
 }

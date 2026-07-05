@@ -45,14 +45,18 @@ describe('CreateRecoveryEventsStep', () => {
     return { step, internalEsClient: internal.mockEsClient, scopedEsClient: scoped.mockEsClient };
   }
 
-  describe('no_recovery', () => {
-    it('skips recovery entirely when recovery_policy is not set', async () => {
+  describe('recovery disabled', () => {
+    it('skips recovery entirely when recovery_strategy is omitted', async () => {
       const { step, internalEsClient, scopedEsClient } = createStep();
 
       const breachedEvents = [createAlertEvent({ group_hash: 'hash-1' })];
 
       const state = createRulePipelineState({
-        rule: createRuleResponse({ kind: 'alert', recovery_policy: undefined }),
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_strategy: undefined,
+          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+        }),
         alertEventsBatch: breachedEvents,
       });
 
@@ -84,7 +88,7 @@ describe('CreateRecoveryEventsStep', () => {
     });
   });
 
-  describe('no_breach recovery', () => {
+  describe('no_breach strategy', () => {
     it('creates recovery events for active groups not in the breached set', async () => {
       const { step, internalEsClient } = createStep();
 
@@ -95,7 +99,14 @@ describe('CreateRecoveryEventsStep', () => {
       const breachedEvents = [createAlertEvent({ group_hash: 'hash-1' })];
 
       const state = createRulePipelineState({
-        rule: createRuleResponse({ kind: 'alert' }),
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_strategy: 'no_breach',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+          },
+        }),
         alertEventsBatch: breachedEvents,
       });
 
@@ -114,6 +125,37 @@ describe('CreateRecoveryEventsStep', () => {
       expect(alertEvents[2].group_hash).toBe('hash-3');
     });
 
+    it('does not execute a custom recovery query when strategy is no_breach', async () => {
+      const { step, internalEsClient, scopedEsClient } = createStep();
+
+      internalEsClient.esql.query.mockResolvedValue(
+        createActiveGroupHashesResponse(['hash-1', 'hash-2'])
+      );
+
+      const state = createRulePipelineState({
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_strategy: 'no_breach',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+          },
+        }),
+        alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
+      });
+
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+
+      expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
+      expect(result.type).toBe('continue');
+      const alertEvents = result.state.alertEventsBatch!;
+      expect(alertEvents).toHaveLength(2);
+      expect(alertEvents[1].status).toBe('recovered');
+      expect(alertEvents[1].group_hash).toBe('hash-2');
+    });
+
     it('returns original events when no active groups exist', async () => {
       const { step, internalEsClient } = createStep();
 
@@ -122,7 +164,14 @@ describe('CreateRecoveryEventsStep', () => {
       const alertEventsBatch = [createAlertEvent({ group_hash: 'hash-1' })];
 
       const state = createRulePipelineState({
-        rule: createRuleResponse({ kind: 'alert' }),
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_strategy: 'no_breach',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+          },
+        }),
         alertEventsBatch,
       });
 
@@ -146,7 +195,14 @@ describe('CreateRecoveryEventsStep', () => {
       ];
 
       const state = createRulePipelineState({
-        rule: createRuleResponse({ kind: 'alert' }),
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_strategy: 'no_breach',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+          },
+        }),
         alertEventsBatch,
       });
 
@@ -168,7 +224,14 @@ describe('CreateRecoveryEventsStep', () => {
       );
 
       const state = createRulePipelineState({
-        rule: createRuleResponse({ kind: 'alert' }),
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_strategy: 'no_breach',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+          },
+        }),
         alertEventsBatch: [],
       });
 
@@ -183,7 +246,81 @@ describe('CreateRecoveryEventsStep', () => {
     });
   });
 
-  describe('query-based recovery', () => {
+  describe('composed format', () => {
+    it('does not execute a custom recovery query when composed rule recovery strategy is no_breach', async () => {
+      const { step, internalEsClient, scopedEsClient } = createStep();
+
+      internalEsClient.esql.query.mockResolvedValue(
+        createActiveGroupHashesResponse(['hash-1', 'hash-2'])
+      );
+
+      const state = createRulePipelineState({
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_strategy: 'no_breach',
+          query: {
+            format: 'composed',
+            base: 'FROM metrics-*',
+            breach: { segment: 'WHERE cpu > 0.9' },
+          },
+        }),
+        alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
+      });
+
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+
+      expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
+      expect(result.type).toBe('continue');
+      const alertEvents = result.state.alertEventsBatch!;
+      expect(alertEvents).toHaveLength(2);
+      expect(alertEvents[1].status).toBe('recovered');
+      expect(alertEvents[1].group_hash).toBe('hash-2');
+    });
+
+    it('executes base+recovery segment as the recovery query for composed format rules', async () => {
+      const { step, internalEsClient, scopedEsClient } = createStep();
+
+      internalEsClient.esql.query.mockResolvedValue(
+        createActiveGroupHashesResponse(['hash-a', 'hash-b'])
+      );
+
+      scopedEsClient.esql.query.mockResolvedValue(
+        createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-recovered']])
+      );
+
+      const state = createRulePipelineState({
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_strategy: 'query',
+          query: {
+            format: 'composed',
+            base: 'FROM metrics-* | STATS AVG(cpu) BY host.name',
+            breach: { segment: 'WHERE AVG(cpu) > 0.9' },
+            recovery: { segment: 'WHERE AVG(cpu) < 0.5' },
+          },
+        }),
+        alertEventsBatch: [],
+      });
+
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+
+      expect(scopedEsClient.esql.query).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: 'FROM metrics-* | STATS AVG(cpu) BY host.name | WHERE AVG(cpu) < 0.5',
+        }),
+        expect.any(Object)
+      );
+      expect(result.type).toBe('continue');
+      const alertEvents = result.state.alertEventsBatch!;
+      expect(alertEvents.every((e: AlertEvent) => e.status === 'recovered')).toBe(true);
+    });
+  });
+
+  describe('query strategy', () => {
     it('executes the recovery query and creates events for matching active groups', async () => {
       const { step, internalEsClient, scopedEsClient } = createStep();
 
@@ -201,9 +338,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
-          recovery_policy: {
-            type: 'query',
-            query: { base: 'FROM logs-* | WHERE recovered = true' },
+          recovery_strategy: 'query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+            recovery: { query: 'FROM logs-* | WHERE recovered = true' },
           },
         }),
         alertEventsBatch: [],
@@ -230,9 +369,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
-          recovery_policy: {
-            type: 'query',
-            query: { base: 'FROM logs-* | WHERE ok = true' },
+          recovery_strategy: 'query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+            recovery: { query: 'FROM logs-* | WHERE ok = true' },
           },
         }),
         alertEventsBatch: [],
@@ -258,9 +399,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
-          recovery_policy: {
-            type: 'query',
-            query: { base: 'FROM logs-* | WHERE recovered = true' },
+          recovery_strategy: 'query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+            recovery: { query: 'FROM logs-* | WHERE recovered = true' },
           },
         }),
         alertEventsBatch: breachedEvents,
@@ -290,10 +433,14 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
+          recovery_strategy: 'query',
           grouping: { fields: ['host.name'] },
-          recovery_policy: {
-            type: 'query',
-            query: { base: 'FROM logs-* | WHERE error_count == 0 | STATS count(*) BY host.name' },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+            recovery: {
+              query: 'FROM logs-* | WHERE error_count == 0 | STATS count(*) BY host.name',
+            },
           },
         }),
         alertEventsBatch: [],
@@ -320,9 +467,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
-          recovery_policy: {
-            type: 'query',
-            query: { base: 'FROM logs-*' },
+          recovery_strategy: 'query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+            recovery: { query: 'FROM logs-*' },
           },
         }),
         alertEventsBatch: breachedEvents,
@@ -349,9 +498,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
-          recovery_policy: {
-            type: 'query',
-            query: { base: 'FROM logs-* | WHERE invalid syntax' },
+          recovery_strategy: 'query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+            recovery: { query: 'FROM logs-* | WHERE invalid syntax' },
           },
         }),
         alertEventsBatch: [],
@@ -374,9 +525,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
-          recovery_policy: {
-            type: 'query',
-            query: { base: 'FROM logs-*' },
+          recovery_strategy: 'query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+            recovery: { query: 'FROM logs-*' },
           },
         }),
         alertEventsBatch: [],
@@ -397,9 +550,11 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
-          recovery_policy: {
-            type: 'query',
-            query: { base: 'FROM logs-*' },
+          recovery_strategy: 'query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+            recovery: { query: 'FROM logs-*' },
           },
         }),
         alertEventsBatch: [],
@@ -422,7 +577,14 @@ describe('CreateRecoveryEventsStep', () => {
       const input = createRuleExecutionInput({ abortSignal: abortController.signal });
       const state = createRulePipelineState({
         input,
-        rule: createRuleResponse({ kind: 'alert' }),
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_strategy: 'no_breach',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+          },
+        }),
         alertEventsBatch: [createAlertEvent()],
       });
 

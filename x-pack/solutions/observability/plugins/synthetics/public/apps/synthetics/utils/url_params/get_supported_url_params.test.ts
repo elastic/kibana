@@ -75,6 +75,7 @@ describe('getSupportedUrlParams', () => {
       packagePolicyId: undefined,
       projects: [],
       remoteName: undefined,
+      remoteNames: [],
       schedules: [],
       spaceId: undefined,
       statusCodes: [],

@@ -13,15 +13,18 @@ import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { QueryClient } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { WorkflowsContextProvider } from '../../common/context';
 import { createMockStore } from '../../entities/workflows/store/__mocks__/store.mock';
 import { createStartServicesMock, type StartServicesMock } from '../../mocks';
+import { createTestQueryClient } from '../test_utils';
 
 interface TestProviderProps {
   store?: ReturnType<typeof createMockStore>;
   queryClient?: QueryClient;
   services?: StartServicesMock;
+  initialEntries?: React.ComponentProps<typeof MemoryRouter>['initialEntries'];
 }
 
 export const TestProvider: React.FC<PropsWithChildren<TestProviderProps>> = ({
@@ -29,16 +32,17 @@ export const TestProvider: React.FC<PropsWithChildren<TestProviderProps>> = ({
   store,
   queryClient,
   services,
+  initialEntries,
 }) => {
   const testStore = store ?? createMockStore();
-  const testQueryClient = queryClient ?? new QueryClient();
+  const testQueryClient = queryClient ?? createTestQueryClient();
   const mockServices = services ?? createStartServicesMock();
   return (
     <EuiProvider colorMode="light">
       <KibanaContextProvider services={mockServices}>
         <QueryClientProvider client={testQueryClient}>
           <WorkflowsContextProvider>
-            <MemoryRouter>
+            <MemoryRouter initialEntries={initialEntries}>
               <I18nProviderMock>
                 <Provider store={testStore}>{children}</Provider>
               </I18nProviderMock>
