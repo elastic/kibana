@@ -635,14 +635,11 @@ describe('metric visualization', () => {
     });
 
     it('keeps legacy persisted metrics on small spacing when building an expression', () => {
-      const initializedState = visualization.initialize(
-        () => fullState.layerId,
-        {
-          ...getLegacyStateWithoutSpacing(),
-          breakdownByAccessor: undefined,
-          collapseFn: undefined,
-        }
-      );
+      const initializedState = visualization.initialize(() => fullState.layerId, {
+        ...getLegacyStateWithoutSpacing(),
+        breakdownByAccessor: undefined,
+        collapseFn: undefined,
+      });
 
       const expression = visualization.toExpression(
         initializedState,

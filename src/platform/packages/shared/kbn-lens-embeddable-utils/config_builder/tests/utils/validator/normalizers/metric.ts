@@ -18,6 +18,7 @@ import {
   DEFAULT_PRIMARY_LABELS_ALIGNMENT,
   DEFAULT_PRIMARY_POSITION,
   DEFAULT_PRIMARY_VALUE_ALIGNMENT,
+  DEFAULT_SPACING,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
 } from '../../../../transforms/charts/metric/defaults';
@@ -145,6 +146,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
 
     // Absent sizing round-trips through the API as `auto`, which maps back to `valueFontMode: 'default'`.
     viz.valueFontMode = viz.valueFontMode ?? 'default';
+    viz.spacing = viz.spacing ?? DEFAULT_SPACING;
 
     if (viz.breakdownByAccessor && viz.maxCols == null) {
       viz.maxCols = LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS;
