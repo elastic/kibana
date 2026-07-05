@@ -93,12 +93,17 @@ export async function setupDependencies(
   });
 
   // Compiling the definition into its execution graph can throw a GraphBuildError
-  // for a structurally-unsupported workflow (e.g. nested flow-control inside a
-  // parallel branch). This is a permanent author error, not a transient fault, so
-  // mark the execution FAILED with the actionable message and rethrow a typed,
-  // non-retryable error — otherwise the raw throw escapes the task runner and the
-  // run is force-recovered into an opaque "Execution abandoned" TaskRecoveryError
-  // with no failure reason and no step records.
+  // for a structurally-unsupported workflow (currently only the parallel-branch
+  // constraints: nested flow-control / unsupported step types inside a branch
+  // body). This same rule is validated in the editor (see the client-side
+  // `validateGraphBuild`, which squiggles the offending step), so authored-in-UI
+  // workflows are rejected before they ever run. This block is the defense-in-depth
+  // runtime net for the paths that bypass the editor — API/programmatic creation,
+  // imports, or workflows authored before the constraint existed. It is a permanent
+  // author error, not a transient fault, so we mark the execution FAILED with the
+  // actionable message and rethrow a typed, non-retryable error — otherwise the raw
+  // throw escapes the task runner and the run is force-recovered into an opaque
+  // "Execution abandoned" TaskRecoveryError with no failure reason and no step records.
   let workflowExecutionGraph: WorkflowGraph;
   try {
     workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(

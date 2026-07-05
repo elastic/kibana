@@ -26,7 +26,6 @@ import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
-import { extractParallelStepTelemetry } from '../lib/telemetry/utils/extract_parallel_step_telemetry';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
@@ -595,12 +594,5 @@ export class WorkflowExecutionRuntimeManager {
       finalStatus,
       outputSizeStats,
     });
-
-    for (const parallelTelemetry of extractParallelStepTelemetry(
-      finalWorkflowExecution,
-      stepExecutions
-    )) {
-      this.telemetryClient.reportParallelStepExecuted(parallelTelemetry);
-    }
   }
 }

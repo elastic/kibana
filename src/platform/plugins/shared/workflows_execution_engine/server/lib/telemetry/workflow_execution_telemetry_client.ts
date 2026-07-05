@@ -27,7 +27,6 @@ import {
   type EventDrivenExecutionSuppressedParams,
   type OutputSizeStats,
   type OutputSizeTelemetryFields,
-  type ParallelStepExecutedParams,
   type TriggerEventDispatchedParams,
   type WorkflowExecutionCancelledParams,
   type WorkflowExecutionCompletedParams,
@@ -452,26 +451,5 @@ export class WorkflowExecutionTelemetryClient {
     };
 
     this.reportEvent(WorkflowExecutionTelemetryEventTypes.TriggerEventDispatched, eventData);
-  }
-
-  /**
-   * Reports when a parallel (dynamic fan-out) step reaches a terminal state.
-   * Emitted once per parallel step execution to track adoption, fan-out shape,
-   * concurrency choices, mode split, and the rate of non-successful branches.
-   */
-  reportParallelStepExecuted(
-    params: Omit<ParallelStepExecutedParams, 'eventName' | 'rejectionRate'>
-  ): void {
-    const { total, succeeded } = params;
-    const rejectionRate = total > 0 ? (total - succeeded) / total : 0;
-
-    const eventData: ParallelStepExecutedParams = {
-      eventName:
-        workflowExecutionEventNames[WorkflowExecutionTelemetryEventTypes.ParallelStepExecuted],
-      ...params,
-      rejectionRate,
-    };
-
-    this.reportEvent(WorkflowExecutionTelemetryEventTypes.ParallelStepExecuted, eventData);
   }
 }

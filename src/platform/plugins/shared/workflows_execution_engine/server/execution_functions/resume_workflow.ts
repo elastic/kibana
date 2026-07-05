@@ -57,6 +57,9 @@ export async function resumeWorkflow({
       workflowsExecutionEngine
     );
   } catch (error) {
+    // The graph could not be built — a permanent author error (the parallel
+    // branch-body constraints, normally caught in the editor by validateGraphBuild
+    // but reachable here for API/imported/legacy workflows that bypass the UI).
     // setupDependencies has already persisted the execution as FAILED with the
     // graph-build reason; return cleanly so the resume task does not surface an
     // opaque TaskRecoveryError.
