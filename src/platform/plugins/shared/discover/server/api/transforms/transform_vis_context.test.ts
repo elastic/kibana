@@ -8,6 +8,7 @@
  */
 
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import type { DiscoverSessionApiTab } from '../schema';
 import { transformVisContextIn, transformVisContextOut } from './transform_vis_context';
 
 describe('vis context transforms', () => {
@@ -37,6 +38,33 @@ describe('vis context transforms', () => {
     it('returns undefined for cleared stored vis context', () => {
       expect(transformVisContextOut({})).toBeUndefined();
       expect(transformVisContextOut(undefined)).toBeUndefined();
+    });
+  });
+
+  describe('round-trip', () => {
+    const requestData = {
+      dataViewId: 'logs-dv',
+      timeField: '@timestamp',
+      timeInterval: 'auto',
+      breakdownField: 'host.name',
+    };
+    const apiVisContext: NonNullable<DiscoverSessionApiTab['vis_context']> = {
+      suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL,
+      attributes: {
+        visualizationType: 'lnsXY',
+        state: { foo: 'bar' },
+      },
+    };
+
+    it('round-trips API vis_context when requestData is supplied on transform in', () => {
+      const stored = transformVisContextIn(apiVisContext, requestData);
+
+      expect(transformVisContextOut(stored)).toEqual(apiVisContext);
+      expect(stored).toEqual({
+        suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
+        requestData,
+        attributes: apiVisContext.attributes,
+      });
     });
   });
 

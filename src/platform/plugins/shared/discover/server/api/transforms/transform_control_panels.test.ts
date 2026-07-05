@@ -8,6 +8,7 @@
  */
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { DiscoverSessionControlPanels } from '../schema';
 import { transformControlPanelsIn, transformControlPanelsOut } from './transform_control_panels';
 
 describe('control panel transforms', () => {
@@ -99,6 +100,118 @@ describe('control panel transforms', () => {
           })
         )
       ).toThrow('controlGroupJson must be a JSON object');
+    });
+
+    it('converts legacy camelCase config keys to snake_case', () => {
+      const result = transformControlPanelsOut(
+        JSON.stringify({
+          'control-1': {
+            order: 0,
+            type: 'esqlControl',
+            width: 'medium',
+            grow: true,
+            controlType: 'STATIC_VALUES',
+            variableName: 'foo',
+            variableType: 'values',
+            availableOptions: ['x', 'y'],
+            selectedOptions: ['x'],
+            singleSelect: true,
+          },
+        })
+      );
+
+      expect(result).toEqual([
+        {
+          id: 'control-1',
+          type: ESQL_CONTROL,
+          width: 'medium',
+          grow: true,
+          config: {
+            control_type: 'STATIC_VALUES',
+            variable_name: 'foo',
+            variable_type: 'values',
+            available_options: ['x', 'y'],
+            selected_options: ['x'],
+            single_select: true,
+          },
+        },
+      ]);
+    });
+
+    it('returns undefined for empty controlGroupJson object', () => {
+      expect(transformControlPanelsOut('{}')).toBeUndefined();
+    });
+  });
+
+  describe('round-trip', () => {
+    const controlPanels: DiscoverSessionControlPanels = [
+      {
+        id: 'control-1',
+        type: ESQL_CONTROL,
+        width: 'medium',
+        grow: true,
+        config: {
+          control_type: 'STATIC_VALUES',
+          variable_name: 'foo',
+          variable_type: 'values',
+          available_options: ['x', 'y'],
+          selected_options: ['x'],
+          single_select: true,
+        },
+      },
+      {
+        id: 'control-2',
+        type: ESQL_CONTROL,
+        width: 'small',
+        grow: false,
+        config: {
+          control_type: 'STATIC_VALUES',
+          variable_name: 'bar',
+          variable_type: 'values',
+          available_options: ['a', 'b'],
+          selected_options: ['b'],
+          single_select: true,
+        },
+      },
+    ];
+
+    it('round-trips API control_panels through stored controlGroupJson', () => {
+      const stored = transformControlPanelsIn(controlPanels);
+      expect(transformControlPanelsOut(stored)).toEqual(controlPanels);
+    });
+
+    it('round-trips legacy stored controlGroupJson through API control_panels', () => {
+      const legacyStored = JSON.stringify({
+        b: {
+          order: 1,
+          type: 'esqlControl',
+          width: 'small',
+          grow: false,
+          control_type: 'STATIC_VALUES',
+          variable_name: 'bar',
+          variable_type: 'values',
+          available_options: ['a', 'b'],
+          selected_options: ['b'],
+          single_select: true,
+        },
+        a: {
+          order: 0,
+          type: ESQL_CONTROL,
+          width: 'medium',
+          grow: true,
+          control_type: 'STATIC_VALUES',
+          variable_name: 'foo',
+          variable_type: 'values',
+          available_options: ['x', 'y'],
+          selected_options: ['x'],
+          single_select: true,
+        },
+      });
+
+      const apiPanels = transformControlPanelsOut(legacyStored);
+      const storedAgain = transformControlPanelsIn(apiPanels);
+
+      expect(transformControlPanelsOut(storedAgain)).toEqual(apiPanels);
     });
   });
 

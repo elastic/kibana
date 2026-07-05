@@ -9,6 +9,7 @@
 
 import { isObject } from 'lodash';
 import { transformType } from '@kbn/embeddable-plugin/server';
+import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import type { DiscoverSessionControlPanels } from '../schema';
 import { discoverSessionControlPanelsSchema } from '../schema';
 
@@ -30,17 +31,24 @@ export const transformControlPanelsOut = (
     throw new Error('controlGroupJson must be a JSON object');
   }
 
+  if (Object.values(parsed).some((panel) => typeof panel.type !== 'string')) {
+    throw new Error('controlGroupJson panels must have a type');
+  }
+
   const panels = Object.entries(parsed)
-    .filter(([, panel]) => typeof panel.type === 'string')
     .sort(([, panelA], [, panelB]) => (panelA.order ?? 0) - (panelB.order ?? 0))
     .map(([id, panel]) => {
       const { order, width, grow, type, ...config } = panel;
+      // Legacy control state was stored in camelCase; convert config keys to snake_case.
+      // `convertCamelCasedKeysToSnakeCase` is idempotent, so it is safe to run on non-legacy config too.
+      const snakeCasedConfig = convertCamelCasedKeysToSnakeCase(config);
+
       return {
         id,
         type: transformType(type),
         ...(width !== undefined && { width }),
         ...(grow !== undefined && { grow }),
-        config,
+        config: snakeCasedConfig,
       };
     });
 

@@ -105,54 +105,155 @@ describe('discover session API transforms', () => {
       const transformed = transformDiscoverSessionOut(discoverSessionAttributes);
       expect(transformed).toEqual(discoverSessionApiData);
     });
+
+    it('converts legacy flat tab sort to API sort objects', () => {
+      const attributes = {
+        ...discoverSessionAttributes,
+        tabs: discoverSessionAttributes.tabs.map((tab, index) =>
+          index === 0
+            ? {
+                ...tab,
+                attributes: {
+                  ...tab.attributes,
+                  sort: ['@timestamp', 'desc'],
+                },
+              }
+            : tab
+        ),
+      };
+
+      const transformed = transformDiscoverSessionOut(attributes);
+      expect(transformed.tabs[0].sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
+    });
   });
 
   describe('transform in', () => {
     it('normalizes fixture API data back to stored attributes', () => {
       const { attributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
 
-      expect(attributes.tabs[0].attributes.controlGroupJson).toBeUndefined();
-      expect(attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON).toBe(
-        '{"query":{"query":"","language":"kuery"},"filter":[],"index":{"title":"logs*,-logstash*,filebeat-*","timeFieldName":"@timestamp"}}'
-      );
-      expect(attributes.tabs[1].attributes.usesAdHocDataView).toBe(false);
-      expect(attributes.tabs[1].attributes.viewMode).toBeUndefined();
-      expect(attributes.tabs[1].attributes.controlGroupJson).toBe(
-        JSON.stringify({
-          'e2be5bb5-87d2-4226-8950-2614f0522209': {
-            order: 0,
-            type: ESQL_CONTROL,
-            width: 'medium',
-            grow: false,
-            selected_options: ['event.dataset'],
-            variable_name: 'field_name',
-            single_select: true,
-            variable_type: 'fields',
-            control_type: 'STATIC_VALUES',
-            available_options: ['event.dataset', 'event.module', 'event.type'],
-            title: 'field_name',
+      expect(attributes).toEqual({
+        title: discoverSessionApiData.title,
+        description: discoverSessionApiData.description,
+        tabs: [
+          {
+            id: discoverSessionApiData.tabs[0].id,
+            label: discoverSessionApiData.tabs[0].label,
+            attributes: {
+              sort: [
+                ['transaction.id', 'asc'],
+                ['@timestamp', 'desc'],
+              ],
+              columns: ['message', 'transaction.id'],
+              grid: {
+                columns: {
+                  message: {
+                    width: 418,
+                  },
+                },
+              },
+              hideChart: false,
+              hideTable: false,
+              isTextBasedQuery: false,
+              usesAdHocDataView: true,
+              kibanaSavedObjectMeta: {
+                searchSourceJSON:
+                  '{"query":{"query":"","language":"kuery"},"filter":[],"index":{"title":"logs*,-logstash*,filebeat-*","timeFieldName":"@timestamp"}}',
+              },
+              viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+              hideAggregatedPreview: false,
+              rowHeight: 1,
+              headerRowHeight: 1,
+              timeRestore: true,
+              timeRange: {
+                from: 'now/d',
+                to: 'now/d',
+              },
+              refreshInterval: {
+                value: 60000,
+                pause: true,
+              },
+              rowsPerPage: 25,
+              sampleSize: 100,
+              breakdownField: 'transaction.id',
+              chartInterval: 'h',
+              density: 'compact',
+              controlGroupJson: undefined,
+              visContext: undefined,
+            },
           },
-          'c8106b8e-e13a-4dc4-9fc6-1a8c48e70464': {
-            order: 1,
-            type: ESQL_CONTROL,
-            width: 'medium',
-            grow: false,
-            selected_options: ['kibana.log'],
-            variable_name: 'field_value',
-            single_select: true,
-            variable_type: 'values',
-            control_type: 'VALUES_FROM_QUERY',
-            esql_query:
-              'FROM logs*,-logstash*,filebeat-* | WHERE @timestamp <= ?_tend and @timestamp > ?_tstart | STATS BY ??field_name',
-            title: 'field_value',
+          {
+            id: discoverSessionApiData.tabs[1].id,
+            label: discoverSessionApiData.tabs[1].label,
+            attributes: {
+              sort: [['transaction.id', 'asc']],
+              columns: [],
+              grid: {},
+              hideChart: false,
+              hideTable: false,
+              isTextBasedQuery: true,
+              usesAdHocDataView: false,
+              kibanaSavedObjectMeta: {
+                searchSourceJSON:
+                  '{"query":{"esql":"FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value"}}',
+              },
+              hideAggregatedPreview: false,
+              rowHeight: 1,
+              headerRowHeight: 1,
+              timeRestore: true,
+              timeRange: {
+                from: 'now/d',
+                to: 'now/d',
+              },
+              refreshInterval: {
+                value: 60000,
+                pause: false,
+              },
+              rowsPerPage: 25,
+              sampleSize: 100,
+              breakdownField: 'transaction.id',
+              chartInterval: 'h',
+              density: 'compact',
+              visContext: {
+                suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
+                requestData: {
+                  breakdownField: 'transaction.id',
+                  timeInterval: 'h',
+                },
+                attributes: (discoverSessionApiData.tabs[1] as DiscoverSessionApiData['tabs'][1])
+                  .vis_context!.attributes,
+              },
+              controlGroupJson: JSON.stringify({
+                'e2be5bb5-87d2-4226-8950-2614f0522209': {
+                  order: 0,
+                  type: ESQL_CONTROL,
+                  width: 'medium',
+                  grow: false,
+                  selected_options: ['event.dataset'],
+                  variable_name: 'field_name',
+                  single_select: true,
+                  variable_type: 'fields',
+                  control_type: 'STATIC_VALUES',
+                  available_options: ['event.dataset', 'event.module', 'event.type'],
+                  title: 'field_name',
+                },
+                'c8106b8e-e13a-4dc4-9fc6-1a8c48e70464': {
+                  order: 1,
+                  type: ESQL_CONTROL,
+                  width: 'medium',
+                  grow: false,
+                  selected_options: ['kibana.log'],
+                  variable_name: 'field_value',
+                  single_select: true,
+                  variable_type: 'values',
+                  control_type: 'VALUES_FROM_QUERY',
+                  esql_query:
+                    'FROM logs*,-logstash*,filebeat-* | WHERE @timestamp <= ?_tend and @timestamp > ?_tstart | STATS BY ??field_name',
+                  title: 'field_value',
+                },
+              }),
+            },
           },
-        })
-      );
-      expect(attributes.tabs[1].attributes.visContext).toMatchObject({
-        requestData: {
-          breakdownField: 'transaction.id',
-          timeInterval: 'h',
-        },
+        ],
       });
       expect(references).toEqual([]);
     });
@@ -177,6 +278,36 @@ describe('discover session API transforms', () => {
         type: 'index-pattern',
         id: 'logs-data-view',
       });
+    });
+  });
+
+  describe('round-trip', () => {
+    it('round-trips fixture API data through persistence', () => {
+      const { attributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
+      const roundTripped = transformDiscoverSessionOut(attributes, references);
+
+      expect(roundTripped).toEqual(discoverSessionApiData);
+    });
+
+    it('round-trips fixture saved object attributes through API', () => {
+      const apiDataFromStored = transformDiscoverSessionOut(discoverSessionAttributes);
+      const { attributes, references } = transformDiscoverSessionIn(apiDataFromStored);
+      const roundTripped = transformDiscoverSessionOut(attributes, references);
+
+      expect(apiDataFromStored).toEqual(discoverSessionApiData);
+      expect(roundTripped).toEqual(discoverSessionApiData);
+      expect(references).toEqual([]);
+    });
+
+    it('round-trips fixture saved object attributes preserving API-representable persistence values', () => {
+      const reverted = transformDiscoverSessionIn(
+        transformDiscoverSessionOut(discoverSessionAttributes)
+      ).attributes;
+      const expected = transformDiscoverSessionIn(discoverSessionApiData).attributes;
+
+      expect(reverted).toEqual(expected);
+      expect(reverted.tabs[0].attributes.controlGroupJson).toBeUndefined();
+      expect(reverted.tabs[1].attributes.usesAdHocDataView).toBe(false);
     });
   });
 
