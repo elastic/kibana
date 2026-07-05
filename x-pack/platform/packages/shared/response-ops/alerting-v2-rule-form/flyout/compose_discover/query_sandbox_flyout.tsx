@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/code-editor';
 import type { RuleQuery } from '../../form/types';
-import { getBreachQuery } from '../../form/utils/query_helpers';
+import { getBreachQuery, getRecoverQuery } from '../../form/utils/query_helpers';
 import type { QueryTab } from './types';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
@@ -78,6 +78,11 @@ export interface QuerySandboxFlyoutProps {
    * Callers are responsible for content and styling (e.g. wrapping in `<EuiText>`).
    */
   helpText?: React.ReactNode;
+  /**
+   * Optional actions rendered right-aligned in the ES|QL query header row — passed through
+   * to `QuerySandbox`. Use for header-level controls such as Split / Merge buttons.
+   */
+  headerActions?: React.ReactNode;
   title?: string;
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
@@ -100,6 +105,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   onApply,
   onClose,
   helpText,
+  headerActions,
   onAlertEditorMount,
   onRecoveryEditorMount,
   title = i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.defaultTitle', {
@@ -147,7 +153,19 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     [query, queryFields, onQueryChange]
   );
 
-  const activeQuery = query.format === 'composed' ? getBreachQuery(query) : query.breach.query;
+  // Run whichever pipeline the active tab represents. Unified mode (no tabs)
+  // has no per-tab concept — always run the full breach query.
+  const activeQuery = (() => {
+    if (!tabs?.length) return getBreachQuery(query);
+    switch (activeTab) {
+      case 'base':
+        return queryFields.base;
+      case 'recovery':
+        return getRecoverQuery(query);
+      default:
+        return getBreachQuery(query);
+    }
+  })();
 
   /*
    * Unified composed mode: the editor holds the whole pipeline, so write it to
@@ -216,6 +234,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           onDateRangeChange={onDateRangeChange}
           autoRun
           helpText={helpText}
+          headerActions={headerActions}
           tabProps={tabProps}
         />
       </EuiFlyoutBody>

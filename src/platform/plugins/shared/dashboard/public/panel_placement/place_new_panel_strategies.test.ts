@@ -239,6 +239,37 @@ describe('new panel placement strategies', () => {
       expect(newLayout.panels).toEqual(expectedPanels);
     });
 
+    it('preserves section panels when placing a top-level panel on a section-only dashboard', () => {
+      // Dashboard where every existing panel lives inside a section (no top-level panels).
+      const currentLayout: DashboardLayout = {
+        panels: {
+          '1': {
+            grid: { x: 0, y: 0, w: 6, h: 6, sectionId: 'section1' },
+            type: 'testPanelType',
+          },
+        },
+        sections: {
+          section1: { grid: { y: 0 }, title: 'Section One', collapsed: false },
+        },
+        pinnedPanels: {},
+      };
+
+      const newLayout = runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
+        currentLayout,
+        // Incoming embeddables are placed at the top level (no sectionId).
+        newPanel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
+      });
+
+      expect(newLayout.panels).toEqual({
+        '1': {
+          grid: { x: 0, y: 0, w: 6, h: 6, sectionId: 'section1' },
+          type: 'testPanelType',
+        },
+        newPanel: { type: 'panelType', grid: { x: 0, y: 0, w: 6, h: 6 } },
+      });
+      expect(newLayout.sections).toEqual(currentLayout.sections);
+    });
+
     it('place panel beside another panel', () => {
       const panels: DashboardLayout['panels'] = {
         ...getMockLayout().panels,

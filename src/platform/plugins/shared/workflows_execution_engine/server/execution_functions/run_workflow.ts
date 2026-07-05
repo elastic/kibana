@@ -17,6 +17,7 @@ import {
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
 import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
+import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
@@ -26,6 +27,11 @@ import type {
 } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
+
+export interface RunWorkflowResult {
+  /** Dormant queued `workflow:run` tasks must be deleted by Task Manager after handling. */
+  shouldDeleteTask?: boolean;
+}
 
 export async function runWorkflow({
   workflowRunId,
@@ -49,7 +55,7 @@ export async function runWorkflow({
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
-}): Promise<void> {
+}): Promise<RunWorkflowResult | void> {
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
   let setupResult: Awaited<ReturnType<typeof setupDependencies>>;
@@ -99,6 +105,27 @@ export async function runWorkflow({
       void meteringService.reportWorkflowExecution(execution, dependencies.cloudSetup);
     }
     return;
+  }
+
+  const handledQueuedRun = await handleQueuedWorkflowRunAtTaskStart({
+    execution,
+    workflowRunId,
+    workflowExecutionRepository,
+    logger,
+  });
+  if (handledQueuedRun) {
+    await handlePostExecutionLoop({
+      workflowRunId,
+      spaceId,
+      logger,
+      fakeRequest,
+      workflowExecutionRepository,
+      internalResumeWorkflowExecution,
+      workflowTaskManager,
+      meteringService,
+      cloudSetup: dependencies.cloudSetup,
+    });
+    return { shouldDeleteTask: true };
   }
 
   const triggeredBy = execution.triggeredBy;
