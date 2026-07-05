@@ -86,7 +86,10 @@ describe('EnterParallelNodeImpl', () => {
       },
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
-    logger = { logDebug: jest.fn() } as unknown as jest.Mocked<IWorkflowEventLogger>;
+    logger = {
+      logDebug: jest.fn(),
+      logError: jest.fn(),
+    } as unknown as jest.Mocked<IWorkflowEventLogger>;
 
     // Each branch run returns a runtime whose stepExecution status reflects the
     // configured outcome for that branch index.
@@ -96,6 +99,7 @@ describe('EnterParallelNodeImpl', () => {
         const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
         const index = Number(scopeId ?? 0);
         return {
+          abortController: new AbortController(),
           contextManager: { ensureContextReady: jest.fn() },
           get stepExecution() {
             return { status: branchOutcome(index), state: {} };
@@ -637,12 +641,57 @@ describe('EnterParallelNodeImpl', () => {
       expect(stepRuntime.enterWaitUntil).toHaveBeenCalled();
 
       // Simulate the timeout zone aborting the step from the outside.
-      impl.onCancel();
+      await impl.onCancel();
 
       // Every started branch's step record is transitioned to TIMED_OUT, so none
       // leaks in WAITING, and the persisted state reflects the terminal branches.
       expect(timeoutStepCalls.filter((fn) => fn.mock.calls.length > 0).length).toBe(2);
       expect(persistedState?.branches.every((b) => b.status === 'timed_out')).toBe(true);
+    });
+
+    it('invokes each parked branch node onCancel() during a timeout-zone abort', async () => {
+      // Regression: a branch body may hold an external resource (e.g. a
+      // `workflow.execute` whose onCancel cancels the child workflow). Marking the
+      // branch step record TIMED_OUT is not enough — the node's onCancel() must
+      // fire or the child keeps running orphaned.
+      node = makeNode({ foreach: JSON.stringify(['a', 'b']) });
+
+      factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+        const lastFrame = stackFrames[stackFrames.length - 1];
+        const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
+        const index = Number(scopeId ?? 0);
+        return {
+          abortController: new AbortController(),
+          contextManager: { ensureContextReady: jest.fn() },
+          get stepExecution() {
+            return { status: ExecutionStatus.WAITING, state: {} };
+          },
+          getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          timeoutStep: jest.fn(),
+        } as unknown as StepExecutionRuntime;
+      }) as unknown as typeof factory.createStepExecutionRuntime;
+
+      // Cancellable branch node (like workflow.execute): expose an onCancel spy.
+      const onCancel = jest.fn();
+      nodesFactory.create = jest.fn(
+        () =>
+          ({
+            run: jest.fn(() => ExecutionStatus.WAITING),
+            onCancel,
+          } as unknown as NodeImplementation)
+      ) as unknown as typeof nodesFactory.create;
+
+      const impl = build();
+
+      // Both branches park in WAITING.
+      await impl.run();
+
+      // The timeout zone aborts the step from the outside.
+      await impl.onCancel();
+
+      // Each started branch's node onCancel() fires so its external resource
+      // (e.g. child workflow) is torn down rather than left running.
+      expect(onCancel).toHaveBeenCalledTimes(2);
     });
   });
 

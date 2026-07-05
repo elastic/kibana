@@ -29,6 +29,7 @@ import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_man
 import { WorkflowScopeStack } from '../../workflow_context_manager/workflow_scope_stack';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { CancellableNode, NodeImplementation } from '../node_implementation';
+import { isCancellableNode } from '../node_implementation';
 import type { NodesFactory } from '../nodes_factory';
 
 // Re-tick the parallel node when branches still have work to do but nothing is
@@ -95,17 +96,20 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
    * cleanup, branches parked in a durable wait/poll would leak their step records
    * in WAITING forever even though the parallel step is failed.
    *
-   * Here we transition every still-running branch's step record to TIMED_OUT so
-   * no per-branch record leaks. The parallel step record itself is failed by the
-   * surrounding error handling (the timeout zone's TimeoutError). Idempotent:
-   * branches already terminal are skipped, and `timeoutStep` upserts by id.
+   * Here we transition every still-running branch's step record to TIMED_OUT and
+   * invoke each branch node's own `onCancel()` (e.g. `workflow.execute` cancelling
+   * its child workflow) so neither the per-branch record nor an external resource
+   * leaks. The parallel step record itself is failed by the surrounding error
+   * handling (the timeout zone's TimeoutError). Idempotent: branches already
+   * terminal are skipped, `timeoutStep` upserts by id, and `onCancel` hooks are
+   * required to be idempotent.
    */
-  public onCancel(): void {
+  public async onCancel(): Promise<void> {
     const state = this.stepExecutionRuntime.getCurrentStepState() as ParallelStepState | undefined;
     if (!state) {
       return;
     }
-    this.timeOutNonTerminalBranches(state, Date.now());
+    await this.timeOutNonTerminalBranches(state, Date.now());
     this.stepExecutionRuntime.setCurrentStepState(state);
   }
 
@@ -201,7 +205,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     // so the step terminates immediately with a clear reason.
     const overallTimeoutMs = this.resolveTimeoutMs(this.node.configuration.timeout);
     if (overallTimeoutMs !== undefined && now - state.startedAt > overallTimeoutMs) {
-      this.timeOutNonTerminalBranches(state, now);
+      await this.timeOutNonTerminalBranches(state, now);
       this.stepExecutionRuntime.setCurrentStepState(state);
       this.workflowLogger.logDebug(
         `Parallel step "${this.node.stepId}" exceeded its overall timeout of ${this.node.configuration.timeout}.`,
@@ -524,9 +528,12 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     if (timedOut) {
       // The deadline aborted the branch's in-flight work mid-run, so the branch
       // node never wrote its own terminal status — its step execution would leak
-      // in RUNNING forever. Mark it TIMED_OUT here so the per-branch step record
+      // in RUNNING forever. Invoke the node's cancellation cleanup (e.g. a
+      // `workflow.execute` cancelling its child workflow so it doesn't keep
+      // running orphaned) then mark it TIMED_OUT so the per-branch step record
       // matches the aggregate `results[]`. This does not set the workflow error
       // (the parallel step owns timeout disposition); see `timeoutStep`.
+      await this.runBranchOnCancel(branchImpl);
       branchRuntime.timeoutStep(new Error(PARALLEL_BRANCH_TIMEOUT_MESSAGE));
       return 'timed_out';
     }
@@ -625,7 +632,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
    * WAITING/RUNNING when the step is torn down by an overall timeout (whether via
    * the in-`tick` overall-timeout sweep or an external cancel/timeout-zone abort).
    */
-  private timeOutNonTerminalBranches(state: ParallelStepState, now: number): void {
+  private async timeOutNonTerminalBranches(state: ParallelStepState, now: number): Promise<void> {
     const nonTerminal = state.branches.filter(
       (branch) => !TERMINAL_BRANCH_STATUSES.has(branch.status)
     );
@@ -633,12 +640,15 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       branch.status = 'timed_out';
       branch.timedOut = true;
       branch.finishedAt = now;
-      // Only branches that actually started have a step-execution record to
-      // transition; not-yet-started (queued) branches have none.
-      if (branch.started) {
-        this.markBranchNodeTimedOut(branch);
-      }
     }
+    // Only branches that actually started have a step-execution record to
+    // transition (and a node to cancel); not-yet-started (queued) branches have
+    // none. Run cleanup concurrently — each branch cancels an independent node.
+    await Promise.all(
+      nonTerminal
+        .filter((branch) => branch.started)
+        .map((branch) => this.markBranchNodeTimedOut(branch))
+    );
   }
 
   /**
@@ -648,9 +658,13 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
    * timeout path. Recreates the branch runtime for its current node and records
    * the timeout without touching the workflow-level error.
    */
-  private markBranchNodeTimedOut(branch: ParallelBranchState): void {
+  private async markBranchNodeTimedOut(branch: ParallelBranchState): Promise<void> {
     const nodeId = branch.currentNodeId ?? this.getBranchStartNodeId(branch.index);
-    this.markBranchNodeTimedOutAt(branch.index, this.buildBranchStackFrames(branch.index), nodeId);
+    await this.markBranchNodeTimedOutAt(
+      branch.index,
+      this.buildBranchStackFrames(branch.index),
+      nodeId
+    );
   }
 
   /**
@@ -659,17 +673,59 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
    * deterministic step-execution id as the parked record (rather than recomputing
    * frames from the current scope, which can drift). Does not touch the
    * workflow-level error; the parallel step owns timeout disposition.
+   *
+   * Before recording the timeout, fire the branch node's abort signal and invoke
+   * its `onCancel()` cleanup hook (if it is a cancellable node). A branch body may
+   * hold external resources — most importantly a `workflow.execute` step whose
+   * `onCancel()` cancels the child workflow — and marking the step record TIMED_OUT
+   * alone would leave that child running orphaned in the background.
    */
-  private markBranchNodeTimedOutAt(
+  private async markBranchNodeTimedOutAt(
     index: number,
     branchStackFrames: StackFrame[],
     nodeId: string
-  ): void {
+  ): Promise<void> {
     const branchRuntime = this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
       nodeId,
       stackFrames: branchStackFrames,
     });
+    await this.cancelBranchNode(branchRuntime);
     branchRuntime.timeoutStep(new Error(PARALLEL_BRANCH_TIMEOUT_MESSAGE));
+  }
+
+  /**
+   * Fires the branch runtime's abort signal and invokes the branch node
+   * implementation's `onCancel()` cleanup hook when it is a cancellable node
+   * (e.g. `workflow.execute`, which cancels its child workflow). Mirrors the
+   * teardown `run_node` performs for a normally-cancelled step. Errors are logged
+   * and swallowed so teardown of sibling branches / the parallel step continues;
+   * `onCancel` implementations are required to be idempotent.
+   */
+  private async cancelBranchNode(branchRuntime: StepExecutionRuntime): Promise<void> {
+    branchRuntime.abortController.abort();
+    const branchImpl = this.nodesFactory.create(branchRuntime);
+    await this.runBranchOnCancel(branchImpl);
+  }
+
+  /**
+   * Invokes a branch node implementation's `onCancel()` cleanup hook when it is a
+   * cancellable node (e.g. `workflow.execute`, which cancels its child workflow).
+   * Mirrors the teardown `run_node` performs for a normally-cancelled step. Errors
+   * are logged and swallowed so teardown of sibling branches / the parallel step
+   * continues; `onCancel` implementations are required to be idempotent.
+   */
+  private async runBranchOnCancel(branchImpl: NodeImplementation): Promise<void> {
+    if (!isCancellableNode(branchImpl)) {
+      return;
+    }
+    try {
+      await branchImpl.onCancel();
+    } catch (onCancelError) {
+      this.workflowLogger.logError(
+        `Parallel step "${this.node.stepId}": branch onCancel hook failed during timeout cleanup - continuing.`,
+        onCancelError instanceof Error ? onCancelError : new Error(String(onCancelError))
+      );
+    }
   }
 
   private buildBranchStackFrames(index: number): StackFrame[] {

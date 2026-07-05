@@ -121,10 +121,12 @@ const nestedStepHandlers: ReadonlyArray<NestedStepHandler> = [
       const groups: NestedStepGroup[] = [];
 
       if (isParallelStep(step)) {
-        // Dynamic fan-out exposes a single shared body (`steps`); static branches
-        // expose one body per named branch (`branches[].steps`). Collect whichever
-        // mode this parallel step uses.
-        if (Array.isArray(step.steps)) {
+        // Dynamic fan-out exposes a single shared body (`steps` paired with
+        // `foreach`); static branches expose one body per named branch
+        // (`branches[].steps`). Collect whichever mode this parallel step uses.
+        // Gate the dynamic body on `foreach` so a stray top-level `steps` on a
+        // static step (schema-invalid, but be defensive) isn't double-collected.
+        if (step.foreach !== undefined && Array.isArray(step.steps)) {
           pushStepGroup(groups, '', step.steps);
         }
         if (Array.isArray(step.branches)) {
