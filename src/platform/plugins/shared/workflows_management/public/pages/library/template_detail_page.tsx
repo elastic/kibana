@@ -9,7 +9,7 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
@@ -43,7 +43,7 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
   const slug = match.params.slug;
   const { euiTheme } = useEuiTheme();
   const { application } = useKibana().services;
-  const setBreadcrumbs = useSetWorkflowsBreadcrumbs();
+  const setWorkflowsBreadcrumbs = useSetWorkflowsBreadcrumbs();
 
   const goToLibrary = useCallback(() => {
     application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsDeepLinks.library });
@@ -63,17 +63,18 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
     [application, goToLibrary]
   );
 
-  // Set the "Library" crumb up front; append the template name once it loads.
-  useEffect(() => {
-    setBreadcrumbs([libraryBreadcrumb]);
-  }, [setBreadcrumbs, libraryBreadcrumb]);
-
-  const handleLoaded = useCallback(
+  const [breadcrumbs, setBreadcrumbs] = useState<ChromeBreadcrumb[]>(() => [libraryBreadcrumb]);
+  const handleTemplateLoaded = useCallback(
     (template: TemplateBody) => {
       setBreadcrumbs([libraryBreadcrumb, { text: template.metadata.name }]);
     },
     [setBreadcrumbs, libraryBreadcrumb]
   );
+
+  // Set the workflows breadcrumbs on every change
+  useEffect(() => {
+    setWorkflowsBreadcrumbs(breadcrumbs);
+  }, [setWorkflowsBreadcrumbs, breadcrumbs]);
 
   // The library is a tech preview gated behind a global uiSetting
   // This will be removed once the library is fully released
@@ -87,7 +88,8 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
       direction="column"
       gutterSize="none"
       alignItems="flexStart"
-      css={kbnFullBodyHeightCss()}
+      // Full-height pages (like the workflow editor) don't use EuiPageTemplate
+      css={[kbnFullBodyHeightCss(), css({ backgroundColor: euiTheme.colors.backgroundBasePlain })]}
       data-test-subj="workflowLibraryTemplateDetailPage"
     >
       <EuiFlexItem grow={false} css={css({ padding: `${euiTheme.size.l} ${euiTheme.size.l} 0` })}>
@@ -109,7 +111,7 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
           width: '100%',
         })}
       >
-        <TemplateDetail slug={slug} onLoaded={handleLoaded} />
+        <TemplateDetail slug={slug} onLoaded={handleTemplateLoaded} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
