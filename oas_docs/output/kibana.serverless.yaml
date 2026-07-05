@@ -88272,6 +88272,12 @@ components:
                     - center
                     - right
                   type: string
+        spacing:
+          description: Spacing preset for metric chart layout
+          enum:
+            - small
+            - large
+          type: string
       title: metricStyling
       type: object
     Kibana_HTTP_APIs_minMaxAvgMedianStdDevMetricOperation:
