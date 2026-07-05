@@ -21,8 +21,8 @@ jest.mock('../../hooks/use_kibana', () => ({
         capabilities: { searchInferenceEndpoints: { show: true, manage: true } },
       },
       uiSettings: {
-        get: jest.fn(
-          (key: string) => key === 'searchInferenceEndpoints:inferencePreferencesEnabled' && false
+        get: jest.fn((key: string, defaultValue?: unknown) =>
+          key === 'searchInferenceEndpoints:inferencePreferencesEnabled' ? false : defaultValue
         ),
       },
     },
@@ -155,9 +155,8 @@ describe('ElasticInferenceServiceModelsPage', () => {
             capabilities: { searchInferenceEndpoints: { show: true, manage: false } },
           },
           uiSettings: {
-            get: jest.fn(
-              (key: string) =>
-                key === 'searchInferenceEndpoints:inferencePreferencesEnabled' && false
+            get: jest.fn((key: string, defaultValue?: unknown) =>
+              key === 'searchInferenceEndpoints:inferencePreferencesEnabled' ? false : defaultValue
             ),
           },
         },

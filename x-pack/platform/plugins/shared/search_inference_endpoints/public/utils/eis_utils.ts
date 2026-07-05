@@ -11,7 +11,8 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { type EisInferenceEndpoint, EisModelStatus, type CspRegion } from '../../common/types';
+import type { EisInferenceEndpoint, CspRegion } from '../../common/types';
+import { EisModelStatus } from '../../common/types';
 import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
