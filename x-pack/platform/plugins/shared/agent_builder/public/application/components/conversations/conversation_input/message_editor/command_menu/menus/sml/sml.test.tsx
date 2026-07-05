@@ -146,10 +146,10 @@ describe('Sml', () => {
   });
 
   describe('select on space for "type/name" queries', () => {
-    it('selects the highlighted match on Space once a name follows the slash', () => {
+    it('selects the match on Space once the exact name is typed', () => {
       const ref = createRef<CommandMenuHandle>();
       const onSelect = jest.fn();
-      renderWithProvider(<Sml ref={ref} query="visualization/s" onSelect={onSelect} />);
+      renderWithProvider(<Sml ref={ref} query="visualization/Pacific Sales" onSelect={onSelect} />);
 
       expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(true);
 
@@ -163,6 +163,23 @@ describe('Sml', () => {
         label: 'visualization/Pacific Sales',
         metadata: {},
       });
+    });
+
+    it('does not claim Space for a partial name with no exact match yet, so it types through normally', () => {
+      // Otherwise every Space keystroke while still narrowing down a search
+      // (or after a typo that never resolves) would be silently swallowed
+      // instead of typed, joining the rest of the sentence into one word.
+      const ref = createRef<CommandMenuHandle>();
+      renderWithProvider(<Sml ref={ref} query="visualization/Pac" onSelect={jest.fn()} />);
+
+      expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
+    });
+
+    it('does not claim Space when there are no matches at all', () => {
+      const ref = createRef<CommandMenuHandle>();
+      renderWithProvider(<Sml ref={ref} query="visualization/nosuchthing" onSelect={jest.fn()} />);
+
+      expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
     });
 
     it('does not select on Space for a bare trailing slash with no name yet', () => {

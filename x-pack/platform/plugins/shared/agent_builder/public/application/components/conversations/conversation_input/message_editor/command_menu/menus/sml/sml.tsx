@@ -26,25 +26,31 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
     const { euiTheme } = useEuiTheme();
     const { results, isLoading } = useSmlAutocomplete(query, { constraints });
     const { type, title } = useMemo(() => getSmlMenuHighlightSearchStrings(query), [query]);
-    // A "type/name" query's name is a single token, so Space can safely commit it.
     const canSelectOnSpace = query.includes('/') && title.length > 0;
-    // Sort an exact name match to the front so it's the one Space (or Enter)
-    // commits, rather than whatever the API happened to rank first.
-    const orderedResults = useMemo(() => {
+    // Only commit on Space once there's a confirmed exact name match — not
+    // just "some results exist" or "more might arrive" — so Space is free to
+    // be typed normally the rest of the time instead of being swallowed.
+    const exactMatchIndex = useMemo(() => {
       if (!canSelectOnSpace) {
-        return results;
+        return -1;
       }
       const lowerName = title.toLowerCase();
-      const exactIndex = results.findIndex((item) => item.title.toLowerCase() === lowerName);
-      if (exactIndex <= 0) {
+      return results.findIndex((item) => item.title.toLowerCase() === lowerName);
+    }, [results, title, canSelectOnSpace]);
+    const spaceSelection = exactMatchIndex !== -1;
+
+    // Sort the exact match to the front so it's the one Space (or Enter)
+    // commits, rather than whatever the API happened to rank first.
+    const orderedResults = useMemo(() => {
+      if (exactMatchIndex <= 0) {
         return results;
       }
       return [
-        results[exactIndex],
-        ...results.slice(0, exactIndex),
-        ...results.slice(exactIndex + 1),
+        results[exactMatchIndex],
+        ...results.slice(0, exactMatchIndex),
+        ...results.slice(exactMatchIndex + 1),
       ];
-    }, [results, title, canSelectOnSpace]);
+    }, [results, exactMatchIndex]);
 
     const smlMenuLabelStyles = useMemo(
       () => ({
@@ -103,7 +109,7 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
         options={options}
         isLoading={isLoading}
         onSelect={handleSelect}
-        spaceSelection={canSelectOnSpace}
+        spaceSelection={spaceSelection}
         data-test-subj="smlMenu"
       />
     );

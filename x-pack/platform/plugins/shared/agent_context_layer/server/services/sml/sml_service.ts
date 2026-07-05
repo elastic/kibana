@@ -1133,7 +1133,7 @@ const SML_LABEL_FIELDS = [
   'discovery_labels.value',
   'discovery_labels.value._2gram',
   'discovery_labels.value._3gram',
-];
+] as const;
 
 const SML_LABEL_INNER_HITS = {
   _source: ['discovery_labels.value', 'discovery_labels.kind'],
@@ -1149,7 +1149,7 @@ const SML_LABEL_INNER_HITS = {
       'discovery_labels.value': {},
     },
   },
-};
+} as const;
 
 const buildLabelBoolPrefixClause = (text: string): Record<string, unknown> => ({
   multi_match: {

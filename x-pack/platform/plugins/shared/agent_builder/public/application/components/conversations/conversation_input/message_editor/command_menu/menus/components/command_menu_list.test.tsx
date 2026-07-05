@@ -141,6 +141,51 @@ describe('CommandMenuList', () => {
       expect(onSelect).toHaveBeenCalledWith({ key: '2', label: 'Beta' });
     });
 
+    it('resets the highlight when options reorder, even at the same length', () => {
+      // Without this, navigating to index 1 and then having a same-length
+      // reorder land underneath it (e.g. an exact match moving to the
+      // front) would silently select whatever is now at index 1 instead of
+      // the item the user actually navigated to.
+      const ref = createRef<CommandMenuHandle>();
+      const onSelect = jest.fn();
+      const { rerender } = renderWithProvider(
+        <CommandMenuList
+          ref={ref}
+          options={[
+            { key: 'bob', label: 'Bob' },
+            { key: 'alice', label: 'Alice' },
+          ]}
+          isLoading={false}
+          onSelect={onSelect}
+        />
+      );
+
+      act(() => {
+        ref.current!.handleKeyDown({ key: 'ArrowDown' } as React.KeyboardEvent);
+      });
+
+      // Same length (2), but Alice moved to the front.
+      rerender(
+        <EuiProvider>
+          <CommandMenuList
+            ref={ref}
+            options={[
+              { key: 'alice', label: 'Alice' },
+              { key: 'bob', label: 'Bob' },
+            ]}
+            isLoading={false}
+            onSelect={onSelect}
+          />
+        </EuiProvider>
+      );
+
+      act(() => {
+        ref.current!.handleKeyDown({ key: 'Enter' } as React.KeyboardEvent);
+      });
+
+      expect(onSelect).toHaveBeenCalledWith({ key: 'alice', label: 'Alice' });
+    });
+
     it('navigates up from second item', () => {
       const ref = createRef<CommandMenuHandle>();
       const onSelect = jest.fn();

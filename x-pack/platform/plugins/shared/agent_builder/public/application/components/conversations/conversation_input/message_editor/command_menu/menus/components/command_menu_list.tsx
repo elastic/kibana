@@ -81,9 +81,10 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     const containerRef = useRef<HTMLDivElement>(null);
 
+    const optionKeysSignature = JSON.stringify(options.map((option) => option.key));
     useEffect(() => {
       setActiveIndex(0);
-    }, [options.length]);
+    }, [optionKeysSignature]);
 
     const scrollIndexIntoView = (index: number) => {
       const items = containerRef.current?.querySelectorAll('.euiSelectableListItem');
