@@ -1090,30 +1090,6 @@ function buildParallelBranchBody(
     );
   }
 
-  // `workflow.output` / `workflow.fail` terminate the WHOLE workflow: they
-  // complete every ancestor scope (including this parallel step) and set the
-  // workflow's terminal status. Inside a branch that silently defeats the
-  // parallel step's scatter-gather contract — `mode: settled` / `fail-fast` and
-  // the per-branch aggregate never take effect because the first such step ends
-  // the run before sibling branches finish. Reject it at compile time so authors
-  // get an actionable error instead of a workflow whose `mode` appears to do
-  // nothing. To fail a single branch, let a normal step fail (its result is
-  // captured per-branch); handle the aggregate in a step AFTER the parallel.
-  const workflowTerminatorNode = bodyGraph
-    .nodes()
-    .map((nodeId) => bodyGraph.node(nodeId))
-    .find((bodyNode) => (bodyNode?.type as string) === 'workflow.output');
-  if (workflowTerminatorNode) {
-    throw new GraphBuildError(
-      `Parallel step "${stepId}" has a branch body containing a workflow terminator ` +
-        `("${workflowTerminatorNode.stepType}"). "workflow.output"/"workflow.fail" end the entire ` +
-        `workflow and would bypass the parallel step's "mode" (settled/fail-fast) and per-branch ` +
-        `results. To fail a single branch, use a normal failing step and handle the aggregate in a ` +
-        `step after the parallel.`,
-      stepId
-    );
-  }
-
   const startNodeId = bodyGraph
     .nodes()
     .filter((nodeId) => bodyGraph.inEdges(nodeId)?.length === 0)[0];

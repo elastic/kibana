@@ -146,36 +146,38 @@ describe('convertToWorkflowGraph - parallel step', () => {
     ).toThrow(/not supported inside a parallel branch/);
   });
 
-  it('rejects a workflow.fail step inside a dynamic branch body', () => {
-    // A workflow terminator inside a branch ends the whole workflow and silently
-    // defeats the parallel step's `mode` (settled/fail-fast) + per-branch results.
-    expect(() =>
-      buildGraph({
-        ...baseParallel,
-        steps: [
-          {
-            name: 'always_fail',
-            type: 'workflow.fail',
-            with: { message: 'boom' },
-          } as unknown as ConnectorStep,
-        ],
-      })
-    ).toThrow(/workflow terminator/);
+  it('compiles a workflow.fail step inside a dynamic branch body', () => {
+    // `workflow.output` / `workflow.fail` are allowed inside a branch body; the
+    // terminator node is compiled into the branch chain like any other step.
+    const executionGraph = buildGraph({
+      ...baseParallel,
+      steps: [
+        {
+          name: 'always_fail',
+          type: 'workflow.fail',
+          with: { message: 'boom' },
+        } as unknown as ConnectorStep,
+      ],
+    });
+    expect(executionGraph.nodes()).toEqual(
+      expect.arrayContaining(['enterParallel_fanOut', 'always_fail', 'exitParallel_fanOut'])
+    );
   });
 
-  it('rejects a workflow.output step inside a dynamic branch body', () => {
-    expect(() =>
-      buildGraph({
-        ...baseParallel,
-        steps: [
-          {
-            name: 'emit',
-            type: 'workflow.output',
-            with: { result: 'x' },
-          } as unknown as ConnectorStep,
-        ],
-      })
-    ).toThrow(/workflow terminator/);
+  it('compiles a workflow.output step inside a dynamic branch body', () => {
+    const executionGraph = buildGraph({
+      ...baseParallel,
+      steps: [
+        {
+          name: 'emit',
+          type: 'workflow.output',
+          with: { result: 'x' },
+        } as unknown as ConnectorStep,
+      ],
+    });
+    expect(executionGraph.nodes()).toEqual(
+      expect.arrayContaining(['enterParallel_fanOut', 'emit', 'exitParallel_fanOut'])
+    );
   });
 
   it('compiles static branches into one chain per branch between enter and exit', () => {
@@ -295,23 +297,24 @@ describe('convertToWorkflowGraph - parallel step', () => {
     ).toThrow(/unsupported flow-control|timeout/);
   });
 
-  it('rejects a workflow.fail step inside a static branch body', () => {
-    expect(() =>
-      buildGraph({
-        name: 'fanOut',
-        type: 'parallel',
-        branches: [
-          {
-            name: 'vt',
-            steps: [{ name: 'scan', type: 'slack', connectorId: 'slack', with: {} }],
-          },
-          {
-            name: 'boom',
-            steps: [{ name: 'die', type: 'workflow.fail', with: { message: 'x' } }],
-          },
-        ],
-      } as unknown as ParallelStep)
-    ).toThrow(/workflow terminator/);
+  it('compiles a workflow.fail step inside a static branch body', () => {
+    const executionGraph = buildGraph({
+      name: 'fanOut',
+      type: 'parallel',
+      branches: [
+        {
+          name: 'vt',
+          steps: [{ name: 'scan', type: 'slack', connectorId: 'slack', with: {} }],
+        },
+        {
+          name: 'boom',
+          steps: [{ name: 'die', type: 'workflow.fail', with: { message: 'x' } }],
+        },
+      ],
+    } as unknown as ParallelStep);
+    expect(executionGraph.nodes()).toEqual(
+      expect.arrayContaining(['enterParallel_fanOut', 'scan', 'die', 'exitParallel_fanOut'])
+    );
   });
 
   it('wraps the parallel block in a timeout zone when timeout is set', () => {
