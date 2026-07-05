@@ -160,6 +160,12 @@ interface YamlValidationResultParallelFanOut extends YamlValidationResultBase {
   owner: 'parallel-fan-out-validation';
 }
 
+interface YamlValidationResultParallelMode extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'parallel-mode-validation';
+}
+
 interface YamlValidationResultGraphBuild extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
@@ -190,6 +196,7 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'deprecated-step-validation',
   'esql-validation',
   'parallel-fan-out-validation',
+  'parallel-mode-validation',
   'graph-build-validation',
 ] as const;
 
@@ -221,6 +228,7 @@ export type YamlValidationResult =
   | YamlValidationResultDeprecatedStep
   | YamlValidationResultEsql
   | YamlValidationResultParallelFanOut
+  | YamlValidationResultParallelMode
   | YamlValidationResultGraphBuild;
 
 export function validationResultFingerprint(r: YamlValidationResult): string {
