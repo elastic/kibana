@@ -393,6 +393,38 @@ describe('EnterParallelNodeImpl', () => {
     expect(branchRunCalls).toEqual([0, 1]);
   });
 
+  it('count-waiting:true keeps a parked branch holding its slot so `max` still binds', async () => {
+    // max: 1, two branches; branch 0 parks in a durable wait forever. With
+    // count-waiting:true (default) the parked branch keeps its slot, so branch 1
+    // must never start.
+    node = makeNode({
+      foreach: JSON.stringify(['a', 'b']),
+      concurrency: { max: 1, 'count-waiting': true },
+    });
+    branchOutcome = () => ExecutionStatus.WAITING;
+    const impl = build();
+    await impl.run();
+    await impl.run();
+    expect(branchRunCalls).toEqual([0, 0]);
+  });
+
+  it('count-waiting:false frees a parked branch\u2019s slot so a queued branch can start', async () => {
+    // max: 1, two branches; branch 0 parks in a durable wait. With
+    // count-waiting:false the parked branch frees its slot, so branch 1 starts on
+    // the next tick even though branch 0 has not reached a terminal state.
+    node = makeNode({
+      foreach: JSON.stringify(['a', 'b']),
+      concurrency: { max: 1, 'count-waiting': false },
+    });
+    // Branch 0 always parks; branch 1 completes when it runs.
+    branchOutcome = (index) => (index === 0 ? ExecutionStatus.WAITING : ExecutionStatus.COMPLETED);
+    const impl = build();
+    await impl.run(); // tick 1: only branch 0 starts (and parks)
+    expect(branchRunCalls).toEqual([0]);
+    await impl.run(); // tick 2: branch 0 re-ticks AND branch 1 starts (freed slot)
+    expect(branchRunCalls).toContain(1);
+  });
+
   it('finishes immediately with an empty aggregate when there are no items', async () => {
     node = makeNode({ foreach: JSON.stringify([]) });
     await build().run();

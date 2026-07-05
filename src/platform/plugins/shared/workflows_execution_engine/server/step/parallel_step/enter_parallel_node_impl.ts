@@ -214,13 +214,16 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     const { max, countWaiting } = this.resolveConcurrency();
 
     // A branch occupies a slot while running. When count-waiting is true (the
-    // default) a waiting/polling branch keeps holding its slot; when false a
-    // started-but-not-terminal branch frees its slot so new branches can start.
+    // default) a branch parked in a durable wait keeps holding its slot; when
+    // false a parked branch frees its slot so a not-yet-started branch can begin.
+    // An actively-running branch (not parked in a wait) always counts against
+    // `max` regardless of count-waiting — otherwise the cap would never bind.
     const slotsInUse = () =>
       state.branches.filter((b) => {
         if (TERMINAL_BRANCH_STATUSES.has(b.status)) return false;
-        if (b.status === 'running') return countWaiting || !b.started;
-        return false;
+        if (b.status !== 'running') return false;
+        if (countWaiting) return true;
+        return !b.waiting;
       }).length;
 
     // fail-fast (default): once a branch has failed (or timed out), stop
@@ -290,6 +293,9 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       if (result !== undefined) {
         branch.status = result.status;
         branch.currentNodeId = result.currentNodeId;
+        // A branch that comes back `running` parked in a durable wait/poll; mark
+        // it so `count-waiting: false` can free its slot for a queued branch.
+        branch.waiting = result.status === 'running';
         if (result.status === 'timed_out') {
           branch.timedOut = true;
         }
@@ -614,13 +620,6 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
   }
 
   /**
-   * Marks a branch's current step execution TIMED_OUT. Used for branches that
-   * parked in a durable wait/poll across ticks and then blew their
-   * `branch-timeout`, so they never returned through `runBranchNode`'s in-tick
-   * timeout path. Recreates the branch runtime for its current node and records
-   * the timeout without touching the workflow-level error.
-   */
-  /**
    * Marks every non-terminal branch TIMED_OUT — both in the persisted parallel
    * state and on each branch's own step-execution record — so no branch leaks in
    * WAITING/RUNNING when the step is torn down by an overall timeout (whether via
@@ -642,6 +641,13 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     }
   }
 
+  /**
+   * Marks a single branch's current step execution TIMED_OUT. Used for branches
+   * that parked in a durable wait/poll across ticks and then blew their
+   * `branch-timeout`, so they never returned through `runBranchNode`'s in-tick
+   * timeout path. Recreates the branch runtime for its current node and records
+   * the timeout without touching the workflow-level error.
+   */
   private markBranchNodeTimedOut(branch: ParallelBranchState): void {
     const nodeId = branch.currentNodeId ?? this.getBranchStartNodeId(branch.index);
     this.markBranchNodeTimedOutAt(branch.index, this.buildBranchStackFrames(branch.index), nodeId);

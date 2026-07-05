@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { PARALLEL_BRANCH_NAME_MAX_LENGTH } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
 /**
@@ -56,6 +57,8 @@ export const structuralStepOutputSchemas: Record<string, z.ZodSchema> = {
     succeeded: z.number(),
     failed: z.number(),
     status: z.enum(['completed', 'failed']),
-    branches: z.record(z.string(), parallelNamedBranchResultSchema).optional(),
+    branches: z
+      .record(z.string().max(PARALLEL_BRANCH_NAME_MAX_LENGTH), parallelNamedBranchResultSchema)
+      .optional(),
   }),
 };

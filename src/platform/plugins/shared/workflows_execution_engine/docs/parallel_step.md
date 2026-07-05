@@ -278,8 +278,9 @@ Constraints this creates:
 
 ### `count-waiting` & `mode`
 - `count-waiting: true` (default) — a parked/waiting branch keeps its slot.
-  `false` — a started-but-not-terminal branch frees its slot so new branches can
-  start (used for poll-style branches that mostly sleep).
+  `false` — a branch parked in a durable wait frees its slot so new branches can
+  start (used for poll-style branches that mostly sleep); actively-running
+  branches still count against `max`.
 - `mode: 'fail-fast'` (default) — once a branch fails/times out, stop scheduling
   **not-yet-started** branches (let in-flight drain), then mark the rest
   `skipped`. `mode: 'settled'` — run every branch regardless; aggregate is still
@@ -338,10 +339,12 @@ that is **waiting/polling** (durable `wait`, poll step) keeps holding its slot.
 | Value | Behaviour |
 | --- | --- |
 | `count-waiting: true` (default) | A waiting/parked branch **keeps** its slot. Conservative: total in-flight ≤ `max` at all times. |
-| `count-waiting: false` | A **started-but-not-terminal** branch frees its slot so a not-yet-started branch can start. Use for poll-style branches that mostly sleep, so sleeping lanes don't starve the window. |
+| `count-waiting: false` | A branch **parked in a durable wait** frees its slot so a not-yet-started branch can start. Actively-running branches still count, so `max` bounds concurrent work. Use for poll-style branches that mostly sleep, so sleeping lanes don't starve the window. |
 
-- Slot math (`slotsInUse`): a branch counts against the window when it's `running`
-  and either `count-waiting` is true **or** it hasn't been `started` yet.
+- Slot math (`slotsInUse`): a `running` branch counts against the window when
+  `count-waiting` is true **or** the branch is not parked in a wait
+  (`waiting !== true`). A branch parked in a durable wait is flagged `waiting`
+  and, under `count-waiting: false`, frees its slot.
 - Terminal branches never count.
 
 ### `mode` — failure policy (fail-fast vs settled) ✅ implemented

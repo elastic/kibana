@@ -50,6 +50,16 @@ export interface ParallelBranchState extends Record<string, unknown> {
   finishedAt?: number;
   /** Set when the branch was terminated by a timeout (overall or per-branch). */
   timedOut?: boolean;
+  /**
+   * True while the branch is parked in a durable wait/poll across ticks (its
+   * body yielded on a `wait` step rather than actively running). Distinguishes a
+   * branch that is holding a worker (`running`, `waiting: false`) from one that
+   * merely re-ticks later (`running`, `waiting: true`). Used by concurrency
+   * accounting: with `count-waiting: false`, parked branches free their slot so
+   * a not-yet-started branch can begin, while actively-running branches still
+   * count against `max`.
+   */
+  waiting?: boolean;
 }
 
 /**

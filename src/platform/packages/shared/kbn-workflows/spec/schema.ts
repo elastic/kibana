@@ -546,6 +546,13 @@ export const DEFAULT_PARALLEL_MAX_CONCURRENCY = 20;
 // Default cap on the total number of fan-out items for a dynamic parallel step.
 export const DEFAULT_PARALLEL_MAX_FAN_OUT = 100;
 
+// Upper bound on a static branch name. Generous for a human-readable identifier
+// while keeping the value bounded so validation can't be fed an unbounded string.
+export const PARALLEL_BRANCH_NAME_MAX_LENGTH = 256;
+// Upper bound on the dynamic `foreach` expression. A Liquid template can be
+// moderately long but should never be unbounded.
+export const PARALLEL_FOREACH_EXPRESSION_MAX_LENGTH = 2000;
+
 // `concurrency` accepts either a bare number (shorthand for `{ max: N }`) or an
 // object so authors can also control whether parked/polling lanes hold a slot.
 export const ParallelConcurrencyObjectSchema = z.object({
@@ -599,6 +606,7 @@ export const ParallelBranchSchema = z.object({
   name: z
     .string()
     .min(1)
+    .max(PARALLEL_BRANCH_NAME_MAX_LENGTH)
     .describe(
       'Branch identifier, used as the result `key` for this branch in the aggregate output.'
     ),
@@ -622,7 +630,7 @@ const PARALLEL_STATIC_MIN_BRANCHES_MESSAGE =
 //   time, so each branch compiles to its own real subgraph.
 export const ParallelStepConfigSchema = z.object({
   foreach: z
-    .union([z.string(), z.array(z.unknown())])
+    .union([z.string().max(PARALLEL_FOREACH_EXPRESSION_MAX_LENGTH), z.array(z.unknown())])
     .optional()
     .describe(
       'Dynamic fan-out: a Liquid expression evaluating to an array (or a literal array). The ' +
