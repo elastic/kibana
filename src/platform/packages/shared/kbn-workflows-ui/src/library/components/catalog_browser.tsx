@@ -17,12 +17,13 @@ import {
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
 import { CategoryFacets } from './category_facets';
 import { SolutionFilter } from './solution_filter';
 import { TemplateCard } from './template_card';
+import { filterCatalog } from '../hooks/filter_catalog';
 import { useActiveSolution } from '../hooks/use_active_solution';
 import { useCatalog } from '../hooks/use_catalog';
 
@@ -63,6 +64,14 @@ export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => 
     categories: selectedCategories,
     solution,
   });
+
+  // Scoped by search + solution but not categories, so category facet counts stay
+  // meaningful (a category's own count isn't collapsed by its own selection) while
+  // still reflecting the solution lock and search term a host may apply.
+  const facetScopedTemplates = useMemo(
+    () => filterCatalog(allTemplates, { search, solution }),
+    [allTemplates, search, solution]
+  );
 
   const handleSearchChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => setSearch(event.target.value),
@@ -158,7 +167,7 @@ export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => 
         >
           <EuiFlexItem grow={1}>
             <CategoryFacets
-              templates={allTemplates}
+              templates={facetScopedTemplates}
               selectedCategories={selectedCategories}
               onChange={setSelectedCategories}
             />

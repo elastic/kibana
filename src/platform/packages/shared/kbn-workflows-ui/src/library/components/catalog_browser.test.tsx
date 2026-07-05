@@ -139,4 +139,17 @@ describe('CatalogBrowser', () => {
     expect(solutionSelect).toBeDisabled();
     expect(solutionSelect.value).toBe('security');
   });
+
+  it('scopes category facet counts by the active solution, excluding other solutions', () => {
+    mockUseActiveSolution.mockReturnValue('security');
+    const allTemplates = [
+      buildTemplate({ slug: 'a', solutions: ['security'], categories: ['enrichment'] }),
+      buildTemplate({ slug: 'b', solutions: ['observability'], categories: ['enrichment'] }),
+    ];
+    mockCatalogState({ templates: [allTemplates[0]], allTemplates });
+
+    renderBrowser();
+
+    expect(screen.getByTestId('workflowLibraryCategoryFacet-enrichment')).toHaveTextContent('1');
+  });
 });
