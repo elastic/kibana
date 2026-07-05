@@ -851,6 +851,217 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('Upgrade Agentless Policies', () => {
+      let apiCalls: Array<{
+        url: string;
+        method: string;
+        data?: any;
+      }> = [];
+
+      // A user with integrations read (but not write) to assert the routes' authz split.
+      // Must use `supertestWithoutAuth` so the request runs as this user rather than the
+      // superuser (plain `supertest` is pre-authenticated as the superuser and ignores
+      // `.auth()`, which would let the write-guarded bulk upgrade return 200 instead of 403).
+      const readOnlyApiClient = new SpaceTestApiClient(
+        supertestWithoutAuth,
+        testUsers.fleet_all_int_read
+      );
+
+      const createTestAgentlessPolicy = (id: string, name: string) =>
+        apiClient.createAgentlessPolicy({
+          id,
+          package: { name: 'test_agentless', version: '1.0.0' },
+          name,
+          description: 'test agentless policy',
+          namespace: 'default',
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: { api_key: 'TEST_VALUE_API_KEY' },
+              streams: {},
+            },
+          },
+        });
+
+      before(async () => {
+        await setupTestUsers(getService('security'));
+        const mockAgentlessApiService = setupMockServer();
+        mockApiServer = await mockAgentlessApiService.listen(8089);
+        mockApiServer.addListener('request', (request) => {
+          if (request.method === 'POST') {
+            request.on('data', (data) => {
+              apiCalls.push({
+                url: request.url || '',
+                method: request.method || '',
+                data: JSON.parse(data.toString()),
+              });
+            });
+          }
+        });
+      });
+
+      after(async () => {
+        await mockApiServer.close();
+      });
+
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        apiCalls = [];
+        await cleanFleetIndices(es);
+        await apiClient.setup();
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+      });
+
+      it('should return a per-policy success for each upgraded policy', async () => {
+        const policyId1 = uuidv4();
+        const policyId2 = uuidv4();
+        await createTestAgentlessPolicy(policyId1, `test_agentless-a-${Date.now()}`);
+        await createTestAgentlessPolicy(policyId2, `test_agentless-b-${Date.now()}`);
+
+        apiCalls = [];
+
+        const res = await apiClient.bulkUpgradeAgentlessPolicies([policyId1, policyId2]);
+
+        // `success` reflects the saved-object upgrade; the live workload is reconciled
+        // asynchronously by a background deploy task (mirrors package-policy bulk
+        // upgrade), so the deploy is intentionally not asserted synchronously here.
+        expect(res.length).to.be(2);
+        for (const item of res) {
+          expect(item.success).to.be(true);
+        }
+        expect(res.map((item) => item.id).sort()).to.eql([policyId1, policyId2].sort());
+      });
+
+      it('should be a genuine no-op (idempotent success, no revision bump) when already at the installed version', async () => {
+        const policyId = uuidv4();
+        await createTestAgentlessPolicy(policyId, `test_agentless-${Date.now()}`);
+
+        // The policy is created at the installed version (1.0.0), so `_upgrade` has nothing
+        // to do. It must stay idempotent-success without re-persisting the saved object.
+        const before = await apiClient.getPackagePolicy(policyId);
+        const revisionBefore = before.item.revision;
+
+        const res = await apiClient.bulkUpgradeAgentlessPolicies([policyId]);
+        expect(res.length).to.be(1);
+        expect(res[0].success).to.be(true);
+
+        const after = await apiClient.getPackagePolicy(policyId);
+        expect(after.item.revision).to.be(revisionBefore);
+      });
+
+      it('should return 200 with per-policy failures for missing/non-agentless ids while upgrading valid ids', async () => {
+        const policyId = uuidv4();
+        await createTestAgentlessPolicy(policyId, `test_agentless-${Date.now()}`);
+
+        // A regular (non-agentless) package policy that must not be upgradable here.
+        const agentPolicyRes = await apiClient.createAgentPolicy(undefined, {
+          name: `standard-policy-${Date.now()}`,
+          namespace: 'default',
+          description: '',
+        });
+        const regularPackagePolicyRes = await apiClient.createPackagePolicy(undefined, {
+          package: { name: 'test_agentless', version: '1.0.0' },
+          name: `regular-package-policy-${Date.now()}`,
+          namespace: 'default',
+          policy_ids: [agentPolicyRes.item.id],
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: { api_key: 'TEST_VALUE_API_KEY' },
+              streams: {},
+            },
+          },
+        });
+
+        const missingId = uuidv4();
+
+        // No top-level promotion: the batch returns 200 with a per-policy array, so valid
+        // ids upgrade while missing / non-agentless ids surface a per-item 404. Results stay
+        // in request order.
+        const res = await apiClient.bulkUpgradeAgentlessPolicies([
+          policyId,
+          regularPackagePolicyRes.item.id,
+          missingId,
+        ]);
+
+        expect(res.length).to.be(3);
+        expect(res.map((item) => item.id)).to.eql([
+          policyId,
+          regularPackagePolicyRes.item.id,
+          missingId,
+        ]);
+
+        const [validRes, regularRes, missingRes] = res;
+        expect(validRes.success).to.be(true);
+        expect(regularRes.success).to.be(false);
+        expect(regularRes.statusCode).to.be(404);
+        expect(missingRes.success).to.be(false);
+        expect(missingRes.statusCode).to.be(404);
+
+        // The non-agentless policy must remain untouched (not upgraded through this API).
+        await apiClient.getPackagePolicy(regularPackagePolicyRes.item.id);
+      });
+
+      it('should preview the upgrade as a clean, PUT-consumable agentless policy', async () => {
+        const policyId = uuidv4();
+        await createTestAgentlessPolicy(policyId, `test_agentless-${Date.now()}`);
+
+        const res = await apiClient.upgradeAgentlessPoliciesDryRun([policyId]);
+
+        expect(res.length).to.be(1);
+        const [item] = res;
+        expect(item.id).to.be(policyId);
+        expect(item.hasErrors).to.be(false);
+        expect(item.currentVersion).to.be('1.0.0');
+        expect(item.proposedVersion).to.be('1.0.0');
+        expect(item.proposedPolicy).not.to.be(undefined);
+        expect(item.proposedPolicy?.id).to.be(policyId);
+        expect(item.proposedPolicy?.package.name).to.be('test_agentless');
+
+        // The proposed policy must be the clean agentless shape, never Fleet internals.
+        expect(item.proposedPolicy).to.not.have.property('policy_ids');
+        expect(item.proposedPolicy).to.not.have.property('revision');
+        expect(item.proposedPolicy).to.not.have.property('supports_agentless');
+      });
+
+      it('should return 200 with a per-policy failure for a missing policy in the dry-run', async () => {
+        const missingId = uuidv4();
+
+        // A per-policy guard failure is surfaced as a dry-run item (`hasErrors: true` +
+        // per-item 404), not promoted to a top-level HTTP error.
+        const res = await apiClient.upgradeAgentlessPoliciesDryRun([missingId]);
+
+        expect(res.length).to.be(1);
+        const [item] = res;
+        expect(item.id).to.be(missingId);
+        expect(item.hasErrors).to.be(true);
+        expect(item.statusCode).to.be(404);
+      });
+
+      it('should reject the bulk upgrade for a user without writeIntegrationPolicies', async () => {
+        const policyId = uuidv4();
+        await createTestAgentlessPolicy(policyId, `test_agentless-${Date.now()}`);
+
+        await expectToRejectWithError(
+          () => readOnlyApiClient.bulkUpgradeAgentlessPolicies([policyId]),
+          /403/
+        );
+      });
+
+      it('should allow the dry-run for a user with only readIntegrationPolicies', async () => {
+        const policyId = uuidv4();
+        await createTestAgentlessPolicy(policyId, `test_agentless-${Date.now()}`);
+
+        const res = await readOnlyApiClient.upgradeAgentlessPoliciesDryRun([policyId]);
+        expect(res.length).to.be(1);
+        expect(res[0].id).to.be(policyId);
+      });
+    });
+
     describe('Sync Agentless Policies', () => {
       let apiCalls: Array<{
         url: string;
