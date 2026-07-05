@@ -11,7 +11,11 @@ import { useTemplateFormSync } from './use_template_form_sync';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 
 const mockSetFieldValue = jest.fn();
-const mockUseFormContext = jest.fn(() => ({ setFieldValue: mockSetFieldValue }));
+const mockUpdateFieldValues = jest.fn();
+const mockUseFormContext = jest.fn(() => ({
+  setFieldValue: mockSetFieldValue,
+  updateFieldValues: mockUpdateFieldValues,
+}));
 const mockUseFormData = jest.fn();
 
 jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => ({
@@ -639,12 +643,21 @@ describe('useTemplateFormSync', () => {
 
       renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
-      expect(mockSetFieldValue).toHaveBeenCalledWith('connectorId', 'jira-1');
-      expect(mockSetFieldValue).toHaveBeenCalledWith('fields', {
-        issueType: '10001',
-        priority: 'High',
-        parent: null,
-      });
+      // Applied via updateFieldValues so the nested connector inputs (which remount on connector
+      // change and initialize from the form default) pick up the template's values.
+      expect(mockUpdateFieldValues).toHaveBeenCalledWith(
+        {
+          connectorId: 'jira-1',
+          fields: {
+            issueType: '10001',
+            priority: 'High',
+            parent: null,
+          },
+        },
+        // deserializer skipped: values are already in form shape (the deserializer expects a
+        // `connector` object and would throw on `connector.id`).
+        { runDeserializer: false }
+      );
     });
 
     it('falls back to the .none connector when the connector id no longer exists', () => {
@@ -681,7 +694,7 @@ describe('useTemplateFormSync', () => {
 
       const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
-      expect(mockSetFieldValue).not.toHaveBeenCalledWith('connectorId', expect.anything());
+      expect(mockUpdateFieldValues).not.toHaveBeenCalled();
 
       // Once connectors load, the connector is applied.
       mockUseGetSupportedActionConnectors.mockReturnValue({
@@ -690,7 +703,10 @@ describe('useTemplateFormSync', () => {
       });
       rerender();
 
-      expect(mockSetFieldValue).toHaveBeenCalledWith('connectorId', 'jira-1');
+      expect(mockUpdateFieldValues).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'jira-1' }),
+        { runDeserializer: false }
+      );
     });
 
     it('reverts the connector to .none when a connector-bearing template is cleared', () => {

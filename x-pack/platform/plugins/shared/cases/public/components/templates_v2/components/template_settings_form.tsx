@@ -1,0 +1,89 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback } from 'react';
+import {
+  EuiForm,
+  EuiFormRow,
+  EuiSwitch,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  EuiHorizontalRule,
+} from '@elastic/eui';
+
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
+import { TemplateConnectorForm } from './template_connector_form';
+import * as commonI18n from '../../../common/translations';
+import * as i18n from '../translations';
+
+export interface TemplateSettingsFormProps {
+  settings?: TemplateSettings;
+  connector?: CaseConnectorWithoutName;
+  onSettingsChange: (settings: TemplateSettings) => void;
+  onConnectorChange: (connector: CaseConnectorWithoutName) => void;
+}
+
+export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
+  settings,
+  connector,
+  onSettingsChange,
+  onConnectorChange,
+}) => {
+  const setSetting = useCallback(
+    (key: keyof TemplateSettings, value: boolean) => {
+      onSettingsChange({ ...(settings ?? {}), [key]: value });
+    },
+    [settings, onSettingsChange]
+  );
+
+  return (
+    <EuiForm component="div" data-test-subj="templateSettingsForm">
+      <EuiText size="s" color="subdued">
+        {i18n.SETTINGS_SECTION_DESCRIPTION}
+      </EuiText>
+      <EuiSpacer size="m" />
+
+      <EuiTitle size="xxs">
+        <h4>{i18n.SETTINGS_SECTION_TITLE}</h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+
+      <EuiFormRow fullWidth helpText={commonI18n.SYNC_ALERTS_HELP}>
+        <EuiSwitch
+          label={commonI18n.SYNC_ALERTS}
+          checked={settings?.syncAlerts ?? false}
+          onChange={(e) => setSetting('syncAlerts', e.target.checked)}
+          data-test-subj="templateSettingsSyncAlertsSwitch"
+        />
+      </EuiFormRow>
+
+      <EuiSpacer size="m" />
+
+      <EuiFormRow fullWidth helpText={commonI18n.EXTRACT_OBSERVABLES_HELP}>
+        <EuiSwitch
+          label={commonI18n.EXTRACT_OBSERVABLES_LABEL}
+          checked={settings?.extractObservables ?? false}
+          onChange={(e) => setSetting('extractObservables', e.target.checked)}
+          data-test-subj="templateSettingsExtractObservablesSwitch"
+        />
+      </EuiFormRow>
+
+      <EuiHorizontalRule margin="l" />
+
+      <EuiTitle size="xxs">
+        <h4>{i18n.CONNECTOR_SECTION_TITLE}</h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+
+      <TemplateConnectorForm connector={connector} onChange={onConnectorChange} />
+    </EuiForm>
+  );
+};
+
+TemplateSettingsForm.displayName = 'TemplateSettingsForm';

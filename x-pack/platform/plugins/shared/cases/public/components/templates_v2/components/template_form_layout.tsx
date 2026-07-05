@@ -34,6 +34,9 @@ import {
   UserPickerDefaultSchema,
 } from '../../../../common/types/domain/template/fields';
 import { normalizeYamlString } from '../utils/normalize_yaml_string';
+import { splitTemplateDefinition, mergeTemplateDefinition } from '../utils/template_settings_yaml';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
@@ -73,6 +76,20 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
   const [isEnabled, setIsEnabled] = useState(initialIsEnabled);
 
+  // The `connector` and `settings` blocks are edited in the Settings tab form, not the YAML buffer.
+  // Split them out of the initial definition so the editor only ever shows fields; they are merged
+  // back into the definition on save.
+  const {
+    fieldsYaml: initialFieldsYaml,
+    connector: initialConnector,
+    settings: initialSettings,
+  } = useMemo(() => splitTemplateDefinition(initialValue), [initialValue]);
+
+  const [settings, setSettings] = useState<TemplateSettings | undefined>(initialSettings);
+  const [connector, setConnector] = useState<CaseConnectorWithoutName | undefined>(
+    initialConnector
+  );
+
   const {
     value: yamlValue,
     onChange: onYamlChange,
@@ -82,15 +99,15 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     isSaved: isYamlSaved,
   } = useDebouncedYamlEdit(
     storageKey,
-    initialValue,
+    initialFieldsYaml,
     (newValue) => form.setValue('definition', newValue),
     templateId
   );
   const hasChanges = useMemo(
     () =>
-      computeChangedLines(normalizeYamlString(initialValue), normalizeYamlString(yamlValue))
+      computeChangedLines(normalizeYamlString(initialFieldsYaml), normalizeYamlString(yamlValue))
         .length > 0,
-    [initialValue, yamlValue]
+    [initialFieldsYaml, yamlValue]
   );
 
   const hasValidationErrors = useMemo(
@@ -158,7 +175,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const handleSave = useCallback(() => {
     setSubmitError(null);
 
-    const validationResult = validateTemplateDefinitionYaml(yamlValue ?? '');
+    // Merge the form-managed connector/settings back into the fields YAML, then validate the
+    // complete definition that will actually be persisted.
+    const mergedDefinition = mergeTemplateDefinition(yamlValue ?? '', { connector, settings });
+
+    const validationResult = validateTemplateDefinitionYaml(mergedDefinition);
     if (!validationResult.success) {
       setSubmitError(i18n.FIX_VALIDATION_ERRORS);
       return;
@@ -167,7 +188,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     form.handleSubmit(
       async (data) => {
         try {
-          await onCreate(data, isEnabled);
+          await onCreate({ ...data, definition: mergedDefinition }, isEnabled);
           clearDraft(isEdit ? data.definition : undefined);
         } catch (e) {
           setSubmitError(e?.message ?? i18n.FAILED_TO_SAVE_TEMPLATE);
@@ -177,7 +198,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         setSubmitError(i18n.FIX_VALIDATION_ERRORS);
       }
     )();
-  }, [form, onCreate, isEnabled, isEdit, clearDraft, yamlValue]);
+  }, [form, onCreate, isEnabled, isEdit, clearDraft, yamlValue, connector, settings]);
 
   const handleIsEnabledChange = useCallback((enabled: boolean) => {
     setIsEnabled(enabled);
@@ -217,7 +238,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             isYamlSaved={isYamlSaved}
             previewWidth={previewWidth}
             onPreviewWidthChange={setPreviewWidth}
-            savedValue={isEdit ? initialValue : undefined}
+            savedValue={isEdit ? initialFieldsYaml : undefined}
+            settings={settings}
+            connector={connector}
+            onSettingsChange={setSettings}
+            onConnectorChange={setConnector}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -42,15 +42,28 @@ const DEFAULT_EXTRACT_OBSERVABLES = true;
 const applyTemplateConnector = (
   connector: CaseConnectorWithoutName,
   connectors: Array<{ id: string; actionTypeId: string }>,
-  setFieldValue: (path: string, value: unknown) => void
+  setFieldValue: (path: string, value: unknown) => void,
+  updateFieldValues: (
+    values: Record<string, unknown>,
+    options?: { runDeserializer?: boolean }
+  ) => void
 ): void => {
   const resolved =
     connector.type !== ConnectorTypes.none &&
     connectors.some((c) => c.id === connector.id && c.actionTypeId === connector.type);
 
   if (resolved) {
-    setFieldValue('connectorId', connector.id);
-    setFieldValue('fields', connector.fields);
+    // The per-type connector inputs are nested `fields.*` UseFields that remount when the connector
+    // changes (`key={connector.id}`) and initialize from the form's default-value object — a plain
+    // `setFieldValue('fields', …)` on the parent never reaches them, and setting them after mount
+    // races the connector's async option loading. `updateFieldValues` merges into the form default
+    // AND sets registered fields, so the inputs pick up the template's values on (re)mount.
+    // `runDeserializer: false` because these values are already in the form (deserialized) shape —
+    // the create form's deserializer expects a `connector` object and would throw on `connector.id`.
+    updateFieldValues(
+      { connectorId: connector.id, fields: connector.fields ?? {} },
+      { runDeserializer: false }
+    );
   } else {
     setFieldValue('connectorId', NONE_CONNECTOR_ID);
     setFieldValue('fields', null);
@@ -77,7 +90,7 @@ export const useTemplateFormSync = (
   innerForm: UseFormReturn,
   globalFieldKeys: ReadonlySet<string>
 ): UseTemplateFormSyncReturn => {
-  const { setFieldValue } = useFormContext();
+  const { setFieldValue, updateFieldValues } = useFormContext();
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
   const { data: template, isLoading: isTemplateLoading } = useGetTemplate(templateId || undefined);
   // A disabled query (no templateId) can sit in "loading" state indefinitely in react-query v4;
@@ -176,7 +189,7 @@ export const useTemplateFormSync = (
     // connector of the same type, fall back to the `.none` connector (no error) — mirroring the
     // form serializer's fallback and the legacy template system's resilience.
     if (definition.connector) {
-      applyTemplateConnector(definition.connector, connectors, setFieldValue);
+      applyTemplateConnector(definition.connector, connectors, setFieldValue, updateFieldValues);
       didApplyConnectorRef.current = true;
     }
 
@@ -220,6 +233,7 @@ export const useTemplateFormSync = (
     templateId,
     template,
     setFieldValue,
+    updateFieldValues,
     innerForm,
     fieldDefsData,
     isLoadingFieldDefs,
