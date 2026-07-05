@@ -29741,7 +29741,7 @@ paths:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_bulk_upgrade_agentless_policy_result'
                 maxItems: 10000
                 type: array
-          description: 'Indicates a successful response. Each item reports the per-policy upgrade outcome; inspect every item''s `success` flag. A missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch.'
+          description: "Indicates a successful response. Each item reports the per-policy upgrade outcome; inspect every item's `success` flag. A missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch."
         '400':
           content:
             application/json:
@@ -50847,6 +50847,13 @@ paths:
             maximum: 1000
             minimum: 1
             type: integer
+        - description: When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.
+          in: query
+          name: include_contributions
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -66427,7 +66434,7 @@ paths:
           content:
             application/json:
               examples:
-                significantEvents:
+                queryOccurrences:
                   value:
                     aggregated_occurrences:
                       - count: 42
@@ -66436,7 +66443,7 @@ paths:
                         date: '2025-01-15T11:00:00.000Z'
                       - count: 7
                         date: '2025-01-15T12:00:00.000Z'
-                    significant_events:
+                    queries:
                       - change_points:
                           type:
                             spike:
@@ -133241,24 +133248,7 @@ components:
         modifiers:
           description: A list of modifiers that were applied to the risk score calculation.
           items:
-            type: object
-            properties:
-              contribution:
-                format: double
-                type: number
-              metadata:
-                additionalProperties: true
-                type: object
-              modifier_value:
-                format: double
-                type: number
-              subtype:
-                type: string
-              type:
-                type: string
-            required:
-              - type
-              - contribution
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreModifier'
           type: array
         notes:
           items:
@@ -133723,6 +133713,23 @@ components:
         category_1_score:
           format: double
           type: number
+        category_2_count:
+          type: integer
+        category_2_score:
+          format: double
+          type: number
+        criticality_level:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+        inputs:
+          description: Present only when requested with `include_contributions=true`.
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreInput'
+          type: array
+        modifiers:
+          description: Present only when requested with `include_contributions=true`.
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreModifier'
+          type: array
         score_type:
           enum:
             - base
@@ -133790,6 +133797,28 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_RiskScoreModifier:
+      description: A modifier that was applied to the risk score calculation.
+      type: object
+      properties:
+        contribution:
+          format: double
+          type: number
+        metadata:
+          additionalProperties: true
+          type: object
+        modifier_value:
+          format: double
+          type: number
+        subtype:
+          maxLength: 100
+          type: string
+        type:
+          maxLength: 100
+          type: string
+      required:
+        - type
+        - contribution
     Security_Entity_Analytics_API_ServiceEntity:
       additionalProperties: false
       description: An entity record representing a service, stored in the Entity Store latest index.
