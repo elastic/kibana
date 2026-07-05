@@ -17,7 +17,11 @@ import {
   buildDestinationFieldEsql,
   buildOneFieldEvaluationEsql,
 } from './esql';
-import type { EuidRankingBranch, FieldEvaluation } from '../definitions/entity_schema';
+import type {
+  EuidRankingBranch,
+  FieldEvaluation,
+  FieldEvaluationWhenClause,
+} from '../definitions/entity_schema';
 import { getEntityDefinition } from '../definitions/registry';
 
 const normalize = (s: string) =>
@@ -572,6 +576,35 @@ describe('buildDestinationFieldEsql', () => {
       expect(expression).toContain('"azure", "entra_id"');
       // No trailing catch-all default inside the inner CASE.
       expect(expression).not.toContain('"ibm"');
+    });
+
+    it('handles compound and-condition as the outer guard (real user.ts shape)', () => {
+      // user.ts now requires both event.kind=asset AND event.module=asset_discovery
+      // so that only the Cloud Asset Discovery integration triggers the cloud.provider mapping.
+      const realClause: FieldEvaluationWhenClause = {
+        condition: {
+          and: [
+            { field: 'event.kind', includes: 'asset' },
+            { field: 'event.module', includes: 'asset_discovery' },
+          ],
+        },
+        then: { field: 'cloud.provider', mapping: { aws: 'aws', gcp: 'gcp', azure: 'entra_id' } },
+      };
+
+      const { expression, conditionPrecomputes } = buildDestinationFieldEsql(
+        '_src',
+        '_eval_dest',
+        '"unknown"',
+        [realClause]
+      );
+
+      expect(conditionPrecomputes).toHaveLength(1);
+      // The precomputed boolean checks both event.kind and event.module.
+      expect(conditionPrecomputes[0].esql).toContain('event.kind');
+      expect(conditionPrecomputes[0].esql).toContain('asset_discovery');
+      // The outer CASE uses the precompute; the inner CASE maps cloud.provider.
+      expect(expression).toContain('CASE(COALESCE(_eval_dest_arm0, FALSE), CASE(');
+      expect(expression).toContain('"aws", "aws"');
     });
   });
 });

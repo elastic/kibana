@@ -127,7 +127,12 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
             then: USER_ENTITY_NAMESPACE.Local,
           },
           {
-            condition: { field: 'event.kind', includes: 'asset' },
+            condition: {
+              and: [
+                { field: 'event.kind', includes: 'asset' },
+                { field: 'event.module', includes: 'asset_discovery' },
+              ],
+            },
             then: {
               field: 'cloud.provider',
               mapping: { aws: 'aws', gcp: 'gcp', azure: 'entra_id' },

@@ -1289,6 +1289,15 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         user: { id: 'cloud-non-asset-user' },
         cloud: { provider: 'aws' },
       });
+      // 7. event.kind=asset but event.module ≠ 'asset_discovery' → defensive guard fires;
+      //    cloud.provider mapping does NOT apply; namespace comes from event.module ('other_integration').
+      //    Verifies that only the Cloud Asset Discovery integration triggers the cloud.provider routing.
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:07:00Z',
+        event: { kind: 'asset', module: 'other_integration' },
+        user: { id: 'cloud-other-module-user' },
+        cloud: { provider: 'aws' },
+      });
 
       const extractionResponse = await forceLogExtraction(
         apiClient,
@@ -1298,7 +1307,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         to
       );
       expect(extractionResponse.statusCode).toBe(200);
-      expect(extractionResponse.body).toMatchObject({ success: true, count: 6 });
+      expect(extractionResponse.body).toMatchObject({ success: true, count: 7 });
 
       // 1. aws → namespace aws
       const awsHit = await searchDocById(esClient, 'user:cloud-aws-user@aws');
@@ -1369,6 +1378,22 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         entity: {
           id: 'user:cloud-non-asset-user@custom-module',
           namespace: 'custom-module',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+        cloud: { provider: 'aws' },
+      });
+
+      // 7. event.kind=asset but event.module ≠ 'asset_discovery' → defensive: cloud.provider mapping
+      //    does NOT fire; namespace comes from event.module ('other_integration'), not 'aws'.
+      const otherModuleHit = await searchDocById(
+        esClient,
+        'user:cloud-other-module-user@other_integration'
+      );
+      expect(otherModuleHit.hits.hits).toHaveLength(1);
+      expect(otherModuleHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-other-module-user@other_integration',
+          namespace: 'other_integration',
           confidence: ENTITY_CONFIDENCE.High,
         },
         cloud: { provider: 'aws' },

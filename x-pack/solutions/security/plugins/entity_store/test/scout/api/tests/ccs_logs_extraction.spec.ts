@@ -620,6 +620,15 @@ apiTest.describe(
           user: { id: 'ccs-cloud-non-asset' },
           cloud: { provider: 'aws' },
         });
+        // 7. event.kind=asset but event.module ≠ 'asset_discovery' → defensive guard fires;
+        //    cloud.provider mapping does NOT apply; namespace comes from event.module ('other_integration').
+        //    Verifies that only the Cloud Asset Discovery integration triggers the cloud.provider routing.
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-06-01T10:07:00Z',
+          event: { kind: 'asset', module: 'other_integration' },
+          user: { id: 'ccs-cloud-other-module' },
+          cloud: { provider: 'aws' },
+        });
 
         const extractResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.internal.FORCE_REMOTE_EXTRACT_TO_UPDATES('user'),
@@ -635,7 +644,7 @@ apiTest.describe(
           }
         );
         expect(extractResponse.statusCode).toBe(200);
-        expect(extractResponse.body).toMatchObject({ count: 6, pages: 3 });
+        expect(extractResponse.body).toMatchObject({ count: 7, pages: 4 });
         await esClient.indices.refresh({ index: UPDATES_INDEX });
 
         const logExtractionResponse = await apiClient.post(
@@ -666,6 +675,7 @@ apiTest.describe(
                       'user:ccs-cloud-ibm@asset_discovery',
                       'user:ccs-cloud-no-provider@asset_discovery',
                       'user:ccs-cloud-non-asset@custom-module',
+                      'user:ccs-cloud-other-module@other_integration',
                     ],
                   },
                 },
@@ -709,6 +719,15 @@ apiTest.describe(
         expect(get(byId['user:ccs-cloud-non-asset@custom-module'], ['cloud', 'provider'])).toBe(
           'aws'
         );
+
+        // 7. event.kind=asset but event.module ≠ 'asset_discovery' → defensive: cloud.provider
+        //    mapping does NOT fire; namespace comes from event.module ('other_integration'), not 'aws'.
+        expect(
+          get(byId['user:ccs-cloud-other-module@other_integration'], ['entity', 'namespace'])
+        ).toBe('other_integration');
+        expect(
+          get(byId['user:ccs-cloud-other-module@other_integration'], ['cloud', 'provider'])
+        ).toBe('aws');
       }
     );
 

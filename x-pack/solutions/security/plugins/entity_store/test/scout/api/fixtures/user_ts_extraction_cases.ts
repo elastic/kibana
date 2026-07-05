@@ -313,7 +313,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     query: { term: { 'user.name': 'scout.asset.cloud.aws.user' } },
     dslFilterSource: {
       user: { name: 'scout.asset.cloud.aws.user' },
-      event: { kind: 'asset', module: 'inventory.generic', outcome: 'success' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
       cloud: { provider: 'aws' },
     },
     expectedEuid: 'user:scout.asset.cloud.aws.user@aws',
@@ -325,7 +325,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     ingestSource: {
       '@timestamp': '2026-01-21T10:00:00.000Z',
       user: { name: 'scout.asset.cloud.aws.user' },
-      event: { kind: 'asset', module: 'inventory.generic', outcome: 'success' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
       cloud: { provider: 'aws' },
     },
   },
@@ -334,7 +334,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     query: { term: { 'user.name': 'scout.asset.cloud.gcp.user' } },
     dslFilterSource: {
       user: { name: 'scout.asset.cloud.gcp.user' },
-      event: { kind: 'asset', module: 'inventory.generic', outcome: 'success' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
       cloud: { provider: 'gcp' },
     },
     expectedEuid: 'user:scout.asset.cloud.gcp.user@gcp',
@@ -346,7 +346,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     ingestSource: {
       '@timestamp': '2026-01-21T10:01:00.000Z',
       user: { name: 'scout.asset.cloud.gcp.user' },
-      event: { kind: 'asset', module: 'inventory.generic', outcome: 'success' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
       cloud: { provider: 'gcp' },
     },
   },
@@ -355,7 +355,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     query: { term: { 'user.name': 'scout.asset.cloud.azure.user' } },
     dslFilterSource: {
       user: { name: 'scout.asset.cloud.azure.user' },
-      event: { kind: 'asset', module: 'inventory.generic', outcome: 'success' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
       cloud: { provider: 'azure' },
     },
     expectedEuid: 'user:scout.asset.cloud.azure.user@entra_id',
@@ -367,7 +367,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     ingestSource: {
       '@timestamp': '2026-01-21T10:02:00.000Z',
       user: { name: 'scout.asset.cloud.azure.user' },
-      event: { kind: 'asset', module: 'inventory.generic', outcome: 'success' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
       cloud: { provider: 'azure' },
     },
   },
@@ -384,7 +384,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     dslFilterSource: {
       user: { name: 'scout.asset.cloud.aws.local.user' },
       host: { id: 'scout-host-cloud-aws-local' },
-      event: { kind: 'asset', module: 'inventory.generic', outcome: 'success' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
       cloud: { provider: 'aws' },
     },
     expectedEuid: 'user:scout.asset.cloud.aws.local.user@scout-host-cloud-aws-local@local',
@@ -397,7 +397,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       '@timestamp': '2026-01-21T10:03:00.000Z',
       user: { name: 'scout.asset.cloud.aws.local.user' },
       host: { id: 'scout-host-cloud-aws-local' },
-      event: { kind: 'asset', module: 'inventory.generic', outcome: 'success' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
       cloud: { provider: 'aws' },
     },
   },
