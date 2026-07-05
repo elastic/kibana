@@ -158,10 +158,10 @@ const metricConfigBackgroundChartSchemaESQL = {
 const metricStylingSchema = schema.object(
   {
     /**
-     * Overall spacing preset for metric elements.
+     * Spacing and sizing preset for metric elements.
      * Possible values:
-     * - 'small': Current compact spacing
-     * - 'large': Increased spacing and paddings
+     * - 'small': Compact spacing (original implementation)
+     * - 'large': Increased spacing, paddings, and sizing (new default)
      */
     spacing: schema.maybe(
       schema.oneOf([schema.literal('small'), schema.literal('large')], {
