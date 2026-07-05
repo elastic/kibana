@@ -12332,7 +12332,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
@@ -14214,7 +14217,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -14276,7 +14279,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -14388,7 +14391,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -14475,7 +14478,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -14572,7 +14575,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -15375,7 +15378,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
@@ -15472,7 +15478,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
@@ -15609,7 +15618,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
@@ -15753,7 +15765,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
@@ -15811,7 +15826,7 @@ paths:
                     deleted: 0,
                     failures: []
                     noops: 0,
-                    requests_per_second: '-1,'
+                    requests_per_second: -1,
                     retries:
                       bulk: 0,
                       search: 0
@@ -15848,7 +15863,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
@@ -15966,7 +15984,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_PlatformErrorResponse'
@@ -16077,7 +16098,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_PlatformErrorResponse'
@@ -16199,7 +16223,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_PlatformErrorResponse'
@@ -16373,7 +16400,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_PlatformErrorResponse'
@@ -16539,7 +16569,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_PlatformErrorResponse'
@@ -16717,7 +16750,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_PlatformErrorResponse'
@@ -17588,7 +17624,7 @@ paths:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
                     scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-                    scriptInput: '--path= /usr/log/exec.log'
+                    scriptInput: --path= /usr/log/exec.log
               MDE:
                 description: Microsoft Defender Endpoint runscript
                 summary: Run a script against a Microsoft Defender Endpoint agent
@@ -17597,7 +17633,7 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
-                    args: '-param1 value1 -param2 value2'
+                    args: -param1 value1 -param2 value2
                     scriptName: my-script.ps1
               SentinelOne:
                 description: SentinelOne runscript
@@ -17608,7 +17644,7 @@ paths:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
                     scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-                    scriptInput: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+                    scriptInput: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
             schema:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_RunScriptRouteRequestBody'
         required: true
@@ -20970,7 +21006,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -21101,7 +21137,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -21335,7 +21371,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -21615,7 +21654,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type: Invalid enum value. Expected ''agnostic'' | ''single'', received ''foo'''
+                    message: "[request query]: namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'foo'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -21944,7 +21983,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -22241,7 +22280,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -22382,7 +22421,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -23042,7 +23081,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -23180,7 +23219,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -23326,7 +23365,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -26145,6 +26187,7 @@ paths:
                 value:
                   cloud_connector:
                     cloud_connector_id: existing-aws-connector-id
+                    enabled: true
                     target_csp: aws
                   description: CSPM integration for AWS reusing existing cloud connector
                   inputs:
@@ -26179,6 +26222,7 @@ paths:
                 description: Example request to create agentless policy with AWS cloud connector
                 value:
                   cloud_connector:
+                    enabled: true
                     target_csp: aws
                   description: CSPM integration for AWS with cloud connector
                   inputs:
@@ -26213,6 +26257,7 @@ paths:
                 description: Example request to create agentless policy with Azure cloud connector
                 value:
                   cloud_connector:
+                    enabled: true
                     target_csp: azure
                   description: CSPM integration for Azure with cloud connector
                   inputs:
@@ -26434,6 +26479,277 @@ paths:
                   - attributes
           description: Conflict
       summary: Create an agentless policy
+      tags:
+        - Fleet agentless policies
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/agentless_policies/_upgrade:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies/_upgrade</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Upgrade multiple agentless policies to their installed package version, migrating each package policy's config onto the new schema. Always returns 200 with a per-policy result array; a missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch, so valid ids are still upgraded. A successful result means the policy's saved object was upgraded, while the agentless deployment is reconciled asynchronously in the background. Policies already at the installed version are a genuine no-op: they still report `success: true` (calls stay idempotent) but nothing is re-persisted or redeployed. Note: agent-policy-level agentless settings (resources, ownership tags) are not re-derived from the new package version — use the update (PUT) endpoint for those.
+      operationId: post-fleet-agentless-policies-upgrade
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              upgradeAgentlessPoliciesRequestExample:
+                description: Bulk upgrade agentless policies to their installed package version
+                value:
+                  policyIds:
+                    - d52a7812-5736-4fdc-aed8-72152afa1ffa
+                    - aws-policy-12345
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_bulk_upgrade_agentless_policies_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                upgradeAgentlessPoliciesPartialFailureResponseExample:
+                  description: Example response where one policy upgraded and another id was missing or not an agentless policy (the batch still returns 200)
+                  value:
+                    - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      name: ess_billing-1
+                      success: true
+                    - body:
+                        message: Agentless policy aws-policy-12345 not found
+                      id: aws-policy-12345
+                      statusCode: 404
+                      success: false
+                upgradeAgentlessPoliciesResponseExample:
+                  description: Example response where every policy was upgraded
+                  value:
+                    - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      name: ess_billing-1
+                      success: true
+                    - id: aws-policy-12345
+                      name: cspm-aws-policy
+                      success: true
+              schema:
+                items:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_bulk_upgrade_agentless_policy_result'
+                maxItems: 10000
+                type: array
+          description: "Indicates a successful response. Each item reports the per-policy upgrade outcome; inspect every item's `success` flag. A missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch."
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Bulk upgrade agentless policies
+      tags:
+        - Fleet agentless policies
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/agentless_policies/_upgrade/dryrun:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies/_upgrade/dryrun</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Preview upgrading multiple agentless policies without applying any change. Targets the installed package version by default; pass `pkgVersion` to preview a specific (for example, not-yet-installed) version. Each result returns the current/proposed version and any migration errors, plus — only on a clean dry-run (`hasErrors: false`) — the migrated `proposedPolicy`. `proposedPolicy` is for the edit-and-upgrade flow (edit it, then save via the update (PUT) endpoint); to apply an upgrade as-is, use `_upgrade`.
+      operationId: post-fleet-agentless-policies-upgrade-dryrun
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              upgradeAgentlessPoliciesDryRunRequestExample:
+                description: Preview the upgrade of agentless policies to their installed package version
+                value:
+                  policyIds:
+                    - d52a7812-5736-4fdc-aed8-72152afa1ffa
+              upgradeAgentlessPoliciesDryRunTargetVersionRequestExample:
+                description: Preview the upgrade against an explicit target package version (for example, before installing the new version). Defaults to the installed package version when omitted.
+                value:
+                  pkgVersion: 1.6.0
+                  policyIds:
+                    - d52a7812-5736-4fdc-aed8-72152afa1ffa
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_upgrade_dry_run_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                upgradeAgentlessPoliciesDryRunMigrationErrorsExample:
+                  description: Example dry-run response where migrating the config to the new version produced errors. `hasErrors` is true and `errors` explains why; do not feed the (partial) proposed config into the update endpoint without resolving them.
+                  value:
+                    - currentVersion: 1.5.0
+                      errors:
+                        - message: Variable "organization_id" is required
+                      hasErrors: true
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      name: ess_billing-1
+                      proposedVersion: 1.6.0
+                upgradeAgentlessPoliciesDryRunMixedResponseExample:
+                  description: 'Example dry-run response for a mixed batch: one policy previews cleanly while two ids are missing or not agentless. Missing / non-agentless ids are surfaced as per-item failures (`hasErrors: true` + `statusCode`) without failing the batch, and results stay in request order.'
+                  value:
+                    - currentVersion: 0.5.0
+                      hasErrors: false
+                      id: 2e426392-f856-4ab2-bc31-92d4dbb8d134
+                      name: agentless_hello_world-16
+                      proposedPolicy:
+                        cloud_connector: null
+                        created_at: '2026-07-01T15:59:08.299Z'
+                        created_by: admin
+                        description: ''
+                        id: 2e426392-f856-4ab2-bc31-92d4dbb8d134
+                        inputs:
+                          agentless_hello_world-cel:
+                            enabled: true
+                            streams:
+                              agentless_hello_world.generic:
+                                enabled: true
+                                vars:
+                                  url: https://epr.elastic.co
+                              agentless_hello_world.mock_counter:
+                                enabled: false
+                                vars:
+                                  events_per_second: 10
+                                  mode: constant
+                                  spike_events: 100
+                                  spike_every_seconds: 60
+                          agentless_hello_world-httpjson:
+                            enabled: false
+                            streams:
+                              agentless_hello_world.generic:
+                                enabled: false
+                                vars:
+                                  url: https://epr.elastic.co
+                        name: agentless_hello_world-16
+                        namespace: default
+                        package:
+                          name: agentless_hello_world
+                          title: Agentless Hello World
+                          version: 0.5.0
+                        updated_at: '2026-07-01T16:02:14.067Z'
+                        updated_by: admin
+                      proposedVersion: 0.5.0
+                    - body:
+                        message: Agentless policy 9300464c-6cfc-4566-850d-e9e7927457fe not found
+                      hasErrors: true
+                      id: 9300464c-6cfc-4566-850d-e9e7927457fe
+                      statusCode: 404
+                    - body:
+                        message: Agentless policy 5b8763e9-791a-4038-be29-b384d578200e not found
+                      hasErrors: true
+                      id: 5b8763e9-791a-4038-be29-b384d578200e
+                      statusCode: 404
+                upgradeAgentlessPoliciesDryRunResponseExample:
+                  description: 'Example clean dry-run response (`hasErrors: false`) with the proposed (migrated) policy. `proposedPolicy` is intended for the edit-and-upgrade flow: edit it and submit the edited payload to the update (PUT) endpoint. To apply without edits, use the `_upgrade` endpoint instead.'
+                  value:
+                    - currentVersion: 1.5.0
+                      hasErrors: false
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      name: ess_billing-1
+                      proposedPolicy:
+                        created_at: '2025-11-06T18:27:43.541Z'
+                        created_by: test_user
+                        description: test
+                        id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                        inputs:
+                          ESS Billing-cel:
+                            enabled: true
+                            vars:
+                              organization_id: '1234'
+                        name: ess_billing-1
+                        namespace: default
+                        package:
+                          name: ess_billing
+                          title: Elasticsearch Service Billing
+                          version: 1.6.0
+                        updated_at: '2025-11-06T18:27:43.541Z'
+                        updated_by: test_user
+                      proposedVersion: 1.6.0
+              schema:
+                items:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_upgrade_dry_run_result'
+                maxItems: 10000
+                type: array
+          description: 'Indicates a successful response. Each clean item (`hasErrors: false`) previews the migrated policy as a consumable agentless policy (`proposedPolicy`); a missing or non-agentless id, or a migration error, is reported as a per-item failure (`hasErrors: true`, with `proposedPolicy` omitted) without failing the batch. Inspect every item.'
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Preview an agentless policies upgrade
       tags:
         - Fleet agentless policies
       x-state: Experimental
@@ -26668,6 +26984,348 @@ paths:
                   - message
           description: Not Found
       summary: Get an agentless policy
+      tags:
+        - Fleet agentless policies
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies/{policyId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update an agentless policy by ID. Uses full-replace semantics: the policy is rebuilt entirely from the request body, so any omitted optional field (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is cleared or reset to its default. The integration package name is immutable and the runtime-managed `cluster_id` is preserved from the existing policy.
+      operationId: put-fleet-agentless-policies-policyid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The ID of the agentless policy to update.
+          in: path
+          name: policyId
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateAgentlessPolicyAttachAWSCloudConnectorRequestExample:
+                description: Example request to attach an AWS cloud connector to an agentless policy on update. Because `PUT` is full-replace, the `cloud_connector` block must be present on every subsequent update or the connector is detached.
+                value:
+                  cloud_connector:
+                    enabled: true
+                    target_csp: aws
+                  description: CSPM integration for AWS with cloud connector
+                  inputs:
+                    cspm-cloudbeat/cis_aws:
+                      enabled: true
+                      streams:
+                        cloud_security_posture.findings:
+                          enabled: true
+                          vars:
+                            aws.account_type: organization-account
+                            aws.credentials.type: cloud_connector
+                            aws.supports_cloud_connectors: true
+                            external_id:
+                              id: ABCDEFGHIJKLMNOPQRST
+                              isSecretRef: true
+                            role_arn: arn:aws:iam::123456789012:role/TestRole
+                      vars:
+                        cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                    cspm-cloudbeat/cis_azure:
+                      enabled: false
+                    cspm-cloudbeat/cis_gcp:
+                      enabled: false
+                  name: cspm-aws-policy
+                  namespace: default
+                  package:
+                    name: cloud_security_posture
+                    version: 3.1.1
+                  vars:
+                    deployment: aws
+                    posture: cspm
+              updateAgentlessPolicyClearFieldsRequestExample:
+                description: Example showing full-replace clearing semantics. Compared to the prior state, this request omits `description` (clearing it) and provides only the minimal required fields. Any optional field not present in the body (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is dropped from the resulting policy.
+                value:
+                  inputs:
+                    ESS Billing-cel:
+                      enabled: true
+                      streams:
+                        ess_billing.billing:
+                          enabled: true
+                        ess_billing.credits:
+                          enabled: true
+                      vars:
+                        api_key: <REPLACE_WITH_YOUR_API_KEY>
+                        organization_id: '1234'
+                  name: ess_billing-1
+                  namespace: default
+                  package:
+                    name: ess_billing
+                    version: 1.6.0
+              updateAgentlessPolicyRequestExample:
+                description: 'Example request to update an agentless policy. `PUT` uses full-replace semantics: the policy is rebuilt entirely from this body, so any omitted optional field is cleared or reset to its default rather than preserved. For example, omitting `description` clears it, omitting `vars` or `global_data_tags` removes them, and omitting `cloud_connector` detaches any previously attached connector. Detaching or swapping a cloud connector only removes the reference; the connector itself is not deleted, as connectors have an independent, shareable lifecycle and are managed through the cloud connector API. Two fields are exceptions that cannot be changed using `PUT`: the integration `package.name` is immutable, and the runtime-managed `cluster_id` is preserved from the existing agent policy.'
+                value:
+                  description: updated description
+                  inputs:
+                    ESS Billing-cel:
+                      enabled: true
+                      streams:
+                        ess_billing.billing:
+                          enabled: true
+                          vars:
+                            hide_sensitive: true
+                            http_client_timeout: 30s
+                            lookbehind: 180
+                            tags:
+                              - forwarded
+                              - billing
+                        ess_billing.credits:
+                          enabled: true
+                      vars:
+                        api_key: <REPLACE_WITH_YOUR_API_KEY>
+                        organization_id: '1234'
+                  name: ess_billing-1
+                  namespace: default
+                  package:
+                    name: ess_billing
+                    version: 1.6.0
+              updateAgentlessPolicyReuseAWSCloudConnectorRequestExample:
+                description: Example request to update an agentless policy reusing an existing AWS cloud connector by ID instead of creating a new one.
+                value:
+                  cloud_connector:
+                    cloud_connector_id: existing-aws-connector-id
+                    enabled: true
+                    target_csp: aws
+                  description: CSPM integration for AWS reusing existing cloud connector
+                  inputs:
+                    cspm-cloudbeat/cis_aws:
+                      enabled: true
+                      streams:
+                        cloud_security_posture.findings:
+                          enabled: true
+                          vars:
+                            aws.account_type: organization-account
+                            aws.credentials.type: cloud_connector
+                            aws.supports_cloud_connectors: true
+                            external_id:
+                              id: ABCDEFGHIJKLMNOPQRST
+                              isSecretRef: true
+                            role_arn: arn:aws:iam::123456789012:role/TestRole
+                      vars:
+                        cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                    cspm-cloudbeat/cis_azure:
+                      enabled: false
+                    cspm-cloudbeat/cis_gcp:
+                      enabled: false
+                  name: cspm-aws-policy
+                  namespace: default
+                  package:
+                    name: cloud_security_posture
+                    version: 3.1.1
+                  vars:
+                    deployment: aws
+                    posture: cspm
+              updateAgentlessPolicyVersionChangeRequestExample:
+                description: Example request to update an agentless policy to a different package version. The package name is immutable, but the version may change.
+                value:
+                  description: bumped to a newer package version
+                  inputs:
+                    ESS Billing-cel:
+                      enabled: true
+                      streams:
+                        ess_billing.billing:
+                          enabled: true
+                        ess_billing.credits:
+                          enabled: false
+                      vars:
+                        api_key: <REPLACE_WITH_YOUR_API_KEY>
+                        organization_id: '1234'
+                  name: ess_billing-1
+                  namespace: default
+                  package:
+                    name: ess_billing
+                    version: 1.7.0
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_create_agentless_policy_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateAgentlessPolicyResponseExample:
+                  description: Example response for updating an agentless policy
+                  value:
+                    item:
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: updated description
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      inputs:
+                        ESS Billing-cel:
+                          enabled: true
+                          streams:
+                            ess_billing.billing:
+                              enabled: true
+                              vars:
+                                hide_sensitive: true
+                                http_client_timeout: 30s
+                                lookbehind: 180
+                                tags:
+                                  - forwarded
+                                  - billing
+                            ess_billing.credits:
+                              enabled: true
+                          vars:
+                            api_key:
+                              id: QY1sWpoBbWcMW-edr0Ee
+                              isSecretRef: true
+                            organization_id: '1234'
+                            url: https://billing.elastic-cloud.com
+                      name: ess_billing-1
+                      namespace: default
+                      package:
+                        name: ess_billing
+                        title: Elasticsearch Service Billing
+                        version: 1.6.0
+                      updated_at: '2025-11-07T09:14:02.118Z'
+                      updated_by: test_user
+                updateAgentlessPolicyWithAWSCloudConnectorResponseExample:
+                  description: Example response after attaching an AWS cloud connector on update
+                  value:
+                    item:
+                      cloud_connector:
+                        cloud_connector_id: aws-connector-67890
+                        enabled: true
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: CSPM integration for AWS with cloud connector
+                      id: aws-policy-12345
+                      inputs:
+                        cspm-cloudbeat/cis_aws:
+                          enabled: true
+                          streams:
+                            cloud_security_posture.findings:
+                              enabled: true
+                              vars:
+                                aws.account_type: organization-account
+                                aws.credentials.type: cloud_connector
+                                external_id:
+                                  id: secret-external-id-123
+                                  isSecretRef: true
+                                role_arn: arn:aws:iam::123456789012:role/TestRole
+                          vars:
+                            cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                        cspm-cloudbeat/cis_azure:
+                          enabled: false
+                        cspm-cloudbeat/cis_gcp:
+                          enabled: false
+                      name: cspm-aws-policy
+                      namespace: default
+                      package:
+                        name: cloud_security_posture
+                        title: Cloud Security Posture Management
+                        version: 3.1.1
+                      updated_at: '2025-11-07T09:14:02.118Z'
+                      updated_by: test_user
+                      vars:
+                        deployment: aws
+                        posture: cspm
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_response'
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+                packageNameChangeErrorResponseExample:
+                  description: The integration package name cannot be changed on update
+                  value:
+                    error: Bad Request
+                    message: Cannot change the integration package of an agentless policy (from "ess_billing" to "cloud_security_posture").
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              examples:
+                conflictErrorResponseExample:
+                  description: Example of a name-conflict error response
+                  value:
+                    error: Conflict
+                    message: An integration policy with the name my-agentless-policy already exists. Please rename it or choose a different name.
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Conflict — for example, the requested name is already used by another integration policy.
+      summary: Update an agentless policy
       tags:
         - Fleet agentless policies
       x-state: Experimental
@@ -29584,6 +30242,7 @@ paths:
                             - MIGRATE
                             - PRIVILEGE_LEVEL_CHANGE
                             - ROLLBACK
+                            - REMOVE_COLLECTOR
                           type: string
                         version:
                           description: agent version number (UPGRADE action)
@@ -36142,6 +36801,7 @@ paths:
                                       required:
                                         - id
                                     - type: string
+                                  nullable: true
                                 es_key:
                                   anyOf:
                                     - additionalProperties: false
@@ -36152,6 +36812,7 @@ paths:
                                       required:
                                         - id
                                     - type: string
+                                  nullable: true
                                 key:
                                   anyOf:
                                     - additionalProperties: false
@@ -36162,6 +36823,7 @@ paths:
                                       required:
                                         - id
                                     - type: string
+                                  nullable: true
                         ssl:
                           additionalProperties: false
                           nullable: true
@@ -36331,6 +36993,7 @@ paths:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                         es_key:
                           anyOf:
                             - additionalProperties: false
@@ -36341,6 +37004,7 @@ paths:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                         key:
                           anyOf:
                             - additionalProperties: false
@@ -36351,6 +37015,7 @@ paths:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                 ssl:
                   additionalProperties: false
                   nullable: true
@@ -36460,6 +37125,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                               es_key:
                                 anyOf:
                                   - additionalProperties: false
@@ -36470,6 +37136,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                               key:
                                 anyOf:
                                   - additionalProperties: false
@@ -36480,6 +37147,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                       ssl:
                         additionalProperties: false
                         nullable: true
@@ -36734,6 +37402,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                               es_key:
                                 anyOf:
                                   - additionalProperties: false
@@ -36744,6 +37413,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                               key:
                                 anyOf:
                                   - additionalProperties: false
@@ -36754,6 +37424,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                       ssl:
                         additionalProperties: false
                         nullable: true
@@ -36924,6 +37595,7 @@ paths:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                         es_key:
                           anyOf:
                             - additionalProperties: false
@@ -36934,6 +37606,7 @@ paths:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                         key:
                           anyOf:
                             - additionalProperties: false
@@ -36944,6 +37617,7 @@ paths:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                 ssl:
                   additionalProperties: false
                   nullable: true
@@ -37050,6 +37724,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                               es_key:
                                 anyOf:
                                   - additionalProperties: false
@@ -37060,6 +37735,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                               key:
                                 anyOf:
                                   - additionalProperties: false
@@ -37070,6 +37746,7 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                                nullable: true
                       ssl:
                         additionalProperties: false
                         nullable: true
@@ -41187,7 +41864,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -44904,6 +45584,154 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/osquery/live_queries/{id}/results/{actionId}/_export:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/live_queries/{id}/results/{actionId}/_export</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Export the results of a live query action as a downloadable file. The response is a streaming file attachment in the requested format.
+      operationId: OsqueryExportLiveQueryResults
+      parameters:
+        - description: The ID of the live query (parent action ID).
+          in: path
+          name: id
+          required: true
+          schema:
+            description: The ID of the live query.
+            example: 3c42c847-eb30-4452-80e0-728584042334
+            type: string
+        - description: The query action ID whose results are exported. Filters the export to rows for this specific per-agent action.
+          in: path
+          name: actionId
+          required: true
+          schema:
+            description: The ID of the query action.
+            example: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+            type: string
+        - description: The output format of the exported file.
+          in: query
+          name: format
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_ExportFormat'
+      requestBody:
+        content:
+          application/json:
+            examples:
+              filteredExport:
+                summary: Export only rows matching a KQL filter
+                value:
+                  kuery: 'user.name: "root"'
+            schema:
+              $ref: '#/components/schemas/Security_Osquery_API_ExportRequestBody'
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                jsonExport:
+                  summary: JSON export with metadata and results
+                  value:
+                    _meta:
+                      action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+                      exported_by: elastic
+                      format: json
+                      query: SELECT * FROM users;
+                      timestamp: '2026-04-30T09:12:00.000Z'
+                      total_results: 2
+                    results:
+                      - '@timestamp': '2026-04-30T09:11:58.321Z'
+                        agent:
+                          id: 980a6b73-0b03-4d1e-8915-67c202e4a980
+                          name: prod-host-1
+                        user:
+                          id: '1000'
+                          name: ubuntu
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_ExportJsonResponse'
+                description: |
+                  A JSON object with `_meta` (export metadata) and `results` (all result rows). Rows are held in memory before writing; prefer `ndjson` for large exports.
+            application/ndjson:
+              examples:
+                ndjsonExport:
+                  summary: NDJSON export with a leading metadata line
+                  value: |
+                    {"_meta":{"action_id":"609c4c66-ba3d-43fa-afdd-53e244577aa0","query":"SELECT * FROM users;","timestamp":"2026-04-30T09:12:00.000Z","exported_by":"elastic","format":"ndjson","total_results":2}}
+                    {"@timestamp":"2026-04-30T09:11:58.321Z","agent":{"id":"980a6b73-0b03-4d1e-8915-67c202e4a980","name":"prod-host-1"},"user":{"id":"1000","name":"ubuntu"}}
+                    {"@timestamp":"2026-04-30T09:11:58.456Z","agent":{"id":"980a6b73-0b03-4d1e-8915-67c202e4a980","name":"prod-host-1"},"user":{"id":"0","name":"root"}}
+              schema:
+                description: |
+                  Newline-delimited JSON stream. The first line is a metadata object; each subsequent line is a result row.
+                format: binary
+                type: string
+            text/csv:
+              examples:
+                csvExport:
+                  summary: CSV export with a header row
+                  value: |
+                    agent.name,agent.id,user.id,user.name
+                    prod-host-1,980a6b73-0b03-4d1e-8915-67c202e4a980,1000,ubuntu
+                    prod-host-1,980a6b73-0b03-4d1e-8915-67c202e4a980,0,root
+              schema:
+                description: |
+                  CSV file with a header row derived from the ECS mapping of the originating query (when available). No metadata block is included in CSV output.
+                format: binary
+                type: string
+          description: |
+            A downloadable file in the requested format. The `Content-Disposition` header contains the suggested filename.
+          headers:
+            Content-Disposition:
+              description: Attachment disposition with a generated filename, e.g. `attachment; filename="osquery-results-{actionId}-{timestamp}.ndjson"`.
+              schema:
+                example: attachment; filename="osquery-results-609c4c66-ba3d-43fa-afdd-53e244577aa0-2026-04-30T09-12-00-000Z.ndjson"
+                type: string
+        '400':
+          content:
+            application/json:
+              examples:
+                rowLimitExceeded:
+                  summary: Result count exceeds the export limit
+                  value:
+                    message: Export limited to 500,000 results. Found 500,001. Please add filters to narrow results.
+              schema:
+                type: object
+                properties:
+                  message:
+                    example: Export limited to 500,000 results. Found 500,001. Please add filters to narrow results.
+                    type: string
+          description: |
+            Bad request. Possible causes: invalid or missing `format` query parameter, malformed KQL in the request body, invalid `esFilters`, or the result count exceeds the 500,000-row limit.
+        '403':
+          description: |
+            The authenticated user does not have the `osquery-readLiveQueries` privilege required to export live query results.
+        '404':
+          content:
+            application/json:
+              examples:
+                actionNotFound:
+                  summary: The id/actionId pair refers to different queries
+                  value:
+                    message: Live query action not found
+              schema:
+                type: object
+                properties:
+                  message:
+                    example: Live query action not found
+                    type: string
+          description: |
+            The parent live query action `{id}` was found but does not contain a query whose `action_id` matches `{actionId}`. This typically means the `id` and `actionId` URL parameters refer to different queries.
+      summary: Export live query results
+      tags:
+        - Security Osquery API
+      x-state: Generally available; Added in 9.5.0
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/osquery/packs:
     get:
       description: |-
@@ -45690,6 +46518,138 @@ paths:
       tags:
         - Security Osquery API
       x-state: Generally available; Added in 9.4.0
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Export all result rows for a specific scheduled query execution as a downloadable file. The response is a streaming file attachment in the requested format.
+      operationId: OsqueryExportScheduledQueryResults
+      parameters:
+        - description: The schedule ID of the scheduled query.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            description: The schedule ID of the scheduled query.
+            example: 90f342ee-9c05-4844-849b-173993234f22
+            type: string
+        - description: The execution counter for the scheduled query run whose results are exported. Must be a non-negative integer.
+          in: path
+          name: executionCount
+          required: true
+          schema:
+            description: The execution counter for this scheduled query run.
+            example: 17384
+            minimum: 0
+            type: integer
+        - description: The output format of the exported file.
+          in: query
+          name: format
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Osquery_API_ExportFormat'
+      requestBody:
+        content:
+          application/json:
+            examples:
+              filteredExport:
+                summary: Export only rows matching a KQL filter
+                value:
+                  kuery: 'agent.name: "prod-host-1"'
+            schema:
+              $ref: '#/components/schemas/Security_Osquery_API_ExportRequestBody'
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                jsonExport:
+                  summary: JSON export with metadata and results
+                  value:
+                    _meta:
+                      action_id: 90f342ee-9c05-4844-849b-173993234f22
+                      execution_count: 17384
+                      exported_by: elastic
+                      format: json
+                      timestamp: '2026-04-30T09:12:00.000Z'
+                      total_results: 1
+                    results:
+                      - '@timestamp': '2026-04-30T09:11:58.321Z'
+                        agent:
+                          id: 5b1bb334-a23d-4006-80fe-bd129b979c9f
+                          name: prod-host-1
+                        osquery:
+                          uid: '1000'
+                          username: ubuntu
+              schema:
+                $ref: '#/components/schemas/Security_Osquery_API_ExportJsonResponse'
+                description: |
+                  A JSON object with `_meta` (export metadata) and `results` (all result rows). Rows are held in memory before writing; prefer `ndjson` for large exports.
+            application/ndjson:
+              examples:
+                ndjsonExport:
+                  summary: NDJSON export with a leading metadata line
+                  value: |
+                    {"_meta":{"action_id":"90f342ee-9c05-4844-849b-173993234f22","execution_count":17384,"timestamp":"2026-04-30T09:12:00.000Z","exported_by":"elastic","format":"ndjson","total_results":32}}
+                    {"@timestamp":"2026-04-30T09:11:58.321Z","agent":{"id":"5b1bb334-a23d-4006-80fe-bd129b979c9f","name":"prod-host-1"},"osquery":{"uid":"1000","username":"ubuntu"}}
+              schema:
+                description: |
+                  Newline-delimited JSON stream. The first line is a metadata object (includes `execution_count`); each subsequent line is a result row.
+                format: binary
+                type: string
+            text/csv:
+              examples:
+                csvExport:
+                  summary: CSV export with a header row
+                  value: |
+                    osquery.description,agent.name,agent.id,osquery.uid,osquery.username
+                    Ubuntu,prod-host-1,5b1bb334-a23d-4006-80fe-bd129b979c9f,1000,ubuntu
+                    root,prod-host-1,5b1bb334-a23d-4006-80fe-bd129b979c9f,0,root
+              schema:
+                description: |
+                  CSV file with a header row. No metadata block is included in CSV output.
+                format: binary
+                type: string
+          description: |
+            A downloadable file in the requested format. The `Content-Disposition` header contains the suggested filename.
+          headers:
+            Content-Disposition:
+              description: Attachment disposition with a generated filename, e.g. `attachment; filename="osquery-scheduled-results-{scheduleId}-{executionCount}-{timestamp}.csv"`.
+              schema:
+                example: attachment; filename="osquery-scheduled-results-90f342ee-9c05-4844-849b-173993234f22-17384-2026-04-30T09-12-00-000Z.csv"
+                type: string
+        '400':
+          content:
+            application/json:
+              examples:
+                rowLimitExceeded:
+                  summary: Result count exceeds the export limit
+                  value:
+                    message: Export limited to 500,000 results. Found 500,001. Please add filters to narrow results.
+              schema:
+                type: object
+                properties:
+                  message:
+                    example: Export limited to 500,000 results. Found 500,001. Please add filters to narrow results.
+                    type: string
+          description: |
+            Bad request. Possible causes: invalid or missing `format` query parameter, malformed KQL in the request body, invalid `esFilters`, or the result count exceeds the 500,000-row limit.
+        '403':
+          description: |
+            The authenticated user does not have the `osquery-read` privilege required to export scheduled query results.
+      summary: Export scheduled query results
+      tags:
+        - Security Osquery API
+      x-state: Generally available; Added in 9.5.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -46724,7 +47684,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: Array of anonymization fields to update.
@@ -48603,7 +49563,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: List of prompts to be updated.
@@ -59967,7 +60927,7 @@ paths:
           content:
             application/json:
               examples:
-                significantEvents:
+                queryOccurrences:
                   value:
                     aggregated_occurrences:
                       - count: 42
@@ -59976,7 +60936,7 @@ paths:
                         date: '2025-01-15T11:00:00.000Z'
                       - count: 7
                         date: '2025-01-15T12:00:00.000Z'
-                    significant_events:
+                    queries:
                       - change_points:
                           type:
                             spike:
@@ -62078,6 +63038,16 @@ paths:
               - managed
               - unmanaged
             type: string
+        - description: When managed workflows are included, only return managed workflows visible in these contexts.
+          in: query
+          name: visibilityContext
+          required: false
+          schema:
+            items:
+              maxLength: 128
+              type: string
+            maxItems: 1000
+            type: array
         - description: Field to sort by.
           in: query
           name: sortField
@@ -64647,7 +65617,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''invalid'' supplied to: sortBy'
+                    message: "Invalid value 'invalid' supplied to: sortBy"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -64756,7 +65726,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: indicator/type'
+                    message: "Invalid value 'foo' supplied to: indicator/type"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -64847,7 +65817,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: list'
+                    message: "Invalid value 'foo' supplied to: list"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -64934,7 +65904,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: taskId'
+                    message: "Invalid value 'foo' supplied to: taskId"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -65023,7 +65993,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: purgePolicy/purgeType'
+                    message: "Invalid value 'foo' supplied to: purgePolicy/purgeType"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -65094,7 +66064,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: list/0/sloId'
+                    message: "Invalid value 'foo' supplied to: list/0/sloId"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -65151,7 +66121,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -65272,7 +66242,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -65397,7 +66367,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: indicator/type'
+                    message: "Invalid value 'foo' supplied to: indicator/type"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -65504,7 +66474,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -65574,7 +66544,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -65644,7 +66614,7 @@ paths:
                   summary: Bad request
                   value:
                     error: Bad Request
-                    message: 'Invalid value ''foo'' supplied to: id'
+                    message: "Invalid value 'foo' supplied to: id"
                     statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
@@ -67655,7 +68625,10 @@ components:
       summary: Two anomaly detection jobs required synchronization in this example.
       value:
         error: Unauthorized
-        message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]]: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]"
+        message: |-
+          [security_exception
+          	Root causes:
+          		security_exception: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]]: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]
         statusCode: 401
     Machine_learning_APIs_mlSyncExample:
       summary: Two anomaly detection jobs required synchronization in this example.
@@ -69882,6 +70855,80 @@ components:
         - item
       title: agentless_policy_response
       type: object
+    Kibana_HTTP_APIs_agentless_policy_upgrade_dry_run_request:
+      additionalProperties: false
+      properties:
+        pkgVersion:
+          description: Target package version to preview the upgrade against. Defaults to the installed package version.
+          maxLength: 256
+          type: string
+        policyIds:
+          description: IDs of the agentless policies to preview upgrading.
+          items:
+            maxLength: 256
+            type: string
+          maxItems: 1000
+          type: array
+      required:
+        - policyIds
+      title: agentless_policy_upgrade_dry_run_request
+      type: object
+    Kibana_HTTP_APIs_agentless_policy_upgrade_dry_run_result:
+      additionalProperties: false
+      properties:
+        body:
+          additionalProperties: false
+          type: object
+          properties:
+            message:
+              description: Error message when the dry-run failed for this policy.
+              maxLength: 4096
+              type: string
+          required:
+            - message
+        currentVersion:
+          description: The current installed package version of the policy.
+          maxLength: 256
+          type: string
+        errors:
+          description: Migration errors encountered while computing the upgrade.
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              message:
+                description: Human-readable migration error.
+                maxLength: 4096
+                type: string
+            required:
+              - message
+          maxItems: 1000
+          type: array
+        hasErrors:
+          description: Whether the dry-run migration produced any errors.
+          type: boolean
+        id:
+          description: The ID of the agentless policy.
+          maxLength: 256
+          type: string
+        name:
+          description: The name of the agentless policy.
+          maxLength: 256
+          type: string
+        proposedPolicy:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy'
+        proposedVersion:
+          description: The package version the policy would be upgraded to.
+          maxLength: 256
+          type: string
+        statusCode:
+          description: HTTP-like status code when the dry-run failed for this policy.
+          type: number
+      required:
+        - id
+        - hasErrors
+      title: agentless_policy_upgrade_dry_run_result
+      type: object
     Kibana_HTTP_APIs_aiops_change_point_chart:
       additionalProperties: false
       description: Change point detection chart embeddable schema
@@ -71196,6 +72243,52 @@ components:
         - packages
       title: bulk_uninstall_packages_request
       type: object
+    Kibana_HTTP_APIs_bulk_upgrade_agentless_policies_request:
+      additionalProperties: false
+      properties:
+        policyIds:
+          description: IDs of the agentless policies to upgrade to their installed package version.
+          items:
+            maxLength: 256
+            type: string
+          maxItems: 1000
+          type: array
+      required:
+        - policyIds
+      title: bulk_upgrade_agentless_policies_request
+      type: object
+    Kibana_HTTP_APIs_bulk_upgrade_agentless_policy_result:
+      additionalProperties: false
+      properties:
+        body:
+          additionalProperties: false
+          type: object
+          properties:
+            message:
+              description: Error message when the upgrade failed for this policy.
+              maxLength: 4096
+              type: string
+          required:
+            - message
+        id:
+          description: The ID of the agentless policy.
+          maxLength: 256
+          type: string
+        name:
+          description: The name of the agentless policy.
+          maxLength: 256
+          type: string
+        statusCode:
+          description: HTTP-like status code when the upgrade failed for this policy.
+          type: number
+        success:
+          description: Whether the policy's saved object was upgraded successfully. The live workload is reconciled asynchronously in the background.
+          type: boolean
+      required:
+        - id
+        - success
+      title: bulk_upgrade_agentless_policy_result
+      type: object
     Kibana_HTTP_APIs_bulk_upgrade_packages_request:
       additionalProperties: false
       properties:
@@ -71287,7 +72380,7 @@ components:
             - categorical
           type: string
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         unassigned:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_unassignedColorSchema'
@@ -71597,7 +72690,7 @@ components:
           description: The index of the color in the palette.
           type: number
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         type:
           enum:
@@ -72303,22 +73396,24 @@ components:
           type: array
         cloud_connector:
           additionalProperties: false
+          nullable: true
           type: object
           properties:
             cloud_connector_id:
-              description: ID of an existing cloud connector to reuse. If not provided, a new connector is created.
+              description: 'ID of an existing cloud connector to reuse. If not provided, a new connector is created. Requires `enabled: true` and cannot be combined with `name`.'
+              maxLength: 256
               type: string
             enabled:
               default: false
-              description: Set to `true` to enable cloud connectors for this policy.
+              description: Set to `true` to attach a cloud connector to this policy. Must be `true` to set any of `cloud_connector_id`, `name`, or `target_csp`.
               type: boolean
             name:
-              description: Name for the cloud connector. If not provided, a name is generated automatically from the credentials.
+              description: 'Name for a new cloud connector. If not provided, a name is generated automatically from the credentials. Requires `enabled: true` and only applies when creating a new connector (cannot be combined with `cloud_connector_id`).'
               maxLength: 255
               minLength: 1
               type: string
             target_csp:
-              description: Target cloud service provider. If not provided, the provider is detected automatically from the inputs.
+              description: 'Target cloud service provider. If not provided, the provider is detected automatically from the inputs. Requires `enabled: true`.'
               enum:
                 - aws
                 - azure
@@ -72459,6 +73554,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
         policy_template:
           description: The policy template to use for the agentless package policy. If not provided, the default policy template is used.
+          maxLength: 256
           type: string
         var_group_selections:
           additionalProperties:
@@ -78946,7 +80042,7 @@ components:
             - gradient
           type: string
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         sort:
           description: Sort direction
@@ -85284,7 +86380,7 @@ components:
           description: When `true`, displays the icon for the secondary value.
           type: boolean
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         to:
           enum:
@@ -85304,7 +86400,7 @@ components:
           description: When `true`, displays the icon for the secondary value.
           type: boolean
         palette:
-          description: 'Color palette name. Accepted values: ''default'', ''elastic_line_optimized'', ''severity'', ''eui_amsterdam'', ''kibana_v7_legacy'', ''elastic_brand_2023''. Defaults to `default`.'
+          description: "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`."
           type: string
         to:
           enum:
@@ -117456,7 +118552,7 @@ components:
               - 10.0.2.15
               - fe80::21a6:63d3:d70e:e3ad
               - 127.0.0.1
-              - '::1'
+              - ::1
             mac:
               - 08:00:27:b1:1d:5a
             name: WinDev2104Eval
@@ -117492,7 +118588,7 @@ components:
           - endpoint-id-1
         parameters:
           scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-          scriptInput: '--some-parameter some-value'
+          scriptInput: --some-parameter some-value
       properties:
         scriptId:
           description: The script ID from the scripts library that will be executed.
@@ -118081,7 +119177,7 @@ components:
             - parameters
     Security_Endpoint_Management_API_Kuery:
       description: A KQL string.
-      example: 'united.endpoint.host.os.name : ''Windows'''
+      example: "united.endpoint.host.os.name : 'Windows'"
       type: string
     Security_Endpoint_Management_API_MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
@@ -118090,7 +119186,7 @@ components:
         endpoint_ids:
           - endpoint-id-1
         parameters:
-          args: '-param1 value1 -param2 value2'
+          args: -param1 value1 -param2 value2
           scriptName: my-script.ps1
       properties:
         args:
@@ -118304,7 +119400,7 @@ components:
                 id: 0cfead88e2024bd8a27476352b5ab264
                 ip:
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                   - 10.0.2.15
                   - fe80::2ac7:8e15:b957:2fa1
                 mac:
@@ -118388,7 +119484,7 @@ components:
                   - 10.0.2.15
                   - fe80::21a6:63d3:d70e:e3ad
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                 mac:
                   - 08:00:27:b1:1d:5a
                 name: WinDev2104Eval
@@ -118903,7 +119999,7 @@ components:
           - endpoint-id-1
         parameters:
           scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-          scriptInput: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+          scriptInput: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
       properties:
         scriptId:
           description: The script ID from SentinelOne scripts library that will be executed.
@@ -123341,6 +124437,139 @@ components:
     Security_Osquery_API_EnabledOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Enabled'
       nullable: true
+    Security_Osquery_API_ExportFormat:
+      description: |
+        The output format for the exported file. Use `ndjson` for streaming newline-delimited JSON (recommended for large exports), `json` for a single JSON array (held in memory; suitable for smaller result sets), or `csv` for a comma-separated values file with a header row derived from the ECS mapping.
+      enum:
+        - ndjson
+        - json
+        - csv
+      example: ndjson
+      type: string
+    Security_Osquery_API_ExportJsonResponse:
+      description: |
+        JSON export response body. The `_meta` field contains export metadata; `results` contains all result rows. Prefer `ndjson` for large exports since rows are streamed individually rather than held in memory.
+      type: object
+      properties:
+        _meta:
+          $ref: '#/components/schemas/Security_Osquery_API_ExportMetadata'
+        results:
+          items:
+            $ref: '#/components/schemas/Security_Osquery_API_ExportResultRow'
+          type: array
+      required:
+        - _meta
+        - results
+    Security_Osquery_API_ExportMetadata:
+      description: |
+        Metadata block produced for every export. Included as `_meta` in the JSON response body and as the first NDJSON line.
+      type: object
+      properties:
+        action_id:
+          description: The action ID (live query) or schedule ID (scheduled query) that produced the results.
+          example: e88d7652-fc3e-4544-b0e0-3d5df2be454c
+          type: string
+        csv_columns:
+          description: |
+            For CSV exports with ECS mapping and zero hits: the column header row so an empty export is not a 0-byte file.
+          items:
+            type: string
+          nullable: true
+          type: array
+        execution_count:
+          description: |
+            For scheduled query exports only: the execution counter of the scheduled run that produced the results.
+          example: 17384
+          nullable: true
+          type: integer
+        exported_by:
+          description: Username of the Kibana user who triggered the export.
+          example: elastic
+          type: string
+        format:
+          $ref: '#/components/schemas/Security_Osquery_API_ExportFormat'
+        query:
+          description: The SQL query text, if it could be resolved from action details.
+          example: SELECT * FROM users;
+          nullable: true
+          type: string
+        timestamp:
+          description: ISO 8601 timestamp of when the export was initiated.
+          example: '2026-04-30T09:12:00.000Z'
+          format: date-time
+          type: string
+        total_results:
+          description: Total number of result rows included in this export.
+          example: 64
+          nullable: true
+          type: integer
+      required:
+        - action_id
+        - timestamp
+        - exported_by
+        - format
+    Security_Osquery_API_ExportRequestBody:
+      description: |
+        Optional request body for export endpoints. All fields are optional. Omit the body or send `null` or `{}` to export all results without additional filtering.
+      nullable: true
+      type: object
+      properties:
+        agentIds:
+          description: |
+            An optional allowlist of Elastic Agent IDs. When provided, only rows reported by the listed agents are included in the export.
+          example:
+            - 980a6b73-0b03-4d1e-8915-67c202e4a980
+            - e40fde1c-5729-4885-b0b2-16a42e9332e3
+          items:
+            type: string
+          nullable: true
+          type: array
+        esFilters:
+          description: |
+            An optional array of Elasticsearch / Kibana SearchBar filter objects (the same `esFilters` payload used by the Discover UI). Each filter is applied as an additional AND clause. An invalid filter object causes a 400 response rather than silently returning unfiltered data.
+          example:
+            - meta:
+                key: agent.name
+                params:
+                  query: prod-host-1
+                type: phrase
+              query:
+                match_phrase:
+                  agent.name: prod-host-1
+          items:
+            additionalProperties: true
+            type: object
+          nullable: true
+          type: array
+        kuery:
+          description: |
+            An optional KQL filter appended (with AND) to the base action/schedule filter. The filter is wrapped in parentheses so it cannot override or escape the built-in action_id / schedule_id gate.
+          example: 'host.name: "prod-host-1"'
+          nullable: true
+          type: string
+    Security_Osquery_API_ExportResultRow:
+      additionalProperties: true
+      description: |
+        A single result row from an NDJSON or JSON export. Fields follow the Elastic Common Schema (ECS) mapping defined on the originating query when available; otherwise raw osquery column names are used under the `osquery.*` namespace.
+      example:
+        '@timestamp': '2026-04-30T09:11:58.321Z'
+        agent:
+          id: 980a6b73-0b03-4d1e-8915-67c202e4a980
+          name: prod-host-1
+          type: osquerybeat
+          version: 9.4.0
+        osquery:
+          directory: /home/ubuntu
+          gid: '1000'
+          shell: /bin/bash
+          uid: '1000'
+          username: ubuntu
+        user:
+          group:
+            id: '1000'
+          id: '1000'
+          name: ubuntu
+      type: object
     Security_Osquery_API_FindLiveQueryDetailsResponse:
       example:
         data:
@@ -125537,7 +126766,7 @@ components:
           example: Bad Request
           type: string
         message:
-          example: 'Invalid value ''foo'' supplied to: [...]'
+          example: "Invalid value 'foo' supplied to: [...]"
           type: string
         statusCode:
           example: 400
@@ -125554,7 +126783,10 @@ components:
           example: Unauthorized
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+          example: |-
+            [security_exception
+            	Root causes:
+            		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
           type: string
         statusCode:
           example: 401
@@ -125571,7 +126803,10 @@ components:
           example: Forbidden
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]"
+          example: |-
+            [security_exception
+            	Root causes:
+            		security_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]
           type: string
         statusCode:
           example: 403
