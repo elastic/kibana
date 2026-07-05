@@ -26,7 +26,7 @@ import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../../common/use_cases_features';
-import { KibanaServices } from '../../../common/lib/kibana';
+import { useCasesConfig } from '../../../common/lib/kibana';
 import { SEARCH_PLACEHOLDER } from '../../actions/translations';
 import { CaseViewAttachButton } from './case_view_attach_button';
 import { CaseViewObservables, OBSERVABLES_FILTER_ID } from './case_view_observables';
@@ -36,6 +36,7 @@ import { AttachmentAccordion } from './attachment_accordion';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
 import { getAttachmentItemCount } from './helpers';
 import { NO_SEARCH_RESULTS_TITLE, NO_SEARCH_RESULTS_BODY, CLEAR_FILTERS } from './translations';
+import { SidebarToggleButton } from '../../cases_redesign/case_view/components/sidebar_toggle_button';
 
 interface CaseViewAttachmentsProps {
   caseData: CaseUI;
@@ -51,7 +52,7 @@ export const CaseViewAttachments = ({
   onUpdateField,
 }: CaseViewAttachmentsProps) => {
   const { euiTheme } = useEuiTheme();
-  const isRedesignEnabled = KibanaServices.getConfig()?.casesRedesign?.details ?? false;
+  const { detailsRedesignEnabled } = useCasesConfig();
   const { unifiedAttachmentTypeRegistry } = useCasesContext();
   const { observablesAuthorized, isObservablesFeatureEnabled } = useCasesFeatures();
   const { data: fileStats } = useGetCaseFileStats({ caseId: caseData.id, searchTerm });
@@ -154,7 +155,7 @@ export const CaseViewAttachments = ({
 
   return (
     <>
-      <EuiFlexItem grow={isRedesignEnabled ? false : 6} data-test-subj="case-view-attachments">
+      <EuiFlexItem grow={detailsRedesignEnabled ? false : 6} data-test-subj="case-view-attachments">
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow>
@@ -179,6 +180,11 @@ export const CaseViewAttachments = ({
           <EuiFlexItem grow={false}>
             <CaseViewAttachButton caseData={caseData} fill />
           </EuiFlexItem>
+          {detailsRedesignEnabled && (
+            <EuiFlexItem grow={false}>
+              <SidebarToggleButton />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         {hasActiveFilter ? (
           <>
