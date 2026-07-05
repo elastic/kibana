@@ -21,6 +21,7 @@ import {
   DE_RULE_HEALTH_PATH,
   DE_SPACE_RULES_HEALTH_PATH,
   ENABLE_DE_HEALTH_UI_SETTING,
+  ENABLE_RULE_CHANGES_HISTORY_SETTING,
   RULES_LANDING_PATH,
   RULES_PATH,
   SecurityPageName,
@@ -190,7 +191,13 @@ const RulesContainerComponent: React.FC = () => {
   const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
-  const isRuleChangesHistoryEnabled = useIsExperimentalFeatureEnabled('ruleChangesHistoryEnabled');
+  const ruleChangesHistoryFFEnabled = useIsExperimentalFeatureEnabled('ruleChangesHistoryEnabled');
+  const [ruleChangesHistoryAdvancedSetting] = useUiSetting$<boolean>(
+    ENABLE_RULE_CHANGES_HISTORY_SETTING,
+    false
+  );
+  const isRuleChangesHistoryEnabled =
+    ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
 
   const subRoutes = useMemo(() => {
     return getRulesSubRoutes(capabilities, {
