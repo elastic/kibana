@@ -187,6 +187,29 @@ describe('convertPreviousRounds', () => {
     );
   });
 
+  it('ignores epoch started_at dates', async () => {
+    const epochStartedAt = new Date(0).toISOString();
+    const previousRounds = [
+      createRound({
+        id: 'round-1',
+        input: makeRoundInput('legacy user message'),
+        response: makeAssistantResponse('hello!'),
+        started_at: epochStartedAt,
+      }),
+    ];
+
+    const result = await convertPreviousRounds({
+      conversation: createConversation({
+        previousRounds,
+        nextInput: makeRoundInput('current message'),
+      }),
+    });
+
+    const [firstHumanMessage] = result;
+    expect(isHumanMessage(firstHumanMessage)).toBe(true);
+    expect(firstHumanMessage.content).toBe('legacy user message');
+  });
+
   it('handles a round with only user and assistant messages', async () => {
     const previousRounds = [
       createRound({

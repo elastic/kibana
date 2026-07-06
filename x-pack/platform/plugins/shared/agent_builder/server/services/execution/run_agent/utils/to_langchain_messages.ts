@@ -186,7 +186,7 @@ const formatRoundInput = ({
     content += `\n\n${attachmentsXml}\n`;
   }
 
-  if (timestamp) {
+  if (timestamp && timestamp !== new Date(0).toISOString()) {
     content = `[Sent: ${formatDate(timestamp)}]\n\n${content}`;
   }
 
