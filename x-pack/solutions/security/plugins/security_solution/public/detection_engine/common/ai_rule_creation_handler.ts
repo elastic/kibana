@@ -10,10 +10,7 @@ import { mergeMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type {
-  RuleResponse,
-  RuleUpdateProps,
-} from '../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 import { EsqlRuleCreateProps } from '../../../common/api/detection_engine/model/rule_schema';
 import {
   SecurityAgentBuilderAttachments,
@@ -26,29 +23,6 @@ import { transformInput, transformOutput } from './transforms';
 import { securitySolutionQueryClient } from '../../common/containers/query_client/query_client_provider';
 import { RULE_MANAGEMENT_FILTERS_QUERY_KEY } from '../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import type { AiRuleCreationService } from './ai_rule_creation_store';
-
-const READ_ONLY_FIELDS: Array<keyof RuleResponse> = [
-  'revision',
-  'created_at',
-  'created_by',
-  'updated_at',
-  'updated_by',
-  'execution_summary',
-];
-
-const stripReadOnlyFields = (rule: RuleResponse): RuleUpdateProps => {
-  const mutable = { ...rule } as Record<string, unknown>;
-  for (const field of READ_ONLY_FIELDS) {
-    delete mutable[field];
-  }
-  return mutable as unknown as RuleUpdateProps;
-};
-
-// Server rejects PUT requests that include both `id` and `rule_id`.
-const stripRuleId = (rule: RuleUpdateProps): RuleUpdateProps => {
-  const { rule_id: _, ...rest } = rule as RuleUpdateProps & { rule_id?: string };
-  return rest as RuleUpdateProps;
-};
 
 // Strip server-assigned fields from attachment text — `id`/`rule_id` in the text causes the
 // agent to skip `attachment_id` and mint a new card instead of updating the existing one.
@@ -63,7 +37,7 @@ const stripServerFields = (rule: RuleResponse): Partial<RuleResponse> => {
     updated_by: _updatedBy,
     execution_summary: _execSummary,
     ...spec
-  } = rule as RuleResponse & { rule_id?: string };
+  } = rule;
   return spec;
 };
 
@@ -83,7 +57,6 @@ export const createAiRuleCreationHandler = ({
 
   const saveSub = aiRuleCreation.saveRuleRequest$
     .pipe(
-      // Different cards save concurrently; requestSaveRule drops same-card re-clicks.
       mergeMap(async ({ rule, attachmentId, updateOrigin }) => {
         const parseResult = EsqlRuleCreateProps.safeParse(rule);
         if (!parseResult.success) {
@@ -103,17 +76,20 @@ export const createAiRuleCreationHandler = ({
         try {
           // Captured before the await: closing chat mid-save nulls activeConversationId.
           const convId = activeConversationId;
+          const ruleProps = parseResult.data;
           let saved: RuleResponse;
           const savedRuleId = rule.id;
           const isUpdate = !!savedRuleId;
           if (savedRuleId) {
+            // The server rejects PUT requests carrying both `id` and `rule_id`, so drop
+            // `rule_id` and address the rule by `id` instead.
+            const { rule_id: _ruleId, ...updateProps } = ruleProps;
             saved = await updateRule({
-              rule: transformOutput(stripRuleId(stripReadOnlyFields(rule))),
+              rule: transformOutput({ ...updateProps, id: savedRuleId }),
             });
           } else {
-            const { id: _id, ...createProps } = rule as RuleResponse & { id?: string };
             saved = await createRule({
-              rule: transformOutput(createProps as unknown as RuleUpdateProps),
+              rule: transformOutput(ruleProps),
             });
           }
           notifications.toasts.addSuccess(
