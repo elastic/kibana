@@ -12,6 +12,7 @@ import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_ste
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
 import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
+import { setAttackTagsStepDefinition } from './set_attack_tags_step/set_attack_tags_step';
 import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
 import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_step';
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
@@ -49,12 +50,13 @@ export const registerWorkflowSteps = (
     return buildAlertEntityGraphStepDefinition;
   });
 
+  workflowsExtensions.registerStepDefinition(assignAlertStepDefinition);
   workflowsExtensions.registerStepDefinition(setAlertStatusStepDefinition);
   workflowsExtensions.registerStepDefinition(setAlertTagsStepDefinition);
-  workflowsExtensions.registerStepDefinition(assignAlertStepDefinition);
 
   if (experimentalFeatures.publicAttacksApiEnabled) {
     workflowsExtensions.registerStepDefinition(assignAttackStepDefinition);
     workflowsExtensions.registerStepDefinition(setAttackStatusStepDefinition);
+    workflowsExtensions.registerStepDefinition(setAttackTagsStepDefinition);
   }
 };

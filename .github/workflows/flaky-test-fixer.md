@@ -50,6 +50,19 @@ tools:
     toolsets: [default, search]
   web-fetch:
   bash: true
+
+# Bootstrap Kibana on the self-hosted runner, in a pre-agent step that runs on the
+# host (before `awf` starts the sandboxed agent), so `node_modules` and
+# `@kbn/setup-node-env` exist and the agent can lint and type check the fix.
+runs-on: kibana
+steps:
+  - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+    with:
+      node-version-file: '.nvmrc'
+      cache: yarn
+  - name: Bootstrap Kibana
+    run: yarn kbn bootstrap
+
 network:
   allowed:
     - defaults
@@ -87,6 +100,49 @@ safe-outputs:
     # transport makes the shallow safe_outputs checkout run `git fetch --unshallow`,
     # which on a repo Kibana's size cannot finish within the 15m job timeout.
     patch-format: am
+  # Adds the fix PR's URL to the outcome comment. The agent can't do this itself:
+  # it doesn't know the PR number while it runs (safe_outputs creates the PR
+  # afterwards), so this job runs after safe_outputs and edits the just-posted comment.
+  jobs:
+    link-fix-pr:
+      description: 'Append the newly-opened fix PR''s URL to the outcome comment on the issue. Call this exactly once, and only after you have opened a draft PR.'
+      runs-on: ubuntu-latest
+      needs: safe_outputs
+      if: needs.safe_outputs.outputs.created_pr_url != '' && needs.safe_outputs.outputs.comment_id != ''
+      permissions:
+        issues: write
+      inputs:
+        confirm:
+          description: 'Set to true to append the opened fix PR link to the outcome comment. Only call this after a PR has been opened.'
+          required: true
+          type: boolean
+      env:
+        # The URL of the fix PR that safe_outputs just created (the link to add).
+        GH_AW_PR_URL: ${{ needs.safe_outputs.outputs.created_pr_url }}
+        # The id of the outcome comment safe_outputs just posted (which comment to edit).
+        GH_AW_COMMENT_ID: ${{ needs.safe_outputs.outputs.comment_id }}
+      steps:
+        - name: Append PR link to outcome comment
+          uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+          with:
+            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+            script: |
+              const prUrl = process.env.GH_AW_PR_URL;
+              const commentId = Number(process.env.GH_AW_COMMENT_ID);
+              if (!prUrl || !Number.isInteger(commentId)) {
+                core.info('Missing PR URL or comment id; nothing to do.');
+                return;
+              }
+              const { owner, repo } = context.repo;
+              const { data: comment } = await github.rest.issues.getComment({ owner, repo, comment_id: commentId });
+              const body = comment.body || '';
+              if (body.includes(prUrl)) {
+                core.info('Comment already references the PR URL; nothing to do.');
+                return;
+              }
+              const updated = `${body.trimEnd()}\n\n**Fix PR:** ${prUrl}`;
+              await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
+              core.info(`Appended ${prUrl} to comment ${commentId}.`);
 
 strict: false
 timeout-minutes: 90
@@ -98,22 +154,26 @@ Open a single draft PR with the smallest possible test-side fix for this flaky-t
 
 ## Requester mention
 
-`${{ env.REQUESTED_BY }}` triggered this run — the user who applied `ai:fix-flaky`, or the manual dispatcher. @-mention them (`@${{ env.REQUESTED_BY }}`) in both the outcome comment and the PR body so they hear the result, but **only if it is a real user account**: if `${{ env.REQUESTED_BY }}` ends with `[bot]` or is `kibanamachine`, omit the mention (and the "Requested by" line) entirely.
+`${{ env.REQUESTED_BY }}` triggered this run — the user who applied `ai:fix-flaky`, or the manual dispatcher. @-mention them (`@${{ env.REQUESTED_BY }}`) in both the outcome comment and the PR body so they get pinged to review the outcome and the fix, but **only if it is a real user account**: if `${{ env.REQUESTED_BY }}` ends with `[bot]` or is `kibanamachine`, omit the mention (and the "Requested by" line) entirely.
+
+## Environment
+
+Kibana is already bootstrapped for you.
 
 ## Steps
 
 1. Read the investigator's comment on the issue for the suspected root cause and proposed fix. If no action is needed, skip to step 6.
 2. Read the failing test and the helpers, fixtures, and page objects it imports.
 3. Apply the smallest test-side patch that addresses the root cause.
-4. Run the test locally until it passes.
+4. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 5. Open the PR (see "PR format" below).
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
+7. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and appends the new PR's URL to your outcome comment. You cannot know the PR number while running (the PR is created afterwards), so never write the URL into the comment yourself — this tool is how the link gets there.
 
 ## PR format
 
 - **Title**: `[<Plugin name>] <concise summary of the fix>`. Derive the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`).
 - **Body**:
-
   ```
   Fixes #<issue-number> (add more issue numbers here if this fix resolves multiple issues)
 
@@ -127,7 +187,7 @@ Open a single draft PR with the smallest possible test-side fix for this flaky-t
 
   #### Verified locally
 
-  <bullet list of what you successfully ran on this branch — e.g. `yarn kbn bootstrap`, `node scripts/check --profile agent`, the targeted test passed N times in a row, etc. Include the exact commands.>
+  <bullet list of what you successfully ran on this branch — e.g. `node scripts/eslint <files>`, `node scripts/type_check --project <tsconfig>`, `node scripts/jest <test>`, etc. Include the exact commands.>
 
   #### Not verified locally
 
@@ -147,8 +207,28 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ## Outcome comment
 
-In **every** run, finish by posting exactly one concise comment (1–2 sentences, no preamble, no sign-off) on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output. Lead with `@${{ env.REQUESTED_BY }}` (see "Requester mention"), then the outcome. Match the case:
+In **every** run, finish by posting exactly one short comment on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output. Format it as a short `###` heading that states the outcome (with the leading emoji shown below), followed by a single sentence of detail, then `cc @${{ env.REQUESTED_BY }}` at the very end (see "Requester mention", only append if the requester isn't a bot). No other preamble or sign-off.
 
-- **PR opened**: `Opened a draft fix PR (linked to this issue) that <one clause on the change>.` The PR carries `Fixes #${{ env.ISSUE_NUMBER }}`, so don't include a URL.
-- **Existing PR already covers it**: `A fix is already in progress in #<number>, so I didn't open a duplicate.`
-- **No PR opened**: `No fix PR: <one-sentence reason>.` — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified from the available evidence.
+Follow this format:
+
+- **PR opened**:
+  ```markdown
+  ### ✅ A fix PR is ready for review
+
+  <one very concise sentence on what the PR changes>. cc @<github-handle-here>
+  ```
+  Don't write the PR URL or number yourself.
+  
+- **Existing PR already covers it**:
+  ```markdown
+  ### 🔁 A fix is already in flight
+
+  #<PR number> already covers this, so no duplicate PR was opened. cc @<github-handle-here>
+  ```
+- **No PR opened**:
+  ```markdown
+  ### ⏭️ No fix PR was opened
+
+  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @<github-handle-here>
+  ```
+  Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified.
