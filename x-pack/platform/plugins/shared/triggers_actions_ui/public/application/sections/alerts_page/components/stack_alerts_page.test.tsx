@@ -8,7 +8,7 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { STACK_ALERTS_ONLY_FEATURE_ID } from '@kbn/rule-data-utils';
+import { STACK_ALERTS_ONLY_FEATURE_ID, OBSERVABILITY_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
 import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
 import { StackAlertsPage } from './stack_alerts_page';
@@ -97,6 +97,23 @@ describe('StackAlertsPage', () => {
     core.application.capabilities = {
       ...core.application.capabilities,
       [STACK_ALERTS_ONLY_FEATURE_ID]: { show: true },
+    };
+    const renderer = createAppMockRenderer({
+      additionalServices: { application: core.application },
+    });
+    renderer.render(<StackAlertsPage />);
+
+    expect(await screen.findByTestId('stackAlertsPageContent')).toBeInTheDocument();
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+    expect(screen.queryByTestId('noPermissionPrompt')).not.toBeInTheDocument();
+  });
+
+  it('renders the page when the user only has the Observability Alerts read capability', async () => {
+    mockLoadRuleTypes.mockResolvedValue([]);
+    const core = coreMock.createStart();
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      [OBSERVABILITY_ALERTS_FEATURE_ID]: { show: true },
     };
     const renderer = createAppMockRenderer({
       additionalServices: { application: core.application },

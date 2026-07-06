@@ -16,6 +16,7 @@ import {
   AlertConsumers,
   isSiemRuleType,
   STACK_ALERTS_ONLY_FEATURE_ID,
+  OBSERVABILITY_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { BoolQuery, Filter } from '@kbn/es-query';
@@ -87,10 +88,13 @@ const PageContentWrapperComponent: React.FC = () => {
     authorizedToReadAnyRules,
   } = useGetRuleTypesPermissions({ http, toasts, filteredRuleTypes: [] });
 
-  // The Stack Alerts feature grants read access to alerts without requiring rule
-  // read privileges, so its `show` capability also unlocks this page.
+  // The Stack Alerts and Observability Alerts features grant read access to alerts
+  // without requiring rule read privileges, so their `show` capability also unlocks
+  // this page.
   const authorizedToReadAnyAlerts =
-    authorizedToReadAnyRules || Boolean(capabilities?.[STACK_ALERTS_ONLY_FEATURE_ID]?.show);
+    authorizedToReadAnyRules ||
+    Boolean(capabilities?.[STACK_ALERTS_ONLY_FEATURE_ID]?.show) ||
+    Boolean(capabilities?.[OBSERVABILITY_ALERTS_FEATURE_ID]?.show);
 
   const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
 
