@@ -111,7 +111,7 @@ Open a single draft PR with the smallest possible test-side fix for this flaky-t
 
 ## Requester mention
 
-`${{ env.REQUESTED_BY }}` triggered this run — the user who applied `ai:fix-flaky`, or the manual dispatcher. @-mention them (`@${{ env.REQUESTED_BY }}`) in both the outcome comment and the PR body so they hear the result, but **only if it is a real user account**: if `${{ env.REQUESTED_BY }}` ends with `[bot]` or is `kibanamachine`, omit the mention (and the "Requested by" line) entirely.
+`${{ env.REQUESTED_BY }}` triggered this run — the user who applied `ai:fix-flaky`, or the manual dispatcher. @-mention them (`@${{ env.REQUESTED_BY }}`) in both the outcome comment and the PR body so they get pinged to review the outcome and the fix, but **only if it is a real user account**: if `${{ env.REQUESTED_BY }}` ends with `[bot]` or is `kibanamachine`, omit the mention (and the "Requested by" line) entirely.
 
 ## Environment
 
@@ -130,7 +130,6 @@ Kibana is already bootstrapped for you.
 
 - **Title**: `[<Plugin name>] <concise summary of the fix>`. Derive the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`).
 - **Body**:
-
   ```
   Fixes #<issue-number> (add more issue numbers here if this fix resolves multiple issues)
 
@@ -164,8 +163,28 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ## Outcome comment
 
-In **every** run, finish by posting exactly one concise comment (1–2 sentences, no preamble, no sign-off) on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output. Lead with `@${{ env.REQUESTED_BY }}` (see "Requester mention"), then the outcome. Match the case:
+In **every** run, finish by posting exactly one short comment on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output. Format it as a short `###` heading that states the outcome (with the leading emoji shown below), followed by a single sentence of detail, then `cc @${{ env.REQUESTED_BY }}` at the very end (see "Requester mention", only append if the requester isn't a bot). No other preamble or sign-off.
 
-- **PR opened**: `Opened a draft fix PR (linked to this issue) that <one clause on the change>.` The PR carries `Fixes #${{ env.ISSUE_NUMBER }}`, so don't include a URL.
-- **Existing PR already covers it**: `A fix is already in progress in #<number>, so I didn't open a duplicate.`
-- **No PR opened**: `No fix PR: <one-sentence reason>.` — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified from the available evidence.
+Follow this format:
+
+- **PR opened**:
+  ```markdown
+  ### ✅ A fix PR is ready for review
+
+  <one very concise sentence on what the PR changes> — find the draft PR in this issue's timeline. cc @<github-handle-here>
+  ```
+  The PR carries `Fixes #${{ env.ISSUE_NUMBER }}`, so don't include a URL.
+- **Existing PR already covers it**:
+  ```markdown
+  ### 🔁 A fix is already in flight
+
+  #<PR number> already covers this, so no duplicate PR was opened. cc @<github-handle-here>
+  ```
+- **No PR opened**:
+  ```markdown
+  ### ⏭️ No fix PR was opened
+
+  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @<github-handle-here>
+  ```
+  Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified.
+

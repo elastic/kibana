@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import DETECTION_YAML from './detection.yaml';
-import DISCOVERY_YAML from './discovery.yaml';
-import ORCHESTRATOR_YAML from './orchestrator.yaml';
-import TRIAGE_YAML from './triage.yaml';
+import DETECTION_YAML from './significant_events/detection.yaml';
+import DISCOVERY_YAML from './significant_events/discovery.yaml';
+import ORCHESTRATOR_YAML from './significant_events/orchestrator.yaml';
+import TRIAGE_YAML from './significant_events/triage.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 export {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
@@ -35,7 +35,7 @@ const SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
 
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-  pluginId: 'streams',
+  pluginId: 'streams', // todo: update to significant_events once https://github.com/elastic/kibana/pull/275522 and follow ups merge
   version: 3,
   billable: false,
   yaml: DETECTION_YAML,
@@ -44,7 +44,7 @@ export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
-  pluginId: 'streams',
+  pluginId: 'streams', // todo: update to significant_events once https://github.com/elastic/kibana/pull/275522 and follow ups merge
   version: 4,
   billable: false,
   yaml: DISCOVERY_YAML,
@@ -53,7 +53,7 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
-  pluginId: 'streams',
+  pluginId: 'streams', // todo: update to significant_events once https://github.com/elastic/kibana/pull/275522 and follow ups merge
   version: 2,
   billable: false,
   yaml: ORCHESTRATOR_YAML,
@@ -62,7 +62,7 @@ export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
-  pluginId: 'streams',
+  pluginId: 'streams', // todo: update to significant_events once https://github.com/elastic/kibana/pull/275522 and follow ups merge
   version: 5,
   billable: false,
   yaml: TRIAGE_YAML,
