@@ -7,25 +7,38 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } from '../../tools';
+import {
+  SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
+  SECURITY_LABS_SEARCH_TOOL_ID,
+  SECURITY_RUN_RULE_PREVIEW_TOOL_ID,
+} from '../../tools';
 
-export const getDetectionRuleEditSkill = () =>
+export const getDetectionRuleEditSkill = ({
+  rulePreviewEnabled,
+}: {
+  rulePreviewEnabled: boolean;
+}) =>
   defineSkillType({
     id: 'detection-rule-edit',
     name: 'detection-rule-edit',
     basePath: 'skills/security/rules',
     description:
       'Creates and edits ES|QL security detection rules as persistent rule attachments, including query logic, MITRE ATT&CK mappings, severity, and schedule. Use when the user wants to author or modify a detection rule explicitly ("create a rule that...", "update the severity", "add MITRE mappings") or with implied authoring intent ("how would I detect this?", "can we catch lateral movement?", "I want an alert for privilege escalation"). Not for alert triage or investigation (use alert analysis skill), proactive threat hunting without a rule-creation goal (use threat hunting skill), or general security questions with no authoring intent.',
-    content: SKILL_CONTENT,
+    content: buildSkillContent({ rulePreviewEnabled }),
     getRegistryTools: () => [
       SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
       SECURITY_LABS_SEARCH_TOOL_ID,
       platformCoreTools.generateEsql,
       platformCoreTools.productDocumentation,
+      ...(rulePreviewEnabled ? [SECURITY_RUN_RULE_PREVIEW_TOOL_ID] : []),
     ],
   });
 
-const SKILL_CONTENT = `# Detection Rule Creation and Editing
+const buildSkillContent = ({
+  rulePreviewEnabled,
+}: {
+  rulePreviewEnabled: boolean;
+}) => `# Detection Rule Creation and Editing
 
 ## When to Use This Skill
 
@@ -145,11 +158,30 @@ attachment_update({
 })
 \`\`\`
 5. Render: \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\`
+${
+  rulePreviewEnabled
+    ? `
+### Step 4: Preview the Rule
+
+After creating a new rule or modifying its query or schedule, run \`security.run_rule_preview\` to validate it fires as expected before saving.
+
+- Pass the current rule object from the attachment as the \`rule\` argument.
+- Defaults to the last hour (\`timeframeStart: "now-1h"\`). Override with a wider range (e.g. \`"now-24h"\`) if no alerts appear and the rule logic looks correct.
+- The tool stores results as a rule preview attachment. Render it inline after the call so the user can inspect the alerts.
+- If the preview returns zero alerts, check the query against the available indices with \`generate_esql\` before concluding the rule is correct.
+`
+    : ''
+}
 
 Checklist before finishing the answer:
 - [ ] (Edit path only) Did I call \`attachment_list\` (if no attachment was in context) and then \`attachment_read\` before modifying?
 - [ ] Did I use the correct tool (query rewrite → \`security.create_detection_rule\`; other fields → \`attachment_update\`)?
-- [ ] Did I render inline the latest version of the attachment?
+- [ ] Did I render inline the latest version of the attachment?${
+  rulePreviewEnabled
+    ? `
+- [ ] Did I run \`security.run_rule_preview\` after creating or modifying the rule query or schedule?`
+    : ''
+}
 
 ---
 
