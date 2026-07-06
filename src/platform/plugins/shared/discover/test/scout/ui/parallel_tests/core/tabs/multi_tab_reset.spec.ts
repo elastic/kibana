@@ -14,11 +14,6 @@
 import type { ScoutTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures/common';
-import {
-  createDataViewFromSearchBar,
-  selectDataViewMode,
-  waitForTabStateToPersist,
-} from '../../../fixtures/tabs/helpers';
 
 spaceTest.describe(
   'tabs - multi-tab Discover session reset behavior',
@@ -114,11 +109,7 @@ spaceTest.describe(
         await spaceTest.step('create tab 1: ad-hoc data view 1', async () => {
           await unifiedTabs.createNewTab();
           await discover.waitUntilTabIsLoaded();
-          await createDataViewFromSearchBar(page, discover, {
-            name: 'logst',
-            adHoc: true,
-            hasTimeField: true,
-          });
+          await discover.createDataViewFromSearchBar({ name: 'logst', adHoc: true });
           await discover.waitUntilTabIsLoaded();
           expect(await discover.getSelectedDataViewName()).toBe(adHocDataView1);
         });
@@ -133,7 +124,7 @@ spaceTest.describe(
         await spaceTest.step('create tab 3: persisted data view 2', async () => {
           await unifiedTabs.createNewTab();
           await discover.waitUntilTabIsLoaded();
-          await selectDataViewMode(page, { discardModal: true });
+          await discover.switchTabToDataViewMode({ discardModal: true });
           await discover.waitUntilTabIsLoaded();
           await discover.selectDataView(persistedDataView2);
           await discover.waitUntilTabIsLoaded();
@@ -143,11 +134,7 @@ spaceTest.describe(
         await spaceTest.step('create tab 4: ad-hoc data view 2', async () => {
           await unifiedTabs.createNewTab();
           await discover.waitUntilTabIsLoaded();
-          await createDataViewFromSearchBar(page, discover, {
-            name: 'log',
-            adHoc: true,
-            hasTimeField: true,
-          });
+          await discover.createDataViewFromSearchBar({ name: 'log', adHoc: true });
           await discover.waitUntilTabIsLoaded();
           expect(await discover.getSelectedDataViewName()).toBe(adHocDataView2);
         });
@@ -160,7 +147,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('refresh and validate all tabs', async () => {
-          await waitForTabStateToPersist(page);
+          await discover.waitForTabStateToPersist();
           await page.reload();
           await discover.waitUntilTabIsLoaded();
           await expect

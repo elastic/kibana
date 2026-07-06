@@ -17,10 +17,6 @@
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../../../fixtures/common';
-import {
-  createDataViewFromSearchBar,
-  waitForTabStateToPersist,
-} from '../../../fixtures/tabs/helpers';
 
 const AD_HOC_WITH_TIME_RANGE = 'log';
 const AD_HOC_WITHOUT_TIME_RANGE = 'logs';
@@ -48,8 +44,8 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
       const { discover, unifiedTabs } = pageObjects;
 
       // Tab 0 keeps the default time-based `logstash-*` data view.
-      await addNonTimeBasedAdHocTab(pageObjects, page);
-      await addNonTimeBasedEsqlTab(pageObjects, page);
+      await addNonTimeBasedAdHocTab(pageObjects);
+      await addNonTimeBasedEsqlTab(pageObjects);
 
       await spaceTest.step('switch is shown while the time-based tab is active', async () => {
         await unifiedTabs.selectTab(0);
@@ -60,7 +56,7 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
 
       await spaceTest.step('switch is shown when the time-based tab is unvisited', async () => {
         await unifiedTabs.selectTab(1);
-        await waitForTabStateToPersist(page);
+        await discover.waitForTabStateToPersist();
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         await expect(await openSaveModalTimeSwitch(pageObjects, page)).toBeVisible();
@@ -81,14 +77,10 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
       // Tab 1: ad hoc data view with a time field (the only time-based tab).
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
-      await createDataViewFromSearchBar(page, discover, {
-        name: AD_HOC_WITH_TIME_RANGE,
-        adHoc: true,
-        hasTimeField: true,
-      });
+      await discover.createDataViewFromSearchBar({ name: AD_HOC_WITH_TIME_RANGE, adHoc: true });
       await discover.waitUntilTabIsLoaded();
 
-      await addNonTimeBasedEsqlTab(pageObjects, page);
+      await addNonTimeBasedEsqlTab(pageObjects);
 
       await spaceTest.step('switch is shown while the time-based tab is active', async () => {
         await unifiedTabs.selectTab(1);
@@ -99,7 +91,7 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
 
       await spaceTest.step('switch is shown when the time-based tab is unvisited', async () => {
         await unifiedTabs.selectTab(0);
-        await waitForTabStateToPersist(page);
+        await discover.waitForTabStateToPersist();
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         await expect(await openSaveModalTimeSwitch(pageObjects, page)).toBeVisible();
@@ -117,7 +109,7 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
       await discover.selectDataView(PERSISTED_WITHOUT_TIME_RANGE);
       await discover.waitUntilTabIsLoaded();
 
-      await addNonTimeBasedAdHocTab(pageObjects, page);
+      await addNonTimeBasedAdHocTab(pageObjects);
 
       // Tab 2: time-based ES|QL query (the only time-based tab).
       await unifiedTabs.createNewTab();
@@ -138,7 +130,7 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
 
       await spaceTest.step('switch is shown when the time-based tab is unvisited', async () => {
         await unifiedTabs.selectTab(1);
-        await waitForTabStateToPersist(page);
+        await discover.waitForTabStateToPersist();
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         await expect(await openSaveModalTimeSwitch(pageObjects, page)).toBeVisible();
@@ -156,14 +148,14 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
       await discover.selectDataView(PERSISTED_WITHOUT_TIME_RANGE);
       await discover.waitUntilTabIsLoaded();
 
-      await addNonTimeBasedAdHocTab(pageObjects, page);
-      await addNonTimeBasedEsqlTab(pageObjects, page);
+      await addNonTimeBasedAdHocTab(pageObjects);
+      await addNonTimeBasedEsqlTab(pageObjects);
 
       await (await openSaveModalTimeSwitch(pageObjects, page)).waitFor({ state: 'hidden' });
       await closeSaveModal(page);
 
       await spaceTest.step('switch stays hidden after a reload', async () => {
-        await waitForTabStateToPersist(page);
+        await discover.waitForTabStateToPersist();
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         await expect(await openSaveModalTimeSwitch(pageObjects, page)).toBeHidden();
@@ -189,11 +181,11 @@ const closeSaveModal = async (page: ScoutPage) => {
 };
 
 /** Adds a new tab backed by an ad hoc data view without a time field. */
-const addNonTimeBasedAdHocTab = async (pageObjects: PageObjects, page: ScoutPage) => {
+const addNonTimeBasedAdHocTab = async (pageObjects: PageObjects) => {
   const { discover, unifiedTabs } = pageObjects;
   await unifiedTabs.createNewTab();
   await discover.waitUntilTabIsLoaded();
-  await createDataViewFromSearchBar(page, discover, {
+  await discover.createDataViewFromSearchBar({
     name: AD_HOC_WITHOUT_TIME_RANGE,
     adHoc: true,
     hasTimeField: false,
@@ -202,12 +194,12 @@ const addNonTimeBasedAdHocTab = async (pageObjects: PageObjects, page: ScoutPage
 };
 
 /** Adds a new tab running a non-time-based ES|QL query. */
-const addNonTimeBasedEsqlTab = async (pageObjects: PageObjects, page: ScoutPage) => {
+const addNonTimeBasedEsqlTab = async (pageObjects: PageObjects) => {
   const { discover, unifiedTabs } = pageObjects;
   await unifiedTabs.createNewTab();
   await discover.waitUntilTabIsLoaded();
   await discover.selectTextBaseLang();
   await discover.codeEditor.setCodeEditorValue('FROM without-timefield');
-  await page.testSubj.click('querySubmitButton');
+  await discover.submitQuery();
   await discover.waitUntilTabIsLoaded();
 };

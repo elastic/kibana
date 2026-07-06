@@ -163,6 +163,16 @@ export class UnifiedTabs {
   }
 
   /**
+   * Opens the context menu for the currently active tab by clicking its
+   * per-tab menu button (`unifiedTabs_tabMenuBtn_<id>`).
+   */
+  async openActiveTabMenu() {
+    const testSubj = await this.getActiveTabTestSubj();
+    const tabId = testSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
+    await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.tabMenuBtnPrefix}${tabId}`);
+  }
+
+  /**
    * Returns the `data-test-subj` of the currently selected tab
    * (e.g. `unifiedTabs_selectTabBtn_<id>`). Useful for capturing a tab id
    * before navigating away so it can be restored later by test-subj.

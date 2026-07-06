@@ -11,11 +11,18 @@ import type { Download } from 'playwright-core';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { DataGrid } from './data_grid';
+import { UnifiedTabs } from './unified_tabs';
 import { expect } from '..';
+import { EuiToastWrapper } from '../eui_components';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 import { resolveSelector } from '../utils';
 
 const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
+
+const NO_TIME_FILTER_OPTION = "--- I don't want to use the time filter ---";
+
+// Discover persists per-tab state to this localStorage key.
+const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 
 export type DiscoverQueryMode = 'esql' | 'classic';
 
@@ -28,15 +35,23 @@ export interface DataViewOptions {
   name: string;
   /** Create a temporary ("ad hoc") data view via "Explore" instead of saving. */
   adHoc?: boolean;
+  /**
+   * Whether the source has a time field. When `false`, the editor's
+   * "I don't want to use the time filter" option is selected so a non-time-based
+   * data view is created. Defaults to `true` (keep the default `@timestamp`).
+   */
+  hasTimeField?: boolean;
 }
 
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
   private readonly dataGrid: DataGrid;
+  private readonly unifiedTabs: UnifiedTabs;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.dataGrid = new DataGrid(page);
+    this.unifiedTabs = new UnifiedTabs(page);
   }
 
   async goto(options: DiscoverGotoOptions) {
@@ -112,7 +127,11 @@ export class DiscoverApp {
     return (await this.getSelectedDataView().innerText()).trim();
   }
 
-  private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
+  private async fillAndSubmitDataViewEditor({
+    name,
+    adHoc = false,
+    hasTimeField = true,
+  }: DataViewOptions) {
     // Minimal inline interaction with the data view editor flyout. The full
     // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
     // `kbn-scout` is a base package and must not depend on a plugin, so the few
@@ -136,6 +155,17 @@ export class DiscoverApp {
       .and(this.page.locator('[data-is-loading="0"]'))
       .waitFor({ state: 'visible', timeout: 30_000 });
 
+    // For non-time-based sources, explicitly select the "no time filter" option.
+    if (!hasTimeField) {
+      const timestampCombo = this.page.testSubj.locator('timestampField >> comboBoxSearchInput');
+      if (await timestampCombo.isEnabled()) {
+        await timestampCombo.click();
+        await timestampCombo.fill(NO_TIME_FILTER_OPTION);
+        // This EUI option has no stable test subject, so match it by role/name.
+        await this.page.getByRole('option', { name: NO_TIME_FILTER_OPTION }).click();
+      }
+    }
+
     if (adHoc) {
       await this.page.testSubj.click('exploreIndexPatternButton');
     } else {
@@ -148,13 +178,123 @@ export class DiscoverApp {
 
   /**
    * Creates a new data view from the Discover search bar data-view switcher
-   * (classic mode only). The editor appends `*` to the title automatically.
+   * (classic mode only). The editor appends `*` to the title automatically. Pass
+   * `hasTimeField: false` to create a non-time-based data view.
    */
   async createDataViewFromSearchBar(options: DataViewOptions) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
     await dataViewSwitch.click();
     await this.page.testSubj.click('dataview-create-new');
     await this.fillAndSubmitDataViewEditor(options);
+  }
+
+  /**
+   * Switches the active tab from ES|QL mode back to classic (data view) mode via
+   * the tab context menu. Pass `discardModal: true` to dismiss the
+   * "unsaved ES|QL changes" confirmation without saving.
+   */
+  async switchTabToDataViewMode({ discardModal }: { discardModal?: boolean } = {}) {
+    await this.unifiedTabs.openActiveTabMenu();
+    const switchToClassicMenuItem = this.page.testSubj.locator(
+      'unifiedTabs_tabMenuItem_switchToClassic'
+    );
+    await switchToClassicMenuItem.waitFor({ state: 'visible' });
+    await switchToClassicMenuItem.click();
+
+    if (discardModal) {
+      const modal = this.page.testSubj.locator('discover-esql-to-dataview-modal');
+      await modal.waitFor({ state: 'visible' });
+      await this.page.testSubj.click('discover-esql-to-dataview-no-save-btn');
+      await modal.waitFor({ state: 'hidden' });
+    }
+
+    // Dismiss any lingering tab-preview popup so the next interaction isn't intercepted.
+    await this.unifiedTabs.hideTabPreview();
+  }
+
+  /**
+   * Dismisses all currently visible toasts, if any. No-op when none are shown.
+   */
+  private async dismissAllToasts() {
+    const toast = new EuiToastWrapper(this.page, { locator: '.euiToast' });
+    if ((await toast.getCount()) > 0) {
+      await toast.closeAllToasts();
+    }
+  }
+
+  /**
+   * Opens the unified histogram's Lens edit flyout, switches the visualization
+   * type (e.g. "Bar", "Area"), applies the change, and waits for the flyout to close.
+   */
+  async changeHistogramVisShape(visShape: string) {
+    await this.dismissAllToasts();
+
+    await this.page.testSubj.click('unifiedHistogramEditFlyoutVisualization');
+    await this.page.testSubj.locator('lnsChartSwitchPopover').waitFor({ state: 'visible' });
+    await this.page.testSubj.click('lnsChartSwitchPopover');
+    await this.page.testSubj.fill('lnsChartSwitchSearch', visShape);
+    await this.page.testSubj.click(`lnsChartSwitchPopover_${visShape.toLowerCase()}`);
+    await expect(this.page.testSubj.locator('lnsChartSwitchPopover')).toHaveText(visShape);
+
+    await this.dismissAllToasts();
+
+    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
+    await this.page.testSubj.click('applyFlyoutButton');
+    await this.page.testSubj
+      .locator('lnsConfigPanelWrapper')
+      .waitFor({ state: 'hidden', timeout: 30_000 });
+    await this.page.testSubj
+      .locator('lnsChartSwitchPopover')
+      .waitFor({ state: 'hidden', timeout: 30_000 });
+  }
+
+  /**
+   * Opens the unified histogram's Lens edit flyout, reads the current
+   * visualization type from the chart switcher, and closes the flyout.
+   */
+  async getHistogramVisShape(): Promise<string> {
+    await this.dismissAllToasts();
+
+    await this.page.testSubj.click('unifiedHistogramEditFlyoutVisualization');
+    await this.page.testSubj.locator('lnsChartSwitchPopover').waitFor({ state: 'visible' });
+    const visShape = await this.page.testSubj.innerText('lnsChartSwitchPopover');
+    await this.page.testSubj.click('cancelFlyoutButton');
+    return visShape;
+  }
+
+  /**
+   * Waits until the locally persisted tab state has settled.
+   *
+   * Discover writes tab state (labels, app state, vis) to localStorage on a
+   * trailing throttle (`MIDDLEWARE_THROTTLE_MS` = 300ms in `internal_state.ts`),
+   * so the most recent edit to the active tab is flushed ~300ms after the action.
+   * A reload within that window drops the pending write and the tab reverts. Call
+   * this before a `page.reload()` that asserts persistence: it polls the stored
+   * snapshot and resolves once two reads a throttle-window apart are identical,
+   * meaning the trailing write has flushed.
+   */
+  async waitForTabStateToPersist() {
+    let previous: string | null = null;
+    let hasPrevious = false;
+    await expect
+      .poll(
+        async () => {
+          const current = await this.page.evaluate(
+            (key) => window.localStorage.getItem(key),
+            TABS_LOCAL_STORAGE_KEY
+          );
+          // Settled once two consecutive reads match. Comparing against the prior read
+          // (rather than requiring a non-null value) means a stable `null` — e.g. when
+          // Discover clears the key or hasn't written it yet — also counts as settled,
+          // avoiding a spurious timeout.
+          const settled = hasPrevious && current === previous;
+          previous = current;
+          hasPrevious = true;
+          return settled;
+        },
+        { timeout: 10_000, intervals: [350] }
+      )
+      .toBe(true);
   }
 
   private async clickAppMenuItem(
