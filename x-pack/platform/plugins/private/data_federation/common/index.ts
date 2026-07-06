@@ -12,6 +12,8 @@ export {
   ALL_DATA_SOURCE_TYPES,
   DATA_SOURCE_TYPES_TO_HELP_TEXT,
   DATA_SOURCE_TYPES_TO_ICONS,
+  ES_REDACTED_SECRET_VALUE,
+  SECRET_FIELDS_BY_TYPE,
 } from './datasource_types';
 
 export const PLUGIN_ID = 'data_federation';
