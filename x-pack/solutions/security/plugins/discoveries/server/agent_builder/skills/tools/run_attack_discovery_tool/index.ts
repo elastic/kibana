@@ -14,13 +14,15 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { executeGenerationWorkflow } from '@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow';
 import type { WorkflowConfig } from '@kbn/discoveries/impl/attack_discovery/generation/types';
+import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 import { z } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { DiscoveriesPluginStartDeps } from '../../../types';
-import { checkManagedWorkflowIntegrity } from '../../../managed_workflows/check_managed_workflow_integrity';
-import { resolveConnectorDetails } from '../../../workflows/helpers/resolve_connector_details';
-import { ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS } from '../../../workflows/steps/run_step/constants';
+import { getAlertsIndexForSpace } from '../../../../lib/get_alerts_index_for_space';
+import type { DiscoveriesPluginStartDeps } from '../../../../types';
+import { checkManagedWorkflowIntegrity } from '../../../../managed_workflows/check_managed_workflow_integrity';
+import { resolveConnectorDetails } from '../../../../workflows/helpers/resolve_connector_details';
+import { ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS } from '../../../../workflows/steps/run_step/constants';
 
 export const RUN_ATTACK_DISCOVERY_TOOL_ID = 'security.attack-discovery.run';
 
@@ -191,6 +193,14 @@ export const getRunAttackDiscoveryTool = ({
     try {
       const { pluginsStart } = await getStartServices();
 
+      // Resolve the space the same way `executeGenerationWorkflow` does for its
+      // authorization guard, so the alerts index is bounded to the caller's own
+      // space rather than hardcoded to `-default`.
+      const spaceId = getSpaceId({
+        request: context.request,
+        spaces: pluginsStart.spaces?.spacesService,
+      });
+
       const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(context.request);
 
       const { actionTypeId } = await resolveConnectorDetails({
@@ -219,17 +229,23 @@ export const getRunAttackDiscoveryTool = ({
 
       const executeParams = {
         ...(alerts != null && alerts.length > 0 ? { alerts } : {}),
-        alertsIndexPattern: '.alerts-security.alerts-default',
+        alertsIndexPattern: getAlertsIndexForSpace(spaceId),
         analytics,
         apiConfig,
         checkIntegrity:
           workflowsManagementApi != null
-            ? async ({ logger: checkLogger, spaceId }: { logger: Logger; spaceId: string }) => {
+            ? async ({
+                logger: checkLogger,
+                spaceId: checkSpaceId,
+              }: {
+                logger: Logger;
+                spaceId: string;
+              }) => {
                 const { pluginsStart: startDeps } = await getStartServices();
                 return checkManagedWorkflowIntegrity({
                   analytics,
                   logger: checkLogger,
-                  spaceId,
+                  spaceId: checkSpaceId,
                   workflowsExtensions: startDeps.workflowsExtensions,
                 });
               }

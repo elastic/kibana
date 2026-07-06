@@ -152,6 +152,7 @@ const FailureSectionComponent: React.FC<Props> = ({
           generatedCount={generatedCount}
           generationStatus={generationStatus}
           hallucinationsFilteredCount={hallucinationsFilteredCount}
+          perWorkflowAlertRetrieval={perWorkflowAlertRetrieval}
           persistedCount={persistedCount}
           sourceMetadata={sourceMetadata}
         />

@@ -21,21 +21,21 @@ import {
   GOOD_SYNTAX_EXAMPLES,
   MITRE_ATTACK_TACTICS,
   SYNTAX,
-} from '../lib/prompt/local_prompt_object/attack_discovery_prompts';
+} from '../../../lib/prompt/local_prompt_object/attack_discovery_prompts';
 import {
   GET_DEFAULT_ESQL_QUERY_TOOL_ID,
   getDefaultEsqlQueryTool,
-} from './tools/get_default_esql_query_tool';
+} from '../tools/get_default_esql_query_tool';
 import {
   GET_ATTACK_DISCOVERY_STATUS_TOOL_ID,
   getAttackDiscoveryStatusTool,
   type WorkflowExecutionLookup,
-} from './tools/get_attack_discovery_status_tool';
+} from '../tools/get_attack_discovery_status_tool';
 import {
   RUN_ATTACK_DISCOVERY_TOOL_ID,
   getRunAttackDiscoveryTool,
   type RunAttackDiscoveryToolDeps,
-} from './tools/run_attack_discovery_tool';
+} from '../tools/run_attack_discovery_tool';
 
 export const ATTACK_DISCOVERY_GENERATOR_SKILL_ID = 'attack-discovery-generator';
 export const ATTACK_DISCOVERY_GENERATOR_SKILL_NAME = 'attack-discovery-generator';
@@ -70,7 +70,7 @@ Use every skill and tool available to you to reach the best possible conclusion.
 
 The goal is to build a complete, evidence-backed picture before making a determination. A half-investigated chain that "looks bad" is not sufficient. The skill is intentionally non-prescriptive about which tools to call — choose based on what is available at runtime and what the evidence demands.
 
-If you do not yet have a curated alert set, the inline tool \`security.attack-discovery.get_default_esql_query\` returns a programmatically-built, space-specific default ES|QL query — a reasonable starting point you can run, adapt, or replace based on the investigation. Treat it as a convenience, not a recommendation: prefer corroborating with whatever evidence-gathering tools the conversation exposes before relying on a default.`;
+If you do not yet have a curated alert set, the inline tool \`${GET_DEFAULT_ESQL_QUERY_TOOL_ID}\` returns a programmatically-built, space-specific default ES|QL query — a reasonable starting point you can run, adapt, or replace based on the investigation. Treat it as a convenience, not a recommendation: prefer corroborating with whatever evidence-gathering tools the conversation exposes before relying on a default.`;
 
 const CROSS_SKILL_CORROBORATION = `## Cross-Skill Corroboration
 
@@ -491,12 +491,14 @@ Sync mode is preferred so fast generations return discoveries inline (\`status: 
 
 export interface AttackDiscoveryGeneratorSkillDeps {
   getEventLogIndex: () => Promise<string>;
+  getStartServices?: RunAttackDiscoveryToolDeps['getStartServices'];
   runAttackDiscoveryToolDeps?: RunAttackDiscoveryToolDeps;
   workflowExecutionLookup: WorkflowExecutionLookup;
 }
 
 export const createAttackDiscoveryGeneratorSkill = ({
   getEventLogIndex,
+  getStartServices,
   runAttackDiscoveryToolDeps,
   workflowExecutionLookup,
 }: AttackDiscoveryGeneratorSkillDeps) =>
@@ -506,7 +508,7 @@ export const createAttackDiscoveryGeneratorSkill = ({
     description: SKILL_DESCRIPTION,
     getInlineTools: () => [
       getDefaultEsqlQueryTool(),
-      getAttackDiscoveryStatusTool({ getEventLogIndex, workflowExecutionLookup }),
+      getAttackDiscoveryStatusTool({ getEventLogIndex, getStartServices, workflowExecutionLookup }),
       ...(runAttackDiscoveryToolDeps != null
         ? [getRunAttackDiscoveryTool(runAttackDiscoveryToolDeps)]
         : []),

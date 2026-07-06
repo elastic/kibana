@@ -8,7 +8,7 @@
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-import { getDefaultEsqlQueryTool } from './tools/get_default_esql_query_tool';
+import { getDefaultEsqlQueryTool } from '../tools/get_default_esql_query_tool';
 
 /**
  * Skill definition for building ES|QL queries that retrieve security alerts
@@ -167,7 +167,7 @@ described above.`,
   getInlineTools: () => [getDefaultEsqlQueryTool()],
   getRegistryTools: () => [platformCoreTools.generateEsql, platformCoreTools.executeEsql],
   id: 'attack-discovery-alert-retrieval-builder',
-  name: 'attack-discovery-alerts-esql-query-builder',
+  name: 'attack-discovery-alert-retrieval-builder',
   referencedContent: [
     {
       content: `# Example ES|QL Queries for Attack Discovery Alert Retrieval

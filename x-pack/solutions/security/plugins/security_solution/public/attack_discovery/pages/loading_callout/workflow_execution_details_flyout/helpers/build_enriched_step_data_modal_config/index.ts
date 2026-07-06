@@ -38,9 +38,9 @@ export const buildEnrichedStepDataModalConfig = ({
 
   return {
     ...config,
-    workflowId: metadata?.workflowId,
-    workflowName: metadata?.workflowName,
-    workflowRunId: metadata?.workflowRunId,
+    workflowId: metadata?.workflowId ?? config.workflowId,
+    workflowName: metadata?.workflowName ?? config.workflowName,
+    workflowRunId: metadata?.workflowRunId ?? config.workflowRunId,
     workflowSummaries: enrichedSummaries,
   };
 };

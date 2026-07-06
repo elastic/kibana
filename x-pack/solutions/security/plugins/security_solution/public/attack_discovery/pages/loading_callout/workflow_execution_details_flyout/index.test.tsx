@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -17,6 +17,7 @@ import { usePipelineData } from '../../hooks/use_pipeline_data';
 import type { PipelineDataResponse } from '../../hooks/use_pipeline_data';
 import { useWorkflowExecutionDetails } from '../../hooks/use_workflow_execution_details';
 import { useGetAttackDiscoveryGeneration } from '../../hooks/use_get_attack_discovery_generation';
+import { useHasWorkflowsPrivileges } from '../../hooks/use_has_workflows_privileges';
 import { WorkflowPipelineMonitor } from '../workflow_pipeline_monitor';
 import type { AggregatedWorkflowExecution, StepExecutionWithLink } from '../types';
 import type { TroubleshootWithAiProps } from './troubleshoot_with_ai';
@@ -25,6 +26,7 @@ import { FailureSection } from './failure_section';
 jest.mock('../../hooks/use_pipeline_data');
 jest.mock('../../hooks/use_workflow_execution_details');
 jest.mock('../../hooks/use_get_attack_discovery_generation');
+jest.mock('../../hooks/use_has_workflows_privileges');
 jest.mock('./conversation_link', () => ({
   ConversationLink: jest.fn(({ conversationId }: { conversationId: string }) => (
     <div data-test-subj="conversationLink" data-conversation-id={conversationId} />
@@ -78,6 +80,9 @@ const MockWorkflowPipelineMonitor = WorkflowPipelineMonitor as unknown as jest.M
 const mockUsePipelineData = usePipelineData as jest.Mock;
 const mockUseWorkflowExecutionDetails = useWorkflowExecutionDetails as jest.Mock;
 const mockUseGetAttackDiscoveryGeneration = useGetAttackDiscoveryGeneration as jest.Mock;
+const mockUseHasWorkflowsPrivileges = useHasWorkflowsPrivileges as jest.Mock;
+
+const EMPTY_MISSING_PRIVILEGES = { featurePrivileges: [], indexPrivileges: [] };
 const MockFailureSection = FailureSection as jest.MockedFunction<typeof FailureSection>;
 
 const mockPipelineDataResponse: PipelineDataResponse = {
@@ -170,6 +175,51 @@ describe('WorkflowExecutionDetailsFlyout', () => {
     mockUseGetAttackDiscoveryGeneration.mockReturnValue({
       generation: undefined,
       isLoading: false,
+    });
+    mockUseHasWorkflowsPrivileges.mockReturnValue({
+      hasWorkflowsExecute: true,
+      hasWorkflowsRead: true,
+      missingPrivileges: EMPTY_MISSING_PRIVILEGES,
+    });
+  });
+
+  describe('workflows read privilege gating', () => {
+    it('renders the insufficient privileges callout when the workflows read privilege is missing', () => {
+      mockUseHasWorkflowsPrivileges.mockReturnValue({
+        hasWorkflowsExecute: false,
+        hasWorkflowsRead: false,
+        missingPrivileges: {
+          featurePrivileges: [['workflowsManagement', ['read', 'execute']]],
+          indexPrivileges: [],
+        },
+      });
+
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(screen.getByText('Insufficient privileges')).toBeInTheDocument();
+    });
+
+    it('does not render the execution content when the workflows read privilege is missing', () => {
+      mockUseHasWorkflowsPrivileges.mockReturnValue({
+        hasWorkflowsExecute: false,
+        hasWorkflowsRead: false,
+        missingPrivileges: {
+          featurePrivileges: [['workflowsManagement', ['read', 'execute']]],
+          indexPrivileges: [],
+        },
+      });
+
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('workflowPipelineMonitor')).not.toBeInTheDocument();
     });
   });
 
@@ -1100,6 +1150,134 @@ describe('WorkflowExecutionDetailsFlyout', () => {
       await userEvent.click(screen.getByTestId('stepDataModalCloseButton'));
 
       expect(screen.queryByTestId('stepDataModal')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('awaiting validation data polling', () => {
+    // Validation tracking present so the flyout knows a validation workflow ran.
+    const validationTracking = {
+      alertRetrieval: null,
+      gate: null,
+      generation: null,
+      validation: { workflowId: 'wf-validation', workflowRunId: 'run-validation' },
+    };
+
+    const getLastRefetchIntervalMs = (): number | undefined =>
+      mockUsePipelineData.mock.calls.at(-1)?.[0]?.refetchIntervalMs;
+
+    it('keeps polling pipeline data when the run succeeded but validation discoveries are not yet available', () => {
+      // The run flips to succeeded at the generation-succeeded event, before the
+      // validation workflow output is queryable — validated_discoveries is null.
+      mockUsePipelineData.mockReturnValue({
+        data: { ...mockPipelineDataResponse, validated_discoveries: null },
+        error: undefined,
+        isError: false,
+        isLoading: false,
+      });
+
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout
+            {...defaultProps}
+            generationStatus="succeeded"
+            workflowExecutions={validationTracking}
+          />
+        </TestProviders>
+      );
+
+      expect(getLastRefetchIntervalMs()).toBe(5000);
+    });
+
+    it('stops polling once validated_discoveries are available', () => {
+      mockUsePipelineData.mockReturnValue({
+        data: mockPipelineDataResponse,
+        error: undefined,
+        isError: false,
+        isLoading: false,
+      });
+
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout
+            {...defaultProps}
+            generationStatus="succeeded"
+            workflowExecutions={validationTracking}
+          />
+        </TestProviders>
+      );
+
+      expect(getLastRefetchIntervalMs()).toBe(0);
+    });
+
+    it('stops polling when validated_discoveries is an empty array (zero persisted)', () => {
+      mockUsePipelineData.mockReturnValue({
+        data: { ...mockPipelineDataResponse, validated_discoveries: [] },
+        error: undefined,
+        isError: false,
+        isLoading: false,
+      });
+
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout
+            {...defaultProps}
+            generationStatus="succeeded"
+            workflowExecutions={validationTracking}
+          />
+        </TestProviders>
+      );
+
+      expect(getLastRefetchIntervalMs()).toBe(0);
+    });
+
+    it('does not keep polling after success when there is no validation tracking', () => {
+      mockUsePipelineData.mockReturnValue({
+        data: { ...mockPipelineDataResponse, validated_discoveries: null },
+        error: undefined,
+        isError: false,
+        isLoading: false,
+      });
+
+      render(
+        <TestProviders>
+          <WorkflowExecutionDetailsFlyout {...defaultProps} generationStatus="succeeded" />
+        </TestProviders>
+      );
+
+      expect(getLastRefetchIntervalMs()).toBe(0);
+    });
+
+    it('stops polling after the max wait cap even if validation data never resolves', () => {
+      jest.useFakeTimers();
+
+      try {
+        mockUsePipelineData.mockReturnValue({
+          data: { ...mockPipelineDataResponse, validated_discoveries: null },
+          error: undefined,
+          isError: false,
+          isLoading: false,
+        });
+
+        render(
+          <TestProviders>
+            <WorkflowExecutionDetailsFlyout
+              {...defaultProps}
+              generationStatus="succeeded"
+              workflowExecutions={validationTracking}
+            />
+          </TestProviders>
+        );
+
+        expect(getLastRefetchIntervalMs()).toBe(5000);
+
+        act(() => {
+          jest.advanceTimersByTime(60_000);
+        });
+
+        expect(getLastRefetchIntervalMs()).toBe(0);
+      } finally {
+        jest.useRealTimers();
+      }
     });
   });
 

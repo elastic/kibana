@@ -284,5 +284,25 @@ describe('FailureSection', () => {
         expect.anything()
       );
     });
+
+    it('passes perWorkflowAlertRetrieval to DiagnosticReport', () => {
+      const perWorkflowAlertRetrieval = [
+        {
+          alertsContextCount: 10,
+          extractionStrategy: 'default_esql',
+          workflowId: 'wf-1',
+          workflowRunId: 'run-1',
+        },
+      ];
+
+      render(
+        <FailureSection {...defaultProps} perWorkflowAlertRetrieval={perWorkflowAlertRetrieval} />
+      );
+
+      expect(MockDiagnosticReport).toHaveBeenCalledWith(
+        expect.objectContaining({ perWorkflowAlertRetrieval }),
+        expect.anything()
+      );
+    });
   });
 });

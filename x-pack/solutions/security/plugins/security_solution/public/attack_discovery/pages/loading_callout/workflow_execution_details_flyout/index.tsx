@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -19,9 +19,11 @@ import type { WorkflowExecutionsTracking } from '@kbn/elastic-assistant-common';
 import type { HttpSetup } from '@kbn/core/public';
 import { ExecutionStatus } from '@kbn/workflows';
 
+import { MissingPrivilegesCallOut } from '../../../../common/components/missing_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttackDiscoveryEventTypes } from '../../../../common/lib/telemetry';
 import type { AttackDiscoveryPipelineStepType } from '../../../../common/lib/telemetry';
+import { useHasWorkflowsPrivileges } from '../../hooks/use_has_workflows_privileges';
 import { useGetAttackDiscoveryGeneration } from '../../hooks/use_get_attack_discovery_generation';
 import { usePipelineData } from '../../hooks/use_pipeline_data';
 import { useWorkflowExecutionDetails } from '../../hooks/use_workflow_execution_details';
@@ -45,6 +47,21 @@ import type {
   SourceMetadata,
 } from './diagnostic_report/helpers/build_diagnostic_report';
 import * as i18n from './translations';
+
+/**
+ * Interval used to keep polling pipeline data after the run reaches a terminal
+ * (succeeded) state while the validation phase's discoveries are not yet
+ * available from the pipeline-data endpoint.
+ */
+const AWAIT_VALIDATION_DATA_POLL_INTERVAL_MS = 5000;
+
+/**
+ * Upper bound on how long to keep polling for the validation phase's discoveries
+ * after the run becomes terminal. Prevents indefinite polling if the validation
+ * output never becomes queryable (e.g. an execution that produced no validation
+ * workflow output).
+ */
+const AWAIT_VALIDATION_DATA_MAX_WAIT_MS = 60_000;
 
 interface WorkflowExecutionDetailsFlyoutProps {
   alertsContextCount?: number | null;
@@ -120,6 +137,7 @@ const WorkflowExecutionDetailsFlyoutComponent: React.FC<WorkflowExecutionDetails
   workflowRunId,
 }) => {
   const { spaces, telemetry } = useKibana().services;
+  const { hasWorkflowsRead, missingPrivileges } = useHasWorkflowsPrivileges();
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'workflowExecutionDetailsFlyout',
   });
@@ -171,7 +189,6 @@ const WorkflowExecutionDetailsFlyoutComponent: React.FC<WorkflowExecutionDetails
     effectiveWorkflowExecutions,
     effectiveWorkflowId,
     effectiveWorkflowRunId,
-    isTerminalStatus,
     pipelineDataRefetchIntervalMs,
   } = useEffectiveWorkflowTracking({
     executionUuid,
@@ -207,28 +224,65 @@ const WorkflowExecutionDetailsFlyoutComponent: React.FC<WorkflowExecutionDetails
     workflowRunId: effectiveWorkflowRunId,
   });
 
-  const { data: pipelineData, refetch: refetchPipelineData } = usePipelineData({
+  // The overall run flips to a terminal (succeeded) status at the
+  // `generation-succeeded` event, which is emitted BEFORE the separate
+  // validation workflow finishes writing its output. If pipeline-data polling
+  // stops at that moment, `validated_discoveries` is cached as null — the
+  // Validation count badge disappears and Inspect falls back to the generated
+  // discoveries. Keep polling (bounded) until the validation phase's
+  // discoveries are available from the pipeline-data endpoint.
+  const [validationDataResolved, setValidationDataResolved] = useState(false);
+  const [awaitValidationTimedOut, setAwaitValidationTimedOut] = useState(false);
+
+  const isAwaitingValidationData =
+    effectiveGenerationStatus === 'succeeded' &&
+    effectiveWorkflowExecutions?.validation != null &&
+    !validationDataResolved &&
+    !awaitValidationTimedOut;
+
+  const effectivePipelineDataRefetchIntervalMs = isAwaitingValidationData
+    ? AWAIT_VALIDATION_DATA_POLL_INTERVAL_MS
+    : pipelineDataRefetchIntervalMs;
+
+  const { data: pipelineData } = usePipelineData({
     executionId: executionUuid ?? '',
     generationWorkflowRunId: generationWorkflowRunId ?? undefined,
     http,
     isEnabled: isPipelineDataEnabled,
-    refetchIntervalMs: pipelineDataRefetchIntervalMs,
+    refetchIntervalMs: effectivePipelineDataRefetchIntervalMs,
     workflowId: effectiveWorkflowId ?? '_',
   });
 
-  // Trigger a final pipeline data fetch when the execution transitions to a
-  // terminal state. The last polling cycle may have run before the validation
-  // step's output was written to ES (validation typically completes within
-  // milliseconds of the success event that stops polling), so without this
-  // final fetch the generation and validation count badges remain empty even
-  // though the server has the data ready.
-  const prevIsTerminalRef = useRef(isTerminalStatus);
+  // Reset the await-validation tracking when the execution changes so a new run
+  // starts polling for its own validation output. Declared before the resolve
+  // effect so that, on mount, a cached non-null result still resolves.
   useEffect(() => {
-    if (!prevIsTerminalRef.current && isTerminalStatus && isPipelineDataEnabled) {
-      refetchPipelineData();
+    setValidationDataResolved(false);
+    setAwaitValidationTimedOut(false);
+  }, [executionUuid]);
+
+  // Mark the validation discoveries resolved once the pipeline-data endpoint
+  // returns them. An empty array is a valid resolved state (a run may legitimately
+  // persist zero discoveries), so polling stops in that case too.
+  useEffect(() => {
+    if (pipelineData?.validated_discoveries != null) {
+      setValidationDataResolved(true);
     }
-    prevIsTerminalRef.current = isTerminalStatus;
-  }, [isPipelineDataEnabled, isTerminalStatus, refetchPipelineData]);
+  }, [pipelineData]);
+
+  // Cap the extra polling so we do not poll indefinitely if the validation
+  // output never becomes available.
+  useEffect(() => {
+    if (!isAwaitingValidationData) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setAwaitValidationTimedOut(true);
+    }, AWAIT_VALIDATION_DATA_MAX_WAIT_MS);
+
+    return () => clearTimeout(timer);
+  }, [isAwaitingValidationData]);
 
   const handleClose = useCallback(() => {
     onClose();
@@ -366,14 +420,22 @@ const WorkflowExecutionDetailsFlyoutComponent: React.FC<WorkflowExecutionDetails
 
         <EuiHorizontalRule />
 
-        <ExecutionContent
-          data={data}
-          effectiveWorkflowId={effectiveWorkflowId}
-          effectiveWorkflowRunId={effectiveWorkflowRunId}
-          isLoading={isLoading}
-          onViewData={handleViewData}
-          pipelineData={pipelineData}
-        />
+        {hasWorkflowsRead ? (
+          <ExecutionContent
+            data={data}
+            effectiveWorkflowId={effectiveWorkflowId}
+            effectiveWorkflowRunId={effectiveWorkflowRunId}
+            isLoading={isLoading}
+            onViewData={handleViewData}
+            pipelineData={pipelineData}
+          />
+        ) : (
+          <MissingPrivilegesCallOut
+            dismissible={false}
+            missingPrivileges={missingPrivileges}
+            namespace="attackDiscoveryWorkflowExecution"
+          />
+        )}
 
         {liveGeneration?.conversation_id != null && (
           <>

@@ -12,8 +12,10 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { v4 as uuidv4 } from 'uuid';
 import { executeGenerationWorkflow } from '@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow';
 import type { WorkflowConfig } from '@kbn/discoveries/impl/attack_discovery/generation/types';
+import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 
 import { RunStepCommonDefinition } from '../../../../common/step_types/run_step';
+import { getAlertsIndexForSpace } from '../../../lib/get_alerts_index_for_space';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
 import { resolveDefaultConnectorId } from '../../helpers/resolve_default_connector_id';
@@ -78,6 +80,14 @@ export const getRunStepDefinition = ({
         const { coreStart, pluginsStart } = await getStartServices();
         const request = context.contextManager.getFakeRequest();
 
+        // Resolve the space from the (space-scoped) fake request the same way
+        // `executeGenerationWorkflow` does for its authorization guard, so the
+        // alerts index is bounded to the schedule's space rather than `-default`.
+        const spaceId = getSpaceId({
+          request,
+          spaces: pluginsStart.spaces?.spacesService,
+        });
+
         const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
 
         const effectiveConnectorId = connectorId
@@ -122,18 +132,24 @@ export const getRunStepDefinition = ({
 
         const executeParams = {
           ...(alerts != null && alerts.length > 0 ? { alerts } : {}),
-          alertsIndexPattern: '.alerts-security.alerts-default',
+          alertsIndexPattern: getAlertsIndexForSpace(spaceId),
           analytics,
           apiConfig,
           authz: pluginsStart.security.authz,
           checkIntegrity:
             workflowsManagementApi != null
-              ? async ({ logger: checkLogger, spaceId }: { logger: Logger; spaceId: string }) => {
+              ? async ({
+                  logger: checkLogger,
+                  spaceId: checkSpaceId,
+                }: {
+                  logger: Logger;
+                  spaceId: string;
+                }) => {
                   const { pluginsStart: startDeps } = await getStartServices();
                   return checkManagedWorkflowIntegrity({
                     analytics,
                     logger: checkLogger,
-                    spaceId,
+                    spaceId: checkSpaceId,
                     workflowsExtensions: startDeps.workflowsExtensions,
                   });
                 }
@@ -192,73 +208,79 @@ export const getRunStepDefinition = ({
           );
         });
 
-        const raced = await Promise.race([pipelinePromise, softDeadlinePromise]);
+        try {
+          const raced = await Promise.race([pipelinePromise, softDeadlinePromise]);
 
-        if (raced === SOFT_DEADLINE_SENTINEL) {
-          context.logger.info(
-            `Attack Discovery sync pipeline exceeded soft deadline of ${ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS}ms; returning execution_uuid for slow-path resume (execution=${executionUuid})`
-          );
-
-          // The pipeline keeps running in the background; surface any later
-          // rejection so it doesn't surface as an unhandled promise rejection.
-          pipelinePromise.catch((err) => {
-            logger.error(
-              `Attack Discovery sync pipeline rejected after returning early (execution=${executionUuid}): ${
-                err instanceof Error ? err.message : String(err)
-              }`
+          if (raced === SOFT_DEADLINE_SENTINEL) {
+            context.logger.info(
+              `Attack Discovery sync pipeline exceeded soft deadline of ${ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS}ms; returning execution_uuid for slow-path resume (execution=${executionUuid})`
             );
-          });
+
+            // The pipeline keeps running in the background; surface any later
+            // rejection so it doesn't surface as an unhandled promise rejection.
+            pipelinePromise.catch((err) => {
+              logger.error(
+                `Attack Discovery sync pipeline rejected after returning early (execution=${executionUuid}): ${
+                  err instanceof Error ? err.message : String(err)
+                }`
+              );
+            });
+
+            return {
+              output: {
+                execution_uuid: executionUuid,
+                status: 'pending' as const,
+              },
+            };
+          }
+
+          const outcome = raced;
+
+          if (outcome.outcome === 'validation_succeeded') {
+            const { alertRetrievalResult, generationResult, validationResult } = outcome;
+
+            return {
+              output: {
+                alerts_context_count: alertRetrievalResult.alertsContextCount,
+                // R3: the run step persists via the persist step and returns exactly the
+                // discoveries it was handed (`[]` when the persist step did not run).
+                attack_discoveries: (validationResult.discoveriesToPersist ?? []) as Array<{
+                  alert_ids: string[];
+                  details_markdown: string;
+                  entity_summary_markdown?: string;
+                  id?: string;
+                  mitre_attack_tactics?: string[];
+                  summary_markdown: string;
+                  timestamp?: string;
+                  title: string;
+                }>,
+                discovery_count: validationResult.generatedCount,
+                execution_uuid: generationResult.executionUuid,
+                status: 'completed' as const,
+              },
+            };
+          }
+
+          context.logger.warn(`Attack Discovery validation failed (execution=${executionUuid})`);
 
           return {
             output: {
+              alerts_context_count: 0,
+              attack_discoveries: null,
+              discovery_count: 0,
               execution_uuid: executionUuid,
-              status: 'pending' as const,
-            },
-          };
-        }
-
-        if (softDeadlineTimer != null) {
-          clearTimeout(softDeadlineTimer);
-        }
-
-        const outcome = raced;
-
-        if (outcome.outcome === 'validation_succeeded') {
-          const { alertRetrievalResult, generationResult, validationResult } = outcome;
-
-          return {
-            output: {
-              alerts_context_count: alertRetrievalResult.alertsContextCount,
-              // R3: the run step persists via the persist step and returns exactly the
-              // discoveries it was handed (`[]` when the persist step did not run).
-              attack_discoveries: (validationResult.discoveriesToPersist ?? []) as Array<{
-                alert_ids: string[];
-                details_markdown: string;
-                entity_summary_markdown?: string;
-                id?: string;
-                mitre_attack_tactics?: string[];
-                summary_markdown: string;
-                timestamp?: string;
-                title: string;
-              }>,
-              discovery_count: validationResult.generatedCount,
-              execution_uuid: generationResult.executionUuid,
               status: 'completed' as const,
             },
           };
+        } finally {
+          // Always clear the soft-deadline timer so it does not leak into the
+          // event loop when the pipeline promise rejects (the timer would
+          // otherwise stay pending until it fired). This also covers the
+          // success and soft-deadline-exceeded paths.
+          if (softDeadlineTimer != null) {
+            clearTimeout(softDeadlineTimer);
+          }
         }
-
-        context.logger.warn(`Attack Discovery validation failed (execution=${executionUuid})`);
-
-        return {
-          output: {
-            alerts_context_count: 0,
-            attack_discoveries: null,
-            discovery_count: 0,
-            execution_uuid: executionUuid,
-            status: 'completed' as const,
-          },
-        };
       } catch (error) {
         context.logger.error(
           `Attack Discovery run step failed: ${

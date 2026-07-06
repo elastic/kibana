@@ -75,6 +75,56 @@ describe('buildEnrichedStepDataModalConfig', () => {
     expect(result.workflowRunId).toBe('meta-run');
   });
 
+  it('falls back to config workflowId when metadata is undefined', () => {
+    const result = buildEnrichedStepDataModalConfig({
+      config: { ...baseConfig, workflowId: 'config-workflow' },
+      metadata: undefined,
+      steps: undefined,
+    });
+
+    expect(result.workflowId).toBe('config-workflow');
+  });
+
+  it('falls back to config workflowName when metadata is undefined', () => {
+    const result = buildEnrichedStepDataModalConfig({
+      config: { ...baseConfig, workflowName: 'Config Workflow' },
+      metadata: undefined,
+      steps: undefined,
+    });
+
+    expect(result.workflowName).toBe('Config Workflow');
+  });
+
+  it('falls back to config workflowRunId when metadata is undefined', () => {
+    const result = buildEnrichedStepDataModalConfig({
+      config: { ...baseConfig, workflowRunId: 'config-run' },
+      metadata: undefined,
+      steps: undefined,
+    });
+
+    expect(result.workflowRunId).toBe('config-run');
+  });
+
+  it('does not clobber config workflowName when metadata omits it', () => {
+    const result = buildEnrichedStepDataModalConfig({
+      config: { ...baseConfig, workflowName: 'Config Workflow' },
+      metadata: { workflowId: 'meta-workflow', workflowName: undefined, workflowRunId: undefined },
+      steps: undefined,
+    });
+
+    expect(result.workflowName).toBe('Config Workflow');
+  });
+
+  it('prefers metadata workflowId over config workflowId when both are set', () => {
+    const result = buildEnrichedStepDataModalConfig({
+      config: { ...baseConfig, workflowId: 'config-workflow' },
+      metadata: { workflowId: 'meta-workflow', workflowName: undefined, workflowRunId: undefined },
+      steps: undefined,
+    });
+
+    expect(result.workflowId).toBe('meta-workflow');
+  });
+
   it('returns undefined workflowSummaries when config has none', () => {
     const result = buildEnrichedStepDataModalConfig({
       config: { ...baseConfig, workflowSummaries: undefined },

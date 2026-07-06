@@ -108,7 +108,7 @@ export const N_ALERTS_FROM_WORKFLOW = (count: number) =>
   i18n.translate(
     'xpack.securitySolution.attackDiscovery.loadingCallout.stepDataModal.nAlertsFromWorkflow',
     {
-      defaultMessage: '{count} alerts from workflow',
+      defaultMessage: '{count} {count, plural, one {alert} other {alerts}} from workflow',
       values: { count },
     }
   );

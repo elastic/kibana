@@ -9,9 +9,9 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 
-import { GET_EXECUTION_SUMMARY_TOOL_ID } from './tools/get_execution_summary_tool';
-import type { WorkflowFetcher } from './tools/get_workflow_health_check_tool';
-import { GET_WORKFLOW_HEALTH_CHECK_TOOL_ID } from './tools/get_workflow_health_check_tool';
+import { GET_EXECUTION_SUMMARY_TOOL_ID } from '../tools/get_execution_summary_tool';
+import type { WorkflowFetcher } from '../tools/get_workflow_health_check_tool';
+import { GET_WORKFLOW_HEALTH_CHECK_TOOL_ID } from '../tools/get_workflow_health_check_tool';
 import { createWorkflowTroubleshootingSkill } from './workflow_troubleshooting_skill';
 
 const VALIDATE_WORKFLOW_TOOL_ID = 'platform.workflows.validate_workflow';

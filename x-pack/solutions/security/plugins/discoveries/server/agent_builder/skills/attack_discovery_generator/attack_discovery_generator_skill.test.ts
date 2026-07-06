@@ -9,15 +9,15 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 
-import { MITRE_ATTACK_TACTICS } from '../lib/prompt/local_prompt_object/attack_discovery_prompts';
+import { MITRE_ATTACK_TACTICS } from '../../../lib/prompt/local_prompt_object/attack_discovery_prompts';
 import {
   ATTACK_DISCOVERY_GENERATOR_SKILL_BASE_PATH,
   ATTACK_DISCOVERY_GENERATOR_SKILL_ID,
   ATTACK_DISCOVERY_GENERATOR_SKILL_NAME,
   createAttackDiscoveryGeneratorSkill,
 } from './attack_discovery_generator_skill';
-import { GET_ATTACK_DISCOVERY_STATUS_TOOL_ID } from './tools/get_attack_discovery_status_tool';
-import { GET_DEFAULT_ESQL_QUERY_TOOL_ID } from './tools/get_default_esql_query_tool';
+import { GET_ATTACK_DISCOVERY_STATUS_TOOL_ID } from '../tools/get_attack_discovery_status_tool';
+import { GET_DEFAULT_ESQL_QUERY_TOOL_ID } from '../tools/get_default_esql_query_tool';
 
 const attackDiscoveryGeneratorSkill = createAttackDiscoveryGeneratorSkill({
   getEventLogIndex: async () => 'event-log-*',

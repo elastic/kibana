@@ -17,11 +17,11 @@ import {
   type AttackDiscoveryStatusResult,
   type WorkflowExecutionLookup,
 } from '.';
-import { extractPipelineValidationData } from '../../../routes/get/pipeline_data/helpers/extract_pipeline_validation_data';
-import { getWorkflowExecutionsTracking } from '../../../routes/get/pipeline_data/helpers/get_workflow_executions_tracking';
+import { extractPipelineValidationData } from '../../../../routes/get/pipeline_data/helpers/extract_pipeline_validation_data';
+import { getWorkflowExecutionsTracking } from '../../../../routes/get/pipeline_data/helpers/get_workflow_executions_tracking';
 
-jest.mock('../../../routes/get/pipeline_data/helpers/get_workflow_executions_tracking');
-jest.mock('../../../routes/get/pipeline_data/helpers/extract_pipeline_validation_data');
+jest.mock('../../../../routes/get/pipeline_data/helpers/get_workflow_executions_tracking');
+jest.mock('../../../../routes/get/pipeline_data/helpers/extract_pipeline_validation_data');
 
 const mockGetWorkflowExecutionsTracking = getWorkflowExecutionsTracking as jest.MockedFunction<
   typeof getWorkflowExecutionsTracking
@@ -104,8 +104,46 @@ describe('getAttackDiscoveryStatusTool', () => {
     return result.results[0];
   };
 
+  const buildToolWithFeatureFlag = (enabled: boolean) =>
+    getAttackDiscoveryStatusTool({
+      getEventLogIndex: mockGetEventLogIndex,
+      getStartServices: async () => ({
+        coreStart: {
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(enabled) },
+        } as never,
+        pluginsStart: {} as never,
+      }),
+      workflowExecutionLookup: mockLookup,
+    });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockEsClient.asCurrentUser.security.authenticate.mockResolvedValue({
+      username: 'test-user',
+    } as unknown as Awaited<ReturnType<typeof mockEsClient.asCurrentUser.security.authenticate>>);
+  });
+
+  it('scopes the tracking lookup to the requesting principal (object-level authz)', async () => {
+    mockGetWorkflowExecutionsTracking.mockResolvedValue(null);
+
+    await invoke(EXECUTION_UUID);
+
+    expect(mockGetWorkflowExecutionsTracking).toHaveBeenCalledWith(
+      expect.objectContaining({ username: 'test-user' })
+    );
+  });
+
+  it('returns an error result and does no event-log work when the feature flag is OFF', async () => {
+    const tool = buildToolWithFeatureFlag(false);
+
+    const result = await tool.handler({ execution_uuid: EXECUTION_UUID }, mockContext);
+
+    if ('prompt' in result) {
+      throw new Error('expected standard tool result, received prompt');
+    }
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(mockGetWorkflowExecutionsTracking).not.toHaveBeenCalled();
   });
 
   it('returns a tool with the expected id', () => {

@@ -214,6 +214,35 @@ describe('getRunStepDefinition', () => {
     });
   });
 
+  describe('space-bounded alerts index', () => {
+    it('derives the alerts index from the resolved space', async () => {
+      mockGetStartServices.mockResolvedValueOnce({
+        coreStart: {
+          elasticsearch: {
+            client: { asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }) },
+          },
+          savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) },
+          uiSettings: { asScopedToClient: jest.fn().mockReturnValue(mockUiSettingsClient) },
+        },
+        pluginsStart: {
+          actions: {
+            getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+          },
+          security: { authz: {} },
+          spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('finance') } },
+        },
+      });
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(asyncMockContext as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ alertsIndexPattern: '.alerts-security.alerts-finance' })
+      );
+    });
+  });
+
   describe('connector resolution', () => {
     it('resolves connector details when only connector_id is provided', async () => {
       const stepDefinition = getStepDefinition();
@@ -443,6 +472,37 @@ describe('getRunStepDefinition', () => {
       const result = await stepDefinition.handler(syncMockContext as never);
 
       expect(result.output?.attack_discoveries).toEqual(handoverDiscoveries);
+    });
+  });
+
+  describe('soft deadline timer cleanup (sync mode)', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+    });
+
+    it('clears the soft-deadline timer when the pipeline rejects', async () => {
+      mockExecuteGenerationWorkflow.mockRejectedValue(new Error('Pipeline failed'));
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(syncMockContext as never);
+
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('clears the soft-deadline timer when the pipeline resolves before the deadline', async () => {
+      mockExecuteGenerationWorkflow.mockResolvedValue(mockSuccessOutcome);
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(syncMockContext as never);
+
+      expect(jest.getTimerCount()).toBe(0);
     });
   });
 

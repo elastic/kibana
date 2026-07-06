@@ -10,7 +10,7 @@ import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 
 import { alertRetrievalBuilderSkill } from './alert_retrieval_builder_skill';
-import { GET_DEFAULT_ESQL_QUERY_TOOL_ID } from './tools/get_default_esql_query_tool';
+import { GET_DEFAULT_ESQL_QUERY_TOOL_ID } from '../tools/get_default_esql_query_tool';
 
 describe('alertRetrievalBuilderSkill', () => {
   it('passes validateSkillDefinition without error', async () => {
@@ -27,7 +27,11 @@ describe('alertRetrievalBuilderSkill', () => {
 
   describe('name', () => {
     it('has the expected name', () => {
-      expect(alertRetrievalBuilderSkill.name).toBe('attack-discovery-alerts-esql-query-builder');
+      expect(alertRetrievalBuilderSkill.name).toBe('attack-discovery-alert-retrieval-builder');
+    });
+
+    it('matches its id (name and id are reconciled)', () => {
+      expect(alertRetrievalBuilderSkill.name).toBe(alertRetrievalBuilderSkill.id);
     });
 
     it('contains only lowercase letters, numbers, and hyphens', () => {

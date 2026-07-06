@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/server';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { AttackDiscoveryApiAlert } from '@kbn/discoveries-schemas';
+import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
-import { extractPipelineValidationData } from '../../../routes/get/pipeline_data/helpers/extract_pipeline_validation_data';
-import { getWorkflowExecutionsTracking } from '../../../routes/get/pipeline_data/helpers/get_workflow_executions_tracking';
+import type { DiscoveriesPluginStartDeps } from '../../../../types';
+import { extractPipelineValidationData } from '../../../../routes/get/pipeline_data/helpers/extract_pipeline_validation_data';
+import { getWorkflowExecutionsTracking } from '../../../../routes/get/pipeline_data/helpers/get_workflow_executions_tracking';
 
 export const GET_ATTACK_DISCOVERY_STATUS_TOOL_ID = 'security.attack-discovery.get_status';
 
@@ -79,9 +82,14 @@ const toErrorMessage = (error: WorkflowExecutionDto['error']): string | null => 
 
 export const getAttackDiscoveryStatusTool = ({
   getEventLogIndex,
+  getStartServices,
   workflowExecutionLookup,
 }: {
   getEventLogIndex: () => Promise<string>;
+  getStartServices?: () => Promise<{
+    coreStart: CoreStart;
+    pluginsStart: DiscoveriesPluginStartDeps;
+  }>;
   workflowExecutionLookup: WorkflowExecutionLookup;
 }): BuiltinSkillBoundedTool<typeof inputSchema> => ({
   description: `Look up the current status of an Attack Discovery generation by its \`execution_uuid\`. Returns one of \`succeeded\`, \`running\`, \`failed\`, or \`not_found\`. When succeeded, includes the validated \`attack_discoveries\` so the agent can emit insights JSON. When running, includes the current \`phase\` (alert_retrieval, generation, or validation). Use this to resume a slow-path generation that returned only an \`execution_uuid\` because it exceeded the run step's soft deadline, and whenever the user asks about the status of a previously-started generation.`,
@@ -90,12 +98,37 @@ export const getAttackDiscoveryStatusTool = ({
     const { esClient, logger, spaceId } = context;
 
     try {
+      // Kill-switch backstop: even though the skill is not registered when the
+      // feature flag is OFF at startup, guard per-invocation so a runtime flip to
+      // OFF does no real work (no event-log read) on an already-registered tool.
+      if (getStartServices != null) {
+        const { coreStart } = await getStartServices();
+        if (!(await isWorkflowsEnabled(coreStart.featureFlags))) {
+          return {
+            results: [
+              {
+                data: { message: 'Attack Discovery workflows are not enabled' },
+                tool_result_id: getToolResultId(),
+                type: ToolResultType.error,
+              },
+            ],
+          };
+        }
+      }
+
       const eventLogIndex = await getEventLogIndex();
+
+      // Object-level authorization: bind the event-log read to the requesting
+      // principal so the status of another user's execution cannot be read by
+      // supplying/guessing its id within the same space.
+      const { username } = await esClient.asCurrentUser.security.authenticate();
 
       const tracking = await getWorkflowExecutionsTracking({
         esClient: esClient.asCurrentUser,
         eventLogIndex,
         executionId: executionUuid,
+        spaceId,
+        username,
       });
 
       if (tracking == null) {
