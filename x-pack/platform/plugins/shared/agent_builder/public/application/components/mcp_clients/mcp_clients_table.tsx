@@ -147,7 +147,6 @@ export const McpClientsTable = memo(() => {
             )
           ) : null
         }
-        responsiveBreakpoint={false}
       />
     </>
   );
