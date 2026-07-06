@@ -189,7 +189,7 @@ export const Host: FC<HostProps> = memo(function Host({
     useEntityRiskScoreRecalculation({
       entityType: EntityType.host,
       identifier: hostName,
-      entityId: entityStoreV2Enabled ? observedHost.entityRecord?.entity.id : undefined,
+      entityId: entityStoreV2Enabled ? observedHost.entityRecord?.entity?.id : undefined,
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,

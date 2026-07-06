@@ -20,6 +20,7 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { PerformanceContext } from '@kbn/ebt-tools';
 import { Observable, of } from 'rxjs';
+import { createCallApmApiV2 } from '@kbn/apm-api-shared/src/create_call_apm_api';
 import type { ITelemetryClient } from '../../services/telemetry/types';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { storybookMockHttp } from '../../services/rest/storybook_mock_http';
@@ -30,6 +31,7 @@ import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time
 import { ChartPointerEventContextProvider } from '../chart_pointer_event/chart_pointer_event_context';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
+import { setApmInternalServices } from '../../plugin';
 
 const mockPerformanceApi = {
   onPageReady: () => {},
@@ -217,6 +219,8 @@ export function MockApmPluginStorybook({
 }) {
   const contextMock = merge({}, mockApmPluginContext, apmContext);
   createCallApmApi(contextMock.core);
+  const callApmApi = createCallApmApiV2(contextMock.core, { cpsManager: undefined });
+  setApmInternalServices({ callApmApi });
   const KibanaReactContext = createKibanaReactContext(
     merge({}, contextMock.core, {
       telemetry: storybookTelemetry,
