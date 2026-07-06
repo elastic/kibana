@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -13,9 +13,10 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/code-editor';
@@ -27,7 +28,7 @@ import type { QueryTab } from './types';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
 import { TAB_DEFINITIONS, isAlertTabDisabled } from './compose_discover_tabs';
-import { useTabQueryValidation } from './use_tab_query_validation';
+import { validateTabQueries, type TabValidationError } from './validate_tab_queries';
 
 /**
  * Props for the Discover Sandbox flyout — a full-screen ES|QL editor with live
@@ -175,8 +176,10 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   })();
 
   /*
-   * Statically validate every tab's query — including ones the user hasn't
-   * switched to — so Apply can be blocked until all of them are error-free.
+   * Apply is gated on static ES|QL validation of every tab — including ones the
+   * user hasn't switched to. Validation runs on the Apply click rather than on
+   * every keystroke, because the ES|QL callbacks issue real requests to
+   * Elasticsearch; a one-shot check on an explicit action keeps typing snappy.
    * The Alert tab is skipped while it's disabled (base not yet defined): its
    * segment isn't part of the active pipeline, so it shouldn't block Apply.
    */
@@ -199,10 +202,27 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     };
   }, [tabs, query, queryFields.base]);
 
-  const { errorTabs, hasErrors } = useTabQueryValidation({
-    queries: validationQueries,
-    callbacks: esqlCallbacks,
-  });
+  const [isValidating, setIsValidating] = useState(false);
+  const [applyErrors, setApplyErrors] = useState<TabValidationError[]>([]);
+
+  // Editing any block invalidates the last apply attempt's errors.
+  useEffect(() => {
+    setApplyErrors([]);
+  }, [query]);
+
+  const handleApply = useCallback(async () => {
+    if (!onApply) return;
+    setIsValidating(true);
+    try {
+      const errors = await validateTabQueries(validationQueries, esqlCallbacks);
+      setApplyErrors(errors);
+      if (errors.length === 0) {
+        onApply();
+      }
+    } finally {
+      setIsValidating(false);
+    }
+  }, [onApply, validationQueries, esqlCallbacks]);
 
   /*
    * Unified composed mode: the editor holds the whole pipeline, so write it to
@@ -218,22 +238,19 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     [query.format, updateQuery]
   );
 
-  const applyDisabledTooltip = useMemo(() => {
-    if (!hasErrors) return undefined;
-    if (!tabs?.length) {
-      return i18n.translate(
-        'xpack.alertingV2.composeDiscover.querySandbox.applyDisabledSingleTooltip',
-        { defaultMessage: 'Resolve the query error before applying changes.' }
-      );
-    }
-    const tabLabels = errorTabs
-      .map((tab) => TAB_DEFINITIONS.find((t) => t.id === tab)?.label)
-      .filter((label): label is string => Boolean(label));
-    return i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.applyDisabledTooltip', {
-      defaultMessage: 'Resolve errors in: {tabs}',
-      values: { tabs: tabLabels.join(', ') },
-    });
-  }, [hasErrors, tabs, errorTabs]);
+  /*
+   * Flatten the per-tab errors into display rows. In tabs mode each row is
+   * prefixed with the tab label so the user knows where to look; in unified
+   * (no-tabs) mode there is only one query, so we show the bare message.
+   */
+  const applyErrorItems = useMemo(
+    () =>
+      applyErrors.flatMap(({ tab, messages }) => {
+        const label = tabs?.length ? TAB_DEFINITIONS.find((t) => t.id === tab)?.label : undefined;
+        return messages.map((message) => (label ? `${label}: ${message}` : message));
+      }),
+    [applyErrors, tabs]
+  );
 
   const tabProps: QuerySandboxProps['tabProps'] = useMemo(() => {
     if (!tabs?.length) return undefined;
@@ -261,14 +278,6 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     onRecoveryEditorMount,
     isReadOnly,
   ]);
-
-  const applyButton = (
-    <EuiButton fill onClick={onApply} disabled={hasErrors} data-test-subj="querySandboxApply">
-      {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.applyButtonLabel', {
-        defaultMessage: 'Apply changes',
-      })}
-    </EuiButton>
-  );
 
   return (
     <EuiFlyout
@@ -303,17 +312,40 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
 
       {onApply && (
         <EuiFlyoutFooter>
+          {applyErrorItems.length > 0 && (
+            <>
+              <EuiCallOut
+                announceOnMount
+                color="danger"
+                iconType="error"
+                size="s"
+                data-test-subj="querySandboxApplyErrors"
+                title={i18n.translate(
+                  'xpack.alertingV2.composeDiscover.querySandbox.applyBlockedTitle',
+                  { defaultMessage: 'Resolve query errors before applying changes' }
+                )}
+              >
+                <ul>
+                  {applyErrorItems.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+            </>
+          )}
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              {hasErrors ? (
-                <EuiToolTip content={applyDisabledTooltip}>
-                  <span tabIndex={0} style={{ display: 'inline-flex' }}>
-                    {applyButton}
-                  </span>
-                </EuiToolTip>
-              ) : (
-                applyButton
-              )}
+              <EuiButton
+                fill
+                onClick={handleApply}
+                isLoading={isValidating}
+                data-test-subj="querySandboxApply"
+              >
+                {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.applyButtonLabel', {
+                  defaultMessage: 'Apply changes',
+                })}
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>

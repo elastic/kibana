@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, act, screen } from '@testing-library/react';
+import { render, act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -35,12 +35,13 @@ jest.mock('../../form/contexts/rule_form_context', () => ({
   }),
 }));
 
-const mockUseTabQueryValidation = jest.fn((_params: unknown) => ({
-  errorTabs: [] as QueryTab[],
-  hasErrors: false,
-}));
-jest.mock('./use_tab_query_validation', () => ({
-  useTabQueryValidation: (params: unknown) => mockUseTabQueryValidation(params),
+const mockValidateTabQueries = jest.fn(
+  async (_queries: unknown, _callbacks: unknown) =>
+    [] as Array<{ tab: QueryTab; messages: string[] }>
+);
+jest.mock('./validate_tab_queries', () => ({
+  validateTabQueries: (queries: unknown, callbacks: unknown) =>
+    mockValidateTabQueries(queries, callbacks),
 }));
 
 const mockColumns: never[] = [];
@@ -264,7 +265,7 @@ describe('QuerySandboxFlyout — Apply gating', () => {
   beforeEach(() => {
     mockFieldMap = {};
     jest.clearAllMocks();
-    mockUseTabQueryValidation.mockReturnValue({ errorTabs: [], hasErrors: false });
+    mockValidateTabQueries.mockResolvedValue([]);
   });
 
   it('does not render Apply when onApply is not provided', () => {
@@ -273,37 +274,39 @@ describe('QuerySandboxFlyout — Apply gating', () => {
     expect(screen.queryByTestId('querySandboxApply')).not.toBeInTheDocument();
   });
 
-  it('enables Apply when no tab has a validation error', () => {
-    mockUseTabQueryValidation.mockReturnValue({ errorTabs: [], hasErrors: false });
+  it('applies when validation finds no errors', async () => {
+    const onApply = jest.fn();
+    mockValidateTabQueries.mockResolvedValue([]);
 
-    renderSandbox({ onApply: jest.fn(), tabs: ['base', 'alert'], activeTab: 'alert' });
+    renderSandbox({ onApply, tabs: ['base', 'alert'], activeTab: 'alert' });
 
-    expect(screen.getByTestId('querySandboxApply')).not.toBeDisabled();
+    await userEvent.click(screen.getByTestId('querySandboxApply'));
+
+    await waitFor(() => expect(onApply).toHaveBeenCalledTimes(1));
+    expect(screen.queryByTestId('querySandboxApplyErrors')).not.toBeInTheDocument();
   });
 
-  it('disables Apply and names the offending tab when a tab has a validation error', async () => {
-    mockUseTabQueryValidation.mockReturnValue({ errorTabs: ['alert'], hasErrors: true });
+  it('blocks apply and shows the offending tab and message when validation fails', async () => {
+    const onApply = jest.fn();
+    mockValidateTabQueries.mockResolvedValue([{ tab: 'alert', messages: ['bad query'] }]);
 
-    renderSandbox({ onApply: jest.fn(), tabs: ['base', 'alert'], activeTab: 'base' });
+    renderSandbox({ onApply, tabs: ['base', 'alert'], activeTab: 'base' });
 
-    const applyButton = screen.getByTestId('querySandboxApply');
-    expect(applyButton).toBeDisabled();
+    await userEvent.click(screen.getByTestId('querySandboxApply'));
 
-    await userEvent.hover(applyButton.parentElement ?? applyButton);
-    expect(await screen.findByText('Resolve errors in: Alert query')).toBeInTheDocument();
+    expect(await screen.findByText('Alert query: bad query')).toBeInTheDocument();
+    expect(onApply).not.toHaveBeenCalled();
   });
 
-  it('disables Apply with a generic message in unified (no-tabs) mode', async () => {
-    mockUseTabQueryValidation.mockReturnValue({ errorTabs: [], hasErrors: true });
+  it('shows the bare message in unified (no-tabs) mode', async () => {
+    const onApply = jest.fn();
+    mockValidateTabQueries.mockResolvedValue([{ tab: 'alert', messages: ['bad query'] }]);
 
-    renderSandbox({ onApply: jest.fn(), tabs: undefined });
+    renderSandbox({ onApply, tabs: undefined });
 
-    const applyButton = screen.getByTestId('querySandboxApply');
-    expect(applyButton).toBeDisabled();
+    await userEvent.click(screen.getByTestId('querySandboxApply'));
 
-    await userEvent.hover(applyButton.parentElement ?? applyButton);
-    expect(
-      await screen.findByText('Resolve the query error before applying changes.')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('bad query')).toBeInTheDocument();
+    expect(onApply).not.toHaveBeenCalled();
   });
 });
