@@ -94,7 +94,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
               <p>
                 {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.errorCallout.body', {
                   defaultMessage:
-                    'An error occurred while fetching region or policy data. Close and reopen this panel to retry.',
+                    'An error occurred while fetching region or policy data. To try again, close and reopen this panel.',
                 })}
               </p>
             </EuiCallOut>
