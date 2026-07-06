@@ -71,7 +71,7 @@ export const runSuiteCmd: Command<void> = {
     const evaluationConnectorId = await resolveEvaluationConnectorId(repoRoot, log, flagsReader);
 
     const envOverrides: Record<string, string> = {
-      EVALUATION_CONNECTOR_ID: evaluationConnectorId,
+      EVAL_CONNECTOR_ID: evaluationConnectorId,
     };
 
     if (suite) {
@@ -95,7 +95,7 @@ export const runSuiteCmd: Command<void> = {
 
     const repetitions = flagsReader.string('repetitions');
     if (repetitions) {
-      envOverrides.EVALUATION_REPETITIONS = repetitions;
+      envOverrides.EVAL_REPETITIONS = repetitions;
     }
 
     const traceEsUrl = flagsReader.string('trace-es-url');
@@ -110,12 +110,12 @@ export const runSuiteCmd: Command<void> = {
 
     const evaluationsKbnUrl = flagsReader.string('evaluations-kbn-url');
     if (evaluationsKbnUrl) {
-      envOverrides.EVALUATIONS_KBN_URL = evaluationsKbnUrl;
+      envOverrides.EVAL_KBN_URL = evaluationsKbnUrl;
     }
 
     const evaluationsKbnApiKey = flagsReader.string('evaluations-kbn-api-key');
     if (evaluationsKbnApiKey) {
-      envOverrides.EVALUATIONS_KBN_API_KEY = evaluationsKbnApiKey;
+      envOverrides.EVAL_KBN_API_KEY = evaluationsKbnApiKey;
     }
 
     const phoenixBaseUrl = flagsReader.string('phoenix-base-url');

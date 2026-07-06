@@ -13,7 +13,7 @@ import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
 import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
 
-const DEFAULT_EVALUATIONS_KBN_URL = 'http://elastic:changeme@localhost:5601';
+const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
 export const compareCmd: Command<void> = {
   name: 'compare',
@@ -22,7 +22,7 @@ export const compareCmd: Command<void> = {
 
   NOTE: The two experiments must use the same experiment orchestrator (e.g. Kibana or Phoenix), due to the different handling of the dataset/example IDs.
   Scores are read from the evals plugin on the target Kibana.
-  Configure target/auth with EVALUATIONS_KBN_URL and EVALUATIONS_KBN_API_KEY.
+  Configure target/auth with EVAL_KBN_URL and EVAL_KBN_API_KEY.
 
   Example:
     node scripts/evals compare <experiment-id-1> <experiment-id-2>
@@ -32,7 +32,7 @@ export const compareCmd: Command<void> = {
 
     if (!firstExperimentId || !secondExperimentId) {
       throw createFlagError(
-        'Two experiment IDs are required. Example: node scripts/evals compare <experiment-id-1> <experiment-id-2>. Configure target Kibana with EVALUATIONS_KBN_URL and EVALUATIONS_KBN_API_KEY.'
+        'Two experiment IDs are required. Example: node scripts/evals compare <experiment-id-1> <experiment-id-2>. Configure target Kibana with EVAL_KBN_URL and EVAL_KBN_API_KEY.'
       );
     }
 
@@ -40,17 +40,17 @@ export const compareCmd: Command<void> = {
       throw createFlagError('Unexpected extra arguments. Provide exactly two experiment IDs.');
     }
 
-    const evaluationsKbnUrl = process.env.EVALUATIONS_KBN_URL;
+    const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
     if (!evaluationsKbnUrl) {
-      log.warning(`EVALUATIONS_KBN_URL not set; defaulting to ${DEFAULT_EVALUATIONS_KBN_URL}.`);
+      log.warning(`EVAL_KBN_URL not set; defaulting to ${DEFAULT_EVAL_KBN_URL}.`);
     }
 
-    const defaultKbnClient = new KbnClient({ log, url: DEFAULT_EVALUATIONS_KBN_URL });
+    const defaultKbnClient = new KbnClient({ log, url: DEFAULT_EVAL_KBN_URL });
     const kbnClient = getEvaluationsKbnClient({
       kbnClient: defaultKbnClient,
       log,
       evaluationsKbnUrl,
-      evaluationsKbnApiKey: process.env.EVALUATIONS_KBN_API_KEY,
+      evaluationsKbnApiKey: process.env.EVAL_KBN_API_KEY,
     });
     const evalsClient = new EvalsClient(kbnClient, log);
 
@@ -60,8 +60,8 @@ export const compareCmd: Command<void> = {
       throw createFlagError(
         [
           error instanceof Error ? error.message : String(error),
-          'Set EVALUATIONS_KBN_URL to a Kibana instance with xpack.evals.enabled=true.',
-          'Set EVALUATIONS_KBN_API_KEY when authenticating to a non-local target.',
+          'Set EVAL_KBN_URL to a Kibana instance with xpack.evals.enabled=true.',
+          'Set EVAL_KBN_API_KEY when authenticating to a non-local target.',
         ].join('\n')
       );
     }

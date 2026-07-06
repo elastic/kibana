@@ -112,7 +112,7 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
     NEED_EIS_CONNECTORS="true"
   fi
   # If the judge connector is EIS-backed, we still need EIS connectors even when running a LiteLLM project.
-  if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == eis-* ]]; then
+  if [[ -n "${EVAL_CONNECTOR_ID:-}" ]] && [[ "${EVAL_CONNECTOR_ID}" == eis-* ]]; then
     NEED_EIS_CONNECTORS="true"
   fi
 
@@ -147,8 +147,8 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
 
     if [[ -z "${CONNECTOR_IDS:-}" ]]; then
       echo "No connectors found in KIBANA_TESTING_AI_CONNECTORS; falling back to evaluation connector only"
-      if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]]; then
-        export EVAL_PROJECT="${EVALUATION_CONNECTOR_ID}"
+      if [[ -n "${EVAL_CONNECTOR_ID:-}" ]]; then
+        export EVAL_PROJECT="${EVAL_CONNECTOR_ID}"
       fi
     else
       echo "--- Uploading eval connector fanout steps"
@@ -189,7 +189,7 @@ EOF
           FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
           EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
           EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
-          EVALUATION_CONNECTOR_ID: "${EVALUATION_CONNECTOR_ID:-}"
+          EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
@@ -198,7 +198,7 @@ EOF
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
           EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
           EVAL_GREP: "${EVAL_GREP:-}"
-          EVALUATION_REPETITIONS: "${EVALUATION_REPETITIONS:-}"
+          EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
@@ -324,7 +324,7 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
   if [[ -n "${EVAL_PROJECT:-}" ]] && [[ "${EVAL_PROJECT}" == eis-* ]]; then
     NEED_EIS_RUNTIME="true"
   fi
-  if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == eis-* ]]; then
+  if [[ -n "${EVAL_CONNECTOR_ID:-}" ]] && [[ "${EVAL_CONNECTOR_ID}" == eis-* ]]; then
     NEED_EIS_RUNTIME="true"
   fi
   if [[ "${EVAL_MODEL_GROUPS:-}" == *"eis/"* ]]; then

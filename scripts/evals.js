@@ -195,8 +195,7 @@ function runFastCiMap(repoRoot, args) {
       entries.push({
         label: labels[j],
         suiteId: suite.id,
-        command:
-          'EVALUATION_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ' + suite.id,
+        command: 'EVAL_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ' + suite.id,
       });
     }
   }
@@ -227,14 +226,14 @@ var ENV_DOCS = [
     example: 'TEST_RUN_ID=agent-builder-baseline',
   },
   {
-    name: 'EVALUATION_CONNECTOR_ID',
+    name: 'EVAL_CONNECTOR_ID',
     description: 'Connector used for LLM-as-a-judge evaluators (required).',
-    example: 'EVALUATION_CONNECTOR_ID=bedrock-claude',
+    example: 'EVAL_CONNECTOR_ID=bedrock-claude',
   },
   {
-    name: 'EVALUATION_REPETITIONS',
+    name: 'EVAL_REPETITIONS',
     description: 'Overrides configured repetition count for evals.',
-    example: 'EVALUATION_REPETITIONS=3',
+    example: 'EVAL_REPETITIONS=3',
   },
   {
     name: 'KBN_EVALS_EXECUTOR',
@@ -274,15 +273,15 @@ var ENV_DOCS = [
     example: 'TRACING_EXPORTERS=\'[{"http":{"url":"https://ingest.example.com/v1/traces"}}]\'',
   },
   {
-    name: 'EVALUATIONS_KBN_URL',
+    name: 'EVAL_KBN_URL',
     description:
       'Kibana URL used for eval score ingestion and dataset operations when targeting a non-local cluster.',
-    example: 'EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601',
+    example: 'EVAL_KBN_URL=http://elastic:changeme@localhost:5601',
   },
   {
-    name: 'EVALUATIONS_KBN_API_KEY',
-    description: 'API key for authenticating to EVALUATIONS_KBN_URL.',
-    example: 'EVALUATIONS_KBN_API_KEY=...',
+    name: 'EVAL_KBN_API_KEY',
+    description: 'API key for authenticating to EVAL_KBN_URL.',
+    example: 'EVAL_KBN_API_KEY=...',
   },
   {
     name: 'SELECTED_EVALUATORS',

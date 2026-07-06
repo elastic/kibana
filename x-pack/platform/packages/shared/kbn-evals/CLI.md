@@ -78,7 +78,7 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--project <id>`                 | `--model` | Connector/model to evaluate (comma-separated for multiple)                                  |
 | `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators                                                |
 | `--profile <name>`               |           | Profile for config resolution (see table above)                                             |
-| `--datasets-profile <name>`      |           | Override dataset settings (sets `EVALUATIONS_KBN_URL`/`EVALUATIONS_KBN_API_KEY`)            |
+| `--datasets-profile <name>`      |           | Override dataset settings (sets `EVAL_KBN_URL`/`EVAL_KBN_API_KEY`)            |
 | `--export-profile <name>`        |           | Override export settings (sets `TRACING_ES_URL`, `TRACING_EXPORTERS`)                       |
 | `--grep <pattern>`               |           | Filter tests by name (passed to Playwright `--grep`)                                        |
 | `--repetitions <n>`              |           | Number of times to repeat each example                                                      |

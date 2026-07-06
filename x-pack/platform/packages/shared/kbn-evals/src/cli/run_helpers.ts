@@ -242,7 +242,7 @@ export const resolveEvaluationConnectorId = async (
   flagsReader: FlagsReader
 ): Promise<string> => {
   const evaluationConnectorId =
-    flagsReader.string('evaluation-connector-id') ?? process.env.EVALUATION_CONNECTOR_ID;
+    flagsReader.string('evaluation-connector-id') ?? process.env.EVAL_CONNECTOR_ID;
 
   if (evaluationConnectorId) {
     return evaluationConnectorId;
@@ -252,9 +252,7 @@ export const resolveEvaluationConnectorId = async (
     return promptForConnector(repoRoot, log);
   }
 
-  throw createFlagError(
-    'EVALUATION_CONNECTOR_ID is required. Set --evaluation-connector-id or env.'
-  );
+  throw createFlagError('EVAL_CONNECTOR_ID is required. Set --evaluation-connector-id or env.');
 };
 
 const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
@@ -346,7 +344,7 @@ export const buildEvalRunEnv = ({
   log: ToolingLog;
 }): Record<string, string> => {
   const envOverrides: Record<string, string> = {
-    EVALUATION_CONNECTOR_ID: evaluationConnectorId,
+    EVAL_CONNECTOR_ID: evaluationConnectorId,
   };
 
   if (requiresEisCcm && !skipServer) {
@@ -365,17 +363,17 @@ export const buildEvalRunEnv = ({
 
   const repetitions = flagsReader.string('repetitions');
   if (repetitions) {
-    envOverrides.EVALUATION_REPETITIONS = repetitions;
+    envOverrides.EVAL_REPETITIONS = repetitions;
   }
 
   const evaluationsKbnUrl = flagsReader.string('evaluations-kbn-url');
   if (evaluationsKbnUrl) {
-    envOverrides.EVALUATIONS_KBN_URL = evaluationsKbnUrl;
+    envOverrides.EVAL_KBN_URL = evaluationsKbnUrl;
   }
 
   const evaluationsKbnApiKey = flagsReader.string('evaluations-kbn-api-key');
   if (evaluationsKbnApiKey) {
-    envOverrides.EVALUATIONS_KBN_API_KEY = evaluationsKbnApiKey;
+    envOverrides.EVAL_KBN_API_KEY = evaluationsKbnApiKey;
   }
 
   return envOverrides;

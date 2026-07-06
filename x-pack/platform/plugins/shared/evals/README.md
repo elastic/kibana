@@ -86,7 +86,7 @@ Run evaluation suites via the `@kbn/evals` CLI to populate the scores and traces
 
 The `@kbn/evals` CLI sends scores via `POST /internal/evals/scores` rather than writing directly to Elasticsearch. The plugin validates the payload and persists documents to the `.evaluation-scores` data stream.
 
-For a shared "golden cluster", set `EVALUATIONS_KBN_URL` (and optionally `EVALUATIONS_KBN_API_KEY`) to route score ingestion and dataset operations to a remote Kibana instance.
+For a shared "golden cluster", set `EVAL_KBN_URL` (and optionally `EVAL_KBN_API_KEY`) to route score ingestion and dataset operations to a remote Kibana instance.
 
 ## API routes
 

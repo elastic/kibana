@@ -141,7 +141,7 @@ Tell the user EDOT is starting up.
 
 #### 8a: Discover available connectors
 
-Read `config/kibana.dev.yml` and parse the `xpack.actions.preconfigured` section to get the list of available connector IDs and names. These connectors are used for both `EVALUATION_CONNECTOR_ID` (the judge) and `--project` (the model being evaluated).
+Read `config/kibana.dev.yml` and parse the `xpack.actions.preconfigured` section to get the list of available connector IDs and names. These connectors are used for both `EVAL_CONNECTOR_ID` (the judge) and `--project` (the model being evaluated).
 
 If no connectors are found, tell the user to configure connectors in `config/kibana.dev.yml` under `xpack.actions.preconfigured` and abort.
 
@@ -149,7 +149,7 @@ If no connectors are found, tell the user to configure connectors in `config/kib
 
 Use `AskUserQuestion` to ask which connector to use as the evaluation judge. Present the discovered connectors as options:
 
-> Which connector should be used as the evaluation judge (EVALUATION_CONNECTOR_ID)?
+> Which connector should be used as the evaluation judge (EVAL_CONNECTOR_ID)?
 
 Options: one per discovered connector, using `id (name)` as the label.
 
@@ -178,7 +178,7 @@ Using the collected values and the following defaults, output the exact command 
 
 - **SELECTED_EVALUATORS**: `Precision@K,Recall@K,F1@K,Latency,Input Tokens,Output Tokens,Tool Calls,Factuality,Groundedness,Relevance`
 - **RAG_EVAL_K**: `10,20,30,40`
-- **EVALUATION_REPETITIONS**: `1`
+- **EVAL_REPETITIONS**: `1`
 
 Display a summary and the command:
 
@@ -198,9 +198,9 @@ Display a summary and the command:
 > SELECTED_EVALUATORS="<value>" \
 > RAG_EVAL_K=<value> \
 > KBN_EVALS_EXECUTOR=phoenix \
-> EVALUATION_CONNECTOR_ID=<value> \
+> EVAL_CONNECTOR_ID=<value> \
 > DATASET_NAME="<value>" \
-> EVALUATION_REPETITIONS=<value> \
+> EVAL_REPETITIONS=<value> \
 > KBN_EVALS_SKIP_CONNECTOR_SETUP=true \
 > node scripts/playwright test \
 >   --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts \

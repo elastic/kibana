@@ -140,7 +140,7 @@ function buildEvalsYaml({
           ? `          EVAL_MODEL_GROUPS: '${suiteModelGroups.join(',')}'`
           : null;
       const evaluationConnectorIdEnv = evaluationConnectorId
-        ? `          EVALUATION_CONNECTOR_ID: '${evaluationConnectorId}'`
+        ? `          EVAL_CONNECTOR_ID: '${evaluationConnectorId}'`
         : null;
       const includeEisModels =
         hasEisJudge || suiteModelGroups.some((group) => group.startsWith('eis/'));
