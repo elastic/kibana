@@ -43,7 +43,7 @@ export const getRuleIdFromEditFormPath = (pathname: string): string | undefined 
   return match ? decodeURIComponent(match[1]) : undefined;
 };
 
-export const isAttachmentRuleOpenOnFormPage = (
+export const isAttachmentRuleOpenOnEditPage = (
   attachmentRuleId: string | undefined,
   pathname: string
 ): boolean => {
@@ -90,7 +90,7 @@ export const isRuleFormOpenForCard = (
   if (intent === 'create') {
     return isOnRuleFormPage(pathname) && pathname.includes('/create');
   }
-  return isAttachmentRuleOpenOnFormPage(attachmentRuleId, pathname);
+  return isAttachmentRuleOpenOnEditPage(attachmentRuleId, pathname);
 };
 
 // `origin` (set after save, persisted server-side) is the source of truth for identity and intent.

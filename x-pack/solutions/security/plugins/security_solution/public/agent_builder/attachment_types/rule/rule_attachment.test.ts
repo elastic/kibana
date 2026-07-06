@@ -15,7 +15,7 @@ import type { RuleResponse } from '../../../../common/api/detection_engine/model
 import { createRuleAttachmentDefinition, registerRuleAttachment } from './rule_attachment';
 import {
   getRuleIdFromEditFormPath,
-  isAttachmentRuleOpenOnFormPage,
+  isAttachmentRuleOpenOnEditPage,
   isOnRuleFormPage,
   isRuleFormOpenForCard,
   shouldShowViewRuleButton,
@@ -115,12 +115,12 @@ describe('shouldShowViewRuleButton', () => {
   });
 });
 
-describe('isAttachmentRuleOpenOnFormPage', () => {
+describe('isAttachmentRuleOpenOnEditPage', () => {
   it('is true only when pathname and attachment rule id match on edit', () => {
-    expect(isAttachmentRuleOpenOnFormPage('rule-a', '/app/security/rules/id/rule-a/edit')).toBe(
+    expect(isAttachmentRuleOpenOnEditPage('rule-a', '/app/security/rules/id/rule-a/edit')).toBe(
       true
     );
-    expect(isAttachmentRuleOpenOnFormPage('rule-b', '/app/security/rules/id/rule-a/edit')).toBe(
+    expect(isAttachmentRuleOpenOnEditPage('rule-b', '/app/security/rules/id/rule-a/edit')).toBe(
       false
     );
   });
