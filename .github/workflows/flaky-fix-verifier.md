@@ -242,9 +242,10 @@ An update comment is the kickoff rationale or a terminal verdict. Post one **onl
 2. One to three sentences: what happened and, for a verdict, the single most useful next step. Don't write a full analysis.
 3. Add a short `<details><summary>See details</summary>` block only when a reader genuinely needs a specific you can't fit above (e.g. a concrete recommended fix, or which unrelated test failed). Keep it terse; omit it otherwise.
 
+A `passed` verdict never gets a comment — the `flaky-fix-check:passed` label is the signal. Only these post:
+
 | Comment | Heading |
 | --- | --- |
-| Passed (incl. a green run with only an unrelated failure to note) | `### ✅ Flaky-fix verification passed` |
 | Failed (fix did not hold) | `### ❌ Flaky-fix verification failed` |
 | Inconclusive (budget spent without a clear verdict) | `### ❓ Flaky-fix verification inconclusive` |
 | Skipped (runner not used) | `### ⏭️ Flaky-fix verification skipped` |
@@ -324,11 +325,11 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
    | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
    | Every config green **and** targeted test ran                   | **Passed.** Remove `flaky-fix-check:started` and add `flaky-fix-check:passed`. Do not post any comment.                                                                                                                                                                                                                                          |
    | Targeted test still **fails** and fewer than 6 runs triggered  | **Iterate.** From the failure artifacts, derive a revised, minimal test-side fix. Check out the PR head branch, apply the change, and push it. Then post a `/flaky` comment to re-run against the new commit: the pushed commit message carries the reasoning, so add a separate rationale comment only when the change or its motivation isn't clear from that commit (rationale heading, per [Update comment](#update-comment)). A run's results only count for the commit they ran on, so re-run every config your change affects: always the config(s) where the targeted test still failed, plus any previously-green config that exercises code your revision touched (e.g. a shared Scout page object). Reuse the config paths from your prior `/flaky` comment (add one only if the fix now touches files under a different config); you may keep trusting an earlier green only for configs your change can't affect. Only re-trigger after an actual code change — never burn budget re-running an unchanged patch hoping for a luckier result. |
-   | Targeted test **passes** but only an **unrelated** test failed | Investigate whether the PR is responsible. If you are confident the failure is unrelated (lane pollution / pre-existing), remove `flaky-fix-check:started`, add `flaky-fix-check:passed`, and post a passed comment ([Update comment](#update-comment)) whose summary states the fix held and names the unrelated failure. If you cannot rule out the PR, treat it as inconclusive (see below).                  |
+   | Targeted test **passes** but only an **unrelated** test failed | Investigate whether the PR is responsible. If you are confident the failure is unrelated (lane pollution / pre-existing), remove `flaky-fix-check:started` and add `flaky-fix-check:passed`; the label is the signal, so post no comment. If you cannot rule out the PR, treat it as inconclusive (see below).                  |
    | Targeted test still **fails** after 6 runs (fix did not hold)  | **Failed.** Remove `flaky-fix-check:started` and add `flaky-fix-check:failed`. Post a failed comment ([Update comment](#update-comment)): a sentence or two on what still fails and the recommended next step for the owning team; add a short `<details>` only if a concrete fix or the failing-test detail genuinely helps.                        |
    | 6 runs exhausted without a clear verdict (ambiguous / only unrelated failures) | **Inconclusive.** Remove `flaky-fix-check:started` and add `flaky-fix-check:inconclusive`. Post an inconclusive comment ([Update comment](#update-comment)): a sentence or two on why no verdict was reached and the suggested next step; add a short `<details>` only if the run detail genuinely helps.                                            |
 
-5. **Always** leave the PR in a coherent state: the correct label(s) set, and either a `/flaky` re-trigger comment or a terminal summary comment.
+5. **Always** leave the PR in a coherent state: the correct label(s) set, plus a `/flaky` re-trigger comment when iterating or a terminal comment for a `failed`, `inconclusive`, or `skipped` verdict. A `passed` verdict is label-only; post nothing.
 
 ### Pushing a revised fix
 
