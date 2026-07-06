@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
@@ -21,7 +21,7 @@ import { createSignificantEventsAvailability } from '../significant_events_avail
 import { attachEventInvestigationToolHandler } from './handler';
 
 export const STREAMS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =
-  platformStreamsSigEventsTools.attachInvestigation;
+  platformSignificantEventsTools.attachInvestigation;
 
 const eventInvestigationAttachSchema = z.object({
   event_id: z.string().describe(

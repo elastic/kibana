@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const NAMESPACE = 'platform.streams.memory';
+const NAMESPACE = 'platform.sig_events.memory';
 
 /**
  * Tool IDs for the Streams memory tools. Defined locally because these are internal tools,
