@@ -342,7 +342,7 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 ## Guardrails
 
 - Never exceed 6 total `/flaky` triggers of your own (kibanamachine-authored) for this PR; developer-triggered `/flaky` comments don't count toward this.
-- Comments are costly noise: post one only when strictly necessary and genuinely useful, keep it to 1–3 sentences, and prefer none (a routine run needs only its `/flaky` comment; a clean `passed` posts nothing). See [Update comment](#update-comment).
+- Comments are costly noise: post one only when strictly necessary and genuinely useful, keep the summary to 1–3 sentences (any extra depth goes in a terse `<details>` block, per [Update comment](#update-comment)), and prefer none: a routine run needs only its `/flaky` comment, and a `passed` verdict posts nothing.
 - The `/flaky` command must be its own comment and start with `/flaky ` (it is consumed by `.github/workflows/trigger-flaky.yml`).
 - Never include the literal phrase `Flaky Test Runner Stats` in any comment you post — that header is how this workflow detects the runner's results comment, and reusing it would make the workflow re-trigger on its own comment.
 - Do not weaken assertions, wrap assertions in `retry()`, bump timeouts as the primary fix, or strip tags to skip the test (see the `flaky-test-investigator` skill's pitfalls). A revised fix must address a root cause and follow the testing best practices in `docs/extend/testing/` (`scout-best-practices.md`, `ui-best-practices.md`, `api-best-practices.md`).
