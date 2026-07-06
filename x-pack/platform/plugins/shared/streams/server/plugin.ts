@@ -87,8 +87,8 @@ import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 import { isInvestigationEnabled } from './lib/investigations/is_investigation_enabled';
 import { installInvestigationWorkflow } from './lib/investigations/install_investigation_workflow';
 import {
-  STREAMS_INVESTIGATION_ENABLED_FLAG,
-  STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
+  SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG,
+  SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
 } from '../common/feature_flags';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
@@ -602,7 +602,7 @@ export class StreamsPlugin
     // The initial flag state is handled by the startup install/registration below,
     // hence `skip(1)`.
     const memoryEnabled$ = core.featureFlags
-      .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
+      .getBooleanValue$(SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
       .pipe(
         distinctUntilChanged(),
         skip(1),
@@ -610,7 +610,7 @@ export class StreamsPlugin
       );
 
     const investigationEnabled$ = core.featureFlags
-      .getBooleanValue$(STREAMS_INVESTIGATION_ENABLED_FLAG, false)
+      .getBooleanValue$(SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG, false)
       .pipe(
         distinctUntilChanged(),
         skip(1),
