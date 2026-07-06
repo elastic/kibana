@@ -273,6 +273,8 @@ const WorkflowYamlCanvasContent: React.FC<{
 
     const buttons: ActionButton[] = [];
 
+    const isSaving = savingAction !== null;
+
     if (workflowId && isPersisted) {
       if (canUpdateWorkflow) {
         buttons.push({
@@ -280,6 +282,7 @@ const WorkflowYamlCanvasContent: React.FC<{
           icon: 'save',
           type: ActionButtonType.PRIMARY,
           handler: handleSave,
+          disabled: isSaving,
         });
       }
       if (canCreateWorkflow) {
@@ -288,6 +291,7 @@ const WorkflowYamlCanvasContent: React.FC<{
           icon: 'copy',
           type: ActionButtonType.SECONDARY,
           handler: handleSaveAsNew,
+          disabled: isSaving,
         });
       }
     } else if (canCreateWorkflow) {
@@ -296,6 +300,7 @@ const WorkflowYamlCanvasContent: React.FC<{
         icon: 'save',
         type: ActionButtonType.PRIMARY,
         handler: handleSave,
+        disabled: isSaving,
       });
     }
 
