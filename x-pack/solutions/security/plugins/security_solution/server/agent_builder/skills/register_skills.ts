@@ -62,7 +62,11 @@ export const registerSkills = async ({
     agentBuilder.skills.register(manageWatchlistsSkill);
   }
 
-  agentBuilder.skills.register(getDetectionRuleEditSkill());
+  agentBuilder.skills.register(
+    getDetectionRuleEditSkill({
+      rulePreviewEnabled: experimentalFeatures.rulePreviewAttachmentEnabled,
+    })
+  );
   if (experimentalFeatures.dexAiSkillRecommendPrebuiltRules) {
     await agentBuilder.skills.register(
       createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml })
