@@ -129,6 +129,70 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
     }
   );
 
+  evaluate(
+    'smoke tests: trace-based evaluators',
+    async ({ executorClient, agentBuilderClient, evaluatorClient }) => {
+      const connectorId = process.env.SMOKE_TEST_EVALUATION_CONNECTOR_ID;
+      evaluate.skip(
+        !connectorId,
+        'Set SMOKE_TEST_EVALUATION_CONNECTOR_ID to run the trace-based evaluator smoke test'
+      );
+
+      const result = await executorClient.runExperiment(
+        {
+          datasets: [
+            {
+              name: 'smoke tests: trace-based evaluators',
+              description:
+                'Verifies trace-based groundedness and correctness evaluators via the evaluator API',
+              examples: [
+                {
+                  input: { prompt: 'What is the current status of the payment service?' },
+                  output: {
+                    expected:
+                      'The status of the payment service is unknown based on the available information.',
+                  },
+                },
+              ],
+            },
+          ],
+          task: async (example) => {
+            const { prompt } = example.input! as { prompt: string };
+            const response = await agentBuilderClient.converse({
+              agentId: 'elastic-ai-agent',
+              input: prompt,
+            });
+            if (!response.traceId) {
+              throw new Error('Agent Builder response is missing traceId');
+            }
+            return { traceId: response.traceId };
+          },
+        },
+        evaluatorClient.toEvaluators([
+          { name: 'groundedness', kind: 'LLM', connectorId: connectorId! },
+          {
+            name: 'correctness',
+            kind: 'LLM',
+            connectorId: connectorId!,
+            subScores: [
+              { key: 'factuality', evaluatorName: 'Factuality' },
+              { key: 'relevance', evaluatorName: 'Relevance' },
+              { key: 'sequence_accuracy', evaluatorName: 'Sequence Accuracy' },
+            ],
+          },
+        ])
+      );
+
+      expect(result[0].evaluationRuns.length).toBeGreaterThan(0);
+
+      const groundednessRun = result[0].evaluationRuns.find((r) => r.name === 'groundedness');
+      expect(groundednessRun?.result?.label).toBeDefined();
+
+      const factualityRun = result[0].evaluationRuns.find((r) => r.name === 'Factuality');
+      expect(factualityRun?.result?.label).toBeDefined();
+    }
+  );
+
   evaluate.describe('smoke tests: es-snapshot-loader', () => {
     let replayResult: LoadResult;
 

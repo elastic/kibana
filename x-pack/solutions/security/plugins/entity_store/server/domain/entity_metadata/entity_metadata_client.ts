@@ -66,8 +66,11 @@ export class EntityMetadataClient {
    * Appends one or more documents to the entity metadata datastream.
    * Does not throw on partial bulk failure — the underlying helper retries
    * transient errors and reports unrecoverable per-doc drops via its `onDrop`
-   * hook (logged in the infra layer). Resolves to `{ successful, failed }`
-   * counts. Transport-level exceptions propagate to the caller's boundary.
+   * hook, aggregated by the infra layer into `dropsByType`. Resolves to
+   * `{ successful, failed, dropsByType }`. This client does not log drop
+   * reasons itself — callers own logging a single summary line with
+   * whatever domain context they have. Transport-level exceptions propagate
+   * to the caller's boundary.
    *
    * The caller owns the doc shape (must include `event.action` and any
    * domain-specific fields). The client does not validate the shape.
@@ -75,15 +78,14 @@ export class EntityMetadataClient {
   public async bulkAppendMetadata<TDoc extends object>(
     docs: TDoc[]
   ): Promise<BulkCreateEntityMetadataDocsResult> {
-    if (docs.length === 0) return { successful: 0, failed: 0 };
+    if (docs.length === 0) return { successful: 0, failed: 0, dropsByType: [] };
 
-    const { successful, failed } = await bulkCreateEntityMetadataDocs(this.esClient, {
+    const { successful, failed, dropsByType } = await bulkCreateEntityMetadataDocs(this.esClient, {
       index: getMetadataEntitiesDataStreamName(this.namespace),
       docs,
-      logger: this.logger,
     });
 
     this.logger.debug(`Appended ${successful} entity metadata docs, dropped ${failed}`);
-    return { successful, failed };
+    return { successful, failed, dropsByType };
   }
 }
