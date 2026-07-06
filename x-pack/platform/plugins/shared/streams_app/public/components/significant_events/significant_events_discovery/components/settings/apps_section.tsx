@@ -21,8 +21,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLACK_APP_CONNECTION_STATUS } from '@kbn/streams-plugin/common';
-import { useSlackAppConnection } from './use_slack_app_connection';
+import { RELAY_APP_CONNECTION_STATUS } from '@kbn/streams-plugin/common';
+import { useRelayAppConnection } from './use_relay_app_connection';
 
 interface AppsSectionProps {
   canEdit: boolean;
@@ -37,14 +37,14 @@ interface AppsSectionProps {
  */
 export function AppsSection({ canEdit }: AppsSectionProps) {
   const { isLoading, available, status, error, isMutating, connect, disconnect } =
-    useSlackAppConnection();
+    useRelayAppConnection();
 
   if (isLoading || !available) {
     return null;
   }
 
-  const isConnected = status === SLACK_APP_CONNECTION_STATUS.connected;
-  const isInProgress = status === SLACK_APP_CONNECTION_STATUS.oauthInProgress;
+  const isConnected = status === RELAY_APP_CONNECTION_STATUS.connected;
+  const isInProgress = status === RELAY_APP_CONNECTION_STATUS.oauthInProgress;
 
   return (
     <>

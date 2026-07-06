@@ -68,9 +68,9 @@ export type {
   SignificantEventsAvailabilityResponse,
 } from './significant_events_availability';
 
-export { SLACK_APP_CONNECTION_STATUS } from './slack_app/types';
+export { RELAY_APP_CONNECTION_STATUS } from './slack_app/types';
 export type {
-  SlackAppConnectionStatus,
+  RelayAppConnectionStatus,
   SlackAppConnectResponse,
   SlackAppStatusResponse,
   SlackAppDisconnectResponse,

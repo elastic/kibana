@@ -11,15 +11,15 @@
  * Relay service so the Relay can call Agent Builder on behalf of the deployment.
  */
 
-export const SLACK_APP_CONNECTION_STATUS = {
+export const RELAY_APP_CONNECTION_STATUS = {
   notConnected: 'not_connected',
   oauthInProgress: 'oauth_in_progress',
   connected: 'connected',
   error: 'error',
 } as const;
 
-export type SlackAppConnectionStatus =
-  (typeof SLACK_APP_CONNECTION_STATUS)[keyof typeof SLACK_APP_CONNECTION_STATUS];
+export type RelayAppConnectionStatus =
+  (typeof RELAY_APP_CONNECTION_STATUS)[keyof typeof RELAY_APP_CONNECTION_STATUS];
 
 /** Response from the connect route: the Slack OAuth consent URL the browser opens. */
 export interface SlackAppConnectResponse {
@@ -30,7 +30,7 @@ export interface SlackAppConnectResponse {
 export interface SlackAppStatusResponse {
   /** feature flag on + `xpack.streams.slackApp.relayUrl` set + agentBuilder available. */
   available: boolean;
-  status: SlackAppConnectionStatus;
+  status: RelayAppConnectionStatus;
   error?: string;
 }
 

@@ -8,9 +8,9 @@
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 
 import { getStreamsPromptsSavedObject } from '../significant_events/saved_objects/prompts_config';
-import { getSlackAppConnectionSavedObjectType } from '../slack_app/saved_object';
+import { getRelayAppConnectionSavedObjectType } from '../slack_app/saved_object';
 
 export const registerStreamsSavedObjects = (savedObjectsService: SavedObjectsServiceSetup) => {
   savedObjectsService.registerType(getStreamsPromptsSavedObject());
-  savedObjectsService.registerType(getSlackAppConnectionSavedObjectType());
+  savedObjectsService.registerType(getRelayAppConnectionSavedObjectType());
 };

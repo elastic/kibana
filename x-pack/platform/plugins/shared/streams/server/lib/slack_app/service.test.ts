@@ -7,13 +7,13 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { SLACK_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
+import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
 import type { StreamsServer } from '../../types';
 import { SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
 import { RelayClient } from './relay_client';
 import { RelayRequestError } from './relay_error';
-import { SLACK_APP_CONNECTION_SO_ID, SLACK_APP_CONNECTION_SO_TYPE } from './saved_object';
+import { RELAY_APP_CONNECTION_SO_ID, RELAY_APP_CONNECTION_SO_TYPE } from './saved_object';
 
 jest.mock('./relay_client');
 
@@ -106,14 +106,14 @@ describe('SlackAppService', () => {
         created_by_user_key: 'admin',
       });
       expect(soClient.create).toHaveBeenCalledWith(
-        SLACK_APP_CONNECTION_SO_TYPE,
+        RELAY_APP_CONNECTION_SO_TYPE,
         expect.objectContaining({
-          status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
           apiKeyId: 'key-1',
           claimId: 'claim-1',
-          deploymentRef: 'dep-1',
+          surface: 'slack',
         }),
-        { id: SLACK_APP_CONNECTION_SO_ID, overwrite: true }
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
       expect(result).toEqual({ authorizeUrl: 'https://slack/oauth' });
     });
@@ -133,18 +133,18 @@ describe('SlackAppService', () => {
       const { server } = createHarness({ relayUrl: undefined });
       await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
         available: false,
-        status: SLACK_APP_CONNECTION_STATUS.notConnected,
+        status: RELAY_APP_CONNECTION_STATUS.notConnected,
       });
     });
 
     it('reports not_connected when no connection document exists', async () => {
       const { server, soClient } = createHarness();
       soClient.get.mockRejectedValue(
-        SavedObjectsErrorHelpers.createGenericNotFoundError(SLACK_APP_CONNECTION_SO_TYPE)
+        SavedObjectsErrorHelpers.createGenericNotFoundError(RELAY_APP_CONNECTION_SO_TYPE)
       );
       await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
         available: true,
-        status: SLACK_APP_CONNECTION_STATUS.notConnected,
+        status: RELAY_APP_CONNECTION_STATUS.notConnected,
       });
     });
 
@@ -152,7 +152,7 @@ describe('SlackAppService', () => {
       const { server, soClient } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
-          status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
           apiKeyId: 'key-1',
           claimId: 'claim-1',
         },
@@ -161,7 +161,7 @@ describe('SlackAppService', () => {
 
       await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
         available: true,
-        status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+        status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
       });
       expect(fetchClaim).toHaveBeenCalledWith('claim-1');
       expect(soClient.create).not.toHaveBeenCalled();
@@ -171,7 +171,7 @@ describe('SlackAppService', () => {
       const { server, soClient, invalidateAsInternalUser } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
-          status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
           apiKeyId: 'key-1',
         },
       });
@@ -182,7 +182,7 @@ describe('SlackAppService', () => {
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(result).toEqual({
         available: true,
-        status: SLACK_APP_CONNECTION_STATUS.error,
+        status: RELAY_APP_CONNECTION_STATUS.error,
         error: 'missing claim id',
       });
     });
@@ -191,7 +191,7 @@ describe('SlackAppService', () => {
       const { server, soClient, invalidateAsInternalUser } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
-          status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
           apiKeyId: 'key-1',
           claimId: 'claim-1',
         },
@@ -204,17 +204,17 @@ describe('SlackAppService', () => {
 
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(soClient.create).toHaveBeenCalledWith(
-        SLACK_APP_CONNECTION_SO_TYPE,
+        RELAY_APP_CONNECTION_SO_TYPE,
         expect.objectContaining({
-          status: SLACK_APP_CONNECTION_STATUS.error,
+          status: RELAY_APP_CONNECTION_STATUS.error,
           apiKeyId: undefined,
           error: 'workspace already bound',
         }),
-        { id: SLACK_APP_CONNECTION_SO_ID, overwrite: true }
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
       expect(result).toEqual({
         available: true,
-        status: SLACK_APP_CONNECTION_STATUS.error,
+        status: RELAY_APP_CONNECTION_STATUS.error,
         error: 'workspace already bound',
       });
     });
@@ -223,7 +223,7 @@ describe('SlackAppService', () => {
       const { server, soClient, invalidateAsInternalUser } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
-          status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
           apiKeyId: 'key-1',
           claimId: 'claim-1',
         },
@@ -232,7 +232,7 @@ describe('SlackAppService', () => {
 
       await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
         available: true,
-        status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+        status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
       });
       expect(invalidateAsInternalUser).not.toHaveBeenCalled();
       expect(soClient.create).not.toHaveBeenCalled();
@@ -242,7 +242,7 @@ describe('SlackAppService', () => {
       const { server, soClient } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
-          status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
           apiKeyId: 'key-1',
           claimId: 'claim-1',
         },
@@ -252,16 +252,15 @@ describe('SlackAppService', () => {
       const result = await new SlackAppService(server).getStatus(request);
 
       expect(soClient.create).toHaveBeenCalledWith(
-        SLACK_APP_CONNECTION_SO_TYPE,
+        RELAY_APP_CONNECTION_SO_TYPE,
         expect.objectContaining({
-          status: SLACK_APP_CONNECTION_STATUS.connected,
-          deploymentRef: 'dep-1',
+          status: RELAY_APP_CONNECTION_STATUS.connected,
         }),
-        { id: SLACK_APP_CONNECTION_SO_ID, overwrite: true }
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
       expect(result).toEqual({
         available: true,
-        status: SLACK_APP_CONNECTION_STATUS.connected,
+        status: RELAY_APP_CONNECTION_STATUS.connected,
       });
     });
   });
@@ -271,9 +270,9 @@ describe('SlackAppService', () => {
       const { server, soClient, invalidateAsInternalUser } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
-          status: SLACK_APP_CONNECTION_STATUS.connected,
+          status: RELAY_APP_CONNECTION_STATUS.connected,
           apiKeyId: 'key-1',
-          deploymentRef: 'dep-1',
+          surface: 'slack',
         },
       });
       unbind.mockResolvedValue(undefined);
@@ -283,8 +282,8 @@ describe('SlackAppService', () => {
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(unbind).toHaveBeenCalled();
       expect(soClient.delete).toHaveBeenCalledWith(
-        SLACK_APP_CONNECTION_SO_TYPE,
-        SLACK_APP_CONNECTION_SO_ID
+        RELAY_APP_CONNECTION_SO_TYPE,
+        RELAY_APP_CONNECTION_SO_ID
       );
       expect(result).toEqual({ success: true });
     });
@@ -293,7 +292,7 @@ describe('SlackAppService', () => {
       const { server, soClient, invalidateAsInternalUser } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
-          status: SLACK_APP_CONNECTION_STATUS.connected,
+          status: RELAY_APP_CONNECTION_STATUS.connected,
           apiKeyId: 'key-1',
         },
       });
@@ -310,8 +309,8 @@ describe('SlackAppService', () => {
       // Local cleanup still completes: key invalidated, state deleted.
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(soClient.delete).toHaveBeenCalledWith(
-        SLACK_APP_CONNECTION_SO_TYPE,
-        SLACK_APP_CONNECTION_SO_ID
+        RELAY_APP_CONNECTION_SO_TYPE,
+        RELAY_APP_CONNECTION_SO_ID
       );
       expect(result).toEqual({ success: true });
     });
@@ -319,7 +318,7 @@ describe('SlackAppService', () => {
     it('is a no-op when there is no connection', async () => {
       const { server, soClient, invalidateAsInternalUser } = createHarness();
       soClient.get.mockRejectedValue(
-        SavedObjectsErrorHelpers.createGenericNotFoundError(SLACK_APP_CONNECTION_SO_TYPE)
+        SavedObjectsErrorHelpers.createGenericNotFoundError(RELAY_APP_CONNECTION_SO_TYPE)
       );
 
       await expect(new SlackAppService(server).disconnect(request)).resolves.toEqual({

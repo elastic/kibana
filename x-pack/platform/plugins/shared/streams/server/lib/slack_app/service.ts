@@ -12,12 +12,12 @@ import type {
   SlackAppDisconnectResponse,
   SlackAppStatusResponse,
 } from '../../../common/slack_app/types';
-import { SLACK_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
+import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
 import type { StreamsServer } from '../../types';
 import {
-  SLACK_APP_CONNECTION_SO_ID,
-  SLACK_APP_CONNECTION_SO_TYPE,
-  type SlackAppConnectionAttributes,
+  RELAY_APP_CONNECTION_SO_ID,
+  RELAY_APP_CONNECTION_SO_TYPE,
+  type RelayAppConnectionAttributes,
 } from './saved_object';
 import { RelayClient } from './relay_client';
 import { RelayRequestError } from './relay_error';
@@ -41,17 +41,17 @@ export class SlackAppService {
 
   private getSoClient(request: KibanaRequest): SavedObjectsClientContract {
     return this.server.core.savedObjects.getScopedClient(request, {
-      includedHiddenTypes: [SLACK_APP_CONNECTION_SO_TYPE],
+      includedHiddenTypes: [RELAY_APP_CONNECTION_SO_TYPE],
     });
   }
 
   private async readConnection(
     soClient: SavedObjectsClientContract
-  ): Promise<SlackAppConnectionAttributes | undefined> {
+  ): Promise<RelayAppConnectionAttributes | undefined> {
     try {
-      const so = await soClient.get<SlackAppConnectionAttributes>(
-        SLACK_APP_CONNECTION_SO_TYPE,
-        SLACK_APP_CONNECTION_SO_ID
+      const so = await soClient.get<RelayAppConnectionAttributes>(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        RELAY_APP_CONNECTION_SO_ID
       );
       return so.attributes;
     } catch (error) {
@@ -64,10 +64,10 @@ export class SlackAppService {
 
   private async writeConnection(
     soClient: SavedObjectsClientContract,
-    attributes: SlackAppConnectionAttributes
+    attributes: RelayAppConnectionAttributes
   ): Promise<void> {
-    await soClient.create<SlackAppConnectionAttributes>(SLACK_APP_CONNECTION_SO_TYPE, attributes, {
-      id: SLACK_APP_CONNECTION_SO_ID,
+    await soClient.create<RelayAppConnectionAttributes>(RELAY_APP_CONNECTION_SO_TYPE, attributes, {
+      id: RELAY_APP_CONNECTION_SO_ID,
       overwrite: true,
     });
   }
@@ -134,10 +134,10 @@ export class SlackAppService {
     }
 
     await this.writeConnection(soClient, {
-      status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+      status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
       apiKeyId: apiKeyResult.id,
       claimId: installResponse.claim_id,
-      deploymentRef: installResponse.deployment_ref,
+      surface: 'slack',
       createdBy: username,
       createdAt: now,
       updatedAt: now,
@@ -153,7 +153,7 @@ export class SlackAppService {
    */
   private async failInProgressInstall(
     soClient: SavedObjectsClientContract,
-    connection: SlackAppConnectionAttributes,
+    connection: RelayAppConnectionAttributes,
     error: RelayRequestError
   ): Promise<SlackAppStatusResponse> {
     if (connection.apiKeyId) {
@@ -170,32 +170,32 @@ export class SlackAppService {
     this.logger.warn(`Slack app install failed terminally: ${message}`);
     await this.writeConnection(soClient, {
       ...connection,
-      status: SLACK_APP_CONNECTION_STATUS.error,
+      status: RELAY_APP_CONNECTION_STATUS.error,
       apiKeyId: undefined,
       error: message,
       updatedAt: new Date().toISOString(),
     });
 
-    return { available: true, status: SLACK_APP_CONNECTION_STATUS.error, error: message };
+    return { available: true, status: RELAY_APP_CONNECTION_STATUS.error, error: message };
   }
 
   async getStatus(request: KibanaRequest): Promise<SlackAppStatusResponse> {
     const relayUrl = this.getRelayUrl();
     if (!relayUrl) {
-      return { available: false, status: SLACK_APP_CONNECTION_STATUS.notConnected };
+      return { available: false, status: RELAY_APP_CONNECTION_STATUS.notConnected };
     }
 
     const soClient = this.getSoClient(request);
     const connection = await this.readConnection(soClient);
 
     if (!connection) {
-      return { available: true, status: SLACK_APP_CONNECTION_STATUS.notConnected };
+      return { available: true, status: RELAY_APP_CONNECTION_STATUS.notConnected };
     }
 
     // While an install is in progress, poll the Relay for claim fulfillment (the Slack
     // OAuth callback lands on the Relay, not Kibana). The Relay resolves the pending
     // claim from the transport-level deployment identity.
-    if (connection.status === SLACK_APP_CONNECTION_STATUS.oauthInProgress) {
+    if (connection.status === RELAY_APP_CONNECTION_STATUS.oauthInProgress) {
       // An in-progress install without a claim id cannot be polled (pre-fix
       // documents, or a partial write): fail it terminally rather than spin.
       if (!connection.claimId) {
@@ -211,11 +211,10 @@ export class SlackAppService {
         if (claim.status === 'complete') {
           await this.writeConnection(soClient, {
             ...connection,
-            status: SLACK_APP_CONNECTION_STATUS.connected,
-            deploymentRef: claim.deployment_ref,
+            status: RELAY_APP_CONNECTION_STATUS.connected,
             updatedAt: new Date().toISOString(),
           });
-          return { available: true, status: SLACK_APP_CONNECTION_STATUS.connected };
+          return { available: true, status: RELAY_APP_CONNECTION_STATUS.connected };
         }
       } catch (error) {
         // A 4xx claim response is terminal (claim expired, consumed, or rejected):
@@ -272,7 +271,7 @@ export class SlackAppService {
     }
 
     await soClient
-      .delete(SLACK_APP_CONNECTION_SO_TYPE, SLACK_APP_CONNECTION_SO_ID)
+      .delete(RELAY_APP_CONNECTION_SO_TYPE, RELAY_APP_CONNECTION_SO_ID)
       .catch((error) => {
         if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
           throw error;

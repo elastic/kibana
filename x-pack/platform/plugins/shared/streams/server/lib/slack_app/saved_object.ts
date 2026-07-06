@@ -8,7 +8,7 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
 
-export const SLACK_APP_CONNECTION_SO_TYPE = 'slack-app-connection';
+export const RELAY_APP_CONNECTION_SO_TYPE = 'relay-app-connection';
 
 /**
  * A single, deployment-wide connection document. The Slack workspace binding is
@@ -19,9 +19,9 @@ export const SLACK_APP_CONNECTION_SO_TYPE = 'slack-app-connection';
  * transport layer (mTLS proxy, identity from XFCC). Only the key *id* is kept so the
  * key can be invalidated on disconnect.
  */
-export const SLACK_APP_CONNECTION_SO_ID = 'slack-app-connection';
+export const RELAY_APP_CONNECTION_SO_ID = 'relay-app-connection';
 
-const slackAppConnectionAttributesV1 = schema.object({
+const relayAppConnectionAttributesV1 = schema.object({
   status: schema.oneOf([
     schema.literal('not_connected'),
     schema.literal('oauth_in_progress'),
@@ -34,18 +34,21 @@ const slackAppConnectionAttributesV1 = schema.object({
   // Claim id issued at install start; required by the Relay's claim poll
   // (`parseClaimInstallInput` on relay main mandates `claim_id` in the body).
   claimId: schema.maybe(schema.string()),
-  // Relay-side identifier of this deployment's binding, returned by the claim poll.
-  deploymentRef: schema.maybe(schema.string()),
+  // Which external app this connection is for (e.g. 'slack'); lets this SO type
+  // host future non-Slack app connections (GitHub, Teams, ...).
+  surface: schema.maybe(schema.string()),
+  // Relay-side tenant identifier for this binding.
+  tenantKey: schema.maybe(schema.string()),
   error: schema.maybe(schema.string()),
   createdBy: schema.maybe(schema.string()),
   createdAt: schema.maybe(schema.string()),
   updatedAt: schema.maybe(schema.string()),
 });
 
-export type SlackAppConnectionAttributes = TypeOf<typeof slackAppConnectionAttributesV1>;
+export type RelayAppConnectionAttributes = TypeOf<typeof relayAppConnectionAttributesV1>;
 
-export const getSlackAppConnectionSavedObjectType = (): SavedObjectsType => ({
-  name: SLACK_APP_CONNECTION_SO_TYPE,
+export const getRelayAppConnectionSavedObjectType = (): SavedObjectsType => ({
+  name: RELAY_APP_CONNECTION_SO_TYPE,
   hidden: true,
   namespaceType: 'agnostic',
   mappings: {
@@ -53,7 +56,8 @@ export const getSlackAppConnectionSavedObjectType = (): SavedObjectsType => ({
     properties: {
       status: { type: 'keyword' },
       apiKeyId: { type: 'keyword' },
-      deploymentRef: { type: 'keyword' },
+      surface: { type: 'keyword' },
+      tenantKey: { type: 'keyword' },
     },
   },
   management: {
@@ -63,8 +67,8 @@ export const getSlackAppConnectionSavedObjectType = (): SavedObjectsType => ({
     '1': {
       changes: [],
       schemas: {
-        forwardCompatibility: slackAppConnectionAttributesV1.extends({}, { unknowns: 'ignore' }),
-        create: slackAppConnectionAttributesV1,
+        forwardCompatibility: relayAppConnectionAttributesV1.extends({}, { unknowns: 'ignore' }),
+        create: relayAppConnectionAttributesV1,
       },
     },
   },
