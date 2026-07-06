@@ -21,6 +21,7 @@ export const servers: ScoutServerConfig = {
         'dexAiSkillRecommendPrebuiltRules',
         'dexAiSkillFindRules',
       ])}`,
+      '--xpack.alerting_v2.enabled=true',
     ],
   },
 };
