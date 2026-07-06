@@ -3,7 +3,7 @@
   "id": "@kbn/inference-cli",
   "owner": [
     "@elastic/appex-ai-infra",
-    "@elastic/search-inference-team"
+    "@elastic/inference-team"
   ],
   "group": "platform",
   "visibility": "shared",
