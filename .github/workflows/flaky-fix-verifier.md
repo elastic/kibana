@@ -208,7 +208,7 @@ You run in one of two modes, selected from the triggering event:
 
 ## Number of runs
 
-Trigger the flaky test runner at most 6 times per PR; run a given config up to 50 times at most. To know how many runs you have already triggered, count only the comments in `pr-issue-comments.json` whose body starts with `/flaky ` **and are authored by `kibanamachine`** — that identity is you, the verifier. Developers can post their own `/flaky` comments; those are not yours, so do not count them against this budget. Never post a `/flaky` comment that would take your own total past 6.
+Trigger the flaky test runner at most 6 times per PR; run a given config up to 50 times at most. To know how many runs you have already triggered, count only the comments in `pr-issue-comments.json` whose body starts with `/flaky ` and are authored by `kibanamachine`. Developers can post their own `/flaky` comments; do not count those against this budget. Never post a `/flaky` comment that would take your own total past 6.
 
 ## State
 
@@ -234,23 +234,25 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
 
 **Scratch files**: write throwaway files inside the repository checkout (the current working directory). Redirecting (`>`) outside the repository checkout may be blocked.
 
-## Comment format
+## Update comment
 
-Every prose comment you post follows the same shape, so a reader grasps the outcome at a glance and expands only if they want the depth:
+The kickoff rationale and the terminal verdicts are **update comments**. Each follows the same shape, so a reader grasps the outcome at a glance and expands only if they want the depth:
 
-1. A `### <emoji> <heading>` first line — the status heading from the table below.
-2. One or two sentences of plain-language summary directly beneath it. This is what most readers will read; make it self-contained.
-3. Any supporting depth — run-attribution tables, root-cause analysis, failure logs, code snippets, recommendations — goes **inside a single `<details><summary>…</summary>` block** so it stays collapsed by default. Omit the block entirely when there is nothing beyond the summary.
-
-The **only** exception is the `/flaky` trigger comment: it must contain nothing but the command (it starts with `/flaky ` and is parsed by another workflow), so it gets no heading and no wrapper.
+1. A `### <emoji> <heading>` first line: the status heading from the table below.
+2. One or two sentences of plain-language summary directly beneath it: this is what most readers read, so make it self-contained.
+3. Any supporting depth (run-attribution tables, root-cause analysis, failure logs, code snippets, recommendations) goes inside a single `<details><summary>See details</summary>` block, so it stays collapsed by default. Omit the block when there is nothing beyond the summary.
 
 | Comment | Heading |
 | --- | --- |
 | Passed (incl. a green run with only an unrelated failure to note) | `### ✅ Flaky-fix verification passed` |
 | Failed (fix did not hold) | `### ❌ Flaky-fix verification failed` |
 | Inconclusive (budget spent without a clear verdict) | `### ❓ Flaky-fix verification inconclusive` |
-| Skipped (runner can't verify this fix) | `### ⏭️ Flaky-fix verification skipped` |
+| Skipped (runner not used) | `### ⏭️ Flaky-fix verification skipped` |
 | Rationale (why these configs, or what a pushed revision changed) | `### 🔍 Verifying the fix` |
+
+## Flaky test invocation comment
+
+The `/flaky` trigger comment is not an update comment: it contains nothing but the command (it starts with `/flaky ` and is parsed by another workflow), so it gets no heading and no `<details>` wrapper.
 
 ---
 
@@ -261,10 +263,10 @@ The **only** exception is the `/flaky` trigger comment: it must contain nothing 
    - the **touched test file(s)** (the files the fix changes), and
    - the **originally-flaky test title(s)** the fix is meant to stabilize. Record these as `targetedTests`.
 
-2. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, post a skipped comment (see [Comment format](#comment-format)) explaining which gate the fix missed, and stop.
+2. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, post a skipped comment (see [Update comment](#update-comment)) explaining which gate the fix missed, and stop.
 
    - **Runner-supported test.** The `/flaky` runner accepts only **FTR** and **Scout** configs. If the fix touches only a **Jest** test (`*.test.ts(x)` not under a `test/scout*/` or FTR `test/` config), it can't help — the fixer already verifies Jest fixes by local repetition.
-   - **A fix repeated runs can actually validate.** The required CI already catches deterministic failures; extra runs add signal only when one pass isn't a reliable verdict — i.e. the test keeps a timing/ordering/concurrency element after the fix. If the fix makes the test **deterministic** (e.g. it excludes a volatile field from an assertion, pins a clock or seed, or removes the racy dependency outright), a single CI pass is sufficient signal and a run reveals nothing more — note that normal CI validates this deterministic fix. Trigger a run only when the fix *mitigates* a non-deterministic cause (a race, a wait/timeout, ordering, shared-state timing) whose stability is confirmed by holding across many runs.
+   - **A fix repeated runs can actually validate.** The required CI already catches deterministic failures; extra runs add signal only when one pass isn't a reliable verdict: when the test still has a timing/ordering/concurrency element after the fix. If the fix makes the test **deterministic** (e.g. it excludes a volatile field from an assertion, pins a clock or seed, or removes the racy dependency outright), a single CI pass is sufficient signal and a run reveals nothing more — note that normal CI validates this deterministic fix. Trigger a run only when the fix *mitigates* a non-deterministic cause (a race, a wait/timeout, ordering, shared-state timing) whose stability is confirmed by holding across many runs.
 
    When both gates hold, resolve the config(s) (next step).
 
@@ -273,7 +275,7 @@ The **only** exception is the `/flaky` trigger comment: it must contain nothing 
    - **Reuse first:** if a previous `/flaky` comment on the PR already names the config(s) — e.g. an earlier iteration recorded them in `pr-issue-comments.json` — reuse those exact config paths so runs stay consistent, and skip the file-tree walk below (only add a config if your latest change touches files under a different one).
    - **FTR:** walk up from each changed test file to the nearest leaf `config*.ts` (skip `*.base.ts`); verify it actually runs the file via `testFiles` / `loadTestFile` (directly or via glob). If none is found by walking up, search for the config that includes the file.
    - **Scout:** walk up to the nearest `playwright.config.ts` or `parallel.playwright.config.ts` (prefer `parallel` when the path contains `parallel_tests/`); verify it runs the file.
-   - Deduplicate; include each config once. If you cannot resolve any config, add `flaky-fix-check:skipped`, post a skipped comment (see [Comment format](#comment-format)) asking a human to identify the config, and stop.
+   - Deduplicate; include each config once. If you cannot resolve any config, add `flaky-fix-check:skipped`, post a skipped comment (see [Update comment](#update-comment)) asking a human to identify the config, and stop.
    - If the PR touches a page object in one of the Scout packages (e.g., `@kbn/scout`, `@kbn/scout-oblt`, etc.) determine if it is worthwhile to run extra configs to test the fix is stable and won't create flakiness.
 
 4. **Trigger the run.** Confirm you have not already triggered 6 runs (count only your own prior `/flaky ` comments authored by `kibanamachine`; ignore any posted by developers). Then post the trigger command as its own comment (it must start with `/flaky ` so the trigger workflow picks it up):
@@ -284,7 +286,7 @@ The **only** exception is the `/flaky` trigger comment: it must contain nothing 
 
    Use `:50` per config. `<type>` is `ftrConfig` or `scoutConfig`. Keep all configs on the single `/flaky` line.
 
-   The `/flaky` comment is the only comment this step needs. Add a separate one-sentence rationale comment **only** when the config choice isn't obvious from the diff (e.g. you added an extra config to guard a shared page object) — skip it for a routine first run rather than restate which test you're exercising. When you do post it, use the rationale heading from [Comment format](#comment-format).
+   The `/flaky` comment is the only comment this step needs. Add a separate one-sentence rationale comment **only** when the config choice isn't obvious from the diff (e.g. you added an extra config to guard a shared page object): skip it for a routine first run rather than restate which test you're exercising. When you do post it, use the rationale heading from [Update comment](#update-comment).
 
 5. **Mark state.** Add the `flaky-fix-check:started` label (if it doesn't already exist). Do not wait for results. Stop here.
 
@@ -321,10 +323,10 @@ The **only** exception is the `/flaky` trigger comment: it must contain nothing 
    | Situation                                                      | Action                                                                                                                                                                                                                                                                                                                                             |
    | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
    | Every config green **and** targeted test ran                   | **Passed.** Remove `flaky-fix-check:started` and add `flaky-fix-check:passed`. Do not post any comment.                                                                                                                                                                                                                                          |
-   | Targeted test still **fails** and fewer than 6 runs triggered  | **Iterate.** From the failure artifacts, derive a revised, minimal test-side fix. Check out the PR head branch, apply the change, and push it. Then post a `/flaky` comment to re-run against the new commit — the pushed commit message carries the reasoning, so add a separate rationale comment only when the change or its motivation isn't clear from that commit (rationale heading, per [Comment format](#comment-format)). A run's results only count for the commit they ran on, so re-run every config your change affects: always the config(s) where the targeted test still failed, plus any previously-green config that exercises code your revision touched (e.g. a shared Scout page object). Reuse the config paths from your prior `/flaky` comment (add one only if the fix now touches files under a different config); you may keep trusting an earlier green only for configs your change can't affect. Only re-trigger after an actual code change — never burn budget re-running an unchanged patch hoping for a luckier result. |
-   | Targeted test **passes** but only an **unrelated** test failed | Investigate whether the PR is responsible. If you are confident the failure is unrelated (lane pollution / pre-existing), remove `flaky-fix-check:started`, add `flaky-fix-check:passed`, and post a passed comment ([Comment format](#comment-format)) whose summary states the fix held and names the unrelated failure. If you cannot rule out the PR, treat it as inconclusive (see below).                  |
-   | Targeted test still **fails** after 6 runs (fix did not hold)  | **Failed.** Remove `flaky-fix-check:started` and add `flaky-fix-check:failed`. Post a failed comment ([Comment format](#comment-format)): the summary says the fix didn't hold and names the still-failing test, with run attribution, root cause, and the recommendation for the owning team inside the `<details>` block.                        |
-   | 6 runs exhausted without a clear verdict (ambiguous / only unrelated failures) | **Inconclusive.** Remove `flaky-fix-check:started` and add `flaky-fix-check:inconclusive`. Post an inconclusive comment ([Comment format](#comment-format)): the summary says why no verdict was reached, with the run detail and the recommendation for the owning team inside the `<details>` block.                                            |
+   | Targeted test still **fails** and fewer than 6 runs triggered  | **Iterate.** From the failure artifacts, derive a revised, minimal test-side fix. Check out the PR head branch, apply the change, and push it. Then post a `/flaky` comment to re-run against the new commit: the pushed commit message carries the reasoning, so add a separate rationale comment only when the change or its motivation isn't clear from that commit (rationale heading, per [Update comment](#update-comment)). A run's results only count for the commit they ran on, so re-run every config your change affects: always the config(s) where the targeted test still failed, plus any previously-green config that exercises code your revision touched (e.g. a shared Scout page object). Reuse the config paths from your prior `/flaky` comment (add one only if the fix now touches files under a different config); you may keep trusting an earlier green only for configs your change can't affect. Only re-trigger after an actual code change — never burn budget re-running an unchanged patch hoping for a luckier result. |
+   | Targeted test **passes** but only an **unrelated** test failed | Investigate whether the PR is responsible. If you are confident the failure is unrelated (lane pollution / pre-existing), remove `flaky-fix-check:started`, add `flaky-fix-check:passed`, and post a passed comment ([Update comment](#update-comment)) whose summary states the fix held and names the unrelated failure. If you cannot rule out the PR, treat it as inconclusive (see below).                  |
+   | Targeted test still **fails** after 6 runs (fix did not hold)  | **Failed.** Remove `flaky-fix-check:started` and add `flaky-fix-check:failed`. Post a failed comment ([Update comment](#update-comment)): the summary says the fix didn't hold and names the still-failing test, with run attribution, root cause, and the recommendation for the owning team inside the `<details>` block.                        |
+   | 6 runs exhausted without a clear verdict (ambiguous / only unrelated failures) | **Inconclusive.** Remove `flaky-fix-check:started` and add `flaky-fix-check:inconclusive`. Post an inconclusive comment ([Update comment](#update-comment)): the summary says why no verdict was reached, with the run detail and the recommendation for the owning team inside the `<details>` block.                                            |
 
 5. **Always** leave the PR in a coherent state: the correct label(s) set, and either a `/flaky` re-trigger comment or a terminal summary comment.
 
