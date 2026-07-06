@@ -7,12 +7,15 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import pMap from 'p-map';
+import { uniq } from 'lodash';
 
 import type { CreateAgentlessPolicyRequestSchema } from '../../../common/types';
 import { appContextService, packagePolicyService } from '../../services';
 import type { FleetRequestHandler, ListAgentlessPoliciesRequestSchema } from '../../types';
 import { AgentlessPoliciesServiceImpl } from '../../services/agentless/agentless_policies';
 import type {
+  AgentlessPolicyUpgradeDryRunRequestSchema,
+  BulkUpgradeAgentlessPoliciesRequestSchema,
   DeleteAgentlessPolicyRequestSchema,
   GetBulkAgentlessPolicyThroughputRequestSchema,
   GetAgentlessPolicyRequestSchema,
@@ -115,6 +118,69 @@ export const updateAgentlessPolicyHandler: FleetRequestHandler<
       item,
     },
   });
+};
+
+export const bulkUpgradeAgentlessPoliciesHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkUpgradeAgentlessPoliciesRequestSchema.body>
+> = async (context, request, response) => {
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  const logger = appContextService.getLogger().get('agentless');
+
+  const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+    fleetContext.packagePolicyService.asCurrentUser,
+    soClient,
+    esClient,
+    logger
+  );
+
+  const policyIds = uniq(request.body.policyIds);
+  const body = await agentlessPoliciesService.bulkUpgradeAgentlessPolicies(policyIds, request);
+
+  // Unlike the package-policy bulk upgrade handler, we deliberately do NOT promote the first
+  // per-policy fatal error to a top-level HTTP status. The batch always returns 200 with the
+  // full per-policy array, so a caller sees every outcome — which ids upgraded and which
+  // failed (with their per-item `success: false` / `statusCode` / `body`) — instead of a
+  // single top-level error that would hide a partially-successful batch.
+  return response.ok({ body });
+};
+
+export const upgradeAgentlessPoliciesDryRunHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof AgentlessPolicyUpgradeDryRunRequestSchema.body>
+> = async (context, request, response) => {
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  const logger = appContextService.getLogger().get('agentless');
+
+  const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+    fleetContext.packagePolicyService.asCurrentUser,
+    soClient,
+    esClient,
+    logger
+  );
+
+  const policyIds = uniq(request.body.policyIds);
+  const body = await agentlessPoliciesService.getAgentlessPolicyUpgradeDryRunDiff(
+    policyIds,
+    request.body.pkgVersion
+  );
+
+  // Unlike the package-policy dry-run handler, we deliberately do NOT promote a per-policy
+  // hard failure (guard 404 or fatal dry-run error) to a top-level HTTP status. The batch
+  // always returns 200 with the full per-policy array, so a caller sees every preview
+  // alongside any per-item failures (`statusCode` / `body`) and soft migration errors
+  // (`errors`).
+  return response.ok({ body });
 };
 
 export const getAgentlessPolicyHandler: FleetRequestHandler<
