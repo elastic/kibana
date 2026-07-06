@@ -33,11 +33,6 @@ const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
 });
 
-const whereContext = {
-  ...mockContext,
-  subquerySupport: true,
-};
-
 export const EMPTY_WHERE_SUGGESTIONS = [...getFieldNamesByType('any'), ...allEvalFns];
 
 export const EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS = [
@@ -51,7 +46,7 @@ const whereExpectSuggestions = (
   query: string,
   expectedSuggestions: string[],
   mockCallbacks?: ICommandCallbacks,
-  context = whereContext,
+  context = mockContext,
   offset?: number
 ) => {
   return expectSuggestions(
@@ -108,6 +103,26 @@ describe('WHERE Autocomplete', () => {
         ]);
       }
     );
+
+    test('after a field name inside parens', async () => {
+      await whereExpectSuggestions('from a | where (keywordField ', [
+        '!= $0',
+        '< $0',
+        '<= $0',
+        '== $0',
+        '> $0',
+        '>= $0',
+        ...getOperatorSuggestions([
+          ...patternMatchOperators,
+          ...inOperators,
+          ...nullCheckOperators,
+        ]),
+      ]);
+    });
+
+    test('at the start of a parenthesized expression', async () => {
+      await whereExpectSuggestions('from a | where (', EMPTY_WHERE_SUGGESTIONS);
+    });
 
     test('suggests dates after a comparison with a date', async () => {
       const expectedFields = getFieldNamesByType(['date', 'date_nanos']);
@@ -256,7 +271,7 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('suggests boolean and numeric operators after a numeric function result', async () => {
-      await whereExpectSuggestions('from a | where log10(doubleField) ', [
+      const expectedSuggestions = [
         ...getFunctionSignaturesByReturnType(
           Location.WHERE,
           'double',
@@ -269,7 +284,10 @@ describe('WHERE Autocomplete', () => {
           { operators: true, skipAssign: true },
           ['double']
         ),
-      ]);
+      ];
+
+      await whereExpectSuggestions('from a | where log10(doubleField) ', expectedSuggestions);
+      await whereExpectSuggestions('from a | where ROUND((doubleField)) ', expectedSuggestions);
     });
 
     test('suggestions after IS', async () => {
@@ -343,6 +361,14 @@ describe('WHERE Autocomplete', () => {
       );
       await whereExpectSuggestions(
         'from index | WHERE doubleField in ( textField, ',
+        [
+          ...getFieldNamesByType('double'),
+          ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { scalar: true }),
+        ],
+        mockCallbacks
+      );
+      await whereExpectSuggestions(
+        'from index | WHERE (doubleField) in ( textField, ',
         [
           ...getFieldNamesByType('double'),
           ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { scalar: true }),
@@ -434,7 +460,7 @@ describe('WHERE Autocomplete', () => {
     it('rangeToReplace starts at the typed word, not at the """ delimiter', async () => {
       const query = 'from index | WHERE KQL("""field_na';
       const kqlStartOffset = 'from index | WHERE KQL("""'.length;
-      const results = await suggest(query, whereContext, 'where', mockCallbacks, autocomplete);
+      const results = await suggest(query, mockContext, 'where', mockCallbacks, autocomplete);
 
       const suggestion = results.find((s) => s.text === 'field_name');
       expect(suggestion).toBeDefined();
@@ -447,7 +473,7 @@ describe('WHERE Autocomplete', () => {
     it('rangeToReplace covers only the current word in multi-token KQL queries', async () => {
       const query = 'from index | WHERE KQL("""fieldA AND field_na';
       const wordStart = query.lastIndexOf('field_na');
-      const results = await suggest(query, whereContext, 'where', mockCallbacks, autocomplete);
+      const results = await suggest(query, mockContext, 'where', mockCallbacks, autocomplete);
 
       const suggestion = results.find((s) => s.text === 'field_name');
       expect(suggestion).toBeDefined();

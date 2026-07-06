@@ -39,6 +39,8 @@ const investigationAgent = {
           platformStreamsSigEventsTools.searchKnowledgeIndicators,
           platformCoreTools.executeEsql,
           platformCoreTools.generateEsql,
+          platformCoreTools.executeWorkflow,
+          platformCoreTools.getWorkflowExecutionStatus,
           OBSERVABILITY_GET_LOGS_TOOL_ID,
           OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
           OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
@@ -50,6 +52,9 @@ const investigationAgent = {
         ],
       },
     ],
+    // Explicit: smlSearch + executeConnectorSubAction let the agent discover and
+    // invoke system connectors (e.g. source repositories) without hard-coding IDs.
+    enable_elastic_capabilities: true,
   },
 } as const satisfies BuiltInAgentDefinition;
 
