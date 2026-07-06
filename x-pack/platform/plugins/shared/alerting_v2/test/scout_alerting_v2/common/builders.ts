@@ -6,7 +6,6 @@
  */
 
 import type { CreateActionPolicyDataInput, CreateRuleData } from '@kbn/alerting-v2-schemas';
-import type { AlertAction } from '../../../server/resources/datastreams/alert_actions';
 import type { AlertEvent } from '../../../server/resources/datastreams/alert_events';
 import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
 
@@ -89,29 +88,6 @@ export const buildAlertEvent = (input: BuildAlertEventInput = {}): AlertEvent =>
     status: 'breached',
     source: 'scout-test',
     type: 'alert',
-    space_id: 'default',
-    ...input,
-  };
-};
-
-/**
- * Defaults used by `buildAlertAction` so the integration specs only have
- * to spell out what makes each audit row unique (typically `action_type`
- * and the identity tuple).
- */
-export type BuildAlertActionInput = Partial<AlertAction>;
-
-export const buildAlertAction = (input: BuildAlertActionInput = {}): AlertAction => {
-  const now = new Date().toISOString();
-  const timestamp = input['@timestamp'] ?? now;
-  return {
-    '@timestamp': timestamp,
-    last_series_event_timestamp: timestamp,
-    actor: 'elastic',
-    action_type: 'ack',
-    rule_id: 'scout-rule-id',
-    group_hash: 'scout-group-hash',
-    episode_id: 'scout-episode-id',
     space_id: 'default',
     ...input,
   };

@@ -107,7 +107,6 @@ export {
   ALERTING_V2_EXECUTION_HISTORY_READ_ROLE,
 } from '../../common/roles';
 export {
-  buildAlertAction,
   buildAlertEvent,
   buildCreateRuleData,
   buildCreateActionPolicyData,
