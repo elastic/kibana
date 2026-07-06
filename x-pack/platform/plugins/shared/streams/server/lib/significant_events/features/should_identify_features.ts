@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { INFERRED_FEATURE_TYPES } from '@kbn/significant-events-schema';
+import { COMPUTED_FEATURE_TYPES, INFERRED_FEATURE_TYPES } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../../streams/ki';
 
 export interface ShouldIdentifyFeaturesResult {
@@ -21,16 +21,23 @@ export async function shouldIdentifyFeatures({
   streamName: string;
   thresholdHours: number;
 }): Promise<ShouldIdentifyFeaturesResult> {
-  const result = await kiClient.getLatestRevisionTimestamp(streamName, {
+  const inferred = await kiClient.getLatestRevisionTimestamp(streamName, {
     types: [...INFERRED_FEATURE_TYPES],
   });
 
-  if (!result) {
+  if (!inferred) {
     return { shouldIdentify: true };
   }
 
-  const newestTimestamp = new Date(result['@timestamp']).getTime();
+  const computed = await kiClient.getLatestRevisionTimestamp(streamName, {
+    types: [...COMPUTED_FEATURE_TYPES],
+  });
 
+  if (!computed) {
+    return { shouldIdentify: true };
+  }
+
+  const newestTimestamp = new Date(computed['@timestamp']).getTime();
   if (Number.isNaN(newestTimestamp)) {
     return { shouldIdentify: true };
   }
