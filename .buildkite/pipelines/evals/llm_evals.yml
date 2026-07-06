@@ -358,7 +358,7 @@ steps:
           EVAL_SUITE_ID: 'security-esql-generation-regression'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_MODEL_GROUPS: *security_oss_models
           EVAL_SERVER_CONFIG_SET: 'evals_tracing'
         timeout_in_minutes: 60
         agents:
@@ -404,7 +404,7 @@ steps:
           EVAL_SUITE_ID: 'security-alerts-rag-regression'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_MODEL_GROUPS: *security_oss_models
           EVAL_SERVER_CONFIG_SET: 'evals_tracing'
         timeout_in_minutes: 60
         agents:
@@ -427,7 +427,7 @@ steps:
           EVAL_SUITE_ID: 'security-alert-triage'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_MODEL_GROUPS: *security_oss_models
           EVAL_SERVER_CONFIG_SET: 'evals_security_alert_triage'
         timeout_in_minutes: 60
         agents:
@@ -450,7 +450,7 @@ steps:
           EVAL_SUITE_ID: 'siem-readiness'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_MODEL_GROUPS: *security_oss_models
           EVAL_SERVER_CONFIG_SET: 'evals_siem_readiness'
         timeout_in_minutes: 60
         agents:
