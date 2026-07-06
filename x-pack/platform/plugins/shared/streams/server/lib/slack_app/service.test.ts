@@ -87,9 +87,7 @@ describe('SlackAppService', () => {
       grantAsInternalUser.mockResolvedValue({ id: 'key-1', name: 'k', api_key: 'secret' });
       startInstall.mockResolvedValue({
         authorize_url: 'https://slack/oauth',
-        state: 's',
         claim_id: 'claim-1',
-        deployment_ref: 'dep-1',
       });
 
       const result = await new SlackAppService(server).connect(request);
@@ -145,9 +143,7 @@ describe('SlackAppService', () => {
       grantAsInternalUser.mockResolvedValue({ id: 'new-key', name: 'k', api_key: 'secret' });
       startInstall.mockResolvedValue({
         authorize_url: 'https://slack/oauth',
-        state: 's',
         claim_id: 'claim-2',
-        deployment_ref: 'dep-1',
       });
 
       const result = await new SlackAppService(server).connect(request);
@@ -283,7 +279,7 @@ describe('SlackAppService', () => {
           claimId: 'claim-1',
         },
       });
-      fetchClaim.mockResolvedValue({ status: 'complete', deployment_ref: 'dep-1' });
+      fetchClaim.mockResolvedValue({ status: 'complete' });
 
       const result = await new SlackAppService(server).getStatus(request);
 

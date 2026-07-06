@@ -23,9 +23,7 @@ describe('RelayClient', () => {
       status: 200,
       json: async () => ({
         authorize_url: 'https://slack/oauth',
-        state: 's',
         claim_id: 'claim-1',
-        deployment_ref: 'dep-1',
       }),
     });
 
@@ -37,9 +35,7 @@ describe('RelayClient', () => {
 
     expect(result).toEqual({
       authorize_url: 'https://slack/oauth',
-      state: 's',
       claim_id: 'claim-1',
-      deployment_ref: 'dep-1',
     });
     const [url, options] = fetchMock.mock.calls[0];
     expect(url.toString()).toBe('https://relay.test/v1/slack/install');
@@ -63,18 +59,11 @@ describe('RelayClient', () => {
     expect(JSON.parse(options.body)).toEqual({ claim_id: 'claim-1' });
   });
 
-  it('maps a 200 claim response to complete with the deployment ref and no secret', async () => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => ({ deployment_ref: 'dep-1' }),
-    });
+  it('maps a 200 claim response to complete', async () => {
+    fetchMock.mockResolvedValue({ ok: true, status: 200 });
 
     const client = new RelayClient('https://relay.test');
-    await expect(client.fetchClaim('claim-1')).resolves.toEqual({
-      status: 'complete',
-      deployment_ref: 'dep-1',
-    });
+    await expect(client.fetchClaim('claim-1')).resolves.toEqual({ status: 'complete' });
   });
 
   it('throws on a non-ok response', async () => {

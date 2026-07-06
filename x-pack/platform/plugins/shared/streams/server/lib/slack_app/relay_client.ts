@@ -28,14 +28,10 @@ export interface RelayInstallRequest {
 
 export interface RelayInstallResponse {
   authorize_url: string;
-  state: string;
   claim_id: string;
-  deployment_ref: string;
 }
 
-export type RelayClaimResponse =
-  | { status: 'pending' }
-  | { status: 'complete'; deployment_ref: string };
+export type RelayClaimResponse = { status: 'pending' } | { status: 'complete' };
 
 /**
  * Thin HTTP client for the Nightshift Relay service. Kibana -> Relay transport runs
@@ -55,17 +51,11 @@ export class RelayClient {
    * Completion poll. `claim_id` (issued by the install start) is required in the
    * body (`parseClaimInstallInput` on relay main); XFCC identity verifies the
    * caller owns the claim. 202 while the Slack OAuth consent is outstanding,
-   * 200 with the deployment ref once fulfilled. No secret is ever returned.
+   * 200 once fulfilled. No secret is ever returned.
    */
   async fetchClaim(claimId: string): Promise<RelayClaimResponse> {
     const { response } = await this.post('/v1/slack/install/claim', { claim_id: claimId });
-    if (response.status === 202) {
-      return { status: 'pending' };
-    }
-    const { deployment_ref: deploymentRef } = (await response.json()) as {
-      deployment_ref: string;
-    };
-    return { status: 'complete', deployment_ref: deploymentRef };
+    return { status: response.status === 202 ? 'pending' : 'complete' };
   }
 
   /** Unbind on disconnect. Not yet implemented Relay-side; tracked as a follow-up. */
