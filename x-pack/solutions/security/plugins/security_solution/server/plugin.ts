@@ -139,6 +139,9 @@ import {
 } from './lib/entity_analytics/entity_store/tasks';
 import { accessesFrequentlyMaintainer } from './lib/entity_analytics/maintainers/accesses';
 import { communicatesWithMaintainer } from './lib/entity_analytics/maintainers/communicates_with';
+import { administersMaintainer } from './lib/entity_analytics/maintainers/administers';
+import { supervisesMaintainer } from './lib/entity_analytics/maintainers/supervises';
+import { ownsMaintainer } from './lib/entity_analytics/maintainers/owns';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   allRiskScoreIndexPattern,
@@ -170,7 +173,6 @@ import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capab
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
-import { registerMlAnomalyDetectionBehaviorMaintainer } from './lib/entity_analytics/maintainers/behaviors/ml_anomaly_detection';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
 
@@ -278,6 +280,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       logger,
       experimentalFeatures,
+      plugins.ml,
       {
         config: this.config,
         ml: plugins.ml,
@@ -288,7 +291,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger,
         isServerless: this.isServerless,
       },
-      this.isServerless
+      this.isServerless,
+      plugins.encryptedSavedObjects?.canEncrypt === true
     ).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
@@ -350,14 +354,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         entityAnalyticsConfig: config.entityAnalytics,
         telemetry: core.analytics,
       });
-      if (experimentalFeatures.entityAnalyticsMlJobBehaviorMaintainer) {
-        registerMlAnomalyDetectionBehaviorMaintainer({
-          entityStore: plugins.entityStore,
-          getStartServices: core.getStartServices,
-          ml: plugins.ml,
-          logger: this.logger,
-        });
-      }
       if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
         registerWatchlistMaintainer({
           entityStore: plugins.entityStore,
@@ -394,6 +390,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (!experimentalFeatures.entityStoreDisabled) {
       plugins.entityStore?.registerEntityMaintainer(accessesFrequentlyMaintainer);
       plugins.entityStore?.registerEntityMaintainer(communicatesWithMaintainer);
+      plugins.entityStore?.registerEntityMaintainer(administersMaintainer);
+      plugins.entityStore?.registerEntityMaintainer(supervisesMaintainer);
+      plugins.entityStore?.registerEntityMaintainer(ownsMaintainer);
 
       registerEntityStoreFieldRetentionEnrichTask({
         getStartServices: core.getStartServices,
@@ -568,7 +567,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    registerCaseAttachments(plugins.cases.attachmentFramework);
+    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
     plugins.cases.attachmentFramework.registerUnified(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
@@ -856,7 +855,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions, core);
+      registerWorkflowSteps(plugins.workflowsExtensions, core, experimentalFeatures);
     }
 
     setupAlertsCapabilitiesSwitcher({

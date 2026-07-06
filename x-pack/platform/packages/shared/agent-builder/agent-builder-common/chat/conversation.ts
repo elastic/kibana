@@ -23,6 +23,7 @@ import type {
   AskUserQuestionAnswer,
 } from '../agents/prompts';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
+import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
 
 /**
@@ -366,6 +367,11 @@ export interface RoundModelUsageStats {
    */
   output_tokens: number;
   /**
+   * Number of input tokens served from cache this round, when reported by the provider.
+   * Subset of `input_tokens` (cache reads), not additive.
+   */
+  cached_input_tokens?: number;
+  /**
    * Model identifier from the provider response, if available.
    */
   model?: string;
@@ -406,6 +412,12 @@ export interface Conversation {
   read?: boolean;
   /** current status of the conversation */
   status?: ConversationRoundStatus;
+  /**
+   * Identifier of the bash/VFS workspace for this conversation.
+   */
+  workspace_id?: string;
+  /** Access mode for the conversation. Missing values are treated as private. */
+  access_control?: ConversationAccessControl;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

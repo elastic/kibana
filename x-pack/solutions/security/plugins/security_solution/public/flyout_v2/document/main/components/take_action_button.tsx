@@ -12,15 +12,15 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
+import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { EventKind } from '../constants/event_kinds';
-import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { useAlertTagsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
+import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
@@ -28,12 +28,22 @@ import { useRunDocumentWorkflowPanel } from '../../../../detections/components/a
 import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import { HostIsolationFlyout } from '../../../../common/components/endpoint/host_isolation/from_alerts/host_isolation_flyout';
+import { useResponderActionItem } from '../../../../common/components/endpoint/responder';
 import { useExploreActions } from '../hooks/use_explore_actions';
+import { AddExceptionFlyoutWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
+import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
   defaultMessage: 'Take action',
 });
+
+const TAKE_ACTION_MENU = i18n.translate(
+  'xpack.securitySolution.flyoutV2.footer.takeActionMenuLabel',
+  {
+    defaultMessage: 'Take action menu',
+  }
+);
 
 const ADD_NOTE = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeAction.addNoteLabel', {
   defaultMessage: 'Add note',
@@ -48,15 +58,6 @@ export interface TakeActionButtonProps {
    * ECS data for the document
    */
   ecsData: Ecs;
-  /**
-   * Non-ECS data for the document
-   */
-  nonEcsData: TimelineNonEcsData[];
-  /**
-   * Field-browser shaped data for the document, used to drive endpoint response actions
-   * (e.g. host isolation) that still consume the legacy `TimelineEventsDetailsItem[]` shape.
-   */
-  detailsData: TimelineEventsDetailsItem[];
   /**
    * Callback to refetch flyout data
    */
@@ -76,27 +77,13 @@ export interface TakeActionButtonProps {
  * // TODO: refactor all actions to take a DataTableRecord as input.
  */
 export const TakeActionButton = memo(
-  ({
-    hit,
-    ecsData,
-    nonEcsData,
-    detailsData,
-    refetchFlyoutData,
-    onAlertUpdated,
-    onShowNotes,
-  }: TakeActionButtonProps) => {
+  ({ hit, ecsData, refetchFlyoutData, onAlertUpdated, onShowNotes }: TakeActionButtonProps) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopoverHandler = useCallback(() => setIsPopoverOpen((open) => !open), []);
     const closePopoverHandler = useCallback(() => setIsPopoverOpen(false), []);
     const [isolateAction, setIsolateAction] = useState<HostIsolationAction | null>(null);
 
     const isInSecurityApp = useIsInSecurityApp();
-
-    const hostIsolationActionItems = useHostIsolationAction({
-      closePopover: closePopoverHandler,
-      detailsData,
-      onAddIsolationStatusClick: setIsolateAction,
-    });
 
     const documentId = hit.raw._id ?? '';
     const isRemoteDocument = useMemo(
@@ -107,10 +94,29 @@ export const TakeActionButton = memo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
-    const alertStatus = useMemo(() => {
-      const rawStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
-      return (Array.isArray(rawStatus) ? rawStatus[0] : rawStatus) as Status;
-    }, [hit]);
+    const alertStatus = useMemo(() => getFieldValue(hit, ALERT_WORKFLOW_STATUS) as Status, [hit]);
+    const isEndpointAlert = useMemo(
+      () =>
+        getFieldValue(hit, 'kibana.alert.original_event.module') === 'endpoint' &&
+        getFieldValue(hit, 'kibana.alert.original_event.kind') === 'alert',
+      [hit]
+    );
+
+    const dataFormattedForFieldBrowser = useMemo(
+      () => getTimelineEventsDetailsFromRecord(hit),
+      [hit]
+    );
+
+    const nonEcsData = useMemo(
+      () => dataFormattedForFieldBrowser.map((d) => ({ field: d.field, value: d.values ?? null })),
+      [dataFormattedForFieldBrowser]
+    );
+
+    const hostIsolationActionItems = useHostIsolationAction({
+      closePopover: closePopoverHandler,
+      detailsData: dataFormattedForFieldBrowser,
+      onAddIsolationStatusClick: setIsolateAction,
+    });
 
     const { addToCaseActionItems } = useAddToCaseActions({
       ecsData,
@@ -186,14 +192,50 @@ export const TakeActionButton = memo(
       closePopover: closePopoverHandler,
     });
 
+    const endpointResponseActionsConsoleItems = useResponderActionItem(
+      dataFormattedForFieldBrowser,
+      closePopoverHandler
+    );
+
+    const [isExceptionFlyoutOpen, setIsExceptionFlyoutOpen] = useState(false);
+    const [exceptionFlyoutType, setExceptionFlyoutType] = useState<ExceptionListTypeEnum | null>(
+      null
+    );
+    const handleOpenAddRuleException = useCallback(
+      (type?: ExceptionListTypeEnum) => {
+        closePopoverHandler();
+        setExceptionFlyoutType(type ?? null);
+        setIsExceptionFlyoutOpen(true);
+      },
+      [closePopoverHandler]
+    );
+    const handleExceptionCancel = useCallback((_didRuleChange: boolean) => {
+      setIsExceptionFlyoutOpen(false);
+    }, []);
+    const handleExceptionConfirm = useCallback(
+      (_didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => {
+        if (didCloseAlert || didBulkCloseAlert) {
+          onAlertUpdated();
+        }
+        setIsExceptionFlyoutOpen(false);
+      },
+      [onAlertUpdated]
+    );
+    const { exceptionActionItems } = useAlertExceptionActions({
+      isEndpointAlert,
+      onAddExceptionTypeClick: handleOpenAddRuleException,
+    });
+
     const items = useMemo(
       () => [
         ...(!isRemoteDocument ? addToCaseActionItems : []),
         ...(!isRemoteDocument && isAlert ? statusActionItems : []),
         ...(!isRemoteDocument && isAlert ? alertTagsItems : []),
         ...(!isRemoteDocument && isAlert ? alertAssigneesItems : []),
+        ...(!isRemoteDocument && isAlert ? exceptionActionItems : []),
         ...(!isRemoteDocument && isAlert ? hostIsolationActionItems : []),
         ...(!isRemoteDocument ? (isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem) : []),
+        ...(!isRemoteDocument ? endpointResponseActionsConsoleItems : []),
         ...(!isRemoteDocument && !isAlert ? noteItems : []),
         ...(isInSecurityApp ? investigateInTimelineActionItems : []),
         ...(!isInSecurityApp ? exploreActionItems : []),
@@ -203,6 +245,8 @@ export const TakeActionButton = memo(
         alertAssigneesItems,
         alertTagsItems,
         documentWorkflowMenuItem,
+        endpointResponseActionsConsoleItems,
+        exceptionActionItems,
         exploreActionItems,
         hostIsolationActionItems,
         investigateInTimelineActionItems,
@@ -253,14 +297,14 @@ export const TakeActionButton = memo(
         {isolateAction !== null && (
           <HostIsolationFlyout
             hit={hit}
-            detailsData={detailsData}
+            detailsData={dataFormattedForFieldBrowser}
             isolateAction={isolateAction}
             onClose={() => setIsolateAction(null)}
           />
         )}
         <EuiPopover
-          aria-label={TAKE_ACTION}
           id="AlertTakeActionPanel"
+          aria-label={TAKE_ACTION_MENU}
           button={takeActionButton}
           isOpen={isPopoverOpen}
           closePopover={closePopoverHandler}
@@ -270,6 +314,14 @@ export const TakeActionButton = memo(
         >
           <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="takeActionPanelMenu" />
         </EuiPopover>
+        {isExceptionFlyoutOpen && (
+          <AddExceptionFlyoutWrapper
+            hit={hit}
+            exceptionListType={exceptionFlyoutType}
+            onCancel={handleExceptionCancel}
+            onConfirm={handleExceptionConfirm}
+          />
+        )}
       </>
     );
   }

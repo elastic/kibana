@@ -121,6 +121,13 @@ export const allowedExperimentalValues = Object.freeze({
   entityStoreDisabled: false,
 
   /**
+   * Entity Analytics: enables attaching entities (users, hosts, IPs) to a case from
+   * Entity Analytics surfaces such as the entity flyout, and registers the
+   * `security.entity` unified cases attachment type.
+   */
+  entityAttachmentsEnabled: false,
+
+  /**
    * Enables AI rule creation feature
    */
   aiRuleCreationEnabled: true,
@@ -163,6 +170,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Allows users to manage trusted USB and external devices
    */
   trustedDevices: true,
+
+  /**
+   * Enables custom YARA signature management in Elastic Defend.
+   */
+  customYaraSignaturesEnabled: false,
 
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
@@ -225,7 +237,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Automatic Troubleshooting Agent Builder skill
    */
-  automaticTroubleshootingSkill: false,
+  automaticTroubleshootingSkill: true,
 
   /**
    * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
@@ -240,6 +252,12 @@ export const allowedExperimentalValues = Object.freeze({
   dexAiSkillFindRules: false,
 
   /**
+   * Enables the recommend-prebuilt-rules Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillRecommendPrebuiltRules: false,
+
+  /**
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
@@ -250,9 +268,9 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsEntityStoreV2: true,
 
   /**
-   * Enables entity ML job behavior maintainer
+   * Enables entity ML anomaly details API
    */
-  entityAnalyticsMlJobBehaviorMaintainer: false,
+  entityAnalyticsAnomalyDetails: false,
 
   /**
    * Enables the deprecated prebuilt rules UI
@@ -291,6 +309,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the risk score history API endpoint for Entity Analytics.
    */
   riskScoreHistoryEnabled: false,
+
+  /**
+   * Enables the Attacks page tour (welcome callout + guided tour).
+   * Release: 9.5
+   */
+  attacksPageTourEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

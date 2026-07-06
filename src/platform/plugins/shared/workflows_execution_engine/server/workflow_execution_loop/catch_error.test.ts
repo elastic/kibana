@@ -168,6 +168,22 @@ describe('catchError', () => {
     });
   });
 
+  it('does NOT re-fail a step that already settled itself in a terminal state', async () => {
+    // Regression: a step that failed itself with its own output (e.g. a parallel
+    // step under fail-fast persisting its aggregate) must not be re-failed here —
+    // that would overwrite its status/output (clobbering the persisted output).
+    const initialError = new Error('boom');
+    const { params, stepRuntime } = createParams(initialError);
+    // The step settled itself, so it no longer carries an active step-level error;
+    // this forces catchError down the branch that only re-fails non-terminal steps.
+    stepRuntime.error = undefined;
+    stepRuntime.stepExecution = { status: 'failed' };
+
+    await catchError(params as any, stepRuntime as any);
+
+    expect(stepRuntime.failStep).not.toHaveBeenCalled();
+  });
+
   it('stores workflow error on the driver and logs when catchError itself throws', async () => {
     const initialError = new Error('boom');
     const { params, stepRuntime, workflowExecutionCursor } = createParams(initialError);
