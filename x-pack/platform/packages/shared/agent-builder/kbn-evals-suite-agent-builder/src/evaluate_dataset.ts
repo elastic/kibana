@@ -23,7 +23,6 @@ import {
   type GroundTruth,
   type ExperimentTask,
   type TaskOutput,
-  type Evaluator,
 } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
