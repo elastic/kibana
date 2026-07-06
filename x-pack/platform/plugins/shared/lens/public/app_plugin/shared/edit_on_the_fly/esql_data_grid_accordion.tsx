@@ -98,6 +98,7 @@ export const ESQLDataGridAccordion = ({
         {isAccordionOpen && (
           <>
             <ESQLDataGrid
+              key={dataGridAttrs?.columns.map((c) => c.name).join(',')}
               rows={dataGridAttrs?.rows}
               columns={dataGridAttrs?.columns}
               dataView={dataGridAttrs?.dataView}
