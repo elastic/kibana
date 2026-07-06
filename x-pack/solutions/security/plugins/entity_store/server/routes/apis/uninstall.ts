@@ -20,9 +20,10 @@ const bodySchema = z.object({
     .optional()
     .default(ALL_ENTITY_TYPES)
     .describe(
-      'DEPRECATED: use `DELETE /uninstall/{entityType}` to uninstall a single entity type. ' +
+      'Deprecated in 9.6.0. Use `DELETE /uninstall/{entityType}` to uninstall a single entity type. ' +
         'Retained for backward compatibility. Entity types to uninstall; defaults to all installed types.'
-    ),
+    )
+    .meta({ deprecated: true }),
 });
 
 export function registerUninstall(router: EntityStorePluginRouter) {
