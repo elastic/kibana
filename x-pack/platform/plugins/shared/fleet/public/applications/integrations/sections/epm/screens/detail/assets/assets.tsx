@@ -20,7 +20,10 @@ import type {
 } from '../../../../../../../../common';
 import { ElasticsearchAssetType } from '../../../../../../../../common';
 import { KibanaSavedObjectType } from '../../../../../../../../common/types/models';
-import { displayedAssetTypes } from '../../../../../../../../common/constants';
+import {
+  displayedAssetTypes,
+  installationStatuses,
+} from '../../../../../../../../common/constants';
 
 import { Error, ExtensionWrapper, Loading } from '../../../../../components';
 
@@ -41,6 +44,7 @@ import { SideBarColumn } from '../../../components/side_bar_column';
 import { ALERTING_ASSET_TYPES } from '../alerting';
 
 import { DeferredAssetsSection } from './deferred_assets_section';
+import { MissingAssetsCallout } from './missing_assets_callout';
 import { AssetsAccordion } from './assets_accordion';
 import { InstallKibanaAssetsButton } from './install_kibana_assets_button';
 
@@ -73,6 +77,13 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
   const pkgInstallationInfo =
     'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+
+  // A failed install can still have partially-installed assets worth showing here, but only when
+  // the failure was actually caused by assets missing from Elasticsearch — mirrors the same
+  // derivation used to decide whether to show the Assets tab at all (see detail/index.tsx).
+  const hasMissingAssetsFailure =
+    pkgInstallationInfo?.install_status === installationStatuses.InstallFailed &&
+    (pkgInstallationInfo?.latest_install_failed_attempts?.[0]?.missing_assets?.length ?? 0) > 0;
 
   const installedSpaceId = pkgInstallationInfo?.installed_kibana_space_id;
   const assetsInstalledInCurrentSpace =
@@ -179,9 +190,10 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
     fetchAssetSavedObjects();
   }, [packageInfo, pkgAssets, pkgInstallationInfo]);
 
-  // if they arrive at this page and the package is not installed, send them to overview
-  // this happens if they arrive with a direct url or they uninstall while on this tab
-  if (packageInstallStatus.status !== InstallStatus.installed) {
+  // if they arrive at this page and the package is neither installed nor failed with missing
+  // assets, send them to overview. This happens if they arrive with a direct url or they
+  // uninstall while on this tab.
+  if (packageInstallStatus.status !== InstallStatus.installed && !hasMissingAssetsFailure) {
     return <Redirect to={getPath('integration_details_overview', { pkgkey })} />;
   }
 
@@ -341,6 +353,15 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
     </>
   ) : null;
 
+  const latestFailedAttempt = pkgInstallationInfo?.latest_install_failed_attempts?.[0];
+  const missingAssetsContent =
+    hasMissingAssetsFailure && latestFailedAttempt ? (
+      <>
+        <MissingAssetsCallout failedAttempt={latestFailedAttempt} />
+        <EuiSpacer size="m" />
+      </>
+    ) : null;
+
   return (
     <EuiFlexGroup alignItems="flexStart">
       <SideBarColumn grow={1} />
@@ -359,6 +380,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
             <EuiSpacer size="m" />
           </>
         )}
+        {missingAssetsContent}
         {deferredInstallationsContent}
         {content}
       </EuiFlexItem>

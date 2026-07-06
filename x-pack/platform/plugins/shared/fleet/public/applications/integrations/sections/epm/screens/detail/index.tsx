@@ -40,7 +40,10 @@ import {
   getAgentlessRelease,
   isOnlyAgentlessIntegration,
 } from '../../../../../../../common/services/agentless_policy_helper';
-import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
+import {
+  HIDDEN_API_REFERENCE_PACKAGES,
+  installationStatuses,
+} from '../../../../../../../common/constants';
 
 import {
   useGetPackageInstallStatus,
@@ -69,6 +72,7 @@ import { PermissionsError } from '../../../../layouts';
 import { wrapTitleWithDeprecated } from '../../components/utils';
 
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
+import { MissingAssetsWarning } from './assets/missing_assets_warning';
 
 import { getInstallPkgRouteOptions } from './utils';
 import {
@@ -346,6 +350,12 @@ export function Detail() {
   const hasInstalledAlertingAssets = (pkgInstallationInfo?.installed_kibana ?? []).some((asset) =>
     (ALERTING_ASSET_TYPES as string[]).includes(asset.type)
   );
+  // A failed install can still have partially-installed assets worth showing in the Assets tab,
+  // but only when the failure was actually caused by assets missing from Elasticsearch —
+  // other failure causes (e.g. a registry error before any asset installed) have nothing to show.
+  const hasMissingAssetsFailure =
+    pkgInstallationInfo?.install_status === installationStatuses.InstallFailed &&
+    (pkgInstallationInfo?.latest_install_failed_attempts?.[0]?.missing_assets?.length ?? 0) > 0;
   const showAlertingTab =
     hasArchiveAlertingAssets ||
     hasInstalledAlertingAssets ||
@@ -774,7 +784,7 @@ export function Detail() {
       });
     }
 
-    if (isInstalled && (packageInfo.assets || CustomAssets)) {
+    if ((isInstalled || hasMissingAssetsFailure) && (packageInfo.assets || CustomAssets)) {
       tabs.push({
         id: 'assets',
         name: (
@@ -784,7 +794,9 @@ export function Detail() {
               defaultMessage="Assets"
             />
             &nbsp;
-            {numOfDeferredInstallations > 0 ? (
+            {hasMissingAssetsFailure ? (
+              <MissingAssetsWarning />
+            ) : numOfDeferredInstallations > 0 ? (
               <DeferredAssetsWarning numOfDeferredInstallations={numOfDeferredInstallations} />
             ) : null}
           </div>
@@ -886,6 +898,7 @@ export function Detail() {
     integration,
     canReadIntegrationPolicies,
     isInstalled,
+    hasMissingAssetsFailure,
     CustomAssets,
     canReadPackageSettings,
     showConfigTab,
