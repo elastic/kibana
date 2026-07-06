@@ -6,7 +6,8 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { QueryLink, StreamQuery, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import type { QueryLink, StreamQuery } from '@kbn/significant-events-schema';
 import type { IRulesManagementClient } from './rules/rules_management_client';
 import type { IndicatorReader } from './indicator_reader';
 import type { IndicatorWriter } from './indicator_writer';

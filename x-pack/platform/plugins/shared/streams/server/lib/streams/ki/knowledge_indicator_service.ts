@@ -13,6 +13,10 @@ import type {
 } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { DataStreamClient } from '@kbn/data-streams';
+import {
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  type SignificantEventsTuningConfig,
+} from '@kbn/significant-events-schema';
 import type { StreamsPluginStartDependencies } from '../../../types';
 import {
   knowledgeIndicatorsDataStream,
@@ -23,11 +27,7 @@ import {
   KnowledgeIndicatorClient,
   type KnowledgeIndicatorDataStreamClient,
 } from './knowledge_indicator_client';
-import {
-  DEFAULT_SIG_EVENTS_TUNING_CONFIG,
-  type SigEventsTuningConfig,
-} from '../../../../common/sig_events_tuning_config';
-import type { SignificantEventsAlertingContext } from '../../sig_events/alerting/significant_events_alerting_context';
+import type { SignificantEventsAlertingContext } from '../../significant_events/alerting/significant_events_alerting_context';
 
 export class KnowledgeIndicatorService {
   constructor(
@@ -39,13 +39,13 @@ export class KnowledgeIndicatorService {
     esClient,
     soClient,
     context,
-    config = DEFAULT_SIG_EVENTS_TUNING_CONFIG,
+    config = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   }: {
     esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
     context: SignificantEventsAlertingContext;
     config?: Pick<
-      SigEventsTuningConfig,
+      SignificantEventsTuningConfig,
       'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
     >;
   }): Promise<KnowledgeIndicatorClient> {

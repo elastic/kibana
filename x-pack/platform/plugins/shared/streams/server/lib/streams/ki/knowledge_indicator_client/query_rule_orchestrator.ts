@@ -6,17 +6,19 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { QueryLink, StreamQuery } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS, deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
+import type { QueryLink, StreamQuery } from '@kbn/significant-events-schema';
+import { deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { computeRuleId } from '../helpers/compute_rule_id';
 import { installQueries, uninstallQueries } from './rule_orchestration';
+import { queryFromLink } from './serializers';
 import { KI_TYPE_QUERY } from '../fields';
 import type { KIBulkOperation } from './types';
 import type { IRulesManagementClient } from './rules/rules_management_client';
 import type { IndicatorWriter } from './indicator_writer';
 import type { IndicatorReader } from './indicator_reader';
-import { canQueryBeRuleBacked } from '../../../sig_events/alerting/significant_events_alerting_context';
+import { canQueryBeRuleBacked } from '../../../significant_events/alerting/significant_events_alerting_context';
 
 export class QueryRuleOrchestrator {
   constructor(
@@ -172,14 +174,14 @@ export class QueryRuleOrchestrator {
     const scopedLinks = currentLinks.filter((l) => l.rule_backed || l.query.id === query.id);
 
     if (!existing) {
-      await this.syncQueries(definition, [...scopedLinks.map((l) => l.query), query], {
+      await this.syncQueries(definition, [...scopedLinks.map(queryFromLink), query], {
         currentLinks: scopedLinks,
       });
       return;
     }
     await this.syncQueries(
       definition,
-      scopedLinks.map((l) => (l.query.id === query.id ? query : l.query)),
+      scopedLinks.map((l) => (l.query.id === query.id ? query : queryFromLink(l))),
       { currentLinks: scopedLinks }
     );
   }
@@ -270,7 +272,7 @@ export class QueryRuleOrchestrator {
         toPromote.map((link) => ({
           index: {
             query: {
-              ...link.query,
+              ...queryFromLink(link),
               rule_backed: true,
               rule_id: link.rule_id,
             },
@@ -366,7 +368,7 @@ export class QueryRuleOrchestrator {
       toDemote.map((link) => ({
         index: {
           query: {
-            ...link.query,
+            ...queryFromLink(link),
             rule_backed: false,
             rule_id: link.rule_id,
           },

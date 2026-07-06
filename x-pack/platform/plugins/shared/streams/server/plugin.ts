@@ -39,11 +39,11 @@ import {
 } from '../common/constants';
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
-import { registerRules } from './lib/sig_events/rules/register_rules';
-import { getSigEventsTuningConfig } from './lib/sig_events/helpers/get_sig_events_tuning_config';
+import { registerRules } from './lib/significant_events/rules/register_rules';
+import { getSignificantEventsTuningConfig } from './lib/significant_events/helpers/get_significant_events_tuning_config';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
-import { createSignificantEventsAlertingContextResolver } from './lib/sig_events/alerting/significant_events_alerting_context';
-import type { SignificantEventsAlertingContext } from './lib/sig_events/alerting/significant_events_alerting_context';
+import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
+import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
@@ -55,7 +55,11 @@ import type {
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
-import { KnowledgeIndicatorService, initializeKnowledgeIndicatorsTemplate } from './lib/streams/ki';
+import {
+  type KnowledgeIndicatorClient,
+  KnowledgeIndicatorService,
+  initializeKnowledgeIndicatorsTemplate,
+} from './lib/streams/ki';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
@@ -63,10 +67,11 @@ import {
   createSignificantEventsClients,
   createSignificantEventsServices,
   initializeSignificantEventsTemplates,
-} from './lib/sig_events/significant_events_clients';
+} from './lib/significant_events/significant_events_clients';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { createMemoryToolsOptions, registerStreamsAgentBuilder } from './agent_builder/register';
+import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
 import { registerStreamsMemoryAgentBuilder } from './agent_builder/skills/register_memory_skills';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
@@ -88,8 +93,11 @@ import {
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StreamsPluginSetup {}
+export interface StreamsPluginSetup {
+  registerKnowledgeIndicatorClientProvider(
+    provider: (request: KibanaRequest) => Promise<KnowledgeIndicatorClient>
+  ): void;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginStart {}
 
@@ -112,6 +120,7 @@ export class StreamsPlugin
   private patternExtractionService?: PatternExtractionService;
   private streamsGetScopedClients?: GetScopedClients;
   private subscriptions: Subscription[] = [];
+  private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClient>;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -197,7 +206,7 @@ export class StreamsPlugin
           rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
         }),
         contentService.getClient(),
-        getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
+        getSignificantEventsTuningConfig(globalUiSettingsClient, this.logger),
       ]);
 
       const space = pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -220,12 +229,13 @@ export class StreamsPlugin
           ? pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID)
           : undefined;
 
-      const resolveSigEventsAlertingContext = createSignificantEventsAlertingContextResolver({
-        uiSettingsClient,
-        getAlertingRulesClient,
-        getAlertingV2RulesClient,
-        logger: this.logger,
-      });
+      const resolveSignificantEventsAlertingContext =
+        createSignificantEventsAlertingContextResolver({
+          uiSettingsClient,
+          getAlertingRulesClient,
+          getAlertingV2RulesClient,
+          logger: this.logger,
+        });
 
       const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
         knowledgeIndicatorService.getClient({
@@ -236,11 +246,13 @@ export class StreamsPlugin
         });
 
       let kiClientPromise: ReturnType<typeof createKnowledgeIndicatorClient> | undefined;
-      const getKnowledgeIndicatorClient = () => {
-        kiClientPromise ??= (async () =>
-          createKnowledgeIndicatorClient(await resolveSigEventsAlertingContext()))();
-        return kiClientPromise;
-      };
+      const getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient> = this.kiProvider
+        ? () => this.kiProvider!(request)
+        : () => {
+            kiClientPromise ??= (async () =>
+              createKnowledgeIndicatorClient(await resolveSignificantEventsAlertingContext()))();
+            return kiClientPromise;
+          };
 
       const license = await licensing.getLicense();
       const isSecurityEnabled = license.getFeature('security').isEnabled;
@@ -264,7 +276,7 @@ export class StreamsPlugin
         soClient,
         attachmentClient,
         streamsClient,
-        getSignificantEventsAlertingContext: resolveSigEventsAlertingContext,
+        getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
         ...significantEventsClients,
         inferenceClient,
@@ -290,6 +302,17 @@ export class StreamsPlugin
     );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
 
+    // Register SML types synchronously during setup so agent_context_layer can schedule
+    // their crawler tasks during its start phase. Must happen in setup() — scheduling
+    // snapshots the registry at start() and types registered later are never crawled.
+    // Matches the contract followed by alerting_v2 and agent_builder_dashboards.
+    if (plugins.agentContextLayer && this.streamsGetScopedClients) {
+      registerAgentBuilderSmlTypes({
+        agentContextLayer: plugins.agentContextLayer,
+        getScopedClients: this.streamsGetScopedClients,
+      });
+    }
+
     if (plugins.agentBuilder) {
       void core
         .getStartServices()
@@ -301,7 +324,6 @@ export class StreamsPlugin
           await registerStreamsAgentBuilder({
             agentBuilder: plugins.agentBuilder!,
             getScopedClients: streamsGetScopedClients,
-            agentContextLayer: plugins.agentContextLayer,
             server,
             logger: this.logger,
             telemetry: telemetryClient,
@@ -542,7 +564,11 @@ export class StreamsPlugin
       logger: this.logger,
     });
 
-    return {};
+    return {
+      registerKnowledgeIndicatorClientProvider: (provider) => {
+        this.kiProvider = provider;
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: StreamsPluginStartDependencies): StreamsPluginStart {

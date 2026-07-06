@@ -6,12 +6,15 @@
  */
 
 import type { ComposerSortShorthand } from '@elastic/esql';
-import type { Feature, KnowledgeIndicator, QueryLink, StreamQuery } from '@kbn/streams-schema';
-import type { Streams } from '@kbn/streams-schema';
 import {
-  DEFAULT_SIG_EVENTS_TUNING_CONFIG,
-  type SigEventsTuningConfig,
-} from '../../../../../common/sig_events_tuning_config';
+  type Feature,
+  type KnowledgeIndicator,
+  type QueryLink,
+  type SignificantEventsTuningConfig,
+  type StreamQuery,
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+} from '@kbn/significant-events-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { SearchMode } from '../../../../../common/queries';
 import type { KnowledgeIndicatorType } from '../fields';
 import {
@@ -25,7 +28,9 @@ import { IndicatorWriter } from './indicator_writer';
 import { IndicatorReader } from './indicator_reader';
 import { IndicatorSearcher } from './indicator_searcher';
 import { QueryRuleOrchestrator } from './query_rule_orchestrator';
-import type { SignificantEventsAlertingContext } from '../../../sig_events/alerting/significant_events_alerting_context';
+import { computeExpiresAt } from './serializers';
+import type { SignificantEventsAlertingContext } from '../../../significant_events/alerting/significant_events_alerting_context';
+
 export type {
   KIBulkOperation,
   KnowledgeIndicatorClientDeps,
@@ -38,17 +43,19 @@ export class KnowledgeIndicatorClient {
   private readonly reader: IndicatorReader;
   private readonly searcher: IndicatorSearcher;
   private readonly orchestrator: QueryRuleOrchestrator;
+  private readonly ttlDays: number;
 
   constructor(
     deps: KnowledgeIndicatorClientDeps,
     isSignificantEventsEnabled: boolean,
     alertingContext: SignificantEventsAlertingContext,
     config: Pick<
-      SigEventsTuningConfig,
+      SignificantEventsTuningConfig,
       'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
-    > = DEFAULT_SIG_EVENTS_TUNING_CONFIG
+    > = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
   ) {
     const revisionReader = new RevisionReader(deps.esClient, deps.logger);
+    this.ttlDays = config.feature_ttl_days;
     this.writer = new IndicatorWriter(
       deps.dataStreamClient,
       deps.logger,
@@ -68,6 +75,17 @@ export class KnowledgeIndicatorClient {
 
   bulk(stream: string, operations: KIBulkOperation[]) {
     return this.writer.bulk(stream, operations);
+  }
+
+  getDefaultExpiresAt(): string {
+    return computeExpiresAt(new Date().toISOString(), this.ttlDays);
+  }
+
+  keepAlivePersistentIndicators(
+    stream: string,
+    options: { lastRefreshedBefore: string }
+  ): Promise<{ refreshed: number }> {
+    return this.writer.keepAlivePersistent(stream, options);
   }
 
   deleteIndicators(stream: string) {
