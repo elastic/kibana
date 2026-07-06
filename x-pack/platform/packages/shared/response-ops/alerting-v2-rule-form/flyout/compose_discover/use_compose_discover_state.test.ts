@@ -151,19 +151,23 @@ describe('reducer', () => {
   describe('SET_RECOVERY_TYPE', () => {
     it('opens child to recovery tab when switching to custom', () => {
       const state = createState({ recoveryType: 'default' });
-      const next = reducer(state, { type: 'SET_RECOVERY_TYPE', recoveryType: 'custom' });
+      const next = reducer(state, {
+        type: 'SET_RECOVERY_TYPE',
+        recoveryType: 'custom',
+        isEditable: true,
+      });
 
       expect(next.recoveryType).toBe('custom');
       expect(next.childOpen).toBe(true);
       expect(next.activeTab).toBe('recovery');
     });
 
-    it('does not open child when switching to custom in builder mode', () => {
+    it('does not open child when switching to custom and not editable (builder mode)', () => {
       const state = createState({ recoveryType: 'default', childOpen: false });
       const next = reducer(state, {
         type: 'SET_RECOVERY_TYPE',
         recoveryType: 'custom',
-        isBuilderMode: true,
+        isEditable: false,
       });
 
       expect(next.recoveryType).toBe('custom');
@@ -172,7 +176,11 @@ describe('reducer', () => {
 
     it('does not open child when switching to default', () => {
       const state = createState({ recoveryType: 'custom', childOpen: false });
-      const next = reducer(state, { type: 'SET_RECOVERY_TYPE', recoveryType: 'default' });
+      const next = reducer(state, {
+        type: 'SET_RECOVERY_TYPE',
+        recoveryType: 'default',
+        isEditable: true,
+      });
 
       expect(next.recoveryType).toBe('default');
       expect(next.childOpen).toBe(false);
@@ -198,43 +206,50 @@ describe('reducer', () => {
   });
 
   describe('GO_NEXT', () => {
-    it('closes preview when advancing in non-builder mode', () => {
+    it('closes preview when advancing and editable (non-builder mode)', () => {
       const state = createState({ step: 0, childOpen: true });
-      const next = reducer(state, { type: 'GO_NEXT', isAlert: true });
+      const next = reducer(state, { type: 'GO_NEXT', stepCount: 4, isEditable: true });
 
       expect(next.step).toBe(1);
       expect(next.childOpen).toBe(false);
     });
 
-    it('preserves preview state when advancing in builder mode', () => {
+    it('preserves preview state when advancing and not editable (builder mode)', () => {
       const state = createState({ step: 0, childOpen: true });
-      const next = reducer(state, { type: 'GO_NEXT', isAlert: true, isBuilderMode: true });
+      const next = reducer(state, { type: 'GO_NEXT', stepCount: 4, isEditable: false });
 
       expect(next.step).toBe(1);
       expect(next.childOpen).toBe(true);
     });
 
-    it('keeps preview closed if user closed it in builder mode', () => {
+    it('keeps preview closed if user closed it and not editable (builder mode)', () => {
       const state = createState({ step: 0, childOpen: false });
-      const next = reducer(state, { type: 'GO_NEXT', isAlert: true, isBuilderMode: true });
+      const next = reducer(state, { type: 'GO_NEXT', stepCount: 4, isEditable: false });
 
       expect(next.step).toBe(1);
       expect(next.childOpen).toBe(false);
+    });
+
+    it('clamps at stepCount - 1', () => {
+      const state = createState({ step: 3, childOpen: false });
+      const next = reducer(state, { type: 'GO_NEXT', stepCount: 4, isEditable: true });
+
+      expect(next.step).toBe(3);
     });
   });
 
   describe('GO_BACK', () => {
-    it('closes preview when going back in non-builder mode', () => {
+    it('closes preview when going back and editable (non-builder mode)', () => {
       const state = createState({ step: 2, childOpen: true });
-      const next = reducer(state, { type: 'GO_BACK' });
+      const next = reducer(state, { type: 'GO_BACK', isEditable: true });
 
       expect(next.step).toBe(1);
       expect(next.childOpen).toBe(false);
     });
 
-    it('preserves preview state when going back in builder mode', () => {
+    it('preserves preview state when going back and not editable (builder mode)', () => {
       const state = createState({ step: 2, childOpen: true });
-      const next = reducer(state, { type: 'GO_BACK', isBuilderMode: true });
+      const next = reducer(state, { type: 'GO_BACK', isEditable: false });
 
       expect(next.step).toBe(1);
       expect(next.childOpen).toBe(true);

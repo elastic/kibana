@@ -110,7 +110,7 @@ export function reducer(
       return {
         ...state,
         recoveryType: action.recoveryType,
-        ...(action.recoveryType === 'custom' && !action.isBuilderMode
+        ...(action.recoveryType === 'custom' && action.isEditable
           ? { childOpen: true, activeTab: 'recovery' as const }
           : {}),
       };
@@ -130,14 +130,11 @@ export function reducer(
     case 'SET_STEP':
       return { ...state, step: action.step };
     case 'GO_NEXT': {
-      const stepCount = (
-        action.isBuilderMode ? getBuilderStepIds(action.isAlert) : getStepIds(action.isAlert)
-      ).length;
-      const nextStep = Math.min(state.step + 1, stepCount - 1);
+      const nextStep = Math.min(state.step + 1, action.stepCount - 1);
       return {
         ...state,
         step: nextStep,
-        childOpen: action.isBuilderMode ? state.childOpen : false,
+        childOpen: action.isEditable ? false : state.childOpen,
       };
     }
     case 'GO_BACK': {
@@ -145,7 +142,7 @@ export function reducer(
       return {
         ...state,
         step: prevStep,
-        childOpen: action.isBuilderMode ? state.childOpen : false,
+        childOpen: action.isEditable ? false : state.childOpen,
       };
     }
     case 'OPEN_CHILD':

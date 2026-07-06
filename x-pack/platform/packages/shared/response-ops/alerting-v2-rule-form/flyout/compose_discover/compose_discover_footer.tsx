@@ -66,7 +66,8 @@ export interface ComposeDiscoverFooterProps {
   isCreate: boolean;
   hasValidationErrors: boolean;
   yamlHasErrors: boolean;
-  isBuilderMode: boolean;
+  /** Mirrors sandboxConfig.isEditable — whether the sandbox owns an independent, losable draft right now. */
+  isEditable: boolean;
   isBuilderStepValid: boolean;
   isSaving: boolean;
   onNext: () => void;
@@ -82,7 +83,7 @@ export const ComposeDiscoverFooter = ({
   isCreate,
   hasValidationErrors,
   yamlHasErrors,
-  isBuilderMode,
+  isEditable,
   isBuilderStepValid,
   isSaving,
   onNext,
@@ -115,7 +116,7 @@ export const ComposeDiscoverFooter = ({
     alertConditionState !== undefined && alertConditionState !== 'success';
 
   const nextDisabled =
-    (!isBuilderMode && uiState.childOpen) ||
+    (isEditable && uiState.childOpen) ||
     hasValidationErrors ||
     (isConditionStep && !isBuilderStep && !uiState.queryCommitted) ||
     (isBuilderStep && !isBuilderStepValid) ||
@@ -185,8 +186,8 @@ export const ComposeDiscoverFooter = ({
             <EuiButton
               color="text"
               iconType="arrowLeft"
-              isDisabled={!isBuilderMode && uiState.childOpen}
-              onClick={() => dispatch({ type: 'GO_BACK', isBuilderMode })}
+              isDisabled={isEditable && uiState.childOpen}
+              onClick={() => dispatch({ type: 'GO_BACK', isEditable })}
               data-test-subj="composeDiscoverBack"
             >
               {BACK_BUTTON_LABEL}

@@ -59,6 +59,23 @@ export interface StepDefinition {
 }
 
 /**
+ * Three independent, intrinsically-named facts about the active sandbox editing surface —
+ * replaces checking a mode's name (currentStep.id, isBuilderMode, manualSplitEnabled, ...)
+ * at each use site. See the design thread for the full reasoning; the short version: the
+ * original bug this refactor responds to was one flag (manualSplitEnabled) doing two
+ * unrelated jobs (tab shape *and* apply behavior) — these three fields can't cross-multiply
+ * that way because each is a single, orthogonal fact.
+ */
+export interface SandboxConfig {
+  /** Which editors to show. undefined/[] = one unified editor. */
+  tabs: QueryTab[] | undefined;
+  /** Whether Apply should derive a split from free text (true) or commit the draft as-is. */
+  autoSplitOnApply: boolean;
+  /** Whether the sandbox owns an independent, losable draft, or mirrors an external source of truth. */
+  isEditable: boolean;
+}
+
+/**
  * UI-only state for the ComposeDiscover flyout.
  *
  * Query content lives in RHF (committed state) and local useState in the parent flyout (editing buffer).
@@ -86,12 +103,17 @@ export interface ComposeDiscoverState {
 }
 
 export type ComposeDiscoverAction =
-  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType; isBuilderMode?: boolean }
+  /**
+   * isEditable mirrors sandboxConfig.isEditable — whether the sandbox owns an independent,
+   * losable draft right now. Required (not optional) so a caller can't silently fall back
+   * to the wrong default.
+   */
+  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType; isEditable: boolean }
   | { type: 'KIND_CHANGE'; kind: 'signal' | 'alert' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
-  | { type: 'GO_NEXT'; isAlert: boolean; isBuilderMode?: boolean }
-  | { type: 'GO_BACK'; isBuilderMode?: boolean }
+  | { type: 'GO_NEXT'; stepCount: number; isEditable: boolean }
+  | { type: 'GO_BACK'; isEditable: boolean }
   | { type: 'OPEN_CHILD'; isAlert: boolean }
   | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean }
   | { type: 'CLOSE_CHILD' }
