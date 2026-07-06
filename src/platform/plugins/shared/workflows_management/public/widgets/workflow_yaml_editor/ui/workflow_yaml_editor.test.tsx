@@ -26,6 +26,7 @@ import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import type { YamlEditorProps } from '../../../shared/ui';
 import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_item_provider';
+import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
 
 // Mock the YamlEditor component to avoid Monaco complexity in tests
 jest.mock('../../../shared/ui/yaml_editor', () => ({
@@ -664,6 +665,68 @@ steps:
       capturedKeyboardHandlers.saveAndRun!();
 
       expect(mockSaveYaml).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('agent builder auto-open', () => {
+    const mockUseAgentBuilderIntegration = useAgentBuilderIntegration as jest.MockedFunction<
+      typeof useAgentBuilderIntegration
+    >;
+
+    const setupAvailable = () => {
+      const openAgentChat = jest.fn();
+      mockUseAgentBuilderIntegration.mockReturnValue({
+        openAgentChat,
+        isAgentBuilderAvailable: true,
+        proposalManager: null,
+      } as unknown as ReturnType<typeof useAgentBuilderIntegration>);
+      return openAgentChat;
+    };
+
+    it('opens the agent chat once when available', async () => {
+      const openAgentChat = setupAvailable();
+      const store = createMockStore();
+
+      const { rerender } = renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      await waitFor(() => {
+        expect(openAgentChat).toHaveBeenCalledTimes(1);
+      });
+
+      // Simulate a re-render (e.g. validation cycle producing a new openAgentChat identity)
+      rerender(<WorkflowYAMLEditor {...defaultProps} />);
+      rerender(<WorkflowYAMLEditor {...defaultProps} />);
+
+      expect(openAgentChat).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not open the agent chat when the editor is read-only (managed workflow)', async () => {
+      const openAgentChat = setupAvailable();
+      const store = createMockStore();
+      store.dispatch(setWorkflow({ ...mockWorkflow, managed: true }));
+      store.dispatch(setActiveTab('workflow'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      await waitFor(() => {
+        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      });
+
+      expect(openAgentChat).not.toHaveBeenCalled();
+    });
+
+    it('does not open the agent chat on the executions tab', async () => {
+      const openAgentChat = setupAvailable();
+      const store = createMockStore();
+      store.dispatch(setActiveTab('executions'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      await waitFor(() => {
+        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      });
+
+      expect(openAgentChat).not.toHaveBeenCalled();
     });
   });
 
