@@ -21,7 +21,7 @@ import {
   isQueryESQLControl,
 } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { getValuesFromQueryField } from '@kbn/esql-utils';
+import { getValuesFromQueryField, getVariableNamePrefix } from '@kbn/esql-utils';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { monaco } from '@kbn/code-editor';
 import { ValueControlForm } from './value_control_form';
@@ -35,7 +35,6 @@ import {
   validateVariableName,
   areValuesIntervalsValid,
   getVariableTypeFromQuery,
-  getVariableNamePrefix,
   checkVariableExistence,
 } from './helpers';
 

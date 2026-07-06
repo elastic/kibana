@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -73,21 +74,23 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       name,
       description,
       definition,
+      isGlobal,
     }: {
       name: string;
       description: string;
       definition: string;
+      isGlobal: boolean;
     }) => {
       const ownerValue = (Array.isArray(owner) ? owner[0] : owner) as Owner;
 
       if (editingFieldDef) {
         updateFieldDef({
           id: editingFieldDef.fieldDefinitionId,
-          fieldDefinition: { name, description, definition, owner: ownerValue },
+          fieldDefinition: { name, description, definition, owner: ownerValue, isGlobal },
         });
       } else {
         createFieldDef({
-          fieldDefinition: { name, description, definition, owner: ownerValue },
+          fieldDefinition: { name, description, definition, owner: ownerValue, isGlobal },
         });
       }
     },
@@ -123,9 +126,11 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       ),
     },
     {
-      field: 'owner',
-      name: i18n.OWNER_COLUMN,
-      truncateText: true,
+      field: 'isGlobal',
+      name: i18n.APPLY_TO_ALL_CASES_COLUMN,
+      render: (value: boolean | undefined) =>
+        value ? i18n.GLOBAL_FIELD_YES : i18n.GLOBAL_FIELD_NO,
+      'data-test-subj': 'fieldDefinitionApplyToAllCasesCell',
     },
     {
       name: i18n.ACTIONS_COLUMN,
@@ -134,23 +139,25 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
           render: (fd: FieldDefinition) => (
             <EuiFlexGroup gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="pencil"
-                  aria-label={i18n.EDIT_FIELD_DEFINITION}
-                  title={i18n.EDIT_FIELD_DEFINITION}
-                  onClick={() => handleEdit(fd)}
-                  data-test-subj="fieldDefinitionEditButton"
-                />
+                <EuiToolTip content={i18n.EDIT_FIELD_DEFINITION} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    aria-label={i18n.EDIT_FIELD_DEFINITION}
+                    onClick={() => handleEdit(fd)}
+                    data-test-subj="fieldDefinitionEditButton"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="trash"
-                  aria-label={i18n.DELETE_FIELD_DEFINITION}
-                  title={i18n.DELETE_FIELD_DEFINITION}
-                  color="danger"
-                  onClick={() => handleDelete(fd)}
-                  data-test-subj="fieldDefinitionDeleteButton"
-                />
+                <EuiToolTip content={i18n.DELETE_FIELD_DEFINITION} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="trash"
+                    aria-label={i18n.DELETE_FIELD_DEFINITION}
+                    color="danger"
+                    onClick={() => handleDelete(fd)}
+                    data-test-subj="fieldDefinitionDeleteButton"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           ),

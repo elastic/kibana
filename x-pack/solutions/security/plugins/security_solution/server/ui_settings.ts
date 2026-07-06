@@ -42,6 +42,7 @@ import {
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_DE_HEALTH_UI_SETTING,
+  ENABLE_NEW_FLYOUT_SETTING,
   ENABLE_NEWS_FEED_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE,
@@ -306,6 +307,27 @@ export const initUiSettings = (
         technicalPreview: true,
       },
     }),
+    ...(experimentalFeatures.newFlyoutSystemEnabled && {
+      [ENABLE_NEW_FLYOUT_SETTING]: {
+        name: i18n.translate('xpack.securitySolution.uiSettings.enableNewFlyoutLabel', {
+          defaultMessage: 'Enable new flyout',
+        }),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableNewFlyoutDescription',
+          {
+            defaultMessage:
+              '<p>Enables the new flyout system for document details in Security Solution.</p>',
+            values: { p: (chunks) => `<p>${chunks}</p>` },
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+      },
+    }),
     [NEWS_FEED_URL_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {
         defaultMessage: 'News feed URL',
@@ -452,6 +474,7 @@ export const initUiSettings = (
             }
           },
           minLength: 1,
+          maxLength: 1024,
         }),
         {
           validate: (values) => {

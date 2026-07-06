@@ -8,20 +8,21 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
-import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
-  SigEventsWorkflowStatus,
-  type StreamsKIsOnboardingFeaturesResult,
-  type StreamsKIsOnboardingQueriesResult,
-  type StreamsKIsOnboardingStatusResult,
+  SignificantEventsWorkflowStatus,
+  type SignificantEventsWorkflowStatusResult,
+  type KIsOnboardingResult,
+  type KIsOnboardingStatusResult,
   type BaseFeature,
   type GeneratedSignificantEventQuery,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { WorkflowExecutionService } from './workflow_execution_service';
+import type { EbtTelemetryClient } from '../telemetry/ebt/client';
 
 const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, total: 0 };
 
@@ -95,16 +96,15 @@ interface OnboardingWorkflowOutputContext {
   queriesConnectorUsed: string;
   persistedQueries: GeneratedSignificantEventQuery[];
   queriesTokensUsed: ChatCompletionTokenCount;
+  keepAliveRefreshed: number;
 }
 
 /**
  * Nested domain representation of a completed onboarding run, grouped by step.
  * Used to extract summary counts for the status response.
  */
-export interface StreamsKIsOnboardingOutput {
+export interface StreamsKIsOnboardingOutput extends KIsOnboardingResult {
   streamName: string;
-  features: StreamsKIsOnboardingFeaturesResult;
-  queries: StreamsKIsOnboardingQueriesResult;
 }
 
 /** Flattens nested onboarding inputs into the workflow engine's scalar payload. */
@@ -159,6 +159,9 @@ const parseWorkflowOutput = (
     connectorUsed: output.queriesConnectorUsed ?? '',
     tokensUsed: output.queriesTokensUsed ?? EMPTY_TOKEN_COUNT,
   },
+  keepAlive: {
+    refreshed: output.keepAliveRefreshed ?? 0,
+  },
 });
 
 const ONBOARDING_EXECUTIONS_SPACE_ID = DEFAULT_SPACE_ID;
@@ -180,7 +183,7 @@ export const parseStreamNameFromConcurrencyKey = (key: string): string | null =>
   return key.slice(CONCURRENCY_KEY_PREFIX.length);
 };
 
-const MAX_STREAMS_PER_QUERY = 10000;
+export const MAX_STREAMS_PER_QUERY = 10000;
 /**
  * Client that wraps the workflows management API to provide a stream-centric
  * interface for running, querying, and canceling KI onboarding workflows.
@@ -190,13 +193,21 @@ const MAX_STREAMS_PER_QUERY = 10000;
  */
 export class StreamsKIsOnboardingClient {
   private readonly workflowExecutionService: WorkflowExecutionService<OnboardingWorkflowInputPayload>;
+  private readonly telemetry: EbtTelemetryClient;
 
-  constructor({ managementApi }: { managementApi: WorkflowsServerPluginSetup['management'] }) {
+  constructor({
+    managementApi,
+    telemetry,
+  }: {
+    managementApi: WorkflowsServerPluginSetup['management'];
+    telemetry: EbtTelemetryClient;
+  }) {
     this.workflowExecutionService = new WorkflowExecutionService({
       managementApi,
-      workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+      workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
+    this.telemetry = telemetry;
   }
 
   /**
@@ -218,6 +229,16 @@ export class StreamsKIsOnboardingClient {
       inputs: toWorkflowInputPayload(inputs),
       request,
     });
+
+    this.telemetry.trackOnboardingScheduled({
+      stream_name: inputs.streamName,
+      execution_id: executionId,
+      workflow_id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+      space_id: ONBOARDING_EXECUTIONS_SPACE_ID,
+      skip_features: inputs.features.skip,
+      skip_queries: inputs.queries.skip,
+    });
+
     return { executionId };
   }
 
@@ -228,17 +249,13 @@ export class StreamsKIsOnboardingClient {
    * For completed executions a second fetch retrieves the full execution
    * context so output counts can be included in the result.
    */
-  async getStatus({
-    streamName,
-  }: {
-    streamName: string;
-  }): Promise<StreamsKIsOnboardingStatusResult> {
+  async getStatus({ streamName }: { streamName: string }): Promise<KIsOnboardingStatusResult> {
     const result = await this.workflowExecutionService.getStatus({
       spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
       queryParams: { concurrencyGroupKey: buildConcurrencyKey(streamName) },
     });
 
-    if (result.status !== SigEventsWorkflowStatus.Completed) {
+    if (result.status !== SignificantEventsWorkflowStatus.Completed) {
       return result;
     }
 
@@ -250,8 +267,55 @@ export class StreamsKIsOnboardingClient {
     const ctx = (fullExecution?.context ?? {}) as {
       output?: Partial<OnboardingWorkflowOutputContext>;
     };
-    const { features, queries } = parseWorkflowOutput(ctx.output ?? {});
-    return { ...result, features, queries };
+    const { features, queries, keepAlive } = parseWorkflowOutput(ctx.output ?? {});
+    return { ...result, features, queries, keepAlive };
+  }
+
+  /**
+   * Returns a lightweight status summary for many streams in one query.
+   *
+   * Collapses all onboarding executions via {@link getRecentExecutions} and
+   * filters to the requested names in memory (the management API can't filter
+   * by a set of concurrency keys). Streams with no execution map to
+   * `NotStarted`. Unlike {@link getStatus}, the completed output is omitted so
+   * no extra per-stream fetch is needed.
+   */
+  async getStatuses({
+    streamNames,
+  }: {
+    streamNames: string[];
+  }): Promise<Record<string, SignificantEventsWorkflowStatusResult>> {
+    if (streamNames.length === 0) {
+      return {};
+    }
+
+    const statuses: Record<string, SignificantEventsWorkflowStatusResult> = {};
+
+    for (const streamName of streamNames) {
+      statuses[streamName] = {
+        status: SignificantEventsWorkflowStatus.NotStarted,
+        executionId: null,
+      };
+    }
+
+    const requested = new Set(streamNames);
+    const executions = await this.getRecentExecutions();
+
+    for (const execution of executions) {
+      if (execution.concurrencyGroupKey === undefined) {
+        continue;
+      }
+      const streamName = parseStreamNameFromConcurrencyKey(execution.concurrencyGroupKey);
+      if (streamName === null || !requested.has(streamName)) {
+        continue;
+      }
+      statuses[streamName] = WorkflowExecutionService.toStatusResult({
+        execution,
+        workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+      });
+    }
+
+    return statuses;
   }
 
   /**

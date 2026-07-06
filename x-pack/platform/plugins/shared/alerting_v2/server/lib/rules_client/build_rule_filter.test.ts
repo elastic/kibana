@@ -35,19 +35,19 @@ describe('buildRuleSoFilter', () => {
       expect(buildRuleSoFilter('enabled: true')).toBe('alerting_rule.attributes.enabled: true');
     });
 
-    it('maps id to SO root path (not under attributes)', () => {
-      expect(buildRuleSoFilter('id: "abc-123"')).toBe('alerting_rule.id: "abc-123"');
+    it('maps id to SO root path and prefixes the id value', () => {
+      expect(buildRuleSoFilter('id: "abc-123"')).toBe('alerting_rule.id: "alerting_rule:abc-123"');
+    });
+
+    it('leaves already-prefixed id values unchanged', () => {
+      expect(buildRuleSoFilter('id: "alerting_rule:abc"')).toBe(
+        'alerting_rule.id: "alerting_rule:abc"'
+      );
     });
 
     it('maps metadata.name to SO attributes path', () => {
       expect(buildRuleSoFilter('metadata.name: "my rule"')).toBe(
         'alerting_rule.attributes.metadata.name: "my rule"'
-      );
-    });
-
-    it('maps metadata.owner to SO attributes path', () => {
-      expect(buildRuleSoFilter('metadata.owner: "team-a"')).toBe(
-        'alerting_rule.attributes.metadata.owner: "team-a"'
       );
     });
 
@@ -62,18 +62,12 @@ describe('buildRuleSoFilter', () => {
         'alerting_rule.attributes.metadata.tags: "production"'
       );
     });
-
-    it('maps grouping.fields to SO attributes path', () => {
-      expect(buildRuleSoFilter('grouping.fields: "host.name"')).toBe(
-        'alerting_rule.attributes.grouping.fields: "host.name"'
-      );
-    });
   });
 
   describe('compound expressions', () => {
     it('handles NOT expressions', () => {
       expect(buildRuleSoFilter('NOT (id: "abc" or id: "def")')).toBe(
-        'NOT (alerting_rule.id: "abc" OR alerting_rule.id: "def")'
+        'NOT (alerting_rule.id: "alerting_rule:abc" OR alerting_rule.id: "alerting_rule:def")'
       );
     });
 
@@ -102,6 +96,18 @@ describe('buildRuleSoFilter', () => {
     it('rejects unknown fields', () => {
       expect(() => buildRuleSoFilter('unknown_field: value')).toThrow(
         'Invalid filter field "unknown_field"'
+      );
+    });
+
+    it('rejects metadata.owner (not an indexed field)', () => {
+      expect(() => buildRuleSoFilter('metadata.owner: "team-a"')).toThrow(
+        'Invalid filter field "metadata.owner"'
+      );
+    });
+
+    it('rejects grouping.fields (not an indexed field)', () => {
+      expect(() => buildRuleSoFilter('grouping.fields: "host.name"')).toThrow(
+        'Invalid filter field "grouping.fields"'
       );
     });
 
@@ -138,6 +144,10 @@ describe('buildRuleSoFilter', () => {
   describe('wildcard / exists patterns', () => {
     it('handles exists-style wildcard values', () => {
       expect(buildRuleSoFilter('kind: *')).toBe('alerting_rule.attributes.kind: *');
+    });
+
+    it('does not prefix wildcard id values', () => {
+      expect(buildRuleSoFilter('id: *')).toBe('alerting_rule.id: *');
     });
   });
 
