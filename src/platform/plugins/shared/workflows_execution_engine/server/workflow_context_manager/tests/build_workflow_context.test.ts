@@ -134,7 +134,7 @@ describe('buildWorkflowContext', () => {
     it('should expose accumulated token usage so it is queryable via {{ execution.usage }}', () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,
-        usage: { inputTokens: 45305, outputTokens: 289, totalTokens: 45594 },
+        usage: { inputTokens: 45305, outputTokens: 289, cachedTokens: 12000, totalTokens: 45594 },
       };
 
       const context = buildWorkflowContext(execution, undefined, dependencies);
@@ -142,6 +142,7 @@ describe('buildWorkflowContext', () => {
       expect(context.execution.usage).toEqual({
         inputTokens: 45305,
         outputTokens: 289,
+        cachedTokens: 12000,
         totalTokens: 45594,
       });
     });
