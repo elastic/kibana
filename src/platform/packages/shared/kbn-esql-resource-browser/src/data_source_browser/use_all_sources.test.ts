@@ -43,6 +43,23 @@ describe('useAllSources', () => {
     expect(names).toContain('ds-2');
   });
 
+  it('keeps the regular source when a dataset shares its name', async () => {
+    const params = makeParams({
+      getDatasets: jest.fn().mockResolvedValue({
+        datasets: [
+          { name: 'my-index', data_source: 'src-1', resource: 'r-1', description: 'A dataset' },
+        ],
+      }),
+    });
+    const { result } = renderHook(() => useAllSources(params));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const matches = result.current.allSources.filter((s) => s.name === 'my-index');
+    expect(matches).toHaveLength(1);
+    expect(matches[0]).toMatchObject({ name: 'my-index', type: SOURCES_TYPES.INDEX });
+  });
+
   it('normalizes datasets with EXTERNAL type', async () => {
     const params = makeParams();
     const { result } = renderHook(() => useAllSources(params));
