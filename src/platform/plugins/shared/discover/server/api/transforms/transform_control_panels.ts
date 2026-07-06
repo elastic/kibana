@@ -39,7 +39,6 @@ export const transformControlPanelsOut = (
     .sort(([, panelA], [, panelB]) => (panelA.order ?? 0) - (panelB.order ?? 0))
     .map(([id, panel]) => {
       const { order, width, grow, type, ...config } = panel;
-      // Legacy control state was stored in camelCase; convert config keys to snake_case.
       // `convertCamelCasedKeysToSnakeCase` is idempotent, so it is safe to run on non-legacy config too.
       const snakeCasedConfig = convertCamelCasedKeysToSnakeCase(config);
 

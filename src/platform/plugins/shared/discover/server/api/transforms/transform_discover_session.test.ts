@@ -217,7 +217,6 @@ describe('discover session API transforms', () => {
                 suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
                 requestData: {
                   breakdownField: 'transaction.id',
-                  timeInterval: 'h',
                 },
                 attributes: (discoverSessionApiData.tabs[1] as DiscoverSessionApiData['tabs'][1])
                   .vis_context!.attributes,
