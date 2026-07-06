@@ -8,15 +8,16 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import { DocumentDetailsContext } from '../../shared/context';
+import { DocumentDetailsContext } from '../../../flyout/document_details/shared/context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { EventFieldsData } from '../../../../common/components/event_details/types';
+import type { EventFieldsData } from '../../../common/components/event_details/types';
 import { TableFieldValueCell } from './table_field_value_cell';
-import { TestProviders } from '../../../../common/mock';
-import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
-import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
-import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from './test_ids';
-import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { TestProviders } from '../../../common/mock';
+import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../flyout/network_details';
+import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/mock_flyout_context';
+import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from '../../../flyout/document_details/right/components/test_ids';
+import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
+import type { OpenFlyoutLinkRenderer } from './open_flyout_link';
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -24,8 +25,8 @@ jest.mock('@kbn/expandable-flyout', () => ({
 }));
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../common/lib/kibana');
   return {
     ...actual,
     useKibana: () => ({
@@ -227,6 +228,48 @@ describe('TableFieldValueCell', () => {
           banner: NETWORK_PREVIEW_BANNER,
         },
       });
+    });
+  });
+
+  describe('when `renderFlyoutLink` is provided (new flyout)', () => {
+    // Stub renderer standing in for `OpenFlyoutLink`: wraps each value in an identifiable element.
+    const renderFlyoutLink: OpenFlyoutLinkRenderer = ({ field, children }) => (
+      <span data-test-subj={`flyout-link-${field}`}>{children}</span>
+    );
+
+    const hostIpFieldFromBrowserField: FieldSpec = {
+      aggregatable: true,
+      name: 'host.ip',
+      readFromDocValues: false,
+      searchable: true,
+      type: 'ip',
+    };
+
+    beforeEach(() => {
+      render(
+        <TestProviders>
+          <DocumentDetailsContext.Provider value={panelContextValue}>
+            <TableFieldValueCell
+              scopeId={scopeId}
+              data={hostIpData}
+              eventId={eventId}
+              fieldFromBrowserField={hostIpFieldFromBrowserField}
+              values={hostIpValues}
+              ruleId="ruleId"
+              isRulePreview={false}
+              renderFlyoutLink={renderFlyoutLink}
+            />
+          </DocumentDetailsContext.Provider>
+        </TestProviders>
+      );
+    });
+
+    it('wraps each value with the injected flyout link renderer', () => {
+      expect(screen.getAllByTestId('flyout-link-host.ip').length).toBe(hostIpValues.length);
+    });
+
+    it('does not render the legacy expandable-flyout preview link', () => {
+      expect(screen.queryByTestId(/securitySolutionFlyoutTablePreviewLinkField-/)).toBeNull();
     });
   });
 });

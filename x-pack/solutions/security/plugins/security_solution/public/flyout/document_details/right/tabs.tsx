@@ -10,11 +10,15 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './test_ids';
 import type { RightPanelPaths } from '.';
 import { JsonTab } from '../../../flyout_v2/document/main/tabs/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
-import { TableTab } from './tabs/table_tab';
+import { TableTab } from '../../../flyout_v2/document/main/tabs/table_tab';
+import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
+import { CellActionsMode, SecurityCellActions } from '../../../common/components/cell_actions';
+import { getSourcererScopeId } from '../../../helpers';
 import { useDocumentDetailsContext } from '../shared/context';
 
 export interface RightPanelTabType {
@@ -23,6 +27,43 @@ export interface RightPanelTabType {
   content: React.ReactElement;
   'data-test-subj': string;
 }
+
+/**
+ * Cell action renderer for the document details flyout Table tab. Uses the `detailsFlyout` trigger,
+ * which (unlike the `default` trigger) also registers the `toggleColumn`/`toggleUserAssetField`
+ * actions, so the flyout keeps its full set of cell actions (6 visible on a typical field).
+ */
+const detailsFlyoutCellActionRenderer: CellActionRenderer = ({ field, value, children, scopeId }) => (
+  <SecurityCellActions
+    data={{ field, value: value ?? [] }}
+    triggerId={SECURITY_CELL_ACTIONS_DETAILS_FLYOUT}
+    mode={CellActionsMode.HOVER_DOWN}
+    visibleCellActions={6}
+    sourcererScopeId={getSourcererScopeId(scopeId)}
+    metadata={{ scopeId }}
+  >
+    {children}
+  </SecurityCellActions>
+);
+
+/**
+ * Adapter that bridges the expandable flyout's `DocumentDetailsContext` to the prop-based
+ * `TableTab` that now lives in `flyout_v2`. The table logic has a single source of truth in
+ * `flyout_v2`; this component only reads the context and forwards the values as props.
+ */
+const TableTabContent = memo(() => {
+  const { searchHit, scopeId, isRulePreview } = useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+  return (
+    <TableTab
+      hit={hit}
+      scopeId={scopeId}
+      isRulePreview={isRulePreview}
+      renderCellActions={detailsFlyoutCellActionRenderer}
+    />
+  );
+});
+TableTabContent.displayName = 'TableTabContent';
 
 /**
  * Adapter that bridges the expandable flyout's `DocumentDetailsContext` to the prop-based
@@ -56,7 +97,7 @@ export const tableTab: RightPanelTabType = {
       defaultMessage="Table"
     />
   ),
-  content: <TableTab />,
+  content: <TableTabContent />,
 };
 
 export const jsonTab: RightPanelTabType = {
