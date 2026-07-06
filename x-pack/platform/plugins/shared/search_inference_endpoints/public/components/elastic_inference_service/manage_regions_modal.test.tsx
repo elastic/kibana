@@ -434,33 +434,6 @@ describe('ManageRegionsModal', () => {
     });
   });
 
-  describe('Reset to default button', () => {
-    it('re-selects all regions when some are unchecked', async () => {
-      mockUseRegionPolicy.mockReturnValue({
-        data: { region_policy: { allowed_regions: [{ csp: 'aws', region: 'us-east-1' }] } },
-        isLoading: false,
-      });
-      mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
-
-      render(
-        <Wrapper>
-          <ManageRegionsModal onClose={onClose} />
-        </Wrapper>
-      );
-
-      // Policy has only us-east-1 → 1 of 2 selected
-      await waitFor(() => {
-        expect(screen.getByText('1 of 2 selected')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('manageRegionsResetButton'));
-
-      await waitFor(() => {
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
-      });
-    });
-  });
-
   describe('error state', () => {
     it('renders a danger callout when the region policy fetch fails', () => {
       mockUseRegionPolicy.mockReturnValue({ data: undefined, isLoading: false, isError: true });

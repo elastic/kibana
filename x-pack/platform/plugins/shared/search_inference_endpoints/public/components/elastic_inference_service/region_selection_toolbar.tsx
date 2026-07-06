@@ -16,7 +16,6 @@ interface RegionSelectionToolbarProps {
   isAllExpanded: boolean;
   onSelectAll: () => void;
   onExpandAll: () => void;
-  onResetToDefault: () => void;
 }
 
 export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
@@ -26,7 +25,6 @@ export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
   isAllExpanded,
   onSelectAll,
   onExpandAll,
-  onResetToDefault,
 }) => (
   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
@@ -61,35 +59,15 @@ export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
     </EuiFlexItem>
 
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            onClick={onExpandAll}
-            data-test-subj="manageRegionsExpandAllButton"
-          >
-            {isAllExpanded
-              ? i18n.translate('xpack.searchInferenceEndpoints.manageRegions.collapseAll', {
-                  defaultMessage: 'Collapse all',
-                })
-              : i18n.translate('xpack.searchInferenceEndpoints.manageRegions.expandAll', {
-                  defaultMessage: 'Expand all',
-                })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            iconType="refresh"
-            onClick={onResetToDefault}
-            data-test-subj="manageRegionsResetButton"
-          >
-            {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.resetToDefault', {
-              defaultMessage: 'Reset to default',
+      <EuiButtonEmpty size="xs" onClick={onExpandAll} data-test-subj="manageRegionsExpandAllButton">
+        {isAllExpanded
+          ? i18n.translate('xpack.searchInferenceEndpoints.manageRegions.collapseAll', {
+              defaultMessage: 'Collapse all',
+            })
+          : i18n.translate('xpack.searchInferenceEndpoints.manageRegions.expandAll', {
+              defaultMessage: 'Expand all',
             })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
 );

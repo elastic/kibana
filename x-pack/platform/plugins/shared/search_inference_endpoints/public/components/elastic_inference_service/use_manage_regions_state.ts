@@ -125,10 +125,6 @@ export const useManageRegionsState = (onClose: () => void) => {
     }
   }, [expandedZones.size, zoneGroups]);
 
-  const handleResetToDefault = useCallback(() => {
-    setCheckedKeys(new Set(availableRegions.map(regionKey)));
-  }, [availableRegions]);
-
   const handleSave = useCallback(() => {
     const allowedRegions = availableRegions
       .filter((r) => checkedKeys.has(regionKey(r)))
@@ -154,7 +150,6 @@ export const useManageRegionsState = (onClose: () => void) => {
     handleToggleZone,
     handleToggleExpand,
     handleExpandAll,
-    handleResetToDefault,
     handleSave,
   };
 };

@@ -234,16 +234,6 @@ describe('useManageRegionsState', () => {
     });
   });
 
-  describe('handleResetToDefault', () => {
-    it('re-selects all regions', () => {
-      const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleSelectAll()); // deselect all
-      expect(result.current.totalSelected).toBe(0);
-      act(() => result.current.handleResetToDefault());
-      expect(result.current.totalSelected).toBe(2);
-    });
-  });
-
   describe('handleSave', () => {
     it('calls savePolicy with only csp+region (no geo field)', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));

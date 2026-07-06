@@ -57,7 +57,6 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     handleToggleZone,
     handleToggleExpand,
     handleExpandAll,
-    handleResetToDefault,
     handleSave,
   } = useManageRegionsState(onClose);
 
@@ -174,7 +173,6 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
               isAllExpanded={isAllExpanded}
               onSelectAll={handleSelectAll}
               onExpandAll={handleExpandAll}
-              onResetToDefault={handleResetToDefault}
             />
             <EuiSpacer size="s" />
             <RegionZoneList
