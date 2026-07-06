@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { TemplateDetail } from './template_detail';
@@ -82,16 +82,20 @@ describe('TemplateDetail', () => {
     renderDetail();
     expect(screen.getByRole('heading', { name: 'My Template' })).toBeInTheDocument();
     expect(screen.getByText('Does useful things.')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowLibraryTemplateDetail-version')).toHaveTextContent('v1.2.0');
+    expect(screen.getByTestId('workflowLibraryTemplateDetail-version')).toHaveTextContent('1.2.0');
   });
 
-  it('should render humanized category badges and the solution badge under their labels', () => {
+  it('should render the solution logo and humanized tag badges under the title', () => {
     renderDetail();
-    expect(screen.getByText('Solutions:')).toBeInTheDocument();
-    expect(screen.getByText('Categories:')).toBeInTheDocument();
-    expect(screen.getByText('Threat Intel')).toBeInTheDocument();
-    expect(screen.getByText('Enrichment')).toBeInTheDocument();
-    expect(screen.getByText('Security')).toBeInTheDocument();
+    expect(screen.getByText('Solutions')).toBeInTheDocument();
+    // Solutions render as product logos (name shown on hover), not text.
+    expect(
+      screen.getByTestId('workflowLibraryTemplateDetail-solution-security')
+    ).toBeInTheDocument();
+    // Categories render as tags under the title (humanized).
+    const tags = screen.getByTestId('workflowLibraryTemplateDetail-tags');
+    expect(within(tags).getByText('Threat Intel')).toBeInTheDocument();
+    expect(within(tags).getByText('Enrichment')).toBeInTheDocument();
   });
 
   it('should call onLoaded with the loaded template', () => {
