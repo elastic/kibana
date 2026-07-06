@@ -40,7 +40,7 @@ import {
   validateExtractionWindow,
 } from './extraction_window';
 import { capAtMaxLogsPerWindow } from './effective_page_limits';
-import { mergeCadenceOverrides } from './cadence_overrides';
+import { mergeLogExtractionOverrides } from './log_extraction_overrides';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
@@ -143,7 +143,7 @@ export class LogsExtractionClient {
       throw new EntityStoreNotRunningError();
     }
     const globalState = await this.globalStateClient.findOrThrow();
-    const config = mergeCadenceOverrides(
+    const config = mergeLogExtractionOverrides(
       globalState.logsExtraction,
       engineDescriptor.logExtractionOverrides
     );

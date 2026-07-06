@@ -6,7 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { LogExtractionInstallSchema, CadenceOverrideSchema } from './log_extraction_validator';
+import {
+  LogExtractionInstallSchema,
+  LogExtractionOverrideSchema,
+} from './log_extraction_validator';
 
 const TestSchema = z.object({ logExtraction: LogExtractionInstallSchema });
 
@@ -61,26 +64,26 @@ describe('LogExtractionInstallParams additionalIndexPatterns', () => {
   });
 });
 
-describe('CadenceOverrideSchema', () => {
+describe('LogExtractionOverrideSchema', () => {
   // Shared by install/{entityType} and update/{entityType}: only real duration values
   // are accepted. There is no `null` to clear a field back to the default — callers who
   // want the default must set it explicitly.
 
   it('accepts an empty object (no changes)', () => {
-    expect(CadenceOverrideSchema.safeParse({}).success).toBe(true);
+    expect(LogExtractionOverrideSchema.safeParse({}).success).toBe(true);
   });
 
   it('accepts a valid frequency', () => {
-    expect(CadenceOverrideSchema.safeParse({ frequency: '10m' }).success).toBe(true);
+    expect(LogExtractionOverrideSchema.safeParse({ frequency: '10m' }).success).toBe(true);
   });
 
   it('rejects a frequency below 30 seconds', () => {
-    const result = CadenceOverrideSchema.safeParse({ frequency: '10s' });
+    const result = LogExtractionOverrideSchema.safeParse({ frequency: '10s' });
     expect(result.success).toBe(false);
   });
 
   it('rejects delay greater than or equal to lookbackPeriod', () => {
-    const result = CadenceOverrideSchema.safeParse({
+    const result = LogExtractionOverrideSchema.safeParse({
       delay: '3h',
       lookbackPeriod: '3h',
     });
@@ -88,12 +91,12 @@ describe('CadenceOverrideSchema', () => {
   });
 
   it('rejects an explicit null value', () => {
-    const result = CadenceOverrideSchema.safeParse({ frequency: null });
+    const result = LogExtractionOverrideSchema.safeParse({ frequency: null });
     expect(result.success).toBe(false);
   });
 
-  it('does not accept additionalIndexPatterns or other non-cadence fields', () => {
-    const result = CadenceOverrideSchema.safeParse({
+  it('does not accept additionalIndexPatterns or other non-overridable fields', () => {
+    const result = LogExtractionOverrideSchema.safeParse({
       frequency: '10m',
       additionalIndexPatterns: ['logs-*'],
     });

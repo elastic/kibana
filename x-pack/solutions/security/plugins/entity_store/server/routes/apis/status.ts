@@ -17,7 +17,7 @@ import { wrapMiddlewares } from '../middleware';
 import type { EntityStoreStatus, GetStatusSuccessResult } from '../../domain/types';
 import type { LogExtractionConfig } from '../../domain/saved_objects';
 import { capAtMaxLogsPerWindow } from '../../domain/logs_extraction/effective_page_limits';
-import { mergeCadenceOverrides } from '../../domain/logs_extraction/cadence_overrides';
+import { mergeLogExtractionOverrides } from '../../domain/logs_extraction/log_extraction_overrides';
 import { ENTITY_STORE_STATUS } from '../../domain/constants';
 
 /**
@@ -78,7 +78,7 @@ function toPublicEngine(
     maxTimeWindowSize,
     maxLogsPerWindow,
     maxLogsPerWindowCapBehavior,
-  } = mergeCadenceOverrides(logsExtractionConfig, logExtractionOverrides);
+  } = mergeLogExtractionOverrides(logsExtractionConfig, logExtractionOverrides);
 
   return {
     ...rest,

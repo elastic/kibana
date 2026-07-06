@@ -335,6 +335,68 @@ apiTest.describe('Entity Store per-entity-type API tests', { tag: ENTITY_STORE_T
   );
 
   apiTest(
+    'update/{entityType} override is cleared when a later store-wide update explicitly sets the same field',
+    async ({ apiClient }) => {
+      await installAllEntityTypes(apiClient, defaultHeaders);
+
+      // set a per-type override on service first
+      const byType = await updateEntityType(apiClient, defaultHeaders, 'service', {
+        logExtraction: { frequency: '5m' },
+      });
+      expect(byType.statusCode).toBe(200);
+
+      let status = await getStatus(apiClient, defaultHeaders);
+      expect(status.body.engines.find((e) => e.type === 'service')?.frequency).toBe('5m');
+
+      // a later store-wide update explicitly setting frequency wins: it clears the
+      // per-type override (including built-in defaults like generic's) for every type
+      const storeWide = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { frequency: '3m' } },
+      });
+      expect(storeWide.statusCode).toBe(200);
+
+      status = await getStatus(apiClient, defaultHeaders);
+      expect(status.body.engines.find((e) => e.type === 'service')?.frequency).toBe('3m');
+      expect(status.body.engines.find((e) => e.type === 'generic')?.frequency).toBe('3m');
+      expect(status.body.engines.find((e) => e.type === 'host')?.frequency).toBe('3m');
+      expect(status.body.engines.find((e) => e.type === 'user')?.frequency).toBe('3m');
+    }
+  );
+
+  apiTest(
+    'update/{entityType} override wins over an earlier store-wide update to the same field',
+    async ({ apiClient }) => {
+      await installAllEntityTypes(apiClient, defaultHeaders);
+
+      // a store-wide update first, applying the same frequency to every type
+      const storeWide = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { frequency: '3m' } },
+      });
+      expect(storeWide.statusCode).toBe(200);
+
+      let status = await getStatus(apiClient, defaultHeaders);
+      expect(status.body.engines.find((e) => e.type === 'service')?.frequency).toBe('3m');
+
+      // a later per-type override wins over the earlier store-wide value, for that type only
+      const byType = await updateEntityType(apiClient, defaultHeaders, 'service', {
+        logExtraction: { frequency: '10m' },
+      });
+      expect(byType.statusCode).toBe(200);
+
+      status = await getStatus(apiClient, defaultHeaders);
+      expect(status.body.engines.find((e) => e.type === 'service')?.frequency).toBe('10m');
+      // other types are untouched by the per-type call and keep the store-wide value
+      expect(status.body.engines.find((e) => e.type === 'generic')?.frequency).toBe('3m');
+      expect(status.body.engines.find((e) => e.type === 'host')?.frequency).toBe('3m');
+      expect(status.body.engines.find((e) => e.type === 'user')?.frequency).toBe('3m');
+    }
+  );
+
+  apiTest(
     'uninstall/{entityType} removes a single type, leaving other types and global state intact',
     async ({ apiClient }) => {
       await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {

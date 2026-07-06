@@ -15,7 +15,7 @@ import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
 import { ENGINE_STATUS } from '../../domain/constants';
-import { mergeCadenceOverrides } from '../../domain/logs_extraction/cadence_overrides';
+import { mergeLogExtractionOverrides } from '../../domain/logs_extraction/log_extraction_overrides';
 
 const bodySchema = z.object({
   entityTypes: z
@@ -72,7 +72,7 @@ export function registerStart(router: EntityStorePluginRouter) {
         await Promise.all(
           toStart.map((type) => {
             const engine = stoppedEngines.find((e) => e.type === type);
-            const effectiveConfig = mergeCadenceOverrides(
+            const effectiveConfig = mergeLogExtractionOverrides(
               logsExtraction,
               engine?.logExtractionOverrides
             );
