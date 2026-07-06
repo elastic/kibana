@@ -221,6 +221,61 @@ describe('XY', () => {
         expect(matchingRef?.id).toBe('my-runtime-annotation-group-id');
         expect(matchingRef?.type).toBe('event-annotation-group');
       });
+
+      for (const type of ['bar', 'line', 'area'] as const) {
+        it(`should validate a runtime by-reference annotation with a ${type} chart`, () => {
+          validator.xy.fromState(setSeriesType(runtimeByRefAnnotationXY, type));
+        });
+      }
+
+      it('emits annotation_group with group_id for a runtime by-reference annotation layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(runtimeByRefAnnotationXY) as XYConfig;
+        const annotationLayer = api.layers.find((l) => l.type === 'annotation_group');
+
+        expect(annotationLayer).toBeDefined();
+        expect(annotationLayer).toEqual({
+          type: 'annotation_group',
+          group_id: 'my-runtime-annotation-group-id',
+        });
+      });
+
+      it('does not emit inline annotations or data_source for a runtime by-reference annotation layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(runtimeByRefAnnotationXY) as XYConfig;
+        const annotationLayer = api.layers.find((l) => l.type === 'annotation_group');
+
+        expect(annotationLayer).toBeDefined();
+        expect(annotationLayer).not.toHaveProperty('annotations');
+        expect(annotationLayer).not.toHaveProperty('data_source');
+        expect(annotationLayer).not.toHaveProperty('events');
+      });
+
+      it('round-trips a runtime by-reference annotation as a persisted by-reference layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(runtimeByRefAnnotationXY);
+        const lensState = builder.fromAPIFormat(api);
+
+        const visualizationLayers = (
+          lensState.state.visualization as { layers: Array<Record<string, unknown>> }
+        ).layers;
+        const annotationLayer = visualizationLayers.find(
+          (layer) => layer.layerType === 'annotations'
+        );
+
+        expect(annotationLayer).toBeDefined();
+        expect(annotationLayer?.persistanceType).toBe('byReference');
+        expect(annotationLayer).toHaveProperty('annotationGroupRef');
+        expect(annotationLayer).not.toHaveProperty('indexPatternId');
+        expect(annotationLayer).not.toHaveProperty('annotations');
+
+        const matchingRef = lensState.references.find(
+          (ref) => ref.name === annotationLayer?.annotationGroupRef
+        );
+        expect(matchingRef).toBeDefined();
+        expect(matchingRef?.id).toBe('my-runtime-annotation-group-id');
+        expect(matchingRef?.type).toBe('event-annotation-group');
+      });
     });
 
     describe('ES|QL panels', () => {
