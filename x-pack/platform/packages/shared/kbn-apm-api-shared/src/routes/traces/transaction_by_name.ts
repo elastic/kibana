@@ -22,6 +22,9 @@ export const transactionByNameRoute = defineRoute<TransactionByNameResponse>()({
         transactionName: t.string,
         serviceName: t.string,
       }),
+      t.partial({
+        environment: t.string,
+      }),
     ]),
   }),
 });

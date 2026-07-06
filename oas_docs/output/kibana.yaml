@@ -7042,12 +7042,15 @@ paths:
                               - severity_equals
                             type: string
                           value:
-                            description: 'The target severity level: critical, high, medium, low, or info.'
+                            description: 'The target severity level: critical, major, high, medium, minor, low, warning, or info.'
                             enum:
                               - critical
+                              - major
                               - high
                               - medium
+                              - minor
                               - low
+                              - warning
                               - info
                             type: string
                         required:
@@ -51602,6 +51605,13 @@ paths:
             maximum: 1000
             minimum: 1
             type: integer
+        - description: When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.
+          in: query
+          name: include_contributions
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -95377,6 +95387,9 @@ components:
         description:
           description: A short description of the dashboard.
           type: string
+        esql_approximation:
+          description: When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.
+          type: boolean
         filters:
           description: Filters applied across all panels, including pinned panels.
           items:
@@ -105944,6 +105957,14 @@ components:
                     type: number
                   timeUnit:
                     type: string
+                  warningComparator:
+                    type: string
+                  warningThreshold:
+                    items:
+                      description: The threshold value that is used with the `warningComparator`. If the `warningComparator` is `between`, you must specify the boundary values.
+                      type: number
+                    maxItems: 2
+                    type: array
                 required:
                   - threshold
                   - comparator
@@ -115871,9 +115892,21 @@ components:
         namespace_customization_enabled_for:
           description: Namespaces for which namespace-level customization is enabled on this package.
           items:
+            maxLength: 100
             type: string
           maxItems: 100
           type: array
+        namespace_customization_settings:
+          additionalProperties:
+            additionalProperties: true
+            type: object
+            properties:
+              ilm_policy:
+                maxLength: 1024
+                minLength: 1
+                type: string
+          description: Per-namespace managed settings (for example, ILM policy) for this package. Keyed by namespace name.
+          type: object
       title: update_package_request
       type: object
     Kibana_HTTP_APIs_update_package_response:
@@ -133999,24 +134032,7 @@ components:
         modifiers:
           description: A list of modifiers that were applied to the risk score calculation.
           items:
-            type: object
-            properties:
-              contribution:
-                format: double
-                type: number
-              metadata:
-                additionalProperties: true
-                type: object
-              modifier_value:
-                format: double
-                type: number
-              subtype:
-                type: string
-              type:
-                type: string
-            required:
-              - type
-              - contribution
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreModifier'
           type: array
         notes:
           items:
@@ -134481,6 +134497,23 @@ components:
         category_1_score:
           format: double
           type: number
+        category_2_count:
+          type: integer
+        category_2_score:
+          format: double
+          type: number
+        criticality_level:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+        inputs:
+          description: Present only when requested with `include_contributions=true`.
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreInput'
+          type: array
+        modifiers:
+          description: Present only when requested with `include_contributions=true`.
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreModifier'
+          type: array
         score_type:
           enum:
             - base
@@ -134548,6 +134581,28 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_RiskScoreModifier:
+      description: A modifier that was applied to the risk score calculation.
+      type: object
+      properties:
+        contribution:
+          format: double
+          type: number
+        metadata:
+          additionalProperties: true
+          type: object
+        modifier_value:
+          format: double
+          type: number
+        subtype:
+          maxLength: 100
+          type: string
+        type:
+          maxLength: 100
+          type: string
+      required:
+        - type
+        - contribution
     Security_Entity_Analytics_API_ServiceEntity:
       additionalProperties: false
       description: An entity record representing a service, stored in the Entity Store latest index.

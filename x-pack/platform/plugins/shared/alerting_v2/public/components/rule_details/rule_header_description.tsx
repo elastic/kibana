@@ -12,23 +12,10 @@ import { RULE_KIND_ICONS, RULE_KIND_LABELS, RULE_KIND_TOOLTIPS } from '@kbn/aler
 import { useRule } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 
-/**
- * Renders the description and tags row below the page title.
- */
-export interface RuleHeaderDescriptionProps {
-  /**
-   * When false, only the description is rendered (tags are omitted). Defaults to true so flyout and
-   * canvas callers keep showing tags.
-   */
-  showTags?: boolean;
-}
-
-export const RuleHeaderDescription: React.FC<RuleHeaderDescriptionProps> = ({
-  showTags = true,
-}) => {
+export const RuleHeaderDescription: React.FC = () => {
   const rule = useRule();
   const { description, tags } = rule.metadata;
-  const hasTags = showTags && tags && tags.length > 0;
+  const hasTags = tags && tags.length > 0;
 
   if (!description && !hasTags) {
     return null;

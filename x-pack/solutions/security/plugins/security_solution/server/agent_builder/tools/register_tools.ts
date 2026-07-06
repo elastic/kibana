@@ -23,6 +23,7 @@ import {
   generateLeadsTool,
   listLeadsTool,
   dismissLeadTool,
+  setAssetCriticalityTool,
 } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
@@ -44,7 +45,7 @@ import type {
  * `run_rule_preview` tool behind `experimentalFeatures.rulePreviewAttachmentEnabled` so the
  * features can ship dark and be enabled per environment.
  */
-export const registerTools = async (
+export const registerTools = (
   agentBuilder: AgentBuilderPluginSetup,
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
@@ -52,6 +53,7 @@ export const registerTools = async (
   ml: SetupPlugins['ml'],
   rulePreviewDeps: RunRulePreviewDeps,
   isServerless: boolean = false,
+  kibanaVersion: string,
   hasEncryptionKey: boolean = false
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
@@ -68,6 +70,9 @@ export const registerTools = async (
   agentBuilder.tools.register(listWatchlistsTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(removeEntitiesFromWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
+  );
   agentBuilder.tools.register(updateWatchlistTool(core, logger, experimentalFeatures));
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
