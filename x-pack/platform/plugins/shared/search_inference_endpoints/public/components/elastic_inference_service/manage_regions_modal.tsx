@@ -61,6 +61,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
   } = useManageRegionsState(onClose);
 
   const showRegionList = !isLoading && totalRegions > 0;
+  const showNoRegions = !isLoading && !isError && totalRegions === 0;
 
   return (
     <EuiModal
@@ -142,7 +143,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           />
         )}
 
-        {!isLoading && !isError && totalRegions === 0 && (
+        {showNoRegions && (
           <EuiCallOut
             announceOnMount
             title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.noRegions.title', {
@@ -193,7 +194,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           isDisabled={isSaving}
           data-test-subj="manageRegionsCancelButton"
         >
-          {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.cancel', {
+          {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.cancelButtonLabel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
@@ -205,7 +206,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           isLoading={isSaving}
           data-test-subj="manageRegionsSaveButton"
         >
-          {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.save', {
+          {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.saveButtonLabel', {
             defaultMessage: 'Save preferences',
           })}
         </EuiButton>
