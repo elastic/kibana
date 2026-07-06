@@ -52,6 +52,8 @@ import { isInferencePreferencesEnabled } from '../../feature_flag';
 import { EisModelStatus } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 
+const TOOLTIP_MAX_VISIBLE_REGIONS = 5;
+
 export interface ModelDetailFlyoutProps {
   modelId: string;
   allEndpoints: EisInferenceEndpoint[];
@@ -187,9 +189,21 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                         values: { count: modelCount, total: totalCount },
                       }
                     )}
-                    content={modelRegions
-                      .map((r) => REGION_DISPLAY_NAMES[`${r.csp}::${r.region}`] ?? r.region)
-                      .join(', ')}
+                    content={(() => {
+                      const names = modelRegions.map(
+                        (r) => REGION_DISPLAY_NAMES[`${r.csp}::${r.region}`] ?? r.region
+                      );
+                      const visible = names.slice(0, TOOLTIP_MAX_VISIBLE_REGIONS).join(', ');
+                      return names.length > TOOLTIP_MAX_VISIBLE_REGIONS
+                        ? `${visible} ${i18n.translate(
+                            'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.andMore',
+                            {
+                              defaultMessage: 'and {count} more',
+                              values: { count: names.length - TOOLTIP_MAX_VISIBLE_REGIONS },
+                            }
+                          )}`
+                        : visible;
+                    })()}
                   >
                     <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
                       {`${geo.toUpperCase()} (${modelCount}/${totalCount})`}

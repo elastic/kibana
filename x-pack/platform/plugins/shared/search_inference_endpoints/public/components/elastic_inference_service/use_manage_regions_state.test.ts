@@ -216,6 +216,14 @@ describe('useManageRegionsState', () => {
       expect(result.current.expandedZones.size).toBe(0);
     });
 
+    it('is a no-op when zoneGroups is empty', () => {
+      mockGetAvailableRegions.mockReturnValue([]);
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      expect(result.current.zoneGroups).toHaveLength(0);
+      act(() => result.current.handleExpandAll());
+      expect(result.current.expandedZones.size).toBe(0);
+    });
+
     it('toggles a single zone', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
       act(() => result.current.handleToggleExpand('us', true));
@@ -267,6 +275,13 @@ describe('useManageRegionsState', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
       act(() => result.current.handleSave());
       expect(onClose).toHaveBeenCalled();
+    });
+
+    it('does not call onClose when save fails (modal stays open)', () => {
+      mockSaveMutate.mockImplementation(() => {});
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      act(() => result.current.handleSave());
+      expect(onClose).not.toHaveBeenCalled();
     });
   });
 

@@ -175,6 +175,29 @@ describe('ModelDetailFlyout', () => {
     });
   });
 
+  describe('region badges', () => {
+    const endpointWithRegions = {
+      ...createEndpoint(),
+      metadata: {
+        regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }],
+      },
+    } as unknown as EisInferenceEndpoint;
+
+    it('renders region badges when FF is enabled and endpoint has region metadata', () => {
+      mockUseKibana.mockReturnValue({ services: { uiSettings: mockUiSettings(true) } });
+      renderFlyout(MODEL_ID, [endpointWithRegions]);
+
+      expect(screen.getByTestId('flyoutRegionBadges')).toBeInTheDocument();
+      expect(screen.getByTestId('flyoutRegionBadge-us')).toBeInTheDocument();
+    });
+
+    it('does not render region badges when FF is disabled', () => {
+      renderFlyout(MODEL_ID, [endpointWithRegions]);
+
+      expect(screen.queryByTestId('flyoutRegionBadges')).not.toBeInTheDocument();
+    });
+  });
+
   describe('release and end-of-life dates', () => {
     const releaseLabel = 'Release date';
     const eolLabel = 'End-of-life date';
