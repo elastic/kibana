@@ -10,6 +10,7 @@ import type { CreateServerRouteFactory } from '@kbn/server-route-repository-util
 import { badRequest, conflict, forbidden, internal, notFound } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import type { SignificantEventsRouteHandlerResources } from './types';
+import { StatusError } from '../lib/errors/status_error';
 
 const createPlainSignificantEventsServerRoute =
   createServerRouteFactory<SignificantEventsRouteHandlerResources>();
@@ -26,6 +27,21 @@ export const createServerRoute: CreateServerRouteFactory<
     },
     handler: (options) => {
       return handler(options).catch((error) => {
+        if (error instanceof StatusError) {
+          switch (error.statusCode) {
+            case 400:
+              throw badRequest(error.message);
+            case 403:
+              throw forbidden(error.message);
+            case 404:
+              throw notFound(error.message);
+            case 409:
+              throw conflict(error.message);
+            default:
+              throw internal(error.message);
+          }
+        }
+
         if (error instanceof errors.ResponseError) {
           switch (error.statusCode) {
             case 400:
