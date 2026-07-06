@@ -186,7 +186,9 @@ const EditPackPageComponent = () => {
       <EuiSkeletonText lines={10} />
     ) : (
       <PackForm
-        key={packId}
+        // updated_at in the key remounts the form after an update so it
+        // re-seeds from fresh data instead of the cached pre-update queries.
+        key={`${packId}-${data.updated_at}`}
         editMode={true}
         defaultValue={data}
         isReadOnly={isReadOnly}

@@ -10,6 +10,7 @@ import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
 import {
   ADD_PACK_HEADER_BUTTON,
   ADD_QUERY_BUTTON,
+  PACK_QUERIES_TABLE,
   SAVE_PACK_BUTTON,
   FLYOUT_SAVED_QUERY_SAVE_BUTTON,
   customActionEditSavedQuerySelector,
@@ -377,24 +378,32 @@ describe(
       it('', { tags: ['@ess', '@brokenInServerless'] }, () => {
         let lensUrl = '';
         openScheduledPackExecutionDetails(packName);
-        // Stub window.open AFTER navigation. openScheduledPackExecutionDetails
-        // reloads the page while polling History, which would discard a stub
-        // installed on the earlier window object.
-        cy.window().then((win) => {
-          cy.stub(win, 'open')
-            .as('windowOpen')
-            .callsFake((url) => {
-              lensUrl = url;
+        // Scheduled results key off scheduleId (from the details-page URL), not
+        // the legacy action id; the Lens viz is titled `Action {scheduleId} results`.
+        cy.location('pathname')
+          .should('match', /\/history\/scheduled\/[^/]+\/\d+$/)
+          .then((pathname) => {
+            const scheduleId = pathname.split('/history/scheduled/')[1].split('/')[0];
+
+            // Stub window.open AFTER navigation. openScheduledPackExecutionDetails
+            // reloads the page while polling History, which would discard a stub
+            // installed on the earlier window object.
+            cy.window().then((win) => {
+              cy.stub(win, 'open')
+                .as('windowOpen')
+                .callsFake((url) => {
+                  lensUrl = url;
+                });
             });
-        });
-        cy.get(`[aria-label="View in Lens"]`).eq(0).click();
-        cy.window()
-          .its('open')
-          .then(() => {
-            cy.visit(lensUrl);
+            cy.get(`[aria-label="View in Lens"]`).eq(0).click();
+            cy.window()
+              .its('open')
+              .then(() => {
+                cy.visit(lensUrl);
+              });
+            cy.getBySel('lnsWorkspace').should('exist');
+            cy.getBySel('breadcrumbs').contains(`Action ${scheduleId} results`);
           });
-        cy.getBySel('lnsWorkspace').should('exist');
-        cy.getBySel('breadcrumbs').contains(`Action pack_default--${packName}_${savedQueryName}`);
       });
     });
 
@@ -433,15 +442,23 @@ describe(
 
       it('', () => {
         openScheduledPackExecutionDetails(packName);
-        cy.get(`[aria-label="View in Discover"]`)
-          .eq(0)
-          .should('have.attr', 'href')
-          .then(($href) => {
-            const actionId = `pack_default--${packName}_${savedQueryName}`;
-            expect($href).to.include(encodeURIComponent(actionId));
-            // @ts-expect-error-next-line href string - check types
-            cy.visit($href);
-            cy.getBySel('breadcrumbs').contains('Discover').should('exist');
+        // Scheduled results filter Discover by scheduleId (from the details-page
+        // URL), not the legacy action id.
+        cy.location('pathname')
+          .should('match', /\/history\/scheduled\/[^/]+\/\d+$/)
+          .then((pathname) => {
+            const scheduleId = pathname.split('/history/scheduled/')[1].split('/')[0];
+
+            cy.get(`[aria-label="View in Discover"]`)
+              .eq(0)
+              .should('have.attr', 'href')
+              .then(($href) => {
+                expect($href).to.include(encodeURIComponent(scheduleId));
+                expect($href).to.include('schedule_id');
+                // @ts-expect-error-next-line href string - check types
+                cy.visit($href);
+                cy.getBySel('breadcrumbs').contains('Discover').should('exist');
+              });
           });
       });
     });
@@ -570,13 +587,11 @@ describe(
 
         cy.get('a').contains(packName).click();
         cy.contains(`Edit ${packName}`).should('exist');
-        // The read-only "Pack details" page (which rendered a status table with
-        // a "No items found" empty prompt) was removed. The Edit page's queries
-        // field renders no table at all when the pack has no queries, so assert
-        // emptiness via the deleted query being gone while the "Add query"
-        // affordance remains.
+        // Assert on the pack queries table, not savedQueryName: that id also
+        // belongs to the suite-wide standalone saved query, so a text match
+        // would find it even after the pack is emptied.
         cy.getBySel(ADD_QUERY_BUTTON).should('exist');
-        cy.contains(savedQueryName).should('not.exist');
+        cy.getBySel(PACK_QUERIES_TABLE).should('not.exist');
       });
     });
 
