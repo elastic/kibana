@@ -31,4 +31,3 @@ jobs:
         with:
           spec-path: oas_docs/output/kibana.yaml
           spec-name: kibana
-          s3-bucket: ${{ vars.OPENAPI_BUCKET }}
