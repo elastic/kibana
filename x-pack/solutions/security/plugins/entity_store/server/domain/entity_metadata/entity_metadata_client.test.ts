@@ -51,7 +51,9 @@ describe('EntityMetadataClient', () => {
 
   // Drains the helper `datasource` (so the mock counts docs) and invokes
   // `onDrop` once per simulated drop before resolving to bulk stats.
-  const mockHelpersBulk = (drops: Array<{ status: number; error?: { reason?: string } }> = []) => {
+  const mockHelpersBulk = (
+    drops: Array<{ status: number; error?: { type?: string; reason?: string } }> = []
+  ) => {
     const impl = jest.fn().mockImplementation(async (opts: any) => {
       let total = 0;
       for await (const _ of opts.datasource) total++;
@@ -68,7 +70,7 @@ describe('EntityMetadataClient', () => {
   describe('bulkAppendMetadata', () => {
     it('returns zero counts and skips helpers.bulk when no docs are passed', async () => {
       const result = await client.bulkAppendMetadata([]);
-      expect(result).toEqual({ successful: 0, failed: 0 });
+      expect(result).toEqual({ successful: 0, failed: 0, dropsByType: [] });
       expect(esClient.helpers.bulk).not.toHaveBeenCalled();
     });
 
@@ -100,14 +102,38 @@ describe('EntityMetadataClient', () => {
     it('returns the successful/failed counts reported by the helper', async () => {
       mockHelpersBulk();
       const result = await client.bulkAppendMetadata([makeDoc(), makeDoc()]);
-      expect(result).toEqual({ successful: 2, failed: 0 });
+      expect(result).toEqual({ successful: 2, failed: 0, dropsByType: [] });
     });
 
-    it('reports dropped docs in the failed count and logs each drop without throwing', async () => {
-      mockHelpersBulk([{ status: 503, error: { reason: 'index read-only' } }]);
+    it('reports dropped docs in the failed count and returns the drop reason without logging or throwing', async () => {
+      mockHelpersBulk([
+        { status: 503, error: { type: 'cluster_block_exception', reason: 'index read-only' } },
+      ]);
       const result = await client.bulkAppendMetadata([makeDoc(), makeDoc()]);
-      expect(result).toEqual({ successful: 1, failed: 1 });
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('index read-only'));
+      expect(result).toEqual({
+        successful: 1,
+        failed: 1,
+        dropsByType: [
+          {
+            type: 'cluster_block_exception',
+            count: 1,
+            status: 503,
+            sampleReason: 'index read-only',
+          },
+        ],
+      });
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('collapses multiple drops of the same error type into a single summary entry', async () => {
+      mockHelpersBulk([
+        { status: 403, error: { type: 'security_exception', reason: 'unauthorized' } },
+        { status: 403, error: { type: 'security_exception', reason: 'unauthorized' } },
+      ]);
+      const result = await client.bulkAppendMetadata([makeDoc(), makeDoc()]);
+      expect(result.dropsByType).toEqual([
+        { type: 'security_exception', count: 2, status: 403, sampleReason: 'unauthorized' },
+      ]);
     });
 
     it('does NOT throw on partial bulk failures', async () => {
@@ -115,6 +141,7 @@ describe('EntityMetadataClient', () => {
       await expect(client.bulkAppendMetadata([makeDoc()])).resolves.toEqual({
         successful: 0,
         failed: 1,
+        dropsByType: [{ type: 'unknown', count: 1, status: 400, sampleReason: 'bad field' }],
       });
     });
 
