@@ -58,6 +58,13 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const auth = getAuthWithSuperUser();
 
+  // The analytics doc records the UNIFIED attachment type, not the legacy
+  // `AttachmentType` domain enum used on the SO / API. A legacy `user`
+  // comment normalizes to unified type `'comment'` (see the
+  // `services/attachments` `toUnifiedSchema`), so the `.cases-attachments`
+  // doc's `attachment.type` is `'comment'` — not `AttachmentType.user`.
+  const UNIFIED_COMMENT_TYPE = 'comment';
+
   describe('attachments surface ES round-trip', () => {
     afterEach(async () => {
       // Clean SOs first, then reset all surfaces — the post-reset
@@ -80,7 +87,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(commentId).to.be.a('string');
 
       const docs = await waitForAttachmentForCase(es, created.id, 1);
-      const userDoc = docs.find((d) => d.attachment.type === AttachmentType.user);
+      const userDoc = docs.find((d) => d.attachment.type === UNIFIED_COMMENT_TYPE);
       expect(userDoc).to.be.an('object');
       expect(userDoc!.cases.id).to.eql(created.id);
       expect(userDoc!.space_id).to.eql('default');
@@ -123,7 +130,7 @@ export default ({ getService }: FtrProviderContext): void => {
       while (Date.now() < deadline) {
         await es.indices.refresh({ index: ATTACHMENTS_INDEX });
         const docs = await waitForAttachmentForCase(es, created.id, 1);
-        const userDoc = docs.find((d) => d.attachment.type === AttachmentType.user);
+        const userDoc = docs.find((d) => d.attachment.type === UNIFIED_COMMENT_TYPE);
         if (userDoc?.attachment.comment === 'Updated comment text') return;
         await new Promise((r) => setTimeout(r, 200));
       }
