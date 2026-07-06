@@ -730,7 +730,9 @@ export const BulkMigrateAgentsRequestSchema = {
   }),
 };
 
-export const BulkMigrateAgentsResponseSchema = ActionIdSchema;
+const DryRunCountSchema = schema.object({ count: schema.number() });
+
+export const BulkMigrateAgentsResponseSchema = schema.oneOf([ActionIdSchema, DryRunCountSchema]);
 
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
@@ -743,7 +745,7 @@ export const PostBulkUpdateAgentTagsRequestSchema = {
   }),
 };
 
-export const PostBulkActionResponseSchema = ActionIdSchema;
+export const PostBulkActionResponseSchema = schema.oneOf([ActionIdSchema, DryRunCountSchema]);
 
 export const GetAgentStatusRequestSchema = {
   query: schema.object({
@@ -1002,7 +1004,10 @@ export const BulkChangeAgentsPrivilegeLevelRequestSchema = {
   }),
 };
 
-export const BulkChangeAgentsPrivilegeLevelResponseSchema = ActionIdSchema;
+export const BulkChangeAgentsPrivilegeLevelResponseSchema = schema.oneOf([
+  ActionIdSchema,
+  DryRunCountSchema,
+]);
 
 export const PostAgentRollbackRequestSchema = {
   params: schema.object({
@@ -1023,9 +1028,10 @@ export const PostBulkAgentRollbackRequestSchema = {
   }),
 };
 
-export const PostBulkAgentRollbackResponseSchema = schema.object({
-  actionIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
-});
+export const PostBulkAgentRollbackResponseSchema = schema.oneOf([
+  schema.object({ actionIds: schema.arrayOf(schema.string(), { maxSize: 10000 }) }),
+  DryRunCountSchema,
+]);
 
 export const PostGenerateAgentsReportRequestSchema = {
   body: schema.object({
