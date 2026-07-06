@@ -9,11 +9,11 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   getManagedWorkflowDefinition,
-  SIGEVENTS_DETECTION_WORKFLOW_ID,
-  SIGEVENTS_DISCOVERY_WORKFLOW_ID,
-  SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-  SIGEVENTS_TRIAGE_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { parse } from 'yaml';
 import { createSignificantEventsScheduledWorkflowsService } from './significant_events_scheduled_workflows';
@@ -67,7 +67,7 @@ const findStep = (steps: ParsedWorkflowStep[], name: string): ParsedWorkflowStep
 
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => ({
   getWorkflow: jest.fn().mockResolvedValue({
-    id: SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+    id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
     enabled: false,
   }),
   updateWorkflow: jest.fn().mockResolvedValue({}),
@@ -86,8 +86,8 @@ const createMockManagedWorkflowsClient = () => ({
 
 describe('scheduled Significant Events managed workflows', () => {
   it.each([
-    ['detection', SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID],
-    ['review', SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID],
+    ['detection', SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID],
+    ['review', SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID],
   ])('registers the %s workflow as dynamic and restorable', (_label, id) => {
     const definition = getManagedWorkflowDefinition(id);
 
@@ -103,10 +103,10 @@ describe('scheduled Significant Events managed workflows', () => {
   });
 
   it('wires the detection interval into both the trigger cadence and the lookback, clamped to a 30m floor', () => {
-    const belowFloor = getParsedWorkflowYaml(SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+    const belowFloor = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
       detectionIntervalMinutes: 5,
     });
-    const aboveFloor = getParsedWorkflowYaml(SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+    const aboveFloor = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
       detectionIntervalMinutes: 45,
     });
 
@@ -116,7 +116,7 @@ describe('scheduled Significant Events managed workflows', () => {
     );
     const belowFloorStep = findStep(belowFloor.steps, 'detect');
     expect(belowFloorStep?.with).toEqual({
-      'workflow-id': SIGEVENTS_DETECTION_WORKFLOW_ID,
+      'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
       inputs: { lookback: 'now-30m' },
     });
 
@@ -125,13 +125,13 @@ describe('scheduled Significant Events managed workflows', () => {
     );
     const aboveFloorStep = findStep(aboveFloor.steps, 'detect');
     expect(aboveFloorStep?.with).toEqual({
-      'workflow-id': SIGEVENTS_DETECTION_WORKFLOW_ID,
+      'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
       inputs: { lookback: 'now-45m' },
     });
   });
 
   it('wires each review config value into its own drain-loop input, not a sibling one', () => {
-    const parsed = getParsedWorkflowYaml(SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
+    const parsed = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
       reviewIntervalMinutes: 20,
       discoveryBatchSize: 7,
       triageBatchSize: 11,
@@ -158,20 +158,20 @@ describe('scheduled Significant Events managed workflows', () => {
 
     const discover = findStep(drainLoop?.steps ?? [], 'discover');
     expect(discover?.with).toEqual({
-      'workflow-id': SIGEVENTS_DISCOVERY_WORKFLOW_ID,
+      'workflow-id': SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
       inputs: { detectionBatchMax: 7 },
     });
 
     const triage = findStep(drainLoop?.steps ?? [], 'triage');
     expect(triage?.with).toEqual({
-      'workflow-id': SIGEVENTS_TRIAGE_WORKFLOW_ID,
+      'workflow-id': SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
       inputs: { discoveryBatchMax: 11 },
     });
   });
 
   it.each([
-    ['discovery', SIGEVENTS_DISCOVERY_WORKFLOW_ID, 'output_no_detections'],
-    ['triage', SIGEVENTS_TRIAGE_WORKFLOW_ID, 'output_no_discoveries'],
+    ['discovery', SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID, 'output_no_detections'],
+    ['triage', SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID, 'output_no_discoveries'],
   ])(
     '%s always completes no-work runs as success and reports queue stats, so the scheduled drain loop can rely on hasRemaining instead of run status',
     (_label, id, noWorkStepName) => {
@@ -224,11 +224,11 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     // Installs must disambiguate the shared managed workflow id per space via
     // workflowIdSuffix; without it a second space collides on one document.
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-      SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
       { spaceId: 'space-a', workflowIdSuffix: 'space-a', values: { detectionIntervalMinutes: 30 } }
     );
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-      SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
       {
         spaceId: 'space-a',
         workflowIdSuffix: 'space-a',
@@ -242,13 +242,13 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     );
     // Enable must target the same per-space document id, not the bare managed id.
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      `${SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
+      `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
       { enabled: true },
       'space-a',
       request
     );
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      `${SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID}-space-a`,
+      `${SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID}-space-a`,
       { enabled: true },
       'space-a',
       request
@@ -314,7 +314,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     });
 
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      `${SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
+      `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
       { enabled: false },
       'space-a',
       request
@@ -325,11 +325,11 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       request
     );
     expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-      SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
       { spaceId: 'space-a', workflowIdSuffix: 'space-a' }
     );
     expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-      SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
       { spaceId: 'space-a', workflowIdSuffix: 'space-a' }
     );
   });

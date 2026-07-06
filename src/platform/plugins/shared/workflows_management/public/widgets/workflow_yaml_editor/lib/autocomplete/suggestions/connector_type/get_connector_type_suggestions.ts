@@ -259,7 +259,7 @@ function getBuiltInStepTypesFromSchema(): Array<{
     },
     {
       schema: ParallelStepSchema,
-      description: 'Execute multiple branches in parallel',
+      description: 'Run a branch body once per item in a list, concurrently',
       icon: monaco.languages.CompletionItemKind.Class,
     },
     {

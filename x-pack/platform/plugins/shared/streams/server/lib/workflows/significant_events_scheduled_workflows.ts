@@ -9,8 +9,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
-  SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { pollUntil } from './poll_until';
@@ -18,8 +18,8 @@ import { pollUntil } from './poll_until';
 const RUNNING_EXECUTIONS_PAGE_SIZE = 1000;
 
 const SCHEDULED_WORKFLOW_IDS = [
-  SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 ] as const;
 
 export interface SignificantEventsScheduledWorkflowsConfig {
@@ -128,14 +128,14 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     config: SignificantEventsScheduledWorkflowsConfig;
   }) => {
     await Promise.all([
-      client.install(SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+      client.install(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
         spaceId,
         workflowIdSuffix: spaceId,
         values: {
           detectionIntervalMinutes: config.detectionIntervalMinutes,
         },
       }),
-      client.install(SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
+      client.install(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
         spaceId,
         workflowIdSuffix: spaceId,
         values: {
@@ -224,11 +224,11 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     spaceId: string;
   }) => {
     await Promise.all([
-      client.uninstall(SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
         spaceId,
         workflowIdSuffix: spaceId,
       }),
-      client.uninstall(SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
+      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
         spaceId,
         workflowIdSuffix: spaceId,
       }),
