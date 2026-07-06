@@ -169,31 +169,19 @@ function SlackCardFooter({
           </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" isDisabled data-test-subj="streamsSlackAppManageButton">
-                {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.apps.slackManage',
-                  { defaultMessage: 'Manage' }
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                color="danger"
-                onClick={onDisconnect}
-                isLoading={isMutating}
-                isDisabled={!canEdit || isMutating}
-                data-test-subj="streamsSlackAppDisconnectButton"
-              >
-                {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.apps.slackDisconnect',
-                  { defaultMessage: 'Disconnect' }
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiButtonEmpty
+            size="s"
+            color="danger"
+            onClick={onDisconnect}
+            isLoading={isMutating}
+            isDisabled={!canEdit || isMutating}
+            data-test-subj="streamsSlackAppDisconnectButton"
+          >
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.settings.apps.slackDisconnect',
+              { defaultMessage: 'Disconnect' }
+            )}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
