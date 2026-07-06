@@ -39,14 +39,15 @@ const buildItem = (alertEvent: AlertEventRecord) =>
 
 describe('deactivateHandler', () => {
   describe('happy path', () => {
-    it.each<AlertEpisodeStatus>([alertEpisodeStatus.active, alertEpisodeStatus.recovering])(
-      'allows deactivate when episode_status is %s',
-      (status) => {
-        expect(() =>
-          deactivateHandler.prepare(buildItem(buildAlertEventRecord({ episode_status: status })))
-        ).not.toThrow();
-      }
-    );
+    it.each<AlertEpisodeStatus>([
+      alertEpisodeStatus.active,
+      alertEpisodeStatus.recovering,
+      alertEpisodeStatus.pending,
+    ])('allows deactivate when episode_status is %s', (status) => {
+      expect(() =>
+        deactivateHandler.prepare(buildItem(buildAlertEventRecord({ episode_status: status })))
+      ).not.toThrow();
+    });
 
     it('forwards the precomputed audit doc unchanged', () => {
       const item = buildItem(buildAlertEventRecord());
@@ -89,32 +90,27 @@ describe('deactivateHandler', () => {
     });
   });
 
-  describe('precondition: episode must be active or recovering', () => {
-    it.each<AlertEpisodeStatus | null | undefined>([
-      alertEpisodeStatus.pending,
-      alertEpisodeStatus.inactive,
-      null,
-      undefined,
-    ])(
-      'rejects deactivate with INVALID_EPISODE_STATE_TRANSITION (400) when episode_status is %s',
-      (status) => {
-        try {
-          deactivateHandler.prepare(buildItem(buildAlertEventRecord({ episode_status: status })));
-          throw new Error('expected handler to throw');
-        } catch (error) {
-          expect(Boom.isBoom(error)).toBe(true);
-          expect(error.output.statusCode).toBe(400);
-          expect(error.data).toMatchObject({
-            code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
-            details: {
-              group_hash: 'group-1',
-              episode_id: 'episode-1',
-              episode_status: status ?? null,
-              action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
-            },
-          });
-        }
+  describe('precondition: rejects only when the episode is already inactive', () => {
+    it('rejects deactivate with INVALID_EPISODE_STATE_TRANSITION (400) when episode_status is inactive', () => {
+      try {
+        deactivateHandler.prepare(
+          buildItem(buildAlertEventRecord({ episode_status: alertEpisodeStatus.inactive }))
+        );
+        throw new Error('expected handler to throw');
+      } catch (error) {
+        expect(Boom.isBoom(error)).toBe(true);
+        expect(error.output.statusCode).toBe(400);
+        expect(error.data).toMatchObject({
+          code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+          details: {
+            group_hash: 'group-1',
+            episode_id: 'episode-1',
+            episode_status: alertEpisodeStatus.inactive,
+            action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          },
+        });
+        expect(error.message).toContain('is already inactive');
       }
-    );
+    });
   });
 });

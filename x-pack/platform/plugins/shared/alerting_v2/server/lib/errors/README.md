@@ -79,7 +79,7 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | Code                         | Status | When                                                                                                | `details`                                                                  |
 | ---------------------------- | ------ | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | `ALERT_EVENT_NOT_FOUND`      | 404    | No alert event matches the supplied `group_hash` (+ optional `episode_id`).                                                                                                                                                    | `{ group_hash, episode_id? }`                                              |
-| `INVALID_EPISODE_STATE_TRANSITION` | 400    | The requested action is incompatible with the episode's lifecycle: deactivate of an already-`inactive` or `pending` episode, or activate of a non-`inactive` episode. | `{ group_hash, episode_id, episode_status, action_type }`                  |
+| `INVALID_EPISODE_STATE_TRANSITION` | 400    | The requested action is a no-op against the current lifecycle state: `activate` of an already-`active` episode, or `deactivate` of an already-`inactive` episode. Every other transition is allowed. | `{ group_hash, episode_id, episode_status, action_type }`                  |
 
 ### Rule doctor insights (`server/lib/rule_doctor_insights_client/`)
 

@@ -28,10 +28,6 @@ afterAll(() => {
   jest.useRealTimers();
 });
 
-// Activate's precondition is `episode_status === 'inactive'`, so the
-// "current" alert event fed to the handler is the deactivate-synthetic
-// (or a naturally-recovered inactive event). We only override that one
-// field on top of the shared default.
 const buildAlertEvent = (overrides: Partial<AlertEventRecord> = {}): AlertEventRecord =>
   buildAlertEventRecord({
     episode_status: alertEpisodeStatus.inactive,
@@ -52,7 +48,7 @@ describe('activateHandler', () => {
       expect(prepared.alertActionDoc).toBe(item.alertActionDoc);
     });
 
-    it('builds a synthetic .rule-events doc that forces the episode back to active + breached', () => {
+    it('builds a synthetic .rule-events doc that forces the episode to active + breached', () => {
       const alertEvent = buildAlertEvent();
       const prepared = activateHandler.prepare(buildItem(alertEvent));
 
@@ -68,6 +64,16 @@ describe('activateHandler', () => {
         episode: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
         severity: alertEvent.severity,
       });
+    });
+
+    it.each<AlertEpisodeStatus>([
+      alertEpisodeStatus.inactive,
+      alertEpisodeStatus.recovering,
+      alertEpisodeStatus.pending,
+    ])('allows activate when episode_status is %s', (status) => {
+      expect(() =>
+        activateHandler.prepare(buildItem(buildAlertEvent({ episode_status: status })))
+      ).not.toThrow();
     });
 
     it('omits episode.status_count on the synthetic event — mirroring the director on any → active transition', () => {
@@ -89,53 +95,26 @@ describe('activateHandler', () => {
     });
   });
 
-  describe('precondition: episode must be inactive', () => {
-    it.each<AlertEpisodeStatus | null | undefined>([
-      alertEpisodeStatus.active,
-      alertEpisodeStatus.recovering,
-      alertEpisodeStatus.pending,
-      null,
-      undefined,
-    ])(
-      'rejects activate with INVALID_EPISODE_STATE_TRANSITION (400) when episode_status is %s',
-      (status) => {
-        try {
-          activateHandler.prepare(buildItem(buildAlertEvent({ episode_status: status })));
-          throw new Error('expected handler to throw');
-        } catch (error) {
-          expect(Boom.isBoom(error)).toBe(true);
-          expect(error.output.statusCode).toBe(400);
-          expect(error.data).toMatchObject({
-            code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
-            details: {
-              group_hash: 'group-1',
-              episode_id: 'episode-1',
-              episode_status: status ?? null,
-              action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
-            },
-          });
-        }
-      }
-    );
-
-    it('renders the rejection message with the actual status value when present', () => {
+  describe('precondition: rejects only when the episode is already active', () => {
+    it('rejects activate with INVALID_EPISODE_STATE_TRANSITION (400) when episode_status is active', () => {
       try {
         activateHandler.prepare(
           buildItem(buildAlertEvent({ episode_status: alertEpisodeStatus.active }))
         );
         throw new Error('expected handler to throw');
       } catch (error) {
-        expect(error.message).toContain(`[${alertEpisodeStatus.active}]`);
-        expect(error.message).toContain("only 'inactive' episodes can be activated");
-      }
-    });
-
-    it("renders 'unknown' when the alert event has no episode status", () => {
-      try {
-        activateHandler.prepare(buildItem(buildAlertEvent({ episode_status: undefined })));
-        throw new Error('expected handler to throw');
-      } catch (error) {
-        expect(error.message).toContain('[unknown]');
+        expect(Boom.isBoom(error)).toBe(true);
+        expect(error.output.statusCode).toBe(400);
+        expect(error.data).toMatchObject({
+          code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+          details: {
+            group_hash: 'group-1',
+            episode_id: 'episode-1',
+            episode_status: alertEpisodeStatus.active,
+            action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+          },
+        });
+        expect(error.message).toContain('is already active');
       }
     });
   });

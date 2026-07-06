@@ -23,13 +23,9 @@ type DeactivateAlertActionBody = Extract<
 >;
 
 /**
- * Precondition check shared between the deactivate handler and its
- * tests. Only `active` and `recovering` episodes can be deactivated:
- *
- * - `pending` is below the activation threshold and not user-visible,
- *   so a deactivate would surface state the user has no way to discover.
- * - `inactive` is already terminal — a second deactivate is a no-op
- *   that would still emit an audit doc, which is misleading.
+ * Precondition: the only rejected case is an already-inactive episode.
+ * Every other state (`active`, `recovering`, `pending`, or a defensively-nullable status)
+ * is treated as deactivatable.
  *
  * Failures throw `Boom.badRequest` carrying
  * `INVALID_EPISODE_STATE_TRANSITION`; the bulk path catches that
@@ -38,20 +34,18 @@ type DeactivateAlertActionBody = Extract<
  */
 const assertEpisodeIsDeactivatable = (alertEvent: AlertEventRecord): void => {
   const status = alertEvent.episode_status;
-  if (status === alertEpisodeStatus.active || status === alertEpisodeStatus.recovering) {
+  if (status !== alertEpisodeStatus.inactive) {
     return;
   }
 
   throw Boom.badRequest(
-    `Cannot deactivate episode [${alertEvent.episode_id}] with status [${
-      status ?? 'unknown'
-    }]; only 'active' or 'recovering' episodes can be deactivated`,
+    `Cannot deactivate episode [${alertEvent.episode_id}]. It is already inactive`,
     {
       code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
       details: {
         group_hash: alertEvent.group_hash,
         episode_id: alertEvent.episode_id,
-        episode_status: status ?? null,
+        episode_status: status,
         action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
       },
     }

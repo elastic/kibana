@@ -23,14 +23,10 @@ type ActivateAlertActionBody = Extract<
 >;
 
 /**
- * Precondition check shared between the activate handler and its
- * tests. Only `inactive` episodes can be re-activated — anything else
- * indicates the episode is still (or already) being observed by the
- * engine, so a user activate would either fight a live emit or be a
- * no-op that still writes an audit row.
- *
- * The engine reaches `inactive` via two paths (natural recovery FSM or
- * a prior user deactivate); this handler treats both as reopenable.
+ * Precondition: the only rejected case is an already-active episode.
+ * Every other state (`pending`, `recovering`, `inactive`, or a
+ * defensively-nullable status) is treated as reactivatable: user
+ * intent overrides the engine's assessment.
  *
  * Failures throw `Boom.badRequest` carrying
  * `INVALID_EPISODE_STATE_TRANSITION`; the bulk path catches that
@@ -39,20 +35,18 @@ type ActivateAlertActionBody = Extract<
  */
 const assertEpisodeIsActivatable = (alertEvent: AlertEventRecord): void => {
   const status = alertEvent.episode_status;
-  if (status === alertEpisodeStatus.inactive) {
+  if (status !== alertEpisodeStatus.active) {
     return;
   }
 
   throw Boom.badRequest(
-    `Cannot activate episode [${alertEvent.episode_id}] with status [${
-      status ?? 'unknown'
-    }]; only 'inactive' episodes can be activated`,
+    `Cannot activate episode [${alertEvent.episode_id}]. It is already active`,
     {
       code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
       details: {
         group_hash: alertEvent.group_hash,
         episode_id: alertEvent.episode_id,
-        episode_status: status ?? null,
+        episode_status: status,
         action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
       },
     }
@@ -62,12 +56,12 @@ const assertEpisodeIsActivatable = (alertEvent: AlertEventRecord): void => {
 /**
  * Handler for the user-initiated activate (reopen) action. Produces:
  *
- * 1. A synthetic `.rule-events` document that forces the episode back
- *    to `active` (`status: breached`, `episode.status: active`,
+ * 1. A synthetic `.rule-events` document that forces the episode to
+ *    `active` (`status: breached`, `episode.status: active`,
  *    `@timestamp: now`), so the next read sees the reopened state
  *    without waiting for the next rule run. The episode keeps its
- *    original `episode_id` — reopen is incident continuity, not a new
- *    firing.
+ *    original `episode_id` — activate is incident continuity, not a
+ *    new firing.
  * 2. The `.alert-actions` audit document already built by the
  *    orchestrator (`alertActionDoc` — unchanged).
  *

@@ -177,11 +177,11 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
   });
 
   apiTest(
-    'precondition: rejects activate when the episode is not inactive',
+    'precondition: rejects activate when the episode is already active',
     async ({ apiClient, apiServices }) => {
-      const ruleId = 'activate-not-inactive-rule';
-      const groupHash = 'activate-not-inactive-group';
-      const episodeId = 'activate-not-inactive-episode';
+      const ruleId = 'activate-already-active-rule';
+      const groupHash = 'activate-already-active-group';
+      const episodeId = 'activate-already-active-episode';
 
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
@@ -208,6 +208,70 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       });
 
       expect(actions).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'activate: allows a recovering episode to be reopened (cancel the wind-down)',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'activate-recovering-rule';
+      const groupHash = 'activate-recovering-group';
+      const episodeId = 'activate-recovering-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          status: 'recovered',
+          type: 'alert',
+          episode: { id: episodeId, status: 'recovering', status_count: 2 },
+        }),
+      ]);
+
+      const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { reason: 'cancel recovery' },
+      });
+
+      expect(response).toHaveStatusCode(204);
+
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
+      expect(latestStates.get(groupHash)).toMatchObject({
+        episode: { id: episodeId, status: 'active' },
+        status: 'breached',
+      });
+    }
+  );
+
+  apiTest(
+    'activate: allows a pending episode to be forced past the activation counter',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'activate-pending-rule';
+      const groupHash = 'activate-pending-group';
+      const episodeId = 'activate-pending-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          status: 'breached',
+          type: 'alert',
+          episode: { id: episodeId, status: 'pending', status_count: 1 },
+        }),
+      ]);
+
+      const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { reason: 'force active' },
+      });
+
+      expect(response).toHaveStatusCode(204);
+
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
+      expect(latestStates.get(groupHash)).toMatchObject({
+        episode: { id: episodeId, status: 'active' },
+        status: 'breached',
+      });
     }
   );
 

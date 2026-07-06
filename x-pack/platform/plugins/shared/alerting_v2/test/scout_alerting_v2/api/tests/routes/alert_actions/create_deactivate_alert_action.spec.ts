@@ -214,7 +214,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
   );
 
   apiTest(
-    'precondition: rejects deactivate of a pending episode with INVALID_EPISODE_STATE_TRANSITION (400)',
+    'precondition: allows deactivate of a pending episode (forces it closed before activation)',
     async ({ apiClient, apiServices }) => {
       const ruleId = 'deactivate-pending-rule';
       const groupHash = 'deactivate-pending-group';
@@ -226,16 +226,22 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
           group_hash: groupHash,
           status: 'breached',
           type: 'alert',
-          episode: { id: episodeId, status: 'pending' },
+          episode: { id: episodeId, status: 'pending', status_count: 1 },
         }),
       ]);
 
       const response = await apiClient.post(getDeactivateAlertActionUrl(groupHash), {
         headers: writerHeaders,
-        body: { reason: 'valid reason' },
+        body: { reason: 'dismiss before activation' },
       });
 
-      expect(response).toHaveStatusCode(400);
+      expect(response).toHaveStatusCode(204);
+
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
+      expect(latestStates.get(groupHash)).toMatchObject({
+        episode: { id: episodeId, status: 'inactive' },
+        status: 'recovered',
+      });
     }
   );
 
