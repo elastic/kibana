@@ -25,13 +25,16 @@ export const SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =
 
 const eventInvestigationAttachSchema = z.object({
   event_id: z.string().describe(
-    i18n.translate('xpack.streams.agentBuilder.tools.eventInvestigationAttach.schema.eventId', {
-      defaultMessage: 'Identifier of the significant event to attach the investigation to.',
-    })
+    i18n.translate(
+      'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.eventId',
+      {
+        defaultMessage: 'Identifier of the significant event to attach the investigation to.',
+      }
+    )
   ),
   workflow_execution_id: z.string().describe(
     i18n.translate(
-      'xpack.streams.agentBuilder.tools.eventInvestigationAttach.schema.workflowExecutionId',
+      'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.workflowExecutionId',
       {
         defaultMessage:
           'The investigation workflow execution id returned by execute_workflow. Used to fetch detailed RCA data.',
@@ -39,23 +42,29 @@ const eventInvestigationAttachSchema = z.object({
     )
   ),
   status: significantEventInvestigationStatusSchema.describe(
-    i18n.translate('xpack.streams.agentBuilder.tools.eventInvestigationAttach.schema.status', {
-      defaultMessage:
-        'Status of the investigation: "pending" while running, "success" or "failed" when done.',
-    })
+    i18n.translate(
+      'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.status',
+      {
+        defaultMessage:
+          'Status of the investigation: "pending" while running, "success" or "failed" when done.',
+      }
+    )
   ),
   started_at: z.iso.datetime({ offset: true }).describe(
-    i18n.translate('xpack.streams.agentBuilder.tools.eventInvestigationAttach.schema.startedAt', {
-      defaultMessage:
-        'ISO-8601 datetime when the investigation started. Read from the workflow execution returned by execute_workflow.',
-    })
+    i18n.translate(
+      'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.startedAt',
+      {
+        defaultMessage:
+          'ISO-8601 datetime when the investigation started. Read from the workflow execution returned by execute_workflow.',
+      }
+    )
   ),
   completed_at: z.iso
     .datetime({ offset: true })
     .optional()
     .describe(
       i18n.translate(
-        'xpack.streams.agentBuilder.tools.eventInvestigationAttach.schema.completedAt',
+        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.completedAt',
         {
           defaultMessage:
             'ISO-8601 datetime when the investigation completed. Only set for terminal statuses (success or failed).',
@@ -79,10 +88,13 @@ export const createEventInvestigationAttachTool = ({
     id: SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      ${i18n.translate('xpack.streams.agentBuilder.tools.eventInvestigationAttach.description', {
-        defaultMessage:
-          'Record an investigation run on a significant event. Call this when an investigation starts (status: pending) and again when it finishes (status: success or failed) to keep the event up to date.',
-      })}
+      ${i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.description',
+        {
+          defaultMessage:
+            'Record an investigation run on a significant event. Call this when an investigation starts (status: pending) and again when it finishes (status: success or failed) to keep the event up to date.',
+        }
+      )}
     `,
     schema: eventInvestigationAttachSchema,
     tags: ['streams', 'significant_events'],
@@ -124,7 +136,7 @@ export const createEventInvestigationAttachTool = ({
               type: ToolResultType.error,
               data: {
                 message: i18n.translate(
-                  'xpack.streams.agentBuilder.tools.eventInvestigationAttach.errorMessage',
+                  'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.errorMessage',
                   {
                     defaultMessage:
                       'Failed to attach investigation to significant event: {message}',

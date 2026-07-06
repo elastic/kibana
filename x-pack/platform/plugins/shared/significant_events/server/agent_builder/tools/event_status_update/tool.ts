@@ -25,12 +25,12 @@ export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
 
 const eventStatusUpdateSchema = z.object({
   event_id: z.string().describe(
-    i18n.translate('xpack.streams.agentBuilder.tools.eventStatusUpdate.schema.eventId', {
+    i18n.translate('xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.schema.eventId', {
       defaultMessage: 'Identifier of the significant event to update.',
     })
   ),
   status: significantEventStatusSchema.describe(
-    i18n.translate('xpack.streams.agentBuilder.tools.eventStatusUpdate.schema.status', {
+    i18n.translate('xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.schema.status', {
       defaultMessage: 'Target status value to set.',
     })
   ),
@@ -51,7 +51,7 @@ export function createEventStatusUpdateTool({
     id: SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      ${i18n.translate('xpack.streams.agentBuilder.tools.eventStatusUpdate.description', {
+      ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.description', {
         defaultMessage: 'Update the status of an existing significant event.',
       })}
     `,
@@ -92,7 +92,7 @@ export function createEventStatusUpdateTool({
               type: ToolResultType.error,
               data: {
                 message: i18n.translate(
-                  'xpack.streams.agentBuilder.tools.eventStatusUpdate.errorMessage',
+                  'xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.errorMessage',
                   {
                     defaultMessage: 'Failed to update significant event status: {message}',
                     values: { message },

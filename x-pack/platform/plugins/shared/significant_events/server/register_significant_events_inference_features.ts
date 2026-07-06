@@ -51,11 +51,14 @@ export function registerSignificantEventsInferenceFeatures(
 
   const parentResult = register({
     featureId: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-    featureName: i18n.translate('xpack.streams.inferenceFeature.significantEventsParentName', {
-      defaultMessage: 'Streams Significant Events',
-    }),
+    featureName: i18n.translate(
+      'xpack.significantEvents.inferenceFeature.significantEventsParentName',
+      {
+        defaultMessage: 'Streams Significant Events',
+      }
+    ),
     featureDescription: i18n.translate(
-      'xpack.streams.inferenceFeature.significantEventsParentDescription',
+      'xpack.significantEvents.inferenceFeature.significantEventsParentDescription',
       {
         defaultMessage:
           'AI models used for Streams Significant Events (knowledge indicators, queries, discovery).',
@@ -84,22 +87,28 @@ export function registerSignificantEventsInferenceFeatures(
   }> = [
     {
       featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-      featureName: i18n.translate('xpack.streams.inferenceFeature.kiExtractionName', {
+      featureName: i18n.translate('xpack.significantEvents.inferenceFeature.kiExtractionName', {
         defaultMessage: 'Knowledge Indicator extraction',
       }),
-      featureDescription: i18n.translate('xpack.streams.inferenceFeature.kiExtractionDescription', {
-        defaultMessage: 'Model used to extract Knowledge Indicators.',
-      }),
+      featureDescription: i18n.translate(
+        'xpack.significantEvents.inferenceFeature.kiExtractionDescription',
+        {
+          defaultMessage: 'Model used to extract Knowledge Indicators.',
+        }
+      ),
       recommendedEndpoints: KI_EXTRACTION_RECOMMENDED_MODELS,
       ignoreGlobalDefault: true,
     },
     {
       featureId: SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-      featureName: i18n.translate('xpack.streams.inferenceFeature.kiQueryGenerationName', {
-        defaultMessage: 'Knowledge Indicator Query generation',
-      }),
+      featureName: i18n.translate(
+        'xpack.significantEvents.inferenceFeature.kiQueryGenerationName',
+        {
+          defaultMessage: 'Knowledge Indicator Query generation',
+        }
+      ),
       featureDescription: i18n.translate(
-        'xpack.streams.inferenceFeature.kiQueryGenerationDescription',
+        'xpack.significantEvents.inferenceFeature.kiQueryGenerationDescription',
         {
           defaultMessage: 'Model used for Knowledge Indicator Query generation.',
         }
@@ -109,22 +118,25 @@ export function registerSignificantEventsInferenceFeatures(
     },
     {
       featureId: SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-      featureName: i18n.translate('xpack.streams.inferenceFeature.discoveryName', {
+      featureName: i18n.translate('xpack.significantEvents.inferenceFeature.discoveryName', {
         defaultMessage: 'Discovery',
       }),
-      featureDescription: i18n.translate('xpack.streams.inferenceFeature.discoveryDescription', {
-        defaultMessage: 'Model used during Discovery and Significant Event generation.',
-      }),
+      featureDescription: i18n.translate(
+        'xpack.significantEvents.inferenceFeature.discoveryDescription',
+        {
+          defaultMessage: 'Model used during Discovery and Significant Event generation.',
+        }
+      ),
       recommendedEndpoints: DISCOVERY_RECOMMENDED_MODELS,
       ignoreGlobalDefault: true,
     },
     {
       featureId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-      featureName: i18n.translate('xpack.streams.inferenceFeature.investigationName', {
+      featureName: i18n.translate('xpack.significantEvents.inferenceFeature.investigationName', {
         defaultMessage: 'Investigation',
       }),
       featureDescription: i18n.translate(
-        'xpack.streams.inferenceFeature.investigationDescription',
+        'xpack.significantEvents.inferenceFeature.investigationDescription',
         {
           defaultMessage: 'Model used during root cause investigation.',
         }

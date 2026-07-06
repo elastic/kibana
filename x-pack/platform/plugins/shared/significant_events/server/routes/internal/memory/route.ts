@@ -648,11 +648,14 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
         const validationDetail = result.validationErrors.join('; ');
         failures.push(
           validationDetail
-            ? i18n.translate('xpack.streams.memory.workflowUpdateFailedWithDetailErrorMessage', {
-                defaultMessage: 'Could not update workflow "{workflowId}": {detail}',
-                values: { workflowId: managedWorkflowId, detail: validationDetail },
-              })
-            : i18n.translate('xpack.streams.memory.workflowUpdateFailedErrorMessage', {
+            ? i18n.translate(
+                'xpack.significantEvents.memory.workflowUpdateFailedWithDetailErrorMessage',
+                {
+                  defaultMessage: 'Could not update workflow "{workflowId}": {detail}',
+                  values: { workflowId: managedWorkflowId, detail: validationDetail },
+                }
+              )
+            : i18n.translate('xpack.significantEvents.memory.workflowUpdateFailedErrorMessage', {
                 defaultMessage: 'Could not update workflow "{workflowId}"',
                 values: { workflowId: managedWorkflowId },
               })

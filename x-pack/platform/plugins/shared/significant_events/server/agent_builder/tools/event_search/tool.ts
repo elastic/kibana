@@ -26,7 +26,7 @@ const searchEventsSchema = z.object({
     .string()
     .optional()
     .describe(
-      i18n.translate('xpack.streams.agentBuilder.tools.eventSearch.schema.query', {
+      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.query', {
         defaultMessage: 'Optional text search in event title.',
       })
     ),
@@ -34,7 +34,7 @@ const searchEventsSchema = z.object({
     .string()
     .optional()
     .describe(
-      i18n.translate('xpack.streams.agentBuilder.tools.eventSearch.schema.streamName', {
+      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.streamName', {
         defaultMessage: 'Optional stream name to scope the search.',
       })
     ),
@@ -42,7 +42,7 @@ const searchEventsSchema = z.object({
     .array(significantEventStatusSchema)
     .optional()
     .describe(
-      i18n.translate('xpack.streams.agentBuilder.tools.eventSearch.schema.status', {
+      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.status', {
         defaultMessage: 'Optional event status filters.',
       })
     ),
@@ -63,11 +63,11 @@ export function createSearchEventsTool({
     id: SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      ${i18n.translate('xpack.streams.agentBuilder.tools.eventSearch.description.line1', {
+      ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line1', {
         defaultMessage: 'Search significant events across all streams or a specific stream.',
       })}
 
-      ${i18n.translate('xpack.streams.agentBuilder.tools.eventSearch.description.line2', {
+      ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line2', {
         defaultMessage:
           'Use this before creating or updating events to understand current event state.',
       })}
@@ -104,7 +104,7 @@ export function createSearchEventsTool({
               type: ToolResultType.error,
               data: {
                 message: i18n.translate(
-                  'xpack.streams.agentBuilder.tools.eventSearch.errorMessage',
+                  'xpack.significantEvents.agentBuilder.tools.eventSearch.errorMessage',
                   {
                     defaultMessage: 'Failed to search significant events: {message}',
                     values: { message },

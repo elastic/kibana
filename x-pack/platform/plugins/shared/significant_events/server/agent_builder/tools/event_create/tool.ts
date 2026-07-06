@@ -24,7 +24,7 @@ export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEvents
 
 const createEventSchema = z.object({
   status: significantEventStatusSchema.optional().describe(
-    i18n.translate('xpack.streams.agentBuilder.tools.eventCreate.schema.status', {
+    i18n.translate('xpack.significantEvents.agentBuilder.tools.eventCreate.schema.status', {
       defaultMessage: 'Status for the new event.',
     })
   ),
@@ -52,7 +52,7 @@ export function createEventTool({
     id: SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      ${i18n.translate('xpack.streams.agentBuilder.tools.eventCreate.description', {
+      ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventCreate.description', {
         defaultMessage: 'Create a significant event for one or more streams.',
       })}
     `,
@@ -61,11 +61,14 @@ export function createEventTool({
     confirmation: {
       askUser: 'always',
       getConfirmation: async ({ toolParams }) => ({
-        title: i18n.translate('xpack.streams.agentBuilder.tools.eventCreate.confirmation.title', {
-          defaultMessage: 'Create Significant Event',
-        }),
+        title: i18n.translate(
+          'xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.title',
+          {
+            defaultMessage: 'Create Significant Event',
+          }
+        ),
         message: i18n.translate(
-          'xpack.streams.agentBuilder.tools.eventCreate.confirmation.message',
+          'xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.message',
           {
             defaultMessage: 'Create significant event "{title}" for streams: {streams}?',
             values: {
@@ -75,13 +78,13 @@ export function createEventTool({
           }
         ),
         confirm_text: i18n.translate(
-          'xpack.streams.agentBuilder.tools.eventCreate.confirmation.confirm',
+          'xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.confirm',
           {
             defaultMessage: 'Create',
           }
         ),
         cancel_text: i18n.translate(
-          'xpack.streams.agentBuilder.tools.eventCreate.confirmation.cancel',
+          'xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.cancel',
           {
             defaultMessage: 'Cancel',
           }
@@ -120,7 +123,7 @@ export function createEventTool({
               type: ToolResultType.error,
               data: {
                 message: i18n.translate(
-                  'xpack.streams.agentBuilder.tools.eventCreate.errorMessage',
+                  'xpack.significantEvents.agentBuilder.tools.eventCreate.errorMessage',
                   {
                     defaultMessage: 'Failed to create significant event: {message}',
                     values: { message },
