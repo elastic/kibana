@@ -8,12 +8,17 @@
  */
 
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
-import { registerSuggestFixRoute } from './suggest_fix_route';
-import { SUGGEST_FIX_ROUTE } from '@kbn/esql-types';
+import { registerNLtoESQLRoute } from './nl_to_esql_route';
+import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { EsqlServerPluginStart } from '../types';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
+  generateEsqlCompletion: jest.fn(),
+}));
+
+jest.mock('@kbn/data-plugin/server', () => ({
+  getRequestAbortedSignal: jest.fn(),
 }));
 
 jest.mock('./helpers', () => ({
@@ -22,7 +27,7 @@ jest.mock('./helpers', () => ({
   resolveIncludeDatasets: jest.fn(),
 }));
 
-const { generateEsql } = jest.requireMock('@kbn/agent-builder-genai-utils');
+const { generateEsql, generateEsqlCompletion } = jest.requireMock('@kbn/agent-builder-genai-utils');
 const { resolveConnectorId, createScopedModel, resolveIncludeDatasets } =
   jest.requireMock('./helpers');
 
@@ -44,7 +49,7 @@ function buildMocks() {
   const requestHandlerContext = {
     core: Promise.resolve(core),
   };
-  const request = { body: {}, headers: {} };
+  const request = { body: {}, headers: {}, events: { aborted$: {} } };
   const response = {
     ok: jest.fn((r) => ({ status: 200, ...r })),
     badRequest: jest.fn((r) => ({ status: 400, ...r })),
@@ -67,45 +72,26 @@ function buildMocks() {
   };
 }
 
-describe('registerSuggestFixRoute', () => {
+describe('registerNLtoESQLRoute', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('registers a POST handler at the correct path', () => {
     const { router, getStartServices, context } = buildMocks();
-    registerSuggestFixRoute(router, getStartServices, context);
+    registerNLtoESQLRoute(router, getStartServices, context);
     expect(router.post).toHaveBeenCalledWith(
-      expect.objectContaining({ path: SUGGEST_FIX_ROUTE }),
+      expect.objectContaining({ path: NL_TO_ESQL_ROUTE }),
       expect.any(Function)
     );
-  });
-
-  it('accepts null for errorCode (JSON serialises undefined as null)', async () => {
-    const { router, handler, requestHandlerContext, request, response, getStartServices, context } =
-      buildMocks();
-    registerSuggestFixRoute(router, getStartServices, context);
-
-    resolveConnectorId.mockResolvedValue('connector-1');
-    createScopedModel.mockResolvedValue({});
-    generateEsql.mockResolvedValue({ query: 'FROM correct_index' });
-
-    request.body = {
-      queryString: 'FROM wrong_index',
-      errorMessage: 'Unknown index',
-      errorCode: null,
-    };
-    await handler(requestHandlerContext, request, response);
-
-    expect(response.ok).toHaveBeenCalledWith({ body: { content: 'FROM correct_index' } });
   });
 
   it('returns 400 when no connector is configured', async () => {
     const { router, handler, requestHandlerContext, request, response, getStartServices, context } =
       buildMocks();
-    registerSuggestFixRoute(router, getStartServices, context);
+    registerNLtoESQLRoute(router, getStartServices, context);
 
     resolveConnectorId.mockResolvedValue(null);
 
-    request.body = { queryString: 'FROM index', errorMessage: 'syntax error' };
+    request.body = { nlInstruction: 'count flights per carrier' };
     await handler(requestHandlerContext, request, response);
 
     expect(response.badRequest).toHaveBeenCalled();
@@ -115,56 +101,77 @@ describe('registerSuggestFixRoute', () => {
   it('returns 403 when the license check fails', async () => {
     const { router, handler, requestHandlerContext, request, response, getStartServices, context } =
       buildMocks();
-    registerSuggestFixRoute(router, getStartServices, context);
+    registerNLtoESQLRoute(router, getStartServices, context);
 
     resolveConnectorId.mockResolvedValue('connector-1');
     createScopedModel.mockResolvedValue({});
+    resolveIncludeDatasets.mockResolvedValue(false);
 
     const licenseError = Object.assign(new Error('license_expired'), { reason: 'license_expired' });
     generateEsql.mockRejectedValue(licenseError);
 
-    request.body = { queryString: 'FROM index', errorMessage: 'syntax error' };
+    request.body = { nlInstruction: 'count flights per carrier' };
     await handler(requestHandlerContext, request, response);
 
     expect(response.forbidden).toHaveBeenCalled();
   });
 
-  it('returns 200 with the corrected query on success', async () => {
+  it('returns 200 with the generated query on success', async () => {
     const { router, handler, requestHandlerContext, request, response, getStartServices, context } =
       buildMocks();
-    registerSuggestFixRoute(router, getStartServices, context);
+    registerNLtoESQLRoute(router, getStartServices, context);
 
     resolveConnectorId.mockResolvedValue('connector-1');
     createScopedModel.mockResolvedValue({});
-    generateEsql.mockResolvedValue({
-      query: 'FROM kibana_sample_data_flights | SORT avg DESC',
-    });
+    resolveIncludeDatasets.mockResolvedValue(false);
+    generateEsql.mockResolvedValue({ query: 'FROM kibana_sample_data_flights' });
 
-    request.body = {
-      queryString: 'FROM kibana_sample_data_flights | SORT avg DESCENGING',
-      errorMessage: "Unknown function 'DESCENGING'",
-    };
+    request.body = { nlInstruction: 'show me all flights' };
     await handler(requestHandlerContext, request, response);
 
     expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ executeQuery: false }));
     expect(response.ok).toHaveBeenCalledWith({
-      body: { content: 'FROM kibana_sample_data_flights | SORT avg DESC' },
+      body: { content: 'FROM kibana_sample_data_flights' },
     });
   });
 
   it('passes includeDatasets through from resolveIncludeDatasets', async () => {
     const { router, handler, requestHandlerContext, request, response, getStartServices, context } =
       buildMocks();
-    registerSuggestFixRoute(router, getStartServices, context);
+    registerNLtoESQLRoute(router, getStartServices, context);
 
     resolveConnectorId.mockResolvedValue('connector-1');
     createScopedModel.mockResolvedValue({});
     resolveIncludeDatasets.mockResolvedValue(true);
-    generateEsql.mockResolvedValue({ query: 'FROM correct_index' });
+    generateEsql.mockResolvedValue({ query: 'FROM speedtest_fixed' });
 
-    request.body = { queryString: 'FROM wrong_index', errorMessage: 'Unknown index' };
+    request.body = { nlInstruction: 'show me all speedtests' };
     await handler(requestHandlerContext, request, response);
 
     expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ includeDatasets: true }));
+  });
+
+  it('does not call generateEsql for a completion request (uses generateEsqlCompletion instead)', async () => {
+    const { router, handler, requestHandlerContext, request, response, getStartServices, context } =
+      buildMocks();
+    registerNLtoESQLRoute(router, getStartServices, context);
+
+    resolveConnectorId.mockResolvedValue('connector-1');
+    createScopedModel.mockResolvedValue({});
+    generateEsqlCompletion.mockResolvedValue({ content: ' | LIMIT 10', replacesNext: false });
+
+    request.body = {
+      nlInstruction: 'limit to 10',
+      currentQuery: 'FROM speedtest_fixed',
+      isCompletion: true,
+    };
+    await handler(requestHandlerContext, request, response);
+
+    expect(generateEsqlCompletion).toHaveBeenCalled();
+    expect(generateEsql).not.toHaveBeenCalled();
+    expect(resolveIncludeDatasets).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { content: ' | LIMIT 10', replacesNext: false },
+    });
   });
 });
