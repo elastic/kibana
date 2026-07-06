@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import React, { Suspense, useMemo, useState, useLayoutEffect } from 'react';
 import { css } from '@emotion/react';
 import type { ChromeBreadcrumb, AppHeaderBack, AppHeaderConfig } from '@kbn/core-chrome-browser';
@@ -38,6 +39,7 @@ interface FallbackProps {
   hasContent: boolean;
   back?: AppHeaderBack[];
   menu?: AppMenuConfig;
+  favorite?: ReactNode;
 }
 
 function useFallbackProps(): FallbackProps {
@@ -54,6 +56,14 @@ function useFallbackProps(): FallbackProps {
   const legacyBadge = useObservable(legacyBadge$, undefined);
   const breadcrumbsBadges$ = useMemo(() => chrome.getBreadcrumbsBadges$(), [chrome]);
   const breadcrumbsBadges = useObservable(breadcrumbsBadges$, []);
+
+  // Bridge breadcrumb append extensions (e.g. a dashboard's favorite button) into the app header's
+  // favorite slot. The Chrome Next global header does not render breadcrumb append extensions, so
+  // without this they would be lost. This intentionally does not contribute to `hasContent`: it
+  // only fills the slot when the header is already shown for other reasons, so a lone append
+  // extension never spawns a header bar on its own.
+  const appendExtensions$ = useMemo(() => chrome.getBreadcrumbsAppendExtensions$(), [chrome]);
+  const appendExtensions = useObservable(appendExtensions$, []);
 
   return useMemo(() => {
     const backTargets: AppHeaderBack[] = [];
@@ -73,12 +83,27 @@ function useFallbackProps(): FallbackProps {
     const hasBadges = !!legacyBadge || breadcrumbsBadges.length > 0;
     const hasContent = hasBack || hasMenu || hasBadges || hasLegacyActionMenu;
 
+    const favorite =
+      appendExtensions.length > 0 ? (
+        <>
+          {appendExtensions
+            .slice()
+            .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+            .map((extension, index) => (
+              <Suspense key={index} fallback={null}>
+                {extension.content}
+              </Suspense>
+            ))}
+        </>
+      ) : undefined;
+
     return {
       hasContent,
       back: hasBack ? backTargets : undefined,
       menu: hasMenu ? appMenu : undefined,
+      favorite,
     };
-  }, [breadcrumbs, appMenu, legacyBadge, breadcrumbsBadges, hasLegacyActionMenu]);
+  }, [breadcrumbs, appMenu, legacyBadge, breadcrumbsBadges, hasLegacyActionMenu, appendExtensions]);
 }
 
 function useAppHeaderConfig(): AppHeaderConfig | undefined {
@@ -150,7 +175,7 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
           tabs={config?.tabs}
           badges={config?.badges}
           menu={config?.menu ?? fallback.menu}
-          favorite={config?.favorite}
+          favorite={config?.favorite ?? fallback.favorite}
           metadata={config?.metadata}
           sticky={false}
           padding="m"

@@ -91,11 +91,14 @@ export function InternalDashboardTopNav({
     coreServices.chrome.getChromeStyle$(),
     coreServices.chrome.getChromeStyle()
   );
-  // When the dashboard is embedded in another application (e.g. Security Solution) or rendered in
-  // embed mode, the host owns the header, so the inline AppHeader must not be used. In those cases
-  // we keep mounting the app menu into the chrome header and render badges via the badge API.
+  // The app header (inline `AppHeader`) is used in standalone solution view; classic view keeps the
+  // app menu mounted into the chrome header, with badges and the favorite button set via the chrome
+  // APIs. When embedded in another application (e.g. Security Solution) or rendered in iframe embed
+  // mode, the host owns the surrounding layout, so we keep the chrome-API path there too. Under the
+  // next chrome the favorite button (set via `setBreadcrumbsAppendExtension`) is bridged into the
+  // app header by the chrome app-header renderer.
   const isEmbedded = Boolean(embedSettings || setCustomHeaderActionMenu);
-  const useAppHeader = chromeStyle !== 'classic' && !isEmbedded;
+  const shouldUseAppHeader = chromeStyle !== 'classic' && !isEmbedded;
 
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
   const { onAppLeave } = useDashboardMountContext();
@@ -395,21 +398,27 @@ export function InternalDashboardTopNav({
   useEffect(() => {
     // In solution view the badges are rendered by AppHeader via the `badges` prop.
     // Otherwise AppHeader is not rendered, so badges are set on the chrome header instead.
-    if (useAppHeader) {
+    if (shouldUseAppHeader) {
       return;
     }
     coreServices.chrome.setBreadcrumbsBadges(badges);
     return () => {
       coreServices.chrome.setBreadcrumbsBadges([]);
     };
-  }, [badges, useAppHeader]);
+  }, [badges, shouldUseAppHeader]);
 
   useEffect(() => {
+    // In standalone solution view the favorite button is rendered by AppHeader via the `favorite`
+    // prop. Otherwise it is appended to the breadcrumbs; the classic/legacy-project headers render
+    // it next to the breadcrumbs, and the next chrome bridges it into the app header favorite slot.
+    if (shouldUseAppHeader) {
+      return;
+    }
     return coreServices.chrome.setBreadcrumbsAppendExtension({
       content: <DashboardFavoriteButton dashboardId={lastSavedId} />,
       order: 0,
     });
-  }, [lastSavedId]);
+  }, [lastSavedId, shouldUseAppHeader]);
 
   return (
     <div css={styles.container}>
@@ -419,8 +428,13 @@ export function InternalDashboardTopNav({
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
-      {useAppHeader ? (
-        <AppHeader title={dashboardTitle} menu={appMenuConfig} badges={appHeaderBadges} />
+      {shouldUseAppHeader ? (
+        <AppHeader
+          title={dashboardTitle}
+          menu={appMenuConfig}
+          badges={appHeaderBadges}
+          favorite={<DashboardFavoriteButton dashboardId={lastSavedId} />}
+        />
       ) : (
         <AppMenu setAppMenu={coreServices.chrome.setAppMenu} config={appMenuConfig} />
       )}
