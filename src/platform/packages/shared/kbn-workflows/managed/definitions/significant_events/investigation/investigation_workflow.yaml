@@ -8,12 +8,13 @@ enabled: true
 settings:
   timeout: '60m'
   concurrency:
-    key: 'streams-investigation-{{ inputs.concurrency_key | default: execution.id }}'
+    key: 'significant-events-investigation-{{ inputs.concurrency_key | default: execution.id }}'
     strategy: cancel-in-progress
     max: 1
 tags:
   - observability
   - streams
+  - significant-events
   - investigation
 
 triggers:
@@ -48,33 +49,32 @@ triggers:
       additionalProperties: false
 
 steps:
-
   # Records a pending investigation on the Significant Event as soon as the workflow starts,
   # so the UI can show an in-progress indicator before the agent step finishes.
   # Only runs when a sig-event context was supplied (triage or chat-agent paths).
   - name: attach_pending_to_significant_event
     type: kibana.request
-    if: "${{ inputs.context.event_id != null }}"
+    if: '${{ inputs.context.event_id != null }}'
     with:
       method: POST
-      path: "/internal/sig_events/events/{{ inputs.context.event_id }}/investigations"
+      path: '/internal/significant_events/events/{{ inputs.context.event_id }}/investigations'
       headers:
-        x-elastic-internal-origin: "kibana"
+        x-elastic-internal-origin: 'kibana'
       body:
-        workflow_execution_id: "{{ execution.id }}"
-        status: "pending"
+        workflow_execution_id: '{{ execution.id }}'
+        status: 'pending'
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
     on-failure:
       continue: true
 
   - name: investigate
     type: ai.agent
-    agent-id: platform.streams.investigation
+    agent-id: platform.sig_events.investigation
     connector-id: '{{ inputs.connector_id }}'
-    # Keep plugin-id/aggregate-by in sync with @kbn/streams-schema inference_feature_ids.ts
-    # (STREAMS_SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID / SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
-    plugin-id: 'streams_significant_events_investigation'
-    aggregate-by: 'streams_significant_events'
+    # Keep plugin-id/aggregate-by in sync with @kbn/significant-events-schema inference_feature_ids.ts
+    # (SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID / SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
+    plugin-id: 'significant_events_investigation'
+    aggregate-by: 'significant_events'
     create-conversation: true
     with:
       timeout: 1800s
@@ -145,15 +145,15 @@ steps:
   # that do not supply `inputs.context.event_id` are unaffected.
   - name: attach_to_significant_event
     type: kibana.request
-    if: "${{ inputs.context.event_id != null }}"
+    if: '${{ inputs.context.event_id != null }}'
     with:
       method: POST
-      path: "/internal/sig_events/events/{{ inputs.context.event_id }}/investigations"
+      path: '/internal/significant_events/events/{{ inputs.context.event_id }}/investigations'
       headers:
-        x-elastic-internal-origin: "kibana"
+        x-elastic-internal-origin: 'kibana'
       body:
-        workflow_execution_id: "{{ execution.id }}"
-        status: "{% if steps.investigate.error == null %}success{% else %}failed{% endif %}"
+        workflow_execution_id: '{{ execution.id }}'
+        status: '{% if steps.investigate.error == null %}success{% else %}failed{% endif %}'
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
         completed_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
     on-failure:
@@ -176,6 +176,6 @@ steps:
 
         Keep only gaps that are actionable structural deficiencies — a data source or access that is missing and could reasonably be provided (e.g. "No traces for the cart service", "No infrastructure metrics for host X", "No code repository access for service Y"). Discard incident-specific observations that just describe what happened during the outage (e.g. "the pod crashed", "no logs during the failure window").
 
-        Read the current _gaps/overview page with platform_streams_memory_read. Compare the filtered gaps against it. If every gap is already reflected there, stop and write nothing. If there are genuinely new gaps, weave them into the existing sections (do not add a separate section) and save the page with platform_streams_memory_write using categories ["_system/gaps"].
+        Read the current _gaps/overview page with platform_sig_events_memory_read. Compare the filtered gaps against it. If every gap is already reflected there, stop and write nothing. If there are genuinely new gaps, weave them into the existing sections (do not add a separate section) and save the page with platform_sig_events_memory_write using categories ["_system/gaps"].
     on-failure:
       continue: true

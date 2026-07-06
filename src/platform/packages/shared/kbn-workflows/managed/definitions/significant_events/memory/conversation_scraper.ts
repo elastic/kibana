@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import INVESTIGATION_WORKFLOW_YAML from './investigation_workflow.yaml';
-import type { ManagedWorkflowDefinition } from '../../types';
+import CONVERSATION_SCRAPER_YAML from './conversation_scraper.yaml';
+import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const STREAMS_INVESTIGATION_WORKFLOW_ID = 'system-streams-investigation';
+export const SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID =
+  'system-streams-memory-conversation-scraper';
 
-export const STREAMS_INVESTIGATION_WORKFLOW = {
-  id: STREAMS_INVESTIGATION_WORKFLOW_ID,
+export const SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 2,
+  version: 1,
   billable: false,
-  yaml: INVESTIGATION_WORKFLOW_YAML,
+  yaml: CONVERSATION_SCRAPER_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
