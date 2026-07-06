@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { EsqlDataResult } from '../utils/fetch_esql_data';
 
 interface EsqlPreviewSectionProps {
@@ -43,6 +43,12 @@ export const EsqlPreviewSection = ({
   onPreview,
   initialIsOpen,
 }: EsqlPreviewSectionProps) => {
+  const [hasRunPreview, setHasRunPreview] = useState(false);
+  useEffect(() => {
+    if (previewData) setHasRunPreview(true);
+  }, [previewData]);
+
+  const isStale = hasRunPreview && previewData === null && !isPreviewLoading;
   const previewRows = ((previewData?.values ?? []) as unknown[][]).slice(0, 10);
 
   const tableColumns: Array<EuiBasicTableColumn<Record<string, unknown>>> =
@@ -119,15 +125,19 @@ export const EsqlPreviewSection = ({
       <EuiButton
         size="s"
         fill
-        color="primary"
+        color={isStale ? 'success' : 'primary'}
         iconType="play"
         onClick={onPreview}
         isLoading={isPreviewLoading}
         disabled={!draftEsqlQuery.trim()}
       >
-        {i18n.translate('xpack.aiPanel.editFlyout.previewData', {
-          defaultMessage: 'Preview data',
-        })}
+        {isStale
+          ? i18n.translate('xpack.aiPanel.editFlyout.rerunPreview', {
+              defaultMessage: 'Re-run preview',
+            })
+          : i18n.translate('xpack.aiPanel.editFlyout.previewData', {
+              defaultMessage: 'Preview data',
+            })}
       </EuiButton>
 
       {previewError && (
