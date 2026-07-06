@@ -457,7 +457,6 @@ export function InternalDashboardTopNav({
               }
             ),
           }}
-          }
         />
       )}
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
