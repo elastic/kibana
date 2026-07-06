@@ -154,13 +154,16 @@ export function StreamListView() {
     'xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel',
     { defaultMessage: 'Significant Events' }
   );
-  const createQueryStreamLabel = i18n.translate(
-    'xpack.streams.streamsListView.createQueryStreamButtonLabel',
-    { defaultMessage: 'Create Query stream' }
+  const createLabel = i18n.translate('xpack.streams.streamsListView.createButtonLabel', {
+    defaultMessage: 'Create',
+  });
+  const queryStreamMenuItemLabel = i18n.translate(
+    'xpack.streams.streamsListView.queryStreamMenuItemLabel',
+    { defaultMessage: 'Query stream' }
   );
-  const moreCreateOptionsLabel = i18n.translate(
-    'xpack.streams.streamsListView.moreCreateOptionsAriaLabel',
-    { defaultMessage: 'More create options' }
+  const classicStreamMenuItemLabel = i18n.translate(
+    'xpack.streams.streamsListView.classicStreamMenuItemLabel',
+    { defaultMessage: 'Classic stream' }
   );
 
   const showSignificantEventsDiscovery = Boolean(
@@ -195,24 +198,27 @@ export function StreamListView() {
     if (showQueryStreams) {
       return {
         primaryActionItem: {
-          id: 'createQueryStream',
-          label: createQueryStreamLabel,
+          id: 'createStream',
+          label: createLabel,
           iconType: 'plus',
-          run: () => setIsQueryStreamCreationFlyoutOpen(true),
-          testId: 'streamsAppCreateQueryStreamButton',
-          splitButtonProps: {
-            secondaryButtonAriaLabel: moreCreateOptionsLabel,
-            items: [
-              {
-                id: 'createClassicStream',
-                order: 1,
-                label: createClassicStreamLabel,
-                run: () => setIsClassicStreamCreationFlyoutOpen(true),
-                disableButton: !canCreateClassicStream,
-                testId: 'streamsAppCreateClassicStreamButton',
-              },
-            ],
-          },
+          testId: 'streamsAppCreateStreamButton',
+          items: [
+            {
+              id: 'createClassicStream',
+              order: 1,
+              label: classicStreamMenuItemLabel,
+              run: () => setIsClassicStreamCreationFlyoutOpen(true),
+              disableButton: !canCreateClassicStream,
+              testId: 'streamsAppCreateClassicStreamButton',
+            },
+            {
+              id: 'createQueryStream',
+              order: 2,
+              label: queryStreamMenuItemLabel,
+              run: () => setIsQueryStreamCreationFlyoutOpen(true),
+              testId: 'streamsAppCreateQueryStreamButton',
+            },
+          ],
         },
         items,
       };
@@ -231,9 +237,10 @@ export function StreamListView() {
     };
   }, [
     canCreateClassicStream,
+    classicStreamMenuItemLabel,
     createClassicStreamLabel,
-    createQueryStreamLabel,
-    moreCreateOptionsLabel,
+    createLabel,
+    queryStreamMenuItemLabel,
     settingsLabel,
     showQueryStreams,
     showSignificantEventsDiscovery,
