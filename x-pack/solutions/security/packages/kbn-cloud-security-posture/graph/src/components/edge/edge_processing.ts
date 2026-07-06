@@ -9,6 +9,28 @@ import type { Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 import { isConnectorShape } from '../utils';
 
+export type GraphEdgeRenderColor = 'danger' | 'subdued';
+
+type EdgeColorContext = Pick<EdgeViewModel, 'color'> & {
+  sourceShape?: NodeViewModel['shape'];
+  targetShape?: NodeViewModel['shape'];
+  sourceColor?: NodeViewModel['color'];
+  targetColor?: NodeViewModel['color'];
+};
+
+/** Danger when touching an alert/action label node; otherwise subdued. */
+export const getGraphEdgeRenderColor = (data?: EdgeColorContext): GraphEdgeRenderColor => {
+  if (data?.color === 'danger') {
+    return 'danger';
+  }
+
+  const touchesDangerLabel =
+    (data?.sourceShape === 'label' && data?.sourceColor === 'danger') ||
+    (data?.targetShape === 'label' && data?.targetColor === 'danger');
+
+  return touchesDangerLabel ? 'danger' : 'subdued';
+};
+
 export interface EdgeHandleConfig {
   sourceHandle?: string;
   targetHandle?: string;

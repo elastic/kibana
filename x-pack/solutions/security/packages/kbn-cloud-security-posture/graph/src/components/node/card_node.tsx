@@ -24,8 +24,13 @@ import { i18n } from '@kbn/i18n';
 import { Handle, Position } from '@xyflow/react';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { GraphNotificationBadge } from '../graph_notification_badge';
-import { OriginNodeOutline } from './origin_node_outline';
+import {
+  ORIGIN_ENTITY_OUTLINE_BORDER_RADIUS,
+  ORIGIN_ENTITY_SIMPLIFIED_OUTLINE_BORDER_RADIUS,
+  OriginNodeOutline,
+} from './origin_node_outline';
 import { NodeButton, HandleStyleOverride, NodeExpandButtonContainer } from './styles';
+import { PILL_EXPAND_BUTTON_SIZE } from './pill_expand_button';
 import { getEntityTypeIcon } from './get_entity_type_icon';
 import { getEntityTypeLabel } from './get_entity_type_label';
 import { getSpanIcon } from './get_span_icon';
@@ -78,12 +83,14 @@ const ICON_SIZE = 40;
 const SIMPLIFIED_ICON_SIZE = 48;
 /** Icon glyph inside the simplified square — one step (8px) smaller than the shell. */
 const SIMPLIFIED_ICON_INNER_SIZE = SIMPLIFIED_ICON_SIZE - 8;
-const SIMPLIFIED_EXPAND_BUTTON_SIZE = 32;
-const SIMPLIFIED_BADGE_SIZE = 24;
+/** Grouped-entity count blip in simplified mode. */
+const SIMPLIFIED_GROUP_COUNT_BADGE_SIZE = 20;
+/** Grouped-entity count blip in full-card mode. */
+const GROUP_COUNT_BADGE_SIZE = 20;
+const GROUP_COUNT_BADGE_FONT_SIZE = 12;
 const SIMPLIFIED_LABEL_GAP = 4;
 const SIMPLIFIED_LABEL_MAX_WIDTH = CARD_NODE_WIDTH;
 const SIMPLIFIED_LABEL_TRUNCATE_LENGTH = 27;
-const EXPAND_BUTTON_SIZE = 24;
 /** Minimum layout footprint for simplified cards (icon + caption). */
 export const SIMPLIFIED_CARD_LAYOUT_HEIGHT =
   SIMPLIFIED_ICON_SIZE + SIMPLIFIED_LABEL_GAP + CARD_METADATA_LINE_HEIGHT;
@@ -191,40 +198,29 @@ const SimplifiedIconCountBadge = styled.div`
 
 const EntityGroupCountBadge = ({
   count,
-  isDanger,
   isSimplified = false,
 }: {
   count: number;
-  isDanger: boolean;
   isSimplified?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const label = count > 99 ? '99+' : String(count);
+  const badgeSize = isSimplified ? SIMPLIFIED_GROUP_COUNT_BADGE_SIZE : GROUP_COUNT_BADGE_SIZE;
 
-  const dangerBadgeCss = css`
-    background-color: ${euiTheme.colors.backgroundFilledDanger};
-    color: ${euiTheme.colors.textInverse};
-  `;
-
-  const simplifiedBadgeCss = css`
+  const badgeCss = css`
     ${metadataTextCss}
+    font-size: ${GROUP_COUNT_BADGE_FONT_SIZE}px;
+    line-height: ${GROUP_COUNT_BADGE_FONT_SIZE}px;
     font-weight: ${euiTheme.font.weight.medium};
-    height: ${SIMPLIFIED_BADGE_SIZE}px;
-    min-width: ${SIMPLIFIED_BADGE_SIZE}px;
+    background-color: ${euiTheme.colors.backgroundFilledPrimary};
+    color: ${euiTheme.colors.textInverse};
+    height: ${badgeSize}px;
+    min-width: ${badgeSize}px;
     padding-inline: 4px;
   `;
 
-  const badgeCss = [
-    isSimplified ? simplifiedBadgeCss : undefined,
-    isDanger ? dangerBadgeCss : undefined,
-  ];
-
   return (
-    <GraphNotificationBadge
-      size={isSimplified ? 's' : 'm'}
-      color={isDanger ? 'accent' : 'subdued'}
-      css={badgeCss.length > 0 ? badgeCss : undefined}
-    >
+    <GraphNotificationBadge size="s" css={badgeCss}>
       {label}
     </GraphNotificationBadge>
   );
@@ -414,10 +410,9 @@ interface CardExpandButtonProps {
 const CardExpandButton = ({
   onClick,
   containerRef,
-  buttonSize = EXPAND_BUTTON_SIZE,
+  buttonSize = PILL_EXPAND_BUTTON_SIZE,
 }: CardExpandButtonProps) => {
   const { euiTheme } = useEuiTheme();
-  const expandShadow = useEuiShadow('m');
   const [isToggled, setIsToggled] = React.useState(false);
 
   const unToggleCallback = useCallback(() => {
@@ -471,7 +466,7 @@ const CardExpandButton = ({
         data-test-subj={GRAPH_NODE_EXPAND_BUTTON_ID}
         color="primary"
         display="fill"
-        size="s"
+        size="xs"
         onClick={onClickHandler}
         css={css`
           width: ${buttonSize}px;
@@ -479,7 +474,6 @@ const CardExpandButton = ({
           min-width: ${buttonSize}px;
           border-radius: 50%;
           background-color: ${euiTheme.colors.primary};
-          box-shadow: ${expandShadow};
 
           &:hover,
           &:focus {
@@ -494,15 +488,13 @@ const CardExpandButton = ({
 // ── Simplified (zoomed-out) card ──────────────────────────────────────────────
 
 interface SimplifiedCardProps {
-  isDanger: boolean;
   isGroup: boolean;
   resolvedIcon: string;
-  iconColor: 'danger' | 'primary';
   count?: number;
   iconBorderColor: string;
   iconBg: string;
   iconEmphasizedBg: string;
-  entityBorderColor: string;
+  originOutlineColor: string;
   highlightAsOrigin?: boolean;
   interactiveShadow?: string;
   interactive?: boolean;
@@ -546,15 +538,13 @@ const SimplifiedCardLabel = ({ text, isGroup }: { text: string; isGroup: boolean
 };
 
 const SimplifiedCard = ({
-  isDanger,
   isGroup,
   resolvedIcon,
-  iconColor,
   count,
   iconBorderColor,
   iconBg,
   iconEmphasizedBg,
-  entityBorderColor,
+  originOutlineColor,
   highlightAsOrigin = false,
   interactiveShadow,
   interactive,
@@ -568,7 +558,10 @@ const SimplifiedCard = ({
     <SimplifiedCardContainer>
       <SimplifiedIconShell>
         {highlightAsOrigin && (
-          <OriginNodeOutline borderColor={entityBorderColor} borderRadius={8} borderWidth={2} />
+          <OriginNodeOutline
+            borderColor={originOutlineColor}
+            borderRadius={ORIGIN_ENTITY_SIMPLIFIED_OUTLINE_BORDER_RADIUS}
+          />
         )}
         <SimplifiedIconBox
           borderColor={iconBorderColor}
@@ -579,13 +572,13 @@ const SimplifiedCard = ({
         >
           {isGroup && count !== undefined && (
             <SimplifiedIconCountBadge>
-              <EntityGroupCountBadge count={count} isDanger={isDanger} isSimplified={true} />
+              <EntityGroupCountBadge count={count} isSimplified={true} />
             </SimplifiedIconCountBadge>
           )}
           <EuiIcon
             type={resolvedIcon}
             size="l"
-            color={iconColor}
+            color="primary"
             aria-hidden={true}
             css={css`
               svg {
@@ -598,7 +591,6 @@ const SimplifiedCard = ({
 
         {interactive && showExpandButton && (
           <CardExpandButton
-            buttonSize={SIMPLIFIED_EXPAND_BUTTON_SIZE}
             onClick={(e, unToggleCallback) => expandButtonClick?.(e, nodeProps, unToggleCallback)}
           />
         )}
@@ -641,7 +633,6 @@ const SimplifiedCard = ({
 
 export const CardNode = memo<NodeProps>((props: NodeProps) => {
   const {
-    color = 'primary',
     icon,
     label,
     tag,
@@ -688,7 +679,6 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
   `;
 
   const entityTypeLabel = getEntityTypeLabel({ tag, icon, shape, documentsData });
-  const isDanger = color === 'danger';
   const isGroup = showStackedShape(count);
   const isCompact = zoom < GRAPH_SIMPLIFIED_ZOOM_THRESHOLD;
 
@@ -697,20 +687,14 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
   const headerPrimaryText = isGroup ? entityTypeLabel ?? entityName : entityName;
   const headerSecondaryText = isGroup ? undefined : entityTypeLabel;
 
-  const borderColor = isDanger
-    ? euiTheme.colors.borderBaseDanger
-    : euiTheme.colors.borderBasePrimary;
-  const headerBg = isDanger
-    ? euiTheme.colors.backgroundBaseDanger
-    : euiTheme.colors.backgroundBasePrimary;
+  const borderColor = euiTheme.colors.borderBasePrimary;
+  const headerBg = euiTheme.colors.backgroundBasePrimary;
   const cardBg = euiTheme.colors.backgroundBasePlain;
   const iconBorderColor = euiTheme.colors.borderBaseSubdued;
   const iconBg = euiTheme.colors.backgroundBasePlain;
-  const iconEmphasizedBg = isDanger
-    ? euiTheme.colors.backgroundLightDanger
-    : euiTheme.colors.backgroundBaseSubdued;
+  const iconEmphasizedBg = euiTheme.colors.backgroundBaseSubdued;
+  const originOutlineColor = euiTheme.colors.primary;
   const resolvedIcon = resolveIcon(icon, tag);
-  const iconColor = isDanger ? 'danger' : 'primary';
 
   const showIp = ips && ips.length > 0;
   const showGeo = countryCodes && countryCodes.length > 0;
@@ -728,15 +712,13 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
   if (isCompact) {
     return (
       <SimplifiedCard
-        isDanger={isDanger}
         isGroup={isGroup}
         resolvedIcon={resolvedIcon}
-        iconColor={iconColor}
         count={count}
         iconBorderColor={iconBorderColor}
         iconBg={iconBg}
         iconEmphasizedBg={iconEmphasizedBg}
-        entityBorderColor={borderColor}
+        originOutlineColor={originOutlineColor}
         highlightAsOrigin={highlightAsOrigin}
         interactiveShadow={props.selected ? simplifiedActiveShadow : simplifiedHoverShadow}
         interactive={interactive}
@@ -752,7 +734,10 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
   return (
     <CardWrapper data-test-subj={GRAPH_ENTITY_NODE_ID}>
       {highlightAsOrigin && (
-        <OriginNodeOutline borderColor={borderColor} borderRadius={CARD_BORDER_RADIUS} />
+        <OriginNodeOutline
+          borderColor={originOutlineColor}
+          borderRadius={ORIGIN_ENTITY_OUTLINE_BORDER_RADIUS}
+        />
       )}
       <div
         css={css`
@@ -771,10 +756,10 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
             >
               {isGroup && count !== undefined && (
                 <IconCountBadge>
-                  <EntityGroupCountBadge count={count} isDanger={isDanger} />
+                  <EntityGroupCountBadge count={count} />
                 </IconCountBadge>
               )}
-              <EuiIcon type={resolvedIcon} size="l" color={iconColor} aria-hidden={true} />
+              <EuiIcon type={resolvedIcon} size="l" color="primary" aria-hidden={true} />
             </IconBox>
 
             <HeaderText>

@@ -88,6 +88,7 @@ const BOTTOM_BAR_BUTTON_SIZE = 32;
 const BOTTOM_BAR_BUTTON_RADIUS = 4;
 const BOTTOM_BAR_SECTION_GAP = 8;
 const INTERACTION_TOOL_GAP = 4;
+const SEARCH_DISPLAY_GAP = 4;
 /** EUI medium drop shadow for the bottom bar panel. */
 const BOTTOM_BAR_SHADOW = 'm' as const;
 
@@ -99,6 +100,7 @@ interface InteractionToolButtonProps {
   testSubj: string;
   onClick?: () => void;
   controlButtonCss: ReturnType<typeof css>;
+  selectedInteractionToolCss: ReturnType<typeof css>;
 }
 
 const InteractionToolButton = ({
@@ -109,21 +111,8 @@ const InteractionToolButton = ({
   testSubj,
   onClick,
   controlButtonCss,
+  selectedInteractionToolCss,
 }: InteractionToolButtonProps) => {
-  const { euiTheme } = useEuiTheme();
-
-  const selectedIconCss = css`
-    ${controlButtonCss}
-    .euiButtonIcon__icon {
-      color: ${euiTheme.colors.textInverse};
-    }
-
-    &:hover:not(:disabled),
-    &:focus-visible:not(:disabled) {
-      background-color: ${euiTheme.components.buttons.backgroundFilledPrimaryHover};
-    }
-  `;
-
   return (
     <GraphControlTooltip content={tooltipContent} position="top" disableScreenReaderOutput>
       <EuiButtonIcon
@@ -135,7 +124,7 @@ const InteractionToolButton = ({
         display={isSelected ? 'fill' : 'empty'}
         size="m"
         color={isSelected ? 'primary' : 'text'}
-        css={isSelected ? selectedIconCss : controlButtonCss}
+        css={isSelected ? selectedInteractionToolCss : controlButtonCss}
         data-test-subj={testSubj}
         onClick={onClick}
       />
@@ -260,17 +249,34 @@ export const BottomBar = ({
     height: 100%;
   `;
 
-  const controlButtonCss = css`
+  const controlButtonBaseCss = css`
     && {
       width: ${BOTTOM_BAR_BUTTON_SIZE}px;
       height: ${BOTTOM_BAR_BUTTON_SIZE}px;
       min-width: ${BOTTOM_BAR_BUTTON_SIZE}px;
       border-radius: ${BOTTOM_BAR_BUTTON_RADIUS}px;
+    }
+  `;
 
-      &:hover:not(:disabled),
-      &:focus-visible:not(:disabled) {
-        background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
-      }
+  const controlButtonCss = css`
+    ${controlButtonBaseCss}
+
+    &&:hover:not(:disabled),
+    &&:focus-visible:not(:disabled) {
+      background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
+    }
+  `;
+
+  const selectedInteractionToolCss = css`
+    ${controlButtonBaseCss}
+
+    .euiButtonIcon__icon {
+      color: ${euiTheme.colors.textInverse};
+    }
+
+    &&:hover:not(:disabled),
+    &&:focus-visible:not(:disabled) {
+      background-color: ${euiTheme.components.buttons.backgroundFilledPrimaryHover};
     }
   `;
 
@@ -293,6 +299,13 @@ export const BottomBar = ({
     margin: 0;
     padding: 0;
     min-inline-size: 0;
+  `;
+
+  const searchDisplayGroupCss = css`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: ${SEARCH_DISPLAY_GAP}px;
   `;
 
   const handleSelectToolClick = () => {
@@ -356,6 +369,7 @@ export const BottomBar = ({
               testSubj={GRAPH_BOTTOM_BAR_SELECT_TOOL_ID}
               onClick={handleSelectToolClick}
               controlButtonCss={controlButtonCss}
+              selectedInteractionToolCss={selectedInteractionToolCss}
             />
             <InteractionToolButton
               iconType="move"
@@ -367,6 +381,7 @@ export const BottomBar = ({
               testSubj={GRAPH_BOTTOM_BAR_PAN_TOOL_ID}
               onClick={handlePanToolClick}
               controlButtonCss={controlButtonCss}
+              selectedInteractionToolCss={selectedInteractionToolCss}
             />
           </div>
         </EuiFlexItem>
@@ -376,73 +391,77 @@ export const BottomBar = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <GraphSearchPanel
-            isOpen={isSearchOpen}
-            onClose={closeSearchPanel}
-            nodes={nodes}
-            entityFilters={entityFilters}
-            onEntityFiltersChange={setEntityFilters}
-          >
-            <GraphControlTooltip
-              content={<ToolShortcutTooltip label={searchLabel} shortcut={SEARCH_TOOL_SHORTCUT} />}
-              position="top"
-              disableScreenReaderOutput
+          <div css={searchDisplayGroupCss}>
+            <GraphSearchPanel
+              isOpen={isSearchOpen}
+              onClose={closeSearchPanel}
+              nodes={nodes}
+              entityFilters={entityFilters}
+              onEntityFiltersChange={setEntityFilters}
             >
-              <div
-                css={css`
-                  position: relative;
-                  display: inline-flex;
-                `}
+              <GraphControlTooltip
+                content={
+                  <ToolShortcutTooltip label={searchLabel} shortcut={SEARCH_TOOL_SHORTCUT} />
+                }
+                position="top"
+                disableScreenReaderOutput
+              >
+                <div
+                  css={css`
+                    position: relative;
+                    display: inline-flex;
+                  `}
+                >
+                  <EuiButtonIcon
+                    iconType="search"
+                    aria-label={searchAriaLabel}
+                    size="m"
+                    color={
+                      isSearchOpen || hasActiveEntityFilters(entityFilters) ? 'primary' : 'text'
+                    }
+                    css={controlButtonCss}
+                    data-test-subj={GRAPH_BOTTOM_BAR_SEARCH_ID}
+                    onClick={toggleSearchPanel}
+                  />
+                  {entityFilterCount > 0 && (
+                    <GraphNotificationBadge
+                      css={css`
+                        position: absolute;
+                        right: -4px;
+                        bottom: -4px;
+                        pointer-events: none;
+                      `}
+                    >
+                      {entityFilterCount > 99 ? '99+' : entityFilterCount}
+                    </GraphNotificationBadge>
+                  )}
+                </div>
+              </GraphControlTooltip>
+            </GraphSearchPanel>
+
+            <ApplyFiltersPopover
+              isOpen={isFiltersOpen}
+              onClose={() => setIsFiltersOpen(false)}
+              filtersState={filtersState}
+              onFiltersChange={onFiltersChange}
+            >
+              <GraphControlTooltip
+                content={<ToolShortcutTooltip label={displayLabel} shortcut={DISPLAY_SHORTCUT} />}
+                position="top"
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
-                  iconType="search"
-                  aria-label={searchAriaLabel}
+                  iconType="layers"
+                  aria-label={displayAriaLabel}
                   size="m"
-                  color={isSearchOpen || hasActiveEntityFilters(entityFilters) ? 'primary' : 'text'}
+                  color={isFiltersOpen ? 'primary' : 'text'}
                   css={controlButtonCss}
-                  data-test-subj={GRAPH_BOTTOM_BAR_SEARCH_ID}
-                  onClick={toggleSearchPanel}
+                  data-test-subj={GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID}
+                  onClick={toggleApplyFiltersPanel}
                 />
-                {entityFilterCount > 0 && (
-                  <GraphNotificationBadge
-                    css={css`
-                      position: absolute;
-                      right: -4px;
-                      bottom: -4px;
-                      pointer-events: none;
-                    `}
-                  >
-                    {entityFilterCount > 99 ? '99+' : entityFilterCount}
-                  </GraphNotificationBadge>
-                )}
-              </div>
-            </GraphControlTooltip>
-          </GraphSearchPanel>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <ApplyFiltersPopover
-            isOpen={isFiltersOpen}
-            onClose={() => setIsFiltersOpen(false)}
-            filtersState={filtersState}
-            onFiltersChange={onFiltersChange}
-          >
-            <GraphControlTooltip
-              content={<ToolShortcutTooltip label={displayLabel} shortcut={DISPLAY_SHORTCUT} />}
-              position="top"
-              disableScreenReaderOutput
-            >
-              <EuiButtonIcon
-                iconType="layers"
-                aria-label={displayAriaLabel}
-                size="m"
-                color={isFiltersOpen ? 'primary' : 'text'}
-                css={controlButtonCss}
-                data-test-subj={GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID}
-                onClick={toggleApplyFiltersPanel}
-              />
-            </GraphControlTooltip>
-          </ApplyFiltersPopover>
+              </GraphControlTooltip>
+            </ApplyFiltersPopover>
+          </div>
         </EuiFlexItem>
 
         {showInvestigateInTimeline && (

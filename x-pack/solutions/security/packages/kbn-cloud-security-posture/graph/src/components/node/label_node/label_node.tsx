@@ -125,6 +125,8 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
 
   const pillTone = getEventPillTone(analysis);
   const pillColors = getEventPillColors(pillTone, isActive, euiTheme);
+  const originOutlineBorderColor =
+    pillTone === 'alert' ? euiTheme.colors.danger : pillColors.borderColor;
   const interactiveShadow = isActive ? activeShadow : hoverShadow;
 
   const labelTextCss = css`
@@ -166,11 +168,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
     <LabelNodeContainer data-test-subj={GRAPH_LABEL_NODE_ID}>
       <PillShell>
         {highlightAsOrigin && (
-          <OriginNodeOutline
-            borderColor={pillColors.borderColor}
-            borderRadius="999px"
-            borderWidth={2}
-          />
+          <OriginNodeOutline borderColor={originOutlineBorderColor} borderRadius="999px" />
         )}
         <EventPill
           data-test-subj={TEST_SUBJ_SHAPE}

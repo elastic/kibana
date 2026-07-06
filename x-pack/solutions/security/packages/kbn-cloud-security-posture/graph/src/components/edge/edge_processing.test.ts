@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getEdgeHandleConfig, shouldRenderGraphEdge } from './edge_processing';
+import {
+  getEdgeHandleConfig,
+  getGraphEdgeRenderColor,
+  shouldRenderGraphEdge,
+} from './edge_processing';
 
 describe('edge_processing', () => {
   describe('shouldRenderGraphEdge', () => {
@@ -43,6 +47,46 @@ describe('edge_processing', () => {
         targetHandle: undefined,
         isReturnStackEdge: false,
       });
+    });
+  });
+
+  describe('getGraphEdgeRenderColor', () => {
+    it('returns danger when edge color is danger', () => {
+      expect(getGraphEdgeRenderColor({ color: 'danger' })).toBe('danger');
+    });
+
+    it('returns danger when connecting to a danger label node', () => {
+      expect(
+        getGraphEdgeRenderColor({
+          color: 'primary',
+          sourceShape: 'hexagon',
+          targetShape: 'label',
+          targetColor: 'danger',
+        })
+      ).toBe('danger');
+    });
+
+    it('returns danger when connecting from a danger label node', () => {
+      expect(
+        getGraphEdgeRenderColor({
+          color: 'subdued',
+          sourceShape: 'label',
+          sourceColor: 'danger',
+          targetShape: 'hexagon',
+        })
+      ).toBe('danger');
+    });
+
+    it('returns subdued for non-alert edges', () => {
+      expect(getGraphEdgeRenderColor({ color: 'primary' })).toBe('subdued');
+      expect(
+        getGraphEdgeRenderColor({
+          color: 'primary',
+          sourceShape: 'hexagon',
+          targetShape: 'label',
+          targetColor: 'primary',
+        })
+      ).toBe('subdued');
     });
   });
 });

@@ -7,15 +7,14 @@
 
 import React, { memo } from 'react';
 import { BaseEdge } from '@xyflow/react';
-import type { EdgeProps, EdgeViewModel } from '../types';
+import type { EdgeProps } from '../types';
 import { getShapeHandlePosition } from './utils';
 import { getMarkerEnd } from './markers';
 import { useEdgeColor } from './styles';
 import { GRAPH_EDGE_ID } from '../test_ids';
 import { getGraphEdgePath, GRAPH_EDGE_STEP_OFFSET } from './get_graph_edge_path';
 import { useGraphLayoutContext } from '../graph/graph_layout_context';
-
-type EdgeColor = EdgeViewModel['color'];
+import { getGraphEdgeRenderColor } from './edge_processing';
 
 const dashedStyle = {
   strokeDasharray: '2 2',
@@ -36,7 +35,7 @@ export const DefaultEdge = memo(
     data,
   }: EdgeProps) => {
     const { useBundledEdgeRouting } = useGraphLayoutContext();
-    const color: EdgeColor = data?.color || 'primary';
+    const color = getGraphEdgeRenderColor(data);
     const sourceMargin = getShapeHandlePosition(data?.sourceShape);
     const targetMargin = getShapeHandlePosition(data?.targetShape);
     const markerEnd =

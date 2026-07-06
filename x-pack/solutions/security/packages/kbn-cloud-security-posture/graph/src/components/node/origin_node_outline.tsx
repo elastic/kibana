@@ -12,6 +12,15 @@ import { GRAPH_ORIGIN_NODE_OUTLINE_ID } from '../test_ids';
 /** Space between the node border and the origin highlight outline. */
 export const ORIGIN_NODE_OUTLINE_OFFSET = 6;
 
+/** Dashed origin highlight stroke width. */
+export const ORIGIN_NODE_OUTLINE_BORDER_WIDTH = 2;
+
+/** Outline radius for full-size entity cards. */
+export const ORIGIN_ENTITY_OUTLINE_BORDER_RADIUS = 16;
+
+/** Outline radius for simplified (zoomed-out) entity icon boxes. */
+export const ORIGIN_ENTITY_SIMPLIFIED_OUTLINE_BORDER_RADIUS = 12;
+
 export interface OriginNodeOutlineProps {
   borderColor: string;
   borderRadius: number | string;
@@ -21,7 +30,7 @@ export interface OriginNodeOutlineProps {
 export const OriginNodeOutline = ({
   borderColor,
   borderRadius,
-  borderWidth = 2.5,
+  borderWidth = ORIGIN_NODE_OUTLINE_BORDER_WIDTH,
 }: OriginNodeOutlineProps) => (
   <div
     data-test-subj={GRAPH_ORIGIN_NODE_OUTLINE_ID}

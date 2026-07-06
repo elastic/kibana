@@ -168,10 +168,10 @@ const extractEdges = (graphData: EnhancedNode[]): GraphResponse => {
 const scenarioLargeGraph = (): GraphResponse =>
   extractEdges([
     {
-      // group + danger: all metadata fields (criticality breakdown, risk range, ips, geo)
+      // group: all metadata fields (criticality breakdown, risk range, ips, geo)
       id: 'siem-windows',
       label: 'siem-windows',
-      color: 'danger',
+      color: 'primary',
       shape: 'hexagon',
       icon: 'storage',
       tag: 'Host',
@@ -185,7 +185,7 @@ const scenarioLargeGraph = (): GraphResponse =>
     {
       id: '213.180.204.3',
       label: 'IP: 213.180.204.3',
-      color: 'danger',
+      color: 'primary',
       shape: 'diamond',
       icon: 'globe',
       tag: 'IP Address',
@@ -194,10 +194,10 @@ const scenarioLargeGraph = (): GraphResponse =>
       riskScore: 88.5,
     },
     {
-      // group + danger: only count badge visible, no metadata body
+      // group: only count badge visible, no metadata body
       id: 'user',
       label: 'Unknown User',
-      color: 'danger',
+      color: 'primary',
       shape: 'ellipse',
       icon: 'user',
       tag: 'User',
@@ -1063,7 +1063,7 @@ const scenarioComplexPreview = (): GraphResponse =>
     {
       id: 'metadata-preview-grouped',
       label: 'workstation-fleet',
-      color: 'danger',
+      color: 'primary',
       shape: 'hexagon',
       icon: 'storage',
       tag: 'Host',
@@ -1078,7 +1078,7 @@ const scenarioComplexPreview = (): GraphResponse =>
     {
       id: 'complex-user-unknown',
       label: 'Unknown User',
-      color: 'danger',
+      color: 'primary',
       shape: 'ellipse',
       icon: 'user',
       tag: 'User',
@@ -1097,7 +1097,7 @@ const scenarioComplexPreview = (): GraphResponse =>
     {
       id: 'complex-user-intruder',
       label: 'unknown.external',
-      color: 'danger',
+      color: 'primary',
       shape: 'ellipse',
       icon: 'user',
       tag: 'User',
@@ -1128,7 +1128,7 @@ const scenarioComplexPreview = (): GraphResponse =>
     {
       id: 'complex-host-jumpbox',
       label: 'bastion-jumpbox',
-      color: 'danger',
+      color: 'primary',
       shape: 'hexagon',
       icon: 'desktop',
       tag: 'Host',
@@ -1140,7 +1140,7 @@ const scenarioComplexPreview = (): GraphResponse =>
     {
       id: 'complex-host-db',
       label: 'db-server-core',
-      color: 'danger',
+      color: 'primary',
       shape: 'hexagon',
       icon: 'storage',
       tag: 'Host',
@@ -1164,7 +1164,7 @@ const scenarioComplexPreview = (): GraphResponse =>
     {
       id: 'complex-ip-external-a',
       label: '185.220.101.5',
-      color: 'danger',
+      color: 'primary',
       shape: 'diamond',
       icon: 'globe',
       tag: 'IP Address',
