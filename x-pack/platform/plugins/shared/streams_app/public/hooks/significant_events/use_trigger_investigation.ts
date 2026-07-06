@@ -52,7 +52,7 @@ export const useTriggerInvestigation = ({
 
   const mutation = useMutation<TriggerInvestigationResult, Error, string>({
     mutationFn: (eventId: string) =>
-      streamsRepositoryClient.fetch('POST /internal/sig_events/events/{id}/investigate', {
+      streamsRepositoryClient.fetch('POST /internal/significant_events/events/{id}/investigate', {
         params: { path: { id: eventId } },
         signal: null,
       }),

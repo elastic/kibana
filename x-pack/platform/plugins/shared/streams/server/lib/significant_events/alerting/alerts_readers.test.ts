@@ -94,6 +94,7 @@ describe('SignificantEventsAlertsReaderV1', () => {
   it('enriches change-point buckets from ES metadata when present', async () => {
     const { client, search } = createEsClient();
     search.mockResolvedValue({
+      took: 42,
       aggregations: {
         by_rule: {
           buckets: [
@@ -146,6 +147,7 @@ describe('SignificantEventsAlertsReaderV1', () => {
         },
       })
     );
+    expect(result.took).toBe(42);
     expect(result.by_rule.buckets).toEqual([
       {
         key: RULE_UUID,
@@ -316,6 +318,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
   it('normalizes change-point buckets to distinct signal counts and query link metadata', async () => {
     const { client, search } = createEsClient();
     search.mockResolvedValue({
+      took: 17,
       aggregations: {
         by_rule: {
           buckets: [
@@ -358,6 +361,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
         },
       })
     );
+    expect(result.took).toBe(17);
     expect(result.by_rule.buckets).toEqual([
       {
         key: RULE_UUID,
