@@ -10,7 +10,7 @@ import type {
   ComposeDiscoverMode,
   RuleFormServices,
 } from '@kbn/alerting-v2-rule-form';
-import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import { ComposeDiscoverFlyout, getSteps, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -180,6 +180,11 @@ export const useComposeDiscoverFlyout = ({
     [openRuleFlyout]
   );
 
+  const resolveSteps = useCallback(
+    (isAlert: boolean) => getSteps(isAlert, builderType ?? undefined),
+    [builderType]
+  );
+
   const flyout = flyoutOpen ? (
     <ComposeDiscoverFlyout
       historyKey={historyKey}
@@ -190,6 +195,7 @@ export const useComposeDiscoverFlyout = ({
       services={ruleFormServices}
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
+      resolveSteps={resolveSteps}
       onCreateRule={(payload, ruleNotifications) =>
         createRuleMutation.mutate(payload, {
           onSuccess: (rule) => {

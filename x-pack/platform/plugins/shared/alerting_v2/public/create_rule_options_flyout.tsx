@@ -21,7 +21,7 @@ import type { History } from 'history';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
-import type { ComposeDiscoverFlyoutProps } from '@kbn/alerting-v2-rule-form';
+import type { ComposeDiscoverFlyoutProps, ResolvedSteps } from '@kbn/alerting-v2-rule-form';
 import { Context } from '@kbn/core-di-browser';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
@@ -63,6 +63,7 @@ type Step =
 interface LoadedModules {
   services: AlertingV2KibanaServices;
   ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
+  getSteps: (isAlert: boolean, builderType?: string) => ResolvedSteps;
 }
 
 const noopSubscribe = () => () => {};
@@ -122,6 +123,7 @@ const CreateRuleOptionsFlyoutInner = ({
     return {
       services,
       ComposeDiscoverFlyout: mod.ComposeDiscoverFlyout,
+      getSteps: mod.getSteps,
     };
   }, []);
 
@@ -236,7 +238,7 @@ const CreateRuleOptionsFlyoutInner = ({
     );
   }
 
-  const { services, ComposeDiscoverFlyout } = value;
+  const { services, ComposeDiscoverFlyout, getSteps } = value;
 
   const isRuleManagementABSkillAvailable = getIsRuleManagementABSkillAvailable(
     services.application,
@@ -255,6 +257,7 @@ const CreateRuleOptionsFlyoutInner = ({
           isSaving={isSaving}
           initialQuery={query}
           esqlVariables={esqlVariables}
+          resolveSteps={(isAlert) => getSteps(isAlert)}
         />
       </Context.Provider>
     );
@@ -273,6 +276,7 @@ const CreateRuleOptionsFlyoutInner = ({
           isSaving={isSaving}
           initialQuery={query}
           esqlVariables={esqlVariables}
+          resolveSteps={(isAlert) => getSteps(isAlert, 'threshold')}
         />
       </Context.Provider>
     );

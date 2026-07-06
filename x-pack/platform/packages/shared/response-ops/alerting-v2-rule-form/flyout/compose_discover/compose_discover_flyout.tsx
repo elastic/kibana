@@ -39,6 +39,7 @@ import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yam
 import { isNonRepresentableRule } from '../../form/utils/is_non_representable';
 import { ComposeDiscoverFooter } from './compose_discover_footer';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
+import type { ResolvedSteps } from './compose_discover_form';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
@@ -167,6 +168,13 @@ export interface ComposeDiscoverFlyoutProps {
   initialQuery?: string;
   /** ES|QL control variables from Discover — inlined into initialQuery when provided. */
   esqlVariables?: ESQLControlVariable[];
+  /**
+   * Resolves the step sequence for the current `isAlert` value. The caller owns this
+   * decision (e.g. a Builder wrapper supplies `(isAlert) => getSteps(isAlert, builderType)`)
+   * so the flyout itself never needs to know whether it's rendering a builder flow.
+   * Defaults to the plain (non-builder) step sequence when omitted.
+   */
+  resolveSteps?: (isAlert: boolean) => ResolvedSteps;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -223,6 +231,7 @@ export function ComposeDiscoverFlyout({
   initialBuilderState,
   initialQuery,
   esqlVariables,
+  resolveSteps,
 }: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
@@ -680,7 +689,9 @@ export function ComposeDiscoverFlyout({
   const supportsUnifiedEditorToggle = isCreate || isEditing;
   const title = getFlyoutTitle(mode);
 
-  const { steps } = getSteps(isAlert, builderType);
+  const { steps, renderCustomRecovery } = resolveSteps
+    ? resolveSteps(isAlert)
+    : getSteps(isAlert);
   const currentStep = steps[uiState.step];
   const isLastStep = uiState.step === steps.length - 1;
 
@@ -1240,6 +1251,8 @@ export function ComposeDiscoverFlyout({
                       isEditing={isEditing}
                       ruleId={ruleId}
                       builderType={builderType}
+                      currentStep={currentStep}
+                      renderCustomRecovery={renderCustomRecovery}
                       onManualSplit={
                         supportsUnifiedEditorToggle ? handleManualSplitFromForm : undefined
                       }

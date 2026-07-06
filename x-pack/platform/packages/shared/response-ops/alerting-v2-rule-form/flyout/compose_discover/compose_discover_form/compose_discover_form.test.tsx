@@ -99,8 +99,9 @@ const createComposeFormWrapper = (
   };
 };
 
-const renderComposeDiscoverDetailsStep = (defaultValues: FormValues = BASE_COMPOSE_VALUES) =>
-  render(
+const renderComposeDiscoverDetailsStep = (defaultValues: FormValues = BASE_COMPOSE_VALUES) => {
+  const { steps, renderCustomRecovery } = getSteps(defaultValues.kind === 'alert');
+  return render(
     <ComposeDiscoverForm
       state={createState({ step: 2 })}
       dispatch={jest.fn()}
@@ -108,9 +109,12 @@ const renderComposeDiscoverDetailsStep = (defaultValues: FormValues = BASE_COMPO
       onRecoveryTypeChange={jest.fn()}
       onKindChange={jest.fn()}
       isEditing={false}
+      currentStep={steps[2]}
+      renderCustomRecovery={renderCustomRecovery}
     />,
     { wrapper: createComposeFormWrapper(defaultValues) }
   );
+};
 
 describe('step validation', () => {
   beforeEach(() => {
@@ -358,14 +362,19 @@ describe('shell shared fields', () => {
     formOverrides: Partial<FormValues> = {}
   ) => {
     const services = { ...createMockServices(), dashboard: mockDashboard };
+    const state = createState({ queryCommitted: true, ...stateOverrides });
+    const isAlert = (formOverrides.kind ?? BASE_COMPOSE_VALUES.kind) === 'alert';
+    const { steps, renderCustomRecovery } = getSteps(isAlert);
     return render(
       <ComposeDiscoverForm
-        state={createState({ queryCommitted: true, ...stateOverrides })}
+        state={state}
         dispatch={jest.fn()}
         services={services}
         onRecoveryTypeChange={jest.fn()}
         onKindChange={jest.fn()}
         isEditing={false}
+        currentStep={steps[state.step]}
+        renderCustomRecovery={renderCustomRecovery}
       />,
       { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES, ...formOverrides }, services) }
     );
@@ -410,6 +419,7 @@ describe('shell shared fields', () => {
 
   it('disables ModeSelect in edit mode', () => {
     const services = { ...createMockServices(), dashboard: mockDashboard };
+    const { steps, renderCustomRecovery } = getSteps(true);
     render(
       <ComposeDiscoverForm
         state={createState({ queryCommitted: true, step: 0 })}
@@ -418,6 +428,8 @@ describe('shell shared fields', () => {
         onRecoveryTypeChange={jest.fn()}
         onKindChange={jest.fn()}
         isEditing={true}
+        currentStep={steps[0]}
+        renderCustomRecovery={renderCustomRecovery}
       />,
       { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES }, services) }
     );

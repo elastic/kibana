@@ -8,6 +8,9 @@
 export { ComposeDiscoverFlyout } from './compose_discover_flyout';
 export type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
 
+export { getSteps } from './compose_discover_form';
+export type { ResolvedSteps } from './compose_discover_form';
+
 export { QuerySandboxFlyout } from './query_sandbox_flyout';
 export type { QuerySandboxFlyoutProps } from './query_sandbox_flyout';
 

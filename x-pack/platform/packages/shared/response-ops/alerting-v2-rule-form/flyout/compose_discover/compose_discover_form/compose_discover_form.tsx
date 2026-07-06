@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useWatch } from 'react-hook-form';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
@@ -44,8 +44,11 @@ interface Props {
   onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
   ruleId?: string;
+  /** Only used for the ModeSelect disable condition below — not step resolution (see `currentStep`). */
   builderType?: string;
   onManualSplit?: () => void;
+  currentStep: StepDefinition;
+  renderCustomRecovery: StepRenderProps['renderCustomRecovery'];
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -135,7 +138,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   },
 };
 
-interface ResolvedSteps {
+export interface ResolvedSteps {
   steps: StepDefinition[];
   renderCustomRecovery?: StepRenderProps['renderCustomRecovery'];
 }
@@ -180,13 +183,10 @@ export const ComposeDiscoverForm = ({
   ruleId,
   builderType,
   onManualSplit,
+  currentStep,
+  renderCustomRecovery,
 }: Props) => {
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
-  const { steps, renderCustomRecovery } = useMemo(
-    () => getSteps(isAlert, builderType),
-    [isAlert, builderType]
-  );
-  const currentStep = steps[state.step];
   const isAlertConditionStep = isAlertConditionStepId(currentStep.id);
 
   const stepContent = currentStep.render({
