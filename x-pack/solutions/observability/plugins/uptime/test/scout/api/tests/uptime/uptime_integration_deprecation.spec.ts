@@ -10,78 +10,34 @@ import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../../fixtures';
 
-interface FleetPackageItem {
-  latestVersion?: string;
-  version?: string;
-}
-
-const getBrowserZipInput = (zipUrl?: string) => ({
-  type: 'synthetics/browser',
-  policy_template: 'synthetics',
-  enabled: false,
-  streams: [
-    {
-      enabled: true,
-      data_stream: { type: 'synthetics', dataset: 'browser' },
-      vars: {
-        __ui: { type: 'yaml' },
-        enabled: { value: true, type: 'bool' },
-        type: { value: 'browser', type: 'text' },
-        name: { type: 'text' },
-        schedule: { value: '"@every 3m"', type: 'text' },
-        'service.name': { type: 'text' },
-        timeout: { type: 'text' },
-        tags: { type: 'yaml' },
-        'source.zip_url.url': { type: 'text', value: zipUrl },
-        'source.zip_url.username': { type: 'text' },
-        'source.zip_url.folder': { type: 'text' },
-        'source.zip_url.password': { type: 'password' },
-        'source.inline.script': { type: 'yaml' },
-        'source.project.content': { type: 'text' },
-        params: { type: 'yaml' },
-        playwright_options: { type: 'yaml' },
-        screenshots: { type: 'text' },
-        synthetics_args: { type: 'text' },
-        ignore_https_errors: { type: 'bool' },
-        'throttling.config': { type: 'text' },
-        'filter_journeys.tags': { type: 'yaml' },
-        'filter_journeys.match': { type: 'text' },
-        'source.zip_url.ssl.certificate_authorities': { type: 'yaml' },
-        'source.zip_url.ssl.certificate': { type: 'yaml' },
-        'source.zip_url.ssl.key': { type: 'yaml' },
-        'source.zip_url.ssl.key_passphrase': { type: 'text' },
-        'source.zip_url.ssl.verification_mode': { type: 'text' },
-        'source.zip_url.ssl.supported_protocols': { type: 'yaml' },
-        'source.zip_url.proxy_url': { type: 'text' },
-        location_name: { value: 'Fleet managed', type: 'text' },
-        id: { type: 'text' },
-        config_id: { type: 'text' },
-        run_once: { value: false, type: 'bool' },
-        origin: { type: 'text' },
-        'monitor.project.id': { type: 'text' },
-        'monitor.project.name': { type: 'text' },
-      },
-      id: 'synthetics/browser-browser-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
-    },
-  ],
-});
-
 apiTest.describe('UptimeIntegrationDeprecation', { tag: '@local-stateful-classic' }, () => {
   let adminCredentials: RoleApiCredentials;
   let agentPolicyId: string;
-  let syntheticsPackageVersion: string;
+  let syntheticsVersion: string;
 
   apiTest.beforeAll(async ({ apiClient, requestAuth }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
 
-    const packageResponse = await apiClient.get('api/fleet/epm/packages/synthetics', {
+    // Resolve the synthetics package version from the registry at runtime and
+    // install it explicitly. A hardcoded legacy version (e.g. `0.10.2`) ages out
+    // of the throwaway EPR `:lite` registry used by Scout, causing the package
+    // policy creation below to 404. Mirrors the sibling synthetics Scout tests.
+    const pkgResponse = await apiClient.get('api/fleet/epm/packages/synthetics', {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
       responseType: 'json',
     });
-    expect(packageResponse.statusCode).toBe(200);
-    const item = packageResponse.body.item as FleetPackageItem;
-    syntheticsPackageVersion = item.latestVersion ?? item.version ?? '';
-    expect(syntheticsPackageVersion).not.toBe('');
+    expect(pkgResponse.statusCode).toBe(200);
+    syntheticsVersion = pkgResponse.body.item.latestVersion ?? pkgResponse.body.item.version;
+
+    const installResponse = await apiClient.post(
+      `api/fleet/epm/packages/synthetics/${syntheticsVersion}`,
+      {
+        headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
+        body: { force: true },
+        responseType: 'json',
+      }
+    );
+    expect(installResponse.statusCode).toBe(200);
 
     const response = await apiClient.post('api/fleet/agent_policies', {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
@@ -126,11 +82,15 @@ apiTest.describe('UptimeIntegrationDeprecation', { tag: '@local-stateful-classic
         namespace: 'default',
         policy_id: agentPolicyId,
         enabled: true,
-        inputs: [getBrowserZipInput()],
+        // The deprecation endpoint only counts non-managed synthetics package
+        // policies, so the specific input type is irrelevant to the assertion.
+        // A minimal supported input avoids coupling to the removed legacy
+        // `source.zip_url.*` browser input.
+        inputs: [{ type: 'synthetics/http', enabled: true, streams: [] }],
         package: {
           name: 'synthetics',
           title: 'For Synthetics Tests',
-          version: syntheticsPackageVersion,
+          version: syntheticsVersion,
         },
       },
       responseType: 'json',
