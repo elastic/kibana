@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filter, Subject, type Subscription } from 'rxjs';
+import { combineLatest, filter, type Observable, of, Subject, type Subscription } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type {
   AppDeepLinkLocations,
@@ -21,11 +21,16 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
+  WORKFLOWS_UI_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { AvailabilityService } from './common/lib/availability';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
+import type { DeepLinksParams } from './deep_links';
+import { getDeepLinks } from './deep_links';
 import { triggerSchemas } from './trigger_schemas';
 import type {
   WorkflowsPublicPluginSetup,
@@ -35,7 +40,6 @@ import type {
   WorkflowsPublicPluginStartDependencies,
   WorkflowsServices,
 } from './types';
-import { getWorkflowsAppDeepLinks } from './workflows_app_deep_links';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
 import type { WorkflowsManagementConfig } from '../server/config';
@@ -94,7 +98,7 @@ export class WorkflowsPlugin
 
     this.setupAgentBuilderStart(core);
 
-    const initialExecutionsViewEnabled = this.pluginConfig.globalExecutionsView.enabled;
+    const executionsViewEnabled = this.pluginConfig.globalExecutionsView.enabled;
 
     core.application.register({
       id: PLUGIN_ID,
@@ -105,7 +109,7 @@ export class WorkflowsPlugin
       category: DEFAULT_APP_CATEGORIES.management, // Only for the classic navigation
       order: 9015,
       updater$: this.appUpdater$,
-      deepLinks: getWorkflowsAppDeepLinks(initialExecutionsViewEnabled),
+      deepLinks: getDeepLinks({ executionsViewEnabled }),
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
@@ -184,13 +188,25 @@ export class WorkflowsPlugin
     const capabilities = getWorkflowsCapabilities(core.application.capabilities);
     const isAuthorized = capabilities.canReadWorkflow; // Read privilege is the minimum privilege required
 
-    this.appVisibilitySubscription = this.availabilityService
-      .getIsAvailable$()
-      .subscribe((isAvailable) => {
+    const isAvailable$ = this.availabilityService.getIsAvailable$();
+
+    const deepLinksFlags$: Observable<DeepLinksParams> = combineLatest({
+      libraryEnabled: core.settings.globalClient.get$<boolean>(
+        WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
+        false
+      ),
+      executionsViewEnabled: of(this.pluginConfig.globalExecutionsView.enabled),
+    });
+
+    this.appVisibilitySubscription = combineLatest([isAvailable$, deepLinksFlags$]).subscribe(
+      ([isAvailable, deepLinksFlags]) => {
+        // Always set the next value of the app updater in a single place to avoid race conditions
         this.appUpdater$.next(() => ({
           visibleIn: this.getVisibleIn({ isAuthorized, isAvailable }),
+          deepLinks: getDeepLinks(deepLinksFlags),
         }));
-      });
+      }
+    );
   }
 
   /**

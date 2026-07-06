@@ -82678,6 +82678,9 @@ components:
         description:
           description: A short description of the dashboard.
           type: string
+        esql_approximation:
+          description: When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.
+          type: boolean
         filters:
           description: Filters applied across all panels, including pinned panels.
           items:
@@ -93481,6 +93484,14 @@ components:
                     type: number
                   timeUnit:
                     type: string
+                  warningComparator:
+                    type: string
+                  warningThreshold:
+                    items:
+                      description: The threshold value that is used with the `warningComparator`. If the `warningComparator` is `between`, you must specify the boundary values.
+                      type: number
+                    maxItems: 2
+                    type: array
                 required:
                   - threshold
                   - comparator
