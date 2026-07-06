@@ -15,6 +15,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
+import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../../common/types';
 import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
@@ -205,6 +206,8 @@ export const Host: FC<HostProps> = memo(function Host({
     onSuccess: onAssetCriticalityChanged,
   });
 
+  const assetCriticalityPrivileges = useAssetCriticalityPrivileges(entityId ?? hostName);
+
   const panelDisplayEntityId = useMemo(
     () => (entityStoreV2Enabled ? observedHost.entityRecord?.entity?.id : entityId),
     [entityId, entityStoreV2Enabled, observedHost.entityRecord?.entity?.id]
@@ -239,7 +242,9 @@ export const Host: FC<HostProps> = memo(function Host({
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
 
   const onCriticalitySave =
-    entityFromStoreResult.entityRecord && observedHost.entityRecord
+    !!assetCriticalityPrivileges.data?.has_write_permissions &&
+    entityFromStoreResult.entityRecord &&
+    observedHost.entityRecord
       ? (level: CriticalityLevelWithUnassigned) =>
           updateAssetCriticalityLevel(level, observedHost.entityRecord)
       : undefined;
