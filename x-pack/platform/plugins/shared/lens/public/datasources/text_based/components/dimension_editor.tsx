@@ -236,7 +236,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                   </EuiText>
                 }
                 data-test-subj="lensDropPartialIntervals"
-                checked={Boolean(selectedField.params?.dropPartials)}
+                checked={selectedField.params?.dropPartials ?? true}
                 onChange={(e) => onDropPartialsChange(e.target.checked)}
                 compressed
               />

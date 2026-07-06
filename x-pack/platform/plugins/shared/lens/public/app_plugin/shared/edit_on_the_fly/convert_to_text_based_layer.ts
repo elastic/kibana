@@ -149,8 +149,9 @@ function buildTextBasedState(
             column.params = { format: format as ValueFormatConfig };
           }
         }
-        if (sourceColumn.dropPartials) {
-          column.params = { ...column.params, dropPartials: true };
+
+        if (sourceColumn.operationType === 'date_histogram') {
+          column.params = { ...column.params, dropPartials: Boolean(sourceColumn.dropPartials) };
         }
 
         return column;

@@ -12,16 +12,25 @@ import { getDateHistogramTextBased } from '../../defs/date_histogram';
 
 const dateHistogram = getDateHistogramTextBased(createDatatableUtilitiesMock, () => 'UTC');
 
-const buildBucketColumn = (
-  params: Record<string, string | boolean>,
-  appliedTimeRange?: { from: string; to: string }
-): Datatable['columns'][number] => ({
+const buildBucketColumn = ({
+  bucket,
+  dropPartials,
+  appliedTimeRange,
+}: {
+  bucket: { interval: number; unit: string };
+  dropPartials?: boolean;
+  appliedTimeRange?: { from: string; to: string };
+}): Datatable['columns'][number] => ({
   id: 'a',
   name: 'A',
   meta: {
     type: 'date',
+    esType: 'date',
+    esMeta: { bucket },
     sourceParams: {
-      params,
+      // Only materialize drop_partials when explicitly set, so an unset value
+      // stays undefined (getDateHistogramMeta returns undefined -> defaults to on).
+      ...(dropPartials !== undefined ? { params: { drop_partials: dropPartials } } : {}),
       ...(appliedTimeRange ? { appliedTimeRange } : {}),
     },
   },
@@ -33,10 +42,11 @@ describe('lens_date_histogram_textbased', () => {
       const input: Datatable = {
         type: 'datatable',
         columns: [
-          buildBucketColumn(
-            { used_interval: '1s', used_time_zone: 'UTC', drop_partials: true },
-            { from: '1970-01-01T00:00:01.000Z', to: '1970-01-01T00:00:04.000Z' }
-          ),
+          buildBucketColumn({
+            bucket: { interval: 1, unit: 'second' },
+            dropPartials: true,
+            appliedTimeRange: { from: '1970-01-01T00:00:01.000Z', to: '1970-01-01T00:00:04.000Z' },
+          }),
           { id: 'b', name: 'B', meta: { type: 'number' } },
         ],
         rows: [
@@ -61,10 +71,11 @@ describe('lens_date_histogram_textbased', () => {
       const input: Datatable = {
         type: 'datatable',
         columns: [
-          buildBucketColumn(
-            { used_interval: '1h', used_time_zone: 'Europe/London', drop_partials: true },
-            { from: '2026-06-29T00:00:00.000Z', to: '2026-06-29T02:30:00.000Z' }
-          ),
+          buildBucketColumn({
+            bucket: { interval: 1, unit: 'hour' },
+            dropPartials: true,
+            appliedTimeRange: { from: '2026-06-29T00:00:00.000Z', to: '2026-06-29T02:30:00.000Z' },
+          }),
           { id: 'b', name: 'B', meta: { type: 'number' } },
         ],
         rows: [
@@ -82,14 +93,43 @@ describe('lens_date_histogram_textbased', () => {
       ]);
     });
 
+    it('drops partial buckets by default when drop_partials is unset', async () => {
+      const input: Datatable = {
+        type: 'datatable',
+        columns: [
+          buildBucketColumn({
+            bucket: { interval: 1, unit: 'second' },
+            appliedTimeRange: { from: '1970-01-01T00:00:01.000Z', to: '1970-01-01T00:00:04.000Z' },
+          }),
+          { id: 'b', name: 'B', meta: { type: 'number' } },
+        ],
+        rows: [
+          { a: 0, b: 1 },
+          { a: 1000, b: 2 },
+          { a: 2000, b: 3 },
+          { a: 3000, b: 4 },
+          { a: 4000, b: 5 },
+        ],
+      };
+
+      const result = await dateHistogram.fn(input, {}, createMockExecutionContext());
+
+      expect(result.rows).toStrictEqual([
+        { a: 1000, b: 2 },
+        { a: 2000, b: 3 },
+        { a: 3000, b: 4 },
+      ]);
+    });
+
     it('keeps all buckets when drop_partials is disabled', async () => {
       const input: Datatable = {
         type: 'datatable',
         columns: [
-          buildBucketColumn(
-            { used_interval: '1s', used_time_zone: 'UTC', drop_partials: false },
-            { from: '1970-01-01T00:00:01.000Z', to: '1970-01-01T00:00:04.000Z' }
-          ),
+          buildBucketColumn({
+            bucket: { interval: 1, unit: 'second' },
+            dropPartials: false,
+            appliedTimeRange: { from: '1970-01-01T00:00:01.000Z', to: '1970-01-01T00:00:04.000Z' },
+          }),
           { id: 'b', name: 'B', meta: { type: 'number' } },
         ],
         rows: [
@@ -114,10 +154,11 @@ describe('lens_date_histogram_textbased', () => {
       const input: Datatable = {
         type: 'datatable',
         columns: [
-          buildBucketColumn(
-            { used_interval: '1s', used_time_zone: 'UTC', drop_partials: false },
-            { from: '1970-01-01T00:00:00.000Z', to: '1970-01-01T00:00:10.000Z' }
-          ),
+          buildBucketColumn({
+            bucket: { interval: 1, unit: 'second' },
+            dropPartials: false,
+            appliedTimeRange: { from: '1970-01-01T00:00:00.000Z', to: '1970-01-01T00:00:10.000Z' },
+          }),
           { id: 'b', name: 'B', meta: { type: 'number' } },
         ],
         rows: [

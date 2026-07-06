@@ -74,30 +74,35 @@ export const dateHistogramTextBasedFn =
     getTimezone: (context: ExecutionContext) => string | Promise<string>
   ): DateHistogramTextBasedExpressionFunction['fn'] =>
   async (input, _args, context) => {
-    const contextTimeZone = await getTimezone(context);
-    const datatableUtilities = await getDatatableUtilities(context);
+    const column = input.columns.find((c) => {
+      return c.meta?.esType === 'date' && c.meta?.esMeta?.bucket !== undefined;
+    });
 
-    const bucketColumn = (() => {
-      for (const column of input.columns) {
-        const meta = datatableUtilities.getDateHistogramMeta(column, { timeZone: contextTimeZone });
-        if (meta?.timeRange && meta.interval) {
-          return { column, meta };
-        }
-      }
-      return undefined;
-    })();
-
-    if (!bucketColumn) {
+    if (!column) {
       return input;
     }
 
-    const { column, meta } = bucketColumn;
+    const contextTimeZone = await getTimezone(context);
+    const datatableUtilities = await getDatatableUtilities(context);
+
+    const meta = datatableUtilities.getDateHistogramMeta(column, {
+      timeZone: contextTimeZone,
+    });
+
+    if (!meta) {
+      return input;
+    }
+
     const { interval: intervalString, timeRange } = meta;
 
     if (!intervalString || !timeRange) {
       return input;
     }
 
+    // ES|QL date histograms drop partial buckets by default: undefined is treated as true, an explicit false is respected.
+    const dropPartials = meta.dropPartials ?? true;
+
+    // Bucket boundaries and interval should must the timezone ES|QL BUCKET so calendar intervals are aligned.
     const timeZone = meta.timeZone || contextTimeZone;
     const parsedInterval = splitStringInterval(intervalString);
     const interval = parseInterval(intervalString);
@@ -116,7 +121,7 @@ export const dateHistogramTextBasedFn =
       parsedInterval.value,
       parsedInterval.unit,
       timeZone,
-      Boolean(meta.dropPartials)
+      dropPartials
     );
 
     const columns = computedDomain
@@ -133,7 +138,7 @@ export const dateHistogramTextBasedFn =
         )
       : input.columns;
 
-    if (!meta.dropPartials || input.rows.length === 1) {
+    if (!dropPartials || input.rows.length === 0) {
       return { ...input, columns };
     }
 
