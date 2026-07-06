@@ -65,26 +65,41 @@ const changePointScanRoute = createServerRoute({
       bucketInterval: z.string().max(64),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
+  handler: async ({ params, request, getScopedClients, server, getSpaceId, telemetry }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const spaceId = await getSpaceId(request);
     const [kiClient, sigEventsContext] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
       scopedClients.getSignificantEventsAlertingContext(),
     ]);
     const queryLinks = await kiClient.getRuleBackedQueryLinks();
-    const aggregations = await sigEventsContext.alertsReader.runChangePointScan(
+
+    const startedAt = Date.now();
+    const { took, ...aggregations } = await sigEventsContext.alertsReader.runChangePointScan(
       scopedClusterClient.asCurrentUser,
       {
         lookback: params.body.lookback,
         bucketInterval: params.body.bucketInterval,
-        spaceId: await getSpaceId(request),
+        spaceId,
       },
       queryLinks
     );
+    const durationMs = Date.now() - startedAt;
+
+    telemetry.trackSignificantEventsDetectionScan({
+      took_ms: took ?? 0,
+      duration_ms: durationMs,
+      rules_scanned: aggregations.by_rule.buckets.length,
+      alerting_engine: sigEventsContext.alertingV2Active ? 'v2' : 'v1',
+      alerts_source_index: sigEventsContext.alertsReader.index,
+      lookback: params.body.lookback,
+      bucket_interval: params.body.bucketInterval,
+      space_id: spaceId,
+    });
 
     return { alertIndex: sigEventsContext.alertsReader.index, aggregations };
   },
@@ -204,7 +219,7 @@ const ruleAlertWindowsRoute = createServerRoute({
   },
 });
 
-export const internalSigEventsDetectionsWorkflowRoutes = {
+export const internalSignificantEventsDetectionsWorkflowRoutes = {
   ...countAlertsRoute,
   ...changePointScanRoute,
   ...ruleChangePointRoute,

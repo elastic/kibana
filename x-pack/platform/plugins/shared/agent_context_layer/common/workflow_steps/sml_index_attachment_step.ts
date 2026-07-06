@@ -87,12 +87,11 @@ const ChunkSchema = z
   .strict();
 
 /**
- * Step input.
- *
- * Permissions are stamped by the indexer from the type's `getPermissions` hook —
- * callers cannot supply them. Unregistered types get empty permissions (publicly
- * readable within the space). `upsert` is a full replace; `delete` wipes all
- * chunks for the origin regardless of how they were produced.
+ * Step input. `permissions` (upsert only) applies when `attachmentType` has
+ * no `getPermissions` hook; supplying it for a hook-backed type is rejected,
+ * since the hook is always authoritative. `upsert` is a full replace;
+ * `delete` wipes all chunks for the origin regardless of how they were
+ * produced.
  */
 const AttachmentTypeSchema = z
   .string()
@@ -106,6 +105,37 @@ const AttachmentTypeSchema = z
     "Context Engine entry type id (chunk namespace). When the value matches a registered SmlTypeDefinition the chunk inherits that type's permissions; when it does not, the indexer stamps empty permissions and the chunk is readable to anyone in the caller's space."
   );
 
+/**
+ * Mirrors the server-side `SmlPermissions` shape — `indices`/`privileges`
+ * are arrays of `{ name }` objects (not bare strings) so a later revision
+ * can add sibling keys without a breaking change.
+ */
+export const SmlPermissionsInputSchema = z
+  .object({
+    elasticsearch: z
+      .object({
+        indices: z
+          .array(z.object({ name: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH) }).strict())
+          .max(100)
+          .optional(),
+      })
+      .strict()
+      .optional(),
+    kibana: z
+      .object({
+        privileges: z
+          .array(z.object({ name: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH) }).strict())
+          .max(100)
+          .optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict()
+  .describe(
+    'Permissions to stamp on the written chunks when the attachmentType has no getPermissions hook. Rejected if the type derives permissions via getPermissions.'
+  );
+
 export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
   z.object({
     originId: z
@@ -116,6 +146,7 @@ export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
     attachmentType: AttachmentTypeSchema,
     action: z.literal('upsert'),
     chunks: z.array(ChunkSchema).min(1).max(100),
+    permissions: SmlPermissionsInputSchema.optional(),
   }),
   z.object({
     originId: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH),
@@ -185,6 +216,26 @@ export const contextEngineAddEntryStepCommonDefinition: CommonStepDefinition<
         content: "Revenue grew 12% across all regions ..."
         description: "Auto-generated quarterly summary"
 \`\`\``,
+
+      `## Add an entry gated to specific Elasticsearch indices
+\`\`\`yaml
+- name: add_scoped_entry
+  type: ${ContextEngineAddEntryStepTypeId}
+  with:
+    originId: "sink-index-ki"
+    attachmentType: "corpus_entry"
+    action: "upsert"
+    chunks:
+      - type: "corpus_entry"
+        title: "Sales data summary"
+        content: "Key figures extracted from the sales index ..."
+    permissions:
+      elasticsearch:
+        indices:
+          - name: "sales-data"
+          - name: "sales-data-archive"
+\`\`\`
+Only used when \`attachmentType\` has no registered \`getPermissions\` hook (e.g. \`corpus_entry\`). Supplying \`permissions\` for a type that already derives permissions via a hook (e.g. \`dashboard\`, \`connector\`) fails the step — the hook is always authoritative for those types.`,
 
       `## Remove a previously added entry
 \`\`\`yaml
