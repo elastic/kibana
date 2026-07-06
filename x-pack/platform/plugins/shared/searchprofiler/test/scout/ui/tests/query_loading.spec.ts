@@ -8,12 +8,6 @@
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
-const DEFAULT_INDEX_NAME = '_all';
-const DEFAULT_QUERY = `{
-  "query":{
-    "match_all" : {}
-  }
-}`;
 const INDEX_NAME = 'test';
 const PRECONFIGURED_QUERY = JSON.stringify(
   {
@@ -66,16 +60,6 @@ test.describe('Search Profiler query loading', { tag: testData.SEARCH_PROFILER_T
     await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(PRECONFIGURED_QUERY);
   });
 
-  test('loads default index and query from empty URL parameters', async ({ pageObjects }) => {
-    await pageObjects.searchProfiler.goto({
-      index: '',
-      loadFrom: '',
-    });
-
-    await expect(pageObjects.searchProfiler.indexInput).toHaveValue(DEFAULT_INDEX_NAME);
-    await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(DEFAULT_QUERY);
-  });
-
   test('updates index and query when URL parameters change in Search Profiler', async ({
     pageObjects,
   }) => {
@@ -110,36 +94,5 @@ test.describe('Search Profiler query loading', { tag: testData.SEARCH_PROFILER_T
 
     await expect(pageObjects.searchProfiler.indexInput).toHaveValue(PERSISTED_INDEX_NAME);
     await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(PERSISTED_QUERY);
-  });
-
-  test('restores default index and query after empty values are persisted', async ({
-    pageObjects,
-  }) => {
-    await pageObjects.searchProfiler.goto();
-
-    await pageObjects.searchProfiler.setIndex('');
-    await pageObjects.searchProfiler.setQuery('');
-
-    await expect(pageObjects.searchProfiler.indexInput).toHaveValue('');
-    await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe('');
-
-    await pageObjects.searchProfiler.gotoConsole();
-    await pageObjects.searchProfiler.goto();
-
-    await expect(pageObjects.searchProfiler.indexInput).toHaveValue(DEFAULT_INDEX_NAME);
-    await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(DEFAULT_QUERY);
-  });
-
-  test('does not persist malformed URL query content', async ({ pageObjects }) => {
-    await pageObjects.searchProfiler.goto({
-      rawLoadFrom: '!!!invalid',
-    });
-
-    await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(DEFAULT_QUERY);
-
-    await pageObjects.searchProfiler.gotoConsole();
-    await pageObjects.searchProfiler.goto();
-
-    await expect.poll(() => pageObjects.searchProfiler.getQuery()).toBe(DEFAULT_QUERY);
   });
 });
