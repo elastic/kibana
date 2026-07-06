@@ -123,7 +123,7 @@ export const McpClientDetailsContent = ({
                     aria-label={labels.details.modal.copySecret}
                     onClick={copy}
                     {...getEbtProps({
-                      element: AGENT_BUILDER_UI_EBT.element.flyout,
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
                       action: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_COPY_SECRET,
                       detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
                     })}
