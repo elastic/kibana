@@ -110,10 +110,11 @@ export function ServiceFlyoutTransactionsSection({
       transactionDetailLocator?.getRedirectUrl({
         serviceName,
         transactionName: item.name,
+        environment,
         rangeFrom: start,
         rangeTo: end,
       }),
-    [transactionDetailLocator, serviceName, start, end]
+    [transactionDetailLocator, serviceName, environment, start, end]
   );
 
   const getAlertsBadgeHref = useCallback(
