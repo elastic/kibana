@@ -10,13 +10,13 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
-import { JsonTab } from './tabs/json_tab';
+import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
-import { TableTab } from './tabs/table_tab';
+import { IndicatorFieldsTable } from './components/fields_table';
 import {
+  IOC_DETAILS_JSON_TAB_TEST_ID,
   IOC_DETAILS_OVERVIEW_TAB_TEST_ID,
   IOC_DETAILS_TABLE_TAB_TEST_ID,
-  IOC_DETAILS_JSON_TAB_TEST_ID,
 } from './test_ids';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
@@ -77,7 +77,14 @@ export const getTabsDisplayed = ({
         defaultMessage="Table"
       />
     ),
-    content: <TableTab indicator={indicator} renderCellActions={renderCellActions} />,
+    content: (
+      <IndicatorFieldsTable
+        data-test-subj="tiFlyoutTable"
+        fields={Object.keys(indicator.fields)}
+        indicator={indicator}
+        renderCellActions={renderCellActions}
+      />
+    ),
   },
   {
     id: 'json',
@@ -88,6 +95,12 @@ export const getTabsDisplayed = ({
         defaultMessage="JSON"
       />
     ),
-    content: <JsonTab indicator={indicator} />,
+    content: (
+      <SharedJsonTab
+        value={indicator as unknown as Record<string, unknown>}
+        showFooterOffset={false}
+        data-test-subj="indicators-flyout"
+      />
+    ),
   },
 ];
