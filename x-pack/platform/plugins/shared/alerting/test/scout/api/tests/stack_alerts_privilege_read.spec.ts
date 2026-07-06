@@ -69,7 +69,7 @@ apiTest.describe(
 
     apiTest('can read muted alert state via _find_muted_alerts', async ({ apiClient }) => {
       const response = await apiClient.post('internal/alerting/rules/_find_muted_alerts', {
-        headers: { ...COMMON_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
+        headers: { ...COMMON_HEADERS, ...withReadPrivilegeCookieHeader },
         body: {
           filter: buildRuleFilter(state.enabledRuleId),
           page: 1,
