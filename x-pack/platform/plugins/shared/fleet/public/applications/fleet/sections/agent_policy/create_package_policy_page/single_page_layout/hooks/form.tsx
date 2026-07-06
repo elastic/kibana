@@ -418,7 +418,9 @@ export function useOnSubmit({
               'overrides',
               'supports_agentless',
               'supports_cloud_connector',
-              'additional_datastreams_permissions'
+              'additional_datastreams_permissions',
+              'global_data_tags',
+              'var_group_selections'
             )
           );
         }
