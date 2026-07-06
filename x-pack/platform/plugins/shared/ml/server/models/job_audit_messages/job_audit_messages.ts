@@ -365,11 +365,10 @@ export function jobAuditMessagesProvider(
     jobId: string,
     notificationIndices: string[]
   ): Promise<{ success: boolean; last_cleared: number }> {
-    notificationIndices.every((index) => {
-      if (!index.startsWith(ML_NOTIFICATIONS_INDEX_PREFIX)) {
+    notificationIndices.forEach((index) => {
+      if (!index.startsWith(ML_NOTIFICATIONS_INDEX_PREFIX) || index.includes(',')) {
         throw Boom.badRequest(`Invalid notification index: ${index}`);
       }
-      return true;
     });
 
     // check that the job exists and the user has permission to access it
