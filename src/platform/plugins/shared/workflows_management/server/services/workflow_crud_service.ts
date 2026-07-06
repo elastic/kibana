@@ -75,7 +75,7 @@ import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
 import { WorkflowHistoryEventNotFoundError } from '../lib/workflow_history_event_not_found_error';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
-import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
+import { applyWorkflowVersion } from '../lib/workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
 import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
@@ -114,10 +114,6 @@ export class WorkflowCrudService {
 
   constructor(private readonly deps: WorkflowCrudDeps) {}
 
-  isWorkflowVersioningEnabled(): boolean {
-    return this.deps.workflowVersioningEnabled;
-  }
-
   async logWorkflowChangesAfterWrite(params: {
     workflows: Array<{ id: string; document: WorkflowProperties }>;
     action: WorkflowChangeHistoryActionType;
@@ -127,10 +123,6 @@ export class WorkflowCrudService {
     correlationId?: string;
     restoreMetadata?: WorkflowRestoreMetadata;
   }): Promise<void> {
-    if (!this.deps.workflowVersioningEnabled) {
-      return;
-    }
-
     const changeHistoryService = this.deps.changeHistoryService;
     const scopedChangeHistory = params.request
       ? changeHistoryService.asScoped(params.request)
@@ -140,7 +132,6 @@ export class WorkflowCrudService {
       workflows: params.workflows,
       changeHistoryService,
       scopedChangeHistory,
-      workflowVersioningEnabled: this.deps.workflowVersioningEnabled,
       action: params.action,
       spaceId: params.spaceId,
       timestamp: params.timestamp,
@@ -312,8 +303,6 @@ export class WorkflowCrudService {
     spaceId: string,
     params: ReadModifyWriteWorkflowDocumentParams
   ): Promise<WorkflowProperties> {
-    const versioningEnabled = this.isWorkflowVersioningEnabled();
-
     return this.runOccWrite(id, async () => {
       const writer = this.getReadModifyWriteOccWriter(
         spaceId,
@@ -322,8 +311,7 @@ export class WorkflowCrudService {
       );
       const { document } = await writer.readModifyWrite({
         id,
-        mutate: (existing) =>
-          maybeApplyWorkflowVersion(params.mutate(existing), existing, versioningEnabled),
+        mutate: (existing) => applyWorkflowVersion(params.mutate(existing), existing),
       });
       return document;
     });
@@ -364,7 +352,6 @@ export class WorkflowCrudService {
       now: params.now,
       spaceId: params.spaceId,
       triggerDefinitions,
-      versioningEnabled: this.isWorkflowVersioningEnabled(),
     });
   }
 
@@ -515,7 +502,6 @@ export class WorkflowCrudService {
     const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
-    const versioningEnabled = this.isWorkflowVersioningEnabled();
 
     const {
       id: baseId,
@@ -529,7 +515,6 @@ export class WorkflowCrudService {
       now,
       spaceId,
       triggerDefinitions,
-      versioningEnabled,
     });
 
     let id = baseId;
@@ -600,7 +585,6 @@ export class WorkflowCrudService {
     const created: WorkflowDetailDto[] = [];
     const failed: BulkFailureEntry[] = [];
     const validWorkflows: BulkWorkflowEntry[] = [];
-    const versioningEnabled = this.isWorkflowVersioningEnabled();
 
     for (let i = 0; i < workflows.length; i++) {
       try {
@@ -616,7 +600,6 @@ export class WorkflowCrudService {
           now,
           spaceId,
           triggerDefinitions,
-          versioningEnabled,
         });
 
         validWorkflows.push({
@@ -659,11 +642,7 @@ export class WorkflowCrudService {
               const existing = await this.getWorkflowDocumentSource(entry.id, spaceId);
               return {
                 ...entry,
-                workflowData: maybeApplyWorkflowVersion(
-                  entry.workflowData,
-                  existing ?? undefined,
-                  versioningEnabled
-                ),
+                workflowData: applyWorkflowVersion(entry.workflowData, existing ?? undefined),
               };
             })
           )
@@ -913,10 +892,7 @@ export class WorkflowCrudService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<RestoreWorkflowVersionResponseDto> {
-    assertWorkflowChangeHistoryEnabled(
-      this.deps.changeHistoryService,
-      this.deps.workflowVersioningEnabled
-    );
+    assertWorkflowChangeHistoryEnabled(this.deps.changeHistoryService);
 
     const history = await this.deps.changeHistoryService.getHistory(spaceId, workflowId, {
       additionalFilters: [{ term: { 'event.id': eventId } }],
@@ -991,13 +967,11 @@ export class WorkflowCrudService {
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
-    const versioningEnabled = spaceId ? this.isWorkflowVersioningEnabled() : false;
     const result = await disableAllWorkflows({
       storage: this.deps.workflowStorage,
       taskScheduler: this.deps.getTaskScheduler(),
       logger: this.deps.logger,
       spaceId,
-      versioningEnabled,
     });
 
     if (spaceId && result.disabledWorkflows.length > 0) {
