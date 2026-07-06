@@ -55,15 +55,18 @@ CenteredMessage.displayName = 'CenteredMessage';
 export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => {
   const { euiTheme } = useEuiTheme();
 
-  // Fluid card grid: tracks are at least 260px wide and grow to fill the row, so
-  // the column count scales with the container — ~2 on narrow screens, ~3–4+ on
-  // wider ones. `auto-fill` keeps card widths consistent instead of stretching a
-  // few cards across the whole row.
+  // Fluid card grid: tracks are at least 260px wide and grow to fill the full
+  // row, but each track becomes at least one sixth of the row on wide screens so
+  // the grid never creates a seventh column.
   const gridCss = useMemo(
     () => css`
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
       gap: ${euiTheme.size.base};
+      grid-template-columns: repeat(
+        auto-fill,
+        minmax(max(min(100%, 260px), calc((100% - (${euiTheme.size.base} * 5)) / 6)), 1fr)
+      );
+      width: 100%;
     `,
     [euiTheme.size.base]
   );
