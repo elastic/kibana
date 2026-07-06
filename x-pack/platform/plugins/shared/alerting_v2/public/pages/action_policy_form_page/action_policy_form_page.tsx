@@ -178,12 +178,13 @@ const ActionPolicyFormPageContent = ({
 
       try {
         await upsert(destinations);
-        onSuccess();
       } catch {
         // The create/update mutation surfaces its own error toast; roll back the
         // workflows we created so we don't leave orphans behind.
-        await rollbackWorkflows(createdIds);
+        return await rollbackWorkflows(createdIds);
       }
+
+      onSuccess();
     },
     [createInlineWorkflows, rollbackWorkflows, toasts, onSuccess]
   );
