@@ -17,7 +17,6 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures/common';
 import {
-  createDataViewFromSearchBar,
   changeVisShape,
   getCurrentVisTitle,
   addFieldColumn,
@@ -29,7 +28,10 @@ import {
   ESQL_TAB,
   PERSISTED_TAB,
 } from '../../../fixtures/tabs/discover_session_test_data';
-import { createMultiTabDiscoverSession } from '../../../fixtures/tabs/discover_session_setup';
+import {
+  buildMultiTabSession,
+  createMultiTabDiscoverSession,
+} from '../../../fixtures/tabs/discover_session_setup';
 
 const SAVED_SESSION_NAME = 'Saved multi-tab Discover session';
 const LOADED_SESSION_NAME = 'Loaded multi-tab Discover session';
@@ -58,44 +60,9 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
   spaceTest('should support saving a multi-tab Discover session', async ({ pageObjects, page }) => {
     const { discover, datePicker, queryBar, unifiedTabs } = pageObjects;
 
-    await spaceTest.step('configure persisted data view tab', async () => {
-      await datePicker.setAbsoluteRange(PERSISTED_TAB.time);
-      await queryBar.setQuery(PERSISTED_TAB.query);
-      await discover.submitQuery();
-      await discover.waitUntilTabIsLoaded();
-      await addFieldColumn(page, PERSISTED_TAB.column1);
-      await unifiedTabs.editTabLabel(0, PERSISTED_TAB.label);
-      await discover.setChartInterval(PERSISTED_TAB.chartIntervalTitle);
-      expect(await discover.getHitCountInt()).toBe(PERSISTED_TAB.hitCount);
-    });
-
-    await spaceTest.step('configure ad hoc data view tab', async () => {
-      await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
-      await datePicker.setAbsoluteRange(AD_HOC_TAB.time);
-      await createDataViewFromSearchBar(page, discover, {
-        name: 'logs',
-        adHoc: true,
-        hasTimeField: true,
-      });
-      await discover.waitUntilTabIsLoaded();
-      await queryBar.setQuery(AD_HOC_TAB.query);
-      await discover.submitQuery();
-      await discover.waitUntilTabIsLoaded();
-      await addFieldColumn(page, AD_HOC_TAB.column1);
-      await unifiedTabs.editTabLabel(1, AD_HOC_TAB.label);
-      expect(await discover.getHitCountInt()).toBe(AD_HOC_TAB.hitCount);
-    });
-
-    await spaceTest.step('configure ES|QL tab', async () => {
-      await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
-      await datePicker.setAbsoluteRange(ESQL_TAB.time);
-      await discover.writeAndSubmitEsqlQuery(ESQL_TAB.query);
-      await changeVisShape(page, ESQL_TAB.visShape);
-      await unifiedTabs.editTabLabel(2, ESQL_TAB.label);
-      expect(await discover.getHitCountInt()).toBe(ESQL_TAB.hitCount);
-    });
+    // Build the three-tab session (persisted, ad-hoc, ES|QL); the resulting
+    // state is validated after the reload below and then saved.
+    await buildMultiTabSession(pageObjects, page);
 
     await spaceTest.step('refresh and validate tab labels', async () => {
       await unifiedTabs.selectTab(0);
