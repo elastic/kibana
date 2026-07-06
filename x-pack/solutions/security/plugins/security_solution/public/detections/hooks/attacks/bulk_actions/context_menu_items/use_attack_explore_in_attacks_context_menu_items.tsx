@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { buildExploreInAttacksUrl } from '../../../../../flyout_v2/attack/main/utils/get_explore_in_attacks_url';
 
 export const EXPLORE_IN_ATTACKS_TEST_ID = 'exploreInAttacksContextMenuItem';
@@ -42,7 +42,7 @@ export const useAttackExploreInAttacksContextMenuItems = ({
   const {
     services: { application },
   } = useKibana();
-  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const enableNewFlyout = useIsNewFlyoutEnabled();
 
   const url = useMemo(() => {
     const attacksBaseURL = application.getUrlForApp('securitySolutionUI', { path: 'attacks' });
@@ -51,9 +51,9 @@ export const useAttackExploreInAttacksContextMenuItems = ({
       indexName: attack.index ?? '',
       timestamp: attack.timestamp,
       attacksBaseURL,
-      useFlyoutV2: newFlyoutSystemEnabled,
+      useFlyoutV2: enableNewFlyout,
     });
-  }, [application, attack.id, attack.index, attack.timestamp, newFlyoutSystemEnabled]);
+  }, [application, attack.id, attack.index, attack.timestamp, enableNewFlyout]);
 
   const onClick = useCallback(() => {
     closePopover?.();
