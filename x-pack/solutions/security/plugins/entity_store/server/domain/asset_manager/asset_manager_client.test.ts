@@ -414,7 +414,7 @@ describe('AssetManagerClient', () => {
       );
     });
 
-    it('re-install with params overwrites existing config with parsed params', async () => {
+    it('re-install with params merges them onto the existing config, not a full replace', async () => {
       mockGlobalStateClient.find.mockResolvedValue({
         historySnapshot: {},
         logsExtraction: existingLogsExtraction,
@@ -425,13 +425,16 @@ describe('AssetManagerClient', () => {
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
         expect.objectContaining({
           logsExtraction: expect.objectContaining({
+            // the explicitly supplied field is applied...
             delay: '2m',
-            frequency: '1m',
-            lookbackPeriod: '3h',
-            fieldHistoryLength: 10,
-            additionalIndexPatterns: [],
-            docsLimit: 10000,
-            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+            // ...while every field the caller didn't mention keeps its existing value,
+            // instead of falling back to LogExtractionConfig's defaults
+            frequency: existingLogsExtraction.frequency,
+            lookbackPeriod: existingLogsExtraction.lookbackPeriod,
+            fieldHistoryLength: existingLogsExtraction.fieldHistoryLength,
+            additionalIndexPatterns: existingLogsExtraction.additionalIndexPatterns,
+            docsLimit: existingLogsExtraction.docsLimit,
+            maxLogsPerPage: existingLogsExtraction.maxLogsPerPage,
           }),
         })
       );

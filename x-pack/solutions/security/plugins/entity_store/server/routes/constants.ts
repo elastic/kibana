@@ -7,7 +7,7 @@
 
 import type { AuthzEnabled } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
-import { HistorySnapshotState, LogExtractionConfig } from '../domain/saved_objects';
+import { HistorySnapshotState } from '../domain/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
@@ -16,23 +16,6 @@ export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
 export const RESOLUTION_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution', 'securitySolution-entity-analytics'],
 };
-
-export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;
-// timeout: intentionally excluded from LogExtractionBodyParams
-// TODO: add timeout once we have a way to set it as a task override param
-export const LogExtractionInstallParams = LogExtractionConfig.pick({
-  fieldHistoryLength: true,
-  additionalIndexPatterns: true,
-  excludedIndexPatterns: true,
-  lookbackPeriod: true,
-  frequency: true,
-  delay: true,
-  docsLimit: true,
-  maxLogsPerPage: true,
-  maxTimeWindowSize: true,
-  maxLogsPerWindow: true,
-  maxLogsPerWindowCapBehavior: true,
-}).partial();
 
 export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
 
@@ -61,6 +44,17 @@ export const LogExtractionUpdateParams = z.object({
   maxLogsPerWindow: z.number().int().min(0).optional(),
   maxLogsPerWindowCapBehavior: z.enum(['defer', 'drop']).optional(),
 });
+
+// timeout: intentionally excluded from LogExtractionBodyParams
+// TODO: add timeout once we have a way to set it as a task override param
+//
+// Reuses `LogExtractionUpdateParams` rather than `LogExtractionConfig.pick(...).partial()`:
+// the latter inherits `LogExtractionConfig`'s `.default(...)` values, so an omitted field
+// would come back from validation already filled in with its default — indistinguishable
+// from a field the caller explicitly set. That silently broke merge-with-existing-config
+// and per-type cadence override detection on install (see #269261).
+export type LogExtractionInstallParams = LogExtractionUpdateParams;
+export const LogExtractionInstallParams = LogExtractionUpdateParams;
 
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;
 

@@ -206,6 +206,191 @@ apiTest.describe('Entity Store per-entity-type API tests', { tag: ENTITY_STORE_T
     }
   );
 
+  apiTest(
+    "install/{entityType} preserves an already-installed type's custom store-wide config when a different type is installed",
+    async ({ apiClient }) => {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          entityTypes: ['host'],
+          logExtraction: { maxLogsPerPage: 12345, maxTimeWindowSize: '22m' },
+        },
+      });
+
+      let status = await getStatus(apiClient, defaultHeaders);
+      let host = status.body.engines.find((e) => e.type === 'host');
+      expect(host?.maxLogsPerPage).toBe(12345);
+      expect(host?.maxTimeWindowSize).toBe('22m');
+
+      const install = await installEntityType(apiClient, defaultHeaders, 'service', {
+        logExtraction: { maxLogsPerWindow: 77777 },
+      });
+      expect(install.statusCode).toBe(201);
+
+      status = await getStatus(apiClient, defaultHeaders);
+      host = status.body.engines.find((e) => e.type === 'host');
+      const service = status.body.engines.find((e) => e.type === 'service');
+      // host's earlier custom config must survive — not reset to defaults
+      expect(host?.maxLogsPerPage).toBe(12345);
+      expect(host?.maxTimeWindowSize).toBe('22m');
+      // the new field from the second call is applied store-wide, affecting both types
+      expect(host?.maxLogsPerWindow).toBe(77777);
+      expect(service?.maxLogsPerWindow).toBe(77777);
+    }
+  );
+
+  apiTest(
+    "install/{entityType} does not touch the type's own cadence default when only a non-cadence field is set",
+    async ({ apiClient }) => {
+      const response = await installEntityType(apiClient, defaultHeaders, 'service', {
+        logExtraction: { maxLogsPerWindow: 12345 },
+      });
+      expect(response.statusCode).toBe(201);
+
+      const status = await getStatus(apiClient, defaultHeaders);
+      const service = status.body.engines.find((e) => e.type === 'service');
+      expect(service?.frequency).toBe(effectiveFrequency('service'));
+      expect(service?.maxLogsPerWindow).toBe(12345);
+    }
+  );
+
+  apiTest(
+    "install/{entityType} with an explicit but empty logExtraction object keeps the type's built-in cadence default",
+    async ({ apiClient }) => {
+      const response = await installEntityType(apiClient, defaultHeaders, 'generic', {
+        logExtraction: {},
+      });
+      expect(response.statusCode).toBe(201);
+
+      const status = await getStatus(apiClient, defaultHeaders);
+      expect(status.body.engines.find((e) => e.type === 'generic')?.frequency).toBe(
+        effectiveFrequency('generic')
+      );
+    }
+  );
+
+  apiTest(
+    'install/{entityType} keeps cadence fields as a pure per-type override and non-cadence fields as pure global state, without cross-contamination',
+    async ({ apiClient }) => {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { entityTypes: ['host'], logExtraction: { maxLogsPerPage: 24680 } },
+      });
+
+      const response = await installEntityType(apiClient, defaultHeaders, 'service', {
+        logExtraction: { frequency: '5m' },
+      });
+      expect(response.statusCode).toBe(201);
+
+      const status = await getStatus(apiClient, defaultHeaders);
+      const host = status.body.engines.find((e) => e.type === 'host');
+      const service = status.body.engines.find((e) => e.type === 'service');
+      // service's cadence field became its own per-type override, not a global change
+      expect(service?.frequency).toBe('5m');
+      expect(host?.frequency).toBe(effectiveFrequency('host'));
+      // host's earlier non-cadence custom value is untouched — the second call's
+      // omitted non-cadence fields must not be treated as a reset to defaults
+      expect(host?.maxLogsPerPage).toBe(24680);
+      // maxLogsPerPage is shared store-wide, so the newly-added service inherits it too
+      expect(service?.maxLogsPerPage).toBe(24680);
+    }
+  );
+
+  apiTest(
+    'install/{entityType} cumulatively merges non-cadence fields from separate calls instead of last-call-wins replace',
+    async ({ apiClient }) => {
+      await installEntityType(apiClient, defaultHeaders, 'host', {
+        logExtraction: { maxLogsPerPage: 11111 },
+      });
+      await installEntityType(apiClient, defaultHeaders, 'user', {
+        logExtraction: { maxTimeWindowSize: '33m' },
+      });
+
+      const status = await getStatus(apiClient, defaultHeaders);
+      const host = status.body.engines.find((e) => e.type === 'host');
+      const user = status.body.engines.find((e) => e.type === 'user');
+      // both fields persist simultaneously — neither call's omission of the other's
+      // field reset it back to default
+      expect(host?.maxLogsPerPage).toBe(11111);
+      expect(host?.maxTimeWindowSize).toBe('33m');
+      expect(user?.maxLogsPerPage).toBe(11111);
+      expect(user?.maxTimeWindowSize).toBe('33m');
+    }
+  );
+
+  apiTest(
+    'install/{entityType} with no logExtraction body at all leaves the existing store completely unaffected',
+    async ({ apiClient }) => {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          entityTypes: ['host'],
+          logExtraction: { maxLogsPerPage: 13579, frequency: '4m' },
+        },
+      });
+
+      const response = await installEntityType(apiClient, defaultHeaders, 'user');
+      expect(response.statusCode).toBe(201);
+
+      const status = await getStatus(apiClient, defaultHeaders);
+      const host = status.body.engines.find((e) => e.type === 'host');
+      expect(host?.maxLogsPerPage).toBe(13579);
+      expect(host?.frequency).toBe('4m');
+    }
+  );
+
+  apiTest(
+    'install/{entityType} rejects an invalid entity type in the path',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(
+        ENTITY_STORE_ROUTES.public.INSTALL_BY_TYPE('not-a-type'),
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {},
+        }
+      );
+      expect(response.statusCode).toBe(400);
+    }
+  );
+
+  apiTest(
+    'install is a one-time operation per type: install/{entityType} and POST /install both no-op identically for an already-installed type',
+    async ({ apiClient }) => {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { entityTypes: ['service'], logExtraction: { maxLogsPerPage: 24680 } },
+      });
+
+      const richBody = {
+        logExtraction: { frequency: '7m', maxLogsPerPage: 99999, fieldHistoryLength: 40 },
+      };
+
+      const byType = await installEntityType(apiClient, defaultHeaders, 'service', richBody);
+      expect(byType.statusCode).toBe(200);
+      expect(byType.body).toStrictEqual({ ok: true });
+
+      const storeWide = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { entityTypes: ['service'], ...richBody },
+      });
+      expect(storeWide.statusCode).toBe(200);
+      expect(storeWide.body).toStrictEqual({ ok: true });
+
+      // neither no-op call touched any state, regardless of what was in the body
+      const status = await getStatus(apiClient, defaultHeaders);
+      const service = status.body.engines.find((e) => e.type === 'service');
+      expect(service?.frequency).toBe(effectiveFrequency('service'));
+      expect(service?.maxLogsPerPage).toBe(24680);
+      expect(service?.fieldHistoryLength).toBe(10); // LogExtractionConfig's default
+    }
+  );
+
   apiTest('install/{entityType} is idempotent when already installed', async ({ apiClient }) => {
     await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,

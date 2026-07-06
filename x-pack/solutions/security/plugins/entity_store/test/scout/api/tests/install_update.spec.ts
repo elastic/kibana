@@ -94,6 +94,220 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     });
   });
 
+  apiTest(
+    'install with an explicit but empty logExtraction object still applies Service/Generic built-in cadence defaults',
+    async ({ apiClient }) => {
+      const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: {} },
+      });
+      expect(install.statusCode).toBe(201);
+
+      const status = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
+        headers: defaultHeaders,
+        responseType: 'json',
+      });
+      const engines = (status.body as { engines: Array<{ type: string; frequency: string }> })
+        .engines;
+      // an empty {} must not be treated as if every field was explicitly supplied —
+      // Service/Generic keep their own reduced-cadence defaults, not the global 1m
+      expect(engines.find((e) => e.type === 'service')?.frequency).toBe('10m');
+      expect(engines.find((e) => e.type === 'generic')?.frequency).toBe('30m');
+      expect(engines.find((e) => e.type === 'host')?.frequency).toBe('1m');
+      expect(engines.find((e) => e.type === 'user')?.frequency).toBe('1m');
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
+  apiTest('install rejects an invalid duration format for frequency', async ({ apiClient }) => {
+    const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { logExtraction: { frequency: '10s' } },
+    });
+    expect(install.statusCode).toBe(400);
+  });
+
+  apiTest(
+    'install rejects delay greater than or equal to lookbackPeriod',
+    async ({ apiClient }) => {
+      const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { delay: '3h', lookbackPeriod: '3h' } },
+      });
+      expect(install.statusCode).toBe(400);
+    }
+  );
+
+  apiTest('install rejects an invalid index pattern', async ({ apiClient }) => {
+    const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { logExtraction: { additionalIndexPatterns: ['has spaces'] } },
+    });
+    expect(install.statusCode).toBe(400);
+  });
+
+  apiTest('install rejects a numeric field below its minimum', async ({ apiClient }) => {
+    const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { logExtraction: { maxLogsPerPage: 0 } },
+    });
+    expect(install.statusCode).toBe(400);
+  });
+
+  apiTest(
+    'install preserves already-set custom config when a new type is added with an unrelated field',
+    async ({ apiClient }) => {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          entityTypes: ['host'],
+          logExtraction: { maxLogsPerPage: 12345, maxTimeWindowSize: '22m' },
+        },
+      });
+
+      // adding 'user' with only maxLogsPerWindow set must not reset host's earlier,
+      // unrelated custom fields back to their defaults
+      const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          entityTypes: ['host', 'user'],
+          logExtraction: { maxLogsPerWindow: 77777 },
+        },
+      });
+      expect(install.statusCode).toBe(201);
+
+      const status = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
+        headers: defaultHeaders,
+        responseType: 'json',
+      });
+      const engines = (
+        status.body as {
+          engines: Array<{
+            type: string;
+            maxLogsPerPage: number;
+            maxTimeWindowSize: string;
+            maxLogsPerWindow: number;
+          }>;
+        }
+      ).engines;
+      const host = engines.find((e) => e.type === 'host');
+      const user = engines.find((e) => e.type === 'user');
+      expect(host?.maxLogsPerPage).toBe(12345);
+      expect(host?.maxTimeWindowSize).toBe('22m');
+      // the new field applies store-wide, affecting both types
+      expect(host?.maxLogsPerWindow).toBe(77777);
+      expect(user?.maxLogsPerWindow).toBe(77777);
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
+  apiTest(
+    'install applies a value equal to a field default as a genuine explicit change, not a no-op',
+    async ({ apiClient }) => {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          entityTypes: ['host'],
+          logExtraction: { maxLogsPerPage: 12345 },
+        },
+      });
+
+      // adding a new type with maxLogsPerPage explicitly set back to its literal default (50000)
+      // must apply that value for real, not be mistaken for "field not supplied"
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          entityTypes: ['host', 'user'],
+          logExtraction: { maxLogsPerPage: 50000 },
+        },
+      });
+
+      const status = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
+        headers: defaultHeaders,
+        responseType: 'json',
+      });
+      const engines = (status.body as { engines: Array<{ type: string; maxLogsPerPage: number }> })
+        .engines;
+      expect(engines.find((e) => e.type === 'host')?.maxLogsPerPage).toBe(50000);
+      expect(engines.find((e) => e.type === 'user')?.maxLogsPerPage).toBe(50000);
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
+  apiTest(
+    'install with every logExtraction field explicitly set applies a full replace matching the request',
+    async ({ apiClient }) => {
+      const fullConfig = {
+        fieldHistoryLength: 30,
+        additionalIndexPatterns: ['logs-custom-*'],
+        excludedIndexPatterns: ['logs-exclude-*'],
+        lookbackPeriod: '6h',
+        frequency: '2m',
+        delay: '2m',
+        docsLimit: 500,
+        maxLogsPerPage: 1000,
+        maxTimeWindowSize: '10m',
+        maxLogsPerWindow: 2000,
+        maxLogsPerWindowCapBehavior: 'defer',
+      };
+      const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: fullConfig },
+      });
+      expect(install.statusCode).toBe(201);
+
+      const status = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
+        headers: defaultHeaders,
+        responseType: 'json',
+      });
+      const engines = (status.body as { engines: Array<{ type: string } & typeof fullConfig> })
+        .engines;
+      // fully explicit cadence fields are a request for the whole store: they win over
+      // Service/Generic's built-in defaults too, so every type matches exactly
+      for (const engine of engines) {
+        expect(engine.frequency).toBe(fullConfig.frequency);
+        expect(engine.delay).toBe(fullConfig.delay);
+        expect(engine.lookbackPeriod).toBe(fullConfig.lookbackPeriod);
+        expect(engine.fieldHistoryLength).toBe(fullConfig.fieldHistoryLength);
+        expect(engine.maxLogsPerPage).toBe(fullConfig.maxLogsPerPage);
+        expect(engine.maxTimeWindowSize).toBe(fullConfig.maxTimeWindowSize);
+        expect(engine.maxLogsPerWindow).toBe(fullConfig.maxLogsPerWindow);
+        expect(engine.maxLogsPerWindowCapBehavior).toBe(fullConfig.maxLogsPerWindowCapBehavior);
+      }
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
   apiTest('Update on uninstalled store should return 404', async ({ apiClient }) => {
     await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,

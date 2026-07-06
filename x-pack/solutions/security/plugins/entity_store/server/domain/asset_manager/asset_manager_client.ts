@@ -738,7 +738,10 @@ function resolveLogsExtractionOnInstall(
 ): LogExtractionConfig {
   const hasParams = params !== undefined && Object.keys(params).length > 0;
   if (hasParams) {
-    return LogExtractionConfig.parse(params);
+    // Merge onto `existing`, not a full replace — otherwise fields the caller didn't
+    // mention would fall back to LogExtractionConfig's defaults instead of keeping
+    // whatever was already persisted.
+    return LogExtractionConfig.parse({ ...existing, ...params });
   }
   if (existing !== undefined) {
     return existing;
