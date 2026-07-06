@@ -54,6 +54,11 @@ describe('deserializeDataStream', () => {
     index_mode: 'standard' as const,
     failure_store: {
       enabled: true,
+      lifecycle: {
+        enabled: true,
+        data_retention: '7d',
+        retention_determined_by: 'data_stream_configuration',
+      },
       indices: [],
       rollover_on_write: false,
     } as any,
@@ -64,7 +69,12 @@ describe('deserializeDataStream', () => {
 
   describe('basic deserialization', () => {
     it('should deserialize data stream with all fields', () => {
-      const result = deserializeDataStream(mockDataStreamFromEs, false);
+      const result = deserializeDataStream(mockDataStreamFromEs, false, undefined, {
+        failureStore: {
+          enabled: true,
+          lifecycle: { enabled: true, data_retention: '7d' },
+        },
+      });
 
       expect(result).toEqual({
         name: 'test-data-stream',
@@ -106,11 +116,20 @@ describe('deserializeDataStream', () => {
           globalMaxRetention: '30d',
         },
         nextGenerationManagedBy: 'Data stream lifecycle',
+        matchesFailureStoreClusterPattern: false,
+        failureStoreSettings: {
+          enabled: true,
+          lifecycle: {
+            enabled: true,
+            dataRetention: '7d',
+          },
+        },
         failureStoreEnabled: true,
         failureStoreRetention: {
-          customRetentionPeriod: undefined,
+          customRetentionPeriod: '7d',
           defaultRetentionPeriod: undefined,
           retentionDisabled: false,
+          retentionDeterminedBy: 'data_stream_configuration',
         },
         indexMode: 'standard',
       });
@@ -166,6 +185,14 @@ describe('deserializeDataStream', () => {
         },
         indexMode: 'standard',
       });
+    });
+
+    it('populates lifecycleSettings only from explicit options', () => {
+      const result = deserializeDataStream(mockDataStreamFromEs, false, undefined, {
+        lifecycleSettings: { preferIlm: false },
+      });
+
+      expect(result.lifecycleSettings).toEqual({ preferIlm: false });
     });
   });
 
@@ -236,6 +263,21 @@ describe('deserializeDataStream', () => {
       const result = deserializeDataStream(mockDataStreamFromEs, false, failureStoreSettings);
 
       expect(result.failureStoreEnabled).toBe(true);
+    });
+
+    it('treats enabled="true" as match-all', () => {
+      const failureStoreSettings = {
+        enabled: 'true',
+      };
+
+      const result = deserializeDataStream(
+        { ...mockDataStreamFromEs, name: 'any-data-stream', failure_store: undefined },
+        false,
+        failureStoreSettings
+      );
+
+      expect(result.failureStoreEnabled).toBe(true);
+      expect(result.matchesFailureStoreClusterPattern).toBe(true);
     });
 
     it('should disable failure store when matches pattern but explicitly disabled', () => {
