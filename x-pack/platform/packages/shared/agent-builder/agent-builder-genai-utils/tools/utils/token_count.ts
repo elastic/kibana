@@ -34,6 +34,7 @@ export const truncateBytes = (data: string, maxBytes: number): string => {
   }
   let end = maxBytes;
   // Back off past any UTF-8 continuation byte (0b10xxxxxx) so we never cut mid-character.
+  // eslint-disable-next-line no-bitwise
   while (end > 0 && (buf[end] & 0xc0) === 0x80) {
     end--;
   }
