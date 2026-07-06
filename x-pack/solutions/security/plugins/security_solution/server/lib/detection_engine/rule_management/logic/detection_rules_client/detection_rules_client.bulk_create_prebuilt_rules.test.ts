@@ -8,7 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import {
+  SecurityRuleChangeTrackingAction,
+  type SecurityRuleChangeTracking,
+} from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { getCreateRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
@@ -51,6 +54,9 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
   const mlAuthz = (buildMlAuthz as jest.Mock)();
   const rulesAuthz = getMockRulesAuthz();
   const actionsClient: jest.Mocked<ActionsClient> = {} as unknown as jest.Mocked<ActionsClient>;
+  const changeTracking: SecurityRuleChangeTracking = {
+    action: SecurityRuleChangeTrackingAction.ruleInstall,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -74,7 +80,10 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
   });
 
   it('returns empty results for empty input', async () => {
-    const result = await detectionRulesClient.bulkCreatePrebuiltRules({ rules: [] });
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [],
+      changeTracking,
+    });
 
     expect(result.results).toEqual([]);
     expect(result.errors).toEqual([]);
@@ -90,7 +99,13 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       total: inputRules.length,
     }));
 
-    await detectionRulesClient.bulkCreatePrebuiltRules({ rules: [params] });
+    await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [params],
+      changeTracking: {
+        action: SecurityRuleChangeTrackingAction.ruleInstall,
+        metadata: { bulkCount: 1 },
+      },
+    });
 
     expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -146,6 +161,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
 
     await detectionRulesClient.bulkCreatePrebuiltRules({
       rules: [enabledRule, disabledRule, defaultRule],
+      changeTracking,
     });
 
     const bulkCall = rulesClient.bulkCreateRules.mock.calls[0][0];
@@ -163,7 +179,10 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       total: inputRules.length,
     }));
 
-    const result = await detectionRulesClient.bulkCreatePrebuiltRules({ rules: [params] });
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [params],
+      changeTracking,
+    });
 
     const passedId = getOptionsId(rulesClient.bulkCreateRules.mock.calls[0][0].rules[0]);
     expect(result.results).toEqual([
@@ -206,6 +225,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
 
     const result = await detectionRulesClient.bulkCreatePrebuiltRules({
       rules: [queryRule, mlRule],
+      changeTracking,
     });
 
     expect(result.errors).toHaveLength(1);
@@ -233,7 +253,10 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       total: 1,
     });
 
-    const result = await detectionRulesClient.bulkCreatePrebuiltRules({ rules: [params] });
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [params],
+      changeTracking,
+    });
 
     expect(result.results).toEqual([]);
     expect(result.errors).toHaveLength(1);
@@ -258,7 +281,10 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       total: 1,
     });
 
-    const result = await detectionRulesClient.bulkCreatePrebuiltRules({ rules: [params] });
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [params],
+      changeTracking,
+    });
 
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0].error.message).toBe('Validation failed');
@@ -279,7 +305,10 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       throw new Error('ML not allowed');
     });
 
-    const result = await detectionRulesClient.bulkCreatePrebuiltRules({ rules: [mlRule] });
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [mlRule],
+      changeTracking,
+    });
 
     expect(result.errors).toHaveLength(1);
     expect(result.results).toEqual([]);
@@ -296,7 +325,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
 
     rulesClient.bulkCreateRules.mockRejectedValue(new Error('bulk authorization failure'));
 
-    const result = await detectionRulesClient.bulkCreatePrebuiltRules({ rules });
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({ rules, changeTracking });
 
     expect(result.results).toEqual([]);
     expect(result.errors).toHaveLength(2);
@@ -321,6 +350,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
 
     const result = await detectionRulesClient.bulkCreatePrebuiltRules({
       rules: [validRule, badRule],
+      changeTracking,
     });
 
     expect(result.errors).toHaveLength(1);
@@ -354,6 +384,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
 
     const result = await detectionRulesClient.bulkCreatePrebuiltRules({
       rules: [goodRule, badRule],
+      changeTracking,
     });
 
     expect(result.errors).toHaveLength(1);
@@ -383,7 +414,10 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       total: 2,
     });
 
-    const result = await detectionRulesClient.bulkCreatePrebuiltRules({ rules: [rule1, rule2] });
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [rule1, rule2],
+      changeTracking,
+    });
 
     expect(result.results).toHaveLength(1);
     expect(result.results[0]).toEqual({
@@ -420,31 +454,6 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       expect.objectContaining({
         changeTracking: expect.objectContaining({
           metadata: { bulkCount: 1000 },
-        }),
-      })
-    );
-  });
-
-  it('falls back to rules.length when bulkCount is not provided', async () => {
-    (throwAuthzError as jest.Mock).mockImplementation(() => {});
-
-    const rules = [
-      { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' },
-      { ...getCreateRulesSchemaMock(), version: 2, rule_id: 'rule-2' },
-    ];
-
-    rulesClient.bulkCreateRules.mockResolvedValue({
-      successfulIds: [],
-      errors: [],
-      total: 2,
-    });
-
-    await detectionRulesClient.bulkCreatePrebuiltRules({ rules });
-
-    expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
-      expect.objectContaining({
-        changeTracking: expect.objectContaining({
-          metadata: { bulkCount: 2 },
         }),
       })
     );

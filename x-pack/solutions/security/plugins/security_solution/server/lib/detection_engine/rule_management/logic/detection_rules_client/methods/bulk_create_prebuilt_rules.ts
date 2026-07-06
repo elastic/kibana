@@ -10,7 +10,6 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { BulkCreateRulesParams, RulesClient } from '@kbn/alerting-plugin/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../../../common';
-import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { PREBUILT_RULES_ALERTING_BULK_CREATE_BATCH_SIZE } from '../../../../prebuilt_rules/constants';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
@@ -36,7 +35,9 @@ export const bulkCreatePrebuiltRules = async ({
   mlAuthz,
   args: { rules, changeTracking },
 }: BulkCreatePrebuiltRulesOptions): Promise<BulkCreatePrebuiltRulesResult> => {
-  if (rules.length === 0) return { results: [], errors: [] };
+  if (rules.length === 0) {
+    return { results: [], errors: [] };
+  }
 
   const {
     bulkInputs,
@@ -44,7 +45,9 @@ export const bulkCreatePrebuiltRules = async ({
     errors: buildBulkInputErrors,
   } = await buildBulkInputs({ actionsClient, mlAuthz, rules });
 
-  if (bulkInputs.length === 0) return { results: [], errors: buildBulkInputErrors };
+  if (bulkInputs.length === 0) {
+    return { results: [], errors: buildBulkInputErrors };
+  }
 
   const results: BulkCreatePrebuiltRulesResult['results'] = [];
   const errors: BulkCreatePrebuiltRulesResult['errors'] = [...buildBulkInputErrors];
@@ -53,23 +56,19 @@ export const bulkCreatePrebuiltRules = async ({
     const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
       rules: bulkInputs,
       batchSize: PREBUILT_RULES_ALERTING_BULK_CREATE_BATCH_SIZE,
-      changeTracking: {
-        action: SecurityRuleChangeTrackingAction.ruleInstall,
-        ...changeTracking,
-        metadata: { bulkCount: rules.length, ...changeTracking?.metadata },
-      },
+      changeTracking,
     });
 
     // Alerting echoes back the options.id we supplied, so itemById.get() always
     // resolves. The guards below satisfy TypeScript's Map.get() return type.
-    for (const id of successfulIds) {
+    successfulIds.forEach((id) => {
       const asset = itemById.get(id);
       if (asset) {
         results.push({ id, rule_id: asset.rule_id, version: asset.version });
       }
-    }
+    });
 
-    for (const err of bulkErrors) {
+    bulkErrors.forEach((err) => {
       const item = itemById.get(err.rule.id);
       if (item) {
         errors.push({
@@ -80,15 +79,15 @@ export const bulkCreatePrebuiltRules = async ({
           ),
         });
       }
-    }
+    });
   } catch (err) {
     const wrappedError = err instanceof Error ? err : new Error(String(err));
-    for (const { options } of bulkInputs) {
+    bulkInputs.forEach(({ options }) => {
       const asset = options?.id ? itemById.get(options.id) : undefined;
       if (asset) {
         errors.push({ item: asset, error: wrappedError });
       }
-    }
+    });
   }
 
   return { results, errors };
@@ -128,14 +127,7 @@ const buildBulkInputs = async ({
     } else {
       const id = uuidv4();
       try {
-        const alertTypeId = ruleTypeMappings[rule.type as keyof typeof ruleTypeMappings];
-        const ruleWithDefaults = applyRuleDefaults({ ...rule, immutable: true });
-        const data = {
-          ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
-          alertTypeId,
-          consumer: SERVER_APP_ID,
-          enabled: rule.enabled ?? false,
-        };
+        const data = buildPrebuiltRuleAlertingPayload({ rule, actionsClient });
         itemById.set(id, rule);
         bulkInputs.push({ data, options: { id } });
       } catch (e) {
@@ -145,4 +137,21 @@ const buildBulkInputs = async ({
   }
 
   return { bulkInputs, itemById, errors };
+};
+
+const buildPrebuiltRuleAlertingPayload = ({
+  rule,
+  actionsClient,
+}: {
+  rule: PrebuiltRuleAsset;
+  actionsClient: ActionsClient;
+}): BulkCreateRulesParams<RuleParams>['rules'][number]['data'] => {
+  const ruleWithDefaults = applyRuleDefaults({ ...rule, immutable: true });
+
+  return {
+    ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
+    alertTypeId: ruleTypeMappings[rule.type as keyof typeof ruleTypeMappings],
+    consumer: SERVER_APP_ID,
+    enabled: rule.enabled ?? false,
+  };
 };

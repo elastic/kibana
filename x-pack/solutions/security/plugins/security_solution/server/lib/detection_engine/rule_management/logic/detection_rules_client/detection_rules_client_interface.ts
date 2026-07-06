@@ -126,7 +126,7 @@ export interface RestoreRuleFromHistoryArgs {
 
 export interface BulkCreatePrebuiltRulesArgs {
   rules: PrebuiltRuleAsset[];
-  changeTracking?: SecurityRuleChangeTracking<never>;
+  changeTracking: SecurityRuleChangeTracking;
 }
 
 export interface BulkCreatePrebuiltRulesResult {

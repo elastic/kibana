@@ -15,6 +15,10 @@ import type {
   PerformRuleInstallationRequestBody,
   InstalledRuleBasicInfo,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import {
+  SecurityRuleChangeTrackingAction,
+  type SecurityRuleChangeTracking,
+} from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
@@ -112,12 +116,20 @@ export const performRuleInstallationHandler = async (
     }
 
     const installBatches = chunk(ruleInstallQueue, PREBUILT_RULES_BULK_CREATE_BATCH_SIZE);
+
     for (const batch of installBatches) {
       const { assets: ruleAssets } = await ruleAssetsClient.fetchAssetsByVersion(batch);
+
+      const changeTracking: SecurityRuleChangeTracking = {
+        action: SecurityRuleChangeTrackingAction.ruleInstall,
+        metadata: { bulkCount: ruleInstallQueue.length },
+      };
+
       const { results, errors } = await detectionRulesClient.bulkCreatePrebuiltRules({
         rules: ruleAssets,
-        changeTracking: { metadata: { bulkCount: ruleInstallQueue.length } },
+        changeTracking,
       });
+
       installedRules.push(...results.map((rule) => pick(rule, ['id', 'rule_id', 'version'])));
       ruleErrors.push(
         ...errors.map(({ item, error }) => ({ item: pick(item, ['rule_id', 'name']), error }))
