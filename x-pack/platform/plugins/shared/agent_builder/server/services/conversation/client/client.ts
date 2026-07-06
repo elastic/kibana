@@ -199,8 +199,15 @@ class ConversationClientImpl implements ConversationClient {
   async delete(conversationId: string): Promise<boolean> {
     await this.getDocumentWithAccess({ conversationId, access: 'owner' });
 
-    const { result } = await this.storage.getClient().delete({ id: conversationId });
-    return result === 'deleted';
+    try {
+      const { result } = await this.storage.getClient().delete({ id: conversationId });
+      return result === 'deleted';
+    } catch (err) {
+      if (err?.statusCode === 404) {
+        return true;
+      }
+      throw err;
+    }
   }
 
   private async _get(conversationId: string): Promise<Document | undefined> {
