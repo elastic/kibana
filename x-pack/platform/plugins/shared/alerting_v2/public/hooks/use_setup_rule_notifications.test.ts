@@ -388,6 +388,8 @@ describe('useSetupRuleNotifications', () => {
       });
       expect(mockCreateActionPolicy).not.toHaveBeenCalled();
       expect(mockUpdateWorkflowFn).not.toHaveBeenCalled();
+      expect(mockAddSuccess).toHaveBeenCalledWith(expect.stringContaining('removed'));
+      expect(mockAddSuccess).not.toHaveBeenCalledWith(expect.stringContaining('saved'));
     });
 
     it('re-points the policy when a hydrated existing-workflow selection changed', async () => {
@@ -434,6 +436,29 @@ describe('useSetupRuleNotifications', () => {
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(removeQueriesSpy).toHaveBeenCalledWith({
+        queryKey: ['ruleNotificationDrafts', 'rule-1'],
+      });
+      expect(removeQueriesSpy).toHaveBeenCalledWith({
+        queryKey: ['matchedActionPolicies', 'rule-1'],
+      });
+    });
+
+    it('drops the cache even when the reconcile fails, since a partial failure still mutates policies', async () => {
+      mockCreateWorkflowFn.mockResolvedValue({ id: 'wf-new' });
+      mockCreateActionPolicy.mockRejectedValue(new Error('boom'));
+      mockDeleteWorkflowFn.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useSetupRuleNotifications(), {
+        wrapper: createWrapper(),
+      });
+
+      result.current.mutate({ rule: mockRule, actions: [emailAction] });
+
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
       });
 
       expect(removeQueriesSpy).toHaveBeenCalledWith({

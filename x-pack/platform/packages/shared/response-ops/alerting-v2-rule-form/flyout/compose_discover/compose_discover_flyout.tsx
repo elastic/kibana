@@ -328,6 +328,10 @@ export function ComposeDiscoverFlyout({
   const yamlBaselineRef = useRef<string | null>(null);
   const yamlTextRef = useRef('');
   const hasBeenEditedRef = useRef(false);
+  const notificationsDirtyRef = useRef(false);
+  if (methods.formState.dirtyFields.notifications) {
+    notificationsDirtyRef.current = true;
+  }
 
   /*
    * recoveryType lives in uiState (not RHF), so toggling it doesn't mark
@@ -765,7 +769,7 @@ export function ComposeDiscoverFlyout({
         ruleId,
         composeFormToUpdateRequest(values, builderType),
         values.notifications,
-        Boolean(methods.formState.dirtyFields.notifications)
+        notificationsDirtyRef.current || Boolean(methods.formState.dirtyFields.notifications)
       );
     }
   });

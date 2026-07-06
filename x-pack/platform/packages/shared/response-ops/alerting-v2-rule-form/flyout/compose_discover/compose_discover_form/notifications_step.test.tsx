@@ -64,6 +64,32 @@ const mockInlinePolicyResponses = (
 };
 
 describe('NotificationsStep', () => {
+  it('gates the form on the drafts fetch in edit mode, hiding the picker while loading', async () => {
+    const http = httpServiceMock.createStartContract();
+    // Keep the match request pending so the drafts stay in-flight.
+    let resolveFetch: (value: unknown) => void = () => {};
+    http.fetch.mockReturnValue(
+      new Promise((resolve) => {
+        resolveFetch = resolve;
+      }) as any
+    );
+
+    render(<NotificationsStep http={http} ruleId="rule-1" />, { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('notificationsStepLoading')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('actionForm')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('actionTemplateCard-inline-email')).not.toBeInTheDocument();
+
+    resolveFetch({ items: [] });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('actionTemplateCard-inline-email')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('notificationsStepLoading')).not.toBeInTheDocument();
+  });
+
   it('populates existing simple actions as editable rows in edit mode', async () => {
     const http = httpServiceMock.createStartContract();
     mockInlinePolicyResponses(http);

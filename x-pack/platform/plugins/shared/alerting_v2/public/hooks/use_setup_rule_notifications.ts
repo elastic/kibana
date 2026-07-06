@@ -15,6 +15,7 @@ import {
   buildRuleScopedMatcher,
   getRuleNotificationDraftsQueryKey,
   type ActionDraft,
+  type ActionDraftOrigin,
   type RuleScopedSimpleActionPolicy,
 } from '@kbn/alerting-v2-rule-form';
 import { ActionPoliciesApi } from '../services/action_policies_api';
@@ -120,7 +121,9 @@ export const useSetupRuleNotifications = () => {
       };
 
       const toSetup = actions.filter((action) => !action.origin);
-      const toUpdate = actions.filter((action) => Boolean(action.origin));
+      const toUpdate = actions.filter(
+        (action): action is ActionDraft & { origin: ActionDraftOrigin } => Boolean(action.origin)
+      );
 
       let toDelete: RuleScopedSimpleActionPolicy[] = [];
       if (onUpdate) {
@@ -129,7 +132,7 @@ export const useSetupRuleNotifications = () => {
           items.map((item) => item.actionPolicy),
           rule.id
         );
-        const keptPolicyIds = new Set(toUpdate.map((action) => action.origin!.policyId));
+        const keptPolicyIds = new Set(toUpdate.map((action) => action.origin.policyId));
         toDelete = existing.filter((policy) => !keptPolicyIds.has(policy.policyId));
       }
 
@@ -140,7 +143,7 @@ export const useSetupRuleNotifications = () => {
       ];
 
       if (tasks.length === 0) {
-        return { changed: 0 };
+        return { created: 0, updated: 0, deleted: 0 };
       }
 
       const results = await Promise.allSettled(tasks.map((task) => task()));
@@ -161,19 +164,30 @@ export const useSetupRuleNotifications = () => {
         );
       }
 
-      return { changed: results.length };
+      return { created: toSetup.length, updated: toUpdate.length, deleted: toDelete.length };
     },
-    onSuccess: (result, { rule }) => {
-      // Drop the cache so reopening the edit flyout re-fetches the
-      // latest workflows instead of populating from the stale pre-edit snapshot.
-      queryClient.removeQueries({ queryKey: getRuleNotificationDraftsQueryKey(rule.id) });
+    onSuccess: (result) => {
+      if (!result) return;
+      const { created, updated, deleted } = result;
+      const savedCount = created + updated;
+      if (savedCount === 0 && deleted === 0) return;
 
-      if (!result || result.changed === 0) return;
+      if (savedCount === 0) {
+        toasts.addSuccess(
+          i18n.translate('xpack.alertingV2.useSetupRuleNotifications.removedMessage', {
+            defaultMessage:
+              '{count} notification action {count, plural, one {policy} other {policies}} removed',
+            values: { count: deleted },
+          })
+        );
+        return;
+      }
+
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.useSetupRuleNotifications.successMessage', {
           defaultMessage:
             '{count} action {count, plural, one {policy} other {policies}} saved successfully',
-          values: { count: result.changed },
+          values: { count: savedCount },
         })
       );
     },
@@ -184,6 +198,11 @@ export const useSetupRuleNotifications = () => {
             'Notifications could not be fully configured. The rule was saved but some action policies may not have been updated.',
         }),
       });
+    },
+    onSettled: (_result, _err, { rule }) => {
+      // Drop the caches unconditionally after any reconcile attempt
+      queryClient.removeQueries({ queryKey: getRuleNotificationDraftsQueryKey(rule.id) });
+      queryClient.removeQueries({ queryKey: ['matchedActionPolicies', rule.id] });
     },
   });
 };

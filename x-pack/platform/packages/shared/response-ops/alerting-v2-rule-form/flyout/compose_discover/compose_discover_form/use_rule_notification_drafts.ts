@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useQuery } from '@kbn/react-query';
-import type { MatchActionPoliciesForRuleResponse } from '@kbn/alerting-v2-schemas';
 import {
   mapWorkflowToActionDraft,
   selectRuleSimpleActionPolicies,
   type ActionDraft,
+  type RuleScopedSimpleActionPolicy,
   type WorkflowForActionDraft,
 } from '../../../actions_form';
+import { useMatchedActionPolicies } from './use_matched_action_policies';
 
 const WORKFLOWS_API_VERSION = '2023-10-31';
 
@@ -35,6 +37,9 @@ export interface UseRuleNotificationDraftsResult {
   drafts: ActionDraft[];
 }
 
+const scopedPoliciesSignature = (policies: RuleScopedSimpleActionPolicy[]): string =>
+  policies.map((p) => `${p.policyId}:${p.policyVersion ?? ''}:${p.workflowId}`).join('|');
+
 /**
  * Loads the rule's existing simple-action policies (and their workflows) and
  * reverse-maps them into {@link ActionDraft}s used to populate the form with the
@@ -49,24 +54,30 @@ export const useRuleNotificationDrafts = ({
 }: UseRuleNotificationDraftsParams): UseRuleNotificationDraftsResult => {
   const enabled = Boolean(ruleId) && Boolean(http);
 
-  const { isLoading, data } = useQuery({
-    queryKey: getRuleNotificationDraftsQueryKey(ruleId),
-    enabled,
+  const { isLoading: isMatchLoading, items } = useMatchedActionPolicies({ http, ruleId });
+  const scopedPolicies = useMemo(
+    () =>
+      ruleId
+        ? selectRuleSimpleActionPolicies(
+            items.map((item) => item.actionPolicy),
+            ruleId
+          )
+        : [],
+    [items, ruleId]
+  );
+
+  const draftsEnabled = Boolean(http) && scopedPolicies.length > 0;
+  const draftsQueryKey = [
+    ...getRuleNotificationDraftsQueryKey(ruleId),
+    scopedPoliciesSignature(scopedPolicies),
+  ];
+  const { isLoading: isDraftsLoading, data } = useQuery({
+    queryKey: draftsQueryKey,
+    enabled: draftsEnabled,
     refetchOnWindowFocus: false,
     queryFn: async (): Promise<ActionDraft[]> => {
-      if (!ruleId || !http) return [];
-
-      const { items } = await http.fetch<MatchActionPoliciesForRuleResponse>(
-        '/api/alerting/v2/action_policies/_match_for_rule',
-        { method: 'POST', body: JSON.stringify({ rule: { id: ruleId } }) }
-      );
-
-      const scopedPolicies = selectRuleSimpleActionPolicies(
-        items.map((item) => item.actionPolicy),
-        ruleId
-      );
-
-      const drafts = await Promise.all(
+      if (!http) return [];
+      return Promise.all(
         scopedPolicies.map(async ({ policyId, policyVersion, workflowId }) => {
           const workflow = await http.get<WorkflowForActionDraft>(
             `/api/workflows/workflow/${encodeURIComponent(workflowId)}`,
@@ -75,13 +86,11 @@ export const useRuleNotificationDrafts = ({
           return mapWorkflowToActionDraft(workflow, { policyId, policyVersion, workflowId });
         })
       );
-
-      return drafts;
     },
   });
 
   return {
-    isLoading: enabled && isLoading,
+    isLoading: (enabled && isMatchLoading) || (draftsEnabled && isDraftsLoading),
     drafts: data ?? [],
   };
 };
