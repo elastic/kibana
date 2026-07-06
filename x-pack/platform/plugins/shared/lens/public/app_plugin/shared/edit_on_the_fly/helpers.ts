@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { esql } from '@elastic/esql';
 import {
   getIndexPatternFromESQLQuery,
   getESQLAdHocDataview,
@@ -31,7 +30,7 @@ import type {
   DatasourceMap,
   VisualizationMap,
 } from '@kbn/lens-common';
-import { appendTimeBucketToEsqlQuery, queryHasStatsCommand } from '@kbn/lens-common';
+import { buildTrendlineQueryWithMetricFieldMap } from '@kbn/lens-common';
 
 import { suggestionsApi } from '../../../lens_suggestions_api';
 import { readUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
@@ -283,26 +282,45 @@ const preserveTrendlineLayer = (
   const newVis = getMetricVis(attrs);
   const newMainLayer = newVis.layerId ? newDsState.layers[newVis.layerId] : undefined;
 
-  const accessorPairs = [
+  const metricAccessorPairs = [
     { from: newVis.metricAccessor, to: prevVis.trendlineMetricAccessor },
     { from: newVis.secondaryMetricAccessor, to: prevVis.trendlineSecondaryMetricAccessor },
+  ];
+
+  const accessorPairs = [
+    ...metricAccessorPairs,
     { from: newVis.breakdownByAccessor, to: prevVis.trendlineBreakdownByAccessor },
   ];
 
-  const sourceQueryHasStats = queryHasStatsCommand(query.esql);
-  const metricFields =
-    !sourceQueryHasStats && newMainLayer
-      ? accessorPairs
-          .map(({ from }) => newMainLayer.columns.find((c) => c.columnId === from))
-          .filter((c): c is TextBasedLayerColumn => Boolean(c))
-          .map((c) => c.fieldName)
-      : undefined;
+  const metricFields = newMainLayer
+    ? metricAccessorPairs
+        .map(({ from }) => newMainLayer.columns.find((c) => c.columnId === from))
+        .filter((c): c is TextBasedLayerColumn => Boolean(c))
+        .map((c) => c.fieldName)
+    : [];
+  const groupByFields = newMainLayer
+    ? [newVis.breakdownByAccessor]
+        .map((from) => newMainLayer.columns.find((c) => c.columnId === from))
+        .filter((c): c is TextBasedLayerColumn => Boolean(c))
+        .map((c) => c.fieldName)
+    : [];
 
-  const trendlineQuery = prevTrendlineLayer.timeField
-    ? {
-        esql: appendTimeBucketToEsqlQuery(query.esql, prevTrendlineLayer.timeField, metricFields),
-      }
-    : prevTrendlineLayer.query;
+  let trendlineQuery = prevTrendlineLayer.query;
+  let metricFieldMap = new Map<string, string>();
+  if (prevTrendlineLayer.timeField) {
+    try {
+      const trendlineQueryResult = buildTrendlineQueryWithMetricFieldMap(
+        query.esql,
+        prevTrendlineLayer.timeField,
+        metricFields,
+        groupByFields
+      );
+      trendlineQuery = { esql: trendlineQueryResult.query };
+      metricFieldMap = trendlineQueryResult.metricFieldMap;
+    } catch {
+      // If the query can't be parsed, keep the existing trendline query unchanged.
+    }
+  }
 
   let updatedColumns = prevTrendlineLayer.columns;
   if (newMainLayer) {
@@ -313,8 +331,8 @@ const preserveTrendlineLayer = (
       const newCol: TextBasedLayerColumn = {
         ...sourceCol,
         columnId: to,
-        ...(!sourceQueryHasStats && {
-          fieldName: `AVG(${esql.col(sourceCol.fieldName)})`,
+        ...(metricFieldMap.has(sourceCol.fieldName) && {
+          fieldName: metricFieldMap.get(sourceCol.fieldName),
         }),
       };
       const exists = updatedColumns.some((c) => c.columnId === to);

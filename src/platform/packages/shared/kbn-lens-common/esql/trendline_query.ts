@@ -100,7 +100,8 @@ const hasBucketForField = (byOption: ESQLCommandOption, timeField: string): bool
 export const appendTimeBucketToEsqlQuery = (
   esqlQuery: string,
   timeField: string,
-  metricFields?: string[]
+  metricFields?: string[],
+  groupByFields: string[] = []
 ): string => {
   const bucketExpr = buildTrendlineBucketExpression(timeField);
   const bucketNode = parseBucketNode(bucketExpr);
@@ -132,9 +133,46 @@ export const appendTimeBucketToEsqlQuery = (
       metricFields && metricFields.length > 0
         ? metricFields.map((f) => `AVG(${esql.col(f)})`).join(', ')
         : 'COUNT(*)';
-    const { root: helperAst } = Parser.parse(`FROM _x | STATS ${statsExprs} BY ${bucketExpr}`);
+    const groupByExprs = [...groupByFields.map((f) => esql.col(f)), bucketExpr].join(', ');
+    const { root: helperAst } = Parser.parse(`FROM _x | STATS ${statsExprs} BY ${groupByExprs}`);
     root.commands.push(findStatsCommand(helperAst.commands));
   }
 
   return BasicPrettyPrinter.print(root);
+};
+
+export interface TrendlineQueryWithMetricFieldMap {
+  query: string;
+  metricFieldMap: Map<string, string>;
+}
+
+/**
+ * Builds a trendline ES|QL query and returns the generated metric result column names.
+ *
+ * When the source query has no STATS command, the trendline query adds AVG(<field>)
+ * aggregations for the provided metric fields. The returned map keeps Lens column
+ * fieldNames aligned with those generated ES|QL result columns.
+ */
+export const buildTrendlineQueryWithMetricFieldMap = (
+  esqlQuery: string,
+  timeField: string,
+  metricFields: string[] = [],
+  groupByFields: string[] = []
+): TrendlineQueryWithMetricFieldMap => {
+  const sourceQueryHasStats = queryHasStatsCommand(esqlQuery);
+  const metricFieldMap = new Map<string, string>();
+
+  if (!sourceQueryHasStats) {
+    metricFields.forEach((field) => metricFieldMap.set(field, `AVG(${esql.col(field)})`));
+  }
+
+  return {
+    query: appendTimeBucketToEsqlQuery(
+      esqlQuery,
+      timeField,
+      !sourceQueryHasStats ? metricFields : undefined,
+      !sourceQueryHasStats ? groupByFields : undefined
+    ),
+    metricFieldMap,
+  };
 };

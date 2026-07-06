@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildTrendlineBucketExpression, appendTimeBucketToEsqlQuery } from './trendline_query';
+import {
+  buildTrendlineBucketExpression,
+  appendTimeBucketToEsqlQuery,
+  buildTrendlineQueryWithMetricFieldMap,
+} from './trendline_query';
 
 describe('buildTrendlineBucketExpression', () => {
   it('builds a BUCKET expression', () => {
@@ -127,5 +131,53 @@ describe('appendTimeBucketToEsqlQuery', () => {
   it('falls back to COUNT(*) when metricFields is empty and query has no STATS', () => {
     const result = appendTimeBucketToEsqlQuery('FROM index', 'timestamp', []);
     expect(result).toBe('FROM index | STATS COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+  });
+
+  it('adds group by fields before BUCKET when query has no STATS', () => {
+    const result = appendTimeBucketToEsqlQuery('FROM index', 'timestamp', ['bytes'], ['host']);
+    expect(result).toBe(
+      'FROM index | STATS AVG(bytes) BY host, BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+  });
+});
+
+describe('buildTrendlineQueryWithMetricFieldMap', () => {
+  it('returns generated query and metric result field names for a query without STATS', () => {
+    const result = buildTrendlineQueryWithMetricFieldMap('FROM index | KEEP bytes', 'timestamp', [
+      'bytes',
+    ]);
+
+    expect(result.query).toBe(
+      'FROM index | KEEP bytes | STATS AVG(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+    expect(result.metricFieldMap.get('bytes')).toBe('AVG(bytes)');
+  });
+
+  it('keeps breakdown fields in BY instead of aggregating them for a query without STATS', () => {
+    const result = buildTrendlineQueryWithMetricFieldMap(
+      'FROM index',
+      '@timestamp',
+      ['bytes'],
+      ['host']
+    );
+
+    expect(result.query).toBe(
+      'FROM index | STATS AVG(bytes) BY host, BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+    );
+    expect(result.metricFieldMap.get('bytes')).toBe('AVG(bytes)');
+    expect(result.metricFieldMap.has('host')).toBe(false);
+  });
+
+  it('returns an empty metric field map when the query already has STATS', () => {
+    const result = buildTrendlineQueryWithMetricFieldMap(
+      'FROM index | STATS avg_bytes = AVG(bytes)',
+      'timestamp',
+      ['bytes']
+    );
+
+    expect(result.query).toBe(
+      'FROM index | STATS avg_bytes = AVG(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+    expect(result.metricFieldMap.size).toBe(0);
   });
 });

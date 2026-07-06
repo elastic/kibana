@@ -15,6 +15,7 @@ import type {
   Datasource,
   FramePublicAPI,
 } from '@kbn/lens-common';
+import { LENS_METRIC_GROUP_ID } from '@kbn/lens-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
@@ -412,6 +413,96 @@ describe('Textbased Data Source', () => {
         indexPatterns,
       };
       expect(TextBasedDatasource.getDropProps(props)).toBeUndefined();
+    });
+  });
+
+  describe('#syncColumns', () => {
+    it('keeps breakdown fields in BY when creating a trendline query from ES|QL without STATS', () => {
+      // The outcome of this is a bit of a useless config, but it's a real world
+      // edge case you can end up with like this:
+      // - If you start with just `FROM kibana_sample_data_logs` the panel will
+      //   be a table and some fields as metrics, among them `@timestamp`.
+      // - If you then switch from table to metric, you'll end up with
+      //   metric `bytes` and `@timestamp` as the breakdown field.
+      // - In earlier iterations of the trendline feature, then enabling the
+      //   trendline would crash the panel because the query and generated
+      //   columns were not in sync.
+      //
+      // This test ensures that the trendline query is generated correctly and
+      // that the breakdown field is preserved in the BY clause.
+
+      const state = {
+        layers: {
+          main: {
+            columns: [
+              {
+                columnId: 'metric-accessor',
+                fieldName: 'bytes',
+                meta: { type: 'number' },
+              },
+              {
+                columnId: 'breakdown-accessor',
+                fieldName: '@timestamp',
+                meta: { type: 'date' },
+              },
+            ],
+            query: { esql: 'FROM kibana_sample_data_logs' },
+            index: 'logs',
+          },
+          trendline: {
+            columns: [],
+            query: { esql: 'FROM kibana_sample_data_logs' },
+            index: 'logs',
+            timeField: '@timestamp',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const newState = TextBasedDatasource.syncColumns({
+        state,
+        links: [
+          {
+            from: {
+              layerId: 'main',
+              columnId: 'metric-accessor',
+              groupId: LENS_METRIC_GROUP_ID.METRIC,
+            },
+            to: {
+              layerId: 'trendline',
+              columnId: 'trendline-metric-accessor',
+              groupId: LENS_METRIC_GROUP_ID.TREND_METRIC,
+            },
+          },
+          {
+            from: {
+              layerId: 'main',
+              columnId: 'breakdown-accessor',
+              groupId: LENS_METRIC_GROUP_ID.BREAKDOWN_BY,
+            },
+            to: {
+              layerId: 'trendline',
+              columnId: 'trendline-breakdown-accessor',
+              groupId: LENS_METRIC_GROUP_ID.TREND_BREAKDOWN_BY,
+            },
+          },
+        ],
+        getDimensionGroups: jest.fn(),
+        indexPatterns: {},
+      });
+
+      expect(newState.layers.trendline.query?.esql).toBe(
+        'FROM kibana_sample_data_logs | STATS AVG(bytes) BY @timestamp, BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+      );
+      expect(
+        newState.layers.trendline.columns.find(
+          (column) => column.columnId === 'trendline-metric-accessor'
+        )?.fieldName
+      ).toBe('AVG(bytes)');
+      expect(
+        newState.layers.trendline.columns.find(
+          (column) => column.columnId === 'trendline-breakdown-accessor'
+        )?.fieldName
+      ).toBe('@timestamp');
     });
   });
 
