@@ -13,6 +13,8 @@ export interface GenerateEsqlAction {
   query?: string;
   /** Result columns of the executed query, used to inform spec authoring/validation. */
   columns?: EsqlEsqlColumnInfo[];
+  /** Sample result rows (keyed by column name) used to headless-validate the spec. */
+  rows?: Array<Record<string, unknown>>;
   error?: string;
 }
 
@@ -33,6 +35,8 @@ export interface ValidateSpecAction {
   spec?: string;
   attempt: number;
   error?: string;
+  /** Non-fatal warnings from the headless compile/render, kept for observability. */
+  warnings?: string[];
 }
 
 export type VegaAction = GenerateEsqlAction | AuthorSpecAction | ValidateSpecAction;
