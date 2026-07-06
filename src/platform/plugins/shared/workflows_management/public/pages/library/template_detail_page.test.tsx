@@ -73,7 +73,9 @@ describe('LibraryTemplateDetailPage', () => {
     });
 
     act(() => {
-      mockOnLoaded?.({ metadata: { name: 'First template' } } as TemplateBody);
+      mockOnLoaded?.({
+        metadata: { slug: 'first-template', name: 'First template' },
+      } as TemplateBody);
     });
 
     await waitFor(() => {

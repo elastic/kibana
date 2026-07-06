@@ -144,6 +144,10 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   }, []);
 
   const closeGraphPreviewTarget = useCallback(() => setSelectedGraphStepId(undefined), []);
+  const openGraphTargetInYaml = useCallback(() => {
+    setPreviewView('yaml');
+    closeGraphPreviewTarget();
+  }, [closeGraphPreviewTarget]);
   const handleFlyoutKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -374,6 +378,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                     canExecuteWorkflow={false}
                     isYamlValid={true}
                     onClose={closeGraphPreviewTarget}
+                    onOpenInYaml={openGraphTargetInYaml}
                     renderStepIcon={renderStepIcon}
                   />
                 </div>

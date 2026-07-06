@@ -48,7 +48,11 @@ jest.mock('../../components', () => {
           <button type="button" data-test-subj="workflowVisualEditorFlyoutMore" />
         ) : null}
         {onOpenInYaml ? (
-          <button type="button" data-test-subj="workflowVisualEditorFlyoutOpenInYaml" />
+          <button
+            type="button"
+            data-test-subj="workflowVisualEditorFlyoutOpenInYaml"
+            onClick={onOpenInYaml}
+          />
         ) : null}
       </div>
     ),
@@ -204,7 +208,9 @@ describe('TemplateDetail', () => {
     );
     expect(screen.queryByTestId('workflowVisualEditorFlyoutRunStep')).toBeNull();
     expect(screen.queryByTestId('workflowVisualEditorFlyoutMore')).toBeNull();
-    expect(screen.queryByTestId('workflowVisualEditorFlyoutOpenInYaml')).toBeNull();
+    fireEvent.click(screen.getByTestId('workflowVisualEditorFlyoutOpenInYaml'));
+
+    expect(screen.getByTestId('workflowLibraryTemplateDetail-preview')).toBeInTheDocument();
   });
 
   it('should render a loading spinner while loading', () => {

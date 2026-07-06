@@ -35,6 +35,11 @@ const backToLibraryLabel = i18n.translate('workflowsManagement.libraryTemplatePa
 
 type LibraryTemplateDetailPageProps = RouteComponentProps<{ slug: string }>;
 
+interface TemplateBreadcrumb {
+  readonly slug: string;
+  readonly name: string;
+}
+
 /**
  * Workflow Template Library template detail page (`/app/workflows/library/:slug`).
  * Fills the available height like the workflow editor so the read-only preview
@@ -66,17 +71,20 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
     [application, goToLibrary]
   );
 
-  const [breadcrumbs, setBreadcrumbs] = useState<ChromeBreadcrumb[]>(() => [libraryBreadcrumb]);
+  const [templateBreadcrumb, setTemplateBreadcrumb] = useState<TemplateBreadcrumb | undefined>();
   const handleTemplateLoaded = useCallback(
     (template: TemplateBody) => {
-      setBreadcrumbs([libraryBreadcrumb, { text: template.metadata.name }]);
+      setTemplateBreadcrumb({ slug: template.metadata.slug, name: template.metadata.name });
     },
-    [setBreadcrumbs, libraryBreadcrumb]
+    [setTemplateBreadcrumb]
   );
 
-  useEffect(() => {
-    setBreadcrumbs([libraryBreadcrumb]);
-  }, [slug, libraryBreadcrumb]);
+  const breadcrumbs = useMemo<ChromeBreadcrumb[]>(() => {
+    if (templateBreadcrumb?.slug === slug) {
+      return [libraryBreadcrumb, { text: templateBreadcrumb.name }];
+    }
+    return [libraryBreadcrumb];
+  }, [libraryBreadcrumb, slug, templateBreadcrumb]);
 
   // Set the workflows breadcrumbs on every change
   useEffect(() => {
