@@ -295,7 +295,7 @@ const transactionByNameRoute = createApmServerRoute({
   handler: async (resources): Promise<TransactionByNameResponse> => {
     const {
       params: {
-        query: { start, end, transactionName, serviceName },
+        query: { start, end, transactionName, serviceName, environment },
       },
     } = resources;
 
@@ -307,6 +307,7 @@ const transactionByNameRoute = createApmServerRoute({
         start,
         end,
         serviceName,
+        environment,
       }),
     };
   },

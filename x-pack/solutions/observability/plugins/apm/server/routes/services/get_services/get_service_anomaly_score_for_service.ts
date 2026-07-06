@@ -39,5 +39,9 @@ export async function getServiceAnomalyScoreForService({
     return {};
   }
 
-  return { anomalyScore: row.anomalyScore };
+  return {
+    anomalyScore: row.anomalyScore,
+    detectorType: row.detectorType,
+    anomalyEnvironment: row.anomalyEnvironment,
+  };
 }
