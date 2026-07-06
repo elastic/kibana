@@ -95,6 +95,10 @@ steps:
   # path is prefixed with the execution's space to read the invoking space's settings.
   - name: fetch_runtime_config
     type: kibana.request
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
     with:
       method: GET
       path: "/s/{{ workflow.spaceId }}/internal/security_solution/alert_analysis_workflow/runtime_config"
