@@ -11,8 +11,8 @@ import { RESOLUTION_RULE_KINDS, RESOLUTION_RULE_IDS } from '../../../../common';
 export const EntityResolutionRuleTypeName = 'entity-resolution-rule';
 
 export const EntityResolutionRuleAttributes = z.object({
-  id: z.enum([RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH, RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE]),
-  kind: z.enum([RESOLUTION_RULE_KINDS.SAME_FIELD, RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE]),
+  id: z.nativeEnum(RESOLUTION_RULE_IDS),
+  kind: z.nativeEnum(RESOLUTION_RULE_KINDS),
   managed: z.boolean(),
   enabled: z.boolean(),
 });
