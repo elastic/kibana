@@ -369,6 +369,41 @@ describe('DataStreamDetailPanel', () => {
       });
     });
 
+    it('hides "Edit data lifecycle" when the user lacks the manage privilege', async () => {
+      const dataStream = createMockDataStream({
+        failureStoreEnabled: true,
+        privileges: {
+          delete_index: true,
+          manage_data_stream_lifecycle: true,
+          read_failure_store: true,
+          manage: false,
+        },
+      });
+
+      mockUseLoadDataStream.mockReturnValue({
+        data: dataStream,
+        isLoading: false,
+        error: null,
+        resendRequest: jest.fn(),
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
+
+      const { getByTestId, queryByTestId } = renderWithI18n(
+        <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('manageDataStreamButton')).toBeInTheDocument();
+      });
+
+      await userEvent.click(getByTestId('manageDataStreamButton'));
+
+      await waitFor(() => {
+        expect(getByTestId('deleteDataStreamButton')).toBeInTheDocument();
+      });
+      expect(queryByTestId('editDataLifecycleButton')).not.toBeInTheDocument();
+    });
+
     it('does not render actions button when user has no actions', async () => {
       const dataStream = createMockDataStream({
         failureStoreEnabled: true,
