@@ -66,6 +66,30 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('resolution_target_id > "user:a"');
       expect(query).toContain('resolution_target_id <= "user:z"');
     });
+
+    it('scopes query to targetEntityIds when they are provided', () => {
+      const query = getResolutionCompositeQuery(
+        '.entity_analytics.risk_score.lookup-default',
+        1000,
+        undefined,
+        ['user:target-1', 'user:target-2']
+      );
+
+      expect(query.query).toEqual({
+        terms: { resolution_target_id: ['user:target-1', 'user:target-2'] },
+      });
+    });
+
+    it('falls back to exists query on resolution_target_id when targetEntityIds is undefined', () => {
+      const query = getResolutionCompositeQuery(
+        '.entity_analytics.risk_score.lookup-default',
+        1000
+      );
+
+      expect(query.query).toEqual({
+        exists: { field: 'resolution_target_id' },
+      });
+    });
   });
 
   describe('buildRiskScoreBucket', () => {

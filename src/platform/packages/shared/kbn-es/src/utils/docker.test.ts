@@ -51,8 +51,15 @@ import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
 import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
 
+/**
+ * This is set to 'true' on CI, and it causes some docker behaviours to differ.
+ * There's a specific test that verifies the cached image is used when set to true.
+ */
+process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
+
 jest.mock('execa');
 const execa = jest.requireMock('execa');
+execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
 jest.mock('./read_string_secrets', () => ({
   readStringSecrets: jest.fn().mockResolvedValue({}),
@@ -297,7 +304,7 @@ describe('resolvePort()', () => {
 
 describe('verifyDockerInstalled()', () => {
   test('should call the correct Docker command and log the version', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'Docker Version 123' }));
+    execa.mockImplementation(() => Promise.resolve({ stdout: 'Docker Version 123' }));
 
     await verifyDockerInstalled(log);
 
@@ -321,7 +328,7 @@ describe('verifyDockerInstalled()', () => {
   });
 
   test('should reject when Docker is not installed', async () => {
-    execa.mockImplementationOnce(() => Promise.reject({ message: 'Hello World' }));
+    execa.mockImplementation(() => Promise.reject({ message: 'Hello World' }));
 
     await expect(verifyDockerInstalled(log)).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Docker not found locally. Install it from: https://www.docker.com
@@ -333,7 +340,7 @@ describe('verifyDockerInstalled()', () => {
 
 describe('maybeCreateDockerNetwork()', () => {
   test('should call the correct Docker command and create the network if needed', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+    execa.mockImplementation(() => Promise.resolve({ exitCode: 0 }));
 
     await maybeCreateDockerNetwork(log);
 
@@ -359,7 +366,7 @@ describe('maybeCreateDockerNetwork()', () => {
   });
 
   test('should use an existing network', async () => {
-    execa.mockImplementationOnce(() =>
+    execa.mockImplementation(() =>
       Promise.reject({ message: 'network with name elastic already exists' })
     );
 
@@ -374,7 +381,7 @@ describe('maybeCreateDockerNetwork()', () => {
   });
 
   test('should reject for any other Docker error', async () => {
-    execa.mockImplementationOnce(() => Promise.reject({ message: 'some error' }));
+    execa.mockImplementation(() => Promise.reject({ message: 'some error' }));
 
     await expect(maybeCreateDockerNetwork(log)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"some error"`
@@ -384,12 +391,42 @@ describe('maybeCreateDockerNetwork()', () => {
 
 describe('maybePullDockerImage()', () => {
   test('should pull the passed image', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+    execa.mockImplementation(() => Promise.resolve({ exitCode: 0 }));
 
     await maybePullDockerImage(log, DOCKER_IMG);
 
     expect(execa.mock.calls[0][0]).toEqual('docker');
     expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+  });
+
+  describe('with KBN_ES_SNAPSHOT_USE_CACHED=true', () => {
+    beforeEach(() => {
+      process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'true';
+    });
+
+    afterEach(() => {
+      process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
+    });
+
+    test('skips pull when the image is available locally', async () => {
+      execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'local-image-id' }));
+
+      await maybePullDockerImage(log, DOCKER_IMG);
+
+      expect(execa.mock.calls).toHaveLength(1);
+      expect(execa.mock.calls[0][1]).toEqual(['images', '-q', DOCKER_IMG]);
+    });
+
+    test('pulls when the image is not available locally', async () => {
+      execa
+        .mockImplementationOnce(() => Promise.resolve({ stdout: '' }))
+        .mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+
+      await maybePullDockerImage(log, DOCKER_IMG);
+
+      expect(execa.mock.calls[0][1]).toEqual(['images', '-q', DOCKER_IMG]);
+      expect(execa.mock.calls[1][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+    });
   });
 });
 
@@ -397,7 +434,7 @@ describe('detectRunningNodes()', () => {
   const nodes = ['es01', 'es02', 'es03'];
 
   test('should not error if no nodes detected', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ stdout: '' }));
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await detectRunningNodes(log, {});
 
@@ -406,7 +443,7 @@ describe('detectRunningNodes()', () => {
   });
 
   test('should kill nodes if detected and kill passed', async () => {
-    execa.mockImplementationOnce(() =>
+    execa.mockImplementation(() =>
       Promise.resolve({
         stdout: nodes.join('\n'),
       })
@@ -419,7 +456,7 @@ describe('detectRunningNodes()', () => {
   });
 
   test('should error if nodes detected and kill not passed', async () => {
-    execa.mockImplementationOnce(() =>
+    execa.mockImplementation(() =>
       Promise.resolve({
         stdout: nodes.join('\n'),
       })
@@ -929,7 +966,7 @@ describe('runServerlessEsNode()', () => {
   };
 
   test('should call the correct Docker command', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'containerId1234' }));
+    execa.mockImplementation(() => Promise.resolve({ stdout: 'containerId1234' }));
 
     await runServerlessEsNode(log, node);
 

@@ -37,7 +37,7 @@ import type {
   PackagePolicy,
   PostPackagePolicyPostCreateCallback,
   PostPackagePolicyDeleteCallback,
-  UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
   AssetsMap,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
@@ -4355,6 +4355,108 @@ describe('Package policy service', () => {
         ).rejects.toThrowError(/Input tcp in test is not allowed for deployment mode 'agentless'/);
       });
     });
+
+    describe('bumpRevision option', () => {
+      beforeEach(() => {
+        mockAgentPolicyService.bumpRevision.mockReset();
+        jest.mocked(licenseService.hasAtLeast).mockReturnValue(true);
+      });
+
+      const generateAttributes = (overrides: Record<string, unknown> = {}) => ({
+        name: 'test-package-policy',
+        description: '',
+        namespace: 'default',
+        enabled: true,
+        revision: 1,
+        policy_ids: ['test-agent-policy-1', 'test-agent-policy-2'],
+        package: {
+          name: 'test',
+          title: 'Test',
+          version: '0.9.0',
+        },
+        inputs: [],
+        ...overrides,
+      });
+
+      const generateSO = (overrides: Record<string, unknown> = {}) => ({
+        id: 'existing-package-policy',
+        type: 'ingest-package-policies',
+        references: [],
+        version: '1.0.0',
+        attributes: generateAttributes(overrides),
+      });
+
+      const policyIds = ['test-agent-policy-1', 'test-agent-policy-2'];
+
+      const setupSOClientMocks = (
+        savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>
+      ) => {
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [generateSO({ policy_ids: policyIds })],
+        });
+        savedObjectsClient.get.mockResolvedValue(generateSO({ policy_ids: policyIds }));
+        savedObjectsClient.update.mockResolvedValue(generateSO({ policy_ids: policyIds }));
+      };
+
+      const callUpdate = async (
+        savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>,
+        elasticsearchClient: ElasticsearchClientMock,
+        options?: { bumpRevision?: boolean }
+      ) => {
+        await packagePolicyService.update(
+          savedObjectsClient,
+          elasticsearchClient,
+          generateSO().id,
+          generateAttributes({ policy_ids: policyIds }),
+          options
+        );
+      };
+
+      it('bumps associated agent policy revisions by default', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+
+        await callUpdate(savedObjectsClient, elasticsearchClient);
+
+        expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledTimes(policyIds.length);
+      });
+
+      it('bumps associated agent policy revisions when bumpRevision is true', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+
+        await callUpdate(savedObjectsClient, elasticsearchClient, { bumpRevision: true });
+
+        expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledTimes(policyIds.length);
+      });
+
+      it('does not bump associated agent policy revisions when bumpRevision is false', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+
+        await callUpdate(savedObjectsClient, elasticsearchClient, { bumpRevision: false });
+
+        expect(mockAgentPolicyService.bumpRevision).not.toHaveBeenCalled();
+      });
+
+      it('still bumps the package policy own revision when bumpRevision is false', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+
+        await callUpdate(savedObjectsClient, elasticsearchClient, { bumpRevision: false });
+
+        expect(savedObjectsClient.update).toHaveBeenCalledWith(
+          expect.anything(),
+          generateSO().id,
+          expect.objectContaining({ revision: 2 }),
+          expect.anything()
+        );
+      });
+    });
   });
 
   describe('bulkUpdate', () => {
@@ -5346,7 +5448,10 @@ describe('Package policy service', () => {
           id: 'asdb1',
         }),
       ];
-      const testedPackagePolicies = packagePoliciesSO.map((so) => so.attributes);
+      const testedPackagePolicies = packagePoliciesSO.map((so) => ({
+        ...so.attributes,
+        id: so.id,
+      }));
 
       const totalPolicyIds = packagePoliciesSO.reduce(
         (count, policy) => count + policy.attributes.policy_ids.length,
@@ -5390,7 +5495,7 @@ describe('Package policy service', () => {
       const callPackagePolicyServiceBulkUpdate = async (
         savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>,
         elasticsearchClient: ElasticsearchClientMock,
-        packagePolicies: UpdatePackagePolicy[]
+        packagePolicies: UpdatePackagePolicyWithId[]
       ) => {
         await packagePolicyService.bulkUpdate(
           savedObjectsClient,
@@ -5542,7 +5647,10 @@ describe('Package policy service', () => {
           }),
         ];
 
-        const nonEndpointTestedPolicies = nonEndpointPoliciesSO.map((so) => so.attributes);
+        const nonEndpointTestedPolicies = nonEndpointPoliciesSO.map((so) => ({
+          ...so.attributes,
+          id: so.id,
+        }));
 
         setupSOClientMocks(savedObjectsClient, nonEndpointPoliciesSO);
 
@@ -5580,8 +5688,12 @@ describe('Package policy service', () => {
           }),
         ];
         const mixedTestedPolicies = [
-          { ...mixedPoliciesSO[0].attributes, policy_ids: [] }, // endpoint policy IDs removed
-          { ...mixedPoliciesSO[1].attributes, policy_ids: ['test-agent-policy-2'] }, // not-endpoint unchanged
+          { ...mixedPoliciesSO[0].attributes, id: mixedPoliciesSO[0].id, policy_ids: [] }, // endpoint policy IDs removed
+          {
+            ...mixedPoliciesSO[1].attributes,
+            id: mixedPoliciesSO[1].id,
+            policy_ids: ['test-agent-policy-2'],
+          }, // not-endpoint unchanged
         ];
 
         setupSOClientMocks(savedObjectsClient, mixedPoliciesSO);
@@ -12379,6 +12491,7 @@ describe('Package policy service', () => {
               policy_ids: ['12345'],
               enabled: true,
               inputs: [],
+              inputs_for_versions: {},
               package: { name: 'system', title: 'System', version: '2.2.0' },
               revision: 4,
               latest_revision: true,
@@ -12404,6 +12517,7 @@ describe('Package policy service', () => {
               policy_ids: ['6789'],
               enabled: true,
               inputs: [],
+              inputs_for_versions: {},
               package: { name: 'system', title: 'System', version: '2.2.0' },
               revision: 4,
               latest_revision: true,
@@ -12621,6 +12735,7 @@ describe('Package policy service', () => {
                 policy_ids: ['12345'],
                 enabled: true,
                 inputs: [],
+                inputs_for_versions: {},
                 package: { name: 'system', title: 'System', version: '2.2.0' },
                 revision: 4,
                 latest_revision: true,
@@ -12655,6 +12770,7 @@ describe('Package policy service', () => {
                 policy_ids: ['6789'],
                 enabled: true,
                 inputs: [],
+                inputs_for_versions: {},
                 package: { name: 'system', title: 'System', version: '2.2.0' },
                 revision: 4,
                 latest_revision: true,
