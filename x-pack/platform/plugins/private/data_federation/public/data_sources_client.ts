@@ -13,6 +13,7 @@ import {
   DATA_SOURCES_LIST_ROUTE_PATH,
   ES_REDACTED_SECRET_VALUE,
   SECRET_FIELDS_BY_TYPE,
+  UI_MANAGED_SECRET_FIELDS_BY_TYPE,
   getDataSourceByIdApiPath,
   type DataSource,
 } from '../common';
@@ -36,12 +37,18 @@ function omitEmptySettingsFields(settings: object): Record<string, unknown> {
  * redacted field must be omitted (never echoed back), and a field the UI dropped (e.g.
  * an auth-mode switch away from credentials) must be nulled rather than merely absent.
  * Plaintext fields keep the existing full-replace-when-present behavior.
+ *
+ * Only fields in UI_MANAGED_SECRET_FIELDS_BY_TYPE get nulled when absent — secret fields
+ * the flyout doesn't expose (e.g. Azure's connection_string/sas_token) are never part of
+ * the submitted settings regardless of whether the stored data source has them set, so
+ * treating their absence as "the user cleared it" would silently wipe them on every save.
  */
 function buildUpdateSettings(
   dataSourceType: DataSourceType,
   settings: object
 ): Record<string, unknown> {
   const secretFields = SECRET_FIELDS_BY_TYPE[dataSourceType];
+  const uiManagedSecretFields = UI_MANAGED_SECRET_FIELDS_BY_TYPE[dataSourceType];
   const settingsRecord = settings as Record<string, unknown>;
   const result: Record<string, unknown> = {};
 
@@ -59,7 +66,7 @@ function buildUpdateSettings(
     }
   }
 
-  for (const key of secretFields) {
+  for (const key of uiManagedSecretFields) {
     if (!(key in settingsRecord)) {
       result[key] = null;
     }
@@ -134,11 +141,11 @@ export class DataSourcesClient {
       );
     }
 
-    const withoutName = omit(dataSource, 'name');
-    const body = {
+    const { name: _name, ...withoutName } = dataSource;
+    const body: Omit<DataSourceWithSecrets, 'name'> = {
       ...withoutName,
       settings: buildUpdateSettings(dataSource.type, dataSource.settings),
-    } as unknown as Omit<DataSourceWithSecrets, 'name'>;
+    };
     await this.http.put(getDataSourceByIdApiPath(nameTrimmed), {
       body: JSON.stringify(body),
     });

@@ -44,6 +44,20 @@ export const SECRET_FIELDS_BY_TYPE: Record<DataSourceType, readonly string[]> = 
   azure: ['connection_string', 'key', 'sas_token'],
 };
 
+/**
+ * Of `SECRET_FIELDS_BY_TYPE`, the subset the create/edit flyout actually exposes for each
+ * type. Azure's `connection_string` and `sas_token` are valid ES secret fields but the
+ * flyout only supports `key`-based auth, so those two never appear in submitted settings
+ * regardless of whether the stored data source has them set. On update, only fields in
+ * this list should be nulled when absent — the rest must be left untouched so editing an
+ * Azure source created outside the UI (e.g. via the API) can't wipe an auth method the UI
+ * doesn't manage.
+ */
+export const UI_MANAGED_SECRET_FIELDS_BY_TYPE: Record<DataSourceType, readonly string[]> = {
+  ...SECRET_FIELDS_BY_TYPE,
+  azure: ['key'],
+};
+
 /** All supported data source type values, for select components and validation. */
 export const ALL_DATA_SOURCE_TYPES: DataSourceType[] = ['s3', 'gcs', 'azure'];
 

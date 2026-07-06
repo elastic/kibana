@@ -290,6 +290,101 @@ describe('DataSourcesClient', () => {
         body: JSON.stringify(expectedBody),
       });
     });
+
+    it('omits an untouched redacted secret for a GCS data source', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      const data: DataSourceWithSecrets = {
+        type: 'gcs',
+        name: 'ds1',
+        description: '',
+        settings: {
+          endpoint: 'https://gcs.example',
+          credentials: '::es_redacted::',
+        },
+      };
+
+      (http.put as jest.Mock).mockResolvedValue(undefined);
+
+      await client.update(data);
+
+      const expectedBody = {
+        type: 'gcs',
+        description: '',
+        settings: {
+          endpoint: 'https://gcs.example',
+        },
+      };
+
+      expect(http.put).toHaveBeenCalledWith(getDataSourceByIdApiPath('ds1'), {
+        body: JSON.stringify(expectedBody),
+      });
+    });
+
+    it('never nulls Azure connection_string/sas_token, which the flyout does not manage', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      // The Azure flyout only ever submits `key` for credentials auth, so `settings`
+      // here never contains connection_string/sas_token even when the stored data
+      // source (e.g. created via the API) authenticates with one of those instead.
+      const data: DataSourceWithSecrets = {
+        type: 'azure',
+        name: 'ds1',
+        description: '',
+        settings: {
+          endpoint: 'https://azure.example',
+          key: '::es_redacted::',
+        },
+      };
+
+      (http.put as jest.Mock).mockResolvedValue(undefined);
+
+      await client.update(data);
+
+      const expectedBody = {
+        type: 'azure',
+        description: '',
+        settings: {
+          endpoint: 'https://azure.example',
+        },
+      };
+
+      expect(http.put).toHaveBeenCalledWith(getDataSourceByIdApiPath('ds1'), {
+        body: JSON.stringify(expectedBody),
+      });
+    });
+
+    it('sends an explicit null to clear an Azure key the user emptied', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      const data: DataSourceWithSecrets = {
+        type: 'azure',
+        name: 'ds1',
+        description: '',
+        settings: {
+          key: '',
+        },
+      };
+
+      (http.put as jest.Mock).mockResolvedValue(undefined);
+
+      await client.update(data);
+
+      const expectedBody = {
+        type: 'azure',
+        description: '',
+        settings: {
+          key: null,
+        },
+      };
+
+      expect(http.put).toHaveBeenCalledWith(getDataSourceByIdApiPath('ds1'), {
+        body: JSON.stringify(expectedBody),
+      });
+    });
   });
 
   describe('delete', () => {
