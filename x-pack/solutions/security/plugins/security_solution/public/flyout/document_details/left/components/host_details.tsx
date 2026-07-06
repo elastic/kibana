@@ -139,6 +139,11 @@ export interface HostDetailsProps {
    * Set for attack flyout entity panels; omit in document details flyout.
    */
   isAttackDetails?: boolean;
+  /**
+   * Optional renderer for the host.ip value in the host overview. Forwarded to `HostOverview`
+   * so the attack Entities tool can open the network flyout via the new flyout system.
+   */
+  renderIpLink?: (ip: string) => React.ReactNode;
 }
 
 /**
@@ -152,6 +157,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   expandedOnFirstRender = true,
   hostEntityFromStoreResult,
   isAttackDetails = false,
+  renderIpLink,
 }) => {
   const EntityCellActions = isAttackDetails ? AttackDetailsCellActions : DocumentDetailsCellActions;
 
@@ -490,6 +496,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
             deleteQuery={deleteQuery}
             scopeId={scopeId}
             isFlyoutOpen={true}
+            renderIpLink={renderIpLink}
             riskScoreState={effectiveRiskScoreState}
             firstSeenFromEntityStore={observedHost.firstSeen?.date ?? undefined}
             lastSeenFromEntityStore={observedHost.lastSeen?.date ?? undefined}
