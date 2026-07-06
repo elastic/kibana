@@ -86,7 +86,7 @@ describe('ExecutionHistorySearchBar — rule filter combobox', () => {
     );
   });
 
-it('shows fetched rules as selectable options when the combobox is opened', async () => {
+  it('shows fetched rules as selectable options when the combobox is opened', async () => {
     mockRules({
       data: { items: [rule('rule-1', 'CPU rule'), rule('rule-2', 'Memory rule')], total: 2 },
     });

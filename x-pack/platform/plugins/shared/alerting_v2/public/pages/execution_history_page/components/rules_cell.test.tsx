@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen } from "@testing-library/react";
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { RulesCell } from "./rules_cell";
+import { RulesCell } from './rules_cell';
 
 describe('RulesCell', () => {
   const props = {
@@ -22,16 +22,12 @@ describe('RulesCell', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('renders nothing when totalRuleCount === 0', () => {
-    const { container } = render(
-      <RulesCell {...props} rules={[]} totalRuleCount={0} />
-    );
+    const { container } = render(<RulesCell {...props} rules={[]} totalRuleCount={0} />);
     expect(container).toBeEmptyDOMElement();
   });
 
   it('renders all rules as badges when count ≤ maxVisibleRules', () => {
-    render(
-      <RulesCell {...props} rules={[rule('r-1'), rule('r-2')]} totalRuleCount={2} />
-    );
+    render(<RulesCell {...props} rules={[rule('r-1'), rule('r-2')]} totalRuleCount={2} />);
     expect(screen.getByText('r-1-name')).toBeInTheDocument();
     expect(screen.getByText('r-2-name')).toBeInTheDocument();
     expect(screen.queryByText(/^\+/)).not.toBeInTheDocument();
