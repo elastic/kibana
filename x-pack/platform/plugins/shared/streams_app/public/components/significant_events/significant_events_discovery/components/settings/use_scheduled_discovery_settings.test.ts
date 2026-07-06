@@ -59,18 +59,21 @@ describe('useScheduledDiscoverySettings', () => {
       await result.current.save();
     });
 
-    expect(http.put).toHaveBeenCalledWith('/internal/streams/_significant_events/settings', {
-      body: JSON.stringify({
-        scheduledDiscovery: {
-          enabled: true,
-          detectionIntervalMinutes: 45,
-          reviewIntervalMinutes: 15,
-          discoveryBatchSize: 6,
-          triageBatchSize: 8,
-          maxReviewPasses: 4,
-        },
-      }),
-    });
+    expect(http.put).toHaveBeenCalledWith(
+      '/internal/streams/_significant_events/scheduled_discovery/settings',
+      {
+        body: JSON.stringify({
+          scheduledDiscovery: {
+            enabled: true,
+            detectionIntervalMinutes: 45,
+            reviewIntervalMinutes: 15,
+            discoveryBatchSize: 6,
+            triageBatchSize: 8,
+            maxReviewPasses: 4,
+          },
+        }),
+      }
+    );
     expect(client.set).toHaveBeenCalledWith(
       OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
       true
