@@ -35,8 +35,11 @@ test.describe.serial(
     }) => {
       await pageObjects.kubernetes.gotoPath('otel-kubernetes?ingestion=wired&foo=bar');
 
-      await expect(page).toHaveURL(/\/kubernetes\?foo=bar/);
+      // The redirect is client-side and only fires once the onboarding SPA has mounted.
+      // Wait for the redirected page to render first so a cold app boot doesn't exhaust
+      // the URL assertion's 10s timeout, then confirm the deprecated `ingestion` param is gone.
       await expect(pageObjects.kubernetes.layout('otel')).toBeVisible();
+      await expect(page).toHaveURL(/\/kubernetes\?foo=bar/);
     });
 
     test('Kubernetes step controls expose expected branch UI', async ({ pageObjects }) => {
