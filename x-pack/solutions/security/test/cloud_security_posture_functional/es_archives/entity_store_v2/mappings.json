@@ -401,6 +401,19 @@
             "name": {
               "type": "keyword"
             },
+            "risk": {
+              "properties": {
+                "calculated_level": {
+                  "type": "keyword"
+                },
+                "calculated_score": {
+                  "type": "float"
+                },
+                "calculated_score_norm": {
+                  "type": "float"
+                }
+              }
+            },
             "schema_version": {
               "type": "keyword",
               "ignore_above": 1024

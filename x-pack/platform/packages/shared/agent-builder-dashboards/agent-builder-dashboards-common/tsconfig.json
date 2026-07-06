@@ -15,9 +15,11 @@
   ],
   "kbn_references": [
     "@kbn/agent-builder-common",
+    "@kbn/agent-builder-visualizations-common",
     "@kbn/zod",
     "@kbn/dashboard-plugin",
     "@kbn/lens-embeddable-utils",
-    "@kbn/lens-common"
+    "@kbn/lens-common",
+    "@kbn/visualizations-common"
   ]
 }

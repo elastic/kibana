@@ -47,6 +47,7 @@ export interface UsageStats {
   'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
+  'observability:apmTraceLogsDefaultColumns': string[];
   'observability:logSources': string[];
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
@@ -197,6 +198,7 @@ export interface UsageStats {
   'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
   'observability:streamsEnableSignificantEventsDiscovery': boolean;
+  'observability:streamsEnableSignificantEventsAlertingV2': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'agentBuilder:prePromptWorkflowIds': string[];
