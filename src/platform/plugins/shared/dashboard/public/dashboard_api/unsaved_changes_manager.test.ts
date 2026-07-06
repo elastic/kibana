@@ -70,7 +70,8 @@ const projectRoutingManagerMock = {
 } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
 const approximationManagerMock = {
   internalApi: {
-    startComparing: () => new BehaviorSubject<Partial<Pick<DashboardState, 'is_approximate'>>>({}),
+    startComparing: () =>
+      new BehaviorSubject<Partial<Pick<DashboardState, 'esql_approximation'>>>({}),
   },
 } as unknown as ReturnType<typeof initializeApproximationManager>;
 const savedObjectId$ = new BehaviorSubject<string | undefined>('dashboard1234');
@@ -243,7 +244,7 @@ describe('unsavedChangesManager', () => {
   describe('approximation changes', () => {
     it('should detect isApproximate changes as unsaved changes', (done) => {
       const approximationChanges$ = new BehaviorSubject<
-        Partial<Pick<DashboardState, 'is_approximate'>>
+        Partial<Pick<DashboardState, 'esql_approximation'>>
       >({});
       const customApproximationManagerMock = {
         internalApi: {
@@ -269,7 +270,7 @@ describe('unsavedChangesManager', () => {
         done();
       });
 
-      approximationChanges$.next({ is_approximate: true });
+      approximationChanges$.next({ esql_approximation: true });
     });
   });
 

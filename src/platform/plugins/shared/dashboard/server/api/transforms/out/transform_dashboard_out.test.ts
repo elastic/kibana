@@ -324,8 +324,8 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
     });
   });
 
-  describe('is_approximate', () => {
-    test('should map isApproximate attribute to is_approximate in dashboardState', () => {
+  describe('esql_approximation', () => {
+    test('should map isApproximate attribute to esql_approximation in dashboardState', () => {
       const input: DashboardSavedObjectAttributes = {
         panelsJSON: JSON.stringify([]),
         optionsJSON: JSON.stringify({}),
@@ -340,10 +340,10 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         undefined,
         getDashboardStateSchema(false)
       );
-      expect(dashboardState.is_approximate).toBe(true);
+      expect(dashboardState.esql_approximation).toBe(true);
     });
 
-    test('should not include is_approximate when isApproximate attribute is undefined', () => {
+    test('should not include esql_approximation when isApproximate attribute is undefined', () => {
       const input: DashboardSavedObjectAttributes = {
         panelsJSON: JSON.stringify([]),
         optionsJSON: JSON.stringify({}),
@@ -357,7 +357,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
         undefined,
         getDashboardStateSchema(false)
       );
-      expect(dashboardState).not.toHaveProperty('is_approximate');
+      expect(dashboardState).not.toHaveProperty('esql_approximation');
     });
   });
 });
