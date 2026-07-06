@@ -45,7 +45,7 @@ import {
 } from '../../create_package_policy_page/services';
 import type { PackagePolicyFormState } from '../../create_package_policy_page/types';
 import { useYaml } from '../../../../../../services';
-import { ExperimentalFeaturesService } from '../../../../services';
+import { ExperimentalFeaturesService, isAgentlessPoliciesUIEnabled } from '../../../../services';
 import { fixApmDurationVars, hasUpgradeAvailable } from '../utils';
 import { prepareInputPackagePolicyDataset } from '../../create_package_policy_page/services/prepare_input_pkg_policy_dataset';
 
@@ -112,8 +112,13 @@ export function usePackagePolicyWithRelatedData(
   // loaded package policy's own `supports_agentless` flag. That flag is authoritative per policy
   // instance (dual-mode packages route correctly), and it drives the write path so an agentless
   // policy is never saved through the package-policy API.
+  // Both inputs are gated on the agentless-policies-UI kill switch: when it is off, this hook
+  // ignores the hint (even if a caller passes it) and the detection, so read and write both fall
+  // back to the legacy package-policy/agent-policy APIs.
+  const agentlessUIEnabled = isAgentlessPoliciesUIEnabled();
   const [detectedAgentless, setDetectedAgentless] = useState(false);
-  const isAgentlessPolicy = (options.isAgentless ?? false) || detectedAgentless;
+  const isAgentlessOption = agentlessUIEnabled && (options.isAgentless ?? false);
+  const isAgentlessPolicy = isAgentlessOption || (agentlessUIEnabled && detectedAgentless);
   const yaml = useYaml();
 
   // Form state
@@ -219,13 +224,13 @@ export function usePackagePolicyWithRelatedData(
   // Load the package policy and related data
   useEffect(() => {
     // Guards against a race with the agentless loader below (both share `packagePolicy`/
-    // `packageInfo`/loading state and both re-run on `options.isAgentless`). On dep change or
+    // `packageInfo`/loading state and both re-run on `isAgentlessOption`). On dep change or
     // unmount the cleanup flips `ignore`, so a superseded/late-resolving request from this run
     // never overwrites state committed by the newer run.
     let ignore = false;
     const getData = async () => {
       // Agentless policies are loaded by the dedicated effect below, through the agentless API.
-      if (options.isAgentless) {
+      if (isAgentlessOption) {
         return;
       }
       setIsLoadingData(true);
@@ -436,7 +441,7 @@ export function usePackagePolicyWithRelatedData(
     return () => {
       ignore = true;
     };
-  }, [packagePolicyId, options.forceUpgrade, options.isAgentless, yaml]);
+  }, [packagePolicyId, options.forceUpgrade, isAgentlessOption, yaml]);
 
   // Load the agentless policy through the agentless API. Deliberately skips the agent-policy bulk
   // read and the upgrade dry-run: agentless deployments have no user-facing agent policy, and the
@@ -446,7 +451,7 @@ export function usePackagePolicyWithRelatedData(
     // Wait for `yaml` before fetching: the whole load (hydration + validation) needs it, so firing
     // the GET before it's ready would just throw the result away and cause a second, redundant call
     // once `yaml` resolves.
-    if (!options.isAgentless || !yaml) {
+    if (!isAgentlessOption || !yaml) {
       return;
     }
     // See the legacy loader above: this flag lets the cleanup discard a superseded/late response
@@ -513,7 +518,7 @@ export function usePackagePolicyWithRelatedData(
     return () => {
       ignore = true;
     };
-  }, [packagePolicyId, options.isAgentless, yaml]);
+  }, [packagePolicyId, isAgentlessOption, yaml]);
 
   // Re-run validation when yaml loads (getData may have run before yaml was available)
   useEffect(() => {

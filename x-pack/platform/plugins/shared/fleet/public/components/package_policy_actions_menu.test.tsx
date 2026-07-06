@@ -13,6 +13,8 @@ import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
 import { useMultipleAgentPolicies, useLink, useGetOneAgentPolicy } from '../hooks';
+import { allowedExperimentalValues } from '../../common/experimental_features';
+import { ExperimentalFeaturesService } from '../services';
 
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 
@@ -271,6 +273,28 @@ describe('PackagePolicyActionsMenu', () => {
         '/mock/app/integrations/edit-integration/some-uuid2?isAgentless=true'
       );
     });
+  });
+
+  it('Should not append the isAgentless hint to agentless edit links when the agentless policies UI is disabled', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      ...allowedExperimentalValues,
+      enableAgentlessPoliciesUI: false,
+    });
+    const agentPolicies = createMockAgentPolicies({});
+    const packagePolicy = createMockPackagePolicy({
+      supports_agentless: true,
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
+      // Route target is unchanged; only the hint is suppressed so the edit page falls
+      // back to the legacy package-policy APIs.
+      expect(editButton).toHaveAttribute(
+        'href',
+        '/mock/app/integrations/edit-integration/some-uuid2'
+      );
+    });
+    jest.mocked(ExperimentalFeaturesService.get).mockRestore();
   });
 
   it('Should show Edit integration with correct href when there is no agent policy', async () => {

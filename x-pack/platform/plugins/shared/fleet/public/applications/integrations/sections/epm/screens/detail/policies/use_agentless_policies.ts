@@ -16,22 +16,25 @@ import type { RequestError } from '../../../../../hooks';
  * agentless policies, so callers only pass a package-name `kuery` (fields are prefixed with the
  * package-policy saved-object type server-side).
  */
-export const useAgentlessPolicies = ({
-  page,
-  perPage,
-  kuery,
-}: {
-  page: number;
-  perPage: number;
-  kuery?: string;
-}) => {
+export const useAgentlessPolicies = (
+  {
+    page,
+    perPage,
+    kuery,
+  }: {
+    page: number;
+    perPage: number;
+    kuery?: string;
+  },
+  options: { enabled?: boolean } = {}
+) => {
   const { data, isLoading, error, refetch } = useQuery<
     Awaited<ReturnType<typeof sendListAgentlessPolicies>>,
     RequestError
   >(
     ['agentlessPolicies', page, perPage, kuery],
     () => sendListAgentlessPolicies({ page, perPage, kuery }),
-    { refetchOnWindowFocus: false }
+    { refetchOnWindowFocus: false, enabled: options.enabled ?? true }
   );
 
   return { data, isLoading, error: error ?? null, resendRequest: refetch };

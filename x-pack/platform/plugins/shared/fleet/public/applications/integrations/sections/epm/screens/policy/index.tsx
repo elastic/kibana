@@ -11,8 +11,11 @@ import { useLocation, useRouteMatch } from 'react-router-dom';
 // TODO: Needs to be moved
 import { EditPackagePolicyForm } from '../../../../../fleet/sections/agent_policy/edit_package_policy_page';
 import type { EditPackagePolicyFrom } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/types';
-import { useGetOnePackagePolicyQuery, useUIExtension } from '../../../../hooks';
-import { IS_AGENTLESS_QUERY_PARAM } from '../../../../../../../common/constants';
+import {
+  useGetOnePackagePolicyQuery,
+  useIsAgentlessQueryParam,
+  useUIExtension,
+} from '../../../../hooks';
 
 export const Policy = memo(() => {
   const {
@@ -23,8 +26,9 @@ export const Policy = memo(() => {
   const qs = new URLSearchParams(search);
 
   // Detect-before-read hint: agentless surfaces append `isAgentless=true` so the edit form
-  // reads/writes through the agentless API instead of the package-policy API.
-  const isAgentless = qs.get(IS_AGENTLESS_QUERY_PARAM) === 'true';
+  // reads/writes through the agentless API instead of the package-policy API. Always false when
+  // the agentless policies UI kill switch is off, so the page falls back to the legacy APIs.
+  const isAgentless = useIsAgentlessQueryParam();
 
   // This read only resolves the edit UI extension, whose `useLatestPackageVersion` flag feeds
   // `forceUpgrade`. Skipping it for agentless is safe and avoids touching the package-policy API:

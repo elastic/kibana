@@ -44,6 +44,7 @@ import {
   useDiscoverLocator,
 } from '../../../../../../hooks';
 import { getAgentlessThroughputIndexPatterns } from '../../../../../../../../../common/services';
+import { isAgentlessPoliciesUIEnabled } from '../../../../../../services';
 import {
   Loading,
   PackagePolicyActionsMenu,
@@ -241,8 +242,12 @@ export const AgentlessPackagePoliciesTable = ({
                 editParams.set('from', from);
               }
               // Hint that this is an agentless policy so the edit page reads/writes through the
-              // agentless API rather than the package-policy API (detect-before-read).
-              editParams.set(IS_AGENTLESS_QUERY_PARAM, 'true');
+              // agentless API rather than the package-policy API (detect-before-read). Suppressed
+              // when the agentless policies UI kill switch is off: rows then come from the legacy
+              // list source and edits must route through the legacy APIs too.
+              if (isAgentlessPoliciesUIEnabled()) {
+                editParams.set(IS_AGENTLESS_QUERY_PARAM, 'true');
+              }
               return (
                 <EuiLink
                   className="eui-textTruncate"

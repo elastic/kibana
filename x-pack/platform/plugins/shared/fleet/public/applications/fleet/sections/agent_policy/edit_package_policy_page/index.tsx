@@ -28,6 +28,7 @@ import {
   useUIExtension,
   useAuthz,
   sendBulkGetAgentPoliciesForRq,
+  useIsAgentlessQueryParam,
 } from '../../../hooks';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
@@ -55,7 +56,6 @@ import {
 } from '../create_package_policy_page/services';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../services';
-import { IS_AGENTLESS_QUERY_PARAM } from '../../../../../../common/constants';
 
 import {
   getInheritedNamespace,
@@ -88,9 +88,10 @@ export const EditPackagePolicyPage = memo(() => {
 
   // Detect-before-read: the route only carries `packagePolicyId`, shared between agentless and
   // agent-based policies. Agentless surfaces append this hint so we can read/write through the
-  // agentless API without first reading the package policy. See task4 follow-ups for the
-  // (provisional) mechanism.
-  const isAgentless = qs.get(IS_AGENTLESS_QUERY_PARAM) === 'true';
+  // agentless API without first reading the package policy. Always false when the agentless
+  // policies UI kill switch is off, so the page falls back to the legacy APIs. See task4
+  // follow-ups for the (provisional) mechanism.
+  const isAgentless = useIsAgentlessQueryParam();
 
   // This read only resolves the edit UI extension, whose `useLatestPackageVersion` flag feeds
   // `forceUpgrade`. Skipping it for agentless is safe and avoids touching the package-policy API:

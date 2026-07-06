@@ -49,7 +49,7 @@ import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_se
 import { KeepPoliciesUpToDateSwitch, NamespaceCustomizationSection } from '../components';
 import { useChangelog } from '../hooks';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
+import { ExperimentalFeaturesService, isAgentlessPoliciesUIEnabled } from '../../../../../services';
 
 import { DeprecationCallout, DeprecatedFeaturesCallout } from '../overview/deprecation_callout';
 
@@ -146,21 +146,28 @@ export const SettingsPage: React.FC<Props> = memo(
 
     // Agentless package policies must upgrade through the agentless API, not the
     // (deprecated-for-agentless) package-policy API. Partition by `supports_agentless`
-    // so each set goes to its own upgrade + dry-run endpoint.
+    // so each set goes to its own upgrade + dry-run endpoint. When the agentless policies UI
+    // kill switch is off, everything stays on the legacy package-policy upgrade path (the
+    // agentless partition is empty, so its dry-run and upgrade calls never fire).
+    const agentlessUIEnabled = isAgentlessPoliciesUIEnabled();
     const agentlessPolicyIds = useMemo(
       () =>
-        packagePoliciesData?.items
-          .filter((packagePolicy) => packagePolicy.supports_agentless === true)
-          .map(({ id }) => id) ?? [],
-      [packagePoliciesData]
+        agentlessUIEnabled
+          ? packagePoliciesData?.items
+              .filter((packagePolicy) => packagePolicy.supports_agentless === true)
+              .map(({ id }) => id) ?? []
+          : [],
+      [packagePoliciesData, agentlessUIEnabled]
     );
 
     const packagePolicyIds = useMemo(
       () =>
         packagePoliciesData?.items
-          .filter((packagePolicy) => packagePolicy.supports_agentless !== true)
+          .filter(
+            (packagePolicy) => !agentlessUIEnabled || packagePolicy.supports_agentless !== true
+          )
           .map(({ id }) => id) ?? [],
-      [packagePoliciesData]
+      [packagePoliciesData, agentlessUIEnabled]
     );
 
     const agentPolicyIds = useMemo(
