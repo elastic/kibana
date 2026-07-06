@@ -19,6 +19,11 @@ import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_re
  * the selected range (see issue #275519). So, unlike Lens (which applies the time
  * range for us), every time-based Vega query must filter its own rows and must do
  * so on the original source field — not a `RENAME`/`EVAL`-derived one.
+ *
+ * It also asks the model to `RENAME` dotted result columns (e.g. `host.name`) to
+ * dotless aliases at the source: Vega reads a dot as a nested-object path, so a
+ * flat dotted column would otherwise render as "undefined". `field_escaping`
+ * remains a deterministic fallback for provided/recovered queries.
  */
 export const vegaEsqlAdditionalInstructions = `
 ## Vega time-range filtering (required)
@@ -27,7 +32,13 @@ This query feeds a Vega chart, whose ES|QL data source only respects the time pi
 
 Therefore, for EVERY time-based chart — time series AND plain metrics/categorical:
 - Always add an explicit row filter on the raw source time field: \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`.
-- Use the RAW source time field (e.g. \`@timestamp\`) directly in both that WHERE filter and any \`BUCKET(...)\`. Never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`; the time filter must reference the original source field so Kibana can bind the range to it.`;
+- Use the RAW source time field (e.g. \`@timestamp\`) directly in both that WHERE filter and any \`BUCKET(...)\`. Never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`; the time filter must reference the original source field so Kibana can bind the range to it.
+
+## Field names for Vega
+
+Vega interprets a dot in a field name as a nested-object path, but ES|QL result columns are flat, so a column whose name contains a dot (e.g. \`host.name\`) is misread and renders as "undefined".
+- RENAME every such column to a readable, dotless alias in the query, e.g. \`RENAME host.name AS host\` or \`RENAME geo.dest AS destination\`, and reference the alias in the spec. Prefer this over leaving dotted names for the renderer to escape.
+- This applies to dimension/metric columns only. Do NOT rename the time field this way — keep filtering and bucketing on the raw source time field exactly as required above.`;
 
 /**
  * Describe the result columns of the backing ES|QL query so the model binds

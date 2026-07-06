@@ -81,4 +81,10 @@ describe('vegaEsqlAdditionalInstructions', () => {
       'Never filter or bucket on a field produced by'
     );
   });
+
+  it('asks to RENAME dotted columns to dotless aliases, except the time field', () => {
+    expect(vegaEsqlAdditionalInstructions).toContain('Field names for Vega');
+    expect(vegaEsqlAdditionalInstructions).toContain('RENAME host.name AS host');
+    expect(vegaEsqlAdditionalInstructions).toContain('Do NOT rename the time field');
+  });
 });
