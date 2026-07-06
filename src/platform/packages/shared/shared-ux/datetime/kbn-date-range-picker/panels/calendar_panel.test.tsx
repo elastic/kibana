@@ -116,6 +116,7 @@ describe('CalendarPanel', () => {
   });
 
   const defaultSettings = { roundRelativeTime: true };
+  const defaultTransformOptions = {};
 
   /** Context with computed dates. */
   const makeContext = (
@@ -127,6 +128,7 @@ describe('CalendarPanel', () => {
     onPresetSave,
     setText,
     settings: defaultSettings,
+    transformOptions: defaultTransformOptions,
     text: formatDateRange(startDate, endDate),
     timeRange: {
       startDate,
@@ -142,6 +144,7 @@ describe('CalendarPanel', () => {
     onPresetSave,
     setText,
     settings: defaultSettings,
+    transformOptions: defaultTransformOptions,
     text: '',
     timeRange: {
       startDate: null,
