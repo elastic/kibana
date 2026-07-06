@@ -79,6 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         indexTemplateName: testDataStreamName,
         hidden: false,
         failureStoreEnabled: false,
+        matchesFailureStoreClusterPattern: false,
         indexMode: 'standard',
         failureStoreRetention: {
           defaultRetentionPeriod: '30d',
@@ -127,6 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
         meteringStorageSize: '0b',
         meteringStorageSizeBytes: 0,
         failureStoreEnabled: false,
+        matchesFailureStoreClusterPattern: false,
         indexMode: 'standard',
         failureStoreRetention: {
           defaultRetentionPeriod: '30d',

@@ -33,91 +33,109 @@ export const ContextEngineAddEntryStepTypeId = 'contextEngine.addEntry';
 // far past the ~512-token window the embedding model truncates to. These
 // bounds exist primarily to harden the public input surface against
 // pathological payloads (CodeQL DoS rule), not to reflect storage limits.
-const MAX_SML_IDENTIFIER_LENGTH = 256;
+const MAX_SML_IDENTIFIER_LENGTH = 512;
 const MAX_SML_TITLE_LENGTH = 1024;
 const MAX_SML_DESCRIPTION_LENGTH = 8192;
 const MAX_SML_CONTENT_LENGTH = 50_000;
 const MAX_SML_REFERENCES = 100;
-const MAX_SML_PERMISSIONS = 100;
 const MAX_SML_TAGS = 100;
 const MAX_SML_TAG_LENGTH = 100;
-const MAX_SML_ES_INDICES = 100;
-
-const ChunkSchema = z.object({
-  type: z
-    .string()
-    .min(1)
-    .max(MAX_SML_IDENTIFIER_LENGTH)
-    .describe('Chunk type (e.g., "visualization", "dashboard").'),
-  title: z.string().min(1).max(MAX_SML_TITLE_LENGTH).describe('Display title for the chunk.'),
-  content: z
-    .string()
-    .min(1)
-    .max(MAX_SML_CONTENT_LENGTH)
-    .describe('Searchable content (indexed as semantic_text).'),
-  description: z
-    .string()
-    .max(MAX_SML_DESCRIPTION_LENGTH)
-    .optional()
-    .describe('Optional longer summary indexed as semantic_text.'),
-  user_id: z
-    .string()
-    .max(MAX_SML_IDENTIFIER_LENGTH)
-    .optional()
-    .describe('Optional owner/last-modifier user id.'),
-  references: z
-    .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
-    .max(MAX_SML_REFERENCES)
-    .optional()
-    .describe('Optional list of referenced SML chunk ids.'),
-  permissions: z
-    .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
-    .max(MAX_SML_PERMISSIONS)
-    .optional()
-    .describe('Optional Kibana privilege strings required to view the chunk later.'),
-  tags: z
-    .array(
-      z
-        .string()
-        .max(MAX_SML_TAG_LENGTH)
-        .regex(
-          /^[a-z0-9][a-z0-9_-]*$/,
-          'Tag must be lowercase alphanumeric and may contain hyphens or underscores (e.g. "otel", "my-tag", "v2_data").'
-        )
-    )
-    .max(MAX_SML_TAGS)
-    .optional()
-    .describe(
-      'Optional tags for grouping and retrieval. Must be lowercase alphanumeric; hyphens and underscores are allowed (e.g. ["otel", "my-tag"]). Tags are matched with OR semantics on the list endpoint.'
-    ),
-  elasticsearchIndices: z
-    .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
-    .max(MAX_SML_ES_INDICES)
-    .optional()
-    .describe(
-      'Optional Elasticsearch index / alias / data-stream names whose data this chunk depends on. Viewers must hold the ES `read` privilege on every listed name to see the chunk at search time.'
-    ),
-});
+const ChunkSchema = z
+  .object({
+    type: z
+      .string()
+      .min(1)
+      .max(MAX_SML_IDENTIFIER_LENGTH)
+      .describe('Chunk type (e.g., "visualization", "dashboard").'),
+    title: z.string().min(1).max(MAX_SML_TITLE_LENGTH).describe('Display title for the chunk.'),
+    content: z
+      .string()
+      .min(1)
+      .max(MAX_SML_CONTENT_LENGTH)
+      .describe('Searchable content (indexed as semantic_text).'),
+    description: z
+      .string()
+      .max(MAX_SML_DESCRIPTION_LENGTH)
+      .optional()
+      .describe('Optional longer summary indexed as semantic_text.'),
+    user_id: z
+      .string()
+      .max(MAX_SML_IDENTIFIER_LENGTH)
+      .optional()
+      .describe('Optional owner/last-modifier user id.'),
+    references: z
+      .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
+      .max(MAX_SML_REFERENCES)
+      .optional()
+      .describe('Optional list of referenced SML chunk ids.'),
+    tags: z
+      .array(
+        z
+          .string()
+          .max(MAX_SML_TAG_LENGTH)
+          .regex(
+            /^[a-z0-9][a-z0-9_-]*$/,
+            'Tag must be lowercase alphanumeric and may contain hyphens or underscores (e.g. "otel", "my-tag", "v2_data").'
+          )
+      )
+      .max(MAX_SML_TAGS)
+      .optional()
+      .describe(
+        'Optional tags for grouping and retrieval. Must be lowercase alphanumeric; hyphens and underscores are allowed (e.g. ["otel", "my-tag"]). Tags are matched with OR semantics on the list endpoint.'
+      ),
+  })
+  .strict();
 
 /**
- * Step input.
- *
- * Workflow-driven writes always go through the content-mode path on the SML
- * start contract — caller-supplied chunks are written as
- * `ingestion_method: 'manual'`.
- *
- * - `upsert` requires `chunks` and always performs a full replace: every
- *   prior chunk for the `origin_id` is removed and the supplied chunks are
- *   written. There is no fail-if-exists / fail-if-not-found distinction —
- *   the indexer's content-mode path is idempotent by design, so we expose
- *   a single `upsert` action rather than the misleading `create`/`update`
- *   pair.
- * - `delete` requires only the origin/type identifiers and wipes every
- *   chunk recorded for the `origin_id` regardless of how it was produced
- *   (both crawled and manual entries). This matches the "workflow owns
- *   this origin" semantic and is the opposite of the crawler's default
- *   delete (which preserves curated manual entries).
+ * Step input. `permissions` (upsert only) applies when `attachmentType` has
+ * no `getPermissions` hook; supplying it for a hook-backed type is rejected,
+ * since the hook is always authoritative. `upsert` is a full replace;
+ * `delete` wipes all chunks for the origin regardless of how they were
+ * produced.
  */
+const AttachmentTypeSchema = z
+  .string()
+  .min(1)
+  .max(MAX_SML_IDENTIFIER_LENGTH)
+  .regex(
+    /^[a-z][a-z0-9_]*$/,
+    'attachmentType must be a lowercase identifier starting with a letter (e.g. "visualization", "my_notes")'
+  )
+  .describe(
+    "Context Engine entry type id (chunk namespace). When the value matches a registered SmlTypeDefinition the chunk inherits that type's permissions; when it does not, the indexer stamps empty permissions and the chunk is readable to anyone in the caller's space."
+  );
+
+/**
+ * Mirrors the server-side `SmlPermissions` shape — `indices`/`privileges`
+ * are arrays of `{ name }` objects (not bare strings) so a later revision
+ * can add sibling keys without a breaking change.
+ */
+export const SmlPermissionsInputSchema = z
+  .object({
+    elasticsearch: z
+      .object({
+        indices: z
+          .array(z.object({ name: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH) }).strict())
+          .max(100)
+          .optional(),
+      })
+      .strict()
+      .optional(),
+    kibana: z
+      .object({
+        privileges: z
+          .array(z.object({ name: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH) }).strict())
+          .max(100)
+          .optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict()
+  .describe(
+    'Permissions to stamp on the written chunks when the attachmentType has no getPermissions hook. Rejected if the type derives permissions via getPermissions.'
+  );
+
 export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
   z.object({
     originId: z
@@ -125,17 +143,14 @@ export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
       .min(1)
       .max(MAX_SML_IDENTIFIER_LENGTH)
       .describe('Stable identifier for the source object (e.g., saved object id).'),
-    attachmentType: z
-      .string()
-      .min(1)
-      .max(MAX_SML_IDENTIFIER_LENGTH)
-      .describe('Context Engine entry type id (chunk namespace).'),
+    attachmentType: AttachmentTypeSchema,
     action: z.literal('upsert'),
     chunks: z.array(ChunkSchema).min(1).max(100),
+    permissions: SmlPermissionsInputSchema.optional(),
   }),
   z.object({
     originId: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH),
-    attachmentType: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH),
+    attachmentType: AttachmentTypeSchema,
     action: z.literal('delete'),
   }),
 ]);
@@ -201,6 +216,26 @@ export const contextEngineAddEntryStepCommonDefinition: CommonStepDefinition<
         content: "Revenue grew 12% across all regions ..."
         description: "Auto-generated quarterly summary"
 \`\`\``,
+
+      `## Add an entry gated to specific Elasticsearch indices
+\`\`\`yaml
+- name: add_scoped_entry
+  type: ${ContextEngineAddEntryStepTypeId}
+  with:
+    originId: "sink-index-ki"
+    attachmentType: "corpus_entry"
+    action: "upsert"
+    chunks:
+      - type: "corpus_entry"
+        title: "Sales data summary"
+        content: "Key figures extracted from the sales index ..."
+    permissions:
+      elasticsearch:
+        indices:
+          - name: "sales-data"
+          - name: "sales-data-archive"
+\`\`\`
+Only used when \`attachmentType\` has no registered \`getPermissions\` hook (e.g. \`corpus_entry\`). Supplying \`permissions\` for a type that already derives permissions via a hook (e.g. \`dashboard\`, \`connector\`) fails the step — the hook is always authoritative for those types.`,
 
       `## Remove a previously added entry
 \`\`\`yaml

@@ -282,6 +282,8 @@ const CreateRuleOptionsFlyoutInner = ({
           builderType="threshold"
           onCreateRule={handleCreateRule}
           isSaving={isSaving}
+          initialQuery={query}
+          esqlVariables={esqlVariables}
         />
       </Context.Provider>
     );

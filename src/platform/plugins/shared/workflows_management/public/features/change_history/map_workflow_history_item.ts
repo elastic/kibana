@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChangeHistoryDetail, ChangeHistoryListItem } from '@kbn/change-history-ui';
+import type {
+  ChangeHistoryDetail,
+  ChangeHistoryListItem,
+  ChangeHistoryListItemChanges,
+} from '@kbn/change-history-ui';
 
 import type { WorkflowHistoryItem } from '../../../common/lib/workflow_change_history/types';
 
 export interface MapWorkflowHistoryItemOptions {
   isCurrent?: boolean;
+  changes?: ChangeHistoryListItemChanges;
 }
 
 export interface WorkflowChangeHistorySnapshot {
@@ -25,19 +30,9 @@ export const toWorkflowChangeHistorySnapshot = (yaml: string): WorkflowChangeHis
   workflow: { yaml },
 });
 
-export const getWorkflowYamlFromSnapshot = (snapshot: unknown): string => {
-  if (!snapshot || typeof snapshot !== 'object') {
-    return '';
-  }
-
-  const workflow = (snapshot as { workflow?: { yaml?: unknown } }).workflow;
-
-  return typeof workflow?.yaml === 'string' ? workflow.yaml : '';
-};
-
 export const mapWorkflowHistoryItemToListItem = (
   item: WorkflowHistoryItem,
-  { isCurrent }: MapWorkflowHistoryItemOptions = {}
+  { isCurrent, changes }: MapWorkflowHistoryItemOptions = {}
 ): ChangeHistoryListItem => ({
   id: item.id,
   timestamp: item.timestamp,
@@ -49,6 +44,7 @@ export const mapWorkflowHistoryItemToListItem = (
   ...(isCurrent ? { isCurrent: true } : {}),
   ...(item.version != null ? { metadata: { version: item.version } } : {}),
   ...(item.comment ? { comment: item.comment } : {}),
+  ...(changes ? { changes } : {}),
 });
 
 export const mapWorkflowHistoryItemToDetail = (
