@@ -26,7 +26,7 @@ import {
   useStartServices,
   useUpgradeReviewActions,
 } from '../hooks';
-import { policyHasFleetServer } from '../services';
+import { isAgentlessPoliciesUIEnabled, policyHasFleetServer } from '../services';
 
 import { scheduleAutoOpenModal } from '../applications/integrations/sections/epm/screens/installed_integrations/components/pending_upgrade_review_status';
 
@@ -127,11 +127,14 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   // isAgentless hint so the edit page reads/writes through the agentless API
   // instead of the package-policy API (detect-before-read). Orphaned (non-agentless)
   // policies keep editing a package policy, so the hint is only added when agentless.
+  // The hint is suppressed when the agentless policies UI kill switch is off, so links
+  // route through the legacy APIs (the pages also ignore the hint when the switch is off).
+  const emitAgentlessHint = isAgentlessPolicy && isAgentlessPoliciesUIEnabled();
   const editQueryParams = new URLSearchParams();
   if (from) {
     editQueryParams.set('from', from);
   }
-  if (isAgentlessPolicy) {
+  if (emitAgentlessHint) {
     editQueryParams.set(IS_AGENTLESS_QUERY_PARAM, 'true');
   }
   const editQueryString = editQueryParams.toString();
@@ -152,7 +155,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   if (from) {
     copyQueryParams.set('from', from);
   }
-  if (isAgentlessPolicy) {
+  if (emitAgentlessHint) {
     copyQueryParams.set(IS_AGENTLESS_QUERY_PARAM, 'true');
   }
   const copyQueryString = copyQueryParams.toString();
