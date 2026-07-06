@@ -9,8 +9,6 @@
     "@kbn/i18n",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
-    "@kbn/agent-builder-visualizations-server",
-    "@kbn/agent-builder-visualizations-common",
     "@kbn/agent-builder-server",
     "@kbn/controls-constants",
     "@kbn/dashboard-plugin",

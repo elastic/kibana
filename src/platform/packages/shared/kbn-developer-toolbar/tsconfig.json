@@ -9,6 +9,5 @@
   "kbn_references": [
     "@kbn/config",
     "@kbn/shared-ux-utility",
-    "@kbn/core-theme-browser-internal-types"
   ]
 }
