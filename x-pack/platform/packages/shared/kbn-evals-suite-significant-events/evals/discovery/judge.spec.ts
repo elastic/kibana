@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from '@kbn/streams-plugin/server';
+import { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from '@kbn/significant-events-plugin/server';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { Discovery } from '@kbn/significant-events-schema';
