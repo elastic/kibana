@@ -10,7 +10,7 @@
 import type { PublishingSubject } from '../../publishing_subject';
 
 export interface PublishesApproximation {
-  isApproximate$: PublishingSubject<boolean | undefined>;
+  esqlApproximation$: PublishingSubject<boolean | undefined>;
 }
 
 export const apiPublishesApproximation = (
@@ -18,6 +18,6 @@ export const apiPublishesApproximation = (
 ): unknownApi is PublishesApproximation =>
   Boolean(
     unknownApi &&
-      typeof (unknownApi as PublishesApproximation).isApproximate$ === 'object' &&
-      (unknownApi as PublishesApproximation).isApproximate$ !== null
+      typeof (unknownApi as PublishesApproximation).esqlApproximation$ === 'object' &&
+      (unknownApi as PublishesApproximation).esqlApproximation$ !== null
   );

@@ -105,7 +105,7 @@ export function LayerPanel(props: LayerPanelProps) {
   );
   const isApproximate = useStateFromPublishingSubject(
     apiPublishesApproximation(parentApi)
-      ? parentApi?.isApproximate$
+      ? parentApi?.esqlApproximation$
       : new BehaviorSubject(undefined)
   );
 

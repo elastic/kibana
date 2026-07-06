@@ -383,7 +383,7 @@ describe('onFetchContextChanged', () => {
       const api = {
         parentApi: {
           ...parentApi,
-          isApproximate$: new BehaviorSubject<boolean | undefined>(true),
+          esqlApproximation$: new BehaviorSubject<boolean | undefined>(true),
         },
       };
       const subscription = fetch$(api).subscribe(onFetchMock);
@@ -406,11 +406,11 @@ describe('onFetchContextChanged', () => {
     });
 
     test('emits a new fetch context when isApproximate toggles', async () => {
-      const isApproximate$ = new BehaviorSubject<boolean | undefined>(false);
-      const api = { parentApi: { ...parentApi, isApproximate$ } };
+      const esqlApproximation$ = new BehaviorSubject<boolean | undefined>(false);
+      const api = { parentApi: { ...parentApi, esqlApproximation$ } };
       const subscription = fetch$(api).subscribe(onFetchMock);
       await waitFor(() => expect(onFetchMock).toHaveBeenCalledTimes(1));
-      isApproximate$.next(true);
+      esqlApproximation$.next(true);
       await waitFor(() => expect(onFetchMock).toHaveBeenCalledTimes(2));
       expect(onFetchMock.mock.calls[1][0].isApproximate).toBe(true);
       subscription.unsubscribe();

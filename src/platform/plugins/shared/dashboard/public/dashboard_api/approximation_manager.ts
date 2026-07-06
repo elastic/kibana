@@ -13,11 +13,11 @@ import { BehaviorSubject, combineLatestWith, debounceTime, map, skip, startWith 
 import type { DashboardState } from '../../common';
 
 export function initializeApproximationManager(initialState: DashboardState) {
-  const isApproximate$ = new BehaviorSubject<boolean>(initialState.esql_approximation ?? false);
+  const esqlApproximation$ = new BehaviorSubject<boolean>(initialState.esql_approximation ?? false);
 
   function setEsqlApproximation(value: boolean) {
-    if (value !== isApproximate$.value) {
-      isApproximate$.next(value);
+    if (value !== esqlApproximation$.value) {
+      esqlApproximation$.next(value);
     }
   }
 
@@ -26,17 +26,17 @@ export function initializeApproximationManager(initialState: DashboardState) {
   };
 
   const getState = (): Pick<DashboardState, 'esql_approximation'> => ({
-    esql_approximation: isApproximate$.value,
+    esql_approximation: esqlApproximation$.value,
   });
 
-  const anyStateChange$ = isApproximate$.pipe(
+  const anyStateChange$ = esqlApproximation$.pipe(
     skip(1),
     map(() => undefined)
   );
 
   return {
     api: {
-      isApproximate$,
+      esqlApproximation$,
       setEsqlApproximation,
     },
     internalApi: {

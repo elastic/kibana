@@ -88,9 +88,9 @@ function getSearchContext(parentApi: unknown) {
     ? parentApi
     : { projectRouting$: undefined };
 
-  const { isApproximate$ } = apiPublishesApproximation(parentApi)
+  const { esqlApproximation$ } = apiPublishesApproximation(parentApi)
     ? parentApi
-    : { isApproximate$: undefined };
+    : { esqlApproximation$: undefined };
 
   return {
     filters: unifiedSearch$.filters$.getValue(),
@@ -101,7 +101,7 @@ function getSearchContext(parentApi: unknown) {
       ? parentApi.esqlVariables$.getValue()
       : undefined,
     projectRouting: projectRouting$?.getValue(),
-    isApproximate: isApproximate$?.getValue(),
+    isApproximate: esqlApproximation$?.getValue(),
   };
 }
 

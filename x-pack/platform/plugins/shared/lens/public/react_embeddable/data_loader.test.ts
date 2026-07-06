@@ -73,7 +73,7 @@ async function expectRerenderOnDataLoader(
         query$: BehaviorSubject<Query | AggregateQuery | undefined>;
         timeRange$: BehaviorSubject<TimeRange | undefined>;
         esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
-        isApproximate$: BehaviorSubject<boolean | undefined>;
+        esqlApproximation$: BehaviorSubject<boolean | undefined>;
       } & LensOverrides
     >;
     internalApiOverrides?: Partial<LensInternalApi>;
@@ -404,7 +404,7 @@ describe('Data Loader', () => {
       },
       undefined,
       {
-        parentApiOverrides: { isApproximate$: new BehaviorSubject<boolean | undefined>(true) },
+        parentApiOverrides: { esqlApproximation$: new BehaviorSubject<boolean | undefined>(true) },
       }
     );
   });
