@@ -34,7 +34,6 @@ export const useManageRegionsState = (onClose: () => void) => {
   const [isCallOutDismissed, setIsCallOutDismissed] = useState(false);
 
   // Seed checkbox state once the policy finishes loading.
-  // No policy (null/empty allowed_regions) means no restrictions — all regions selected.
   useEffect(() => {
     if (!isPolicyLoading && !isEndpointsLoading && !syncedFromPolicy) {
       const existing = policy?.region_policy?.allowed_regions ?? [];
