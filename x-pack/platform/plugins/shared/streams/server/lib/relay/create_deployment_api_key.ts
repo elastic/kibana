@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { serverUnavailable } from '@hapi/boom';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/common/features';
+import { RelayBadRequestError } from './errors';
 
 /**
  * `metadata.kibana.type` tag on the managed API key, so it can be identified and
@@ -50,7 +50,9 @@ export const createDeploymentToken = async ({
 
   if (!apiKey) {
     logger.error('Unable to create the Agent Builder API key: security is disabled.');
-    throw serverUnavailable('Unable to create the Agent Builder API key (security is disabled).');
+    throw new RelayBadRequestError(
+      'Unable to create the Agent Builder API key (security is disabled).'
+    );
   }
 
   return Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64');

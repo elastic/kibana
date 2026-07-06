@@ -8,6 +8,16 @@
 
 import { StatusError } from '../streams/errors/status_error';
 
+export class RelayBadRequestError extends StatusError {
+  constructor(message: string, options?: { cause?: Error }) {
+    super(message, 400);
+    this.name = 'RelayBadRequestError';
+    if (options?.cause) {
+      this.cause = options.cause;
+    }
+  }
+}
+
 export class RelayServiceError extends StatusError {
   constructor(message: string, options?: { cause?: Error }) {
     super(message, 502);

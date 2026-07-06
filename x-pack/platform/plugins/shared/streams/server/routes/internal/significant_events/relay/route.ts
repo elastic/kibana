@@ -7,7 +7,11 @@
 
 import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import type { ListTenantsResult, RelayClient } from '../../../../lib/relay';
+import type {
+  RelayClient,
+  StartInstallResponseBody,
+  TenantsResponseBody,
+} from '../../../../lib/relay';
 import type { StreamsServer } from '../../../../types';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG } from '../../../../../common/feature_flags';
@@ -50,7 +54,7 @@ const connectSlackRoute = createServerRoute({
     server,
     logger,
     getScopedClients,
-  }): Promise<{ authorizeUrl: string }> => {
+  }): Promise<StartInstallResponseBody> => {
     // Cheap synchronous guards first, so a disabled/unconfigured instance skips
     // the scoped-clients init and the async access assertion below.
     const relay = assertRelayEnabled({ server });
@@ -96,7 +100,7 @@ const listTenantsRoute = createServerRoute({
     request,
     server,
     getScopedClients,
-  }): Promise<ListTenantsResult> => {
+  }): Promise<TenantsResponseBody> => {
     // Cheap synchronous guards first, so a disabled/unconfigured instance skips
     // the scoped-clients init and the async access assertion below.
     const relay = assertRelayEnabled({ server });

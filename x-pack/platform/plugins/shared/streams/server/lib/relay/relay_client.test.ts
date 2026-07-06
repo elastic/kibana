@@ -39,7 +39,7 @@ describe('RelayClientImpl', () => {
   const kibanaApiKey = 'a'.repeat(48);
 
   describe('startSlackInstall', () => {
-    it('POSTs to /v1/slack/install with the kibana_api_key + created_by_user_key and maps the response', async () => {
+    it('POSTs to /v1/slack/install with the kibana_api_key + created_by_user_key and returns the response', async () => {
       fetchMock.mockResolvedValue(okResponse(relayResponse));
       const client = new RelayClientImpl({ baseUrl: 'https://relay.example', logger });
 
@@ -59,7 +59,7 @@ describe('RelayClientImpl', () => {
         kibana_api_key: kibanaApiKey,
         created_by_user_key: 'user-42',
       });
-      expect(result).toEqual({ authorizeUrl: relayResponse.authorize_url });
+      expect(result).toEqual(relayResponse);
     });
 
     it('sends the content-type header', async () => {
@@ -110,8 +110,7 @@ describe('RelayClientImpl', () => {
 
   describe('listTenants', () => {
     const tenantsResponse: TenantsResponseBody = {
-      ok: true,
-      tenants: [
+      items: [
         {
           surface: 'slack',
           tenant_key: 'team-1',
@@ -122,7 +121,7 @@ describe('RelayClientImpl', () => {
       next_cursor: 'opaque-cursor',
     };
 
-    it('GETs /v1/tenants with no query string and maps the response', async () => {
+    it('GETs /v1/tenants with no query string and returns the response', async () => {
       fetchMock.mockResolvedValue(okResponse(tenantsResponse));
       const client = new RelayClientImpl({ baseUrl: 'https://relay.example', logger });
 
@@ -132,17 +131,7 @@ describe('RelayClientImpl', () => {
       const [url, init] = fetchMock.mock.calls[0];
       expect(url).toBe('https://relay.example/v1/tenants');
       expect(init).toMatchObject({ method: 'GET', headers: {} });
-      expect(result).toEqual({
-        tenants: [
-          {
-            surface: 'slack',
-            tenantKey: 'team-1',
-            deploymentRef: 'deployment-1',
-            status: 'active',
-          },
-        ],
-        nextCursor: 'opaque-cursor',
-      });
+      expect(result).toEqual(tenantsResponse);
     });
 
     it('encodes limit and cursor as query params', async () => {
@@ -176,8 +165,7 @@ describe('RelayClientImpl', () => {
 
   describe('listBindings', () => {
     const bindingsResponse: BindingsResponseBody = {
-      ok: true,
-      bindings: [
+      items: [
         {
           surface: 'slack',
           tenant_key: 'team-1',
@@ -188,7 +176,7 @@ describe('RelayClientImpl', () => {
       next_cursor: 'opaque-cursor',
     };
 
-    it('GETs /v1/bindings with no query string and maps the response', async () => {
+    it('GETs /v1/bindings with no query string and returns the response', async () => {
       fetchMock.mockResolvedValue(okResponse(bindingsResponse));
       const client = new RelayClientImpl({ baseUrl: 'https://relay.example', logger });
 
@@ -198,17 +186,7 @@ describe('RelayClientImpl', () => {
       const [url, init] = fetchMock.mock.calls[0];
       expect(url).toBe('https://relay.example/v1/bindings');
       expect(init).toMatchObject({ method: 'GET', headers: {} });
-      expect(result).toEqual({
-        bindings: [
-          {
-            surface: 'slack',
-            tenantKey: 'team-1',
-            scope: { type: 'USER', id: 'user-42' },
-            deploymentRef: 'deployment-1',
-          },
-        ],
-        nextCursor: 'opaque-cursor',
-      });
+      expect(result).toEqual(bindingsResponse);
     });
 
     it('encodes limit and cursor as query params', async () => {
@@ -242,7 +220,7 @@ describe('RelayClientImpl', () => {
 
   describe('TLS dispatcher', () => {
     const AGENT_MOCK = { name: 'mock-undici-agent' };
-    const emptyTenantsResponse: TenantsResponseBody = { ok: true, tenants: [] };
+    const emptyTenantsResponse: TenantsResponseBody = { items: [] };
     let readFileSyncSpy: jest.SpyInstance;
     let agentSpy: jest.SpyInstance;
 

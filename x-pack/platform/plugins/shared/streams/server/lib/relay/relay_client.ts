@@ -9,21 +9,14 @@ import { readFileSync } from 'fs';
 import { Agent } from 'undici';
 import type { Logger } from '@kbn/core/server';
 import type {
-  Binding,
   BindingsResponseBody,
-  BindingViewBody,
-  ListBindingsResult,
   ListPageInput,
-  ListTenantsResult,
   RelayClient,
   RelayClientTlsOptions,
   StartInstallRequestBody,
   StartInstallResponseBody,
   StartSlackInstallInput,
-  StartSlackInstallResult,
-  Tenant,
   TenantsResponseBody,
-  TenantViewBody,
 } from './types';
 import { RelayResponseError, RelayUnreachableError } from './errors';
 
@@ -38,20 +31,6 @@ const buildListQueryString = ({ limit, cursor }: ListPageInput): string => {
   const query = params.toString();
   return query ? `?${query}` : '';
 };
-
-const tenantFromWire = (tenant: TenantViewBody): Tenant => ({
-  surface: tenant.surface,
-  tenantKey: tenant.tenant_key,
-  deploymentRef: tenant.deployment_ref,
-  status: tenant.status,
-});
-
-const bindingFromWire = (binding: BindingViewBody): Binding => ({
-  surface: binding.surface,
-  tenantKey: binding.tenant_key,
-  scope: binding.scope,
-  deploymentRef: binding.deployment_ref,
-});
 
 export interface RelayClientOptions {
   /** Base URL of the relay-service, e.g. `https://relay.elastic.co`. */
@@ -161,46 +140,37 @@ export class RelayClientImpl implements RelayClient {
     return (await response.json()) as T;
   }
 
-  async startSlackInstall(input: StartSlackInstallInput): Promise<StartSlackInstallResult> {
+  async startSlackInstall(input: StartSlackInstallInput): Promise<StartInstallResponseBody> {
     const url = `${this.baseUrl}/v1/slack/install`;
     const body: StartInstallRequestBody = {
       kibana_api_key: input.kibanaApiKey,
       created_by_user_key: input.createdByUserKey,
     };
 
-    const responseBody = await this.request<StartInstallResponseBody>(url, {
+    return this.request<StartInstallResponseBody>(url, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
       },
       body: JSON.stringify(body),
     });
-    return { authorizeUrl: responseBody.authorize_url };
   }
 
-  async listTenants(input: ListPageInput = {}): Promise<ListTenantsResult> {
+  async listTenants(input: ListPageInput = {}): Promise<TenantsResponseBody> {
     const url = `${this.baseUrl}/v1/tenants${buildListQueryString(input)}`;
 
-    const responseBody = await this.request<TenantsResponseBody>(url, {
+    return this.request<TenantsResponseBody>(url, {
       method: 'GET',
       headers: {},
     });
-    return {
-      tenants: responseBody.tenants.map(tenantFromWire),
-      nextCursor: responseBody.next_cursor,
-    };
   }
 
-  async listBindings(input: ListPageInput = {}): Promise<ListBindingsResult> {
+  async listBindings(input: ListPageInput = {}): Promise<BindingsResponseBody> {
     const url = `${this.baseUrl}/v1/bindings${buildListQueryString(input)}`;
 
-    const responseBody = await this.request<BindingsResponseBody>(url, {
+    return this.request<BindingsResponseBody>(url, {
       method: 'GET',
       headers: {},
     });
-    return {
-      bindings: responseBody.bindings.map(bindingFromWire),
-      nextCursor: responseBody.next_cursor,
-    };
   }
 }

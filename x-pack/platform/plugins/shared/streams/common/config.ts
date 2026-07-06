@@ -23,16 +23,9 @@ export const configSchema = schema.object({
       taskTimeout: schema.duration({ defaultValue: '30s' }),
     }),
   }),
-  // Base URL of the Elastic relay-service used to connect external apps (e.g. Slack)
-  // to significant events. Server-only (never exposed to the browser). When unset,
-  // the connect routes return a "not configured" error.
   relayService: schema.maybe(
     schema.object({
       url: schema.string(),
-      // Outbound TLS settings for the `fetch` connection to the relay-service, e.g. a
-      // client certificate for mTLS or a custom CA. Mirrors
-      // `xpack.security.uiam.ssl` naming/semantics for consistency across Kibana's
-      // `fetch`-based outbound clients.
       tls: schema.maybe(
         schema.object(
           {

@@ -11,12 +11,12 @@ export type {
   RelayClient,
   RelayClientTlsOptions,
   StartSlackInstallInput,
-  StartSlackInstallResult,
+  StartInstallResponseBody,
   ListPageInput,
-  ListTenantsResult,
-  ListBindingsResult,
-  Tenant,
-  Binding,
+  TenantsResponseBody,
+  BindingsResponseBody,
+  TenantViewBody,
+  BindingViewBody,
   BindingScope,
 } from './types';
 export {

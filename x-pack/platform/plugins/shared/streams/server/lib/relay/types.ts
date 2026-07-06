@@ -48,14 +48,12 @@ export interface BindingViewBody {
 }
 
 export interface TenantsResponseBody {
-  ok: true;
-  tenants: TenantViewBody[];
+  items: TenantViewBody[];
   next_cursor?: string;
 }
 
 export interface BindingsResponseBody {
-  ok: true;
-  bindings: BindingViewBody[];
+  items: BindingViewBody[];
   next_cursor?: string;
 }
 
@@ -72,17 +70,9 @@ export interface RelayClientTlsOptions {
   key?: string;
 }
 
-/**
- * Domain types (camelCase) are what the rest of Kibana consumes. For the
- * initiate-only scope we only surface the authorize URL.
- */
 export interface StartSlackInstallInput {
   kibanaApiKey: string;
   createdByUserKey?: string;
-}
-
-export interface StartSlackInstallResult {
-  authorizeUrl: string;
 }
 
 /** `cursor` is the opaque `next_cursor` returned by a previous page. */
@@ -91,32 +81,8 @@ export interface ListPageInput {
   cursor?: string;
 }
 
-export interface Tenant {
-  surface: string;
-  tenantKey: string;
-  deploymentRef: string;
-  status: string;
-}
-
-export interface Binding {
-  surface: string;
-  tenantKey: string;
-  scope: BindingScope;
-  deploymentRef: string;
-}
-
-export interface ListTenantsResult {
-  tenants: Tenant[];
-  nextCursor?: string;
-}
-
-export interface ListBindingsResult {
-  bindings: Binding[];
-  nextCursor?: string;
-}
-
 export interface RelayClient {
-  startSlackInstall(input: StartSlackInstallInput): Promise<StartSlackInstallResult>;
-  listTenants(input?: ListPageInput): Promise<ListTenantsResult>;
-  listBindings(input?: ListPageInput): Promise<ListBindingsResult>;
+  startSlackInstall(input: StartSlackInstallInput): Promise<StartInstallResponseBody>;
+  listTenants(input?: ListPageInput): Promise<TenantsResponseBody>;
+  listBindings(input?: ListPageInput): Promise<BindingsResponseBody>;
 }
