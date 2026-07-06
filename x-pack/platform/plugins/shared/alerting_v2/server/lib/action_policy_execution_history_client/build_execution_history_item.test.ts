@@ -529,7 +529,7 @@ describe('buildExecutionHistoryItem', () => {
       expect(historyItem?.totalRuleCount).toBe(1);
     });
 
-    it('returns all rules when policy is search-matched and no mandatoryRuleIds is provided', () => {      
+    it('returns all rules when policy is search-matched and no mandatoryRuleIds is provided', () => {
       const event = eventWithRules(['rule-a', 'rule-b']);
       const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, {
         policyIds: ['policy-1'],
@@ -542,16 +542,11 @@ describe('buildExecutionHistoryItem', () => {
 
     it('returns all rules when neither search nor mandatoryRuleIds narrows', () => {
       const event = eventWithRules(['rule-a', 'rule-b']);
-      const historyItem = buildExecutionHistoryItem(
-        event,
-        EMPTY_NAME_MAPS,
-        undefined,
-        undefined
-      );
+      const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, undefined, undefined);
       expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-a', 'rule-b']);
     });
 
-    it('returns null when the union does not intersect any event rules', () => {      
+    it('returns null when the union does not intersect any event rules', () => {
       const event = eventWithRules(['rule-a']);
       const historyItem = buildExecutionHistoryItem(
         event,

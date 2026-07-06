@@ -86,13 +86,13 @@ export function getRelevantRuleIdsFromLogEvent(
   matchingSearchIds?: ResolvedSearchIds,
   mandatoryRuleIds?: string[]
 ): string[] {
-  const searchNarrows = matchingSearchIds !== undefined 
-    && !matchingSearchIds.policyIds.includes(policyId);
+  const searchNarrows =
+    matchingSearchIds !== undefined && !matchingSearchIds.policyIds.includes(policyId);
   const mandatoryActive = mandatoryRuleIds !== undefined && mandatoryRuleIds.length > 0;
 
   if (!searchNarrows && !mandatoryActive) {
     return allRuleIds;
-  }  
+  }
 
   const relevantRuleIds = new Set<string>([
     ...(searchNarrows ? matchingSearchIds.ruleIds : []),
