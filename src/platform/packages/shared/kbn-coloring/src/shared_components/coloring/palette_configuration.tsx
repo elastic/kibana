@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useReducer, useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import isEqual from 'lodash/isEqual';
 import { css } from '@emotion/react';
 import { EuiFormRow, htmlIdGenerator, EuiButtonGroup, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { PalettePicker } from './palette_picker';
@@ -46,7 +47,8 @@ function shouldSyncPaletteState(
   colorRangesToShow: ReturnType<typeof toColorRanges>
 ) {
   return (
-    (localState.activePalette !== activePalette || colorRangesToShow !== localState.colorRanges) &&
+    (!isEqual(localState.activePalette, activePalette) ||
+      !isEqual(colorRangesToShow, localState.colorRanges)) &&
     allRangesValid(localState.colorRanges, localState.activePalette.params?.rangeType === 'percent')
   );
 }
@@ -61,12 +63,14 @@ export const CustomizablePalette = ({
   disableSwitchingContinuity = false,
 }: CustomizablePaletteProps) => {
   const idPrefix = useMemo(() => htmlIdGenerator()(), []);
-  const colorRangesToShow = toColorRanges(
-    palettes,
-    activePalette.params?.colorStops || [],
-    activePalette,
-    dataBounds
-  );
+  const colorRangesToShow = useMemo(() => {
+    return toColorRanges(
+      palettes,
+      activePalette.params?.colorStops || [],
+      activePalette,
+      dataBounds
+    );
+  }, [palettes, activePalette, dataBounds]);
 
   const [localState, dispatch] = useReducer(paletteConfigurationReducer, {
     activePalette,
@@ -94,12 +98,22 @@ export const CustomizablePalette = ({
 
   useDebounce(
     () => {
-      if (shouldSyncPaletteState(localState, activePalette, colorRangesToShow)) {
-        setPalette(localState.activePalette);
+      const latestPaletteState = latestPaletteStateRef.current;
+
+      // Parent rerenders should not restart the debounce; compare against the latest
+      // external palette state when the local edit window actually elapses.
+      if (
+        shouldSyncPaletteState(
+          latestPaletteState.localState,
+          latestPaletteState.activePalette,
+          latestPaletteState.colorRangesToShow
+        )
+      ) {
+        setPaletteRef.current(latestPaletteState.localState.activePalette);
       }
     },
     250,
-    [activePalette, colorRangesToShow, localState, setPalette]
+    [localState]
   );
 
   useEffect(() => {

@@ -219,6 +219,21 @@ describe('palette panel', () => {
 
       expect(props.setPalette).toHaveBeenCalledTimes(1);
     });
+
+    it('does not resync on semantically equal parent rerenders', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      act(() => {
+        instance.setProps({
+          activePalette: { type: 'palette', name: 'positive' },
+          dataBounds: { min: 0, max: 100 },
+        });
+      });
+
+      jest.advanceTimersByTime(250);
+
+      expect(props.setPalette).not.toHaveBeenCalled();
+    });
   });
 
   describe('percentage / number modes', () => {
