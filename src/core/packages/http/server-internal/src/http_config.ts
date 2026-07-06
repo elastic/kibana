@@ -42,6 +42,10 @@ const match = (regex: RegExp, errorMsg: string) => (str: string) =>
 // The lower-case set of response headers which are forbidden within `customResponseHeaders`.
 const RESPONSE_HEADER_DENY_LIST = ['location', 'refresh'];
 
+// Auth schemes that may bypass kbn-xsrf (configured using `server.xsrf.allowedSchemes`).
+// Must be stateless; `basic` is excluded because browsers can cache and replay it cross-origin.
+const xsrfSchemeSchema = schema.oneOf([schema.literal('apikey'), schema.literal('bearer')]);
+
 const validHostName = () => {
   // see https://github.com/elastic/kibana/issues/139730
   return hostname().replace(/[^\x00-\x7F]/g, '');
@@ -189,6 +193,17 @@ const configSchema = schema.object(
         schema.string({ validate: match(/^\//, 'must start with a slash') }),
         { defaultValue: [], maxSize: 100 }
       ),
+      // `as const` prevents the defaultValue literal from widening TypeOf<> to `string[]`.
+      allowedSchemes: offeringBasedSchema({
+        serverless: schema.arrayOf(xsrfSchemeSchema, {
+          defaultValue: ['apikey', 'bearer'] as const,
+          maxSize: 2,
+        }),
+        traditional: schema.arrayOf(xsrfSchemeSchema, {
+          defaultValue: [] as const,
+          maxSize: 2,
+        }),
+      }),
     }),
     excludeRoutes: schema.arrayOf(
       schema.string({ validate: match(/^\//, 'must start with a slash') }),
@@ -382,7 +397,12 @@ export class HttpConfig implements IHttpConfig {
   public csp: ICspConfig;
   public prototypeHardening: boolean;
   public externalUrl: IExternalUrlConfig;
-  public xsrf: { disableProtection: boolean; allowlist: string[] };
+  public xsrf: {
+    disableProtection: boolean;
+    allowlist: string[];
+    // Literal union, not `string[]`: adding a scheme without updating consumers is a compile error.
+    allowedSchemes: Array<'apikey' | 'bearer'>;
+  };
   public excludeRoutes: string[];
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
   public versioned: {

@@ -43,6 +43,15 @@ import type {
   IlmPhaseSelectRenderButtonProps,
 } from '../data_phases/ilm_phase_select/ilm_phase_select';
 import { IlmPhaseSelect } from '../data_phases/ilm_phase_select/ilm_phase_select';
+import type { FrozenPhaseCallouts } from '../common/data_lifecycle/data_lifecycle_summary';
+import { getFrozenPhaseLabel } from '../common/data_lifecycle/lifecycle_types';
+
+const getRemovablePhaseLabel = (phaseName: string): string =>
+  phaseName === 'frozen'
+    ? getFrozenPhaseLabel()
+    : i18n.translate('xpack.streams.dataLifecycleSummary.deletePhaseLabel', {
+        defaultMessage: 'Delete',
+      });
 
 const addPhaseButtonLabel = i18n.translate(
   'xpack.streams.dataLifecycleSummary.addPhaseButtonLabel',
@@ -106,6 +115,20 @@ interface LifecycleSummaryProps {
   refreshDefinition?: () => void;
   onEditSuccessfulLifecycle?: () => void;
   onAddDeletePhase?: () => void;
+  onAddDataPhase?: (phase: IlmPhaseSelectOption) => void;
+  /** The phase selected in the open "Edit data phases" flyout, used to highlight it on the timeline. */
+  dataPhaseSelectedPhase?: PhaseName;
+  /** Phases with active validation errors in the open "Edit data phases" flyout, shown in red on the timeline. */
+  dataPhaseInvalidPhases?: PhaseName[];
+  frozenPhaseGating?: {
+    excludeFrozen: boolean;
+    showEnterpriseLicenseRequiredBadge: boolean;
+    showDefaultRepositoryRequiredBadge: boolean;
+    onUpgradeEnterprise?: () => void;
+    createDefaultRepositoryHref?: string;
+    onRefreshDefaultRepository?: () => void;
+    isRefreshingDefaultRepository?: boolean;
+  };
   isExternalFlyoutOpen?: boolean;
   isDataPhaseFlyoutOpen?: boolean;
   onDataPhaseFlyoutOpenChange?: (isOpen: boolean) => void;
@@ -268,7 +291,6 @@ const IlmLifecycleSummary = ({
     phases: ilmSummary.phases,
     isMetricsStream,
     hasUnsavedChangesInFlyout: ilmSummary.hasUnsavedEditLifecycleFlyoutChanges,
-    onDataPhaseFlyoutOpenChange,
   });
 
   const headerActions =
@@ -371,6 +393,10 @@ const NonIlmLifecycleSummary = ({
   stats,
   refreshDefinition,
   onAddDeletePhase,
+  onAddDataPhase,
+  dataPhaseSelectedPhase,
+  dataPhaseInvalidPhases,
+  frozenPhaseGating,
   isExternalFlyoutOpen = false,
   isDataPhaseFlyoutOpen = false,
   onDataPhaseFlyoutOpenChange,
@@ -379,7 +405,10 @@ const NonIlmLifecycleSummary = ({
 }: InternalLifecycleSummaryProps) => {
   const {
     core: { notifications },
+    isServerless,
   } = useKibana();
+  // Frozen phase is not available in serverless
+  const dataPhaseFlowEnabled = !isServerless;
   const {
     isActive: isPreviewActive,
     isDslDownsampleFlyoutOpen,
@@ -406,7 +435,6 @@ const NonIlmLifecycleSummary = ({
     phases: dslSummary.phases,
     downsampleSteps: dslSummary.downsampleSteps,
     isMetricsStream,
-    onDataPhaseFlyoutOpenChange,
     includeDownsampleStepsInTimeline: isDsl,
     countDownsampleFromPhases: false,
   });
@@ -415,6 +443,15 @@ const NonIlmLifecycleSummary = ({
   const isAddDownsampleStepDisabled = currentDslStepsCount >= MAX_DOWNSAMPLE_STEPS;
   const invalidStepIndices = dslSummary.flyoutInvalidStepIndices;
   const hasDeletePhase = dslSummary.phases.some((p) => p.isDelete);
+  // Derive frozen presence from the effective lifecycle rather than the timeline phase label:
+  // the frozen phase's display label is localized ("Frozen"), so it is not a stable identifier.
+  const hasFrozenPhase =
+    isDslLifecycle(definition.effective_lifecycle) &&
+    definition.effective_lifecycle.dsl.frozen_after !== undefined;
+  // The "Edit data phases" flyout is owned by the parent and surfaced here via isDataPhaseFlyoutOpen.
+  // While it's open the timeline acts as a navigation control into the flyout rather than showing
+  // per-phase popovers.
+  const isDataPhaseEditing = isDataPhaseFlyoutOpen;
   const isDslDownsampleFlyoutBlocking =
     isDslDownsampleFlyoutOpen || dslSummary.isEditLifecycleFlyoutOpen || isDataPhaseFlyoutOpen;
   const isAddDeletePhaseDisabled = isExternalFlyoutOpen || isDslDownsampleFlyoutBlocking;
@@ -427,7 +464,7 @@ const NonIlmLifecycleSummary = ({
       size="s"
       data-test-subj="dataLifecycleSummaryAddDownsampleStep"
       onClick={() => dslSummary.onAddDownsampleStep?.()}
-      disabled={isAddDownsampleStepDisabled || isExternalFlyoutOpen}
+      disabled={isAddDownsampleStepDisabled || isExternalFlyoutOpen || isDataPhaseEditing}
     >
       {addDownsampleStepButtonLabel}
     </EuiButton>
@@ -464,6 +501,63 @@ const NonIlmLifecycleSummary = ({
       addDeletePhaseButtonElement
     );
 
+  // Stateful DLM: the "Add data phase" popover offers the frozen and delete phases.
+  // (In serverless only the delete phase is allowed, so the dedicated "Add delete phase" button
+  // above is used instead.) Configured phases are derived from the effective lifecycle (rather than
+  // the localized timeline labels) so they are filtered out of the popover. When both frozen and
+  // delete are configured the popover has no options left and IlmPhaseSelect disables the button.
+  const enabledDataPhases: IlmPhaseSelectOption[] = [
+    ...(hasFrozenPhase ? (['frozen'] as IlmPhaseSelectOption[]) : []),
+    ...(hasDeletePhase ? (['delete'] as IlmPhaseSelectOption[]) : []),
+  ];
+
+  // Thread gating callouts into the frozen phase's timeline popover so users know why they
+  // need to take action (upgrade license or create a default snapshot repository).
+  const frozenPhaseCallouts: FrozenPhaseCallouts | undefined = frozenPhaseGating
+    ? {
+        showEnterpriseCallout: frozenPhaseGating.showEnterpriseLicenseRequiredBadge,
+        onUpgradeEnterprise: frozenPhaseGating.onUpgradeEnterprise,
+        showDefaultRepositoryCallout: frozenPhaseGating.showDefaultRepositoryRequiredBadge,
+        createDefaultRepositoryHref: frozenPhaseGating.createDefaultRepositoryHref,
+        onRefreshDefaultRepository: frozenPhaseGating.onRefreshDefaultRepository,
+        isRefreshingDefaultRepository: frozenPhaseGating.isRefreshingDefaultRepository,
+      }
+    : undefined;
+
+  // Hide frozen from the popover when the user has no way to configure it (no default
+  // repository and no permission to create one).
+  const excludedDataPhases: IlmPhaseSelectOption[] = [
+    'hot',
+    'warm',
+    'cold',
+    ...(frozenPhaseGating?.excludeFrozen ? (['frozen'] as IlmPhaseSelectOption[]) : []),
+  ];
+
+  // Mirrors the "Add delete phase" button's render condition (no isDsl gate) so a disabled
+  // lifecycle on stateful still offers a way to add a phase, just like the delete-phase flow does.
+  const addDataPhaseButton =
+    onAddDataPhase && definition.privileges.lifecycle ? (
+      <IlmPhaseSelect
+        selectedPhases={enabledDataPhases}
+        excludedPhases={excludedDataPhases}
+        onSelect={(phase) => onAddDataPhase(phase)}
+        disabled={isAddDeletePhaseDisabled}
+        showEnterpriseLicenseRequiredBadge={
+          frozenPhaseGating?.showEnterpriseLicenseRequiredBadge ?? false
+        }
+        showDefaultRepositoryRequiredBadge={
+          frozenPhaseGating?.showDefaultRepositoryRequiredBadge ?? false
+        }
+        data-test-subj="dataLifecycleSummaryAddDataPhase"
+        anchorPosition="downRight"
+        renderButton={renderAddPhaseButton(addPhaseButtonLabel)}
+      />
+    ) : undefined;
+
+  // The data-phase flow (frozen + delete) replaces the single "Add delete phase" button wherever it
+  // is enabled (currently stateful); serverless keeps the delete-only button.
+  const primaryAddPhaseButton = dataPhaseFlowEnabled ? addDataPhaseButton : addDeletePhaseButton;
+
   const dslHeaderActions =
     definition.privileges.lifecycle &&
     isDsl &&
@@ -480,10 +574,10 @@ const NonIlmLifecycleSummary = ({
 
   const headerActionsWithEditButton = composeHeaderActions(
     editLifecycleMethodButton,
-    editLifecycleMethodButton && (addDeletePhaseButton || dslHeaderActions) ? (
+    editLifecycleMethodButton && (primaryAddPhaseButton || dslHeaderActions) ? (
       <HeaderActionsSeparator />
     ) : undefined,
-    addDeletePhaseButton,
+    primaryAddPhaseButton,
     dslHeaderActions
   );
 
@@ -495,11 +589,19 @@ const NonIlmLifecycleSummary = ({
     isExternalFlyoutOpen,
   });
 
+  const timelineModelPhases = (isPreviewActive && previewTimelinePhases) || dslSummary.phases;
+  // Highlight the phase currently open in the flyout. The timeline matches on the (localized) phase
+  // label, so resolve the selected schema phase id back to the matching phase's label.
+  const editedTimelinePhaseLabel =
+    isDataPhaseEditing && dataPhaseSelectedPhase
+      ? timelineModelPhases.find((p) => p.name === dataPhaseSelectedPhase)?.label
+      : undefined;
+
   return (
     <>
       <DataLifecycleSummary
         model={{
-          phases: (isPreviewActive && previewTimelinePhases) || dslSummary.phases,
+          phases: timelineModelPhases,
           loading: false,
           downsampleSteps: isPreviewActive
             ? previewTimelineDownsampleSteps ?? undefined
@@ -510,25 +612,48 @@ const NonIlmLifecycleSummary = ({
         title={title}
         titleBadge={titleBadge}
         showDownsampling={isMetricsStream}
-        downsamplingActions={{
-          onRemoveDownsampleStep: dslSummary.onRemoveDownsampleStep,
-          onEditDownsampleStep: dslSummary.onEditDownsampleStep,
-        }}
+        downsamplingActions={
+          // While the data phases flyout is open, downsampling steps must not be interactive —
+          // only the individual phases can be selected to edit them inside the flyout.
+          isDataPhaseEditing
+            ? {}
+            : {
+                onRemoveDownsampleStep: dslSummary.onRemoveDownsampleStep,
+                onEditDownsampleStep: dslSummary.onEditDownsampleStep,
+              }
+        }
         capabilities={{
           canManageLifecycle: definition.privileges.lifecycle && !isExternalFlyoutOpen,
         }}
         headerActions={headerActionsWithEditButton}
         phaseActions={
-          definition.privileges.lifecycle && hasDeletePhase
+          definition.privileges.lifecycle &&
+          (hasDeletePhase || hasFrozenPhase || isDataPhaseEditing)
             ? {
                 showPhaseActions: true,
                 onEditPhase: (phaseName) => {
-                  if (phaseName === 'delete' && onAddDeletePhase && !isAddDeletePhaseDisabled) {
-                    onAddDeletePhase();
+                  // `phaseName` is the stable schema phase id (e.g. 'frozen'), supplied by
+                  // LifecyclePhase via its `name` — never the localized label.
+                  // Delete-only flow (serverless): the delete phase is edited via its own flyout.
+                  if (!dataPhaseFlowEnabled) {
+                    if (phaseName === 'delete' && !isAddDeletePhaseDisabled) {
+                      onAddDeletePhase?.();
+                    }
+                    return;
                   }
+                  // Data-phase flow: edit frozen/delete through the data phases flyout. Navigating
+                  // within an already-open flyout is allowed; opening a new one respects the
+                  // blocking state of other flyouts.
+                  if (phaseName !== 'frozen' && phaseName !== 'delete') {
+                    return;
+                  }
+                  if (!isDataPhaseEditing && isAddDeletePhaseDisabled) {
+                    return;
+                  }
+                  onAddDataPhase?.(phaseName as IlmPhaseSelectOption);
                 },
                 onRemovePhase: (phaseName) => {
-                  if (phaseName !== 'delete' || isExternalFlyoutOpen) {
+                  if ((phaseName !== 'delete' && phaseName !== 'frozen') || isExternalFlyoutOpen) {
                     return;
                   }
 
@@ -539,24 +664,32 @@ const NonIlmLifecycleSummary = ({
                   const baseline = effectiveToIngestLifecycle(definition.effective_lifecycle);
                   if (!('dsl' in baseline)) return;
 
-                  const { data_retention: _removed, ...rest } = baseline.dsl;
+                  const removedKey = phaseName === 'frozen' ? 'frozen_after' : 'data_retention';
+                  const { [removedKey]: _removed, ...rest } = baseline.dsl;
                   const nextLifecycle: IngestStreamLifecycle = { dsl: { ...rest } };
 
+                  const phaseLabel = getRemovablePhaseLabel(phaseName);
                   const performRemove = async () => {
                     try {
                       await updateStreamLifecycle(nextLifecycle);
                       notifications.toasts.addSuccess({
                         title: i18n.translate(
-                          'xpack.streams.dataLifecycleSummary.removeDeletePhaseSuccess',
-                          { defaultMessage: 'Delete phase removed' }
+                          'xpack.streams.dataLifecycleSummary.removeDataPhaseSuccess',
+                          {
+                            defaultMessage: '{phase} phase removed',
+                            values: { phase: phaseLabel },
+                          }
                         ),
                       });
                       await Promise.resolve(refreshDefinition?.());
                     } catch (error) {
                       notifications.toasts.addError(error as Error, {
                         title: i18n.translate(
-                          'xpack.streams.dataLifecycleSummary.removeDeletePhaseError',
-                          { defaultMessage: 'Failed to remove delete phase' }
+                          'xpack.streams.dataLifecycleSummary.removeDataPhaseError',
+                          {
+                            defaultMessage: 'Failed to remove {phase} phase',
+                            values: { phase: phaseLabel },
+                          }
                         ),
                       });
                     }
@@ -564,19 +697,29 @@ const NonIlmLifecycleSummary = ({
 
                   confirmOverride(() => performRemove());
                 },
-                shouldShowEditPhaseAction: (phaseName) => phaseName === 'delete',
-                shouldShowRemovePhaseAction: (phaseName) => phaseName === 'delete',
+                shouldShowEditPhaseAction: (phaseName) =>
+                  dataPhaseFlowEnabled
+                    ? phaseName === 'frozen' || phaseName === 'delete'
+                    : phaseName === 'delete',
+                shouldShowRemovePhaseAction: (phaseName) =>
+                  dataPhaseFlowEnabled
+                    ? phaseName === 'frozen' || phaseName === 'delete'
+                    : phaseName === 'delete',
               }
             : undefined
         }
         uiState={{
-          editedPhaseName: undefined,
+          editedPhaseName: editedTimelinePhaseLabel,
           editedDownsampleStepIndex: dslSummary.isEditLifecycleFlyoutOpen
             ? dslSummary.selectedStepIndex
             : undefined,
-          isEditLifecycleFlyoutOpen: dslSummary.isEditLifecycleFlyoutOpen,
+          // Treat the data phases flyout like the downsample-steps flyout: timeline clicks navigate
+          // into it rather than opening per-phase/-step popovers.
+          isEditLifecycleFlyoutOpen: dslSummary.isEditLifecycleFlyoutOpen || isDataPhaseEditing,
           invalidStepIndices,
+          invalidPhases: dataPhaseInvalidPhases,
         }}
+        frozenPhaseCallouts={frozenPhaseCallouts}
       />
 
       {dslSummary.modals}
