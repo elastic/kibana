@@ -111,6 +111,7 @@ safe-outputs:
     target: ${{ env.PR_NUMBER }}
   resolve-pull-request-review-thread:
     max: 10
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
 ---
 
 # Claude PR Reviewer
