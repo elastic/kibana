@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const DASHBOARD_NAME = 'Test Links Panel A11y';
 
-  describe.only('Dashboard links a11y tests', () => {
+  describe('Dashboard links a11y tests', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
