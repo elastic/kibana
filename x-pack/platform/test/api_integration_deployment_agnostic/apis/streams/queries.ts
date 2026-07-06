@@ -389,12 +389,44 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .then((res) => res.body);
       expect(deleteQueryResponse.acknowledged).to.be(true);
 
-      // A genuinely unknown id must still 404 — the fix must not blanket-succeed.
+      const rules = await alertingApi.searchRules(roleAuthc, '');
+      expect(rules.body.data).to.have.length(0);
+
+      // Repeating the delete on the same id must now 404, proving it was a real
+      // delete and not another silent no-op.
       await apiClient
         .fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
           params: { path: { name: STREAM_NAME, queryId } },
         })
         .expect(404);
+    });
+
+    it('cleans up an already-expired query and its rule when the stream itself is deleted', async () => {
+      const queryId = v4();
+      await apiClient
+        .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+          params: {
+            path: { name: STREAM_NAME, queryId },
+            body: {
+              title: 'lingering expired query',
+              esql: {
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'lingering'")`,
+              },
+              expires_at: '2020-01-01T00:00:00.000Z',
+            },
+          },
+        })
+        .expect(200);
+
+      // Deliberately left in place, expired but never explicitly deleted, so
+      // teardown (deleteStream -> deleteAllQueries) must be the one to catch it.
+      await deleteStream(apiClient, STREAM_NAME);
+
+      const rules = await alertingApi.searchRules(roleAuthc, '');
+      expect(rules.body.data).to.have.length(0);
+
+      // Recreate so the outer afterEach's deleteStream (expecting 200) doesn't 404.
+      await putStream(apiClient, STREAM_NAME, { stream, ...emptyAssets });
     });
 
     it('bulks insert and remove queries', async () => {
@@ -594,6 +626,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
         expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([]);
         expect((await getQueries(apiClient, SECOND_STREAM_NAME)).queries).to.eql([]);
+      });
+
+      it('partitions valid and unknown ids within a single request', async () => {
+        const query = {
+          id: v4(),
+          title: 'partition test',
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'partition'")`,
+          },
+        };
+        await bulkQueries(apiClient, STREAM_NAME, [{ index: query }]);
+
+        const response = await apiClient
+          .fetch('POST /internal/streams/queries/_bulk_delete', {
+            params: { body: { queryIds: [query.id, 'unknown-id'] } },
+          })
+          .expect(200)
+          .then((res) => res.body);
+
+        expect(response).to.eql({ succeeded: 1, failed: 0, skipped: 1 });
+        expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([]);
       });
 
       it('actually removes an already-expired query, not just from the default listing', async () => {
