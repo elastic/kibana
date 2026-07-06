@@ -11,8 +11,8 @@ export const TEST_OBJECT_ID_B = 'object-b';
 export const TEST_OBJECT_TITLE = 'Test object';
 export const TEST_CHANGE_HISTORY_SCOPE = {
   module: 'stack',
-  dataset: 'workflows',
-  objectType: 'workflow',
+  dataset: 'documents',
+  objectType: 'document',
 } as const;
 export const TEST_SNAPSHOT = { content: 'name: test\n' };
 export const TEST_SNAPSHOT_OLD = { content: 'name: old\n' };

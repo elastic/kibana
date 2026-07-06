@@ -8,18 +8,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiCallOut,
-  EuiContextMenu,
   EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPageHeader,
   EuiSpacer,
-  EuiSplitButton,
-  useGeneratedHtmlId,
   type Criteria,
 } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean, useDebouncedValue } from '@kbn/react-hooks';
@@ -45,6 +43,63 @@ import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/ru
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
 
+const RULES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.rulesList.pageTitle', {
+  defaultMessage: 'Rules',
+});
+
+const getRulesListMenu = ({
+  onCreateRule,
+  onCreateEsqlRule,
+  onCreateWithAgent,
+}: {
+  onCreateRule: () => void;
+  onCreateEsqlRule: () => void;
+  onCreateWithAgent?: () => void;
+}): AppHeaderMenu => ({
+  primaryActionItem: {
+    id: 'createRule',
+    label: i18n.translate('xpack.alertingV2.rulesList.createRuleButton', {
+      defaultMessage: 'Create rule',
+    }),
+    iconType: 'plusInCircle',
+    run: onCreateRule,
+    testId: 'createRuleButton',
+    popoverTestId: 'createRulePopoverPanel',
+    splitButtonProps: {
+      iconType: 'arrowDown',
+      secondaryButtonAriaLabel: i18n.translate('xpack.alertingV2.rulesList.createRuleMoreOptions', {
+        defaultMessage: 'More create options',
+      }),
+      items: [
+        {
+          id: 'createEsqlRule',
+          label: i18n.translate('xpack.alertingV2.rulesList.createEsqlRuleButton', {
+            defaultMessage: 'Create ES|QL rule',
+          }),
+          iconType: 'productDiscover',
+          order: 0,
+          run: onCreateEsqlRule,
+          testId: 'createEsqlRuleButton',
+        },
+        ...(onCreateWithAgent
+          ? [
+              {
+                id: 'createWithAgent',
+                label: i18n.translate('xpack.alertingV2.rulesList.createWithAgentButton', {
+                  defaultMessage: 'Create with agent',
+                }),
+                iconType: 'sparkles' as const,
+                order: 1,
+                run: onCreateWithAgent,
+                testId: 'createWithAgentButton',
+              },
+            ]
+          : []),
+      ],
+    },
+  },
+});
+
 const SORT_FIELD_TO_TABLE_FIELD: Record<FindRulesSortField, RulesListTableSortField> = {
   kind: 'kind',
   enabled: 'enabled',
@@ -62,8 +117,6 @@ export const RulesListPage = () => {
     isCreateOptionsFlyoutOpen,
     { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
   ] = useBoolean(false);
-  const [isCreateMenuOpen, { off: closeCreateMenu, toggle: toggleCreateMenu }] = useBoolean(false);
-  const createMenuId = useGeneratedHtmlId({ prefix: 'createRuleMenu' });
   const { flyout, openCreateFlyout, openCreateBuilderFlyout, openEditFlyout, openCloneFlyout } =
     useComposeDiscoverFlyout();
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
@@ -146,97 +199,33 @@ export const RulesListPage = () => {
     openCreateBuilderFlyout('threshold');
   };
 
+  // "Create with agent" is only offered when the agent-builder AB skill is available. Compute the
+  // gated handlers once so the header, empty-state panel, and options flyout stay in sync.
+  const onCreateWithAgent = isRuleManagementABSkillAvailable ? navigateToAgentBuilder : undefined;
+  const onCreateWithAgentFromFlyout = isRuleManagementABSkillAvailable
+    ? onCreateWithAgentFromOptionsFlyout
+    : undefined;
+  const showHeaderMenu = hasRules || hasActiveFilters;
+  const headerMenu = useMemo(
+    () =>
+      showHeaderMenu
+        ? getRulesListMenu({
+            onCreateRule: openCreateOptionsFlyout,
+            onCreateEsqlRule: openCreateFlyout,
+            onCreateWithAgent,
+          })
+        : undefined,
+    [showHeaderMenu, openCreateOptionsFlyout, openCreateFlyout, onCreateWithAgent]
+  );
+
   return (
     <div>
-      <EuiPageHeader
-        pageTitle={
-          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false} component="span">
-              <FormattedMessage id="xpack.alertingV2.rulesList.pageTitle" defaultMessage="Rules" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} component="span">
-              <ExperimentalBadge />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        rightSideItems={
-          hasRules || hasActiveFilters
-            ? [
-                <EuiSplitButton
-                  key="create-rule-split"
-                  color="text"
-                  fill={false}
-                  data-test-subj="createRuleSplitButton"
-                >
-                  <EuiSplitButton.ActionPrimary
-                    onClick={openCreateOptionsFlyout}
-                    data-test-subj="createRuleButton"
-                    iconType="plusInCircle"
-                  >
-                    <FormattedMessage
-                      id="xpack.alertingV2.rulesList.createRuleButton"
-                      defaultMessage="Create rule"
-                    />
-                  </EuiSplitButton.ActionPrimary>
-                  <EuiSplitButton.ActionSecondary
-                    iconType="arrowDown"
-                    aria-label={i18n.translate('xpack.alertingV2.rulesList.createRuleMoreOptions', {
-                      defaultMessage: 'More create options',
-                    })}
-                    onClick={toggleCreateMenu}
-                    data-test-subj="createRulePopoverButton"
-                    popoverProps={{
-                      id: createMenuId,
-                      isOpen: isCreateMenuOpen,
-                      closePopover: closeCreateMenu,
-                      anchorPosition: 'downRight',
-                      panelPaddingSize: 'none',
-                      children: (
-                        <EuiContextMenu
-                          initialPanelId={0}
-                          panels={[
-                            {
-                              id: 0,
-                              items: [
-                                {
-                                  name: i18n.translate(
-                                    'xpack.alertingV2.rulesList.createEsqlRuleButton',
-                                    { defaultMessage: 'Create ES|QL rule' }
-                                  ),
-                                  icon: 'productDiscover',
-                                  onClick: () => {
-                                    closeCreateMenu();
-                                    openCreateFlyout();
-                                  },
-                                  'data-test-subj': 'createEsqlRuleButton',
-                                },
-                                ...(isRuleManagementABSkillAvailable
-                                  ? [
-                                      {
-                                        name: i18n.translate(
-                                          'xpack.alertingV2.rulesList.createWithAgentButton',
-                                          { defaultMessage: 'Create with agent' }
-                                        ),
-                                        icon: 'sparkles' as const,
-                                        onClick: () => {
-                                          closeCreateMenu();
-                                          navigateToAgentBuilder();
-                                        },
-                                        'data-test-subj': 'createWithAgentButton',
-                                      },
-                                    ]
-                                  : []),
-                              ],
-                            },
-                          ]}
-                        />
-                      ),
-                    }}
-                  />
-                </EuiSplitButton>,
-              ]
-            : []
-        }
+      <AppHeader
+        sticky={false}
+        title={RULES_LIST_PAGE_TITLE}
+        titleAppend={<ExperimentalBadge />}
+        padding={{ bleed: 'l' }}
+        menu={headerMenu}
       />
       <EuiSpacer size="m" />
       {isInitialLoad ? (
@@ -267,7 +256,7 @@ export const RulesListPage = () => {
       {showEmptyState ? (
         <RuleCreateOptionsPanel
           onCreateEsqlRule={openCreateFlyout}
-          onCreateWithAgent={isRuleManagementABSkillAvailable ? navigateToAgentBuilder : undefined}
+          onCreateWithAgent={onCreateWithAgent}
           onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
       ) : null}
@@ -320,9 +309,7 @@ export const RulesListPage = () => {
         <RuleCreateOptionsFlyout
           onClose={closeCreateOptionsFlyout}
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
-          onCreateWithAgent={
-            isRuleManagementABSkillAvailable ? onCreateWithAgentFromOptionsFlyout : undefined
-          }
+          onCreateWithAgent={onCreateWithAgentFromFlyout}
           onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
       ) : null}
