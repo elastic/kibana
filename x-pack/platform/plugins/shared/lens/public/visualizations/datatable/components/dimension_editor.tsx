@@ -324,7 +324,6 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 paletteService={props.paletteService}
                 panelRef={props.panelRef}
                 isInlineEditing={isInlineEditing}
-                formatter={formatter}
                 onUpdate={(newColumn) => updateColumnState(accessor, newColumn, { flush: true })}
               />
             ) : showColorByTerms ? (

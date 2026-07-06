@@ -19,11 +19,9 @@ import type {
   OperationDescriptor,
 } from '@kbn/lens-common';
 import { getKbnPalettes } from '@kbn/palettes';
-import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import type { TableDimensionEditorProps } from './dimension_editor';
 import { TableDimensionEditor } from './dimension_editor';
-import { getCellDecorationLabel } from '../cell_decoration';
 import { getAdjustedRangeForInputChange } from './progress_bar_controls';
 import { renderWithProviders } from '../../../test_utils/test_utils';
 
@@ -77,7 +75,6 @@ describe('data table progress bar regressions', () => {
   let frame: FramePublicAPI;
   let state: DatatableVisualizationState;
   let props: TableDimensionEditorProps;
-  let colorMode: EuiComboBoxTestHarness;
   let setState: jest.Mock<void, [DatatableVisualizationState]>;
 
   const setFooRows = (rows: Array<{ foo: number }>) => {
@@ -88,10 +85,6 @@ describe('data table progress bar regressions', () => {
 
     activeData.first.rows = rows;
   };
-
-  const getDynamicColoringLabel = (
-    colorModeValue: DatatableVisualizationState['columns'][number]['colorMode']
-  ) => getCellDecorationLabel(colorModeValue ?? 'none');
 
   function mockFirstColumn(overrides: Partial<OperationDescriptor> = {}) {
     const firstDatasource = frame.datasourceLayers?.first;
@@ -134,7 +127,6 @@ describe('data table progress bar regressions', () => {
 
   beforeEach(() => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    colorMode = new EuiComboBoxTestHarness('lnsDatatable_dynamicColoring_groups');
     state = {
       layerId: 'first',
       layerType: LayerTypes.DATA,

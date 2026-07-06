@@ -785,8 +785,7 @@ export function ProgressBarControls({
     const clampActualValue = (value: number) =>
       Math.min(Math.max(value, sliderBoundsMin), sliderBoundsMax);
     const toSliderOffset = (value: number) => value - sliderBoundsMin;
-    const paletteColors =
-      palette.params?.colors ?? palette.params?.stops?.map(({ color }) => color);
+    const paletteColors = palette.params?.stops?.map(({ color }) => color);
     const paletteStops = palette.name === 'custom' ? palette.params?.stops : undefined;
     if (usesPalette) {
       const stops = getProgressBarPaletteStops(

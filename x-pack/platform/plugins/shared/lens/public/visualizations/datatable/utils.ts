@@ -19,6 +19,7 @@ import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   hasPaletteStops,
 } from '@kbn/coloring';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
@@ -29,6 +30,12 @@ import type {
 } from '@kbn/lens-common';
 import { defaultPaletteParams, findMinMaxByColumnId } from '../../shared_components';
 import { getCellDecorationCapabilities } from './cell_decoration';
+
+type ProgressBarPaletteParams =
+  | Pick<CustomPaletteParams, 'rangeType' | 'steps' | 'stops'>
+  | Pick<CustomPaletteState, 'range' | 'colors' | 'stops'>;
+
+type ProgressBarPalette = PaletteOutput<ProgressBarPaletteParams>;
 
 export function getColumnAlignment<C extends { alignment?: 'left' | 'right' | 'center' }>(
   { alignment }: C,
@@ -267,9 +274,9 @@ export function getProgressBarDomain(
 export function getProgressBarPaletteStops(
   paletteService: PaletteRegistry,
   dataBounds: DataBounds,
-  palette?: PaletteOutput<CustomPaletteParams>,
+  palette?: ProgressBarPalette,
   colors?: string[],
-  stops?: Array<number | Pick<ColorStop, 'stop'>>
+  stops?: Array<number | Pick<ColorStop, 'stop' | 'color'>>
 ): Array<{ color: string; stop: number }> {
   const explicitPaletteStops = resolveExplicitProgressBarPaletteStops(
     dataBounds,
@@ -319,9 +326,9 @@ function distributeColorsAcrossDomain(
 
 function resolveExplicitProgressBarPaletteStops(
   domain: DataBounds,
-  palette: PaletteOutput<CustomPaletteParams> | undefined,
+  palette: ProgressBarPalette | undefined,
   colors: string[] | undefined,
-  stops: Array<number | Pick<ColorStop, 'stop'>> | undefined
+  stops: Array<number | Pick<ColorStop, 'stop' | 'color'>> | undefined
 ): Array<{ color: string; stop: number }> {
   const explicitStops = toExplicitStopPairs(colors, stops);
   if (!explicitStops.length) {
@@ -332,7 +339,7 @@ function resolveExplicitProgressBarPaletteStops(
     return [{ color: explicitStops[0].color, stop: domain.min }];
   }
 
-  const rangeType = palette?.params?.rangeType ?? 'percent';
+  const rangeType = getProgressBarPaletteRangeType(palette);
   const upperBounds = explicitStops
     .map(({ color, stop }) => ({
       color,
@@ -365,15 +372,11 @@ function resolveExplicitProgressBarPaletteStops(
 
 function toExplicitStopPairs(
   colors: string[] | undefined,
-  stops: Array<number | Pick<ColorStop, 'stop'>> | undefined
+  stops: Array<number | Pick<ColorStop, 'stop' | 'color'>> | undefined
 ): Array<{ color: string; stop: number }> {
   return (stops ?? []).reduce<Array<{ color: string; stop: number }>>((acc, rawStop, index) => {
     const stop = typeof rawStop === 'number' ? rawStop : rawStop?.stop;
-    const color =
-      colors?.[index] ??
-      (typeof rawStop === 'object' && rawStop != null && 'color' in rawStop
-        ? rawStop.color
-        : undefined);
+    const color = colors?.[index] ?? (typeof rawStop === 'number' ? undefined : rawStop.color);
 
     if (color != null && stop != null) {
       acc.push({ color, stop });
@@ -397,14 +400,19 @@ function toDomainStop(
 
 function resolveProgressBarPaletteColors(
   paletteService: PaletteRegistry,
-  palette?: PaletteOutput<CustomPaletteParams>
+  palette?: ProgressBarPalette
 ): string[] | undefined {
   if (!palette || palette.name === CUSTOM_PALETTE) {
     return undefined;
   }
 
+  const paletteParams = palette.params;
+  if (paletteParams && 'colors' in paletteParams) {
+    return paletteParams.colors;
+  }
+
   const colorCount =
-    palette.params?.stops?.length ?? palette.params?.steps ?? defaultPaletteParams.steps;
+    paletteParams?.stops?.length ?? paletteParams?.steps ?? defaultPaletteParams.steps;
 
   return getColorByValuePalette(
     paletteService,
@@ -412,11 +420,22 @@ function resolveProgressBarPaletteColors(
     {
       ...palette,
       params: {
-        ...palette.params,
+        ...paletteParams,
         steps: colorCount,
       },
     }
   ).params?.stops?.map(({ color }) => color);
+}
+
+function getProgressBarPaletteRangeType(
+  palette: ProgressBarPalette | undefined
+): CustomPaletteParams['rangeType'] {
+  const paletteParams = palette?.params;
+  if (!paletteParams) {
+    return 'percent';
+  }
+
+  return 'range' in paletteParams ? paletteParams.range : paletteParams.rangeType ?? 'percent';
 }
 
 /**

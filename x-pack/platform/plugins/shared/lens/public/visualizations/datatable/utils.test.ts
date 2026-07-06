@@ -5,11 +5,10 @@
  * 2.0.
  */
 
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { CellDecorationFillConfig } from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import {
-  type CustomPaletteParams,
-  type PaletteOutput,
   getDefaultFillConfig,
   isPaletteFillMode,
   getProgressBarDomain,
