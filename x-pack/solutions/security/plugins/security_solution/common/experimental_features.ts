@@ -115,12 +115,6 @@ export const allowedExperimentalValues = Object.freeze({
   filterProcessDescendantsForTrustedAppsEnabled: true,
 
   /**
-   * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
-   * can be disabled if necessary in a given environment.
-   */
-  entityStoreDisabled: false,
-
-  /**
    * Entity Analytics: enables attaching entities (users, hosts, IPs) to a case from
    * Entity Analytics surfaces such as the entity flyout, and registers the
    * `security.entity` unified cases attachment type.
@@ -291,7 +285,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Agents, Discover and Workflows external links in the classic Security Solution side navigation
    */
-  securityClassicNavExternalLinks: false,
+  securityClassicNavExternalLinks: true,
   /**
    * Enables public Detection Engine attacks REST APIs
    * (`/api/detection_engine/attacks/*`).

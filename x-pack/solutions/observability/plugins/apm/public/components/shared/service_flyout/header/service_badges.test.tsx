@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import type { ServiceAnomalyScoreResponse } from '@kbn/apm-api-shared';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { ServiceBadges } from './service_badges';
-import type { ServiceAnomalyScoreResponse } from '../../../../../server/routes/services/get_services/get_service_anomaly_score_for_service';
 
 const mockNavigateToUrl = jest.fn();
 const mockUseApmPluginContext = jest.fn();

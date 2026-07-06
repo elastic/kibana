@@ -128,7 +128,7 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
   const observedDataWithAnomalies = useMemo(
     () => ({
       ...observedData,
-      entityId: observedData.entityRecord?.entity.id,
+      entityId: observedData.entityRecord?.entity?.id,
       anomalies: {
         isLoading: isLoadingAnomaliesData,
         anomalies: anomaliesData,
