@@ -16,7 +16,6 @@ import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { TaskCost } from '../task';
 import * as CostCapacityModule from './cost_capacity';
-import * as WorkerCapacityModule from './worker_capacity';
 import { capacityMock } from './capacity.mock';
 import { CLAIM_STRATEGY_MGET } from '../config';
 import { mockRun, mockTask } from './test_utils';
@@ -28,7 +27,6 @@ jest.mock('../constants', () => ({
 
 describe('TaskPool', () => {
   const costCapacityMock = capacityMock.create();
-  const workerCapacityMock = capacityMock.create();
   const logger = loggingSystemMock.create().get();
 
   const definitions = new TaskTypeDictionary(logger);
@@ -58,27 +56,20 @@ describe('TaskPool', () => {
 
   describe('uses the correct capacity calculator based on the strategy', () => {
     let costCapacitySpy: jest.SpyInstance;
-    let workerCapacitySpy: jest.SpyInstance;
     beforeEach(() => {
       costCapacitySpy = jest
         .spyOn(CostCapacityModule, 'CostCapacity')
         .mockImplementation(() => costCapacityMock);
-
-      workerCapacitySpy = jest
-        .spyOn(WorkerCapacityModule, 'WorkerCapacity')
-        .mockImplementation(() => workerCapacityMock);
     });
 
     afterEach(() => {
       costCapacitySpy.mockRestore();
-      workerCapacitySpy.mockRestore();
     });
 
     test('uses CostCapacity to calculate capacity when strategy is mget', () => {
       new TaskPool({ capacity$: of(20), definitions, logger, strategy: CLAIM_STRATEGY_MGET });
 
       expect(CostCapacityModule.CostCapacity).toHaveBeenCalledTimes(1);
-      expect(WorkerCapacityModule.WorkerCapacity).not.toHaveBeenCalled();
     });
 
     test('uses CostCapacity to calculate capacity when strategy is default', () => {
@@ -90,14 +81,12 @@ describe('TaskPool', () => {
       });
 
       expect(CostCapacityModule.CostCapacity).toHaveBeenCalledTimes(1);
-      expect(WorkerCapacityModule.WorkerCapacity).not.toHaveBeenCalled();
     });
 
     test('uses CostCapacity to calculate capacity when strategy is unrecognized', () => {
       new TaskPool({ capacity$: of(20), definitions, logger, strategy: 'any old strategy' });
 
       expect(CostCapacityModule.CostCapacity).toHaveBeenCalledTimes(1);
-      expect(WorkerCapacityModule.WorkerCapacity).not.toHaveBeenCalled();
     });
   });
 
