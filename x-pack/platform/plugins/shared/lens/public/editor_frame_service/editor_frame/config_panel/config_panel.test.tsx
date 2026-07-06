@@ -17,7 +17,7 @@ import {
   renderWithReduxStore,
 } from '../../../mocks';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { Visualization } from '@kbn/lens-common';
+import type { Visualization, FramePublicAPI } from '@kbn/lens-common';
 import { ConfigPanel } from './config_panel';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -42,12 +42,12 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
 });
 
 describe('ConfigPanel', () => {
-  const frame = createMockFramePublicAPI();
-
+  let frame: FramePublicAPI;
   let uiActions: UiActionsStart;
 
   beforeEach(() => {
     jest.useFakeTimers();
+    frame = createMockFramePublicAPI();
     uiActions = uiActionsPluginMock.createStartContract();
   });
 
@@ -75,12 +75,12 @@ describe('ConfigPanel', () => {
       {
         preloadedState: {
           datasourceStates: {
-            formBased: {
+            [rest.activeDatasourceId]: {
               isLoading: false,
               state: 'state',
             },
           },
-          activeDatasourceId: 'formBased',
+          activeDatasourceId: rest.activeDatasourceId,
           query: query as Query,
           visualization: {
             activeId: 'testVis',
@@ -99,19 +99,23 @@ describe('ConfigPanel', () => {
     );
   }
 
-  function getDefaultProps(
-    { datasourceMap = mockDatasourceMap(), visualizationMap = mockVisualizationMap() } = {
-      datasourceMap: mockDatasourceMap(),
-      visualizationMap: mockVisualizationMap(),
-    }
-  ) {
+  function getDefaultProps({
+    datasourceMap = mockDatasourceMap(),
+    visualizationMap = mockVisualizationMap(),
+    activeDatasourceId = 'formBased',
+  }: {
+    datasourceMap?: ReturnType<typeof mockDatasourceMap>;
+    visualizationMap?: ReturnType<typeof mockVisualizationMap>;
+    activeDatasourceId?: string;
+  } = {}) {
+    const activeDatasource = datasourceMap[activeDatasourceId as keyof typeof datasourceMap];
     frame.datasourceLayers = {
-      first: datasourceMap.formBased.publicAPIMock,
+      first: activeDatasource.publicAPIMock,
     };
     return {
       activeVisualizationId: 'testVis',
       visualizationMap,
-      activeDatasourceId: 'formBased',
+      activeDatasourceId,
       datasourceMap,
       activeVisualization: {
         ...visualizationMap.testVis,
@@ -131,12 +135,6 @@ describe('ConfigPanel', () => {
           );
         },
       } as Visualization,
-      datasourceStates: {
-        formBased: {
-          isLoading: false,
-          state: 'state',
-        },
-      },
       indexPatternService: createIndexPatternServiceMock(),
       visualizationState: 'state',
       updateVisualization: jest.fn(),
@@ -194,10 +192,10 @@ describe('ConfigPanel', () => {
   });
 
   describe('initial default value', () => {
-    it('should add an initial dimension value when clicking on the empty dimension button', async () => {
+    it('should add an initial dimension value when clicking on the empty dimension button', () => {
       const datasourceMap = mockDatasourceMap();
-
       const visualizationMap = mockVisualizationMap();
+
       visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
         {
           type: LayerTypes.DATA,
@@ -254,11 +252,17 @@ describe('ConfigPanel', () => {
           label: 'Reference layer',
         },
       ]);
-      datasourceMap.formBased.initializeDimension = jest.fn();
-      const props = getDefaultProps({ datasourceMap, visualizationMap });
+      datasourceMap.textBased.publicAPIMock.isTextBasedLanguage.mockReturnValue(true);
+
+      const props = getDefaultProps({
+        datasourceMap,
+        visualizationMap,
+        activeDatasourceId: 'textBased',
+      });
 
       renderConfigPanel(props, undefined, { esql: 'from "foo"' });
-      expect(screen.queryByTestId('lnsLayerClone')).not.toBeInTheDocument();
+      // Regex matches "lnsLayerClone--{index}" (e.g. "lnsLayerClone--0")
+      expect(screen.queryByTestId(/^lnsLayerClone/)).not.toBeInTheDocument();
     });
   });
 });
