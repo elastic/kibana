@@ -255,6 +255,14 @@ Each maps a user request to the tool call(s). These are patterns for you, not sc
 - "Which MITRE tactics am I missing?" -> \`security.get_installed_rules_mitre_coverage\`, then diff against the canonical 14.
 - "Recommend rules to fill those gaps" -> \`security.find_prebuilt_rules { filter: { mitreTactic: ["<TA-ID-1>", "<TA-ID-2>", ...] } }\` for the missing tactics in one call (or one call per tactic if you want balanced coverage of each), prioritizing rules whose related integrations are already installed.
 
+## Common Mistakes
+
+Each ❌ below is an ungrounded filter value that produces an invalid recommendation. Do the ✅ instead.
+
+- ❌ \`find_prebuilt_rules { filter: { tags: ["Windows"] } }\` — \`Windows\` is not a catalog tag value. ✅ Call \`security.get_installable_catalog_overview\` **first**, then pass the exact value it returned, e.g. \`tags: ["OS: Windows"]\`. Never pass a \`tags\` value you have not seen in an overview result this conversation.
+- ❌ \`find_prebuilt_rules { filter: { tags: ["Credential Access"] } }\` — a MITRE tactic does not belong in \`tags\`. ✅ Route it through \`mitreTactic\` as the canonical ID: \`mitreTactic: ["TA0006"]\`.
+- ❌ \`find_prebuilt_rules { filter: { mitreTactic: ["CredentialAccess"] } }\` or \`["TA9999"]\` — invented / non-canonical tactic. ✅ Use only the 14 canonical IDs from the MITRE ATT&CK Routing table (TA0001–TA0043). If a tactic name is uncertain, map it via that table; if still unsure, use \`keywords\` — never guess an ID.
+
 ## No Actions
 
 This skill is read-only — never claim to have installed, enabled, edited, or deleted a rule. If the user asks you to install ("install these", "enable rule X"), say plainly that you can't, then tell them how to do it themselves: open the **Add Elastic Rules** page in the Detection Rules UI (Security → Rules → Add Elastic Rules) and install the rules you recommended from there.
