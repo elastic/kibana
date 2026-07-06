@@ -117,6 +117,6 @@ export const readRelatedUserBundleForSeed = async ({
 
   return {
     relatedUsers: getFieldStringValues(source, RELATED_USER_FIELD),
-    managerValues: OKTA_MANAGER_FIELDS.flatMap((field) => getFieldStringValues(source, field)),
+    excludedValues: OKTA_MANAGER_FIELDS.flatMap((field) => getFieldStringValues(source, field)),
   };
 };

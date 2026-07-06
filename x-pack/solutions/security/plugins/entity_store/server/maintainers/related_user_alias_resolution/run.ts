@@ -62,14 +62,14 @@ const isWellKnownOrSharedValue = (value: string): boolean => {
   );
 };
 
-const cleanRelatedUsers = (relatedUsers: string[], managerValues: string[]): string[] => {
-  const managers = new Set(managerValues.map(normalize));
+const cleanRelatedUsers = (relatedUsers: string[], excludedValues: string[]): string[] => {
+  const excluded = new Set(excludedValues.map(normalize));
   return [
     ...new Set(
       relatedUsers
         .map((value) => value.trim())
         .filter((value) => value.length > 0)
-        .filter((value) => !managers.has(normalize(value)))
+        .filter((value) => !excluded.has(normalize(value)))
         .filter((value) => !isWellKnownOrSharedValue(value))
     ),
   ];
@@ -241,16 +241,19 @@ export async function runRelatedUserAliasResolution(
       return state;
     }
 
-    const bundle = await readRelatedUserBundleForSeed({
+    const sourceRelatedUserValues = await readRelatedUserBundleForSeed({
       esClient,
       seed,
       abortSignal: abortController.signal,
     });
-    if (!bundle) {
+    if (!sourceRelatedUserValues) {
       continue;
     }
 
-    const values = cleanRelatedUsers(bundle.relatedUsers, bundle.managerValues);
+    const values = cleanRelatedUsers(
+      sourceRelatedUserValues.relatedUsers,
+      sourceRelatedUserValues.excludedValues
+    );
     const candidatesForSeed = new Map<string, CandidateEntity>();
     for (const value of values) {
       if (abortController.signal.aborted) {

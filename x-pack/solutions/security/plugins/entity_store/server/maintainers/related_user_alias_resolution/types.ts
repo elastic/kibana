@@ -32,5 +32,5 @@ export interface CandidateEntity extends TargetSelectionEntity {
 
 export interface RelatedUserBundle {
   relatedUsers: string[];
-  managerValues: string[];
+  excludedValues: string[];
 }
