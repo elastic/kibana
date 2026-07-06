@@ -33,8 +33,8 @@ import { BULK_FILTER_MAX_RULES, getRootEsqlQuery, type RuleKind } from '@kbn/ale
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { RULE_KIND_ICONS, RULE_KIND_LABELS, RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { RuleKindBadge } from '../../components/rule_details/rule_header_description';
 import { RuleActionsMenu } from './rule_actions_menu';
 
 const labelsContainerStyle = css`
@@ -314,13 +314,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         ),
         width: '10%',
         sortable: true,
-        render: (kind: RuleKind) => (
-          <EuiToolTip content={RULE_KIND_TOOLTIPS[kind]}>
-            <EuiBadge color="hollow" iconType={RULE_KIND_ICONS[kind]} iconSide="left" tabIndex={0}>
-              {RULE_KIND_LABELS[kind]}
-            </EuiBadge>
-          </EuiToolTip>
-        ),
+        render: (kind: RuleKind) => <RuleKindBadge kind={kind} />,
       },
       {
         field: 'enabled',
