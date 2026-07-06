@@ -113,6 +113,108 @@ describe('scheduled significant events discovery settings route', () => {
     });
   });
 
+  it('reconciles a teardown when scheduled discovery is disabled', async () => {
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: {
+        enabled: false,
+      },
+      spaceSettings: {
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 5,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
+      },
+    });
+
+    await route.handler(handlerParams);
+
+    expect(uiSettingsClient.setMany).toHaveBeenCalledWith({
+      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: false,
+    });
+    expect(scheduledWorkflowService.ensureWorkflow).toHaveBeenCalledWith({
+      enabled: false,
+      request: handlerParams.request,
+      spaceId: 'space-a',
+      config: {
+        detectionIntervalMinutes: 30,
+        reviewIntervalMinutes: 10,
+        discoveryBatchSize: 3,
+        triageBatchSize: 5,
+        maxReviewPasses: 3,
+      },
+    });
+  });
+
+  it('reconciles a config-only update while enabled, merging request values over stored settings', async () => {
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: {
+        detectionIntervalMinutes: 45,
+      },
+      spaceSettings: {
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 5,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
+      },
+    });
+
+    await route.handler(handlerParams);
+
+    expect(uiSettingsClient.setMany).toHaveBeenCalledWith({
+      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 45,
+    });
+    expect(scheduledWorkflowService.ensureWorkflow).toHaveBeenCalledWith({
+      enabled: true,
+      request: handlerParams.request,
+      spaceId: 'space-a',
+      config: {
+        detectionIntervalMinutes: 45,
+        reviewIntervalMinutes: 10,
+        discoveryBatchSize: 3,
+        triageBatchSize: 5,
+        maxReviewPasses: 3,
+      },
+    });
+  });
+
+  it('does not reconcile workflows for a config-only update while disabled', async () => {
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: {
+        detectionIntervalMinutes: 45,
+      },
+      spaceSettings: {
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: false,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
+      },
+    });
+
+    await route.handler(handlerParams);
+
+    expect(uiSettingsClient.setMany).toHaveBeenCalledWith({
+      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 45,
+    });
+    expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('does not reconcile workflows when the enabled state is re-sent unchanged with no config change', async () => {
+    const { handlerParams, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: {
+        enabled: true,
+      },
+      spaceSettings: {
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
+      },
+    });
+
+    await route.handler(handlerParams);
+
+    expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
+  });
+
   it('rolls back scheduled discovery settings when workflow reconciliation fails', async () => {
     const previousSettings = {
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: false,

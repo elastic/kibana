@@ -144,7 +144,6 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
       for (const key of spaceKeys) {
         previousSpaceValues[key] = spaceSettings[key];
       }
-      await uiSettingsClient.setMany(spaceUpdates);
     }
 
     // Resolve a scheduled discovery config value, preferring the incoming request,
@@ -168,6 +167,12 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
     };
 
     try {
+      // Persist the settings inside the try so a partial write failure is reverted
+      // by rollbackSettings() alongside a downstream workflow reconciliation failure.
+      if (spaceKeys.length > 0) {
+        await uiSettingsClient.setMany(spaceUpdates);
+      }
+
       // Reconcile the per-space workflows on an enabled-state transition, and also
       // on a config change while enabled so the rendered workflow templates pick up
       // the new cadence and batch sizes.
