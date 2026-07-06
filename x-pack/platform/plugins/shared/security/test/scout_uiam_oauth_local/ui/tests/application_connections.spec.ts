@@ -96,10 +96,10 @@ test.describe(
       await applicationConnections.switchToListView();
       await expect(
         page.testSubj.locator(`applicationConnectionsListViewRow-${connectionIds[0]}`)
-      ).toBeVisible({ timeout: 60_000 });
+      ).toBeVisible();
       await expect(
         page.testSubj.locator(`applicationConnectionsListViewRow-${connectionIds[1]}`)
-      ).toBeVisible({ timeout: 60_000 });
+      ).toBeVisible();
     });
 
     test('edits a connection name inline and persists it', async ({ page, pageObjects }) => {
@@ -114,7 +114,7 @@ test.describe(
       await pageObjects.applicationConnections.navigate();
       await pageObjects.applicationConnections.switchToListView();
       await pageObjects.applicationConnections.waitForListConnectionRow(connectionId);
-      await expect(page.getByText(newName)).toBeVisible({ timeout: 60_000 });
+      await expect(page.getByText(newName)).toBeVisible();
     });
 
     test('revokes an individual connection', async ({ pageObjects }) => {
@@ -130,7 +130,7 @@ test.describe(
           connectionId
         );
         expect(rowText).toContain('Revoked');
-      }).toPass({ timeout: 60_000 });
+      }).toPass();
     });
 
     test('bulk revokes multiple selected connections', async ({ pageObjects }) => {
@@ -151,7 +151,7 @@ test.describe(
             connectionId
           );
           expect(rowText).toContain('Revoked');
-        }).toPass({ timeout: 60_000 });
+        }).toPass();
       }
     });
   }

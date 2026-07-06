@@ -62,27 +62,24 @@ test.describe(
       const clientId = await pageObjects.agentBuilder.submitMcpClientCreate();
       createdClientIds.push(clientId);
 
-      await pageObjects.agentBuilder.waitForMcpClientDetailsModal();
-      expect(await pageObjects.agentBuilder.mcpClientDetailsModalContainsText('Client ID')).toBe(
-        true
-      );
-      expect(
-        await pageObjects.agentBuilder.mcpClientDetailsModalContainsText('api/agent_builder/mcp')
-      ).toBe(true);
-      expect(await pageObjects.agentBuilder.mcpClientDetailsModalHasSecretField()).toBe(false);
+      const modal = page.testSubj.locator('mcpClientDetailsModal');
+      await expect(modal).toContainText('Client ID');
+      await expect(modal).toContainText('api/agent_builder/mcp');
+      await expect(modal.getByText('MCP client secret', { exact: false })).toHaveCount(0);
 
       await pageObjects.agentBuilder.closeMcpClientDetails();
       await pageObjects.agentBuilder.searchMcpClients(clientName);
-      await expect(page.getByRole('button', { name: clientName, exact: true })).toBeVisible({
-        timeout: 60_000,
-      });
+      await expect(page.getByRole('button', { name: clientName, exact: true })).toBeVisible();
 
       await pageObjects.agentBuilder.openMcpClientDetailsFlyoutByName(clientName);
-      expect(await pageObjects.agentBuilder.mcpClientDetailsFlyoutHasLogo()).toBe(true);
+      await expect(
+        page.testSubj.locator('mcpClientDetailsFlyout').getByTestId('mcpClientLogo')
+      ).toBeVisible();
       await pageObjects.agentBuilder.closeMcpClientDetails();
     });
 
     test('registers a confidential client and reveals its secret in the post-create modal', async ({
+      page,
       pageObjects,
     }) => {
       const clientName = uniqueClientName('scout-confidential');
@@ -94,8 +91,8 @@ test.describe(
       const clientId = await pageObjects.agentBuilder.submitMcpClientCreate();
       createdClientIds.push(clientId);
 
-      await pageObjects.agentBuilder.waitForMcpClientDetailsModal();
-      expect(await pageObjects.agentBuilder.mcpClientDetailsModalHasSecretField()).toBe(true);
+      const modal = page.testSubj.locator('mcpClientDetailsModal');
+      await expect(modal.getByText('MCP client secret', { exact: false })).toBeVisible();
 
       await pageObjects.agentBuilder.closeMcpClientDetails();
     });
@@ -112,22 +109,41 @@ test.describe(
       });
       createdClientIds.push(active.id);
 
+      const revokedName = uniqueClientName('scout-revoked');
+      const revoked = await createOAuthClient(apiClient, authHeaders, {
+        clientName: revokedName,
+        clientType: 'public',
+      });
+      createdClientIds.push(revoked.id);
+      await revokeOAuthClient(apiClient, authHeaders, revoked.id);
+
       await pageObjects.agentBuilder.navigateToMcpClients();
       await pageObjects.agentBuilder.waitForMcpClientRow(active.id);
+      await pageObjects.agentBuilder.waitForMcpClientRow(revoked.id);
+
+      const activeRow = page.testSubj.locator(`agentBuilderMcpClientsListRow-${active.id}`);
+      const revokedRow = page.testSubj.locator(`agentBuilderMcpClientsListRow-${revoked.id}`);
 
       await pageObjects.agentBuilder.searchMcpClients(activeName);
-      await expect(page.testSubj.locator(`agentBuilderMcpClientsListRow-${active.id}`)).toBeVisible(
-        { timeout: 60_000 }
-      );
+      await expect(activeRow).toBeVisible();
+      await expect(revokedRow).not.toBeAttached();
 
       await pageObjects.agentBuilder.clearMcpClientsSearch();
-      await pageObjects.agentBuilder.filterMcpClientsByStatus('Active');
-      await expect(page.testSubj.locator(`agentBuilderMcpClientsListRow-${active.id}`)).toBeVisible(
-        { timeout: 60_000 }
-      );
+      await pageObjects.agentBuilder.toggleMcpClientsStatusFilter('Active');
+      await expect(activeRow).toBeVisible();
+      await expect(revokedRow).not.toBeAttached();
+
+      await pageObjects.agentBuilder.toggleMcpClientsStatusFilter('Active');
+      await pageObjects.agentBuilder.toggleMcpClientsStatusFilter('Revoked');
+      await expect(revokedRow).toBeVisible();
+      await expect(activeRow).not.toBeAttached();
     });
 
-    test('opens the details flyout from a client name link', async ({ apiClient, pageObjects }) => {
+    test('opens the details flyout from a client name link', async ({
+      apiClient,
+      page,
+      pageObjects,
+    }) => {
       const clientName = uniqueClientName('scout-details');
       const client = await createOAuthClient(apiClient, authHeaders, {
         clientName,
@@ -140,12 +156,9 @@ test.describe(
       await pageObjects.agentBuilder.waitForMcpClientRow(client.id);
       await pageObjects.agentBuilder.openMcpClientDetailsFlyout(client.id);
 
-      expect(await pageObjects.agentBuilder.mcpClientDetailsFlyoutContainsText(client.id)).toBe(
-        true
-      );
-      expect(
-        await pageObjects.agentBuilder.mcpClientDetailsFlyoutContainsText('api/agent_builder/mcp')
-      ).toBe(true);
+      const flyout = page.testSubj.locator('mcpClientDetailsFlyout');
+      await expect(flyout).toContainText(client.id);
+      await expect(flyout).toContainText('api/agent_builder/mcp');
 
       await pageObjects.agentBuilder.closeMcpClientDetails();
     });
@@ -168,7 +181,7 @@ test.describe(
       await expect(async () => {
         const status = await pageObjects.agentBuilder.getMcpClientRowStatus(client.id);
         expect(status).toContain('Revoked');
-      }).toPass({ timeout: 60_000 });
+      }).toPass();
     });
   }
 );

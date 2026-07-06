@@ -1,5 +1,5 @@
 {
-  "sha1": "0a7e28e96536c5218d50419fed36e4732d40e95e",
+  "sha1": "f681e5626d9da5fbf34e511646f9c155beb09d44",
   "tests": [
     {
       "id": "bc04b6d7b9795d6-a575d75181b677a",
@@ -373,7 +373,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 85,
+        "line": 81,
         "column": 9
       }
     },
@@ -387,7 +387,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 103,
+        "line": 100,
         "column": 9
       }
     },
@@ -401,7 +401,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 130,
+        "line": 142,
         "column": 9
       }
     },
@@ -415,7 +415,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 153,
+        "line": 166,
         "column": 9
       }
     },

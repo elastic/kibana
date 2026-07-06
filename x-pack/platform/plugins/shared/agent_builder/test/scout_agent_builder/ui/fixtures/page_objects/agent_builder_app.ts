@@ -688,7 +688,7 @@ export class AgentBuilderApp {
     await this.page.gotoApp('agent_builder/manage/tools/mcp_clients');
     await this.page.testSubj
       .locator('agentBuilderMcpClientsListPage')
-      .waitFor({ state: 'visible', timeout: 60_000 });
+      .waitFor({ state: 'visible' });
   }
 
   async openManageMcpClientsFromMenu() {
@@ -699,7 +699,7 @@ export class AgentBuilderApp {
     await this.page.testSubj.click('agentBuilderManageMcpClientsMenuItem');
     await this.page.testSubj
       .locator('agentBuilderMcpClientsListPage')
-      .waitFor({ state: 'visible', timeout: 60_000 });
+      .waitFor({ state: 'visible' });
   }
 
   async isMcpClientInList(clientId: string): Promise<boolean> {
@@ -710,7 +710,7 @@ export class AgentBuilderApp {
   async waitForMcpClientRow(clientId: string) {
     await this.page.testSubj
       .locator(`agentBuilderMcpClientsListRow-${clientId}`)
-      .waitFor({ state: 'visible', timeout: 60_000 });
+      .waitFor({ state: 'visible' });
   }
 
   async isMcpClientsEmptyStateVisible(): Promise<boolean> {
@@ -735,7 +735,7 @@ export class AgentBuilderApp {
     await search.fill('');
   }
 
-  async filterMcpClientsByStatus(statusLabel: 'Active' | 'Revoked') {
+  async toggleMcpClientsStatusFilter(statusLabel: 'Active' | 'Revoked') {
     const search = this.page.testSubj.locator('mcpClientsTableSearch');
     await search.getByRole('button', { name: 'Status' }).click();
     await this.page.getByRole('option', { name: statusLabel }).click();
@@ -746,14 +746,14 @@ export class AgentBuilderApp {
     await this.page.testSubj.click('mcpClientsAddButton');
     await this.page.testSubj
       .locator('agentBuilderMcpClientCreatePage')
-      .waitFor({ state: 'visible', timeout: 60_000 });
+      .waitFor({ state: 'visible' });
   }
 
   async openMcpClientCreateFromEmptyState() {
     await this.page.testSubj.click('mcpClientsEmptyStateAddButton');
     await this.page.testSubj
       .locator('agentBuilderMcpClientCreatePage')
-      .waitFor({ state: 'visible', timeout: 60_000 });
+      .waitFor({ state: 'visible' });
   }
 
   async fillMcpClientName(name: string) {
@@ -764,9 +764,9 @@ export class AgentBuilderApp {
     const combo = this.page.testSubj.locator('mcpClientLogoSelect');
     await combo.click();
     const option = this.page.getByRole('option', { name: label });
-    await option.waitFor({ state: 'visible', timeout: 60_000 });
+    await option.waitFor({ state: 'visible' });
     await option.click();
-    await expect(combo.getByText(label, { exact: false })).toBeVisible({ timeout: 60_000 });
+    await expect(combo.getByText(label, { exact: false })).toBeVisible();
   }
 
   async setMcpClientConfidential(confidential: boolean) {
@@ -790,22 +790,6 @@ export class AgentBuilderApp {
     return id;
   }
 
-  async waitForMcpClientDetailsModal() {
-    await this.page.testSubj
-      .locator('mcpClientDetailsModal')
-      .waitFor({ state: 'visible', timeout: 60_000 });
-  }
-
-  async mcpClientDetailsModalContainsText(text: string): Promise<boolean> {
-    const modalText = await this.page.testSubj.locator('mcpClientDetailsModal').innerText();
-    return modalText.includes(text);
-  }
-
-  async mcpClientDetailsModalHasSecretField(): Promise<boolean> {
-    const modal = this.page.testSubj.locator('mcpClientDetailsModal');
-    return (await modal.getByText('MCP client secret', { exact: false }).count()) > 0;
-  }
-
   async closeMcpClientDetails() {
     await this.dismissToasts();
     await this.page.testSubj.click('mcpClientDetailsCloseButton');
@@ -819,30 +803,12 @@ export class AgentBuilderApp {
 
   async openMcpClientDetailsFlyout(clientId: string) {
     await this.page.testSubj.click(`mcpClientsListNameLink-${clientId}`);
-    await this.page.testSubj
-      .locator('mcpClientDetailsFlyout')
-      .waitFor({ state: 'visible', timeout: 60_000 });
-  }
-
-  async mcpClientDetailsFlyoutContainsText(text: string): Promise<boolean> {
-    const flyoutText = await this.page.testSubj.locator('mcpClientDetailsFlyout').innerText();
-    return flyoutText.includes(text);
+    await this.page.testSubj.locator('mcpClientDetailsFlyout').waitFor({ state: 'visible' });
   }
 
   async openMcpClientDetailsFlyoutByName(clientName: string) {
     await this.page.getByRole('button', { name: clientName, exact: true }).click();
-    await this.page.testSubj
-      .locator('mcpClientDetailsFlyout')
-      .waitFor({ state: 'visible', timeout: 60_000 });
-  }
-
-  async mcpClientDetailsFlyoutHasLogo(): Promise<boolean> {
-    return (
-      (await this.page.testSubj
-        .locator('mcpClientDetailsFlyout')
-        .locator(subj('mcpClientLogo'))
-        .count()) > 0
-    );
+    await this.page.testSubj.locator('mcpClientDetailsFlyout').waitFor({ state: 'visible' });
   }
 
   async openMcpClientRevokeModal(clientId: string) {
@@ -851,17 +817,13 @@ export class AgentBuilderApp {
       .locator(`mcpClientRevokeAction-${clientId}`)
       .waitFor({ state: 'visible' });
     await this.page.testSubj.click(`mcpClientRevokeAction-${clientId}`);
-    await this.page.testSubj
-      .locator('mcpClientRevokeModal')
-      .waitFor({ state: 'visible', timeout: 60_000 });
+    await this.page.testSubj.locator('mcpClientRevokeModal').waitFor({ state: 'visible' });
   }
 
   async confirmMcpClientRevoke(clientName: string) {
     await this.page.testSubj.fill('mcpClientRevokeConfirmInput', clientName);
     await this.page.testSubj.click('mcpClientRevokeConfirmButton');
-    await this.page.testSubj
-      .locator('mcpClientRevokeModal')
-      .waitFor({ state: 'detached', timeout: 60_000 });
+    await this.page.testSubj.locator('mcpClientRevokeModal').waitFor({ state: 'detached' });
   }
 
   async getMcpClientRowStatus(clientId: string): Promise<string> {
