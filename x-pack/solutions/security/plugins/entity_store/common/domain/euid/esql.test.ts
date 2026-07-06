@@ -541,7 +541,9 @@ describe('buildDestinationFieldEsql', () => {
     // with user.ts automatically — no duplicate manual copy to drift.
     const { identityField } = userEntityDefinition;
     if (isSingleFieldIdentity(identityField)) throw new Error('expected multi-field identity');
-    const cloudProviderClause = identityField.fieldEvaluations[0].whenClauses[1] as FieldEvaluationWhenClause & {
+    const { fieldEvaluations } = identityField;
+    if (!fieldEvaluations?.length) throw new Error('expected fieldEvaluations');
+    const cloudProviderClause = fieldEvaluations[0].whenClauses[1] as FieldEvaluationWhenClause & {
       condition: object;
       then: { field: string; mapping: Record<string, string> };
     };
