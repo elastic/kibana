@@ -45,6 +45,7 @@ interface ESQLDataGridProps {
   initialColumns?: DatatableColumn[];
   initialRowHeight?: number;
   controlColumnIds?: string[];
+  isApproximate?: boolean;
 }
 
 const sortOrder: SortOrder[] = [];
@@ -148,6 +149,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         timeRange: props.data.query.timefilter.timefilter.getTime(),
         query: props.query,
         columns: activeColumns,
+        ...(typeof props.isApproximate === 'boolean' && { isApproximate: props.isApproximate }),
       });
       return renderCustomToolbar({
         ...customToolbarProps,
