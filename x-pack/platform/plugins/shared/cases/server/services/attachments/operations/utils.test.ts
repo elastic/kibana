@@ -9,9 +9,15 @@ import { assertLegacyWriteableAttachmentType, transformAttributesForMode } from 
 import { isUnifiedOnlyAttachment } from '../../type_guards';
 import { createUserAttachment } from '../test_utils';
 import {
+  AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
+  FILE_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   LENS_SO_TYPE,
+  ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
 } from '../../../../common/constants';
 import { AttachmentType } from '../../../../common/types/domain';
@@ -43,6 +49,56 @@ const createByReferenceLens = (withSnapshot = false) =>
     attachmentId: 'lens-1',
     metadata: { title: 'My lens', soType: LENS_SO_TYPE },
     ...(withSnapshot ? { data: { attributes: { title: 'My lens' } } } : {}),
+    ...basicAttributes,
+  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+
+// A unified file attachment is SO-backed (`metadata.soType`) but, unlike Lens-by-ref,
+// maps cleanly onto a legacy externalReference, so it must stay legacy-writeable.
+const createUnifiedFile = () =>
+  ({
+    type: FILE_ATTACHMENT_TYPE,
+    owner: 'cases',
+    attachmentId: 'file-1',
+    metadata: {
+      soType: 'file',
+      files: [
+        { name: 'test.txt', extension: 'txt', mimeType: 'text/plain', created: '2026-05-29' },
+      ],
+    },
+    ...basicAttributes,
+  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+
+// Every unified type that maps onto a legacy externalReference. These are SO-backed
+// (`metadata.soType`) yet always have a legacy form, so they are never unified-only.
+const externalReferenceTypes = [
+  ['endpoint', SECURITY_ENDPOINT_ATTACHMENT_TYPE],
+  ['file', FILE_ATTACHMENT_TYPE],
+  ['osquery', OSQUERY_ATTACHMENT_TYPE],
+  ['indicator', INDICATOR_ATTACHMENT_TYPE],
+] as const;
+
+const createExternalReference = (type: string) =>
+  ({
+    type,
+    owner: 'cases',
+    attachmentId: `${type}-1`,
+    metadata: { soType: type },
+    ...basicAttributes,
+  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+
+// Every persistable-state subtype. Their legacy form is by-value, so a by-value
+// instance is legacy-writeable (only a by-reference instance would be unified-only).
+const persistableStateTypes = [
+  ['lens', LENS_ATTACHMENT_TYPE],
+  ['ml anomaly swimlane', ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE],
+  ['aiops change point chart', AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE],
+] as const;
+
+const createByValuePersistableState = (type: string) =>
+  ({
+    type,
+    owner: 'cases',
+    data: { state: {} },
     ...basicAttributes,
   } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
 
@@ -149,6 +205,16 @@ describe('transformAttributesForMode', () => {
     }
   });
 
+  // Files are SO-backed but have a legacy externalReference form, so mode=legacy
+  // must downgrade them rather than keep them unified.
+  it('downgrades a unified file to legacy externalReference in legacy mode', () => {
+    const out = transformAttributesForMode({ attributes: createUnifiedFile(), mode: 'legacy' });
+    expect(out.isUnified).toBe(false);
+    if (!out.isUnified) {
+      expect(out.attributes.type).toBe(AttachmentType.externalReference);
+    }
+  });
+
   // A Lens-by-reference instance has no by-value legacy form, so it must stay on
   // the unified branch even for mode=legacy — otherwise toLegacySchema would
   // fabricate a bogus persistableState from the snapshot and drop attachmentId.
@@ -172,17 +238,32 @@ describe('transformAttributesForMode', () => {
 });
 
 describe('isUnifiedOnlyAttachment', () => {
-  it('is false for by-value lens (has a legacy persistableState form)', () => {
-    expect(isUnifiedOnlyAttachment(createByValueLens())).toBe(false);
+  it('is false for legacy user comments', () => {
+    expect(isUnifiedOnlyAttachment(createUserAttachment().attributes)).toBe(false);
   });
 
+  // External-reference-mapped types are SO-backed (`metadata.soType`) but always have a
+  // legacy externalReference form. Flagging them unified-only broke every file write with
+  // the flag off, so guard the whole map (endpoint/file/osquery/indicator).
+  it.each(externalReferenceTypes)(
+    'is false for a unified %s attachment (has a legacy externalReference form)',
+    (_desc, type) => {
+      expect(isUnifiedOnlyAttachment(createExternalReference(type))).toBe(false);
+    }
+  );
+
+  it.each(persistableStateTypes)(
+    'is false for by-value %s (has a legacy persistableState form)',
+    (_desc, type) => {
+      expect(isUnifiedOnlyAttachment(createByValuePersistableState(type))).toBe(false);
+    }
+  );
+
+  // A by-reference persistable-state instance (only Lens supports this today) has no
+  // by-value legacy counterpart, so it is the one persistable case that is unified-only.
   it('is true for a Lens-by-reference attachment (no legacy form)', () => {
     expect(isUnifiedOnlyAttachment(createByReferenceLens())).toBe(true);
     expect(isUnifiedOnlyAttachment(createByReferenceLens(true))).toBe(true);
-  });
-
-  it('is false for legacy user comments', () => {
-    expect(isUnifiedOnlyAttachment(createUserAttachment().attributes)).toBe(false);
   });
 });
 
@@ -201,5 +282,9 @@ describe('assertLegacyWriteableAttachmentType', () => {
     expect(() => assertLegacyWriteableAttachmentType(createByReferenceLens())).toThrow(
       /has no legacy representation/
     );
+  });
+
+  it('does not throw for a unified file attachment', () => {
+    expect(() => assertLegacyWriteableAttachmentType(createUnifiedFile())).not.toThrow();
   });
 });

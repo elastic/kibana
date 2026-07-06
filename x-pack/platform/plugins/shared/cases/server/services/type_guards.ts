@@ -14,6 +14,7 @@ import {
   getAttachmentTypeFromAttributes,
   isUnifiedOnlyAttachmentType,
 } from '../../common/utils/attachments';
+import { UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP } from '../../common/constants/attachments';
 
 /**
  * A type narrowing function for external reference saved object attachments.
@@ -56,14 +57,23 @@ export const isUnifiedAttachmentWithSoReference = (
  * True when an attachment *instance* has no legacy (v1) representation and must be
  * persisted/returned in the unified schema. Combines:
  *  - unified-only *types* (e.g. entity/timeline/dashboard) via `isUnifiedOnlyAttachmentType`, and
- *  - unified-only *instances* of hybrid types: an SO-reference attachment
- *    (e.g. Lens-by-reference) has no by-value legacy counterpart even though the
- *    by-value form of the same type does, so a type-only check misclassifies it.
+ *  - unified-only *instances* of hybrid types: a Lens-by-reference attachment has no
+ *    by-value legacy counterpart even though by-value Lens does.
+ *
+ * The SO-reference branch is scoped to types without a legacy externalReference form:
+ * `file`/`endpoint`/`osquery`/`indicator` are SO-backed but map cleanly onto legacy
+ * externalReference, so their by-reference instances are legacy-writeable.
  */
 export const isUnifiedOnlyAttachment = (
   attributes: Partial<AttachmentAttributesV2> | Record<string, unknown>
 ): boolean => {
   const type = getAttachmentTypeFromAttributes(attributes);
   const owner = (attributes as { owner?: string }).owner ?? '';
-  return isUnifiedOnlyAttachmentType(type, owner) || isUnifiedAttachmentWithSoReference(attributes);
+  if (isUnifiedOnlyAttachmentType(type, owner)) {
+    return true;
+  }
+  return (
+    isUnifiedAttachmentWithSoReference(attributes) &&
+    !(type in UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP)
+  );
 };
