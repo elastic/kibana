@@ -14,6 +14,7 @@ import {
   GEO_ORDER,
   regionKey,
 } from '../../utils/eis_utils';
+import type { CspRegion } from '../../../common/types';
 import type { ZoneGroup } from './region_zone_list';
 
 export const useManageRegionsState = (onClose: () => void) => {
@@ -47,20 +48,16 @@ export const useManageRegionsState = (onClose: () => void) => {
   }, [isPolicyLoading, isEndpointsLoading, syncedFromPolicy, policy, availableRegions]);
 
   const zoneGroups = useMemo((): ZoneGroup[] => {
-    const byGeo = new Map<string, typeof availableRegions>();
-    for (const r of availableRegions) {
-      const geo = r.geo ?? 'other';
-      const list = byGeo.get(geo) ?? [];
-      list.push(r);
-      byGeo.set(geo, list);
+    const regionsByGeo: Record<string, CspRegion[]> = {};
+    for (const region of availableRegions) {
+      (regionsByGeo[region.geo ?? 'other'] ??= []).push(region);
     }
-    return [...GEO_ORDER]
-      .filter((geo) => byGeo.has(geo))
-      .map((geo) => ({
-        geo,
-        displayName: getGeoDisplayName(geo),
-        regions: byGeo.get(geo) ?? [],
-      }));
+
+    return GEO_ORDER.filter((geo) => geo in regionsByGeo).map((geo) => ({
+      geo,
+      displayName: getGeoDisplayName(geo),
+      regions: regionsByGeo[geo],
+    }));
   }, [availableRegions]);
 
   const totalSelected = checkedKeys.size;
