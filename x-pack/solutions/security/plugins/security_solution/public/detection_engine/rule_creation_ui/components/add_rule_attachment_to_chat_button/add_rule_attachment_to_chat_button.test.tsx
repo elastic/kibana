@@ -24,6 +24,7 @@ import type {
 } from '../../../common/types';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { useKibana } from '../../../../common/lib/kibana';
+import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 
 const mockOpenAgentBuilderFlyout = jest.fn();
 const mockUseAgentBuilderAttachment = jest.fn();
@@ -127,6 +128,7 @@ describe('AddRuleAttachmentToChatButton', () => {
         attachmentLabel: 'Formatted Rule',
       },
       attachmentDescription: 'Formatted Rule',
+      attachmentPrompt: RULE_EXPLORATION_ATTACHMENT_PROMPT,
     });
 
     await user.click(screen.getByTestId('newAgentBuilderAttachmentMock'));

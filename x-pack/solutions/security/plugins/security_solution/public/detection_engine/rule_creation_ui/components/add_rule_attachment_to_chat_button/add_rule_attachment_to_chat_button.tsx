@@ -22,6 +22,7 @@ import {
   SECURITY_RULE_ATTACHMENT_ID,
 } from '../../../../../common/constants';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { formatRule } from '../../pages/rule_creation/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -115,6 +116,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
       },
       ...(linkedRuleId ? { origin: linkedRuleId } : {}),
       attachmentDescription: attachmentLabel,
+      attachmentPrompt: RULE_EXPLORATION_ATTACHMENT_PROMPT,
     };
   }, [
     isFormBased,
