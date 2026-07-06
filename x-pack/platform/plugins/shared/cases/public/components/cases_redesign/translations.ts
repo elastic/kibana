@@ -73,6 +73,13 @@ export const TEMPLATE_FIELDS_TITLE = i18n.translate(
   }
 );
 
+export const CONNECTORS_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.details.connectorsTitle',
+  {
+    defaultMessage: 'Connectors',
+  }
+);
+
 export const SECTION_SETTINGS_ARIA = i18n.translate(
   'xpack.cases.casesRedesign.details.sectionSettingsAria',
   {
@@ -96,3 +103,7 @@ export const CLICK_TO_SEND_EMAIL = (email: string) =>
     defaultMessage: 'Click to send email to {email}',
     values: { email },
   });
+
+export const ADD_CONNECTOR = i18n.translate('xpack.cases.casesRedesign.details.addConnector', {
+  defaultMessage: 'Add connector',
+});

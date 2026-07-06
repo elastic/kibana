@@ -16,19 +16,19 @@ import {
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import type { CaseUI } from '../../../../../../common';
-import { EditConnector } from '../../../../edit_connector';
 import * as i18n from '../../../../case_view/translations';
-import { CONNECTORS } from '../../../../../common/translations';
-import { UserPickerFieldPanel } from './user_picker_field/user_picker_field_panel';
+import { AssigneesField } from './assignees_field';
+import { ParticipantsField } from './participants_field';
 import { SeverityField } from './severity_field';
 import { CategoryField } from './category_field';
 import { TagsField } from './tags_field';
+import { ConnectorField } from './connector_field';
 import { CustomFields } from '../../../../case_view/components/custom_fields';
 import { TemplateFields } from '../../../../case_view/components/template_fields';
 import * as redesignI18n from '../../../translations';
 import { SidebarAccordionSection } from './sidebar_accordion_section';
-import { SidebarSectionSettingsButton } from './sidebar_section_settings_button';
 import { TemplateSettingsPopover } from './template_settings_popover';
+import { ConnectorSettingsPopover } from './connector_settings_popover';
 import { useCaseViewSidebar } from './hooks/use_case_view_sidebar';
 
 export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
@@ -86,8 +86,7 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
         >
           <EuiFlexGroup direction="column" responsive={false} css={fieldsGroupStyles}>
             {caseAssignmentAuthorized ? (
-              <UserPickerFieldPanel
-                isEditable
+              <AssigneesField
                 title={redesignI18n.ASSIGNED_TITLE}
                 dataTestSubj="case-view-assignees-field-panel"
                 caseAssignees={caseData.assignees}
@@ -106,7 +105,7 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
               onSeverityChange={onUpdateSeverity}
             />
             {participants != null ? (
-              <UserPickerFieldPanel
+              <ParticipantsField
                 title={redesignI18n.PARTICIPANTS_TITLE}
                 users={participants}
                 userProfiles={userProfiles ?? new Map()}
@@ -160,22 +159,21 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
             <EuiSpacer size="m" />
             <SidebarAccordionSection
               id="connectors"
-              title={CONNECTORS}
+              title={redesignI18n.CONNECTORS_TITLE}
               extraAction={
-                <SidebarSectionSettingsButton data-test-subj="case-view-sidebar-connectors-settings" />
+                <ConnectorSettingsPopover data-test-subj="case-view-sidebar-connectors-settings" />
               }
               isOpen={isOpen('connectors')}
               onToggle={onToggle}
               data-test-subj="case-view-sidebar-connectors"
             >
-              <EditConnector
+              <ConnectorField
                 caseData={caseData}
                 caseConnectors={caseConnectors}
                 supportedActionConnectors={supportedActionConnectors}
                 isLoading={isConnectorLoading}
                 onSubmit={onSubmitConnector}
                 key={caseData.connector.id}
-                showHeader={false}
               />
             </SidebarAccordionSection>
           </>

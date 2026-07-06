@@ -15,7 +15,7 @@ import { useGetCaseConnectors } from '../../../../../../containers/use_get_case_
 import { useCasesFeatures } from '../../../../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../../../../containers/user_profiles/use_get_current_user_profile';
 import { useGetSupportedActionConnectors } from '../../../../../../containers/configure/use_get_supported_action_connectors';
-import type { EditConnectorProps } from '../../../../../edit_connector';
+import type { CaseConnector } from '../../../../../../../common/types/domain';
 import { useOnUpdateField } from '../../../../../case_view/use_on_update_field';
 import { useCasesContext } from '../../../../../cases_context/use_cases_context';
 import type { Assignee } from '../../../../../user_profiles/types';
@@ -86,8 +86,8 @@ export const useCaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
     [assigneeUids, onUpdateField]
   );
 
-  const onSubmitConnector = useCallback<EditConnectorProps['onSubmit']>(
-    (connector) => {
+  const onSubmitConnector = useCallback(
+    (connector: CaseConnector) => {
       onUpdateField({ key: 'connector', value: connector });
     },
     [onUpdateField]
