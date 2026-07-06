@@ -119,12 +119,8 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         <CentralizedActionPoliciesPanel http={props.services.http} />
         <EuiSpacer size="m" />
         <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
-        {props.ruleId === undefined && (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <NotificationsStep />
-          </>
-        )}
+        <EuiHorizontalRule margin="m" />
+        <NotificationsStep http={props.services.http} ruleId={props.ruleId} />
       </>
     ),
     validate: (methods) => {

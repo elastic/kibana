@@ -6,7 +6,7 @@
  */
 
 import type { FeatureFlagsStart } from '@kbn/core/server';
-import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../../../common/feature_flags';
+import { SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../../../common/feature_flags';
 
 export const isSignificantEventsMemoryEnabled = (featureFlags: FeatureFlagsStart) =>
-  featureFlags.getBooleanValue(STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false);
+  featureFlags.getBooleanValue(SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false);

@@ -8,8 +8,7 @@
 /**
  * Enables the Streams memory feature for accumulating knowledge from significant events discovery.
  */
-export const STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG =
-  'streams.significantEventsMemoryEnabled';
+export const SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG = 'streams.significantEventsMemoryEnabled';
 
 /**
  * Enables grounding of significant events query generation against source code indexed via
@@ -17,10 +16,10 @@ export const STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG =
  * generation reasoning agent can consult the source code (through the installed SCS Kibana
  * workflows) to verify hypotheses before emitting ES|QL queries.
  */
-export const STREAMS_SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG =
+export const SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG =
   'streams.significantEventsSemanticCodeSearchGroundingEnabled';
 
 /**
  * Enables the Streams root cause investigation workflow and agent.
  */
-export const STREAMS_INVESTIGATION_ENABLED_FLAG = 'streams.investigationEnabled';
+export const SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG = 'streams.investigationEnabled';
