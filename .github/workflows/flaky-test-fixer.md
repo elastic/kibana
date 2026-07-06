@@ -217,7 +217,7 @@ Follow this format:
 
   <one very concise sentence on what the PR changes>. cc @<github-handle-here>
   ```
-  Don't write the PR URL yourself — the `link_fix_pr` tool (step 7) appends a `**Fix PR:** <url>` line to this comment once the PR exists.
+  Don't write the PR URL yourself; `link_fix_pr` (step 7) adds it.
 - **Existing PR already covers it**:
   ```markdown
   ### 🔁 A fix is already in flight
