@@ -10,7 +10,6 @@
 import * as Option from 'fp-ts/Option';
 import { omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { INDEX_NUMBER_OF_SHARDS_OVERRIDES } from '@kbn/core-saved-objects-base-server-internal';
 import type {
   AllActionStates,
   CheckTargetTypesMappingsState,
@@ -106,7 +105,6 @@ export const nextActionMap = (
         indexName: state.targetIndex,
         mappings: state.targetIndexMappings,
         esCapabilities: state.esCapabilities,
-        numberOfShards: INDEX_NUMBER_OF_SHARDS_OVERRIDES[state.currentAlias],
       }),
     CHECK_TARGET_MAPPINGS: (state: CheckTargetTypesMappingsState) =>
       Actions.checkTargetTypesMappings({

@@ -19,7 +19,7 @@ const aliasResponse = {
   [SOURCE]: { aliases: { [ALIAS]: {}, '.kibana_task_manager_9.2.0': {} } },
 };
 
-const settingsResponse = (shards: string, routingShards: string) => ({
+const settingsResponse = (shards: number, routingShards: number) => ({
   [SOURCE]: {
     settings: { index: { number_of_shards: shards } },
     defaults: { index: { number_of_routing_shards: routingShards } },
@@ -36,7 +36,7 @@ describe('ensureIndexShardCount', () => {
   it('is a no-op when the index already has enough shards', async () => {
     const client = elasticsearchClientMock.createInternalClient();
     client.indices.getAlias.mockResolvedValue(aliasResponse);
-    client.indices.getSettings.mockResolvedValue(settingsResponse('2', '4'));
+    client.indices.getSettings.mockResolvedValue(settingsResponse(2, 4));
 
     await ensureIndexShardCount({ client, logger, alias: ALIAS, numberOfShards: 2 });
 
@@ -57,7 +57,7 @@ describe('ensureIndexShardCount', () => {
     const client = elasticsearchClientMock.createInternalClient();
     client.indices.getAlias.mockResolvedValue(aliasResponse);
     // routing shards = 4 cannot be split into 3
-    client.indices.getSettings.mockResolvedValue(settingsResponse('1', '4'));
+    client.indices.getSettings.mockResolvedValue(settingsResponse(1, 4));
 
     await ensureIndexShardCount({ client, logger, alias: ALIAS, numberOfShards: 3 });
 
@@ -67,7 +67,7 @@ describe('ensureIndexShardCount', () => {
   it('splits, swaps every alias, and removes the old index', async () => {
     const client = elasticsearchClientMock.createInternalClient();
     client.indices.getAlias.mockResolvedValue(aliasResponse);
-    client.indices.getSettings.mockResolvedValue(settingsResponse('1', '4'));
+    client.indices.getSettings.mockResolvedValue(settingsResponse(1, 4));
 
     await ensureIndexShardCount({ client, logger, alias: ALIAS, numberOfShards: 2 });
 
@@ -94,7 +94,7 @@ describe('ensureIndexShardCount', () => {
   it('removes the write block and does not throw when the split fails before the swap', async () => {
     const client = elasticsearchClientMock.createInternalClient();
     client.indices.getAlias.mockResolvedValue(aliasResponse);
-    client.indices.getSettings.mockResolvedValue(settingsResponse('1', '4'));
+    client.indices.getSettings.mockResolvedValue(settingsResponse(1, 4));
     client.indices.split.mockRejectedValue(new Error('boom'));
 
     await expect(

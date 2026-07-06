@@ -67,8 +67,9 @@ export const ensureIndexShardCount = async ({
     indicesForAlias = await client.indices.getAlias({ name: alias });
   } catch (error) {
     if (error?.meta?.statusCode === 404) {
-      // Fresh deployment: the index does not exist yet. It will be created with
-      // the desired shard count by the `createIndex` migration action.
+      // The index does not exist yet (e.g. this alias isn't in use). Nothing to
+      // reconcile; a freshly created index is split on the same startup once it
+      // exists.
       return;
     }
     throw error;

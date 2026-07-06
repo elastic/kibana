@@ -51,13 +51,6 @@ export interface CreateIndexParams {
   aliases?: string[];
   timeout?: string;
   waitForIndexStatusTimeout?: string;
-  /**
-   * Number of primary shards to create the index with. Defaults to
-   * `INDEX_NUMBER_OF_SHARDS`. Used to give write-heavy indices (e.g. the Task
-   * Manager index) more shards so writes spread across nodes. Ignored on
-   * serverless, where shard settings are not supported.
-   */
-  numberOfShards?: number;
 }
 
 export type CreateIndexSuccessResponse = 'create_index_succeeded' | 'index_already_exists';
@@ -80,7 +73,6 @@ export const createIndex = ({
   aliases = [],
   timeout = DEFAULT_TIMEOUT,
   waitForIndexStatusTimeout = DEFAULT_TIMEOUT,
-  numberOfShards = INDEX_NUMBER_OF_SHARDS,
 }: CreateIndexParams): TaskEither.TaskEither<
   RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded,
   CreateIndexSuccessResponse
@@ -98,7 +90,7 @@ export const createIndex = ({
         : {
             // ES rule of thumb: shards should be several GB to 10's of GB, so
             // Kibana is unlikely to cross that limit.
-            number_of_shards: numberOfShards,
+            number_of_shards: INDEX_NUMBER_OF_SHARDS,
             auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
             // Set an explicit refresh interval so that we don't inherit the
             // value from incorrectly configured index templates (not required

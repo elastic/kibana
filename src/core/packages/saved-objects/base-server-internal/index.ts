@@ -10,7 +10,7 @@
 export {
   DEFAULT_INDEX_TYPES_MAP,
   HASH_TO_VERSION_MAP,
-  INDEX_NUMBER_OF_SHARDS_OVERRIDES,
+  INDEX_MAX_SHARDS_OVERRIDES,
 } from './src/constants';
 export { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from './src/legacy_alias';
 export {
