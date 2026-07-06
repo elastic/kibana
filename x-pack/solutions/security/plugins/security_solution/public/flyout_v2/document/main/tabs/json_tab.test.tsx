@@ -8,32 +8,30 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { DocumentDetailsContext } from '../../shared/context';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import { JsonTab } from './json_tab';
 import {
   JSON_TAB_CONTENT_TEST_ID,
   JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID,
 } from '../../../shared/components/json_tab';
-import { PREFIX } from '../../../shared/test_ids';
+import { PREFIX } from '../../../../flyout/shared/test_ids';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   EuiCopy: jest.fn(({ children: functionAsChild }) => functionAsChild(jest.fn())),
 }));
 
-const searchHit = {
-  some_field: 'some_value',
-};
-const contextValue = {
-  searchHit,
-} as unknown as DocumentDetailsContext;
+const hit = buildDataTableRecord({
+  _id: '1',
+  _index: 'index',
+  _source: { some_field: 'some_value' },
+} as EsHitRecord);
 
 const renderJsonTab = () =>
   render(
     <IntlProvider locale="en">
-      <DocumentDetailsContext.Provider value={contextValue}>
-        <JsonTab />
-      </DocumentDetailsContext.Provider>
+      <JsonTab hit={hit} />
     </IntlProvider>
   );
 
