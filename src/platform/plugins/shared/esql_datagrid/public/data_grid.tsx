@@ -195,6 +195,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       props.data.query.timefilter.timefilter,
       props.dataView,
       props.query,
+      props.isApproximate,
     ]
   );
 
