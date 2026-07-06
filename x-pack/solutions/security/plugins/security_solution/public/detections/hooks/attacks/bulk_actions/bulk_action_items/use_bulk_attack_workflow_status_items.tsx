@@ -62,7 +62,21 @@ export const useBulkAttackWorkflowStatusItems = ({
   );
 
   const onSubmitCloseReason = useCallback(
-    async ({ alertItems, reason }: { alertItems: TimelineItem[]; reason?: AlertClosingReason }) => {
+    async ({
+      alertItems,
+      reason,
+      closePopoverMenu,
+    }: {
+      alertItems: TimelineItem[];
+      reason?: AlertClosingReason;
+      closePopoverMenu: () => void;
+    }) => {
+      // Close the popover immediately on submit so the closing-reason sub-panel does not
+      // remain open while the request is in flight. Mirrors the assignees flow in
+      // `useBulkAttackAssigneesItems` (`renderContent.onSubmit` calls `closePopoverMenu()`
+      // before applying assignees).
+      closePopoverMenu();
+
       const attackIds = alertItems.map((item) => item._id);
       const relatedAlertIds = extractRelatedDetectionAlertIds(alertItems);
 
