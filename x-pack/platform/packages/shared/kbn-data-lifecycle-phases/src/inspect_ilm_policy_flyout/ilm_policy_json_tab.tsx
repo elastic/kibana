@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiCodeBlock } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { SerializedPolicy } from '@kbn/index-lifecycle-management-common-shared';
 import { inspectIlmPolicyFlyoutStrings as strings } from './strings';
 
@@ -15,7 +16,14 @@ export interface IlmPolicyJsonTabProps {
   policy: SerializedPolicy;
 }
 
+const codeBlockItemStyles = css`
+  min-height: 0;
+`;
+
 export const IlmPolicyJsonTab = ({ policyName, policy }: IlmPolicyJsonTabProps) => {
+  const [containerElement, setContainerElement] = useState<HTMLDivElement | null>(null);
+  const { height: containerHeight } = useResizeObserver(containerElement);
+
   const { name: _name, ...policyBody } = policy;
   const fullRequest = `PUT _ilm/policy/${policyName}\n${JSON.stringify(
     { policy: policyBody },
@@ -24,16 +32,29 @@ export const IlmPolicyJsonTab = ({ policyName, policy }: IlmPolicyJsonTabProps) 
   )}`;
 
   return (
-    <EuiCodeBlock
-      language="json"
-      isCopyable
-      transparentBackground
-      paddingSize="l"
-      fontSize="s"
-      copyAriaLabel={strings.copyRequestAriaLabel}
-      data-test-subj="ilmPolicyJsonTabCodeBlock"
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      responsive={false}
+      ref={setContainerElement}
+      className="eui-fullHeight"
+      data-test-subj="ilmPolicyJsonTab"
     >
-      {fullRequest}
-    </EuiCodeBlock>
+      <EuiFlexItem grow css={codeBlockItemStyles}>
+        <EuiCodeBlock
+          language="json"
+          isCopyable
+          transparentBackground
+          paddingSize="l"
+          fontSize="s"
+          whiteSpace="pre"
+          overflowHeight={containerHeight > 0 ? containerHeight : undefined}
+          copyAriaLabel={strings.copyRequestAriaLabel}
+          data-test-subj="ilmPolicyJsonTabCodeBlock"
+        >
+          {fullRequest}
+        </EuiCodeBlock>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
