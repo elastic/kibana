@@ -182,12 +182,8 @@ describe('ChangePasswordModal', () => {
       jest.clearAllMocks();
       // Mock useCurrentUser to return a different user by default
       useCurrentUserMock.mockReturnValue(
-        currentUserMock.createResultWithRaw({
-          rawAuthQuery: {
-            isLoading: false,
-            state: { username: 'different_user' } as any,
-            error: undefined,
-          },
+        currentUserMock.createResult({
+          user: currentUserMock.createCurrentUser({ username: 'different_user' }),
         })
       );
     });
@@ -309,12 +305,8 @@ describe('ChangePasswordModal', () => {
       beforeEach(() => {
         // Mock useCurrentUser to return the current user
         useCurrentUserMock.mockReturnValue(
-          currentUserMock.createResultWithRaw({
-            rawAuthQuery: {
-              isLoading: false,
-              state: { username: 'currentuser' } as any,
-              error: undefined,
-            },
+          currentUserMock.createResult({
+            user: currentUserMock.createCurrentUser({ username: 'currentuser' }),
           })
         );
       });

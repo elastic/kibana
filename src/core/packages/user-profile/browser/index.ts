@@ -27,12 +27,9 @@ export {
 export type {
   CurrentUserServices,
   CurrentUserProviderProps,
-  UseCurrentUserOptions,
   UseCurrentUserResult,
-  UseCurrentUserResultWithRaw,
   AuthenticatedUser,
   CurrentUser,
-  RawQuerySource,
   UserProfileAvatarData,
   UserSettingsData,
 } from './src/current_user';

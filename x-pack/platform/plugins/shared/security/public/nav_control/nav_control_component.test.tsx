@@ -14,8 +14,6 @@ import { useCurrentUser } from '@kbn/core-user-profile-browser';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { SecurityNavControl } from './nav_control_component';
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { userProfileMock } from '../../common/model/user_profile.mock';
 
 jest.mock('@kbn/core-user-profile-browser', () => {
   const actual = jest.requireActual('@kbn/core-user-profile-browser');
@@ -26,14 +24,6 @@ jest.mock('react-use/lib/useObservable');
 const useObservableMock = useObservable as jest.Mock;
 const useCurrentUserMock = useCurrentUser as jest.Mock;
 
-const userProfile = {
-  ...userProfileMock.createWithSecurity(),
-  user: {
-    ...userProfileMock.createWithSecurity().user,
-    authentication_provider: { type: 'basic', name: 'basic1' },
-  },
-};
-
 const userMenuLinks$ = new BehaviorSubject([]);
 
 const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
@@ -43,9 +33,14 @@ describe('SecurityNavControl', () => {
     useCurrentUserMock.mockReset();
     useCurrentUserMock.mockReturnValue({
       isLoading: false,
-      user: { displayName: 'full name', isAnonymous: false, avatar: undefined },
-      rawAuthQuery: { isLoading: false, state: mockAuthenticatedUser(), error: undefined },
-      rawProfileQuery: { isLoading: false, state: userProfile, error: undefined },
+      user: {
+        username: 'user',
+        email: 'email',
+        fullName: 'full name',
+        displayName: 'full name',
+        isAnonymous: false,
+        avatar: undefined,
+      },
     });
 
     useObservableMock.mockReset();
@@ -84,16 +79,16 @@ describe('SecurityNavControl', () => {
                 id="generated-id_euiToolTipAnchor"
               >
                 <div
-                  aria-label="some@email"
+                  aria-label="full name (email)"
                   class="euiAvatar euiAvatar--s euiAvatar--user emotion-euiAvatar-user-s-uppercase"
                   data-test-subj="userMenuAvatar"
                   role="img"
-                  style="background-color: rgb(255, 199, 219); color: rgb(0, 0, 0);"
+                  style="background-color: rgb(97, 162, 255); color: rgb(0, 0, 0);"
                 >
                   <span
                     aria-hidden="true"
                   >
-                    s
+                    fn
                   </span>
                 </div>
               </span>
@@ -108,8 +103,6 @@ describe('SecurityNavControl', () => {
     useCurrentUserMock.mockReturnValue({
       isLoading: true,
       user: null,
-      rawAuthQuery: { isLoading: true, state: undefined, error: undefined },
-      rawProfileQuery: { isLoading: true, state: undefined, error: undefined },
     });
 
     renderWithIntl(
@@ -163,8 +156,6 @@ describe('SecurityNavControl', () => {
     useCurrentUserMock.mockReturnValue({
       isLoading: true,
       user: null,
-      rawAuthQuery: { isLoading: true, state: undefined, error: undefined },
-      rawProfileQuery: { isLoading: true, state: undefined, error: undefined },
     });
 
     renderWithIntl(
@@ -511,14 +502,15 @@ describe('SecurityNavControl', () => {
   });
 
   it('should render anonymous user', async () => {
-    const anonymousUser = mockAuthenticatedUser({
-      authentication_provider: { type: 'anonymous', name: 'does no matter' },
-    });
     useCurrentUserMock.mockReturnValue({
       isLoading: false,
-      user: { displayName: 'full name', isAnonymous: true, avatar: undefined },
-      rawAuthQuery: { isLoading: false, state: anonymousUser, error: undefined },
-      rawProfileQuery: { isLoading: false, state: undefined, error: undefined },
+      user: {
+        username: 'user',
+        fullName: 'full name',
+        displayName: 'full name',
+        isAnonymous: true,
+        avatar: undefined,
+      },
     });
 
     renderWithIntl(

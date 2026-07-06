@@ -6,22 +6,16 @@
  */
 
 import type { Capabilities } from '@kbn/core/types';
+import { isUserAnonymous, canUserHaveProfile } from '@kbn/core-security-common';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 const REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE = ['reserved', 'native'];
 
-export function isUserAnonymous(user: Pick<AuthenticatedUser, 'authentication_provider'>) {
-  return user.authentication_provider.type === 'anonymous';
-}
-
 /**
- * All users are supposed to have profiles except anonymous users and users authenticated
- * via authentication HTTP proxies.
- * @param user Authenticated user information.
+ * Re-exported from `@kbn/core-security-common` so the shared `useCurrentUser` hook in
+ * `@kbn/core-user-profile-browser` can reuse the same logic without depending on this plugin.
  */
-export function canUserHaveProfile(user: AuthenticatedUser) {
-  return !isUserAnonymous(user) && user.authentication_provider.type !== 'http';
-}
+export { isUserAnonymous, canUserHaveProfile };
 
 export function canUserChangePassword(
   user: Pick<AuthenticatedUser, 'authentication_realm' | 'authentication_provider'>

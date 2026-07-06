@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isUserAnonymous } from '@kbn/core-security-common';
+
 import type {
   AuthenticatedUser,
   CurrentUser,
@@ -16,13 +18,11 @@ import type {
 } from './types';
 
 /**
- * Pure mapper that combines the authenticated user and (optional) user profile into the curated
+ * Pure mapper that combines the authenticated user and (optional) user profile into the
  * {@link CurrentUser} entity.
  *
- * Precedence rule: the curated identity fields are derived **only** from `authc`. The raw
- * profile's own `user` projection stays nested (it is only reachable via the raw escape hatch),
- * so there is no collision on `username`/`email`/`full_name`/`authentication_provider`, which are
- * present on both sources.
+ * Precedence rule: the identity fields (`username`/`email`/`fullName`) are derived **only** from
+ * `authc`, never from the profile's own `user` projection.
  *
  * @param authc Authenticated user, or `undefined` while the auth request is still loading.
  * @param profile Full user profile response, `null` when the user has no profile (e.g. anonymous
@@ -45,11 +45,8 @@ export const buildCurrentUser = (
     email: authc.email,
     fullName: authc.full_name,
     displayName: authc.full_name || authc.email || authc.username,
-    roles: authc.roles,
 
-    isCloudUser: authc.elastic_cloud_user,
-    isOperator: authc.operator ?? false,
-    isAnonymous: authc.authentication_provider.type === 'anonymous',
+    isAnonymous: isUserAnonymous(authc),
 
     profileUid: authc.profile_uid ?? profile?.uid,
     avatar: profileData?.avatar,

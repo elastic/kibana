@@ -60,7 +60,7 @@ const createUserProfile = (
     getCurrent,
     getUserProfile$: () => of(null),
     getEnabled$: () => of(false),
-    dataUpdates$: of({}),
+    getDataUpdates$: () => of({}),
     bulkGet: jest.fn(),
     suggest: jest.fn(),
     update: jest.fn(),
@@ -85,7 +85,7 @@ describe('useCurrentUser', () => {
     consoleError.mockRestore();
   });
 
-  it('transitions from loading to a resolved curated user', async () => {
+  it('transitions from loading to a resolved user', async () => {
     const { result } = renderHook(() => useCurrentUser(), {
       wrapper: createWrapper(createAuthc(), createUserProfile()),
     });
@@ -120,60 +120,75 @@ describe('useCurrentUser', () => {
     expect(getCurrent).toHaveBeenCalledWith({ dataPath: 'avatar,userSettings' });
   });
 
-  it('treats a 404 profile as "no profile" rather than an error', async () => {
-    const getCurrent = jest.fn().mockRejectedValue({ response: { status: 404 } });
+  it('skips the profile request entirely for users who cannot have a profile', async () => {
+    const anonymousUser: AuthenticatedUser = {
+      ...authenticatedUser,
+      authentication_provider: { type: 'anonymous', name: 'anon' },
+    };
+    const getCurrent = jest.fn().mockResolvedValue(profileResponse);
 
-    const { result } = renderHook(() => useCurrentUser({ includeRawQuerySource: true }), {
+    const { result } = renderHook(() => useCurrentUser(), {
+      wrapper: createWrapper(
+        createAuthc(jest.fn().mockResolvedValue(anonymousUser)),
+        createUserProfile(getCurrent)
+      ),
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(getCurrent).not.toHaveBeenCalled();
+    expect(result.current.user).toEqual(
+      expect.objectContaining({ username: 'jdoe', isAnonymous: true, avatar: undefined })
+    );
+  });
+
+  it('still resolves the user from auth when a permitted profile request unexpectedly 404s', async () => {
+    const profileError = { response: { status: 404 } };
+    const getCurrent = jest.fn().mockRejectedValue(profileError);
+
+    const { result } = renderHook(() => useCurrentUser(), {
       wrapper: createWrapper(createAuthc(), createUserProfile(getCurrent)),
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.rawProfileQuery.state).toBeNull();
-    expect(result.current.rawProfileQuery.error).toBeUndefined();
-    // user is still valid from auth
-    expect(result.current.user).toEqual(expect.objectContaining({ username: 'jdoe' }));
+    // user is still valid from auth, just without profile-derived fields
+    expect(result.current.user).toEqual(
+      expect.objectContaining({ username: 'jdoe', avatar: undefined })
+    );
+    expect(result.current.errors.authcError).toBeUndefined();
+    expect(result.current.errors.profileError).toBe(profileError);
   });
 
-  it('surfaces a critical auth failure: no user, auth error reported', async () => {
+  it('surfaces a critical auth failure: no user, authcError reported', async () => {
     const authError = new Error('auth boom');
     const getCurrentUser = jest.fn().mockRejectedValue(authError);
 
-    const { result } = renderHook(() => useCurrentUser({ includeRawQuerySource: true }), {
+    const { result } = renderHook(() => useCurrentUser(), {
       wrapper: createWrapper(createAuthc(getCurrentUser), createUserProfile()),
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.user).toBeNull();
-    expect(result.current.rawAuthQuery.error).toBe(authError);
+    expect(result.current.errors.authcError).toBe(authError);
+    expect(result.current.errors.profileError).toBeUndefined();
   });
 
-  it('surfaces a non-critical profile failure independently: user still valid', async () => {
+  it('resolves the user from auth alone when the (non-critical) profile request fails', async () => {
     const profileError = Object.assign(new Error('profile boom'), {
       response: { status: 500 },
     });
     const getCurrent = jest.fn().mockRejectedValue(profileError);
 
-    const { result } = renderHook(() => useCurrentUser({ includeRawQuerySource: true }), {
+    const { result } = renderHook(() => useCurrentUser(), {
       wrapper: createWrapper(createAuthc(), createUserProfile(getCurrent)),
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.user).toEqual(expect.objectContaining({ username: 'jdoe' }));
-    expect(result.current.rawProfileQuery.error).toBe(profileError);
-    expect(result.current.rawAuthQuery.error).toBeUndefined();
-  });
-
-  it('omits raw query sources unless requested', async () => {
-    const { result } = renderHook(() => useCurrentUser(), {
-      wrapper: createWrapper(createAuthc(), createUserProfile()),
-    });
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    expect(result.current).not.toHaveProperty('rawAuthQuery');
-    expect(result.current).not.toHaveProperty('rawProfileQuery');
+    expect(result.current.errors.authcError).toBeUndefined();
+    expect(result.current.errors.profileError).toBe(profileError);
   });
 });

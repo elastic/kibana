@@ -21,6 +21,12 @@ import type { UserProfileData } from '@kbn/user-profile-components';
 
 import type { GetUserProfileResponse, UserProfile } from '../../../common';
 
+/**
+ * Cache key used for `getCurrent()` calls that don't specify a `dataPath` (i.e. just the basic
+ * user information, no profile data).
+ */
+const DEFAULT_PROFILE_CACHE_KEY = '__profile__';
+
 export class UserProfileAPIClient implements UserProfileAPIClientType {
   private readonly _cache = new Map<string, Promise<GetUserProfileResponse>>();
 
@@ -69,7 +75,7 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
       return Promise.reject(new Error('Unable to retrieve user profile for anonymous paths'));
     }
 
-    const key = params?.dataPath ?? '__profile__';
+    const key = params?.dataPath ?? DEFAULT_PROFILE_CACHE_KEY;
 
     if (!this._cache.has(key)) {
       const req = this.http

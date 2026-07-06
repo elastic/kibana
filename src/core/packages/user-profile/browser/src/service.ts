@@ -25,11 +25,10 @@ export interface UserProfileService {
   getEnabled$(): Observable<boolean>;
 
   /**
-   * Emits whenever the current user's profile data is updated via {@link update} or
-   * {@link partialUpdate}. Unlike {@link getUserProfile$}, this is a plain Observable (no
-   * initial replay on subscription), making it suitable as a re-fetch trigger.
+   * Retrieve an observable that emits once an {@link update} or {@link partialUpdate} call has
+   * been persisted and the internal profile cache has been cleared.
    */
-  dataUpdates$: Observable<UserProfileData>;
+  getDataUpdates$(): Observable<UserProfileData>;
 
   /**
    * Retrieves the user profile of the current user. If the profile isn't available, e.g. for the anonymous users or

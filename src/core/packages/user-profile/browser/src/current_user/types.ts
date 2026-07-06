@@ -19,59 +19,32 @@ export interface UserProfileAvatarData {
   imageUrl?: string | null;
 }
 
-export interface UserSettingsData {
-  darkMode?: 'system' | 'dark' | 'light' | 'space_default';
-  contrastMode?: 'system' | 'standard' | 'high';
-  locale?: string;
-  solutionNavOptOut?: boolean;
-  rememberSelectedSpace?: boolean;
-  lastSelectedSpaceId?: string | null;
-  agentBuilderAnnouncementModalSeen?: boolean;
-  agentBuilderAnnouncementModalSeenBySpaceJson?: string;
-}
+/**
+ * User-settings data stored in the user profile. Intentionally opaque from Core's perspective —
+ * the concrete keys are owned and defined by the plugins that read/write them.
+ */
+export type UserSettingsData = Record<string, unknown>;
 
 export interface CurrentUser {
-  /** Username of the user (from `AuthenticatedUser.username`). */
+  /** The user's login name. */
   username: string;
-  /** Optional email of the user (from `AuthenticatedUser.email`). */
+  /** The user's email address, if one is set. */
   email?: string;
-  /** Full name of the user (from `AuthenticatedUser.full_name`). */
+  /** The user's full name, if one is set. */
   fullName?: string;
   /**
-   * Human-readable display name. Mirrors the security plugin's `getUserDisplayName`:
-   * `full_name || email || username`.
+   * Human-readable display name, suitable for greetings and labels. Falls back from full name, to
+   * email, to username.
    */
   displayName: string;
-  /** Roles assigned to the user (from `AuthenticatedUser.roles`). */
-  roles: readonly string[];
 
-  /** Whether the user is an Elastic Cloud user (from `AuthenticatedUser.elastic_cloud_user`). */
-  isCloudUser: boolean;
-  /** Whether the user is an operator (from `AuthenticatedUser.operator`, defaults to `false`). */
-  isOperator: boolean;
-  /**
-   * Whether the user is anonymous
-   * (from `AuthenticatedUser.authentication_provider.type === 'anonymous'`).
-   */
+  /** Whether the user was authenticated via the `anonymous` authentication provider. */
   isAnonymous: boolean;
 
-  /** Profile identifier (from `AuthenticatedUser.profile_uid`, falling back to `profile.uid`). */
+  /** Identifier of the user's profile, if one exists. */
   profileUid?: string;
-  /** Avatar stored in the user profile (from `profile.data.avatar`). */
+  /** The user's avatar, as configured in their user profile. */
   avatar?: UserProfileAvatarData;
-  /** User settings stored in the user profile (from `profile.data.userSettings`). */
+  /** Opaque per-plugin settings stored in the user's profile. */
   userSettings?: UserSettingsData;
-}
-
-/**
- * Per-source, react-query-style state. Exposed only when {@link useCurrentUser} is called with
- * `includeRawQuerySource: true`.
- */
-export interface RawQuerySource<T> {
-  /** Whether the underlying request is still in flight. */
-  isLoading: boolean;
-  /** The raw source data. `undefined` while loading. */
-  state: T | undefined;
-  /** The error, if the request failed. A missing profile (HTTP 404) is NOT an error. */
-  error?: Error;
 }

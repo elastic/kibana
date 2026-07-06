@@ -61,7 +61,6 @@ describe('buildCurrentUser', () => {
         email: 'jdoe@elastic.co',
         fullName: 'John Doe',
         displayName: 'John Doe',
-        roles: ['superuser'],
       })
     );
   });
@@ -83,16 +82,6 @@ describe('buildCurrentUser', () => {
   });
 
   it('derives flags', () => {
-    expect(buildCurrentUser(createAuthenticatedUser({ elastic_cloud_user: true }), null)).toEqual(
-      expect.objectContaining({ isCloudUser: true })
-    );
-    expect(buildCurrentUser(createAuthenticatedUser({ operator: true }), null)).toEqual(
-      expect.objectContaining({ isOperator: true })
-    );
-    // operator defaults to false when unset
-    expect(buildCurrentUser(createAuthenticatedUser({ operator: undefined }), null)).toEqual(
-      expect.objectContaining({ isOperator: false })
-    );
     expect(
       buildCurrentUser(
         createAuthenticatedUser({ authentication_provider: { type: 'anonymous', name: 'anon' } }),

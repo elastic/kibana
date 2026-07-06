@@ -13,16 +13,11 @@ export type { CurrentUserServices } from './current_user_context';
 export { CurrentUserProvider } from './current_user_provider';
 export type { CurrentUserProviderProps } from './current_user_provider';
 export { useCurrentUser, CURRENT_USER_DATA_PATH } from './use_current_user';
-export type {
-  UseCurrentUserOptions,
-  UseCurrentUserResult,
-  UseCurrentUserResultWithRaw,
-} from './use_current_user';
+export type { UseCurrentUserResult } from './use_current_user';
 export type {
   AuthenticatedUser,
   CurrentUser,
   GetUserProfileResponse,
-  RawQuerySource,
   UserProfileAvatarData,
   UserSettingsData,
 } from './types';

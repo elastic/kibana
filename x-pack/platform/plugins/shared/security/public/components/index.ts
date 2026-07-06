@@ -13,4 +13,3 @@ export {
   useUserProfile,
   useCurrentUser,
 } from './use_current_user';
-export type { CurrentUser } from './use_current_user';

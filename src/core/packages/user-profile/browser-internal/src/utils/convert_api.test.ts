@@ -42,6 +42,12 @@ describe('convertUserProfileAPI', () => {
     });
   });
 
+  describe('getDataUpdates$', () => {
+    it('returns the observable from the source', () => {
+      expect(output.getDataUpdates$()).toBe(source.dataUpdates$);
+    });
+  });
+
   describe('getCurrent', () => {
     it('calls the API from the source with the correct parameters', () => {
       output.getCurrent();
