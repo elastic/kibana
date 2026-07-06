@@ -67,7 +67,7 @@ export const mainTranslations = {
         'xpack.dataFederation.table.deleteActionHasDataSetsDescription',
         {
           defaultMessage:
-            "You can't delete a data source while datasets read from it. Delete those datasets first.",
+            "To delete a data source, you must first delete all datasets that read from it.",
         }
       ),
       caption: i18n.translate('xpack.dataFederation.table.caption', {
