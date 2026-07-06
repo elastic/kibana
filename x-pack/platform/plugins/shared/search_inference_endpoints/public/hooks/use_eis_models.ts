@@ -14,8 +14,6 @@ import { useQueryInferenceEndpoints } from './use_inference_endpoints';
 export const useEisModels = () => {
   const { data: allEndpoints, ...rest } = useQueryInferenceEndpoints();
 
-  // filter(isEisEndpoint) is a type guard predicate — TypeScript narrows the array
-  // to EisInferenceEndpoint[] automatically, so data is EisInferenceEndpoint[] | undefined.
   const data: EisInferenceEndpoint[] | undefined = useMemo(
     () => allEndpoints?.filter(isEisEndpoint).filter((ep) => !isHiddenEisEndpoint(ep)),
     [allEndpoints]
