@@ -51,7 +51,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     isLoading,
     isError,
     isSaving,
-    setIsCallOutDismissed,
+    handleDismissCallOut,
     handleSelectAll,
     handleToggleRegion,
     handleToggleZone,
@@ -122,7 +122,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
               color="primary"
               iconType="info"
               announceOnMount={false}
-              onDismiss={() => setIsCallOutDismissed(true)}
+              onDismiss={handleDismissCallOut}
               data-test-subj="manageRegionsCallout"
             >
               <p>

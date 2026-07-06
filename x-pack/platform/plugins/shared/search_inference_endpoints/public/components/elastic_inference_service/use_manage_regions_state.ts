@@ -132,6 +132,10 @@ export const useManageRegionsState = (onClose: () => void) => {
     savePolicy({ allowed_regions: allowedRegions }, { onSuccess: onClose });
   }, [availableRegions, checkedKeys, savePolicy, onClose]);
 
+  const handleDismissCallOut = useCallback(() => {
+    setIsCallOutDismissed(true);
+  }, []);
+
   return {
     zoneGroups,
     checkedKeys,
@@ -144,7 +148,7 @@ export const useManageRegionsState = (onClose: () => void) => {
     isLoading,
     isError,
     isSaving,
-    setIsCallOutDismissed,
+    handleDismissCallOut,
     handleSelectAll,
     handleToggleRegion,
     handleToggleZone,
