@@ -62,6 +62,7 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG,
   SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
 } from '../common/feature_flags';
+import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significant_events';
 
@@ -266,6 +267,7 @@ export class SignificantEventsPlugin
       SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
     );
 
+    core.pricing.registerProductFeatures(SIGNIFICANT_EVENT_TIERED_FEATURES);
     registerFeatureFlags(core, this.logger, {
       isAlertingV2PluginAvailable: 'alertingVTwo' in plugins,
     });

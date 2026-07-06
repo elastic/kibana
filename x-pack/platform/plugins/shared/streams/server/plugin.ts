@@ -34,6 +34,7 @@ import {
   STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
+import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
 import { StreamsService } from './lib/streams/service';
@@ -315,6 +316,7 @@ export class StreamsPlugin
       },
     });
 
+    registerFeatureFlags(core);
     core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
 
     const routeRegistrationOptions = {

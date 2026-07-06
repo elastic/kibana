@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
@@ -18,11 +18,7 @@ import {
 
 import type { StreamsPluginStartDependencies } from './types';
 
-export function registerFeatureFlags(
-  core: CoreSetup<StreamsPluginStartDependencies>,
-  logger: Logger,
-  { isAlertingV2PluginAvailable }: { isAlertingV2PluginAvailable: boolean }
-) {
+export function registerFeatureFlags(core: CoreSetup<StreamsPluginStartDependencies>) {
   core.uiSettings.register({
     [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: {
       category: ['observability'],

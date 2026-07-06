@@ -2045,6 +2045,7 @@ x-pack/platform/plugins/shared/streams/test/scout/api/tests/significant_events @
 
 # Streams
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams @elastic/obs-sig-events-team  @elastic/obs-onboarding-team
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/significant_events @elastic/obs-sig-events-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/test/api_integration/apis/streams @elastic/obs-sig-events-team @elastic/obs-onboarding-team
