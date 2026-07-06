@@ -589,7 +589,6 @@ describe('buildDestinationFieldEsql', () => {
       // No trailing catch-all default inside the inner CASE.
       expect(expression).not.toContain('"ibm"');
     });
-
   });
 });
 
