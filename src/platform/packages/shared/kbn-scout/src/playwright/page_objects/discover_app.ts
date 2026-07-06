@@ -188,16 +188,27 @@ export class DiscoverApp {
     await menuItem.click();
   }
 
-  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
-    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
-    await this.page.testSubj.hover('dscHideSidebarButton'); // cancel tooltips
-    await this.waitForDiscoverPage();
-    await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
+  private async dismissHoverOverlays() {
+    await this.page.mouse.move(0, 0);
   }
 
-  async saveSearch(name: string) {
+  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
+    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
+    await this.dismissHoverOverlays();
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
     await this.page.testSubj.click('discoverSaveButton');
     await this.page.testSubj.fill('savedObjectTitle', name);
+    if (storeTimeRange !== undefined) {
+      const switchControl = this.page.testSubj.locator('storeTimeWithSearch');
+      await switchControl.waitFor({ state: 'visible' });
+      const isChecked = (await switchControl.getAttribute('aria-checked')) === 'true';
+      if (isChecked !== storeTimeRange) {
+        await switchControl.click();
+      }
+    }
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
   }
@@ -533,6 +544,15 @@ export class DiscoverApp {
     await this.page.testSubj.click('unifiedHistogramEditVisualization');
   }
 
+  async openLensEditFlyout() {
+    await this.page.testSubj.locator('unifiedHistogramEditFlyoutVisualization').click();
+    await this.getLensEditFlyout().waitFor({ state: 'visible' });
+  }
+
+  getLensEditFlyout(): Locator {
+    return this.page.testSubj.locator('lnsChartSwitchPopover');
+  }
+
   async getTheColumnFromGrid(): Promise<string[]> {
     const columnLocators = await this.page.testSubj.locator('unifiedDataTableColumnTitle').all();
     return await Promise.all(columnLocators.map((locator) => locator.innerText()));
@@ -664,6 +684,11 @@ export class DiscoverApp {
 
   async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
     return this.codeEditor.getCodeEditorValue(nthIndex);
+  }
+
+  async openSidebar() {
+    await this.page.testSubj.locator('dscShowSidebarButton').click();
+    await this.waitUntilFieldListHasCountOfFields();
   }
 
   async addBreakdownFieldFromSidebar(
