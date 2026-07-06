@@ -87,7 +87,7 @@ const customValueRangeTooltip = i18n.translate(
   'xpack.lens.table.progressBar.valueRange.customTooltip',
   {
     defaultMessage:
-      'Custom lets you change the range. You can also reverse color order or tweak color stops in the color palette editor.',
+      'Custom lets you change the range. You can also reverse color order or tweak color stops by editing Color mappings.',
   }
 );
 
