@@ -731,6 +731,42 @@ describe('usePackagePolicy - agentless', () => {
     expect(saveResult).toEqual({ data: { item: { id: 'agentless-detect' } }, error: null });
   });
 
+  it('resets the supports_agentless detection when re-loading a different, non-agentless policy', async () => {
+    // Param-only navigation re-runs this hook with a new `packagePolicyId` without a remount.
+    // A stale detection from the previously loaded (agentless) policy must not route the next
+    // (agent-based) policy's save through the agentless PUT — the server rejects it.
+    jest
+      .mocked(sendUpdatePackagePolicy)
+      .mockResolvedValue({ data: { item: { id: 'nginx-1' } }, error: null } as any);
+
+    let packagePolicyId = 'agentless-detect';
+    const renderer = createFleetTestRendererMock();
+    const { result, rerender } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData(packagePolicyId, {})
+    );
+    // The agentless policy loads and is detected via its `supports_agentless` flag. Both mock
+    // policies are named `nginx-1`, so distinguish the loads by their `policy_ids`.
+    await waitFor(() =>
+      expect(result.current.packagePolicy?.policy_ids).toEqual(['agentless-agent-policy-1'])
+    );
+
+    // Navigate to an agent-based policy without remounting.
+    await act(async () => {
+      packagePolicyId = 'package-policy-1';
+      rerender();
+    });
+    await waitFor(() =>
+      expect(result.current.packagePolicy?.policy_ids).toEqual(['agent-policy-1'])
+    );
+
+    await act(async () => {
+      await result.current.savePackagePolicy();
+    });
+
+    expect(sendUpdatePackagePolicy).toHaveBeenCalledWith('package-policy-1', expect.anything());
+    expect(sendUpdateAgentlessPolicy).not.toHaveBeenCalled();
+  });
+
   it('normalizes agentless save failures into the { data, error } shape', async () => {
     const requestError = Object.assign(new Error('conflict'), { statusCode: 409 });
     jest.mocked(sendUpdateAgentlessPolicy).mockRejectedValue(requestError);

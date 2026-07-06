@@ -250,10 +250,11 @@ export function usePackagePolicyWithRelatedData(
         }
 
         // Detect an agentless policy that was opened without the `isAgentless` hint, so the save
-        // routes through the agentless API rather than the package-policy API.
-        if (packagePolicyData?.item?.supports_agentless) {
-          setDetectedAgentless(true);
-        }
+        // routes through the agentless API rather than the package-policy API. Set (not just
+        // raised) on every load: this hook can re-run with a different `packagePolicyId` without
+        // a remount, and a stale `true` from a previously loaded agentless policy would route the
+        // next policy's save through the agentless PUT, which the server rejects.
+        setDetectedAgentless(Boolean(packagePolicyData?.item?.supports_agentless));
 
         if (packagePolicyData!.item.policy_ids && packagePolicyData!.item.policy_ids.length > 0) {
           const { data, error: agentPolicyError } = await sendBulkGetAgentPolicies(
