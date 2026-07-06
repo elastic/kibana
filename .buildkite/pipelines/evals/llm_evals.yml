@@ -465,3 +465,14 @@ steps:
           automatic:
             - exit_status: '-1'
               limit: 3
+  - wait: ~
+    continue_on_failure: true
+
+  - label: 'LLM Evals: Weekly build Slack summary'
+    key: kbn-evals-weekly-build-slack-summary
+    command: bash .buildkite/scripts/steps/evals/weekly_build_slack_summary.sh
+    soft_fail: true
+    timeout_in_minutes: 5
+    env:
+      KBN_EVALS: '1'
+      KBN_EVALS_WEEKLY: '1'
