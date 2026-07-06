@@ -94629,6 +94629,9 @@ components:
         description:
           description: A short description of the dashboard.
           type: string
+        esql_approximation:
+          description: When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.
+          type: boolean
         filters:
           description: Filters applied across all panels, including pinned panels.
           items:

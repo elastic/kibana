@@ -101,7 +101,11 @@ class FleetServerHostService {
           esClient,
           defaultItem.id,
           { is_default: false },
-          { fromPreconfiguration: options?.fromPreconfiguration }
+          // fromPreconfiguration: true so the internal unsetting of is_default on the
+          // existing default host bypasses the preconfiguration edit restriction. This is a
+          // system-level side effect of setting a new default, not a user edit, so it must be
+          // allowed even when the current default is a preconfigured host.
+          { fromPreconfiguration: true }
         );
       }
     }
@@ -378,7 +382,11 @@ class FleetServerHostService {
           {
             is_default: false,
           },
-          { fromPreconfiguration: options?.fromPreconfiguration }
+          // fromPreconfiguration: true so the internal unsetting of is_default on the
+          // existing default host bypasses the preconfiguration edit restriction. This is a
+          // system-level side effect of setting a new default, not a user edit, so it must be
+          // allowed even when the current default is a preconfigured host.
+          { fromPreconfiguration: true }
         );
       }
     }
