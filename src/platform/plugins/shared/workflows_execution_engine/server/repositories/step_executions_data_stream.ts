@@ -31,6 +31,7 @@ export const TOKEN_USAGE_MAPPING = mappings.object({
   properties: {
     inputTokens: mappings.long(),
     outputTokens: mappings.long(),
+    cachedTokens: { type: 'long' },
     totalTokens: mappings.long(),
   },
 });

@@ -55,6 +55,18 @@ export const WORKFLOWS_EXECUTIONS_DS_MAPPINGS = {
     // Aggregated token usage across all token-consuming steps, accumulated
     // incrementally as each step finishes.
     usage: TOKEN_USAGE_MAPPING,
+    // Per-step token usage, retained on the workflow execution so callers can
+    // query usage by producing step and resolved connector.
+    stepUsage: mappings.object({
+      properties: {
+        stepId: mappings.keyword(),
+        connectorId: mappings.keyword(),
+        inputTokens: mappings.long(),
+        outputTokens: mappings.long(),
+        cachedTokens: mappings.long(),
+        totalTokens: mappings.long(),
+      },
+    }),
     version: mappings.long(),
   },
 } satisfies MappingsDefinition;
