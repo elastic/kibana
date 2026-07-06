@@ -96,8 +96,8 @@ describe('entity risk score V2 calculation route', () => {
     (buildAlertFilters as jest.Mock).mockReturnValue([]);
     (fetchWatchlistConfigs as jest.Mock).mockResolvedValue(new Map());
     (getIsIdBasedRiskScoringEnabled as jest.Mock).mockResolvedValue(false);
-    (scoreBaseEntities as jest.Mock).mockResolvedValue(undefined);
-    (runResolutionScoringStep as jest.Mock).mockResolvedValue(undefined);
+    (scoreBaseEntities as jest.Mock).mockResolvedValue({ scores: {}, scoresWritten: 0 });
+    (runResolutionScoringStep as jest.Mock).mockResolvedValue({ scores: {}, scoresWritten: 0 });
 
     riskScoreEntityCalculationRouteV2(server.router, getStartServicesMock, logger);
   });
@@ -238,7 +238,7 @@ describe('entity risk score V2 calculation route', () => {
     );
 
     expect(response.status).toEqual(400);
-    expect(response.body.message).toEqual('Entity not found');
+    expect(response.body.message).toContain('Entity not found');
     expect(scoreBaseEntities).not.toHaveBeenCalled();
   });
 

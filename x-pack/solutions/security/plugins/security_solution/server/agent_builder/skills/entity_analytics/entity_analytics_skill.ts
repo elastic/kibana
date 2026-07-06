@@ -16,8 +16,9 @@ import {
 } from './inline_tools';
 import {
   SECURITY_GET_ENTITY_TOOL_ID,
-  SECURITY_LIST_WATCHLISTS_TOOL_ID,
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
+  SECURITY_LIST_WATCHLISTS_TOOL_ID,
+  SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
 } from '../../tools';
 
 // Feature flag controlling whether our tools try to dynamically generate ESQL queries based on the question asked of
@@ -252,6 +253,13 @@ When the user names a vendor or platform (AWS, Okta, Azure, Microsoft 365, Activ
 
 For vendors not listed here, try \`namespaces: ['<event.module>']\` on user entities (pass-through) or \`sources: ['<lowercase vendor key>']\` — a single prefix key is enough thanks to exact-or-prefix matching.
 
+### Set Asset Criticality Tool
+- \`security.set_asset_criticality\` - Set or remove the asset criticality level for a single entity (host, user, service, or generic). Criticality influences risk scoring — higher-criticality entities carry more weight in risk calculations. Single-record only; bulk or CSV changes belong in the Entity Analytics management UI.
+  - Valid levels (lowest to highest): \`low_impact\` → \`medium_impact\` → \`high_impact\` → \`extreme_impact\`. Use \`"unassigned"\` to remove the existing value.
+  - **Required args:** \`entityId\` (full EUID, e.g. \`"host:server1"\`), \`entityType\` (\`host\`, \`user\`, \`service\`, or \`generic\`), \`criticality\`
+  - If the \`security.entity\` attachment identifies the target, read its \`identifierType\` as \`entityType\` and the prefixed entity id as \`entityId\`
+  - A confirmation prompt is always presented before the write executes; after the user accepts, optionally call \`security.get_entity\` to show the updated entity profile
+
 ## Entity Analysis Investigation Steps
 
 ### 1. Find entities to investigate
@@ -458,7 +466,25 @@ Steps:
 
 **Common mistake:** rendering only the \`security.entity\` entities table (titled e.g. "Top 10 Riskiest Users") and claiming in prose that it is the Entity Analytics dashboard. That is **wrong** — always render the \`security.entity_analytics_dashboard\` tag from \`attachments.add\` (and optionally the \`security.entity\` tag as a complement) when the user's prompt matches the "Dashboard trigger" phrases.
 
-### Example 12: List Watchlists
+### Example 12: Set asset criticality from chat
+
+User query: "Mark this host as high impact" (entity attachment present, or "mark host:server1 as high impact")
+
+Steps:
+1. Call \`security.set_asset_criticality\` with \`entityId: "host:server1"\`, \`entityType: "host"\`, \`criticality: "high_impact"\`.
+2. The tool presents a confirmation prompt — wait for the user to accept before calling follow-up tools.
+3. On success, briefly confirm the new criticality level. Optionally call \`security.get_entity\` to show the updated profile card.
+
+### Example 13: Clear asset criticality
+
+User query: "Remove the criticality for user:jsmith"
+
+Steps:
+1. Call \`security.set_asset_criticality\` with \`entityId: "user:jsmith"\`, \`entityType: "user"\`, \`criticality: "unassigned"\`.
+2. The tool presents a confirmation prompt — wait for the user to accept before calling follow-up tools.
+3. On success, inform the user the criticality has been cleared.
+
+### Example 13: List Watchlists
 
 User query: What watchlists do we have?
 
@@ -466,7 +492,7 @@ Steps:
 1. Call \`security.list_watchlists\` (no arguments).
 2. Summarize the result in prose — name, risk modifier, and description per watchlist. Use a short markdown table when 4+ watchlists are returned. Do **not** emit a \`<render_attachment>\` tag; this tool does not produce a rich attachment.
 
-### Example 13: Members Of A Named Watchlist (discover → filter chain)
+### Example 14: Members Of A Named Watchlist (discover → filter chain)
 
 User query: Who is on the Privileged Users watchlist?
 
@@ -614,8 +640,9 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
       ctx.isEntityStoreV2Enabled
         ? [
             SECURITY_GET_ENTITY_TOOL_ID,
-            SECURITY_LIST_WATCHLISTS_TOOL_ID,
             SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            SECURITY_LIST_WATCHLISTS_TOOL_ID,
+            SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
           ]
         : [],
   });
