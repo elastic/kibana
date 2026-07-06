@@ -83,6 +83,20 @@ export class SlackAppService {
     const soClient = this.getSoClient(request);
     const now = new Date().toISOString();
 
+    // A prior connection (connected, or a still-in-progress install) may already
+    // hold a live managed key. Invalidate it before minting a new one so
+    // reconnecting — or any repeat call to this route — never orphans a key in ES.
+    const existingConnection = await this.readConnection(soClient);
+    if (existingConnection?.apiKeyId) {
+      await this.server.security.authc.apiKeys
+        .invalidateAsInternalUser({ ids: [existingConnection.apiKeyId] })
+        .catch((error) => {
+          this.logger.warn(
+            `Failed to invalidate existing API key ${existingConnection.apiKeyId} before reconnecting: ${error.message}`
+          );
+        });
+    }
+
     // Mint a managed, least-privilege ES API key scoped to Agent Builder read. The key
     // is granted on behalf of the connecting user but survives their deletion (ES keys
     // outlive their owner). The connecting user must hold `agentBuilder:read`, otherwise
@@ -258,16 +272,30 @@ export class SlackAppService {
     }
 
     if (relayUrl) {
-      await new RelayClient(relayUrl).unbind().catch((error) => {
-        // The Relay does not implement the uninstall endpoint yet; a 404 is
-        // expected and not actionable from Kibana. The binding must be cleared
-        // Relay-side until that endpoint lands.
-        if (error instanceof RelayRequestError && error.statusCode === 404) {
-          this.logger.debug('Relay uninstall endpoint is not available (404); skipping unbind.');
-          return;
-        }
-        this.logger.warn(`Failed to unbind from Relay on disconnect: ${error.message}`);
-      });
+      try {
+        await new RelayClient(relayUrl).unbind();
+      } catch (error) {
+        // The Relay's own contract requires the caller never see success while a
+        // binding survives (a partial teardown returns 502 and must be retried).
+        // Keep the connection record in an `error` state instead of deleting it,
+        // so the settings UI surfaces the failure and the user can retry rather
+        // than believing they're disconnected while the workspace stays bound.
+        const message =
+          error instanceof RelayRequestError
+            ? error.relayMessage ?? error.message
+            : error instanceof Error
+            ? error.message
+            : String(error);
+        this.logger.warn(`Failed to unbind from Relay on disconnect: ${message}`);
+        await this.writeConnection(soClient, {
+          ...connection,
+          status: RELAY_APP_CONNECTION_STATUS.error,
+          apiKeyId: undefined,
+          error: message,
+          updatedAt: new Date().toISOString(),
+        });
+        return { success: false };
+      }
     }
 
     await soClient

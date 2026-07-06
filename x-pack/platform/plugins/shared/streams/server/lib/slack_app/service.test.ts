@@ -23,7 +23,13 @@ const request = {} as unknown as KibanaRequest;
 
 function createHarness(configOverride?: Partial<StreamsServer['config']['slackApp']>) {
   const soClient = {
-    get: jest.fn(),
+    // Defaults to "no connection exists yet"; individual tests override this
+    // with mockResolvedValue to simulate an existing connection document.
+    get: jest
+      .fn()
+      .mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(RELAY_APP_CONNECTION_SO_TYPE)
+      ),
     create: jest.fn().mockResolvedValue({}),
     delete: jest.fn().mockResolvedValue({}),
   };
@@ -125,6 +131,36 @@ describe('SlackAppService', () => {
 
       await expect(new SlackAppService(server).connect(request)).rejects.toThrow('relay down');
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
+    });
+
+    it('invalidates a pre-existing key before minting a new one when a connection already exists', async () => {
+      const { server, soClient, invalidateAsInternalUser, grantAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'old-key',
+          surface: 'slack',
+        },
+      });
+      grantAsInternalUser.mockResolvedValue({ id: 'new-key', name: 'k', api_key: 'secret' });
+      startInstall.mockResolvedValue({
+        authorize_url: 'https://slack/oauth',
+        state: 's',
+        claim_id: 'claim-2',
+        deployment_ref: 'dep-1',
+      });
+
+      const result = await new SlackAppService(server).connect(request);
+
+      // The old key is invalidated rather than left orphaned when the
+      // connection document gets overwritten.
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['old-key'] });
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({ apiKeyId: 'new-key', claimId: 'claim-2' }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+      expect(result).toEqual({ authorizeUrl: 'https://slack/oauth' });
     });
   });
 
@@ -288,7 +324,7 @@ describe('SlackAppService', () => {
       expect(result).toEqual({ success: true });
     });
 
-    it('treats a 404 from the not-yet-implemented Relay uninstall endpoint as expected', async () => {
+    it('keeps the connection in an error state and reports failure when the Relay unbind fails', async () => {
       const { server, soClient, invalidateAsInternalUser } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
@@ -299,20 +335,29 @@ describe('SlackAppService', () => {
       unbind.mockRejectedValue(
         new RelayRequestError(
           '/v1/slack/uninstall',
-          404,
-          'Route POST:/v1/slack/uninstall not found'
+          502,
+          'teardown incomplete: 1 workspace(s) failed and remain bound; retry to finish'
         )
       );
 
       const result = await new SlackAppService(server).disconnect(request);
 
-      // Local cleanup still completes: key invalidated, state deleted.
+      // The key is still invalidated even though the Relay-side teardown failed,
+      // but the connection record survives (not deleted) so the user can retry —
+      // the Relay's own contract says the caller must never see success while a
+      // binding survives.
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
-      expect(soClient.delete).toHaveBeenCalledWith(
+      expect(soClient.delete).not.toHaveBeenCalled();
+      expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
-        RELAY_APP_CONNECTION_SO_ID
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.error,
+          apiKeyId: undefined,
+          error: 'teardown incomplete: 1 workspace(s) failed and remain bound; retry to finish',
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
-      expect(result).toEqual({ success: true });
+      expect(result).toEqual({ success: false });
     });
 
     it('is a no-op when there is no connection', async () => {
