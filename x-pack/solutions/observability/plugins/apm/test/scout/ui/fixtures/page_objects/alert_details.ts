@@ -40,6 +40,12 @@ export class AlertDetailsPage {
     );
   }
 
+  getAnomalySeverityBadgeInPanel(chartTitle: string): Locator {
+    return this.getChartPanel(chartTitle).locator(
+      '[data-test-subj="apmAlertDetailsAnomalySeverityBadge"]'
+    );
+  }
+
   async openChartActions(chartTitle: string) {
     await this.getOpenActionsButton(chartTitle).click();
   }

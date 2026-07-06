@@ -27,7 +27,8 @@ export function AnomalySeverityBadge({ severity, score }: AnomalySeverityBadgePr
   const badgeContentCss = css({
     display: 'inline-flex',
     alignItems: 'center',
-    gap: euiTheme.size.xs,
+    verticalAlign: 'middle',
+    gap: `${euiTheme.size.xs}`,
   });
 
   return (

@@ -49,8 +49,8 @@ export function AnomalySeverityIcon({ severity }: { severity: ML_ANOMALY_SEVERIT
     <EuiIcon
       type={iconType}
       css={iconCss}
-      size={'m'}
-      color={'inherit'}
+      size="m"
+      color="inherit"
       aria-hidden={true}
       data-test-subj={`apmAlertDetailsAnomalySeverityIcon-${severity}`}
     />

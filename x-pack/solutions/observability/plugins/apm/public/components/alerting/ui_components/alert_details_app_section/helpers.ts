@@ -11,10 +11,8 @@ import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import {
-  ANOMALY_ALERT_SEVERITY_TYPES,
-  getApmMlDetectorLabel,
-} from '../../../../../common/rules/apm_rule_types';
+import { getApmMlDetectorLabel } from '../../../../../common/anomaly_detection';
+import { ANOMALY_ALERT_SEVERITY_TYPES } from '../../../../../common/rules/apm_rule_types';
 
 export const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType => {
   if (ruleAggType === '95th') return LatencyAggregationType.p95;
@@ -55,10 +53,6 @@ function getThresholdSeverityLabel(alertEvaluationThreshold: number): string {
   return severityMatch?.type ?? String(alertEvaluationThreshold);
 }
 
-function formatDetectorTitleLabel(detectorLabel: string): string {
-  return detectorLabel.charAt(0).toUpperCase() + detectorLabel.slice(1);
-}
-
 export function formatAnomalyCalloutTitle({
   alertSeverity,
   detectorType,
@@ -70,7 +64,7 @@ export function formatAnomalyCalloutTitle({
     defaultMessage: '{severity} APM anomaly detected - {detectorType}',
     values: {
       severity: formatSeverityLabel(alertSeverity),
-      detectorType: formatDetectorTitleLabel(getApmMlDetectorLabel(detectorType)),
+      detectorType: getApmMlDetectorLabel(detectorType),
     },
   });
 }

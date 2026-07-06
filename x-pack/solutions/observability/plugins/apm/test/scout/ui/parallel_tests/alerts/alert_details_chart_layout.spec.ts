@@ -63,7 +63,7 @@ function createChartLayoutTest(alertIndex: string, config: AlertTestConfig) {
           await expect(alertDetailsPage.anomalySeverityBadge).toBeVisible();
           await expect(alertDetailsPage.anomalyChartPanel).toBeVisible();
           await expect(
-            alertDetailsPage.getChartPanel(config.primaryChartTitle).getByText('Critical')
+            alertDetailsPage.getAnomalySeverityBadgeInPanel(config.primaryChartTitle)
           ).toBeVisible();
         }).toPass({ timeout: 60_000, intervals: [2_000] });
       });
