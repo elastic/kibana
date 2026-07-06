@@ -31,14 +31,9 @@ export {
   ESQL_TYPE_DESCRIPTION,
 } from '../../../detection_engine/rule_creation_ui/components/description_step/translations';
 
-export const APPLY_TO_FORM = i18n.translate(
-  'xpack.securitySolution.agentBuilder.ruleAttachment.applyToForm',
-  { defaultMessage: 'Apply to form' }
-);
-
-export const EDIT_RULE_SETTINGS = i18n.translate(
-  'xpack.securitySolution.agentBuilder.ruleAttachment.editRuleSettings',
-  { defaultMessage: 'Edit rule settings' }
+export const APPLY_TO_RULE_FORM = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.applyToRuleForm',
+  { defaultMessage: 'Apply to rule form' }
 );
 
 export const VIEW_RULE = i18n.translate(

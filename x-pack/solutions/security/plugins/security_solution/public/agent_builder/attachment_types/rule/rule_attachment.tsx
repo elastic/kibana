@@ -23,8 +23,6 @@ import {
   getRuleIdFromAttachment,
   getRuleAttachmentIntent,
   parseRuleFromAttachment,
-  shouldShowViewRuleButton,
-  isRuleFormOpenForCard,
 } from './helpers';
 
 export const registerRuleAttachment = ({
@@ -72,9 +70,6 @@ export const createRuleAttachmentDefinition = ({
       ruleId,
       attachmentId: attachment.id,
       updateOrigin,
-      showViewRule:
-        intent === 'update' && shouldShowViewRuleButton(ruleId, window.location.pathname),
-      isRuleFormOpen: isRuleFormOpenForCard(intent, ruleId, window.location.pathname),
     });
   },
 });

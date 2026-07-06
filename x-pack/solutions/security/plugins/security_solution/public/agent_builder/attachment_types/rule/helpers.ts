@@ -7,7 +7,6 @@
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
-import { RULES_PATH } from '../../../../common/constants';
 import {
   ML_TYPE_DESCRIPTION,
   EQL_TYPE_DESCRIPTION,
@@ -31,67 +30,6 @@ export type RuleAttachment = Attachment<
     attachmentLabel?: string;
   }
 >;
-
-export const isOnRuleFormPage = (pathname: string): boolean =>
-  pathname.includes(RULES_PATH) && (pathname.includes('/create') || pathname.includes('/edit'));
-
-export const getRuleIdFromEditFormPath = (pathname: string): string | undefined => {
-  if (!pathname.includes(RULES_PATH) || !pathname.includes('/edit')) {
-    return undefined;
-  }
-  const match = pathname.match(/\/id\/([^/]+)\/edit/);
-  return match ? decodeURIComponent(match[1]) : undefined;
-};
-
-export const isAttachmentRuleOpenOnEditPage = (
-  attachmentRuleId: string | undefined,
-  pathname: string
-): boolean => {
-  if (!attachmentRuleId || !isOnRuleFormPage(pathname)) {
-    return false;
-  }
-  if (pathname.includes('/create')) {
-    return false;
-  }
-  const formRuleId = getRuleIdFromEditFormPath(pathname);
-  return formRuleId !== undefined && formRuleId === attachmentRuleId;
-};
-
-const isOnRuleDetailsPage = (ruleId: string, pathname: string): boolean => {
-  if (!pathname.includes(RULES_PATH) || pathname.includes('/edit')) {
-    return false;
-  }
-  const match = pathname.match(/\/id\/([^/]+)/);
-  if (!match) {
-    return false;
-  }
-
-  const pathRuleId = decodeURIComponent(match[1]);
-  return pathRuleId === ruleId;
-};
-
-export const shouldShowViewRuleButton = (
-  attachmentRuleId: string | undefined,
-  pathname: string
-): boolean => {
-  if (!attachmentRuleId) {
-    return false;
-  }
-  return !isOnRuleDetailsPage(attachmentRuleId, pathname);
-};
-
-// When the card's target form is already open, the apply button applies in place instead of
-// navigating, and its label switches to "Apply to form".
-export const isRuleFormOpenForCard = (
-  intent: RuleAttachmentIntent,
-  attachmentRuleId: string | undefined,
-  pathname: string
-): boolean => {
-  if (intent === 'create') {
-    return isOnRuleFormPage(pathname) && pathname.includes('/create');
-  }
-  return isAttachmentRuleOpenOnEditPage(attachmentRuleId, pathname);
-};
 
 // `origin` (set after save, persisted server-side) is the source of truth for identity and intent.
 export const getRuleIdFromAttachment = (attachment: RuleAttachment): string | undefined =>

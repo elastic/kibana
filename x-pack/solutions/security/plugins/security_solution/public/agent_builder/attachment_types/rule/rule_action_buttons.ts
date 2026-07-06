@@ -20,13 +20,7 @@ import {
 import { type RuleAttachmentIntent, getRuleTypeLabel } from './helpers';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import { getNonEsqlRuleActionDisabledReason } from '../../components/translations';
-import {
-  APPLY_TO_FORM,
-  EDIT_RULE_SETTINGS,
-  VIEW_RULE,
-  UPDATE_RULE,
-  CREATE_RULE,
-} from './translations';
+import { APPLY_TO_RULE_FORM, VIEW_RULE, UPDATE_RULE, CREATE_RULE } from './translations';
 
 interface BuildRuleActionButtonsParams {
   rule: RuleResponse | null;
@@ -36,9 +30,6 @@ interface BuildRuleActionButtonsParams {
   intent: RuleAttachmentIntent;
   ruleId: string | undefined;
   attachmentId: string;
-  showViewRule: boolean;
-  /** When the target form is already open the apply button applies in place instead of navigating. */
-  isRuleFormOpen: boolean;
   /**
    * Framework callback that links the attachment to its saved rule via `origin` and invalidates
    * the conversation. Threaded into the save request and called once the rule is persisted.
@@ -55,8 +46,6 @@ export const buildRuleActionButtons = ({
   intent,
   ruleId,
   attachmentId,
-  showViewRule,
-  isRuleFormOpen,
   updateOrigin,
 }: BuildRuleActionButtonsParams): ActionButton[] => {
   const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
@@ -72,7 +61,7 @@ export const buildRuleActionButtons = ({
 
   const buttons: ActionButton[] = [
     {
-      label: isRuleFormOpen ? APPLY_TO_FORM : EDIT_RULE_SETTINGS,
+      label: APPLY_TO_RULE_FORM,
       icon: 'pencil' as const,
       type: ActionButtonType.SECONDARY,
       handler: () => {
@@ -84,7 +73,7 @@ export const buildRuleActionButtons = ({
         });
       },
     },
-    ...(showViewRule && ruleId
+    ...(isUpdate && ruleId
       ? [
           {
             label: VIEW_RULE,
