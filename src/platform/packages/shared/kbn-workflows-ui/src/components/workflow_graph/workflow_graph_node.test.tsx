@@ -172,10 +172,16 @@ describe('WorkflowGraphNode', () => {
     expect(node.getAttribute('aria-label')).toContain(ExecutionStatus.FAILED);
   });
 
-  it('renders a compact preview without the step label text', () => {
-    const { queryByTitle } = renderNode({ label: 'hidden-label', preview: true });
-    // In preview mode the outer div is an aria-label'd div, not a role=button,
-    // and there is no label text rendered as a <span>.
-    expect(queryByTitle('hidden-label')).toBeNull();
+  it('renders a dense preview with the step name and step type', () => {
+    const { getByTitle, getByText } = renderNode({
+      label: 'my-step',
+      stepType: 'http',
+      preview: true,
+    });
+    // Preview mode shows both the step name (with a title attribute for truncation
+    // tooltips) and the step-type subtitle.
+    expect(getByTitle('my-step')).not.toBeNull();
+    expect(getByText('my-step')).not.toBeNull();
+    expect(getByText('http')).not.toBeNull();
   });
 });

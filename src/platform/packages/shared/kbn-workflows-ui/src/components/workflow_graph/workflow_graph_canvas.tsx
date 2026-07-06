@@ -192,6 +192,10 @@ export interface WorkflowGraphCanvasProps {
   readonly renderStepIcon?: RenderStepIcon;
   /** Dagre rank direction (default `'TB'`). */
   readonly direction?: LayoutDirection;
+  /** Override dagre rank separation (arrow length in layout direction). */
+  readonly rankSep?: number;
+  /** Override dagre node separation (gap between siblings in a rank). */
+  readonly nodeSep?: number;
   /**
    * When true the viewport is fitted to show all nodes on init, overriding the
    * default centre-on-top behaviour.
@@ -237,6 +241,12 @@ export interface WorkflowGraphCanvasProps {
    * `defaultViewport` on the next mount.
    */
   readonly onViewportChange?: (viewport: Viewport) => void;
+  /**
+   * Static preview mode: icon-only nodes, no interaction, no invalid-YAML
+   * callout, autofit. Used by `WorkflowGraphPreview` to render a compact
+   * non-interactive snapshot (e.g. inline attachment previews).
+   */
+  readonly previewMode?: boolean;
 }
 
 function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
@@ -257,16 +267,27 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     canRunSteps,
     renderStepIcon,
     direction = 'TB',
-    fitView: fitViewProp = false,
+    rankSep,
+    nodeSep,
+    previewMode = false,
+    fitView: fitViewPropRaw = false,
     fitViewOptions: fitViewOptionsProp,
-    showMinimap = true,
+    showMinimap: showMinimapProp,
     showZoomControls = false,
-    showBackground = true,
+    showBackground: showBackgroundProp,
     edgeZIndex = -1,
     onReady,
     defaultViewport,
     onViewportChange,
   } = props;
+
+  const fitViewProp = previewMode ? true : fitViewPropRaw;
+  const showMinimap = showMinimapProp ?? !previewMode;
+  const showBackground = showBackgroundProp ?? !previewMode;
+  const resolvedFitViewOptions = useMemo(
+    () => fitViewOptionsProp ?? { padding: 0.08, minZoom: 0.2, maxZoom: 2 },
+    [fitViewOptionsProp]
+  );
 
   const defaultEdgeOptions = useMemo(
     () => ({ type: 'workflowEdge', zIndex: edgeZIndex }),
@@ -288,6 +309,8 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     transformed,
     stepExecutions,
     direction,
+    rankSep,
+    nodeSep,
     onPerfMark,
     onLayoutFailed,
   });
@@ -304,11 +327,17 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     });
   }, [nodes.length, onPerfMark]);
 
-  // Decorate nodes with selection state — without rebuilding identity for non-changed ones
+  // Decorate nodes with selection state and preview flag — without rebuilding
+  // identity for non-changed ones. In preview mode every node also gets
+  // `data.preview: true`, which triggers the icon-only compact render inside
+  // `WorkflowGraphNode`.
   const decoratedNodes = useMemo(() => {
-    if (!selectedStepId) return nodes;
-    return nodes.map((n) => (n.id === selectedStepId ? { ...n, selected: true } : n));
-  }, [nodes, selectedStepId]);
+    if (!previewMode && !selectedStepId) return nodes;
+    return nodes.map((n) => {
+      const next = previewMode ? { ...n, data: { ...n.data, preview: true } } : n;
+      return n.id === selectedStepId ? { ...next, selected: true } : next;
+    });
+  }, [nodes, selectedStepId, previewMode]);
 
   const handleNodeClick = useCallback(
     (_evt: React.MouseEvent, node: { id: string; data: Record<string, unknown> }) => {
@@ -369,9 +398,9 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     (instance: ReactFlowInstance, duration = 0) => {
       if (fitViewProp) {
         void instance.fitView({
-          padding: fitViewOptionsProp?.padding ?? 0.08,
-          minZoom: fitViewOptionsProp?.minZoom ?? 0.2,
-          maxZoom: fitViewOptionsProp?.maxZoom ?? 2,
+          padding: resolvedFitViewOptions.padding ?? 0.08,
+          minZoom: resolvedFitViewOptions.minZoom ?? 0.2,
+          maxZoom: resolvedFitViewOptions.maxZoom ?? 2,
           duration,
         });
         return;
@@ -403,7 +432,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         duration,
       });
     },
-    [nodes, graphBounds, fitViewProp, fitViewOptionsProp, focusStepId]
+    [nodes, graphBounds, fitViewProp, resolvedFitViewOptions, focusStepId]
   );
 
   // Centers on the graph's top row at the initial zoom — always ignores
@@ -492,7 +521,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     [euiTheme.colors.danger]
   );
 
-  const dimmed = !isYamlValid;
+  const dimmed = !isYamlValid && !previewMode;
 
   return (
     <WorkflowGraphActionsContext.Provider value={actions}>
@@ -558,11 +587,11 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               colorMode={colorMode}
               onInit={handleInit}
               fitView={fitViewProp}
-              fitViewOptions={fitViewProp ? fitViewOptionsProp : undefined}
+              fitViewOptions={fitViewProp ? resolvedFitViewOptions : undefined}
               defaultViewport={defaultViewport}
               onMoveEnd={handleMoveEnd}
-              onNodeClick={handleNodeClick}
-              onPaneClick={handlePaneClick}
+              onNodeClick={previewMode ? undefined : handleNodeClick}
+              onPaneClick={previewMode ? undefined : handlePaneClick}
               nodesDraggable={false}
               nodesConnectable={false}
               // Prevent React Flow from boosting a selected node's z-index above
@@ -572,13 +601,13 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               // through the body.
               elevateNodesOnSelect={false}
               elevateEdgesOnSelect={false}
-              elementsSelectable
-              panOnScroll
-              panOnDrag
+              elementsSelectable={!previewMode}
+              panOnScroll={!previewMode}
+              panOnDrag={!previewMode}
               zoomOnScroll={false}
-              zoomOnPinch={true}
+              zoomOnPinch={!previewMode}
               zoomOnDoubleClick={false}
-              translateExtent={translateExtent}
+              translateExtent={previewMode ? undefined : translateExtent}
             >
               {showBackground && (
                 <Background

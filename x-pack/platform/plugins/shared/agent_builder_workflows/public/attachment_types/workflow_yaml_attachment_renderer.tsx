@@ -24,8 +24,12 @@ import {
   useWorkflowsCapabilities,
   useWorkflowsMonacoTheme,
   WORKFLOW_READ_ONLY_MONACO_OPTIONS,
+  WorkflowGraphPreview,
   type WorkflowApi,
 } from '@kbn/workflows-ui';
+import type { WorkflowYaml } from '@kbn/workflows';
+import { parse as parseYaml } from 'yaml';
+import { EuiCallOut } from '@elastic/eui';
 import type { QueryClient } from '@kbn/react-query';
 import { PLUGIN_ID as WORKFLOW_PLUGIN_ID } from '@kbn/workflows-management-plugin/common';
 import type { WorkflowsBaseTelemetry } from '@kbn/workflows-management-plugin/public';
@@ -294,6 +298,53 @@ const WorkflowYamlCanvasContent: React.FC<{
   );
 };
 
+// Dense inline preview: stretches to the panel's full width and uses a
+// horizontal (LR) dagre layout, so the whole workflow fits in a short strip.
+// Sidebar keeps a smaller strip since the panel is narrower.
+const INLINE_PREVIEW_HEIGHT_SIDEBAR = 180;
+const INLINE_PREVIEW_HEIGHT_DEFAULT = 220;
+
+const parseWorkflowYaml = (yaml: string): WorkflowYaml | null => {
+  try {
+    const parsed = parseYaml(yaml);
+    if (parsed && typeof parsed === 'object') {
+      return parsed as WorkflowYaml;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+const WorkflowYamlInlinePreview: React.FC<{
+  attachment: WorkflowYamlAttachment;
+  isSidebar: boolean;
+}> = ({ attachment, isSidebar }) => {
+  const parsed = React.useMemo(
+    () => parseWorkflowYaml(attachment.data.yaml),
+    [attachment.data.yaml]
+  );
+
+  if (!parsed) {
+    return (
+      <EuiCallOut
+        size="s"
+        color="warning"
+        iconType="warning"
+        data-test-subj="workflowYamlInlinePreviewInvalid"
+        title={i18n.translate(
+          'workflowsManagement.attachmentRenderers.workflowYaml.inlinePreview.invalidYaml',
+          { defaultMessage: 'Workflow YAML could not be parsed' }
+        )}
+      />
+    );
+  }
+
+  const height = isSidebar ? INLINE_PREVIEW_HEIGHT_SIDEBAR : INLINE_PREVIEW_HEIGHT_DEFAULT;
+
+  return <WorkflowGraphPreview workflow={parsed} height={height} />;
+};
+
 export const createWorkflowYamlAttachmentUiDefinition = ({
   core,
   telemetry,
@@ -330,6 +381,12 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
       }),
 
     getIcon: () => 'workflowsApp',
+
+    renderInlineContent: ({ attachment, isSidebar }) => (
+      <KibanaContextProvider services={core}>
+        <WorkflowYamlInlinePreview attachment={attachment} isSidebar={isSidebar} />
+      </KibanaContextProvider>
+    ),
 
     getActionButtons: ({ attachment, isCanvas, openCanvas }) => {
       if (isCanvas) return [];

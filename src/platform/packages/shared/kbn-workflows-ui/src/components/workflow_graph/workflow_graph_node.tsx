@@ -189,8 +189,9 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const showActions = (isHovered || isActive) && !isTrigger && !hasStatusIcon;
   const runLabel = i18n.translate('workflowsUi.graphNode.runStep', { defaultMessage: 'Run step' });
 
-  // Compact icon-only render for the workflow-list hover preview. All hooks
-  // above are still called every render, so the early return is safe.
+  // Dense preview render for inline attachment previews: icon + step name +
+  // step-type subtitle. No interaction, no retry badge, no run button. All
+  // hooks above are still called every render, so the early return is safe.
   if (preview) {
     return (
       <>
@@ -200,39 +201,94 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
           css={{
             width: '100%',
             height: '100%',
-            background: palette.iconAreaBg,
+            background: euiTheme.colors.backgroundBasePlain,
             border: `1px solid ${palette.outerBorder}`,
             borderRadius: 6,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            gap: 10,
+            padding: 8,
+            overflow: 'hidden',
           }}
         >
-          {renderStepIcon ? (
-            <div
-              css={[
-                { color: palette.iconColor, display: 'flex' },
-                isTriggerNode && {
-                  '& svg, & svg *': { fill: FIGMA_TRIGGER_ICON_COLOR },
-                },
-              ]}
+          <div
+            css={{
+              flex: '0 0 auto',
+              width: 32,
+              height: 32,
+              background: palette.iconAreaBg,
+              border: `1px solid ${palette.innerBoxBorder}`,
+              borderRadius: 6,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {renderStepIcon ? (
+              <div
+                css={[
+                  { color: palette.iconColor, display: 'flex' },
+                  isTriggerNode && {
+                    '& svg, & svg *': { fill: FIGMA_TRIGGER_ICON_COLOR },
+                  },
+                ]}
+              >
+                {renderStepIcon({ stepType, isTrigger: isTrigger ?? false, size: 'm' })}
+              </div>
+            ) : (
+              <EuiIcon
+                type={iconType}
+                size="m"
+                color={
+                  isTriggerNode
+                    ? FIGMA_TRIGGER_ICON_COLOR
+                    : LOGO_ICONS.has(iconType)
+                    ? undefined
+                    : palette.iconColor
+                }
+                aria-hidden={true}
+              />
+            )}
+          </div>
+          <div
+            css={{
+              flex: '1 1 auto',
+              minWidth: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+            }}
+          >
+            <span
+              css={{
+                fontFamily: euiTheme.font.family,
+                fontSize: 12,
+                fontWeight: 500,
+                lineHeight: '16px',
+                color: FIGMA_STEP_LABEL_COLOR,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+              title={label}
             >
-              {renderStepIcon({ stepType, isTrigger: isTrigger ?? false, size: 'm' })}
-            </div>
-          ) : (
-            <EuiIcon
-              type={iconType}
-              size="m"
-              color={
-                isTriggerNode
-                  ? FIGMA_TRIGGER_ICON_COLOR
-                  : LOGO_ICONS.has(iconType)
-                  ? undefined
-                  : palette.iconColor
-              }
-              aria-hidden={true}
-            />
-          )}
+              {label}
+            </span>
+            <span
+              css={{
+                fontFamily: euiTheme.font.familyCode ?? euiTheme.font.family,
+                fontSize: 11,
+                lineHeight: '14px',
+                color: euiTheme.colors.textSubdued,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+              title={stepType}
+            >
+              {stepType}
+            </span>
+          </div>
         </div>
         <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
       </>
