@@ -19,11 +19,11 @@ import type {
 } from '@kbn/lens-common';
 import {
   mergeLayer,
-  updateColumnDropPartials,
   updateColumnFormat,
   updateColumnLabel,
   isNotNumeric,
   isNumeric,
+  updateColumnDropPartials,
 } from '../utils';
 import type { FormatSelectorProps } from '../../form_based/dimension_panel/format_selector';
 import { FormatSelector } from '../../form_based/dimension_panel/format_selector';
@@ -244,7 +244,17 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           </>
         )}
       </div>
-      {props.dataSectionExtra}
+      {props.dataSectionExtra && (
+        <div
+          css={css`
+            &:not(:empty) {
+              padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
+            }
+          `}
+        >
+          {props.dataSectionExtra}
+        </div>
+      )}
       {!isFullscreen && selectedField && (
         <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
           <EuiText
