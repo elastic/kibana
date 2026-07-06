@@ -13,16 +13,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 
-import {
-  EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES,
-  IS_AGENTLESS_QUERY_PARAM,
-} from '../../../../../../common/constants';
+import { EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES } from '../../../../../../common/constants';
 
 import { Loading, Error as ErrorComponent } from '../../../components';
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 
 import { CreatePackagePolicySinglePage } from '../create_package_policy_page/single_page_layout';
-import { useBreadcrumbs, useGetOneAgentPolicy } from '../../../hooks';
+import { useBreadcrumbs, useGetOneAgentPolicy, useIsAgentlessQueryParam } from '../../../hooks';
 import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
 import { copyPackagePolicy } from '../../../../../../common/services/copy_package_policy_utils';
 
@@ -65,11 +62,9 @@ export const CopyPackagePolicyPage = memo(() => {
   const { search } = useLocation();
 
   // Detect-before-read hint: agentless copies read/hydrate through the agentless API instead of the
-  // package-policy/agent-policy APIs.
-  const isAgentless = useMemo(
-    () => new URLSearchParams(search).get(IS_AGENTLESS_QUERY_PARAM) === 'true',
-    [search]
-  );
+  // package-policy/agent-policy APIs. Always false when the agentless policies UI kill switch is
+  // off, so the copy falls back to the legacy APIs.
+  const isAgentless = useIsAgentlessQueryParam();
 
   const {
     item: sourcePolicy,
