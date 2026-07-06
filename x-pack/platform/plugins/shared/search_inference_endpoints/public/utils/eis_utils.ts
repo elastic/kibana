@@ -21,6 +21,7 @@ import {
 } from '../../common/type_guards';
 import type { MultiSelectFilterOption } from '../components/filter/multi_select_filter';
 import { GEO_ORDER } from '../types';
+import type { RegionZoneCount } from '../types';
 
 // Inference ID prefixes for internal Elastic endpoints kept for backwards
 // compatibility that must not be surfaced in the UI.
@@ -334,15 +335,7 @@ const GEO_DISPLAY_NAMES: Record<string, string> = {
 export const getGeoDisplayName = (geo: string): string => GEO_DISPLAY_NAMES[geo] ?? geo;
 
 export { GEO_ORDER } from '../types';
-
-export interface RegionZoneCount {
-  geo: string;
-  modelCount: number;
-  totalCount: number;
-  modelRegions: CspRegion[];
-  /** True when the model only has geo-level availability (no csp+region data). Show badge without counter. */
-  geoOnly: boolean;
-}
+export type { RegionZoneCount } from '../types';
 
 const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, CspRegion[]> => {
   const byGeo = new Map<string, Map<string, CspRegion>>();

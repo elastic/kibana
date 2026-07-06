@@ -98,3 +98,12 @@ export interface EndpointDeprecationInfo {
 
 /** Ordered list of EIS geo codes for display in the region picker. */
 export const GEO_ORDER = ['apac', 'eu', 'us', 'other'] as const;
+
+export interface RegionZoneCount {
+  geo: string;
+  modelCount: number;
+  totalCount: number;
+  modelRegions: CspRegion[];
+  /** True when the model only has geo-level availability (no csp+region data). Show badge without counter. */
+  geoOnly: boolean;
+}
