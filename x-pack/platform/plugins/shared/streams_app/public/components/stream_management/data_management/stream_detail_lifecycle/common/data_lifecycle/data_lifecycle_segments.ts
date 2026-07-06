@@ -12,6 +12,9 @@ import { splitSizeAndUnits, toMillis } from '../../../../../../util/format_size_
 interface BaseLifecycleSegment {
   grow: EuiFlexItemProps['grow'];
   isDelete?: boolean;
+  // Marks the frozen phase so the timeline can flag it (e.g. red for an invalid frozen_after) by
+  // identity rather than by matching its `min_age`, which may be invalid/clamped and coincide with 0d.
+  isFrozen?: boolean;
 }
 
 export interface TimelineSegment extends BaseLifecycleSegment {
@@ -40,13 +43,16 @@ function assertGrowValue(value: number): asserts value is GrowValue {
 }
 
 const toGrowValue = (value: number): GrowValue => {
-  const clamped = Math.min(10, Math.max(1, Math.round(value)));
+  // Minimum of 2 matches ILM's floor so out-of-order / zero-duration phases never collapse to a
+  // 1fr sliver that causes labels to crowd together (mirrors getIlmPhaseGrowValues in
+  // ilm_policy_phases.ts which also clamps to [2, 10]).
+  const clamped = Math.min(10, Math.max(2, Math.round(value)));
   assertGrowValue(clamped);
   return clamped;
 };
 
 const normalizeToGrowValue = (value: number, maxValue: number): GrowValue => {
-  if (!Number.isFinite(value) || value <= 0) return 1;
+  if (!Number.isFinite(value) || value <= 0) return 2;
   return toGrowValue((value / maxValue) * 10);
 };
 
@@ -86,6 +92,7 @@ const filterDownsampleStepsBeforeRetention = (
 interface DslBoundary {
   label: string;
   stepIndex?: number;
+  isFrozen?: boolean;
 }
 
 const partitionPhases = (phases: SegmentPhase[]) => {
@@ -94,12 +101,19 @@ const partitionPhases = (phases: SegmentPhase[]) => {
   return { deletePhase, nonDeletePhases };
 };
 
+// An invalid/negative age (e.g. frozen_after=-1d) is positioned at the timeline start rather than
+// dropped, so clamp negatives to 0 for all layout math while the raw label is still shown to the user.
+const positionMs = (label?: string): number | undefined => {
+  const ms = toMillis(label);
+  return ms === undefined ? undefined : Math.max(ms, 0);
+};
+
 const calculateGrowValues = (
   boundaries: string[],
   segmentCount: number,
   hasRetention: boolean
 ): GrowValue[] => {
-  const boundaryMs = boundaries.map(toMillis);
+  const boundaryMs = boundaries.map(positionMs);
 
   const durations = Array.from({ length: segmentCount }, (_, index) => {
     const startMs = boundaryMs[index];
@@ -163,6 +177,7 @@ export const buildPhaseTimelineSegments = (phases: SegmentPhase[]): TimelineSegm
       grow,
       leftValue,
       isDelete: phase.isDelete,
+      isFrozen: phase.isFrozen,
     };
   });
 };
@@ -176,12 +191,31 @@ export const buildDslSegments = (
   const retentionLabel = deletePhase?.min_age;
   const retentionMs = toMillis(retentionLabel);
 
-  // Get downsample step start times, filtering out those after retention
+  // Downsample steps are normally hidden once they fall after retention (they'd never run). But when
+  // the config is out of order — delete/retention is before a later phase boundary (e.g. delete=1d
+  // while frozen_after=20d) — it is invalid and the timeline shows everything so the user can see
+  // and fix it; filtering steps by retention there would make steps beyond the frozen boundary (e.g.
+  // a 24d step) vanish. So: skip step filtering entirely when out of order, and otherwise filter by
+  // retention as usual (in-order configs).
+  const phaseBoundaryMsValues = nonDeletePhases
+    .slice(1)
+    .map((phase) => (phase.min_age ? toMillis(phase.min_age) : undefined))
+    .filter((ms): ms is number => ms !== undefined);
+  const maxPhaseBoundaryMs = phaseBoundaryMsValues.length
+    ? Math.max(...phaseBoundaryMsValues)
+    : undefined;
+  const isOutOfOrder = retentionMs !== undefined && retentionMs < (maxPhaseBoundaryMs ?? 0);
+  const effectiveRetentionMs = isOutOfOrder ? undefined : retentionMs;
+
+  // Get downsample step start times, filtering out those after the effective timeline end
   const stepStarts = filterStepStartsBeforeRetention(
     downsampleSteps.map((step) => step.after),
-    retentionMs
+    effectiveRetentionMs
   );
-  const stepsBeforeRetention = filterDownsampleStepsBeforeRetention(downsampleSteps, retentionMs);
+  const stepsBeforeRetention = filterDownsampleStepsBeforeRetention(
+    downsampleSteps,
+    effectiveRetentionMs
+  );
 
   // Build time boundaries: [start, ...stepStarts, retention?]
   const startLabel = basePhase?.min_age ?? getZeroLabel(retentionLabel ?? stepStarts[0]);
@@ -197,15 +231,19 @@ export const buildDslSegments = (
   // Boundaries introduced by later non-delete phases (e.g. frozen's `min_age`/`frozen_after`).
   // Without these, a phase like frozen would visually start at the last downsample step instead of
   // its configured age. They carry no `stepIndex` because no downsample step starts there.
-  const startMs = toMillis(startLabel);
+  //
+  // Each phase always emits its own boundary (keeping its raw label for display), tagged so the
+  // timeline can flag it. Positioning is handled during insertion below via `positionMs`, which
+  // clamps to the start, so:
+  //   - frozen_after=0d → its own 0d mark right after hot (ILM / non-metrics parity), not attached
+  //     to the nearest downsample step, and
+  //   - an invalid/negative frozen_after (e.g. -1d) → shown right after hot too (marked red via
+  //     `isFrozen`) instead of disappearing.
+  // Not filtered by retention so out-of-order phases (frozen > delete) also stay visible. A genuine
+  // duplicate against a downsample step at the same instant is still deduped during insertion below.
   const phaseBoundaries: DslBoundary[] = nonDeletePhases.slice(1).flatMap((phase) => {
     if (!phase.min_age) return [];
-    const ms = toMillis(phase.min_age);
-    if (ms === undefined) return [];
-    // Keep boundaries that fall strictly inside the (start, retention) window.
-    const afterStart = startMs === undefined || ms > startMs;
-    const beforeRetention = retentionMs === undefined || ms < retentionMs;
-    return afterStart && beforeRetention ? [{ label: phase.min_age }] : [];
+    return [{ label: phase.min_age, isFrozen: phase.isFrozen }];
   });
 
   // Insert phase boundaries into the step boundaries without reordering the steps themselves
@@ -218,10 +256,10 @@ export const buildDslSegments = (
   // same boundary. Each label is parsed once into a `{ boundary, ms }` pair to avoid re-parsing on
   // every comparison.
   const innerBoundaries: Array<{ boundary: DslBoundary; ms: number }> = stepBoundaries.map(
-    (boundary) => ({ boundary, ms: toMillis(boundary.label) ?? 0 })
+    (boundary) => ({ boundary, ms: positionMs(boundary.label) ?? 0 })
   );
   for (const phaseBoundary of phaseBoundaries) {
-    const phaseMs = toMillis(phaseBoundary.label) ?? 0;
+    const phaseMs = positionMs(phaseBoundary.label) ?? 0;
     if (innerBoundaries.some((entry) => entry.ms === phaseMs)) {
       continue;
     }
@@ -256,6 +294,7 @@ export const buildDslSegments = (
       grow,
       leftValue,
       stepIndex,
+      isFrozen: boundaries[index].isFrozen,
     };
   });
 
@@ -352,25 +391,40 @@ export const getPhaseColumnSpans = (phases: SegmentPhase[], segments: TimelineSe
   const nonDeleteSegments = segments.filter((segment) => !segment.isDelete);
   const nonDeleteColumns = Math.max(nonDeleteSegments.length, 1);
 
-  const phaseStartMs = nonDeletePhases.map((phase) => toMillis(phase.min_age) ?? 0);
+  // `positionMs` clamps invalid/negative ages to the start, so an invalid frozen phase (and its
+  // column) is placed right after hot rather than being pushed off the timeline.
+  const phaseStartMs = nonDeletePhases.map((phase) => positionMs(phase.min_age) ?? 0);
   // Count how many non-delete columns start within each phase's time range.
   const spanByNonDeleteIndex = nonDeletePhases.map((_, phaseIndex) => {
     const startMs = phaseStartMs[phaseIndex];
     const nextStartMs = phaseStartMs[phaseIndex + 1];
     return nonDeleteSegments.filter((segment) => {
-      const columnMs = toMillis(segment.leftValue) ?? 0;
+      const columnMs = positionMs(segment.leftValue) ?? 0;
       const afterStart = columnMs >= startMs;
       const beforeNext = nextStartMs === undefined || columnMs < nextStartMs;
       return afterStart && beforeNext;
     }).length;
   });
 
-  // Make sure every phase spans at least one column and the totals still match the grid columns;
-  // any leftover columns (e.g. from rounding/edge cases) fall onto the first non-delete phase.
+  // Every phase must occupy at least one grid column so its bar renders, but the spans must still
+  // sum to exactly `nonDeleteColumns` or a bar wraps to a second row. A zero-duration phase (e.g.
+  // hot when frozen_after is 0d, so hot spans `[0d, 0d)`) counts 0 columns; bumping it to 1 without
+  // compensating would over-allocate. Borrow the extra column(s) from the widest phase so the total
+  // is preserved and everything stays on one line.
   const normalizedSpans = spanByNonDeleteIndex.map((span) => Math.max(span, 1));
-  const assignedColumns = normalizedSpans.reduce((sum, span) => sum + span, 0);
-  if (normalizedSpans.length > 0 && assignedColumns !== nonDeleteColumns) {
-    normalizedSpans[0] = Math.max(normalizedSpans[0] + (nonDeleteColumns - assignedColumns), 1);
+  const widestSpanIndex = () =>
+    normalizedSpans.reduce((best, span, idx) => (span > normalizedSpans[best] ? idx : best), 0);
+  let overAllocated = normalizedSpans.reduce((sum, span) => sum + span, 0) - nonDeleteColumns;
+  while (overAllocated > 0) {
+    const donor = widestSpanIndex();
+    if (normalizedSpans[donor] <= 1) break; // more phases than columns — unavoidable, leave as-is
+    normalizedSpans[donor] -= 1;
+    overAllocated -= 1;
+  }
+  // If we under-allocated (fewer phase columns than grid columns, e.g. rounding), give the slack to
+  // the widest phase so the totals line up again.
+  if (normalizedSpans.length > 0 && overAllocated < 0) {
+    normalizedSpans[widestSpanIndex()] -= overAllocated;
   }
 
   let nonDeleteCursor = 0;
