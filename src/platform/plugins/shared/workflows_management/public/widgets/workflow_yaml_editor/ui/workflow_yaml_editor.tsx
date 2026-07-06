@@ -40,6 +40,7 @@ import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integratio
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { KeyboardShortcutsPopover } from './keyboard_shortcuts_popover';
 import { StepActions } from './step_actions';
+import { WorkflowStepMinimap } from './workflow_step_minimap';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
@@ -106,14 +107,13 @@ import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
+import { EDITOR_PADDING_TOP_PX, MINIMAP_RESERVE_PX } from '../styles/constants';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import {
   EXECUTION_YAML_SNAPSHOT_CLASS,
   useWorkflowEditorStyles,
 } from '../styles/use_workflow_editor_styles';
-import { EDITOR_PADDING_TOP_PX, MINIMAP_RESERVE_PX } from '../styles/constants';
-import { WorkflowStepMinimap } from './workflow_step_minimap';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
@@ -723,7 +723,6 @@ export const WorkflowYAMLEditor = ({
     };
   }, []);
 
-
   const extraActions = useMemo<ExtraAction[]>(
     () => [
       {
@@ -867,10 +866,7 @@ const WorkflowYamlEditorAssistActions = React.memo(function WorkflowYamlEditorAs
         onClick={onOpenAgentChat}
         data-test-subj="workflowYamlEditorAiAgentButton"
       >
-        <FormattedMessage
-          id="workflows.yamlEditor.aiAgentButtonLabel"
-          defaultMessage="AI Agent"
-        />
+        <FormattedMessage id="workflows.yamlEditor.aiAgentButtonLabel" defaultMessage="AI Agent" />
       </EuiButtonEmpty>
     </EuiToolTip>
   );

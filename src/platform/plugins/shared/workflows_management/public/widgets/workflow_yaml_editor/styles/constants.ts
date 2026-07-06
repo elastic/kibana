@@ -38,4 +38,5 @@ export const MINIMAP_PADDING_LEFT_PX = 16;
 export const MINIMAP_PADDING_RIGHT_PX = 16;
 
 /** Total right-side reserve: minimap + both side paddings + gap. Scrollbar is hidden. */
-export const MINIMAP_RESERVE_PX = MINIMAP_WIDTH_PX + MINIMAP_PADDING_LEFT_PX + MINIMAP_PADDING_RIGHT_PX + 8;
+export const MINIMAP_RESERVE_PX =
+  MINIMAP_WIDTH_PX + MINIMAP_PADDING_LEFT_PX + MINIMAP_PADDING_RIGHT_PX + 8;

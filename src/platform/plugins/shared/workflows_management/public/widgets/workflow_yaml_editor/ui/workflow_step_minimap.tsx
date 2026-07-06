@@ -9,16 +9,21 @@
 
 import { shade, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { monaco } from '@kbn/monaco';
-import type { NestedStepKey, StepInfo } from '@kbn/workflows-yaml';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
+import type { monaco } from '@kbn/monaco';
+import type { NestedStepKey, StepInfo } from '@kbn/workflows-yaml';
 import {
   selectEditorFocusedStepInfo,
   selectEditorWorkflowLookup,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { EDITOR_PADDING_TOP_PX, MINIMAP_PADDING_LEFT_PX, MINIMAP_PADDING_RIGHT_PX, MINIMAP_WIDTH_PX } from '../styles/constants';
+import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
+import {
+  EDITOR_PADDING_TOP_PX,
+  MINIMAP_PADDING_LEFT_PX,
+  MINIMAP_PADDING_RIGHT_PX,
+  MINIMAP_WIDTH_PX,
+} from '../styles/constants';
 
 const ITEM_HEIGHT = 32;
 const DOT_R = 4;
@@ -258,7 +263,6 @@ export const WorkflowStepMinimap = ({
     // Re-run when Monaco finishes mounting (isEditorMounted) or when steps first
     // appear. Without isEditorMounted, cached Redux state can cause the effect to
     // fire before editorRef.current is set, leaving no listeners attached.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorRef, stepEntries.length, isEditorMounted]);
 
   // First and last index of steps currently in the visible viewport
@@ -297,7 +301,8 @@ export const WorkflowStepMinimap = ({
     // Clamp to the nearest step boundary so the indicator is always visible.
     const lastIdx = stepEntries.length - 1;
     if (visibleLineRange.end < stepEntries[0][1].lineStart) return { first: 0, last: 0 };
-    if (visibleLineRange.start > stepEntries[lastIdx][1].lineEnd) return { first: lastIdx, last: lastIdx };
+    if (visibleLineRange.start > stepEntries[lastIdx][1].lineEnd)
+      return { first: lastIdx, last: lastIdx };
     // Between two consecutive steps — span both neighbours.
     const belowIdx = stepEntries.findIndex(([, s]) => s.lineStart > visibleLineRange.end);
     const idx = belowIdx > 0 ? belowIdx - 1 : 0;
@@ -341,224 +346,230 @@ export const WorkflowStepMinimap = ({
 
   const inactiveBg = transparentize(euiTheme.colors.primary, 0.12);
   const inactiveBgHover = transparentize(euiTheme.colors.primary, 0.2);
-const inactiveText = euiTheme.colors.primaryText;
+  const inactiveText = euiTheme.colors.primaryText;
   const activeBg = activeColor;
   const activeBgHover = shade(activeColor, 0.1);
   const activeText = euiTheme.colors.plainLight;
 
   return (
-    <div css={css({ paddingTop: EDITOR_PADDING_TOP_PX, paddingLeft: MINIMAP_PADDING_LEFT_PX, paddingRight: MINIMAP_PADDING_RIGHT_PX })}>
-    <div css={css({ position: 'relative', width: MAX_LABEL_W + TRACK_W, height: totalHeight })}>
-      {/* Viewport indicator — shows which steps are currently visible in the editor.
+    <div
+      css={css({
+        paddingTop: EDITOR_PADDING_TOP_PX,
+        paddingLeft: MINIMAP_PADDING_LEFT_PX,
+        paddingRight: MINIMAP_PADDING_RIGHT_PX,
+      })}
+    >
+      <div css={css({ position: 'relative', width: MAX_LABEL_W + TRACK_W, height: totalHeight })}>
+        {/* Viewport indicator — shows which steps are currently visible in the editor.
           Negative left/right offsets extend the border into the outer padding zones so
           severity dots (left) and SVG track circles (right) sit inside the border. */}
-      {viewportSteps &&
-        visibleLineRange &&
-        stepEntries.length > 0 &&
-        (visibleLineRange.start > stepEntries[0][1].lineStart ||
-          visibleLineRange.end < stepEntries[stepEntries.length - 1][1].lineEnd) && (
-        <div
+        {viewportSteps &&
+          visibleLineRange &&
+          stepEntries.length > 0 &&
+          (visibleLineRange.start > stepEntries[0][1].lineStart ||
+            visibleLineRange.end < stepEntries[stepEntries.length - 1][1].lineEnd) && (
+            <div
+              aria-hidden="true"
+              css={css({
+                position: 'absolute',
+                top: viewportSteps.first * ITEM_HEIGHT,
+                left: -MINIMAP_PADDING_LEFT_PX,
+                right: -(OUTER_TRACK_X + DOT_R - TRACK_W + 8),
+                height: (viewportSteps.last - viewportSteps.first + 1) * ITEM_HEIGHT,
+                border: `1px solid ${transparentize(euiTheme.colors.primary, 0.65)}`,
+                borderRadius: 6,
+                pointerEvents: 'none',
+                zIndex: 0,
+              })}
+            />
+          )}
+        {/* ── SVG track ── */}
+        <svg
+          css={css({ position: 'absolute', right: 0, top: 0, zIndex: 1 })}
+          width={TRACK_W}
+          height={totalHeight}
+          style={{ pointerEvents: 'none' }}
           aria-hidden="true"
-          css={css({
-            position: 'absolute',
-            top: viewportSteps.first * ITEM_HEIGHT,
-            left: -MINIMAP_PADDING_LEFT_PX,
-            right: -(OUTER_TRACK_X + DOT_R - TRACK_W + 8),
-            height: (viewportSteps.last - viewportSteps.first + 1) * ITEM_HEIGHT,
-            border: `1px solid ${transparentize(euiTheme.colors.primary, 0.65)}`,
-            borderRadius: 6,
-            pointerEvents: 'none',
-            zIndex: 0,
-          })}
-        />
-      )}
-      {/* ── SVG track ── */}
-      <svg
-        css={css({ position: 'absolute', right: 0, top: 0, zIndex: 1 })}
-        width={TRACK_W}
-        height={totalHeight}
-        style={{ pointerEvents: 'none' }}
-        aria-hidden="true"
-      >
-        {/* No-nesting: single continuous solid line */}
-        {!hasNesting && stepEntries.length > 1 && (
-          <line
-            x1={TRACK_X}
-            y1={ITEM_HEIGHT / 2}
-            x2={TRACK_X}
-            y2={totalHeight - ITEM_HEIGHT / 2}
-            stroke={railColor}
-            strokeWidth={2}
-            strokeLinecap="round"
-          />
-        )}
-
-        {/* With nesting: outer rail drawn as segments — solid where no branch exists between
-            two consecutive top-level steps, dashed where nested children occupy those rows */}
-        {hasNesting &&
-          stepEntries
-            .reduce<number[]>((acc, [id], i) => {
-              if ((depths.get(id) ?? 0) === 0) acc.push(i);
-              return acc;
-            }, [])
-            .flatMap((fromIdx, j, topLevel) => {
-              if (j === topLevel.length - 1) return [];
-              const toIdx = topLevel[j + 1];
-              return [
-                <line
-                  key={`outer-seg-${j}`}
-                  x1={OUTER_TRACK_X}
-                  y1={fromIdx * ITEM_HEIGHT + ITEM_HEIGHT / 2}
-                  x2={OUTER_TRACK_X}
-                  y2={toIdx * ITEM_HEIGHT + ITEM_HEIGHT / 2}
-                  stroke={railColor}
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeDasharray={toIdx > fromIdx + 1 ? '5 4' : undefined}
-                />,
-              ];
-            })}
-
-        {/* Inner rails — one segment per parent's full nested span */}
-        {hasNesting &&
-          parentGroups.map(({ parentIndex, firstChildIndex, lastChildIndex }) => (
+        >
+          {/* No-nesting: single continuous solid line */}
+          {!hasNesting && stepEntries.length > 1 && (
             <line
-              key={`inner-rail-${parentIndex}`}
-              x1={INNER_TRACK_X}
-              y1={firstChildIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2}
-              x2={INNER_TRACK_X}
-              y2={lastChildIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2}
+              x1={TRACK_X}
+              y1={ITEM_HEIGHT / 2}
+              x2={TRACK_X}
+              y2={totalHeight - ITEM_HEIGHT / 2}
               stroke={railColor}
               strokeWidth={2}
               strokeLinecap="round"
             />
-          ))}
+          )}
 
-        {/* Branch connectors — one per parent, connecting only to the first (nearest) child.
-            Skipping later-branch connectors avoids long arcs that jump over intermediate steps. */}
-        {hasNesting &&
-          parentGroups.flatMap(({ parentIndex, branches, firstChildIndex }) => {
-            const parentCy = parentIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2;
-            return branches
-              .filter(({ firstIndex }) => firstIndex === firstChildIndex)
-              .map(({ branchKey, firstIndex }) => {
-                const childCy = firstIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2;
-                const startY = parentCy + DOT_R + 2;
-                const midY = (startY + childCy) / 2;
-                const d = `M ${OUTER_TRACK_X} ${startY} C ${OUTER_TRACK_X} ${midY} ${INNER_TRACK_X} ${midY} ${INNER_TRACK_X} ${childCy}`;
-                return (
-                  <path
-                    key={`connector-${parentIndex}-${branchKey}`}
-                    d={d}
-                    fill="none"
+          {/* With nesting: outer rail drawn as segments — solid where no branch exists between
+            two consecutive top-level steps, dashed where nested children occupy those rows */}
+          {hasNesting &&
+            stepEntries
+              .reduce<number[]>((acc, [id], i) => {
+                if ((depths.get(id) ?? 0) === 0) acc.push(i);
+                return acc;
+              }, [])
+              .flatMap((fromIdx, j, topLevel) => {
+                if (j === topLevel.length - 1) return [];
+                const toIdx = topLevel[j + 1];
+                return [
+                  <line
+                    key={`outer-seg-${j}`}
+                    x1={OUTER_TRACK_X}
+                    y1={fromIdx * ITEM_HEIGHT + ITEM_HEIGHT / 2}
+                    x2={OUTER_TRACK_X}
+                    y2={toIdx * ITEM_HEIGHT + ITEM_HEIGHT / 2}
                     stroke={railColor}
-                    strokeWidth={1.5}
+                    strokeWidth={2}
                     strokeLinecap="round"
-                  />
-                );
-              });
-          })}
+                    strokeDasharray={toIdx > fromIdx + 1 ? '5 4' : undefined}
+                  />,
+                ];
+              })}
 
-        {/* Dots — outer track for top-level, inner for nested */}
-        {stepEntries.map(([stepId], index) => {
-          const isFocused = stepId === focusedStepInfo?.stepId;
-          const isInViewport =
-            viewportSteps !== null && index >= viewportSteps.first && index <= viewportSteps.last;
-          const cy = index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
-          const isNested = hasNesting && (depths.get(stepId) ?? 0) > 0;
-          const cx = hasNesting ? (isNested ? INNER_TRACK_X : OUTER_TRACK_X) : TRACK_X;
-          return (
-            <circle
-              key={stepId}
-              cx={cx}
-              cy={cy}
-              r={DOT_R}
-              fill={isFocused ? activeColor : dotBgColor}
-              stroke={isFocused ? activeColor : railColor}
-              strokeWidth={2}
-            />
-          );
-        })}
-      </svg>
-
-      {/* ── Step pill buttons ── */}
-      {stepEntries.map(([stepId, step], index) => {
-        const isFocused = stepId === focusedStepInfo?.stepId;
-        const severity = getStepSeverity(step, validationErrors);
-        const isNested = hasNesting && (depths.get(stepId) ?? 0) > 0;
-        const pillMaxW = isNested ? MAX_LABEL_W - NESTED_PILL_INDENT : MAX_LABEL_W;
-
-        return (
-          <button
-            key={stepId}
-            title={stepId}
-            onClick={(e) => {
-              handleStepClick(step);
-              // Blur immediately so the browser doesn't fight our programmatic scroll
-              (e.currentTarget as HTMLButtonElement).blur();
-            }}
-            css={css({
-              position: 'absolute',
-              top: index * ITEM_HEIGHT,
-              left: 0,
-              right: TRACK_W + PILL_TRACK_GAP,
-              height: ITEM_HEIGHT,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              gap: 4,
-              background: 'none',
-              border: 'none',
-              padding: 0,
-              zIndex: 1,
-              cursor: 'pointer',
-              '&:hover .minimap-pill': {
-                background: isFocused ? activeBgHover : inactiveBgHover,
-              },
-            })}
-          >
-            {severity && (
-              <span
-                aria-hidden="true"
-                css={css({
-                  width: 7,
-                  height: 7,
-                  borderRadius: '50%',
-                  flexShrink: 0,
-                  pointerEvents: 'none',
-                  backgroundColor:
-                    severity === 'error' ? euiTheme.colors.danger : euiTheme.colors.warning,
-                })}
+          {/* Inner rails — one segment per parent's full nested span */}
+          {hasNesting &&
+            parentGroups.map(({ parentIndex, firstChildIndex, lastChildIndex }) => (
+              <line
+                key={`inner-rail-${parentIndex}`}
+                x1={INNER_TRACK_X}
+                y1={firstChildIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2}
+                x2={INNER_TRACK_X}
+                y2={lastChildIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2}
+                stroke={railColor}
+                strokeWidth={2}
+                strokeLinecap="round"
               />
-            )}
-            <span
-              className="minimap-pill"
+            ))}
+
+          {/* Branch connectors — one per parent, connecting only to the first (nearest) child.
+            Skipping later-branch connectors avoids long arcs that jump over intermediate steps. */}
+          {hasNesting &&
+            parentGroups.flatMap(({ parentIndex, branches, firstChildIndex }) => {
+              const parentCy = parentIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2;
+              return branches
+                .filter(({ firstIndex }) => firstIndex === firstChildIndex)
+                .map(({ branchKey, firstIndex }) => {
+                  const childCy = firstIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2;
+                  const startY = parentCy + DOT_R + 2;
+                  const midY = (startY + childCy) / 2;
+                  const d = `M ${OUTER_TRACK_X} ${startY} C ${OUTER_TRACK_X} ${midY} ${INNER_TRACK_X} ${midY} ${INNER_TRACK_X} ${childCy}`;
+                  return (
+                    <path
+                      key={`connector-${parentIndex}-${branchKey}`}
+                      d={d}
+                      fill="none"
+                      stroke={railColor}
+                      strokeWidth={1.5}
+                      strokeLinecap="round"
+                    />
+                  );
+                });
+            })}
+
+          {/* Dots — outer track for top-level, inner for nested */}
+          {stepEntries.map(([stepId], index) => {
+            const isFocused = stepId === focusedStepInfo?.stepId;
+            const isInViewport =
+              viewportSteps !== null && index >= viewportSteps.first && index <= viewportSteps.last;
+            const cy = index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
+            const isNested = hasNesting && (depths.get(stepId) ?? 0) > 0;
+            const cx = hasNesting ? (isNested ? INNER_TRACK_X : OUTER_TRACK_X) : TRACK_X;
+            return (
+              <circle
+                key={stepId}
+                cx={cx}
+                cy={cy}
+                r={DOT_R}
+                fill={isFocused ? activeColor : dotBgColor}
+                stroke={isFocused ? activeColor : railColor}
+                strokeWidth={2}
+              />
+            );
+          })}
+        </svg>
+
+        {/* ── Step pill buttons ── */}
+        {stepEntries.map(([stepId, step], index) => {
+          const isFocused = stepId === focusedStepInfo?.stepId;
+          const severity = getStepSeverity(step, validationErrors);
+          const isNested = hasNesting && (depths.get(stepId) ?? 0) > 0;
+          const pillMaxW = isNested ? MAX_LABEL_W - NESTED_PILL_INDENT : MAX_LABEL_W;
+
+          return (
+            <button
+              key={stepId}
+              title={stepId}
+              onClick={(e) => {
+                handleStepClick(step);
+                // Blur immediately so the browser doesn't fight our programmatic scroll
+                (e.currentTarget as HTMLButtonElement).blur();
+              }}
               css={css({
-                display: 'inline-block',
-                maxWidth: pillMaxW,
-                height: PILL_H,
-                lineHeight: `${PILL_H}px`,
-                paddingInline: '8px',
-                background: isFocused ? activeBg : inactiveBg,
-                color: isFocused ? activeText : inactiveText,
-                borderRadius: PILL_RADIUS,
-                fontSize: '12px',
-                fontFamily: euiTheme.font.family,
-                fontWeight: isFocused ? 600 : 400,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                transition: 'background 0.15s ease',
-                userSelect: 'none',
-                pointerEvents: 'none',
+                position: 'absolute',
+                top: index * ITEM_HEIGHT,
+                left: 0,
+                right: TRACK_W + PILL_TRACK_GAP,
+                height: ITEM_HEIGHT,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                gap: 4,
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                zIndex: 1,
+                cursor: 'pointer',
+                '&:hover .minimap-pill': {
+                  background: isFocused ? activeBgHover : inactiveBgHover,
+                },
               })}
             >
-              {stepId}
-            </span>
-          </button>
-        );
-      })}
-    </div>
+              {severity && (
+                <span
+                  aria-hidden="true"
+                  css={css({
+                    width: 7,
+                    height: 7,
+                    borderRadius: '50%',
+                    flexShrink: 0,
+                    pointerEvents: 'none',
+                    backgroundColor:
+                      severity === 'error' ? euiTheme.colors.danger : euiTheme.colors.warning,
+                  })}
+                />
+              )}
+              <span
+                className="minimap-pill"
+                css={css({
+                  display: 'inline-block',
+                  maxWidth: pillMaxW,
+                  height: PILL_H,
+                  lineHeight: `${PILL_H}px`,
+                  paddingInline: '8px',
+                  background: isFocused ? activeBg : inactiveBg,
+                  color: isFocused ? activeText : inactiveText,
+                  borderRadius: PILL_RADIUS,
+                  fontSize: '12px',
+                  fontFamily: euiTheme.font.family,
+                  fontWeight: isFocused ? 600 : 400,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  transition: 'background 0.15s ease',
+                  userSelect: 'none',
+                  pointerEvents: 'none',
+                })}
+              >
+                {stepId}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };

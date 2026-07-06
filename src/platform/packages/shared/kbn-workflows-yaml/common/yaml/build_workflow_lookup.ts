@@ -116,7 +116,10 @@ export function inspectStep(
         const keyValue = YAML.isScalar(item.key) ? item.key.value : undefined;
         if (!isNestedStepKey(keyValue)) {
           const currentParentStepId = stepId ?? parentStepId;
-          Object.assign(result, inspectStep(item.value, lineCounter, currentParentStepId, branchKey));
+          Object.assign(
+            result,
+            inspectStep(item.value, lineCounter, currentParentStepId, branchKey)
+          );
         }
       }
     });
