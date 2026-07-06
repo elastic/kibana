@@ -32,8 +32,8 @@ describe('ResolutionRulesClient', () => {
         enabled: true,
       },
       {
-        id: RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE,
-        kind: RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE,
+        id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
+        kind: RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION,
         managed: true,
         enabled: false,
       },
@@ -46,8 +46,8 @@ describe('ResolutionRulesClient', () => {
         saved_objects: [
           {
             attributes: {
-              id: RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE,
-              kind: RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE,
+              id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
+              kind: RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION,
               managed: true,
               enabled: true,
             },
@@ -59,9 +59,9 @@ describe('ResolutionRulesClient', () => {
 
     const rules = await client.getEffectiveRules();
 
-    expect(rules.find((rule) => rule.id === RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE)?.enabled).toBe(
-      true
-    );
+    expect(
+      rules.find((rule) => rule.id === RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION)?.enabled
+    ).toBe(true);
   });
 
   it('creates an override when setting enabled for the first time', async () => {
@@ -71,17 +71,17 @@ describe('ResolutionRulesClient', () => {
     const client = createClient(soClient);
 
     await expect(
-      client.setEnabled(RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE, true)
+      client.setEnabled(RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION, true)
     ).resolves.toMatchObject({
-      id: RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE,
+      id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
       enabled: true,
     });
 
     expect(soClient.create).toHaveBeenCalledWith(
       EntityResolutionRuleTypeName,
       {
-        id: RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE,
-        kind: RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE,
+        id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
+        kind: RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION,
         managed: true,
         enabled: true,
       },

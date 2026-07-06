@@ -8,10 +8,10 @@ responses:
         examples:
           ruleEnabledExample:
             summary: Rule enabled
-            description: The related user bridge rule was enabled in the current space.
+            description: The related user alias resolution rule was enabled in the current space.
             value:
-              id: related_user_bridge
-              kind: related_user_bridge
+              id: related_user_alias_resolution
+              kind: related_user_alias_resolution
               managed: true
               enabled: true
   '404':

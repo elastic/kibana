@@ -14,11 +14,11 @@ import { EntityResolutionRuleTypeName } from './constants';
 const entityResolutionRuleAttributesSchema = schema.object({
   id: schema.oneOf([
     schema.literal(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
-    schema.literal(RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE),
+    schema.literal(RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION),
   ]),
   kind: schema.oneOf([
     schema.literal(RESOLUTION_RULE_KINDS.SAME_FIELD),
-    schema.literal(RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE),
+    schema.literal(RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION),
   ]),
   managed: schema.boolean(),
   enabled: schema.boolean(),

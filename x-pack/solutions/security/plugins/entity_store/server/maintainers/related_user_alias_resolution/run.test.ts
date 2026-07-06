@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ResolutionClient } from '../../domain/resolution';
 import type { MaintainerTelemetryClient } from '../../tasks/entity_maintainers/maintainer_telemetry_client';
 import type { PerRuleState } from '../automated_resolution/types';
-import { collectSeeds, runRelatedUserBridge } from './run';
+import { collectSeeds, runRelatedUserAliasResolution } from './run';
 
 const NAMESPACE = 'default';
 const INITIAL_STATE: PerRuleState = { lastProcessedTimestamp: null, lastRun: null };
@@ -77,7 +77,7 @@ const createDeps = ({
   telemetry,
 });
 
-describe('runRelatedUserBridge', () => {
+describe('runRelatedUserAliasResolution', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;
   let cascadeLinkEntities: jest.Mock;
   let resolutionClient: ResolutionClient;
@@ -104,7 +104,7 @@ describe('runRelatedUserBridge', () => {
       )
       .mockResolvedValueOnce(createSearchResponse([createCandidate('user:ad')]) as never);
 
-    const result = await runRelatedUserBridge(createDeps({ esClient, resolutionClient }));
+    const result = await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
 
     expect(esClient.search).toHaveBeenCalledTimes(3);
     expect(esClient.search.mock.calls[2][0]).toEqual(
@@ -136,7 +136,7 @@ describe('runRelatedUserBridge', () => {
         createSearchResponse([createSourceDoc(['manager@example.com'])]) as never
       );
 
-    const result = await runRelatedUserBridge(createDeps({ esClient, resolutionClient }));
+    const result = await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
     expect(cascadeLinkEntities).not.toHaveBeenCalled();
@@ -152,7 +152,7 @@ describe('runRelatedUserBridge', () => {
         ]) as never
       );
 
-    await runRelatedUserBridge(createDeps({ esClient, resolutionClient }));
+    await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
     expect(cascadeLinkEntities).not.toHaveBeenCalled();
@@ -169,7 +169,7 @@ describe('runRelatedUserBridge', () => {
         ]) as never
       );
 
-    await runRelatedUserBridge(createDeps({ esClient, resolutionClient }));
+    await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
     expect(cascadeLinkEntities).not.toHaveBeenCalled();
@@ -183,7 +183,7 @@ describe('runRelatedUserBridge', () => {
         createSearchResponse([createCandidate('user:ad-1'), createCandidate('user:ad-2')]) as never
       );
 
-    const result = await runRelatedUserBridge(createDeps({ esClient, resolutionClient }));
+    const result = await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
 
     expect(cascadeLinkEntities).not.toHaveBeenCalled();
     expect(result.lastRun).toMatchObject({ skippedAmbiguous: 1 });
@@ -207,7 +207,7 @@ describe('runRelatedUserBridge', () => {
         createSearchResponse([createCandidate('user:okta', 'okta', 'okta-login')]) as never
       );
 
-    const result = await runRelatedUserBridge(createDeps({ esClient, resolutionClient }));
+    const result = await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
 
     expect(cascadeLinkEntities).toHaveBeenCalledTimes(1);
     expect(cascadeLinkEntities).toHaveBeenCalledWith('user:ad', [
@@ -231,7 +231,7 @@ describe('runRelatedUserBridge', () => {
       )
       .mockResolvedValueOnce(createSearchResponse([createCandidate('user:ad')]) as never);
 
-    const result = await runRelatedUserBridge(createDeps({ esClient, resolutionClient }));
+    const result = await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
 
     expect(cascadeLinkEntities).toHaveBeenCalledTimes(1);
     expect(cascadeLinkEntities).toHaveBeenCalledWith('user:ad', ['user:seed@example.com@entra_id']);
@@ -254,7 +254,7 @@ describe('runRelatedUserBridge', () => {
         ]) as never
       );
 
-    const result = await runRelatedUserBridge(createDeps({ esClient, resolutionClient }));
+    const result = await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
 
     expect(cascadeLinkEntities).toHaveBeenCalledTimes(1);
     expect(cascadeLinkEntities).toHaveBeenCalledWith('user:ad', ['user:seed@example.com@entra_id']);

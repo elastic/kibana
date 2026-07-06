@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { runRelatedUserBridge, type RunRelatedUserBridgeDeps } from './run';
+export { runRelatedUserAliasResolution, type RunRelatedUserAliasResolutionDeps } from './run';

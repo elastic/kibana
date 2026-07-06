@@ -13,7 +13,7 @@ import type { AutomatedResolutionState, PerRuleState } from './types';
 import { migrate } from './migrate';
 import { RESOLUTION_RULE_CONFIGS } from '../../domain/resolution_rules';
 import { runEmailRuleResolution } from './run';
-import { runRelatedUserBridge } from '../related_user_bridge';
+import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
 
 export const MAINTAINER_ID = 'automated-resolution';
 
@@ -62,8 +62,8 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
               telemetry,
             });
           }
-        } else if (ruleConfig.kind === RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE) {
-          rules[ruleConfig.id] = await runRelatedUserBridge({
+        } else if (ruleConfig.kind === RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION) {
+          rules[ruleConfig.id] = await runRelatedUserAliasResolution({
             state: ruleState,
             namespace,
             esClient,

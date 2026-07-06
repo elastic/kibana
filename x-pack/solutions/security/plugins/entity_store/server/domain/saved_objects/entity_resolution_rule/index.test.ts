@@ -22,8 +22,8 @@ interface TestModelVersion {
 describe('EntityResolutionRuleType', () => {
   const modelVersions = EntityResolutionRuleType.modelVersions as Record<number, TestModelVersion>;
   const validAttributes = {
-    id: RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE,
-    kind: RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE,
+    id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
+    kind: RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION,
     managed: true,
     enabled: false,
   };

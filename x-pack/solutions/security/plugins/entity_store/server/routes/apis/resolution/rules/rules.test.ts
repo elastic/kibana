@@ -100,8 +100,8 @@ describe('resolution rules routes', () => {
   it('registers and handles enable as an upsert', async () => {
     const { router, route } = createRouter('put');
     const rule = {
-      id: RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE,
-      kind: 'related_user_bridge',
+      id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
+      kind: 'related_user_alias_resolution',
       managed: true,
       enabled: true,
     };
@@ -115,7 +115,11 @@ describe('resolution rules routes', () => {
     const res = createResponse();
 
     registerResolutionRulesEnable(router);
-    await route.handler(ctx, { params: { id: RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE } }, res);
+    await route.handler(
+      ctx,
+      { params: { id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION } },
+      res
+    );
 
     expect(route.routeConfig).toMatchObject({
       path: ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE,
@@ -123,7 +127,10 @@ describe('resolution rules routes', () => {
       security: { authz: RESOLUTION_ENTITY_STORE_PERMISSIONS },
     });
     expect(route.versionConfig).toMatchObject({ version: API_VERSIONS.public.v1 });
-    expect(setEnabled).toHaveBeenCalledWith(RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE, true);
+    expect(setEnabled).toHaveBeenCalledWith(
+      RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
+      true
+    );
     expect(res.ok).toHaveBeenCalledWith({ body: rule });
   });
 

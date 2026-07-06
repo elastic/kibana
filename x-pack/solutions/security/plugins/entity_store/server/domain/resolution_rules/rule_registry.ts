@@ -27,9 +27,9 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
     defaultEnabled: true,
   },
   {
-    id: RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE,
-    kind: RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE,
-    description: 'Related user bridge across identity providers',
+    id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
+    kind: RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION,
+    description: 'Related user alias resolution across identity providers',
     defaultEnabled: false,
   },
 ];

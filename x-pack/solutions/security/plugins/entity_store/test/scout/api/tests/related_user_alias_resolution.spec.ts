@@ -28,7 +28,7 @@ import {
 } from '../fixtures/helpers';
 
 apiTest.describe(
-  'Related user bridge resolution integration tests',
+  'Related user alias resolution integration tests',
   { tag: ENTITY_STORE_TAGS },
   () => {
     let defaultHeaders: Record<string, string>;
@@ -82,7 +82,9 @@ apiTest.describe(
       await esClient.indices.delete({ index: ENTRA_SOURCE_INDEX, ignore_unavailable: true });
 
       const enable = await apiClient.put(
-        ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE),
+        ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(
+          RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION
+        ),
         {
           headers: defaultHeaders,
           responseType: 'json',
@@ -103,14 +105,14 @@ apiTest.describe(
     });
 
     apiTest(
-      'enables bridge, links related user candidate by priority target, then preserves link when disabled',
+      'enables alias resolution, links related user candidate by priority target, then preserves link when disabled',
       async ({ apiClient, esClient }) => {
         const seedId = 'user:seed@example.com@entra_id';
         const adId = 'user:T03KX1Z@active_directory';
         const disabledSeedId = 'user:disabled@example.com@entra_id';
         const disabledAdId = 'user:T04KX2Z@active_directory';
 
-        await expectBridgeEnabled(apiClient, defaultHeaders, true);
+        await expectAliasResolutionEnabled(apiClient, defaultHeaders, true);
 
         await seedUserEntity(esClient, {
           entityId: seedId,
@@ -136,7 +138,7 @@ apiTest.describe(
 
         const disable = await apiClient.put(
           ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(
-            RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE
+            RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION
           ),
           {
             headers: defaultHeaders,
@@ -144,7 +146,7 @@ apiTest.describe(
           }
         );
         expect(disable.statusCode).toBe(200);
-        await expectBridgeEnabled(apiClient, defaultHeaders, false);
+        await expectAliasResolutionEnabled(apiClient, defaultHeaders, false);
 
         const group = await apiClient.get(
           `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${seedId}&apiVersion=2`,
@@ -271,7 +273,7 @@ apiTest.describe(
   }
 );
 
-const expectBridgeEnabled = async (
+const expectAliasResolutionEnabled = async (
   apiClient: {
     get: Function;
   },
@@ -287,7 +289,7 @@ const expectBridgeEnabled = async (
   expect(list.body.rules).toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
-        id: RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE,
+        id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
         enabled,
       }),
     ])

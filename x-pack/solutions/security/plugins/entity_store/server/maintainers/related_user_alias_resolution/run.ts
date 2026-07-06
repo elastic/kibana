@@ -19,7 +19,7 @@ import { getFieldStringValues, readRelatedUserBundleForSeed } from './left';
 import {
   SEED_IDENTITY_PREFILTER_FIELDS,
   type CandidateEntity,
-  type RelatedUserBridgeLastRun,
+  type RelatedUserAliasResolutionLastRun,
   type SeedEntity,
 } from './types';
 
@@ -29,7 +29,7 @@ const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 const ENTITY_NAMESPACE_FIELD = 'entity.namespace';
 const FIRST_SEEN_FIELD = 'entity.lifecycle.first_seen';
-// The bridge seeds and target priority intentionally use the same IDP namespace set.
+// The alias resolution seeds and target priority intentionally use the same IDP namespace set.
 const IDP_NAMESPACES = NAMESPACE_PRIORITY;
 const RIGHT_MATCH_FIELDS = ['user.id', 'user.name', 'user.email', 'user.full_name'] as const;
 const LOCAL_NAMESPACE = 'local';
@@ -40,7 +40,7 @@ const GENERIC_SERVICE_ACCOUNTS = new Set([
   'service account',
 ]);
 
-export interface RunRelatedUserBridgeDeps {
+export interface RunRelatedUserAliasResolutionDeps {
   state: PerRuleState;
   namespace: string;
   esClient: ElasticsearchClient;
@@ -213,19 +213,21 @@ const findCandidates = async ({
 };
 
 /**
- * Runs the default-off related.user bridge rule.
+ * Runs the default-off related.user alias resolution rule.
  *
  * For each unresolved IDP seed, read the seed's own entityanalytics source
  * record, clean its related.user values, collect unambiguous entity-store
  * candidates across all values, then link the whole group once by namespace
  * priority. The source read is EUID-confirmed so records that merely mention
- * the seed do not become bridge input.
+ * the seed do not become alias-resolution input.
  */
-export async function runRelatedUserBridge(deps: RunRelatedUserBridgeDeps): Promise<PerRuleState> {
+export async function runRelatedUserAliasResolution(
+  deps: RunRelatedUserAliasResolutionDeps
+): Promise<PerRuleState> {
   const { state, namespace, esClient, logger, resolutionClient, abortController, telemetry } = deps;
   const index = getLatestEntitiesIndexName(namespace);
   const seeds = await collectSeeds({ esClient, index, abortSignal: abortController.signal });
-  const lastRun: RelatedUserBridgeLastRun = {
+  const lastRun: RelatedUserAliasResolutionLastRun = {
     seedsScanned: seeds.length,
     linksCreated: 0,
     cascadeRetargeted: 0,
@@ -278,7 +280,7 @@ export async function runRelatedUserBridge(deps: RunRelatedUserBridgeDeps): Prom
         candidatesForSeed.set(candidatesExcludingSeed[0].entityId, candidatesExcludingSeed[0]);
       } catch (error) {
         lastRun.failedGroups++;
-        logger.warn(`Failed to process related_user_bridge value '${value}': ${error}`);
+        logger.warn(`Failed to process related_user_alias_resolution value '${value}': ${error}`);
       }
     }
 
@@ -302,7 +304,9 @@ export async function runRelatedUserBridge(deps: RunRelatedUserBridgeDeps): Prom
       lastRun.cascadesBlocked += result.cascadesBlocked;
     } catch (error) {
       lastRun.failedGroups++;
-      logger.warn(`Failed to cascade related_user_bridge seed '${seed.entityId}': ${error}`);
+      logger.warn(
+        `Failed to cascade related_user_alias_resolution seed '${seed.entityId}': ${error}`
+      );
     }
   }
 

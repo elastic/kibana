@@ -13,15 +13,15 @@ import {
   RESOLUTION_RULE_KINDS,
 } from '../../../common/domain/resolution_rules/constants';
 import { automatedResolutionMaintainerConfig, MAINTAINER_ID } from '.';
-import { runRelatedUserBridge } from '../related_user_bridge';
+import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
 import type { AutomatedResolutionState } from './types';
 
 const EMAIL_RULE = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
-const BRIDGE_RULE = RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE;
+const ALIAS_RESOLUTION_RULE = RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION;
 const NAMESPACE = 'default';
 
-jest.mock('../related_user_bridge', () => ({
-  runRelatedUserBridge: jest.fn(),
+jest.mock('../related_user_alias_resolution', () => ({
+  runRelatedUserAliasResolution: jest.fn(),
 }));
 
 const DEFAULT_EFFECTIVE_RULES = [
@@ -32,8 +32,8 @@ const DEFAULT_EFFECTIVE_RULES = [
     enabled: true,
   },
   {
-    id: RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE,
-    kind: RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE,
+    id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
+    kind: RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION,
     managed: true,
     enabled: false,
   },
@@ -148,9 +148,9 @@ describe('automatedResolutionMaintainerConfig', () => {
     });
   });
 
-  it('skips disabled bridge rule and preserves its existing state', async () => {
+  it('skips disabled alias resolution rule and preserves its existing state', async () => {
     const esClient = createEsClient();
-    const bridgeState = {
+    const aliasResolutionState = {
       lastProcessedTimestamp: '2026-06-01T00:00:00Z',
       lastRun: {
         seedsScanned: 10,
@@ -158,23 +158,27 @@ describe('automatedResolutionMaintainerConfig', () => {
       },
     };
 
-    const result = await runConfig(esClient, { rules: { [BRIDGE_RULE]: bridgeState } }, [
-      {
-        id: EMAIL_RULE,
-        kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
-        managed: true,
-        enabled: false,
-      },
-      {
-        id: BRIDGE_RULE,
-        kind: RESOLUTION_RULE_KINDS.RELATED_USER_BRIDGE,
-        managed: true,
-        enabled: false,
-      },
-    ]);
+    const result = await runConfig(
+      esClient,
+      { rules: { [ALIAS_RESOLUTION_RULE]: aliasResolutionState } },
+      [
+        {
+          id: EMAIL_RULE,
+          kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
+          managed: true,
+          enabled: false,
+        },
+        {
+          id: ALIAS_RESOLUTION_RULE,
+          kind: RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION,
+          managed: true,
+          enabled: false,
+        },
+      ]
+    );
 
-    expect(runRelatedUserBridge).not.toHaveBeenCalled();
+    expect(runRelatedUserAliasResolution).not.toHaveBeenCalled();
     expect(esClient.search).not.toHaveBeenCalled();
-    expect(result.rules[BRIDGE_RULE]).toEqual(bridgeState);
+    expect(result.rules[ALIAS_RESOLUTION_RULE]).toEqual(aliasResolutionState);
   });
 });
