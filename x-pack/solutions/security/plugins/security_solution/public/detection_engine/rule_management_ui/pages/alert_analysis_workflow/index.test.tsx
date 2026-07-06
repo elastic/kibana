@@ -33,6 +33,7 @@ describe('AlertAnalysisWorkflowPage', () => {
       autoCloseEnabled: true,
       autoCloseConfidenceScoreMinThreshold: 0.85,
       autoCloseConfidenceScoreMaxThreshold: 1,
+      tagPrefix: 'alert-analysis',
     }
   ) => ({
     settings,
@@ -104,6 +105,7 @@ describe('AlertAnalysisWorkflowPage', () => {
           autoCloseEnabled: false,
           autoCloseConfidenceScoreMinThreshold: 0.85,
           autoCloseConfidenceScoreMaxThreshold: 1,
+          tagPrefix: 'alert-analysis',
         }),
       });
     });
@@ -154,6 +156,22 @@ describe('AlertAnalysisWorkflowPage', () => {
 
     const minThresholdField = await screen.findByTestId('alertAnalysisWorkflowMinThreshold');
     fireEvent.change(minThresholdField, { target: { value: '' } });
+
+    const saveButton = await screen.findByTestId('alertAnalysisWorkflowSaveButton');
+    expect(saveButton).toBeDisabled();
+
+    fireEvent.click(saveButton);
+    expect(coreStart.http.fetch).not.toHaveBeenCalledWith(
+      ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
+      expect.objectContaining({ method: 'PUT' })
+    );
+  });
+
+  it('disables saving when the tag prefix is cleared', async () => {
+    renderComponent();
+
+    const tagPrefixField = await screen.findByTestId('alertAnalysisWorkflowTagPrefix');
+    fireEvent.change(tagPrefixField, { target: { value: '' } });
 
     const saveButton = await screen.findByTestId('alertAnalysisWorkflowSaveButton');
     expect(saveButton).toBeDisabled();

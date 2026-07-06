@@ -30,6 +30,9 @@ export const AlertAnalysisWorkflowSettings = z.object({
   autoCloseEnabled: z.boolean(),
   autoCloseConfidenceScoreMinThreshold: z.number().min(0).max(1),
   autoCloseConfidenceScoreMaxThreshold: z.number().min(0).max(1),
+  // Prefix for the workflow tags written to (and matched on) each analyzed alert. Non-empty so the
+  // dedup gate and tag replacement always have a real namespace to match against.
+  tagPrefix: z.string().min(1),
 });
 
 export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflowSettings>;

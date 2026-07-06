@@ -10,6 +10,7 @@ import {
   EuiButton,
   EuiDescribedFormGroup,
   EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -61,7 +62,8 @@ const areSettingsEqual = (
     left?.autoCloseConfidenceScoreMinThreshold === right?.autoCloseConfidenceScoreMinThreshold &&
     left?.autoCloseConfidenceScoreMaxThreshold === right?.autoCloseConfidenceScoreMaxThreshold &&
     left?.connectorId === right?.connectorId &&
-    left?.createConversation === right?.createConversation
+    left?.createConversation === right?.createConversation &&
+    left?.tagPrefix === right?.tagPrefix
   );
 };
 
@@ -115,10 +117,18 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
       pageSettings.autoCloseConfidenceScoreMinThreshold <
       pageSettings.autoCloseConfidenceScoreMaxThreshold
     );
+  const isTagPrefixInvalid =
+    pageSettings !== undefined && (pageSettings.tagPrefix ?? '').trim() === '';
   const thresholdRangeErrorMessage = i18n.translate(
     'xpack.securitySolution.alertAnalysisWorkflow.thresholdRangeErrorMessage',
     {
       defaultMessage: 'Minimum confidence score must be lower than maximum confidence score.',
+    }
+  );
+  const tagPrefixErrorMessage = i18n.translate(
+    'xpack.securitySolution.alertAnalysisWorkflow.tagPrefixErrorMessage',
+    {
+      defaultMessage: 'Tag prefix is required.',
     }
   );
   const saveSettingsMutation = useMutation({
@@ -460,10 +470,57 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                 />
               </EuiFormRow>
             </EuiDescribedFormGroup>
+            <EuiDescribedFormGroup
+              fullWidth
+              title={
+                <h4>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertAnalysisWorkflow.tagPrefixLabel"
+                    defaultMessage="Alert tag prefix"
+                  />
+                </h4>
+              }
+              description={
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertAnalysisWorkflow.tagPrefixHelpText"
+                    defaultMessage="Prefix for the tags the workflow adds to alerts it analyzes (for example alert-analysis.classification.false_positive). Changing it means alerts tagged under the old prefix are no longer recognized as analyzed."
+                  />
+                </p>
+              }
+            >
+              <EuiFormRow
+                fullWidth
+                isInvalid={isTagPrefixInvalid}
+                error={isTagPrefixInvalid ? tagPrefixErrorMessage : undefined}
+              >
+                <EuiFieldText
+                  data-test-subj="alertAnalysisWorkflowTagPrefix"
+                  value={pageSettings.tagPrefix ?? ''}
+                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  isInvalid={isTagPrefixInvalid}
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.alertAnalysisWorkflow.tagPrefixAriaLabel',
+                    { defaultMessage: 'Alert tag prefix' }
+                  )}
+                  onChange={(event) =>
+                    setPageSettings({
+                      ...pageSettings,
+                      tagPrefix: event.target.value,
+                    })
+                  }
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
             <EuiButton
               data-test-subj="alertAnalysisWorkflowSaveButton"
               fill
-              disabled={!canEditAdvancedSettings || !isDirty || isThresholdRangeInvalid}
+              disabled={
+                !canEditAdvancedSettings ||
+                !isDirty ||
+                isThresholdRangeInvalid ||
+                isTagPrefixInvalid
+              }
               isLoading={saveSettingsMutation.isLoading}
               onClick={() => {
                 if (pageSettings) {
