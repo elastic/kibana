@@ -67,6 +67,11 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
+      // Draft-stream samples are fetched via ES|QL from the parent and can take
+      // 30–60s on cloud targets. The default 60s Scout per-test budget (which
+      // includes hooks) is not enough for the full login → clear → goto →
+      // switchToColumnsView chain, so extend it for this suite.
+      test.setTimeout(120_000);
       await browserAuth.loginAsAdmin();
       await apiServices.streams.clearStreamProcessors(DRAFT_CHILD);
       await pageObjects.streams.gotoProcessingTab(DRAFT_CHILD);

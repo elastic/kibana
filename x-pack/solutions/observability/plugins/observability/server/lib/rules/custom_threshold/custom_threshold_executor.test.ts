@@ -45,7 +45,7 @@ const initialRuleState: TestRuleState = {
 };
 
 const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
-const MOCKED_SPACE_ID = 'mockedSpaceId';
+const MOCKED_SPACE_ID = 'mocked-space-id';
 
 const logger = {
   trace: fakeLogger,

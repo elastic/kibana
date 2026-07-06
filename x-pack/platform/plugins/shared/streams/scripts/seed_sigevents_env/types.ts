@@ -42,24 +42,16 @@ export interface SeedQuery {
   description?: string;
 }
 
-export interface SeedInsight {
-  title: string;
-  description: string;
-  impact: 'critical' | 'high' | 'medium' | 'low';
-  recommendations: string[];
-}
-
 export interface SeedScenario {
   /** Name of the scenario key in CLAIMS_APP.scenarios — e.g. 'postgres_timeout'. */
   scenarioName: string;
   queries: SeedQuery[];
-  insights: SeedInsight[];
 }
 
 /**
  * The resolved, post-promotion query identity passed between seed steps.
  * Carries severityScore and description from SeedQuery so downstream steps
- * (seed_tasks, etc.) can use them without re-accessing the scenario definition.
+ * (seed_alerts, etc.) can use them without re-accessing the scenario definition.
  */
 export interface SeededQuery {
   queryId: string;

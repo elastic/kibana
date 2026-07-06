@@ -6,31 +6,49 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { PluginInitializerContext, SavedObjectsClientContract } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { ActionPolicyClient } from '../action_policy_client';
+import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
+import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
+import type { PluginConfig } from '../../config';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import { createUserService } from '../services/user_service/user_service.mock';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { RulesClient } from './rules_client';
 
 export function createRulesClient(): {
   rulesClient: RulesClient;
   mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  ruleEventPublisher: RuleEventPublisher;
 } {
   const { rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService();
   const request = httpServerMock.createKibanaRequest();
   const taskManager = taskManagerMock.createStart();
   const { userService } = createUserService();
-  const actionPolicyClient = {
-    deleteActionPoliciesByFilter: jest
-      .fn()
-      .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
-  } as unknown as ActionPolicyClient;
+  const { publisher: ruleEventPublisher } = createRuleEventPublisher();
+  const { loggerService } = createLoggerService();
 
-  const rulesClient = new RulesClient({
-    services: { request, rulesSavedObjectService, taskManager, userService, actionPolicyClient },
-    options: { spaceId: 'default' },
-  });
+  const config = {
+    enabled: true,
+    invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+    rules: { minimumScheduleInterval: '1m', maxScheduledPerMinute: 400 },
+  } as PluginConfig;
 
-  return { rulesClient, mockSavedObjectsClient };
+  const pluginConfigAccessor = {
+    get: () => config,
+  } as unknown as PluginInitializerContext<PluginConfig>['config'];
+
+  const rulesClient = new RulesClient(
+    request,
+    rulesSavedObjectService,
+    taskManager,
+    userService,
+    'default',
+    pluginConfigAccessor,
+    rulesSavedObjectService,
+    ruleEventPublisher,
+    loggerService
+  );
+
+  return { rulesClient, mockSavedObjectsClient, ruleEventPublisher };
 }

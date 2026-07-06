@@ -80,6 +80,27 @@ const roundTripMappingFixtures: Array<{
       },
     },
   },
+  {
+    name: 'nested empty-object field',
+    mappings: {
+      dynamic: false,
+      properties: {
+        title: { type: 'text' },
+        meta: { dynamic: false, properties: {} },
+      },
+    },
+  },
+  {
+    name: 'object field with indexing disabled (enabled: false)',
+    mappings: {
+      dynamic: false,
+      properties: {
+        allow_edit: { enabled: false },
+        latest_executed_state: { type: 'object', enabled: false },
+        title: { type: 'text' },
+      },
+    },
+  },
 ];
 
 const flattenSnapshotMappings = (

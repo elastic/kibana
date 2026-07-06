@@ -40,7 +40,8 @@ dependsOn:
   - '@kbn/crypto'
   - '@kbn/es-errors'
   - '@kbn/spaces-plugin'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
+  - '@kbn/i18n'
 tags:
   - plugin
   - prod

@@ -42,10 +42,10 @@ groups:
 
       - setting: xpack.fleet.createArtifactsBulkBatchSize
         description: |
-          Allow to configure batch size for creating and updating Fleet user artifacts.  Examples include creation of Trusted Applications and Endpoint Exceptions in Security. It is available in {{ecloud}} 8.9.0 and later versions.
+          Allow to configure batch size for creating and updating Fleet user artifacts. Examples include creation of Trusted Applications and Endpoint Exceptions in Security.
         datatype: int
         applies_to:
-          stack: ga
+          stack: ga 8.9
           ech: ga
           self: ga
 
@@ -482,11 +482,9 @@ groups:
       - setting: xpack.fleet.enableExperimental
         description: |
           List of experimental feature flag to enable in Fleet.
-          It is available in {{ecloud}} 8.6.0 and later versions.
-          Deprecated beginning in 9.3.0.
         datatype: string
         applies_to:
-          - "stack: deprecated 9.3.0"
+          - "stack: ga 8.6, deprecated 9.3"
           - "ech: ga"
           - "self: ga"
         deprecation_details: "From 9.3.0 onwards, use `xpack.fleet.experimentalFeatures` to explicitly enable or disable experimental features."

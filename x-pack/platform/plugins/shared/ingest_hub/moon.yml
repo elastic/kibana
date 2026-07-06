@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/ingest_hub
 dependsOn:
   - '@kbn/core'
+  - '@kbn/config-schema'
   - '@kbn/i18n'
   - '@kbn/shared-ux-utility'
   - '@kbn/shared-ux-router'
@@ -28,6 +29,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/react-query'
   - '@kbn/fleet-plugin'
+  - '@kbn/i18n-react'
 tags:
   - plugin
   - prod
@@ -38,6 +40,7 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - server/**/*
     - test/scout/**/*
     - '!target/**/*'
   jest-config:

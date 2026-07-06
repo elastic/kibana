@@ -6,8 +6,8 @@
  */
 
 import path from 'node:path';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
+import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
@@ -43,7 +43,7 @@ export function registerUninstall(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
           },
         },
         options: {
@@ -63,8 +63,12 @@ export function registerUninstall(router: EntityStorePluginRouter) {
         const installedTypes = new Set(engines.map((e) => e.type));
         const toUninstall = entityTypes.filter((type) => installedTypes.has(type));
 
-        await entityMaintainersClient.removeAll();
         await Promise.all(toUninstall.map((type) => assetManager.uninstall(type)));
+
+        const isFullUninstall = toUninstall.length === engines.length;
+        if (isFullUninstall) {
+          await entityMaintainersClient.removeAll();
+        }
 
         return res.ok({ body: { ok: true } });
       })

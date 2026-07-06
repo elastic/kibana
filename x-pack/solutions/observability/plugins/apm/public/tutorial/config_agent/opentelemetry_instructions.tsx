@@ -10,10 +10,11 @@ import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiButtonIcon,
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiButtonIcon,
+  EuiToolTip,
   copyToClipboard,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -71,18 +72,25 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
             {value}
           </EuiText>
           {value && (
-            <EuiButtonIcon
-              data-test-subj="apmColumnsButton"
-              aria-label={i18n.translate(
-                'xpack.apm.tutorial.config_otel.column.value.copyIconText',
-                {
-                  defaultMessage: 'Copy to clipboard',
-                }
-              )}
-              color="text"
-              iconType="copy"
-              onClick={() => copyToClipboard(value)}
-            />
+            <EuiToolTip
+              content={i18n.translate('xpack.apm.tutorial.config_otel.column.value.copyIconText', {
+                defaultMessage: 'Copy to clipboard',
+              })}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="apmColumnsButton"
+                aria-label={i18n.translate(
+                  'xpack.apm.tutorial.config_otel.column.value.copyIconText',
+                  {
+                    defaultMessage: 'Copy to clipboard',
+                  }
+                )}
+                color="text"
+                iconType="copy"
+                onClick={() => copyToClipboard(value)}
+              />
+            </EuiToolTip>
           )}
         </>
       ),

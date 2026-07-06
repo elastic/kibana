@@ -220,7 +220,11 @@ export function registerSkillsRoutes({
         const { skills: skillService, auditLogService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.create(createRequest);
-        analyticsService?.reportSkillCreated({ skillId: skill.id, origin: 'custom' });
+        analyticsService?.reportSkillCreated({
+          skillId: skill.id,
+          origin: 'custom',
+          toolIds: await skill.getRegistryTools(),
+        });
         auditLogService.logSkillCreated(request, { skillId: skill.id });
         const publicSkill = await internalToPublicDefinition(skill);
         return response.ok<CreateSkillResponse>({
@@ -299,7 +303,11 @@ export function registerSkillsRoutes({
         const update: UpdateSkillPayload = parseResult.data;
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.update(skillId, update);
-        analyticsService?.reportSkillUpdated({ skillId: skill.id, origin: 'custom' });
+        analyticsService?.reportSkillUpdated({
+          skillId: skill.id,
+          origin: 'custom',
+          toolIds: await skill.getRegistryTools(),
+        });
         auditLogService.logSkillUpdated(request, { skillId: skill.id });
         const publicSkill = await internalToPublicDefinition(skill);
         return response.ok<UpdateSkillResponse>({

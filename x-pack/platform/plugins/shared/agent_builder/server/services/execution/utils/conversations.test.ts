@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 import type { RoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ChatEventType } from '@kbn/agent-builder-common';
+import { ChatEventType, ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import {
   createEmptyConversation,
   createRound,
@@ -28,6 +28,37 @@ describe('conversations utils', () => {
         });
 
         expect(result.operation).toBe('CREATE');
+      });
+
+      it('defaults access control to private for new conversation placeholders', async () => {
+        const conversationClient = createConversationClientMock();
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          conversationId: undefined,
+          conversationClient,
+        });
+
+        expect(result.access_control).toEqual({
+          access_mode: ConversationAccessControlMode.Private,
+        });
+      });
+
+      it('uses explicit access control for new conversation placeholders', async () => {
+        const conversationClient = createConversationClientMock();
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          conversationId: undefined,
+          conversationClient,
+          accessControl: {
+            access_mode: ConversationAccessControlMode.Public,
+          },
+        });
+
+        expect(result.access_control).toEqual({
+          access_mode: ConversationAccessControlMode.Public,
+        });
       });
 
       it('returns UPDATE operation when conversationId is provided', async () => {
@@ -73,6 +104,32 @@ describe('conversations utils', () => {
 
         expect(result.operation).toBe('UPDATE');
       });
+
+      it('ignores access control when auto-created conversation already exists', async () => {
+        const conversationClient = createConversationClientMock();
+        const existingConversation = createEmptyConversation({
+          access_control: {
+            access_mode: ConversationAccessControlMode.Private,
+          },
+        });
+        conversationClient.exists.mockResolvedValue(true);
+        conversationClient.get.mockResolvedValue(existingConversation);
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          conversationId: 'existing-conversation',
+          autoCreateConversationWithId: true,
+          conversationClient,
+          accessControl: {
+            access_mode: ConversationAccessControlMode.Public,
+          },
+        });
+
+        expect(result.operation).toBe('UPDATE');
+        expect(result.access_control).toEqual({
+          access_mode: ConversationAccessControlMode.Private,
+        });
+      });
     });
   });
 
@@ -113,7 +170,8 @@ describe('conversations utils', () => {
             rounds: [newRound],
             read: false,
             status: newRound.status,
-          })
+          }),
+          { access: 'converse' }
         );
       });
 
@@ -151,7 +209,8 @@ describe('conversations utils', () => {
             rounds: [existingRound, newRound],
             read: false,
             status: newRound.status,
-          })
+          }),
+          { access: 'converse' }
         );
       });
 
@@ -190,7 +249,8 @@ describe('conversations utils', () => {
             rounds: [newRound],
             read: false,
             status: newRound.status,
-          })
+          }),
+          { access: 'converse' }
         );
       });
     });

@@ -8,7 +8,6 @@
 import type {
   AnalyticsServiceSetup,
   ElasticsearchClient,
-  HttpServiceSetup,
   KibanaRequest,
   LoggerFactory,
   SavedObjectsClientContract,
@@ -32,7 +31,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { Space } from '@kbn/spaces-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import {
@@ -88,7 +87,6 @@ export interface EndpointAppContextServiceSetupContract {
   cloud: CloudSetup;
   loggerFactory: LoggerFactory;
   telemetry: AnalyticsServiceSetup;
-  httpServiceSetup: HttpServiceSetup;
 }
 
 export interface EndpointAppContextServiceStartContract {
@@ -146,8 +144,7 @@ export class EndpointAppContextService {
     }
 
     const savedObjectsFactory = new SavedObjectsClientFactory(
-      dependencies.savedObjectsServiceStart,
-      this.setupDependencies.httpServiceSetup
+      dependencies.savedObjectsServiceStart
     );
 
     this.savedObjectsFactoryService = savedObjectsFactory;

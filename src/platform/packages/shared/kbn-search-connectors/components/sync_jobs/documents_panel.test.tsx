@@ -9,7 +9,8 @@
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import { SyncJobDocumentsPanel } from './documents_panel';
 
@@ -17,13 +18,16 @@ describe('DocumentsPanel', () => {
   const documents = {
     added: 10,
     removed: 0,
-    total: 305,
     volume: 1120,
   };
 
-  it('renders', () => {
-    const wrapper = shallow(<SyncJobDocumentsPanel {...documents} />);
+  it('renders the documents heading and upserted/deleted counts', () => {
+    renderWithKibanaRenderContext(<SyncJobDocumentsPanel {...documents} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByRole('heading', { name: 'Documents' })).toBeInTheDocument();
+    expect(screen.getByText('Upserted')).toBeInTheDocument();
+    expect(screen.getByText('Deleted')).toBeInTheDocument();
+    expect(screen.getByText('10')).toBeInTheDocument();
+    expect(screen.getByText('0')).toBeInTheDocument();
   });
 });

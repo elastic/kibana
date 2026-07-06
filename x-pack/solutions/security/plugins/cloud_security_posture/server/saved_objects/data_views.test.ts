@@ -9,7 +9,7 @@ import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/ser
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,

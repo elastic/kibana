@@ -108,6 +108,37 @@ export function ChatMessageText({
     [isSidebar, http?.externalUrl, application]
   );
 
+  const visualizationRenderer = useMemo(
+    () =>
+      createVisualizationRenderer({
+        application,
+        startDependencies,
+        stepsFromCurrentRound,
+        stepsFromPrevRounds,
+      }),
+    [application, startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]
+  );
+
+  const renderAttachmentRenderer = useMemo(
+    () =>
+      createRenderAttachmentRenderer({
+        conversationAttachments,
+        attachmentRefs,
+        conversationId,
+        isSidebar,
+        attachmentsService,
+        isStreaming,
+      }),
+    [
+      conversationAttachments,
+      attachmentRefs,
+      conversationId,
+      isSidebar,
+      attachmentsService,
+      isStreaming,
+    ]
+  );
+
   const { parsingPluginList, processingPluginList } = useMemo(() => {
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
     const defaultProcessingPlugins = getDefaultEuiMarkdownProcessingPlugins();
@@ -187,19 +218,8 @@ export function ChatMessageText({
           </EuiTableRowCell>
         );
       },
-      [visualizationElement.tagName]: createVisualizationRenderer({
-        startDependencies,
-        stepsFromCurrentRound,
-        stepsFromPrevRounds,
-      }),
-      [renderAttachmentElement.tagName]: createRenderAttachmentRenderer({
-        conversationAttachments,
-        attachmentRefs,
-        conversationId,
-        isSidebar,
-        attachmentsService,
-        isStreaming,
-      }),
+      [visualizationElement.tagName]: visualizationRenderer,
+      [renderAttachmentElement.tagName]: renderAttachmentRenderer,
     };
 
     return {
@@ -212,18 +232,7 @@ export function ChatMessageText({
       ],
       processingPluginList: processingPlugins,
     };
-  }, [
-    startDependencies,
-    stepsFromCurrentRound,
-    stepsFromPrevRounds,
-    conversationAttachments,
-    attachmentRefs,
-    conversationId,
-    isSidebar,
-    attachmentsService,
-    isStreaming,
-    handleLinkClick,
-  ]);
+  }, [visualizationRenderer, renderAttachmentRenderer, handleLinkClick]);
 
   return (
     <>
