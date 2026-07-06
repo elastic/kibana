@@ -32,6 +32,20 @@ triggers:
         required: false
         description: "Connector ID for the judge agent."
 
+outputs:
+  - name: candidateCount
+    type: number
+  - name: processedCount
+    type: number
+  - name: remainingCount
+    type: number
+  - name: hasRemaining
+    type: boolean
+  - name: queueEmpty
+    type: boolean
+  - name: noWork
+    type: boolean
+
 consts:
   DISCOVERIES_INDEX: '.significant_events-discoveries'
   EVENTS_INDEX: '.significant_events-events'
@@ -99,27 +113,58 @@ steps:
   # Step 2: Filter to only unassessed slugs (latest doc is discovery or quiet,
   # not handled).
   # -----------------------------------------------------------------------
-  - name: collect_discoveries
+  - name: collect_discovery_candidates
     type: data.set
     with:
       findings: >-
         ${{ steps.get_unassessed_discoveries.output.hits.hits
           | map: '_source'
           | reject: 'kind', 'handled'
+          | default: [] }}
+
+  - name: collect_discoveries
+    type: data.set
+    with:
+      findings: >-
+        ${{ steps.collect_discovery_candidates.output.findings
           | slice: 0, inputs.discoveryBatchMax
           | default: [] }}
+
+  # NOTE: cross-step references chaining a `.size` property accessor (e.g.
+  # `steps.x.output.findings.size`) resolve to undefined once referenced from
+  # the 3rd+ step of the workflow — an engine quirk with the dot-notation size
+  # getter. The `| size` filter does not have this issue, but filter chains
+  # cannot be followed by comparison operators in the same expression, so raw
+  # sizes are computed here and derived stats are computed from those (plain
+  # number) outputs in a separate step below.
+  - name: compute_queue_sizes
+    type: data.set
+    with:
+      candidateCount: '${{ steps.collect_discovery_candidates.output.findings | size | default: 0 }}'
+      processedCount: '${{ steps.collect_discoveries.output.findings | size | default: 0 }}'
+
+  - name: compute_queue_stats
+    type: data.set
+    with:
+      candidateCount: '${{ steps.compute_queue_sizes.output.candidateCount }}'
+      processedCount: '${{ steps.compute_queue_sizes.output.processedCount }}'
+      remainingCount: '${{ steps.compute_queue_sizes.output.candidateCount | minus: steps.compute_queue_sizes.output.processedCount | at_least: 0 }}'
+      hasRemaining: '${{ steps.compute_queue_sizes.output.candidateCount > steps.compute_queue_sizes.output.processedCount }}'
+      queueEmpty: '${{ steps.compute_queue_sizes.output.candidateCount <= steps.compute_queue_sizes.output.processedCount }}'
 
   # -----------------------------------------------------------------------
   # Step 3: Exit early when there is nothing to triage.
   # -----------------------------------------------------------------------
-  - name: exit_no_discoveries
+  - name: output_no_discoveries
     type: workflow.output
-    if: >-
-      ${{ steps.collect_discoveries.output.findings == null
-      or steps.collect_discoveries.output.findings.size == 0 }}
-    status: cancelled
+    if: '${{ steps.compute_queue_sizes.output.processedCount == 0 }}'
     with:
-      reason: 'No unassessed discoveries or quiet docs — nothing to triage'
+      candidateCount: '${{ steps.compute_queue_stats.output.candidateCount }}'
+      processedCount: '${{ steps.compute_queue_stats.output.processedCount }}'
+      remainingCount: '${{ steps.compute_queue_stats.output.remainingCount }}'
+      hasRemaining: '${{ steps.compute_queue_stats.output.hasRemaining }}'
+      queueEmpty: '${{ steps.compute_queue_stats.output.queueEmpty }}'
+      noWork: true
 
   # -----------------------------------------------------------------------
   # Step 4: Judge — evaluate unreviewed discoveries and quiet docs.
@@ -160,15 +205,15 @@ steps:
                   type: integer
                   minimum: 0
                   maximum: 100
-                  description: "Judge's own severity assessment 0–100."
+                  description: "Judge's own severity assessment from 0 to 100."
                 confidence:
                   type: integer
                   minimum: 0
                   maximum: 100
-                  description: 'Confidence in this verdict 0–100.'
+                  description: 'Confidence in this verdict from 0 to 100.'
                 summary:
                   type: string
-                  description: 'Operator notification — always emit for promoted and acknowledged. Lead with service + operator-visible symptom; name the exposed path when dependency_edges has exposed entries; close with the single most time-sensitive on-call action. One to two sentences. For demoted/resolved: omit unless you have a material correction.'
+                  description: 'Operator notification - always emit for promoted and acknowledged. Lead with service + operator-visible symptom; name the exposed path when dependency_edges has exposed entries; close with the single most time-sensitive on-call action. One to two sentences. For demoted/resolved: omit unless you have a material correction.'
                 root_cause:
                   type: string
                   description: 'Corrected probable-cause hypothesis. Omit when nothing contradicts the discovery. Must cite KI name + row_count and keep the causal chain coherent.'
@@ -176,7 +221,7 @@ steps:
                   type: array
                   items:
                     type: string
-                  description: '3 candidate stop-the-bleeding actions ranked by likelihood of stopping user impact. These are operational attempts — not a guaranteed fix sequence. Order from most reversible and most targeted to broader interventions. Each must name the specific service or error code observed in evidences and include the exact operational command (kubectl, helm, systemctl, CLI). No ES|QL or diagnostic queries — investigation is complete. Required for promoted and acknowledged.'
+                  description: '3 candidate stop-the-bleeding actions ranked by likelihood of stopping user impact. These are operational attempts - not a guaranteed fix sequence. Order from most reversible and most targeted to broader interventions. Each must name the specific service or error code observed in evidences and include the exact operational command (kubectl, helm, systemctl, CLI). No ES|QL or diagnostic queries - investigation is complete. Required for promoted and acknowledged.'
                 assessment_note:
                   type: string
                   description: "Adversarial reasoning trace: what was independently verified, what signals confirmed or contradicted the discovery, and how criticality and status were calibrated. Not operator-facing. Required for promoted and acknowledged; brief for demoted and resolved."
@@ -379,3 +424,13 @@ steps:
               recommendations: '${{ foreach.item.recommendations | default: [] }}'
         on-failure:
           continue: true
+
+  - name: output_result
+    type: workflow.output
+    with:
+      candidateCount: '${{ steps.compute_queue_stats.output.candidateCount }}'
+      processedCount: '${{ steps.compute_queue_stats.output.processedCount }}'
+      remainingCount: '${{ steps.compute_queue_stats.output.remainingCount }}'
+      hasRemaining: '${{ steps.compute_queue_stats.output.hasRemaining }}'
+      queueEmpty: '${{ steps.compute_queue_stats.output.queueEmpty }}'
+      noWork: false
