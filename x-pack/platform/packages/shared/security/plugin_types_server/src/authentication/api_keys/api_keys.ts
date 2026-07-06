@@ -41,7 +41,7 @@ export const crossClusterApiKeySchema = schema.object({
   name: schema.string(),
   expiration: schema.maybe(schema.string()),
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  certificate_identity: schema.maybe(schema.string()),
+  certificate_identity: schema.maybe(schema.string({ maxLength: 1024 })),
   access: schema.object(
     {
       search: schema.maybe(
@@ -84,7 +84,7 @@ export const updateCrossClusterApiKeySchema = schema.object({
   expiration: schema.maybe(schema.string()),
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   // `null` explicitly clears a previously assigned certificate identity.
-  certificate_identity: schema.maybe(schema.nullable(schema.string())),
+  certificate_identity: schema.maybe(schema.nullable(schema.string({ maxLength: 1024 }))),
   access: schema.object(
     {
       search: schema.maybe(

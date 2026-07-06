@@ -172,6 +172,26 @@ export default function ({ getService }: FtrProviderContext) {
           expect(createdKey).to.not.be(undefined);
           expect(createdKey.certificate_identity).to.eql(certificateIdentity);
         });
+
+        it(`should reject a cross cluster API Key with a certificate identity exceeding 1024 characters`, async () => {
+          await supertest
+            .post('/internal/security/api_key')
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              type: 'cross_cluster',
+              name: 'test_cc_api_key_with_oversized_certificate_identity',
+              metadata: {},
+              certificate_identity: 'C'.repeat(1025),
+              access: {
+                search: [
+                  {
+                    names: ['logs*'],
+                  },
+                ],
+              },
+            })
+            .expect(400);
+        });
       }
     });
 
