@@ -216,10 +216,14 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
     let mockModel: ScopedModel;
     let mockGraph: { invoke: jest.Mock };
 
+    const mockEsInternalUser = {} as unknown;
     const createHandlerContext = () =>
       ({
         modelProvider: mockModelProvider,
         spaceId: 'space-1',
+        esClient: {
+          asInternalUser: mockEsInternalUser,
+        },
         logger: {
           error: jest.fn(),
         },
@@ -293,6 +297,7 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
         endpointIds: ['endpoint-1', 'endpoint-2'],
         data: inputData,
         spaceId: 'space-1',
+        esClient: mockEsInternalUser,
       });
       expect(mockGraph.invoke).toHaveBeenCalledWith({});
       expect(result).toEqual({ results: mockResults });

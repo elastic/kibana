@@ -58,7 +58,7 @@ This tool creates structured insights for persisting the results of the troubles
     schema: generateInsightSchema,
     handler: async (
       { problemDescription, remediation, endpointIds, data },
-      { spaceId, modelProvider, logger }
+      { spaceId, modelProvider, logger, esClient }
     ) => {
       try {
         await endpointAppContextService
@@ -73,6 +73,7 @@ This tool creates structured insights for persisting the results of the troubles
           endpointIds,
           data,
           spaceId,
+          esClient: esClient.asInternalUser,
         });
         const outState = await graph.invoke({});
 
