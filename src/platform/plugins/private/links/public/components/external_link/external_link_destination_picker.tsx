@@ -80,7 +80,7 @@ export const ExternalLinkDestinationPicker = ({
             setDestinationError(message);
           }
         }}
-        data-test-subj="links--linkEditor--externalLink--input"
+        data-test-subj="links--linkEditor--external_link--input"
       />
     </div>
   );

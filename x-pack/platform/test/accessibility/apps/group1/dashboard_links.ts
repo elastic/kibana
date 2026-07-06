@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const DASHBOARD_NAME = 'Test Links Panel A11y';
 
-  describe('Dashboard links a11y tests', () => {
+  describe.only('Dashboard links a11y tests', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
@@ -60,8 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Add external link flyout', async () => {
-      const radioOption = await testSubjects.find('links--linkEditor--externalLink--radioBtn');
-      const label = await radioOption.findByCssSelector('label[for="externalLink"]');
+      const radioOption = await testSubjects.find('links--linkEditor--external_link--radioBtn');
+      const label = await radioOption.findByCssSelector('label[for="external_link"]');
       await label.click();
       await a11y.testAppSnapshot();
       await dashboardLinks.clickLinkEditorCloseButton();
