@@ -277,6 +277,103 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
+    'holds an episode active across engine recoveries when the last lifecycle action is activate',
+    async ({ apiServices }) => {
+      // End-to-end proof of the DirectorService user-lock contract:
+      //
+      //   1. Engine drives the episode to `active` normally.
+      //   2. A user issues `activate` (we seed the audit row directly to
+      //      keep the test focused on the director; the alert-actions API
+      //      is covered elsewhere).
+      //   3. The engine's recovery signal is emitted by the executor.
+      //   4. The director must NOT flip the episode to `recovering` /
+      //      `inactive` — it emits with `status: 'recovered'` (raw
+      //      engine signal) but forces `episode.status: 'active'`.
+      //
+      // This exercises the cross-datastream `.rule-events + .alert-actions`
+      // aggregate the director runs per tick.
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-user-locked',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'director-user-locked' },
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-user-locked" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+        })
+      );
+
+      // 1. Wait for the initial `active` event so we know the group_hash
+      //    and the episode id we need to reference in the audit row.
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'active',
+      });
+      const [firstActive] = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        episodeStatus: 'active',
+      });
+      const groupHash = firstActive.group_hash;
+      const episodeId = firstActive.episode?.id;
+
+      expect(episodeId).toBeDefined();
+
+      // 2. Seed the `activate` audit row. From this point onward the
+      //    director must treat this group as user-owned.
+      await apiServices.alertingV2.alertActions.seed([
+        {
+          '@timestamp': new Date().toISOString(),
+          last_series_event_timestamp: new Date().toISOString(),
+          actor: 'elastic',
+          action_type: 'activate',
+          rule_id: rule.id,
+          group_hash: groupHash,
+          episode_id: episodeId!,
+          space_id: 'default',
+        },
+      ]);
+
+      // 3. Stop the breach — the executor will emit a recovery event
+      //    for this group on the next tick.
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': 'host-user-locked' } },
+      });
+
+      // 4. Wait for a director-emitted event that pairs the raw
+      //    `status: 'recovered'` signal with a forced `episode.status:
+      //    'active'` — the smoking gun for the user-lock enforcement.
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        status: 'recovered',
+        episodeStatus: 'active',
+      });
+
+      // 5. No event for this group was ever emitted with
+      //    `episode.status` other than `active`. In particular, no
+      //    `recovering` or `inactive` event was written, and the
+      //    episode id stayed the same.
+      const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
+      const groupEvents = events.filter((event) => event.group_hash === groupHash);
+      const offActive = groupEvents.filter((event) => event.episode?.status !== 'active');
+      expect(offActive).toStrictEqual([]);
+
+      const episodeIds = new Set(groupEvents.map((event) => event.episode?.id));
+      expect(episodeIds).toStrictEqual(new Set([episodeId]));
+    }
+  );
+
+  apiTest(
     'uses the basic strategy when state_transition is omitted (no status_count is ever set)',
     async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
