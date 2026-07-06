@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { render, act } from '@testing-library/react';
+import { render, act, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import type { ComposedQuery, RuleQuery } from '../../form/types';
 import { getBreachQuery, getRecoverQuery } from '../../form/utils/query_helpers';
 import { QuerySandboxFlyout, type QuerySandboxFlyoutProps } from './query_sandbox_flyout';
+import type { QueryTab } from './types';
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
@@ -29,7 +31,16 @@ jest.mock('../../form/contexts/rule_form_context', () => ({
     http: {},
     data: { search: { search: jest.fn() } },
     dataViews: {},
+    application: {},
   }),
+}));
+
+const mockUseTabQueryValidation = jest.fn((_params: unknown) => ({
+  errorTabs: [] as QueryTab[],
+  hasErrors: false,
+}));
+jest.mock('./use_tab_query_validation', () => ({
+  useTabQueryValidation: (params: unknown) => mockUseTabQueryValidation(params),
 }));
 
 const mockColumns: never[] = [];
@@ -61,7 +72,12 @@ jest.mock('@kbn/code-editor', () => ({
 
 jest.mock('./compose_discover_tabs', () => ({
   ComposeDiscoverTabs: () => null,
-  TAB_DEFINITIONS: [],
+  QueryTabButton: () => null,
+  TAB_DEFINITIONS: [
+    { id: 'base', label: 'Base query' },
+    { id: 'alert', label: 'Alert query' },
+    { id: 'recovery', label: 'Recovery query' },
+  ],
   visibleTabIds: () => [],
   isAlertTabDisabled: () => false,
 }));
@@ -241,5 +257,53 @@ describe('QuerySandboxFlyout — per-tab query execution', () => {
     expect(mockUseQueryExecution).toHaveBeenCalledWith(
       expect.objectContaining({ query: getBreachQuery(query) })
     );
+  });
+});
+
+describe('QuerySandboxFlyout — Apply gating', () => {
+  beforeEach(() => {
+    mockFieldMap = {};
+    jest.clearAllMocks();
+    mockUseTabQueryValidation.mockReturnValue({ errorTabs: [], hasErrors: false });
+  });
+
+  it('does not render Apply when onApply is not provided', () => {
+    renderSandbox({ onApply: undefined });
+
+    expect(screen.queryByTestId('querySandboxApply')).not.toBeInTheDocument();
+  });
+
+  it('enables Apply when no tab has a validation error', () => {
+    mockUseTabQueryValidation.mockReturnValue({ errorTabs: [], hasErrors: false });
+
+    renderSandbox({ onApply: jest.fn(), tabs: ['base', 'alert'], activeTab: 'alert' });
+
+    expect(screen.getByTestId('querySandboxApply')).not.toBeDisabled();
+  });
+
+  it('disables Apply and names the offending tab when a tab has a validation error', async () => {
+    mockUseTabQueryValidation.mockReturnValue({ errorTabs: ['alert'], hasErrors: true });
+
+    renderSandbox({ onApply: jest.fn(), tabs: ['base', 'alert'], activeTab: 'base' });
+
+    const applyButton = screen.getByTestId('querySandboxApply');
+    expect(applyButton).toBeDisabled();
+
+    await userEvent.hover(applyButton.parentElement ?? applyButton);
+    expect(await screen.findByText('Resolve errors in: Alert query')).toBeInTheDocument();
+  });
+
+  it('disables Apply with a generic message in unified (no-tabs) mode', async () => {
+    mockUseTabQueryValidation.mockReturnValue({ errorTabs: [], hasErrors: true });
+
+    renderSandbox({ onApply: jest.fn(), tabs: undefined });
+
+    const applyButton = screen.getByTestId('querySandboxApply');
+    expect(applyButton).toBeDisabled();
+
+    await userEvent.hover(applyButton.parentElement ?? applyButton);
+    expect(
+      await screen.findByText('Resolve the query error before applying changes.')
+    ).toBeInTheDocument();
   });
 });
