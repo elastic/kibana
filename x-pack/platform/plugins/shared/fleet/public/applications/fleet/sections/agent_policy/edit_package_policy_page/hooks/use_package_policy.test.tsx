@@ -19,9 +19,12 @@ import {
   sendGetAgentlessPolicy,
   sendGetPackageInfoByKey,
   sendUpdateAgentlessPolicy,
+  sendUpdatePackagePolicy,
   sendUpgradePackagePolicyDryRun,
 } from '../../../../../../hooks';
 import { createFleetTestRendererMock } from '../../../../../../mock';
+import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
+import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import { usePackagePolicyWithRelatedData } from './use_package_policy';
 
@@ -58,6 +61,7 @@ jest.mock('../../../../../../hooks/use_request', () => ({
   ...jest.requireActual('../../../../../../hooks/use_request'),
   sendGetAgentlessPolicy: jest.fn(),
   sendUpdateAgentlessPolicy: jest.fn(),
+  sendUpdatePackagePolicy: jest.fn(),
   sendGetOnePackagePolicy: (packagePolicyId: string) => {
     if (packagePolicyId === 'package-policy-1') {
       return {
@@ -802,5 +806,55 @@ describe('usePackagePolicy - agentless', () => {
 
     // The superseded agentless response is discarded — the legacy load still wins.
     expect(result.current.packagePolicy?.name).toBe('nginx-1');
+  });
+});
+
+describe('usePackagePolicy - agentless policies UI kill switch off', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      ...allowedExperimentalValues,
+      enableAgentlessPoliciesUI: false,
+    });
+    jest.mocked(sendUpdatePackagePolicy).mockResolvedValue({
+      data: { item: { id: 'nginx-1' } },
+    } as any);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('ignores the isAgentless hint: reads and saves through the package-policy API', async () => {
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('package-policy-1', { isAgentless: true })
+    );
+    await waitFor(() => expect(result.current.packagePolicy?.name).toBe('nginx-1'));
+
+    // The agentless loader must never fire when the kill switch is off.
+    expect(sendGetAgentlessPolicy).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await result.current.savePackagePolicy();
+    });
+
+    expect(sendUpdatePackagePolicy).toHaveBeenCalledWith('package-policy-1', expect.anything());
+    expect(sendUpdateAgentlessPolicy).not.toHaveBeenCalled();
+  });
+
+  it('ignores the supports_agentless detection: a legacy-loaded agentless policy still saves through the package-policy API', async () => {
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('agentless-detect', {})
+    );
+    await waitFor(() => expect(result.current.packagePolicy?.name).toBe('nginx-1'));
+
+    await act(async () => {
+      await result.current.savePackagePolicy();
+    });
+
+    expect(sendUpdatePackagePolicy).toHaveBeenCalledWith('agentless-detect', expect.anything());
+    expect(sendUpdateAgentlessPolicy).not.toHaveBeenCalled();
   });
 });
