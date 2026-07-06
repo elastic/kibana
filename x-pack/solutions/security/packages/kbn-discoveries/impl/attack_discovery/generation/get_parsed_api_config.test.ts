@@ -121,6 +121,34 @@ describe('getParsedApiConfig', () => {
     });
   });
 
+  describe('when apiConfig is nullish', () => {
+    it('does not throw and returns an empty action_type_id when apiConfig is null', () => {
+      expect(() => getParsedApiConfig(null)).not.toThrow();
+    });
+
+    it('returns an empty action_type_id when apiConfig is null', () => {
+      const result = getParsedApiConfig(null);
+
+      expect(result.action_type_id).toBe('');
+    });
+
+    it('returns an empty connector_id when apiConfig is null', () => {
+      const result = getParsedApiConfig(null);
+
+      expect(result.connector_id).toBe('');
+    });
+
+    it('does not throw and returns an empty action_type_id when apiConfig is undefined', () => {
+      expect(() => getParsedApiConfig(undefined)).not.toThrow();
+    });
+
+    it('returns an empty action_type_id when apiConfig is undefined', () => {
+      const result = getParsedApiConfig(undefined);
+
+      expect(result.action_type_id).toBe('');
+    });
+  });
+
   describe('when action_type_id and actionTypeId are both missing', () => {
     it('falls back to provider for action_type_id', () => {
       const result = getParsedApiConfig({

@@ -13,7 +13,7 @@ import {
   writeAttackDiscoveryEvent,
 } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
 
-import { ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID } from '@kbn/discoveries/impl/attack_discovery/constants';
+import { ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 
 /**
  * Integration tests verifying workflow IDs flow from the internal _generate API

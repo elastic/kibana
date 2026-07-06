@@ -36,6 +36,24 @@ export const isEsqlShape = (output: unknown): output is EsqlShape => {
 };
 
 /**
+ * Serializes a single element to a string:
+ * - strings pass through unchanged
+ * - objects are JSON-stringified
+ * - everything else (numbers, booleans) is converted via String()
+ */
+const serializeElement = (element: unknown): string => {
+  if (typeof element === 'string') {
+    return element;
+  }
+
+  if (typeof element === 'object' && element !== null) {
+    return JSON.stringify(element);
+  }
+
+  return String(element);
+};
+
+/**
  * Converts an ES|QL result (columns + values) to an array of CSV-formatted
  * alert strings, matching the format produced by the legacy alert retrieval
  * workflow (see `getCsvFromData`).
@@ -44,6 +62,7 @@ export const isEsqlShape = (output: unknown): output is EsqlShape => {
  * - Keys are sorted alphabetically
  * - Each line is `fieldName,value1,value2,...`
  * - Multi-value fields have their values joined by commas
+ * - Object values are JSON-stringified (never `"[object Object]"`)
  * - Null / undefined values are omitted
  */
 export const convertEsqlResultToAlerts = ({
@@ -66,7 +85,9 @@ export const convertEsqlResultToAlerts = ({
       const value = i < row.length ? row[i] : null;
 
       if (value !== null && value !== undefined) {
-        data[columnNames[i]] = Array.isArray(value) ? value.map(String) : [String(value)];
+        data[columnNames[i]] = Array.isArray(value)
+          ? value.map(serializeElement)
+          : [serializeElement(value)];
       }
     }
 
@@ -75,24 +96,6 @@ export const convertEsqlResultToAlerts = ({
       .map((key) => `${key},${data[key].join(',')}`)
       .join('\n');
   });
-};
-
-/**
- * Serializes a single element to a string:
- * - strings pass through unchanged
- * - objects are JSON-stringified
- * - everything else (numbers, booleans) is converted via String()
- */
-const serializeElement = (element: unknown): string => {
-  if (typeof element === 'string') {
-    return element;
-  }
-
-  if (typeof element === 'object' && element !== null) {
-    return JSON.stringify(element);
-  }
-
-  return String(element);
 };
 
 /**

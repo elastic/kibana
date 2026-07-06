@@ -171,8 +171,37 @@ describe('getWorkflowExecutionsTracking', () => {
             filter: expect.arrayContaining([
               { term: { 'event.provider': 'securitySolution.attackDiscovery' } },
               { term: { 'kibana.alert.rule.execution.uuid': executionId } },
+              { term: { 'kibana.space_ids': spaceId } },
+              { term: { 'user.name': username } },
               { exists: { field: 'event.reference' } },
             ]),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('scopes the query to the requesting principal via user.name (object-level authz)', async () => {
+    mockSearch.mockResolvedValue({
+      hits: {
+        hits: [],
+        total: { value: 0 },
+      },
+    });
+
+    await getWorkflowExecutionsTracking({
+      esClient,
+      eventLogIndex,
+      executionId,
+      spaceId,
+      username,
+    });
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([{ term: { 'user.name': username } }]),
           }),
         }),
       })
@@ -338,6 +367,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result?.gate).toEqual([{ workflowId: 'workflow-gate', workflowRunId: 'gate-run-id' }]);

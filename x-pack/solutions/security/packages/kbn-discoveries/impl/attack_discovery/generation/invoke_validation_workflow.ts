@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type {
   WorkflowDetailDto,
@@ -24,6 +29,7 @@ import { getDurationNanoseconds } from '../../lib/persistence';
 
 import { AttackDiscoveryError } from '../../lib/errors/attack_discovery_error';
 
+import { deduplicateScheduledDiscoveries } from './deduplicate_scheduled_discoveries';
 import type {
   AlertRetrievalResult,
   WorkflowsManagementApi,
@@ -67,8 +73,19 @@ type ExtractedValidationResult = Omit<
 export interface InvokeValidationParams {
   alertRetrievalResult: AlertRetrievalResult;
   authenticatedUser: AuthenticatedUser;
+  /**
+   * Isomorphic sha256 hasher injected by the scheduled executor for FF-on
+   * scheduled cross-execution de-duplication (this package cannot import the
+   * Node.js `crypto` builtin). Present only on the scheduled path.
+   */
+  computeSha256Hash?: (input: string) => string;
   defaultValidationWorkflowId: string;
   enableFieldRendering: boolean;
+  /**
+   * Trusted in-process Elasticsearch client used for FF-on scheduled
+   * cross-execution de-duplication. Present only on the scheduled path.
+   */
+  esClient?: ElasticsearchClient;
   eventLogger: IEventLogger;
   eventLogIndex: string;
   executionUuid: string;
@@ -76,6 +93,11 @@ export interface InvokeValidationParams {
   generationResult: GenerationWorkflowResult;
   maxWaitMs?: number;
   request: KibanaRequest;
+  /**
+   * Trusted in-process schedule owner (the alerting `rule.id`) used as the alert
+   * hash owner for FF-on scheduled cross-execution de-duplication.
+   */
+  ruleId?: string;
   source?: AttackDiscoverySource;
   spaceId: string;
   withReplacements: boolean;
@@ -456,6 +478,65 @@ const extractValidationResult = ({
 };
 
 /**
+ * FF-on scheduled cross-execution de-duplication (Option B).
+ *
+ * The persist step short-circuits for scheduled rules (it reports the handover
+ * with `duplicates_dropped_count: 0`), so search-based dedup must run here —
+ * where the `validation-succeeded` summary is written — using the trusted
+ * in-process `rule.id`. Otherwise re-running a schedule re-persists attacks that
+ * are already stored, and the reported counts drift from what is actually
+ * persisted. Drops the already-persisted discoveries, then recomputes
+ * `duplicatesDroppedCount` (dropped this run) and `persistedCount` (survivors)
+ * and overrides the `validationSummary` so the event/EBT/History UI are accurate.
+ */
+const deduplicateScheduledResult = async ({
+  alertRetrievalResult,
+  computeSha256Hash,
+  esClient,
+  extractedResult,
+  generationResult,
+  logger,
+  ruleId,
+  spaceId,
+}: {
+  alertRetrievalResult: AlertRetrievalResult;
+  computeSha256Hash: (input: string) => string;
+  esClient: ElasticsearchClient;
+  extractedResult: ExtractedValidationResult;
+  generationResult: GenerationWorkflowResult;
+  logger: Logger;
+  ruleId: string;
+  spaceId: string;
+}): Promise<ExtractedValidationResult> => {
+  const originalDiscoveries = extractedResult.discoveriesToPersist ?? [];
+
+  const discoveriesToPersist = await deduplicateScheduledDiscoveries({
+    computeSha256Hash,
+    connectorId: alertRetrievalResult.apiConfig.connector_id,
+    discoveriesToPersist: originalDiscoveries,
+    esClient,
+    logger,
+    replacements: generationResult.replacements,
+    ruleId,
+    spaceId,
+  });
+
+  const duplicatesDroppedCount = originalDiscoveries.length - discoveriesToPersist.length;
+  const persistedCount = discoveriesToPersist.length;
+
+  return {
+    ...extractedResult,
+    discoveriesToPersist,
+    duplicatesDroppedCount,
+    validationSummary: {
+      ...extractedResult.validationSummary,
+      duplicatesDroppedCount,
+      persistedCount,
+    },
+  };
+};
+
+/**
  * Writes the validation started event to the event log.
  */
 const writeValidationStartedEvent = async ({
@@ -653,8 +734,10 @@ const writeValidationFailedEvent = async ({
 export const invokeValidationWorkflow = async ({
   alertRetrievalResult,
   authenticatedUser,
+  computeSha256Hash,
   defaultValidationWorkflowId,
   enableFieldRendering,
+  esClient,
   eventLogger,
   eventLogIndex,
   executionUuid,
@@ -662,6 +745,7 @@ export const invokeValidationWorkflow = async ({
   generationResult,
   maxWaitMs,
   request,
+  ruleId,
   source,
   spaceId,
   withReplacements,
@@ -783,10 +867,28 @@ export const invokeValidationWorkflow = async ({
 
     // Step 6: Extract results
     const extractedResult = extractValidationResult({ generatedCount, execution, logger });
+
+    // Step 6b: FF-on scheduled cross-execution de-duplication. Gated strictly to
+    // scheduled runs with the trusted in-process rule.id + esClient in scope;
+    // ad-hoc / skill / run-step paths are untouched.
+    const finalResult =
+      source === 'scheduled' && computeSha256Hash != null && esClient != null && ruleId != null
+        ? await deduplicateScheduledResult({
+            alertRetrievalResult,
+            computeSha256Hash,
+            esClient,
+            extractedResult,
+            generationResult,
+            logger,
+            ruleId,
+            spaceId,
+          })
+        : extractedResult;
+
     const endTime = new Date();
 
     logger.info(
-      `Validation workflow completed: ${extractedResult.validationSummary.persistedCount} discoveries stored`
+      `Validation workflow completed: ${finalResult.validationSummary.persistedCount} discoveries stored`
     );
 
     // Step 7: Write success event
@@ -801,19 +903,19 @@ export const invokeValidationWorkflow = async ({
       source,
       spaceId,
       startTime,
-      validationSummary: extractedResult.validationSummary,
+      validationSummary: finalResult.validationSummary,
       workflowId,
       workflowExecutions,
       workflowRunId,
     });
 
     return {
-      discoveriesToPersist: extractedResult.discoveriesToPersist,
-      duplicatesDroppedCount: extractedResult.duplicatesDroppedCount,
-      generatedCount: extractedResult.generatedCount,
-      success: extractedResult.success,
-      validatedDiscoveries: extractedResult.validatedDiscoveries,
-      validationSummary: extractedResult.validationSummary,
+      discoveriesToPersist: finalResult.discoveriesToPersist,
+      duplicatesDroppedCount: finalResult.duplicatesDroppedCount,
+      generatedCount: finalResult.generatedCount,
+      success: finalResult.success,
+      validatedDiscoveries: finalResult.validatedDiscoveries,
+      validationSummary: finalResult.validationSummary,
       workflowExecution,
       workflowId,
       workflowRunId,

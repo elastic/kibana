@@ -478,6 +478,28 @@ describe('invokeAlertRetrievalWorkflow', () => {
         'workflowName'
       );
     });
+
+    it('extracts errorCategory from the AttackDiscoveryError into the failed event', async () => {
+      await expect(invokeAlertRetrievalWorkflow(defaultProps)).rejects.toThrow();
+
+      const failedCall = mockWriteAttackDiscoveryEvent.mock.calls.find(
+        (call: unknown[]) =>
+          (call[0] as Record<string, unknown>)?.action === 'alert-retrieval-failed'
+      );
+
+      expect(failedCall![0].errorCategory).toBe('workflow_deleted');
+    });
+
+    it('extracts failedWorkflowId from the AttackDiscoveryError into the failed event', async () => {
+      await expect(invokeAlertRetrievalWorkflow(defaultProps)).rejects.toThrow();
+
+      const failedCall = mockWriteAttackDiscoveryEvent.mock.calls.find(
+        (call: unknown[]) =>
+          (call[0] as Record<string, unknown>)?.action === 'alert-retrieval-failed'
+      );
+
+      expect(failedCall![0].failedWorkflowId).toBe(workflowId);
+    });
   });
 
   describe('when workflow has no definition', () => {

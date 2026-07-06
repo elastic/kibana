@@ -135,6 +135,25 @@ describe('extractAlertRetrievalResult', () => {
     expect(result.apiConfig).toEqual(apiConfig);
   });
 
+  it('uses provided apiConfig when api_config is an array', () => {
+    const execution = {
+      ...baseExecution,
+      stepExecutions: [
+        {
+          ...baseExecution.stepExecutions[0],
+          output: {
+            ...(baseExecution.stepExecutions[0] as { output: Record<string, unknown> }).output,
+            api_config: [{ connector_id: 'array-should-not-be-used' }],
+          },
+        },
+      ],
+    } as unknown as WorkflowExecutionDto;
+
+    const result = extractAlertRetrievalResult({ apiConfig, execution });
+
+    expect(result.apiConfig).toEqual(apiConfig);
+  });
+
   it('defaults missing output fields', () => {
     const execution = {
       ...baseExecution,

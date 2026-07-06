@@ -14,6 +14,7 @@ import type {
 } from '@kbn/workflows';
 
 import type { AttackDiscoverySource } from '../persistence/event_logging';
+import { AttackDiscoveryError } from '../../lib/errors/attack_discovery_error';
 import type {
   ParsedApiConfig,
   WorkflowExecutionTracking,
@@ -271,6 +272,12 @@ export const invokeAlertRetrievalWorkflow = async ({
     const endTime = new Date();
     const errorMessage = error instanceof Error ? error.message : String(error);
 
+    // Extract structured diagnostics from AttackDiscoveryError (parity with the
+    // custom alert retrieval and orchestration catch blocks) so the failed event
+    // carries the error category and the workflow that actually failed.
+    const errorCategory = error instanceof AttackDiscoveryError ? error.errorCategory : undefined;
+    const failedWorkflowId = error instanceof AttackDiscoveryError ? error.workflowId : undefined;
+
     logger.error(`Alert retrieval workflow failed: ${errorMessage}`);
 
     const workflowExecution: WorkflowExecutionTracking = {
@@ -290,10 +297,12 @@ export const invokeAlertRetrievalWorkflow = async ({
       authenticatedUser,
       connectorId: apiConfig.connector_id,
       endTime,
+      errorCategory,
       errorMessage,
       eventLogger,
       eventLogIndex,
       executionUuid,
+      failedWorkflowId,
       logger,
       source,
       spaceId,

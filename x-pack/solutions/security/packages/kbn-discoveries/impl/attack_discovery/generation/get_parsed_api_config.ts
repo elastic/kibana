@@ -22,7 +22,7 @@ interface SnakeCaseApiConfig {
 }
 
 export const getParsedApiConfig = (apiConfig: unknown): ParsedApiConfig => {
-  const config = apiConfig as CamelCaseApiConfig & SnakeCaseApiConfig;
+  const config = (apiConfig ?? {}) as CamelCaseApiConfig & SnakeCaseApiConfig;
 
   return {
     action_type_id: config.action_type_id ?? config.actionTypeId ?? config.provider ?? '',

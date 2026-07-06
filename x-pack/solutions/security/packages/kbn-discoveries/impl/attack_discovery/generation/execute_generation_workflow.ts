@@ -36,6 +36,7 @@ import {
 } from '../../lib/telemetry/report_workflow_telemetry';
 import type { MisconfigurationType } from '../../lib/telemetry/event_based_telemetry';
 import { getSpaceId } from '../../lib/helpers/get_space_id';
+import { isWorkflowsEnabled } from '../../lib/helpers/is_workflows_enabled';
 import { AttackDiscoveryError } from '../../lib/errors/attack_discovery_error';
 import { assertAttackDiscoveryType } from './assert_attack_discovery_type';
 import { assertAuthorizedToExecuteWorkflows } from './assert_authorized_to_execute_workflows';
@@ -488,6 +489,7 @@ export async function executeGenerationWorkflow({
   apiConfig,
   authz,
   checkIntegrity,
+  computeSha256Hash,
   end,
   esClient: preAuthenticatedEsClient,
   executionUuid,
@@ -527,6 +529,14 @@ export async function executeGenerationWorkflow({
     const startServices = await getStartServices();
     coreStart = startServices.coreStart;
     const { pluginsStart } = startServices;
+
+    // Universal kill-switch backstop for every AD 2.0 generation surface (ad hoc,
+    // scheduled, agent-builder run tool, and workflow run-step). When the feature
+    // flag is OFF no real work is performed: this throws before authorization,
+    // anonymization, alert retrieval, LLM generation, and event-log writes.
+    if (!(await isWorkflowsEnabled(coreStart.featureFlags))) {
+      throw new Error('Attack Discovery workflows are not enabled');
+    }
 
     const { spaces: spacesPlugin } = pluginsStart as { spaces?: SpacesPluginStart };
 
@@ -691,8 +701,10 @@ export async function executeGenerationWorkflow({
       apiConfig: parsedApiConfig,
       authenticatedUser,
       basePath,
+      computeSha256Hash,
       defaultWorkflowIds: verifiedWorkflowIds,
       end,
+      esClient,
       eventLogger,
       eventLogIndex,
       executionUuid,

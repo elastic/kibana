@@ -211,7 +211,7 @@ describe('invokeCustomAlertRetrievalWorkflows', () => {
     api.getWorkflowExecution.mockResolvedValue({
       id: 'run-1',
       status: 'completed',
-      stepExecutions: [],
+      stepExecutions: [{ output: {}, stepType: 'custom.retrieval' }],
     } as never);
 
     const anonymizationFields = [{ allowed: true, anonymized: true, field: 'host.name', id: '1' }];
@@ -267,7 +267,7 @@ describe('invokeCustomAlertRetrievalWorkflows', () => {
     api.getWorkflowExecution.mockResolvedValue({
       id: 'run-1',
       status: 'completed',
-      stepExecutions: [],
+      stepExecutions: [{ output: {}, stepType: 'custom.retrieval' }],
     } as never);
 
     const anonymizationFields = [
@@ -312,7 +312,7 @@ describe('invokeCustomAlertRetrievalWorkflows', () => {
     api.getWorkflowExecution.mockResolvedValue({
       id: 'run-1',
       status: 'completed',
-      stepExecutions: [],
+      stepExecutions: [{ output: {}, stepType: 'custom.retrieval' }],
     } as never);
 
     await invokeCustomAlertRetrievalWorkflows({
@@ -356,7 +356,7 @@ describe('invokeCustomAlertRetrievalWorkflows', () => {
     api.getWorkflowExecution.mockResolvedValue({
       id: 'run-1',
       status: 'completed',
-      stepExecutions: [],
+      stepExecutions: [{ output: {}, stepType: 'custom.retrieval' }],
     } as never);
 
     await invokeCustomAlertRetrievalWorkflows({
@@ -408,7 +408,7 @@ describe('invokeCustomAlertRetrievalWorkflows', () => {
       return {
         id: executionId,
         status: 'completed',
-        stepExecutions: [],
+        stepExecutions: [{ output: {}, stepType: 'custom.retrieval' }],
       } as never;
     });
 
@@ -552,5 +552,78 @@ describe('invokeCustomAlertRetrievalWorkflows', () => {
 
     expect(inputs).not.toHaveProperty('start');
     expect(inputs).not.toHaveProperty('end');
+  });
+
+  describe('isReady polling for step metadata (workflow-engine persistence race)', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const emptyCompletedExecution = {
+      id: 'run-1',
+      status: 'completed',
+      stepExecutions: [],
+    } as never;
+
+    const populatedCompletedExecution = {
+      id: 'run-1',
+      status: 'completed',
+      stepExecutions: [
+        {
+          output: {
+            columns: [{ name: '_id', type: 'keyword' }],
+            values: [['alert-1'], ['alert-2']],
+          },
+          stepType: 'elasticsearch.esql.query',
+        },
+      ],
+    } as never;
+
+    it('waits for step metadata before extracting results (avoids silent ES|QL alert loss)', async () => {
+      const api = createMockWorkflowsApi();
+
+      api.getWorkflow.mockResolvedValue({
+        definition: { steps: [] },
+        enabled: true,
+        id: 'workflow-1',
+        name: 'Custom Workflow',
+        valid: true,
+        yaml: 'name: test',
+      } as never);
+
+      api.runWorkflow.mockResolvedValue('run-1');
+
+      // The execution reaches a terminal status before its step-execution documents
+      // are visible (fast ES|QL workflows). isReady must re-poll until they appear.
+      api.getWorkflowExecution
+        .mockResolvedValueOnce(emptyCompletedExecution)
+        .mockResolvedValueOnce(emptyCompletedExecution)
+        .mockResolvedValue(populatedCompletedExecution);
+
+      const promise = invokeCustomAlertRetrievalWorkflows({
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        anonymizationFields: [],
+        apiConfig: mockApiConfig,
+        authenticatedUser: mockAuthenticatedUser,
+        eventLogger: mockEventLogger,
+        eventLogIndex: mockEventLogIndex,
+        executionUuid: mockExecutionUuid,
+        logger: mockLogger,
+        request: mockRequest,
+        spaceId: 'default',
+        workflowIds: ['workflow-1'],
+        workflowsManagementApi: api,
+      });
+
+      await jest.advanceTimersByTimeAsync(500);
+
+      const result = await promise;
+
+      expect(result[0].alertsContextCount).toBe(2);
+    });
   });
 });

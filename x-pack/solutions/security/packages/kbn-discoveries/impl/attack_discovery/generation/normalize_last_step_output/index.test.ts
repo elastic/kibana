@@ -186,6 +186,32 @@ describe('convertEsqlResultToAlerts', () => {
 
     expect(result).toEqual([]);
   });
+
+  it('JSON-stringifies object values instead of producing "[object Object]"', () => {
+    const result = convertEsqlResultToAlerts({
+      columns: [
+        { name: '_id', type: 'keyword' },
+        { name: 'host', type: 'object' },
+      ],
+      values: [['alert-1', { name: 'host-a', os: 'windows' }]],
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toBe(['_id,alert-1', 'host,{"name":"host-a","os":"windows"}'].join('\n'));
+  });
+
+  it('JSON-stringifies object elements within multi-value (array) fields', () => {
+    const result = convertEsqlResultToAlerts({
+      columns: [
+        { name: '_id', type: 'keyword' },
+        { name: 'related', type: 'object' },
+      ],
+      values: [['alert-1', [{ ip: '1.1.1.1' }, { ip: '2.2.2.2' }]]],
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toBe(['_id,alert-1', 'related,{"ip":"1.1.1.1"},{"ip":"2.2.2.2"}'].join('\n'));
+  });
 });
 
 describe('normalizeLastStepOutput', () => {

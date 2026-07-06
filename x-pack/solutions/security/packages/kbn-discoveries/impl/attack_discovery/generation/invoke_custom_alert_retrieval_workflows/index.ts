@@ -206,9 +206,15 @@ const invokeSingleCustomWorkflow = async ({
       workflowRunId,
     });
 
-    // Step 5: Poll for completion
+    // Step 5: Poll for completion.
+    // `isReady` guards against the workflow-engine persistence race: a fast custom
+    // workflow (e.g. ES|QL) can reach a terminal status before its step-execution
+    // documents are visible, which would otherwise yield an empty `stepExecutions`
+    // array and silently drop the retrieved alerts. Custom workflows have arbitrary
+    // step types, so readiness is "at least one step executed".
     const execution = await pollForWorkflowCompletion({
       executionId: workflowRunId,
+      isReady: (exec) => exec.stepExecutions.length > 0,
       logger,
       spaceId,
       workflowsManagementApi,

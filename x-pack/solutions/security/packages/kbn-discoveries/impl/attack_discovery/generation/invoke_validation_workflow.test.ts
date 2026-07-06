@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { ExecutionStatus, type WorkflowDetailDto, type WorkflowExecutionDto } from '@kbn/workflows';
 
@@ -17,6 +22,13 @@ import type {
 } from './invoke_alert_retrieval_workflow';
 import type { GenerationWorkflowResult } from './invoke_generation_workflow';
 import { invokeValidationWorkflow } from './invoke_validation_workflow';
+
+const mockDeduplicateScheduledDiscoveries = jest.fn();
+
+jest.mock('./deduplicate_scheduled_discoveries', () => ({
+  deduplicateScheduledDiscoveries: (...args: unknown[]) =>
+    mockDeduplicateScheduledDiscoveries(...args),
+}));
 
 const mockWriteAttackDiscoveryEvent = jest.fn();
 
@@ -1257,23 +1269,31 @@ describe('invokeValidationWorkflow', () => {
       status: ExecutionStatus.PENDING,
     };
 
-    it('throws timeout error when max wait time is exceeded', async () => {
-      jest.useRealTimers();
+    beforeEach(() => {
+      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
+      // The execution never reaches a terminal status, so the poll must give up
+      // once the max wait time is exceeded.
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        mockPendingExecution
+      );
+    });
 
-      const timeoutApi: WorkflowsManagementApi = {
-        getWorkflow: jest.fn().mockResolvedValue(mockWorkflow),
-        getWorkflowExecution: jest.fn().mockResolvedValue(mockPendingExecution),
-        runWorkflow: jest.fn().mockResolvedValue('workflow-run-id'),
-        scheduleWorkflow: jest.fn().mockResolvedValue('workflow-run-id'),
-      };
+    it('throws a timeout error when the max wait time is exceeded', async () => {
+      await expect(invokeValidationWorkflow({ ...defaultProps, maxWaitMs: 0 })).rejects.toThrow(
+        'Workflow timed out after 0ms (execution: workflow-run-id)'
+      );
+    });
 
-      // Verify the API would return non-terminal status
-      const execution = await timeoutApi.getWorkflowExecution('test', 'default');
+    it('writes a validation-failed event when the poll times out', async () => {
+      await expect(invokeValidationWorkflow({ ...defaultProps, maxWaitMs: 0 })).rejects.toThrow();
 
-      expect(execution?.status).toBe('pending');
-
-      // Restore fake timers
-      jest.useFakeTimers();
+      expect(mockWriteAttackDiscoveryEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'validation-failed',
+          outcome: 'failure',
+        })
+      );
     });
   });
 
@@ -2116,6 +2136,141 @@ describe('invokeValidationWorkflow', () => {
       });
 
       expect(lazyCall).toBeDefined();
+    });
+  });
+
+  describe('FF-on scheduled cross-execution de-duplication', () => {
+    const mockEsClient = {} as unknown as ElasticsearchClient;
+    const mockComputeSha256Hash = (input: string): string => `sha256(${input})`;
+
+    const handover = [
+      { alert_ids: ['a1'], title: 'H1' },
+      { alert_ids: ['a2'], title: 'H2' },
+      { alert_ids: ['a3'], title: 'H3' },
+    ];
+
+    // Scheduled: ad-hoc persistence is skipped (persisted_discoveries empty), the
+    // persist step reports the handover with duplicates_dropped_count 0.
+    const mockScheduledExecution: WorkflowExecutionDto = {
+      ...mockCompletedExecution,
+      stepExecutions: [
+        {
+          ...mockCompletedExecution.stepExecutions[0],
+          output: {
+            discoveries_to_persist: handover,
+            duplicates_dropped_count: 0,
+            persisted_discoveries: [],
+          },
+        },
+      ],
+    };
+
+    const scheduledProps = {
+      ...defaultProps,
+      computeSha256Hash: mockComputeSha256Hash,
+      esClient: mockEsClient,
+      ruleId: 'rule-123',
+      source: 'scheduled' as const,
+    };
+
+    beforeEach(() => {
+      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        mockScheduledExecution
+      );
+      // Default: drop the two known duplicates, keep one survivor.
+      mockDeduplicateScheduledDiscoveries.mockResolvedValue([handover[0]]);
+    });
+
+    it('calls deduplicateScheduledDiscoveries with the trusted owner and handover', async () => {
+      await invokeValidationWorkflow(scheduledProps);
+
+      expect(mockDeduplicateScheduledDiscoveries).toHaveBeenCalledWith({
+        computeSha256Hash: mockComputeSha256Hash,
+        connectorId: 'test-connector-id',
+        discoveriesToPersist: handover,
+        esClient: mockEsClient,
+        logger: mockLogger,
+        replacements: { 'user-1': 'REDACTED_USER_1' },
+        ruleId: 'rule-123',
+        spaceId: 'default',
+      });
+    });
+
+    it('returns the reduced discoveriesToPersist', async () => {
+      const result = await invokeValidationWorkflow(scheduledProps);
+
+      expect(result.discoveriesToPersist).toEqual([handover[0]]);
+    });
+
+    it('recomputes persistedCount as the number of survivors', async () => {
+      const result = await invokeValidationWorkflow(scheduledProps);
+
+      expect(result.validationSummary.persistedCount).toBe(1);
+    });
+
+    it('recomputes duplicatesDroppedCount as the number dropped this run', async () => {
+      const result = await invokeValidationWorkflow(scheduledProps);
+
+      expect(result.validationSummary.duplicatesDroppedCount).toBe(2);
+    });
+
+    it('writes the accurate persistedCount as newAlerts in the succeeded event', async () => {
+      await invokeValidationWorkflow(scheduledProps);
+
+      expect(mockWriteAttackDiscoveryEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'validation-succeeded',
+          newAlerts: 1,
+          validationSummary: expect.objectContaining({
+            duplicatesDroppedCount: 2,
+            persistedCount: 1,
+          }),
+        })
+      );
+    });
+
+    it('does not de-duplicate for non-scheduled sources', async () => {
+      await invokeValidationWorkflow({ ...scheduledProps, source: 'interactive' });
+
+      expect(mockDeduplicateScheduledDiscoveries).not.toHaveBeenCalled();
+    });
+
+    it('does not de-duplicate when esClient is absent', async () => {
+      await invokeValidationWorkflow({ ...scheduledProps, esClient: undefined });
+
+      expect(mockDeduplicateScheduledDiscoveries).not.toHaveBeenCalled();
+    });
+
+    it('does not de-duplicate when ruleId is absent', async () => {
+      await invokeValidationWorkflow({ ...scheduledProps, ruleId: undefined });
+
+      expect(mockDeduplicateScheduledDiscoveries).not.toHaveBeenCalled();
+    });
+
+    it('does not de-duplicate when computeSha256Hash is absent', async () => {
+      await invokeValidationWorkflow({ ...scheduledProps, computeSha256Hash: undefined });
+
+      expect(mockDeduplicateScheduledDiscoveries).not.toHaveBeenCalled();
+    });
+
+    it('reports the un-reduced handover when the source is not scheduled', async () => {
+      const result = await invokeValidationWorkflow({ ...scheduledProps, source: 'interactive' });
+
+      expect(result.discoveriesToPersist).toEqual(handover);
+      expect(result.validationSummary.persistedCount).toBe(3);
+    });
+
+    it('does not corrupt counts when the best-effort helper falls back to no dedup', async () => {
+      // On an ES failure the helper returns the original handover unchanged.
+      mockDeduplicateScheduledDiscoveries.mockResolvedValue(handover);
+
+      const result = await invokeValidationWorkflow(scheduledProps);
+
+      expect(result.discoveriesToPersist).toEqual(handover);
+      expect(result.validationSummary.duplicatesDroppedCount).toBe(0);
+      expect(result.validationSummary.persistedCount).toBe(3);
     });
   });
 });

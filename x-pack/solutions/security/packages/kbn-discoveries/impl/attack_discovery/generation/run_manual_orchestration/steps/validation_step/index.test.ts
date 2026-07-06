@@ -151,6 +151,28 @@ describe('runValidationStep', () => {
     );
   });
 
+  it('forwards esClient and the trusted ruleId (from sourceMetadata) to invokeValidationWorkflow', async () => {
+    const esClient = {} as never;
+
+    await runValidationStep({
+      ...baseParams,
+      esClient,
+      sourceMetadata: { actionExecutionUuid: 'a', ruleId: 'rule-123', ruleName: 'r' },
+    });
+
+    expect(mockInvokeValidationWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ esClient, ruleId: 'rule-123' })
+    );
+  });
+
+  it('forwards an undefined ruleId when sourceMetadata is absent', async () => {
+    await runValidationStep(baseParams);
+
+    expect(mockInvokeValidationWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ ruleId: undefined })
+    );
+  });
+
   it('re-throws non-Error rejection reasons', async () => {
     mockInvokeValidationWorkflow.mockRejectedValue('string-error');
 

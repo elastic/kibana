@@ -26,7 +26,7 @@ Attack Discovery supports two sources of alerts:
 
 | Source | Extractor | Output |
 |--------|-----------|--------|
-| **Legacy** (`attack-discovery.defaultAlertRetrieval` step) | `extractAlertRetrievalResult` | Anonymized alerts with replacements |
+| **Legacy** (`security.attack-discovery.defaultAlertRetrieval` step) | `extractAlertRetrievalResult` | Anonymized alerts with replacements |
 | **Custom** (any user-authored workflow) | `extractCustomWorkflowResult` | Raw (non-anonymized) alert strings |
 
 Custom workflows give users full control over _which_ alerts are retrieved and _how_ they are formatted. The extraction system must handle arbitrary workflow shapes because the workflow author decides what steps to include and what the final step produces.
@@ -350,7 +350,7 @@ A workflow whose final step produces a single summary object.
 
 ### Legacy alerts (anonymized)
 
-Produced by `extractAlertRetrievalResult` from the `attack-discovery.defaultAlertRetrieval` step. These are CSV-formatted strings where field values have been replaced with anonymized tokens. A `replacements` map allows de-anonymization later.
+Produced by `extractAlertRetrievalResult` from the `security.attack-discovery.defaultAlertRetrieval` step. These are CSV-formatted strings where field values have been replaced with anonymized tokens. A `replacements` map allows de-anonymization later.
 
 ```
 _id,abc123-anon-token

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 
 import { logHealthCheck } from '../../../../../lib/log_health_check';
@@ -18,7 +23,7 @@ import {
   invokeValidationWorkflow,
   type ValidationResult,
 } from '../../../invoke_validation_workflow';
-import type { AttackDiscoverySource } from '../../../../persistence/event_logging';
+import type { AttackDiscoverySource, SourceMetadata } from '../../../../persistence/event_logging';
 import type { WorkflowConfig } from '../../../types';
 
 export interface ManualOrchestrationOutcome {
@@ -31,7 +36,17 @@ export interface ManualOrchestrationOutcome {
 export interface ValidationStepParams {
   alertRetrievalResult: AlertRetrievalResult;
   authenticatedUser: AuthenticatedUser;
+  /**
+   * Isomorphic sha256 hasher injected by the scheduled executor for FF-on
+   * scheduled cross-execution de-duplication. Present only on the scheduled path.
+   */
+  computeSha256Hash?: (input: string) => string;
   defaultValidationWorkflowId: string;
+  /**
+   * Trusted in-process Elasticsearch client, threaded down for FF-on scheduled
+   * cross-execution de-duplication. Present only on the scheduled path.
+   */
+  esClient?: ElasticsearchClient;
   eventLogger: IEventLogger;
   eventLogIndex: string;
   executionUuid: string;
@@ -40,6 +55,11 @@ export interface ValidationStepParams {
   maxWaitMs?: number;
   request: KibanaRequest;
   source?: AttackDiscoverySource;
+  /**
+   * Source metadata carrying the trusted in-process `ruleId` (schedule owner),
+   * used as the alert hash owner for FF-on scheduled de-duplication.
+   */
+  sourceMetadata?: SourceMetadata;
   spaceId: string;
   workflowConfig: WorkflowConfig;
   workflowsManagementApi: WorkflowsManagementApi;
@@ -48,7 +68,9 @@ export interface ValidationStepParams {
 export const runValidationStep = async ({
   alertRetrievalResult,
   authenticatedUser,
+  computeSha256Hash,
   defaultValidationWorkflowId,
+  esClient,
   eventLogger,
   eventLogIndex,
   executionUuid,
@@ -57,6 +79,7 @@ export const runValidationStep = async ({
   maxWaitMs,
   request,
   source,
+  sourceMetadata,
   spaceId,
   workflowConfig,
   workflowsManagementApi,
@@ -71,8 +94,10 @@ export const runValidationStep = async ({
     const validationResult = await invokeValidationWorkflow({
       alertRetrievalResult,
       authenticatedUser,
+      computeSha256Hash,
       defaultValidationWorkflowId,
       enableFieldRendering: true,
+      esClient,
       eventLogger,
       eventLogIndex,
       executionUuid,
@@ -80,6 +105,7 @@ export const runValidationStep = async ({
       generationResult,
       maxWaitMs,
       request,
+      ruleId: sourceMetadata?.ruleId,
       source,
       spaceId,
       withReplacements: true,
