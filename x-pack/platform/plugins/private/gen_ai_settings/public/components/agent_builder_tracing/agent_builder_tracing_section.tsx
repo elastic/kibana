@@ -8,6 +8,9 @@
 import React from 'react';
 import {
   EuiAccordion,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -30,6 +33,7 @@ import {
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
 import { useTracingEnabledState } from './use_tracing_enabled_state';
+import { useDashboardStatus } from './use_dashboard_status';
 
 export const AgentBuilderTracingSection: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -43,12 +47,24 @@ export const AgentBuilderTracingSection: React.FC = () => {
   const { tracingEnabledField, tracingEnabled, handleTracingEnabledChange } =
     useTracingEnabledState();
 
+  const {
+    isInstalled,
+    dashboardId,
+    isLoading: isDashboardLoading,
+    isInstalling,
+    installDashboard,
+  } = useDashboardStatus();
+
   if (!tracingEnabledField) {
     return null;
   }
 
   const rolesUrl = application.getUrlForApp('management', {
     path: '/security/roles',
+  });
+
+  const dashboardUrl = application.getUrlForApp('dashboards', {
+    path: `#/view/${dashboardId}`,
   });
 
   return (
@@ -221,6 +237,69 @@ export const AgentBuilderTracingSection: React.FC = () => {
                       />
                     )}
                   </EuiAccordion>
+                </EuiPanel>
+                <EuiSpacer size="l" />
+                <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="spaceBetween"
+                    responsive={false}
+                  >
+                    <EuiFlexItem>
+                      <EuiTitle size="xs">
+                        <h4>
+                          <FormattedMessage
+                            id="xpack.genAiSettings.agentBuilderTracing.dashboardTitle"
+                            defaultMessage="Traces dashboard"
+                          />
+                        </h4>
+                      </EuiTitle>
+                      <EuiSpacer size="xs" />
+                      <EuiText size="s" color="subdued">
+                        <p>
+                          {isInstalled ? (
+                            <FormattedMessage
+                              id="xpack.genAiSettings.agentBuilderTracing.dashboardDescriptionInstalled"
+                              defaultMessage="View collected traces in the prebuilt Agent Builder dashboard."
+                            />
+                          ) : (
+                            <FormattedMessage
+                              id="xpack.genAiSettings.agentBuilderTracing.dashboardDescriptionNotInstalled"
+                              defaultMessage="Install the prebuilt dashboard to start viewing collected traces."
+                            />
+                          )}
+                        </p>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {isInstalled ? (
+                        <EuiButton
+                          href={dashboardUrl}
+                          iconType="popout"
+                          iconSide="right"
+                          data-test-subj="agentBuilderTracingOpenDashboard"
+                        >
+                          <FormattedMessage
+                            id="xpack.genAiSettings.agentBuilderTracing.openDashboardButton"
+                            defaultMessage="Open dashboard"
+                          />
+                        </EuiButton>
+                      ) : (
+                        <EuiButton
+                          onClick={() => installDashboard()}
+                          iconType="download"
+                          isLoading={isInstalling}
+                          isDisabled={isDashboardLoading}
+                          data-test-subj="agentBuilderTracingInstallDashboard"
+                        >
+                          <FormattedMessage
+                            id="xpack.genAiSettings.agentBuilderTracing.installDashboardButton"
+                            defaultMessage="Install dashboard"
+                          />
+                        </EuiButton>
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiPanel>
               </>
             )}
