@@ -8,6 +8,7 @@
  */
 
 import type { AnalyticsServiceStart } from '@kbn/core/server';
+import { QuerySource } from '@kbn/esql-types';
 import {
   ESQLEditorTelemetryService,
   AiReviewAction,
@@ -24,6 +25,7 @@ import {
   ESQL_COMMENT_TO_ESQL_REVIEWED,
   ESQL_FIX_WITH_AI_SUBMITTED,
   ESQL_FIX_WITH_AI_REVIEWED,
+  ESQL_QUERY_SUBMITTED,
 } from './events_registration';
 import { reportEsqlError } from '../report_error';
 
@@ -45,6 +47,65 @@ describe('ESQLEditorTelemetryService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('trackQuerySubmitted', () => {
+    it('tracks query submission with source command and data source category', () => {
+      telemetryService.trackQuerySubmitted({
+        source: QuerySource.MANUAL,
+        query: 'FROM logs-* | LIMIT 10',
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+        ESQL_QUERY_SUBMITTED,
+        expect.objectContaining({
+          query_source: QuerySource.MANUAL,
+          query_length: expect.any(String),
+          query_lines: '1',
+          source_command: 'FROM',
+          data_source_category: 'logs',
+          anti_limit_before_aggregate: false,
+          anti_missing_sort_before_limit: false,
+        })
+      );
+    });
+
+    it('tracks registered non-index source commands', () => {
+      telemetryService.trackQuerySubmitted({
+        source: QuerySource.MANUAL,
+        query: 'PROMQL index=metrics-* step=1m start=?_tstart end=?_tend (avg(cpu_usage))',
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+        ESQL_QUERY_SUBMITTED,
+        expect.objectContaining({
+          source_command: 'PROMQL',
+          data_source_category: 'metrics',
+        })
+      );
+    });
+
+    it('tracks invalid query submissions with unknown source metadata', () => {
+      const invalidQuery = 'FROM logs-* | ???';
+
+      telemetryService.trackQuerySubmitted({
+        source: QuerySource.MANUAL,
+        query: invalidQuery,
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+        ESQL_QUERY_SUBMITTED,
+        expect.objectContaining({
+          query_source: QuerySource.MANUAL,
+          query_length: expect.any(String),
+          query_lines: '1',
+          source_command: 'unknown',
+          data_source_category: 'unknown',
+          anti_limit_before_aggregate: false,
+          anti_missing_sort_before_limit: false,
+        })
+      );
+    });
   });
 
   describe('trackLookupJoinHoverActionShown', () => {

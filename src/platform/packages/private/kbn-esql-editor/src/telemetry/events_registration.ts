@@ -111,6 +111,20 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
         type: 'keyword',
         _meta: { description: 'The number of lines in the query.' },
       },
+      source_command: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The leading source command of the query. Possible values are: FROM|TS|ROW|SHOW|PROMQL|unknown.',
+        },
+      },
+      data_source_category: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The data source category derived from the query source. Possible values are: logs|metrics|traces|unknown.',
+        },
+      },
       anti_limit_before_aggregate: {
         type: 'boolean',
         _meta: { description: 'Whether the query had a LIMIT before the aggregation.' },
