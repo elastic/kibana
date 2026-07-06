@@ -14,11 +14,8 @@ apiTest.describe('Stream lifecycle & failure store - inherited config API', () =
   const rootStream = 'logs.otel';
   const streamNamePrefix = `${rootStream}.lci`;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   type ApiClient = any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   type CookieHeader = any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   type StreamResponse = any;
 
   async function forkStream(

@@ -29,9 +29,9 @@ import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
+import { PromptsConfigService } from '@kbn/streams-plugin/server';
 import type { KnowledgeIndicatorClient } from '../../ki';
 import { fetchSampleDocuments } from './fetch_sample_documents';
-import { PromptsConfigService } from '@kbn/streams-plugin/server';
 
 import {
   reconcileInferredFeatures,

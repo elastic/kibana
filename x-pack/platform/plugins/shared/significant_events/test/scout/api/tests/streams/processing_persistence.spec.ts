@@ -20,11 +20,8 @@ apiTest.describe(
     const rootStream = 'logs.otel';
     const streamNamePrefix = `${rootStream}.pp`;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type ApiClient = any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type CookieHeader = any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type StreamResponse = any;
 
     // Helper to create a stream and get its definition

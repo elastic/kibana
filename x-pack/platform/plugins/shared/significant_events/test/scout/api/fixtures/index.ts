@@ -13,8 +13,14 @@ import type {
   RequestAuthFixture,
   SamlAuth,
 } from '@kbn/scout';
-import type { StreamsTestApiService } from '../services/streams_api_service';
-import { getSignificantEventsTestApiService } from '../services/streams_api_service';
+import {
+  getStreamsTestApiService,
+  type StreamsTestApiService,
+} from '../services/streams_api_service';
+import {
+  getSignificantEventsTestApiService,
+  type SignificantEventsTestApiService,
+} from '../services/significant_events_api_service';
 import { getStreamsUsers } from './constants';
 
 export interface StreamsSamlAuthFixture extends SamlAuth {
@@ -30,6 +36,7 @@ export interface StreamsRequestAuthFixture extends RequestAuthFixture {
 
 export interface StreamsApiServicesFixture extends ApiServicesFixture {
   streamsTest: StreamsTestApiService;
+  significantEventsTest: SignificantEventsTestApiService;
 }
 
 export const streamsApiTest = apiTest.extend<{
@@ -74,9 +81,13 @@ export const streamsApiTest = apiTest.extend<{
     await use(extendedSamlAuth);
   },
 
-  apiServices: async ({ apiServices, kbnClient, log }, use) => {
+  apiServices: async ({ apiServices, kbnClient, esClient, log }, use) => {
     const extendedApiServices = apiServices as StreamsApiServicesFixture;
-    extendedApiServices.streamsTest = getSignificantEventsTestApiService({ kbnClient, log });
+    extendedApiServices.streamsTest = getStreamsTestApiService({ kbnClient, esClient, log });
+    extendedApiServices.significantEventsTest = getSignificantEventsTestApiService({
+      kbnClient,
+      log,
+    });
     await use(extendedApiServices);
   },
 });
