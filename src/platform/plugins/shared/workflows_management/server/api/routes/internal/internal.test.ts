@@ -16,7 +16,7 @@ import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { SearchTriggerEventLogResult } from '@kbn/workflows-ui';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { registerInternalRoutes } from '.';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../../common';
+import { WORKFLOWS_EXECUTIONS_DS } from '../../../../common';
 import { WorkflowHistoryEventNotFoundError } from '../../../lib/workflow_history_event_not_found_error';
 import { ManagedWorkflowUpdateForbiddenError } from '../../managed_workflow_errors';
 import type { RouteDependencies } from '../types';
@@ -254,7 +254,7 @@ describe('Internal Routes', () => {
 
     expect(getFieldsForWildcard).toHaveBeenCalledWith(
       expect.objectContaining({
-        pattern: WORKFLOWS_EXECUTIONS_INDEX,
+        pattern: WORKFLOWS_EXECUTIONS_DS,
         indexFilter: { bool: { must_not: [{ term: { managed: true } }] } },
       })
     );
@@ -679,7 +679,7 @@ describe('Internal Routes', () => {
 
     expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+        index: WORKFLOWS_EXECUTIONS_DS,
         query: {
           bool: {
             filter: expect.arrayContaining([

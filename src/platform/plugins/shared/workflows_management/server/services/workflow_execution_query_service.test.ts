@@ -14,7 +14,7 @@ import { ExecutionType } from '@kbn/workflows';
 import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
 
 import { WorkflowExecutionQueryService } from './workflow_execution_query_service';
-import { WORKFLOWS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_INDEX, WORKFLOWS_STEP_EXECUTIONS_DS } from '../../common';
 
 describe('WorkflowExecutionQueryService', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
@@ -272,7 +272,7 @@ describe('WorkflowExecutionQueryService', () => {
       await service.getWorkflowExecutionHistory('exec-1', 'default');
 
       const call = mockEsClient.search.mock.calls[0][0] as any;
-      expect(call.index).toBe('.workflows-step-executions');
+      expect(call.index).toBe(WORKFLOWS_STEP_EXECUTIONS_DS);
       expect(call.query.bool.must).toContainEqual({ term: { executionId: 'exec-1' } });
       expect(call.query.bool.must).toContainEqual({ term: { spaceId: 'default' } });
       expect(call.sort).toEqual([{ timestamp: { order: 'asc' } }]);
@@ -540,7 +540,7 @@ describe('WorkflowExecutionQueryService', () => {
           };
         };
       };
-      expect(searchArgs.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
+      expect(searchArgs.index).toBe(WORKFLOWS_STEP_EXECUTIONS_DS);
 
       const must = searchArgs.query.bool.must;
       expect(must).toEqual(
@@ -802,7 +802,7 @@ describe('WorkflowExecutionQueryService', () => {
         };
         sort: unknown;
       };
-      expect(searchArgs.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
+      expect(searchArgs.index).toBe(WORKFLOWS_STEP_EXECUTIONS_DS);
       expect(searchArgs.query.bool.must).toEqual(
         expect.arrayContaining([
           { term: { spaceId: 'default' } },
@@ -1043,7 +1043,7 @@ describe('WorkflowExecutionQueryService', () => {
 
         const reasoningArgs = mockEsClient.search.mock.calls[2][0] as any;
         expect(reasoningArgs).toMatchObject({
-          index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+          index: WORKFLOWS_STEP_EXECUTIONS_DS,
           _source: { includes: ['workflowRunId', 'finishedAt', 'output.reasoning'] },
           size: 1000,
           track_total_hits: false,
@@ -1140,7 +1140,7 @@ describe('WorkflowExecutionQueryService', () => {
       await service.listProcessedWaitForInputFacets('default');
 
       const args = mockEsClient.search.mock.calls[0][0] as any;
-      expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
+      expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_DS);
       expect(args.size).toBe(0);
       expect(args.query.bool.must).toEqual([
         { term: { spaceId: 'default' } },
@@ -1256,7 +1256,7 @@ describe('WorkflowExecutionQueryService', () => {
           };
         };
       };
-      expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
+      expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_DS);
       expect(args.size).toBe(1);
       expect(args.query.bool.must).toEqual(
         expect.arrayContaining([
@@ -1315,7 +1315,7 @@ describe('WorkflowExecutionQueryService', () => {
         retry_on_conflict: number;
         script: { source: string; lang: string; params: Record<string, unknown> };
       };
-      expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
+      expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_DS);
       expect(args.id).toBe('step-exec-1');
       expect(args.refresh).toBe('wait_for');
       expect(args.retry_on_conflict).toBeGreaterThan(0);

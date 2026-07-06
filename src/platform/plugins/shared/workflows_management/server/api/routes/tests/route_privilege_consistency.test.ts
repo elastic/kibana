@@ -29,9 +29,9 @@ import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server/types';
 import {
-  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_EXECUTIONS_DS,
   WORKFLOWS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_DS,
 } from '../../../../common';
 import { config as pluginConfig } from '../../../config';
 import type { WorkflowsRouter } from '../../../types';
@@ -88,12 +88,12 @@ const PRIVILEGE_SCOPE: Record<string, PrivilegeScope> = {
     delegates: ['actionsClient'],
   },
   [WorkflowsManagementApiActions.readExecution]: {
-    reads: [WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX],
+    reads: [WORKFLOWS_EXECUTIONS_DS, WORKFLOWS_STEP_EXECUTIONS_DS],
     writes: [],
     delegates: ['eventLoggerService'],
   },
   [WorkflowsManagementApiActions.readManagedExecution]: {
-    reads: [WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX],
+    reads: [WORKFLOWS_EXECUTIONS_DS, WORKFLOWS_STEP_EXECUTIONS_DS],
     writes: [],
     delegates: ['eventLoggerService'],
   },
@@ -153,7 +153,7 @@ const INTERNAL_READ_EXCEPTIONS: Record<string, string[]> = {
   // it — an internal lookup intrinsic to the resume action, not data exposed to
   // the caller. See WorkflowsManagementApi.resumeWorkflowExecution →
   // WorkflowExecutionQueryService.getWaitingStepExecutionId.
-  'POST:/api/workflows/executions/{executionId}/resume': [WORKFLOWS_STEP_EXECUTIONS_INDEX],
+  'POST:/api/workflows/executions/{executionId}/resume': [WORKFLOWS_STEP_EXECUTIONS_DS],
   // Managed-execution authorization checks read the parent workflow metadata but do not return it.
   'GET:/api/workflows/workflow/{workflowId}/executions': [WORKFLOWS_INDEX],
   'GET:/api/workflows/workflow/{workflowId}/executions/steps': [WORKFLOWS_INDEX],
@@ -173,7 +173,7 @@ const INTERNAL_WRITE_EXCEPTIONS: Record<string, string[]> = {
   // HITL audit stamp / first-writer-wins claim (see
   // WorkflowsManagementApi.resumeWorkflowExecution →
   // WorkflowExecutionQueryService.markStepAsResponded).
-  'POST:/api/workflows/executions/{executionId}/resume': [WORKFLOWS_STEP_EXECUTIONS_INDEX],
+  'POST:/api/workflows/executions/{executionId}/resume': [WORKFLOWS_STEP_EXECUTIONS_DS],
 };
 
 /**
@@ -492,13 +492,13 @@ describe('Route privilege/ES-operation consistency', () => {
       },
       search: jest.fn().mockImplementation((params: any) => {
         const idx = params?.index;
-        if (idx === WORKFLOWS_EXECUTIONS_INDEX) {
+        if (idx === WORKFLOWS_EXECUTIONS_DS) {
           return Promise.resolve({
             hits: { hits: [mockExecutionDocument], total: { value: 1 } },
             aggregations: {},
           });
         }
-        if (idx === WORKFLOWS_STEP_EXECUTIONS_INDEX) {
+        if (idx === WORKFLOWS_STEP_EXECUTIONS_DS) {
           return Promise.resolve({
             hits: { hits: [mockStepExecutionDocument], total: { value: 1 } },
           });

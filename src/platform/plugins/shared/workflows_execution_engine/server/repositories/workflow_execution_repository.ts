@@ -216,7 +216,6 @@ export class WorkflowExecutionRepository {
     for (let idx = 0; idx < bulkResponse.items.length; idx++) {
       const item = bulkResponse.items[idx];
       const op = item.create ?? item.index;
-      const id = executions[idx].id as string;
       if (op?.error && docs[idx]) {
         results.push({ doc: docs[idx], error: op.error.reason ?? JSON.stringify(op.error) });
       } else if (docs[idx]) {
@@ -400,6 +399,7 @@ export class WorkflowExecutionRepository {
       index: this.dataStreamName,
       size: 1,
       terminate_after: 1,
+      seq_no_primary_term: true,
       query: {
         bool: {
           filter: filterClauses,

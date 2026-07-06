@@ -104,6 +104,10 @@ function createDeps(overrides: Partial<TriggerEventHandlerDeps> = {}): TriggerEv
       maxChainDepth: 10,
     },
     scheduleWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' }),
+    workflowExecutionRepository: {
+      getWorkflowExecutionById: (...args: unknown[]) => mockGetWorkflowExecutionById(...args),
+      getRunningExecutionsByWorkflowId: jest.fn().mockResolvedValue([]),
+    } as any,
     logger: mockLogger,
     ...overrides,
   };

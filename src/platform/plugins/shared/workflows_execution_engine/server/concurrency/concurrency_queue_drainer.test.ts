@@ -8,6 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   drainConcurrencyQueueSlots,
@@ -233,7 +234,11 @@ describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
   const baseParams = {
     workflowTaskManager,
     logger: { debug: debugMock, warn: jest.fn() } as unknown as Logger,
-    workflowRunId: 'exec-finished',
+    workflowExecutionWithVersion: {
+      id: 'exec-finished',
+      doc: { id: 'exec-finished' } as EsWorkflowExecution,
+      version: { index: '.ds-.workflows-executions-2026.06.22-000001', seqNo: 1, primaryTerm: 1 },
+    },
     spaceId: 'default',
   };
 

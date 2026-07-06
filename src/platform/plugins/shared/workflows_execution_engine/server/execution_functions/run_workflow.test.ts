@@ -21,6 +21,7 @@ import {
   createMockWorkflowExecutionEngineConfig,
   createMockWorkflowExecutionRepository,
   createMockWorkflowRuntime,
+  createWorkflowExecutionWithVersion,
   getExpectedWorkflowExecutionLoopCallArgs,
 } from './execution_functions_test_utils';
 import { runWorkflow } from './run_workflow';
@@ -90,7 +91,7 @@ describe('runWorkflow', () => {
       workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
     }) =>
       runWorkflow({
-        workflowRunId,
+        workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
         spaceId,
         taskAbortController,
         logger,
@@ -127,6 +128,11 @@ describe('runWorkflow', () => {
         ...buildMockSetupDependenciesReturn({ workflowRuntime, workflowExecutionRepository }),
         workflowExecutionState: {
           getWorkflowExecution: mockGetWorkflowExecutionFromState,
+          getWorkflowExecutionVersion: jest.fn().mockReturnValue({
+            index: '.ds-.workflows-executions-2026.06.22-000001',
+            seqNo: 1,
+            primaryTerm: 1,
+          }),
           getLastFailedStepContext: jest.fn(),
         } as unknown as WorkflowExecutionState,
       });
@@ -139,7 +145,7 @@ describe('runWorkflow', () => {
         await runWorkflowWithDefaults();
 
         expect(mockSetupDependencies).toHaveBeenCalledWith(
-          workflowRunId,
+          createWorkflowExecutionWithVersion(workflowRunId),
           spaceId,
           logger,
           mockConfig,
@@ -240,7 +246,8 @@ describe('runWorkflow', () => {
 
         expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
           workflowRunId,
-          spaceId
+          spaceId,
+          expect.any(String)
         );
       });
 
@@ -376,7 +383,8 @@ describe('runWorkflow', () => {
 
         expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
           workflowRunId,
-          spaceId
+          spaceId,
+          expect.any(String)
         );
       });
 
@@ -508,6 +516,11 @@ describe('runWorkflow', () => {
         workflowExecutionState: {
           getLastFailedStepContext: mockGetLastFailedStepContext,
           getWorkflowExecution: mockGetWorkflowExecutionFromState,
+          getWorkflowExecutionVersion: jest.fn().mockReturnValue({
+            index: '.ds-.workflows-executions-2026.06.22-000001',
+            seqNo: 1,
+            primaryTerm: 1,
+          }),
         },
         workflowLogger: {},
         nodesFactory: {},
@@ -546,7 +559,7 @@ describe('runWorkflow', () => {
 
       await expect(
         runWorkflow({
-          workflowRunId,
+          workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
           spaceId,
           taskAbortController: new AbortController(),
           logger: logger as Logger,
@@ -606,7 +619,7 @@ describe('runWorkflow', () => {
 
       await expect(
         runWorkflow({
-          workflowRunId,
+          workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
           spaceId,
           taskAbortController: new AbortController(),
           logger: logger as Logger,
@@ -630,7 +643,7 @@ describe('runWorkflow', () => {
       mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.COMPLETED);
 
       await runWorkflow({
-        workflowRunId,
+        workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
         spaceId,
         taskAbortController: new AbortController(),
         logger: logger as Logger,
@@ -640,7 +653,11 @@ describe('runWorkflow', () => {
         workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
       });
 
-      expect(mockGetWorkflowExecutionById).toHaveBeenCalledWith(workflowRunId, spaceId);
+      expect(mockGetWorkflowExecutionById).toHaveBeenCalledWith(
+        workflowRunId,
+        spaceId,
+        expect.any(String)
+      );
     });
 
     it('does not emit when execution status is not FAILED', async () => {
@@ -655,7 +672,7 @@ describe('runWorkflow', () => {
 
       await expect(
         runWorkflow({
-          workflowRunId,
+          workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
           spaceId,
           taskAbortController: new AbortController(),
           logger: logger as Logger,
@@ -688,7 +705,7 @@ describe('runWorkflow', () => {
 
       await expect(
         runWorkflow({
-          workflowRunId,
+          workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
           spaceId,
           taskAbortController: new AbortController(),
           logger: logger as Logger,
@@ -716,7 +733,7 @@ describe('runWorkflow', () => {
       const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
 
       await runWorkflow({
-        workflowRunId,
+        workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
         spaceId,
         taskAbortController: new AbortController(),
         logger: logger as Logger,

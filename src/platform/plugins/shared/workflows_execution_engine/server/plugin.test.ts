@@ -30,6 +30,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
   let esClient: jest.Mocked<Client>;
   let workflowExecutionRepository: WorkflowExecutionRepository;
   let stepExecutionRepository: StepExecutionRepository;
+  let dataStreamClientMock: { create: jest.Mock };
   let logger: Logger;
   let workflow: WorkflowExecutionEngineModel;
   let currentTaskInstance: ConcreteTaskInstance;
@@ -79,8 +80,18 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     esClient.indices.getDataStream = jest.fn().mockResolvedValue({
       data_streams: [{ indices: [{ index_name: TEST_BACKING_INDEX }] }],
     }) as any;
-    workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-    stepExecutionRepository = new StepExecutionRepository(esClient);
+    dataStreamClientMock = {
+      create: jest.fn().mockResolvedValue({
+        items: [
+          { create: { _id: 'exec-1', _index: TEST_BACKING_INDEX, _seq_no: 1, _primary_term: 1 } },
+        ],
+      }),
+    };
+    workflowExecutionRepository = new WorkflowExecutionRepository(
+      esClient,
+      dataStreamClientMock as any
+    );
+    stepExecutionRepository = new StepExecutionRepository(esClient, dataStreamClientMock as any);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
     jest.spyOn(workflowExecutionRepository, 'updateWorkflowExecution').mockResolvedValue({});
     logger = loggingSystemMock.create().get();
@@ -147,6 +158,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         },
         size: 1,
         terminate_after: 1,
+        seq_no_primary_term: true,
       });
       expect(esClient.index).not.toHaveBeenCalled();
       expect(logger.info).not.toHaveBeenCalled();
@@ -188,34 +200,34 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(true);
-      expect(esClient.index).toHaveBeenCalledTimes(1);
-      expect(esClient.index).toHaveBeenCalledWith(
+      expect(dataStreamClientMock.create).toHaveBeenCalledTimes(1);
+      expect(dataStreamClientMock.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: WORKFLOWS_EXECUTIONS_DS,
-          refresh: false,
-          id: expect.any(String),
-          document: expect.objectContaining({
-            spaceId,
-            workflowId: workflow.id,
-            status: ExecutionStatus.SKIPPED,
-            triggeredBy: 'scheduled',
-            workflowDefinition: workflow.definition,
-            yaml: workflow.yaml,
-            isTestRun: workflow.isTestRun,
-            cancelRequested: true,
-            cancellationReason: 'Skipped due to existing non-terminal scheduled execution',
-            cancelledAt: expect.any(String),
-            cancelledBy: 'system',
-            context: expect.objectContaining({
+          documents: [
+            expect.objectContaining({
+              _id: expect.any(String),
               spaceId,
-              event: {
-                type: 'scheduled',
-                source: 'task-manager',
-                timestamp: expect.any(String),
-              },
+              workflowId: workflow.id,
+              status: ExecutionStatus.SKIPPED,
               triggeredBy: 'scheduled',
+              workflowDefinition: workflow.definition,
+              yaml: workflow.yaml,
+              isTestRun: workflow.isTestRun,
+              cancelRequested: true,
+              cancellationReason: 'Skipped due to existing non-terminal scheduled execution',
+              cancelledAt: expect.any(String),
+              cancelledBy: 'system',
+              context: expect.objectContaining({
+                spaceId,
+                event: {
+                  type: 'scheduled',
+                  source: 'task-manager',
+                  timestamp: expect.any(String),
+                },
+                triggeredBy: 'scheduled',
+              }),
             }),
-          }),
+          ],
         })
       );
       expect(logger.debug).toHaveBeenCalledWith(
@@ -267,8 +279,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         );
 
         expect(result).toBe(true);
-        expect(esClient.index).toHaveBeenCalled();
+        expect(dataStreamClientMock.create).toHaveBeenCalled();
         jest.clearAllMocks();
+        dataStreamClientMock.create.mockResolvedValue({
+          items: [
+            { create: { _id: 'exec-1', _index: TEST_BACKING_INDEX, _seq_no: 1, _primary_term: 1 } },
+          ],
+        });
       }
     });
 
@@ -392,8 +409,8 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      const indexCall = esClient.index.mock.calls[0][0] as any;
-      expect(indexCall.document.context).toMatchObject({
+      const createdDoc = dataStreamClientMock.create.mock.calls[0][0].documents[0] as any;
+      expect(createdDoc.context).toMatchObject({
         spaceId,
         inputs: {},
         event: {
@@ -403,7 +420,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         },
         triggeredBy: 'scheduled',
       });
-      expect(indexCall.document.context.workflowRunId).toMatch(/^scheduled-\d+$/);
+      expect(createdDoc.context.workflowRunId).toMatch(/^scheduled-\d+$/);
     });
   });
 
@@ -546,11 +563,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
       expect(result).toBe(true); // Skip (don't mark as failed - execution is from this attempt)
       expect(esClient.update).not.toHaveBeenCalled(); // Don't mark as failed
-      expect(esClient.index).toHaveBeenCalledWith(
+      expect(dataStreamClientMock.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          document: expect.objectContaining({
-            status: ExecutionStatus.SKIPPED,
-          }),
+          documents: [
+            expect.objectContaining({
+              status: ExecutionStatus.SKIPPED,
+            }),
+          ],
         })
       );
     });
@@ -592,12 +611,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
       expect(result).toBe(true); // Skip current run
       expect(esClient.update).not.toHaveBeenCalled(); // Don't mark as failed
-      expect(esClient.index).toHaveBeenCalledWith(
+      expect(dataStreamClientMock.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: WORKFLOWS_EXECUTIONS_DS,
-          document: expect.objectContaining({
-            status: ExecutionStatus.SKIPPED,
-          }),
+          documents: [
+            expect.objectContaining({
+              status: ExecutionStatus.SKIPPED,
+            }),
+          ],
         })
       );
       expect(logger.debug).toHaveBeenCalledWith(
@@ -641,11 +661,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
       expect(result).toBe(true); // Skip to be safe
       expect(esClient.update).not.toHaveBeenCalled(); // Don't mark legacy execution as failed
-      expect(esClient.index).toHaveBeenCalledWith(
+      expect(dataStreamClientMock.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          document: expect.objectContaining({
-            status: ExecutionStatus.SKIPPED,
-          }),
+          documents: [
+            expect.objectContaining({
+              status: ExecutionStatus.SKIPPED,
+            }),
+          ],
         })
       );
     });
@@ -688,7 +710,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
       expect(result).toBe(true); // Skip when we can't compare
       expect(esClient.update).not.toHaveBeenCalled();
-      expect(esClient.index).toHaveBeenCalled();
+      expect(dataStreamClientMock.create).toHaveBeenCalled();
     });
 
     it('should handle RUNNING status execution with matching taskRunAt AND attempts > 1 (stale)', async () => {

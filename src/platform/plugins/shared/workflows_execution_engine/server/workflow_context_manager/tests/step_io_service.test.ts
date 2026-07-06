@@ -19,11 +19,18 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import type { EsDocumentWithVersion } from '../../repositories/document_version';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import { buildStepExecutionId } from '../../utils';
 import { StepIoService } from '../step_io_service';
 import { WorkflowExecutionState } from '../workflow_execution_state';
+
+const withVersion = (doc: EsWorkflowExecution): EsDocumentWithVersion<EsWorkflowExecution> => ({
+  id: doc.id,
+  doc,
+  version: { index: 'test-index', seqNo: 1, primaryTerm: 1 },
+});
 
 /**
  * Builds a state + service pair backed by jest-mock repositories. Returns
@@ -70,7 +77,10 @@ function buildHarness(opts: { evictionMinBytes?: number; logger?: Logger } = {})
     isTestRun: false,
   } as EsWorkflowExecution;
 
-  const state = new WorkflowExecutionState(fakeWorkflowExecution, workflowExecutionRepository);
+  const state = new WorkflowExecutionState(
+    withVersion(fakeWorkflowExecution),
+    workflowExecutionRepository
+  );
   // The type requires scopeStack but tests construct via the standard `as`
   // cast — set an empty stack here so prepareForRead can read it.
   state.updateWorkflowExecution({ scopeStack: [] });

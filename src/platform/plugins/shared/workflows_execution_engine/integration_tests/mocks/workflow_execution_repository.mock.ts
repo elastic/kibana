@@ -16,7 +16,7 @@ import {
 } from '@kbn/workflows';
 import type {
   DocumentVersionsById,
-  EsDocumentVersion,
+  EsDocumentWithVersion,
 } from '../../server/repositories/document_version';
 import type { WorkflowExecutionRepository as WorkflowExecutionRepositoryType } from '../../server/repositories/workflow_execution_repository';
 
@@ -39,12 +39,13 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
   public getWorkflowExecutionWithVersion(
     workflowExecutionId: string,
     spaceId: string
-  ): Promise<{ doc: EsWorkflowExecution; version: EsDocumentVersion } | null> {
+  ): Promise<EsDocumentWithVersion<EsWorkflowExecution> | null> {
     const doc = this.workflowExecutions.get(workflowExecutionId);
     if (!doc) {
       return Promise.resolve(null);
     }
     return Promise.resolve({
+      id: workflowExecutionId,
       doc,
       version: { index: TEST_INDEX, seqNo: 1, primaryTerm: 1 },
     });
@@ -53,20 +54,27 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
   public createWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>,
     _options: { refresh?: boolean | 'wait_for' } = {}
-  ): Promise<Partial<EsWorkflowExecution>> {
+  ): Promise<EsDocumentWithVersion<EsWorkflowExecution>> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for creation');
     }
 
     this.workflowExecutions.set(workflowExecution.id, workflowExecution as EsWorkflowExecution);
-    return Promise.resolve(workflowExecution);
+    return Promise.resolve({
+      id: workflowExecution.id,
+      doc: workflowExecution as EsWorkflowExecution,
+      version: { index: TEST_INDEX, seqNo: 1, primaryTerm: 1 },
+    });
   }
 
   public async bulkCreateWorkflowExecutions(
     executions: Array<Partial<EsWorkflowExecution>>,
     _options: { refresh?: boolean | 'wait_for' } = {}
   ): Promise<
-    Array<{ id: string; result: Partial<EsWorkflowExecution> } | { id: string; error: string }>
+    Array<
+      | EsDocumentWithVersion<Partial<EsWorkflowExecution>>
+      | { doc: Partial<EsWorkflowExecution>; error: string }
+    >
   > {
     if (executions.length === 0) {
       return [];
@@ -81,7 +89,11 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     return executions.map((execution) => {
       const id = execution.id as string;
       this.workflowExecutions.set(id, execution as EsWorkflowExecution);
-      return { id, result: execution };
+      return {
+        id,
+        doc: execution,
+        version: { index: TEST_INDEX, seqNo: 1, primaryTerm: 1 },
+      };
     });
   }
 
@@ -179,7 +191,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     workflowId: string,
     spaceId: string,
     triggeredBy?: string
-  ): Promise<Array<{ _source: EsWorkflowExecution; _id: string; _index: string }>> {
+  ): Promise<Array<EsDocumentWithVersion<EsWorkflowExecution>>> {
     let results = Array.from(this.workflowExecutions.values()).filter(
       (exec) =>
         exec.workflowId === workflowId &&
@@ -191,11 +203,11 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
       results = results.filter((exec) => exec.triggeredBy === triggeredBy);
     }
 
-    // Return in Elasticsearch hit format, limited to 1 as per the real implementation
+    // Return in EsDocumentWithVersion format, limited to 1 as per the real implementation
     return results.slice(0, 1).map((exec) => ({
-      _source: exec,
-      _id: exec.id,
-      _index: 'workflows-executions',
+      id: exec.id,
+      doc: exec,
+      version: { index: TEST_INDEX, seqNo: 1, primaryTerm: 1 },
     }));
   }
 

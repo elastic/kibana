@@ -9,11 +9,30 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
 import type { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import type { EsDocumentWithVersion } from '../repositories/document_version';
 import type { ContextDependencies } from '../workflow_context_manager/types';
+
+/**
+ * Builds the `EsDocumentWithVersion` wrapper that `runWorkflow` / `resumeWorkflow` /
+ * `setupDependencies` now receive in place of a bare `workflowRunId`.
+ */
+export const createWorkflowExecutionWithVersion = (
+  id: string,
+  doc: Partial<EsWorkflowExecution> = {}
+): EsDocumentWithVersion<EsWorkflowExecution> => ({
+  id,
+  doc: { id, ...doc } as EsWorkflowExecution,
+  version: {
+    index: '.ds-.workflows-executions-2026.06.22-000001',
+    seqNo: 1,
+    primaryTerm: 1,
+  },
+});
 
 export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEngineConfig => ({
   enabled: true,
@@ -80,7 +99,14 @@ export const buildMockSetupDependenciesReturn = (options: {
     workflowRuntime: options.workflowRuntime,
     stepExecutionRuntimeFactory: {},
     workflowExecutionState: {
-      getWorkflowExecution: jest.fn().mockReturnValue({ status: ExecutionStatus.WAITING }),
+      getWorkflowExecution: jest
+        .fn()
+        .mockReturnValue({ id: 'test-workflow-run-id', status: ExecutionStatus.WAITING }),
+      getWorkflowExecutionVersion: jest.fn().mockReturnValue({
+        index: '.ds-.workflows-executions-2026.06.22-000001',
+        seqNo: 1,
+        primaryTerm: 1,
+      }),
       getLastFailedStepContext: jest.fn(),
     },
     workflowLogger: {},

@@ -10,10 +10,17 @@
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import type { EsDocumentWithVersion } from '../../repositories/document_version';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import { StepIoService } from '../step_io_service';
 import { WorkflowExecutionState } from '../workflow_execution_state';
+
+const withVersion = (doc: EsWorkflowExecution): EsDocumentWithVersion<EsWorkflowExecution> => ({
+  id: doc.id,
+  doc,
+  version: { index: 'test-index', seqNo: 1, primaryTerm: 1 },
+});
 
 /**
  * Test helper: seeds metadata through state and IO through the service —
@@ -87,7 +94,10 @@ describe('WorkflowExecutionState', () => {
       startedAt: '2025-08-05T20:00:00.000Z',
       isTestRun: false,
     } as EsWorkflowExecution;
-    underTest = new WorkflowExecutionState(fakeWorkflowExecution, workflowExecutionRepository);
+    underTest = new WorkflowExecutionState(
+      withVersion(fakeWorkflowExecution),
+      workflowExecutionRepository
+    );
     ioService = buildService(underTest, stepExecutionRepository);
   });
 
@@ -175,7 +185,7 @@ describe('WorkflowExecutionState', () => {
       isTestRun: true,
     } as EsWorkflowExecution;
     const stateWithTestRun = new WorkflowExecutionState(
-      workflowExecutionWithTestRun,
+      withVersion(workflowExecutionWithTestRun),
       workflowExecutionRepository
     );
     buildService(stateWithTestRun, stepExecutionRepository);
@@ -293,7 +303,7 @@ describe('WorkflowExecutionState', () => {
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         updatedWorkflowExecution,
         {},
-        undefined
+        { 'test-workflow-execution-id': { index: 'test-index', seqNo: 1, primaryTerm: 1 } }
       );
     });
 
@@ -309,7 +319,7 @@ describe('WorkflowExecutionState', () => {
           id: 'test-workflow-execution-id',
         }),
         {},
-        undefined
+        { 'test-workflow-execution-id': { index: 'test-index', seqNo: 1, primaryTerm: 1 } }
       );
     });
 
@@ -1223,7 +1233,7 @@ describe('WorkflowExecutionState', () => {
           usage: { inputTokens: 100, outputTokens: 50, totalTokens: 150 },
         }),
         {},
-        undefined
+        { 'test-workflow-execution-id': { index: 'test-index', seqNo: 1, primaryTerm: 1 } }
       );
     });
 

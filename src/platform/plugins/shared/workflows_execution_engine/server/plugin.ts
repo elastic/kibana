@@ -141,7 +141,7 @@ export class WorkflowsExecutionEnginePlugin
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
   private concurrencyManager!: ConcurrencyManager;
-  private workflowExecutionRepository: WorkflowExecutionRepository;
+  private workflowExecutionRepository!: WorkflowExecutionRepository;
   private setupDependencies?: SetupDependencies;
   private coreSetup?: CoreSetup<
     WorkflowsExecutionEnginePluginStartDeps,

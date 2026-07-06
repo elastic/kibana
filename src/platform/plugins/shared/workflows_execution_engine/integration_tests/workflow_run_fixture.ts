@@ -26,6 +26,13 @@ import { workflowsExecutionEngineMock } from '../server/mocks';
 jest.mock('../server/repositories/workflow_execution_repository');
 jest.mock('../server/repositories/step_execution_repository');
 
+const FAKE_EXECUTION_ID = 'fake_workflow_execution_id';
+const FAKE_VERSION = {
+  index: '.ds-.workflows-executions-2026.06.22-000001',
+  seqNo: 1,
+  primaryTerm: 1,
+} as const;
+
 export class WorkflowRunFixture {
   public readonly taskAbortController = new AbortController();
   public readonly dependencies = mockContextDependencies();
@@ -115,11 +122,15 @@ export class WorkflowRunFixture {
       triggeredBy: 'system',
     };
     this.workflowExecutionRepositoryMock.workflowExecutions.set(
-      'fake_workflow_execution_id',
+      FAKE_EXECUTION_ID,
       workflowExecution as EsWorkflowExecution
     );
     return runWorkflow({
-      workflowRunId: 'fake_workflow_execution_id',
+      workflowExecutionWithVersion: {
+        id: FAKE_EXECUTION_ID,
+        doc: workflowExecution as EsWorkflowExecution,
+        version: FAKE_VERSION,
+      },
       spaceId: 'fake_space_id',
       taskAbortController: this.taskAbortController,
       dependencies: this.dependencies,
@@ -132,8 +143,15 @@ export class WorkflowRunFixture {
   }
 
   public resumeWorkflow() {
+    const doc =
+      this.workflowExecutionRepositoryMock.workflowExecutions.get(FAKE_EXECUTION_ID) ??
+      ({ id: FAKE_EXECUTION_ID } as EsWorkflowExecution);
     return resumeWorkflow({
-      workflowRunId: 'fake_workflow_execution_id',
+      workflowExecutionWithVersion: {
+        id: FAKE_EXECUTION_ID,
+        doc,
+        version: FAKE_VERSION,
+      },
       spaceId: 'fake_space_id',
       taskAbortController: this.taskAbortController,
       logger: this.loggerMock,
@@ -173,11 +191,15 @@ export class WorkflowRunFixture {
       triggeredBy: 'system',
     };
     this.workflowExecutionRepositoryMock.workflowExecutions.set(
-      'fake_workflow_execution_id',
+      FAKE_EXECUTION_ID,
       workflowExecution as EsWorkflowExecution
     );
     return runWorkflow({
-      workflowRunId: 'fake_workflow_execution_id',
+      workflowExecutionWithVersion: {
+        id: FAKE_EXECUTION_ID,
+        doc: workflowExecution as EsWorkflowExecution,
+        version: FAKE_VERSION,
+      },
       spaceId: 'fake_space_id',
       taskAbortController: this.taskAbortController,
       dependencies: this.dependencies,

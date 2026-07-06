@@ -21,6 +21,7 @@ describe('StepExecutionRepository', () => {
     search: jest.Mock;
     indices: { getDataStream: jest.Mock };
   };
+  let dataStreamClient: { create: jest.Mock };
 
   beforeEach(() => {
     esClient = {
@@ -38,12 +39,15 @@ describe('StepExecutionRepository', () => {
         }),
       },
     };
-    underTest = new StepExecutionRepository(esClient as any);
+    dataStreamClient = {
+      create: jest.fn().mockResolvedValue({ errors: false, items: [] }),
+    };
+    underTest = new StepExecutionRepository(esClient as any, dataStreamClient as any);
   });
 
   describe('bulkUpsert', () => {
-    it('creates new step executions through the data stream alias', async () => {
-      esClient.bulk.mockResolvedValue({
+    it('creates new step executions through the data stream client', async () => {
+      dataStreamClient.create.mockResolvedValue({
         errors: false,
         items: [
           {
@@ -64,11 +68,10 @@ describe('StepExecutionRepository', () => {
         },
       ]);
 
-      expect(esClient.bulk).toHaveBeenCalledWith({
-        refresh: false,
-        operations: [
-          { create: { _index: WORKFLOWS_STEP_EXECUTIONS_DS, _id: 'step-1' } },
+      expect(dataStreamClient.create).toHaveBeenCalledWith({
+        documents: [
           expect.objectContaining({
+            _id: 'step-1',
             id: 'step-1',
             stepId: 'my-step',
             '@timestamp': expect.any(String),

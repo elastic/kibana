@@ -10,7 +10,10 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from './__mock__/context_dependencies';
-import { createMockWorkflowExecutionEngineConfig } from './execution_functions_test_utils';
+import {
+  createMockWorkflowExecutionEngineConfig,
+  createWorkflowExecutionWithVersion,
+} from './execution_functions_test_utils';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
@@ -35,6 +38,11 @@ describe('setupDependencies', () => {
     status: 'running',
     startedAt: Date.now(),
   };
+
+  const workflowExecutionWithVersion = createWorkflowExecutionWithVersion(
+    workflowRunId,
+    mockWorkflowExecution as never
+  );
 
   const mockScopedActionsClient = {
     getAll: jest.fn(),
@@ -106,7 +114,7 @@ describe('setupDependencies', () => {
     } as KibanaRequest;
 
     const result = await setupDependencies(
-      workflowRunId,
+      workflowExecutionWithVersion,
       spaceId,
       mockLogger,
       mockConfig,
@@ -134,7 +142,7 @@ describe('setupDependencies', () => {
     } as KibanaRequest;
 
     await setupDependencies(
-      workflowRunId,
+      workflowExecutionWithVersion,
       spaceId,
       mockLogger,
       mockConfig,
@@ -165,7 +173,7 @@ describe('setupDependencies', () => {
       } as KibanaRequest;
 
       await setupDependencies(
-        workflowRunId,
+        workflowExecutionWithVersion,
         spaceId,
         mockLogger,
         mockConfig,
@@ -185,7 +193,7 @@ describe('setupDependencies', () => {
       } as KibanaRequest;
 
       await setupDependencies(
-        workflowRunId,
+        workflowExecutionWithVersion,
         spaceId,
         mockLogger,
         mockConfig,
@@ -197,35 +205,6 @@ describe('setupDependencies', () => {
         timeout: '6h',
       });
     });
-  });
-
-  it('throws when the workflow execution document is missing', async () => {
-    const mockFakeRequest = { headers: {} } as KibanaRequest;
-    mockWorkflowExecutionRepository.getWorkflowExecutionById = jest.fn().mockResolvedValue(null);
-
-    const mockScopedClient = {
-      search: jest.fn(),
-      index: jest.fn(),
-    } as unknown as ElasticsearchClient;
-    mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
-      asCurrentUser: mockScopedClient,
-    });
-
-    await expect(
-      setupDependencies(
-        workflowRunId,
-        spaceId,
-        mockLogger,
-        mockConfig,
-        mockDependencies,
-        mockFakeRequest
-      )
-    ).rejects.toThrow(`Workflow execution with ID ${workflowRunId} not found`);
-
-    expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
-      workflowRunId,
-      spaceId
-    );
   });
 
   describe('workflowsExtensions', () => {
@@ -240,7 +219,7 @@ describe('setupDependencies', () => {
       });
     });
 
-    it('should await workflowsExtensions.isReady before reading the workflow execution', async () => {
+    it('awaits workflowsExtensions.isReady before completing setup', async () => {
       const mockFakeRequest = { headers: {} } as KibanaRequest;
 
       let isReadyResolved = false;
@@ -253,29 +232,30 @@ describe('setupDependencies', () => {
       });
       (mockDependencies.workflowsExtensions.isReady as jest.Mock).mockReturnValue(isReadyPromise);
 
+      let settled = false;
       const setupPromise = setupDependencies(
-        workflowRunId,
+        workflowExecutionWithVersion,
         spaceId,
         mockLogger,
         mockConfig,
         mockDependencies,
         mockFakeRequest
-      );
+      ).then((result) => {
+        settled = true;
+        return result;
+      });
 
-      // Let any microtasks before the isReady await run
-      await Promise.resolve();
+      // Flush the async repository setup that precedes the isReady await.
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(mockDependencies.workflowsExtensions.isReady).toHaveBeenCalledTimes(1);
       expect(isReadyResolved).toBe(false);
-      expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
+      expect(settled).toBe(false);
 
       resolveIsReady();
       await setupPromise;
 
-      expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
-        workflowRunId,
-        spaceId
-      );
+      expect(settled).toBe(true);
     });
   });
 });

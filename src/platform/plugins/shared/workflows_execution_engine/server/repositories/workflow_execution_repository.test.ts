@@ -30,6 +30,7 @@ describe('WorkflowExecutionRepository', () => {
     bulk: jest.Mock;
     indices: { exists: jest.Mock; create: jest.Mock; getDataStream: jest.Mock };
   };
+  let dataStreamClient: { create: jest.Mock };
 
   beforeEach(() => {
     esClient = {
@@ -57,26 +58,35 @@ describe('WorkflowExecutionRepository', () => {
         }),
       },
     };
-    repository = new WorkflowExecutionRepository(esClient as any);
+    dataStreamClient = {
+      create: jest.fn().mockResolvedValue({
+        items: [{ create: { _id: '1', _index: TEST_BACKING_INDEX, _seq_no: 1, _primary_term: 1 } }],
+      }),
+    };
+    repository = new WorkflowExecutionRepository(esClient as any, dataStreamClient as any);
   });
 
   describe('createWorkflowExecution', () => {
     it('should create a workflow execution', async () => {
       const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'default' };
       const result = await repository.createWorkflowExecution(workflowExecution);
-      expect(esClient.create).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_DS,
-        id: '1',
-        refresh: false,
-        document: expect.objectContaining({
-          id: '1',
-          workflowId: 'test-workflow',
-          spaceId: 'default',
-          '@timestamp': expect.any(String),
-        }),
+      expect(dataStreamClient.create).toHaveBeenCalledWith({
+        documents: [
+          expect.objectContaining({
+            _id: '1',
+            id: '1',
+            workflowId: 'test-workflow',
+            spaceId: 'default',
+            '@timestamp': expect.any(String),
+          }),
+        ],
       });
       expect(result).toEqual(
-        expect.objectContaining({ id: '1', '@timestamp': expect.any(String) })
+        expect.objectContaining({
+          id: '1',
+          doc: expect.objectContaining({ id: '1', '@timestamp': expect.any(String) }),
+          version: { index: TEST_BACKING_INDEX, seqNo: 1, primaryTerm: 1 },
+        })
       );
     });
 
@@ -91,12 +101,11 @@ describe('WorkflowExecutionRepository', () => {
     it('returns an empty array and skips ES when no executions are provided', async () => {
       const result = await repository.bulkCreateWorkflowExecutions([]);
       expect(result).toEqual([]);
-      expect(esClient.bulk).not.toHaveBeenCalled();
+      expect(dataStreamClient.create).not.toHaveBeenCalled();
     });
 
-    it('issues a single _bulk create call with provided docs and refresh option', async () => {
-      esClient.bulk.mockResolvedValue({
-        errors: false,
+    it('issues a single data stream create call with provided docs and refresh option', async () => {
+      dataStreamClient.create.mockResolvedValue({
         items: [
           { create: { _id: 'e1', _index: TEST_BACKING_INDEX, _seq_no: 1, _primary_term: 1 } },
           { create: { _id: 'e2', _index: TEST_BACKING_INDEX, _seq_no: 2, _primary_term: 1 } },
@@ -112,33 +121,39 @@ describe('WorkflowExecutionRepository', () => {
         refresh: 'wait_for',
       });
 
-      expect(esClient.bulk).toHaveBeenCalledTimes(1);
-      expect(esClient.bulk).toHaveBeenCalledWith({
+      expect(dataStreamClient.create).toHaveBeenCalledTimes(1);
+      expect(dataStreamClient.create).toHaveBeenCalledWith({
         refresh: 'wait_for',
-        index: WORKFLOWS_EXECUTIONS_DS,
-        operations: [
-          { create: { _id: 'e1' } },
-          expect.objectContaining({ ...executions[0], '@timestamp': expect.any(String) }),
-          { create: { _id: 'e2' } },
-          expect.objectContaining({ ...executions[1], '@timestamp': expect.any(String) }),
+        documents: [
+          expect.objectContaining({
+            ...executions[0],
+            _id: 'e1',
+            '@timestamp': expect.any(String),
+          }),
+          expect.objectContaining({
+            ...executions[1],
+            _id: 'e2',
+            '@timestamp': expect.any(String),
+          }),
         ],
       });
 
       expect(result).toEqual([
-        {
+        expect.objectContaining({
           id: 'e1',
-          result: expect.objectContaining({ id: 'e1', '@timestamp': expect.any(String) }),
-        },
-        {
+          doc: expect.objectContaining({ id: 'e1', '@timestamp': expect.any(String) }),
+          version: { index: TEST_BACKING_INDEX, seqNo: 1, primaryTerm: 1 },
+        }),
+        expect.objectContaining({
           id: 'e2',
-          result: expect.objectContaining({ id: 'e2', '@timestamp': expect.any(String) }),
-        },
+          doc: expect.objectContaining({ id: 'e2', '@timestamp': expect.any(String) }),
+          version: { index: TEST_BACKING_INDEX, seqNo: 2, primaryTerm: 1 },
+        }),
       ]);
     });
 
     it('defaults refresh to false when not provided', async () => {
-      esClient.bulk.mockResolvedValue({
-        errors: false,
+      dataStreamClient.create.mockResolvedValue({
         items: [
           { create: { _id: 'e1', _index: TEST_BACKING_INDEX, _seq_no: 1, _primary_term: 1 } },
         ],
@@ -146,12 +161,13 @@ describe('WorkflowExecutionRepository', () => {
 
       await repository.bulkCreateWorkflowExecutions([{ id: 'e1' }]);
 
-      expect(esClient.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: false }));
+      expect(dataStreamClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ refresh: false })
+      );
     });
 
     it('maps per-doc bulk errors back to per-item results in input order', async () => {
-      esClient.bulk.mockResolvedValue({
-        errors: true,
+      dataStreamClient.create.mockResolvedValue({
         items: [
           { create: { _id: 'e1', _index: TEST_BACKING_INDEX, _seq_no: 1, _primary_term: 1 } },
           {
@@ -172,15 +188,18 @@ describe('WorkflowExecutionRepository', () => {
       ]);
 
       expect(result).toEqual([
-        {
+        expect.objectContaining({
           id: 'e1',
-          result: expect.objectContaining({ id: 'e1' }),
-        },
-        { id: 'e2', error: 'doc already exists' },
-        {
+          doc: expect.objectContaining({ id: 'e1' }),
+        }),
+        expect.objectContaining({
+          doc: expect.objectContaining({ id: 'e2' }),
+          error: 'doc already exists',
+        }),
+        expect.objectContaining({
           id: 'e3',
-          result: expect.objectContaining({ id: 'e3' }),
-        },
+          doc: expect.objectContaining({ id: 'e3' }),
+        }),
       ]);
     });
 
@@ -188,18 +207,20 @@ describe('WorkflowExecutionRepository', () => {
       await expect(repository.bulkCreateWorkflowExecutions([{ id: 'e1' }, {}])).rejects.toThrow(
         'Workflow execution ID is required for bulk create'
       );
-      expect(esClient.bulk).not.toHaveBeenCalled();
+      expect(dataStreamClient.create).not.toHaveBeenCalled();
     });
 
     it('should respect space isolation when getting workflow execution by ID', async () => {
       const workflowExecution = { id: 'exec-1', workflowId: 'test-workflow', spaceId: 'space1' };
       await repository.createWorkflowExecution(workflowExecution);
 
-      expect(esClient.create).toHaveBeenCalledWith(
+      expect(dataStreamClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          document: expect.objectContaining({
-            spaceId: 'space1',
-          }),
+          documents: [
+            expect.objectContaining({
+              spaceId: 'space1',
+            }),
+          ],
         })
       );
 
@@ -553,14 +574,19 @@ describe('WorkflowExecutionRepository', () => {
 
   describe('getRunningExecutionsByWorkflowId', () => {
     it('should return running executions for a workflow using optimized query', async () => {
+      const source = {
+        id: 'exec-1',
+        workflowId: 'workflow-1',
+        spaceId: 'default',
+        status: ExecutionStatus.RUNNING,
+      };
       const mockHits = [
         {
-          _source: {
-            id: 'exec-1',
-            workflowId: 'workflow-1',
-            spaceId: 'default',
-            status: ExecutionStatus.RUNNING,
-          },
+          _id: 'exec-1',
+          _index: TEST_BACKING_INDEX,
+          _seq_no: 1,
+          _primary_term: 1,
+          _source: source,
         },
       ];
       esClient.search.mockResolvedValue({
@@ -573,6 +599,7 @@ describe('WorkflowExecutionRepository', () => {
         index: WORKFLOWS_EXECUTIONS_DS,
         size: 1,
         terminate_after: 1,
+        seq_no_primary_term: true,
         query: {
           bool: {
             filter: [
@@ -587,19 +614,30 @@ describe('WorkflowExecutionRepository', () => {
           },
         },
       });
-      expect(result).toEqual(mockHits);
+      expect(result).toEqual([
+        {
+          id: 'exec-1',
+          doc: source,
+          version: { index: TEST_BACKING_INDEX, seqNo: 1, primaryTerm: 1 },
+        },
+      ]);
     });
 
     it('should filter by triggeredBy when provided', async () => {
+      const source = {
+        id: 'exec-1',
+        workflowId: 'workflow-1',
+        spaceId: 'default',
+        status: ExecutionStatus.PENDING,
+        triggeredBy: 'scheduled',
+      };
       const mockHits = [
         {
-          _source: {
-            id: 'exec-1',
-            workflowId: 'workflow-1',
-            spaceId: 'default',
-            status: ExecutionStatus.PENDING,
-            triggeredBy: 'scheduled',
-          },
+          _id: 'exec-1',
+          _index: TEST_BACKING_INDEX,
+          _seq_no: 1,
+          _primary_term: 1,
+          _source: source,
         },
       ];
       esClient.search.mockResolvedValue({
@@ -616,6 +654,7 @@ describe('WorkflowExecutionRepository', () => {
         index: WORKFLOWS_EXECUTIONS_DS,
         size: 1,
         terminate_after: 1,
+        seq_no_primary_term: true,
         query: {
           bool: {
             filter: [
@@ -631,7 +670,13 @@ describe('WorkflowExecutionRepository', () => {
           },
         },
       });
-      expect(result).toEqual(mockHits);
+      expect(result).toEqual([
+        {
+          id: 'exec-1',
+          doc: source,
+          version: { index: TEST_BACKING_INDEX, seqNo: 1, primaryTerm: 1 },
+        },
+      ]);
     });
 
     it('should return empty array when no running executions exist', async () => {

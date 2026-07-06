@@ -198,7 +198,7 @@ export async function runWorkflow({
   }
 
   await handlePostExecutionLoop({
-    workflowRunId,
+    workflowExecutionState,
     spaceId,
     logger,
     fakeRequest,

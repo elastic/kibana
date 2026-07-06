@@ -20,6 +20,7 @@ import {
   createMockWorkflowExecutionEngineConfig,
   createMockWorkflowExecutionRepository,
   createMockWorkflowRuntime,
+  createWorkflowExecutionWithVersion,
   getExpectedWorkflowExecutionLoopCallArgs,
 } from './execution_functions_test_utils';
 import { resumeWorkflow } from './resume_workflow';
@@ -115,7 +116,7 @@ describe('resumeWorkflow', () => {
       } as never);
 
       await resumeWorkflow({
-        workflowRunId,
+        workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
         spaceId,
         taskAbortController: new AbortController(),
         dependencies,
@@ -139,7 +140,13 @@ describe('resumeWorkflow', () => {
         stepExecutionRuntimeFactory: {},
         workflowExecutionState: {
           getWorkflowExecution: () => ({
+            id: 'test-workflow-run-id',
             status: ExecutionStatus.WAITING,
+          }),
+          getWorkflowExecutionVersion: () => ({
+            index: '.ds-.workflows-executions-2026.06.22-000001',
+            seqNo: 1,
+            primaryTerm: 1,
           }),
         },
         workflowLogger: {},
@@ -153,7 +160,7 @@ describe('resumeWorkflow', () => {
       } as never);
 
       await resumeWorkflow({
-        workflowRunId,
+        workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
         spaceId,
         taskAbortController: new AbortController(),
         dependencies,
@@ -190,7 +197,7 @@ describe('resumeWorkflow', () => {
       } as never);
 
       await resumeWorkflow({
-        workflowRunId,
+        workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
         spaceId,
         taskAbortController: new AbortController(),
         dependencies,
@@ -214,7 +221,13 @@ describe('resumeWorkflow', () => {
         stepExecutionRuntimeFactory: {},
         workflowExecutionState: {
           getWorkflowExecution: () => ({
+            id: 'test-workflow-run-id',
             status: ExecutionStatus.RUNNING,
+          }),
+          getWorkflowExecutionVersion: () => ({
+            index: '.ds-.workflows-executions-2026.06.22-000001',
+            seqNo: 1,
+            primaryTerm: 1,
           }),
         },
         workflowLogger: {},
@@ -228,7 +241,7 @@ describe('resumeWorkflow', () => {
       } as never);
 
       await resumeWorkflow({
-        workflowRunId,
+        workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
         spaceId,
         taskAbortController: new AbortController(),
         dependencies,
@@ -261,7 +274,7 @@ describe('resumeWorkflow', () => {
       workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
     }) =>
       resumeWorkflow({
-        workflowRunId,
+        workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
         spaceId,
         taskAbortController,
         logger,
@@ -296,7 +309,7 @@ describe('resumeWorkflow', () => {
         await resumeWorkflowWithDefaults();
 
         expect(mockSetupDependencies).toHaveBeenCalledWith(
-          workflowRunId,
+          createWorkflowExecutionWithVersion(workflowRunId),
           spaceId,
           logger,
           mockConfig,
@@ -319,7 +332,7 @@ describe('resumeWorkflow', () => {
         await resumeWorkflowWithDefaults({ workflowsExecutionEngine });
 
         expect(mockSetupDependencies).toHaveBeenCalledWith(
-          workflowRunId,
+          createWorkflowExecutionWithVersion(workflowRunId),
           spaceId,
           logger,
           mockConfig,
@@ -383,7 +396,8 @@ describe('resumeWorkflow', () => {
 
         expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
           workflowRunId,
-          spaceId
+          spaceId,
+          expect.any(String)
         );
       });
 
@@ -509,7 +523,7 @@ describe('resumeWorkflow', () => {
 
       await expect(
         resumeWorkflow({
-          workflowRunId,
+          workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
           spaceId,
           taskAbortController: new AbortController(),
           logger: logger as Logger,
@@ -563,7 +577,7 @@ describe('resumeWorkflow', () => {
 
       await expect(
         resumeWorkflow({
-          workflowRunId,
+          workflowExecutionWithVersion: createWorkflowExecutionWithVersion(workflowRunId),
           spaceId,
           taskAbortController: new AbortController(),
           logger: logger as Logger,
