@@ -57,7 +57,7 @@ export const useContinuousExtractionSettings = ({
   }, [saved]);
 
   const save = useCallback(async () => {
-    await http.put('/internal/streams/_significant_events/settings', {
+    await http.put('/internal/streams/_knowledge_indicators/continuous_ki_extraction/settings', {
       body: JSON.stringify({ continuousKiExtraction: draft }),
     });
 
