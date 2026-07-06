@@ -20,23 +20,14 @@ import { READ_SECURITY, withSmlFeatureFlag } from './common';
 
 const SML_SEARCH_SIZE_MAX = 1000;
 const SML_SEARCH_FILTER_ARRAY_MAX = 100;
-// Count of `fields[]` literals in the request schema below — keep in sync
-// with the `schema.oneOf` list; `maxSize` bounds the array length below.
+// Count of `fields[]` literals in the schema below; keep in sync.
 const SML_SEARCH_FIELDS_MAX = 9;
 
 /**
- * Builds the `SmlSearchHttpResultItem` for one service-layer hit.
- *
- * Deliberately a hand-written, one-line-per-field mapping rather than a
- * generic loop over `SmlSearchResult`'s keys: `SmlSearchResult` is an
- * internal service-layer type describing what the storage/query layer can
- * produce, while `SmlSearchHttpResultItem` is the public wire contract. This
- * function is the seam where those two are deliberately decoupled — a
- * generic key-driven copy would silently couple the API response shape to
- * internal storage schema changes. Keep it explicit; when adding a new
- * `fields[]`-requestable field, add both the schema literal above and a line
- * here (this pairing is exactly what search-team#15114 tracked, so this
- * comment doubles as the reminder to update both).
+ * Hand-written rather than a generic loop over `SmlSearchResult`'s keys, so
+ * the wire contract doesn't silently couple to internal storage schema
+ * changes. When adding a new `fields[]`-requestable field, update both the
+ * schema literals above and this mapping.
  */
 const toSmlSearchHttpResultItem = (hit: SmlSearchResult): SmlSearchHttpResultItem => {
   const item: SmlSearchHttpResultItem = {

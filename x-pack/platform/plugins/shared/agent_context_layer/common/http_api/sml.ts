@@ -100,14 +100,10 @@ export interface SmlHttpItem {
 type WithOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 /**
- * Per-hit shape returned by `POST /sml/_search`.
- *
- * Structurally `SmlHttpItem` with every field except the baseline identity
- * fields (`id`, `type`, `title`, `origin`) made optional — those are the
- * only fields not gated by the `fields[]` request parameter. This
- * derivation keeps `_search`'s per-hit shape from drifting out of sync with
- * `SmlHttpItem`: a field added, renamed, or reshaped on one is reflected on
- * the other automatically, at compile time.
+ * Per-hit shape returned by `POST /sml/_search`: `SmlHttpItem` with every
+ * field except the baseline identity fields (`id`, `type`, `title`,
+ * `origin`) made optional, since those are the only fields not gated by the
+ * `fields[]` request parameter.
  */
 export type SmlSearchHttpResultItem = WithOptional<
   SmlHttpItem,

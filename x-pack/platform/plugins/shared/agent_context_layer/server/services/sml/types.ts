@@ -269,18 +269,13 @@ export interface SmlDocument {
 }
 
 /**
- * Compact SML search result — LLM-shaped by default. Baseline (`id`, `type`,
- * `title`, `origin`) is always present; every other field is opt-in via the
- * caller's `fields` array, including the full `content` blob and bookkeeping
- * fields (`created_at`, `updated_at`, `ingestion_method`) that are excluded
- * unless explicitly requested — callers fetch full content via the lookup
- * tool (`sml_read`) when they don't need it inline. `extended_attrs` and
- * `discovery_labels` are never surfaced through search at all; there is no
- * `fields` value for them.
+ * Compact SML search result. Baseline (`id`, `type`, `title`, `origin`) is
+ * always present; every other field is opt-in via the caller's `fields`
+ * array. `extended_attrs` and `discovery_labels` are never surfaced through
+ * search — there is no `fields` value for them.
  *
- * `permissions` is retained here so callers (route / tool wrapper) can apply
- * post-hoc authorization filtering. Callers should not expose it
- * unconditionally or by default — the `sml_search` LLM tool wrapper never
+ * `permissions` is retained so callers (route / tool wrapper) can apply
+ * post-hoc authorization filtering; the `sml_search` LLM tool wrapper never
  * forwards it, by construction (it whitelists an explicit output shape).
  */
 export interface SmlSearchResult {
@@ -527,7 +522,8 @@ export interface SmlService {
     /**
      * Optional fields to include beyond the baseline (`id`, `type`, `title`,
      * `description`). Valid opt-in values: `'content'`, `'tags'`,
-     * `'references'`, `'spaces'`, `'permissions'`.
+     * `'references'`, `'spaces'`, `'permissions'`, `'created_at'`,
+     * `'updated_at'`, `'ingestion_method'`.
      */
     fields?: string[];
     /** Runtime-imposed per-type id-allowlist constraints. See {@link SmlSearchConstraints}. */
