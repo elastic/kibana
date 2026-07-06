@@ -123,81 +123,86 @@ apiTest.describe(
         type: ConversationSourceType.Slack,
         external_conversation_id: 'team:T123/channel:C123/thread:callback-continuation',
       };
+      let conversationId: string;
 
-      await setupAgentDirectAnswer({
-        proxy: llmProxy,
-        title: 'Callback Continuation Title',
-        response: 'First callback response',
-      });
+      await apiTest.step('first round starts a new conversation', async () => {
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          title: 'Callback Continuation Title',
+          response: 'First callback response',
+        });
 
-      const first = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
-        headers: internalHeaders(),
-        body: {
-          input: 'Start callback thread',
-          connector_id: connectorId,
-          source,
-          callback: {
-            url: `${callbackServerUrl}/callback?token=continuation-first`,
+        const first = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
+          headers: internalHeaders(),
+          body: {
+            input: 'Start callback thread',
+            connector_id: connectorId,
+            source,
+            callback: {
+              url: `${callbackServerUrl}/callback?token=continuation-first`,
+            },
           },
-        },
-        responseType: 'json',
+          responseType: 'json',
+        });
+
+        expect(first).toHaveStatusCode(202);
+
+        const firstAccepted = first.body as ChatCallbackAcceptedResponse;
+        const firstCallback = (await callbackServer.waitForRequest())
+          .body as ChatCallbackSuccessPayload;
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        expect(firstCallback.execution_id).toBe(firstAccepted.execution_id);
+        expect(firstCallback.status).toBe(ExecutionStatus.completed);
+
+        conversationId = firstCallback.response.conversation_id;
+        conversationIds.add(conversationId);
       });
 
-      expect(first).toHaveStatusCode(202);
+      await apiTest.step('second round continues the same conversation', async () => {
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          continueConversation: true,
+          response: 'Second callback response',
+        });
 
-      const firstAccepted = first.body as ChatCallbackAcceptedResponse;
-      const firstCallback = (await callbackServer.waitForRequest())
-        .body as ChatCallbackSuccessPayload;
-
-      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-      expect(firstCallback.execution_id).toBe(firstAccepted.execution_id);
-      expect(firstCallback.status).toBe(ExecutionStatus.completed);
-
-      const conversationId = firstCallback.response.conversation_id;
-      conversationIds.add(conversationId);
-
-      await setupAgentDirectAnswer({
-        proxy: llmProxy,
-        continueConversation: true,
-        response: 'Second callback response',
-      });
-
-      const second = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
-        headers: internalHeaders(),
-        body: {
-          input: 'Continue callback thread',
-          connector_id: connectorId,
-          source,
-          callback: {
-            url: `${callbackServerUrl}/callback?token=continuation-second`,
+        const second = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
+          headers: internalHeaders(),
+          body: {
+            input: 'Continue callback thread',
+            connector_id: connectorId,
+            source,
+            callback: {
+              url: `${callbackServerUrl}/callback?token=continuation-second`,
+            },
           },
-        },
-        responseType: 'json',
+          responseType: 'json',
+        });
+
+        expect(second).toHaveStatusCode(202);
+
+        const secondAccepted = second.body as ChatCallbackAcceptedResponse;
+        const secondCallback = (await callbackServer.waitForRequest())
+          .body as ChatCallbackSuccessPayload;
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        expect(secondCallback.execution_id).toBe(secondAccepted.execution_id);
+        expect(secondCallback.status).toBe(ExecutionStatus.completed);
+        expect(secondCallback.response.conversation_id).toBe(conversationId);
+        expect(secondCallback.response.response.message).toBe('Second callback response');
+
+        const conversation = await getConversation(
+          apiClient,
+          adminCredentials.apiKeyHeader,
+          conversationId
+        );
+
+        expect(conversation.rounds).toHaveLength(2);
+        expect(conversation.rounds[0].response.message).toBe('First callback response');
+        expect(conversation.rounds[1].response.message).toBe('Second callback response');
       });
-
-      expect(second).toHaveStatusCode(202);
-
-      const secondAccepted = second.body as ChatCallbackAcceptedResponse;
-      const secondCallback = (await callbackServer.waitForRequest())
-        .body as ChatCallbackSuccessPayload;
-
-      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-      expect(secondCallback.execution_id).toBe(secondAccepted.execution_id);
-      expect(secondCallback.status).toBe(ExecutionStatus.completed);
-      expect(secondCallback.response.conversation_id).toBe(conversationId);
-      expect(secondCallback.response.response.message).toBe('Second callback response');
-
-      const conversation = await getConversation(
-        apiClient,
-        adminCredentials.apiKeyHeader,
-        conversationId
-      );
-
-      expect(conversation.rounds).toHaveLength(2);
-      expect(conversation.rounds[0].response.message).toBe('First callback response');
-      expect(conversation.rounds[1].response.message).toBe('Second callback response');
     });
   }
 );
