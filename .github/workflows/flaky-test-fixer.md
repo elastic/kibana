@@ -184,7 +184,7 @@ Follow this format:
   ```markdown
   ### ⏭️ No fix PR was opened
 
-  <one-clause reason>. cc @<github-handle-here>
+  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @<github-handle-here>
   ```
-  e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified.
+  Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified.
 
