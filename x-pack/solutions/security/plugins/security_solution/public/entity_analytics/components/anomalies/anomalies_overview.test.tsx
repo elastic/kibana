@@ -90,6 +90,7 @@ const makeHit = (overrides: Partial<AnomalyOverviewHit> = {}): AnomalyOverviewHi
   jobName: 'Security Job',
   timestamp: '2026-05-19T13:41:58.725Z',
   anomalousValue: '1000 events',
+  recordId: 'record-1',
   ...overrides,
 });
 
