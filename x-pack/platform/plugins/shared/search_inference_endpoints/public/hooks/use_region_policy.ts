@@ -37,27 +37,29 @@ export const useSaveRegionPolicy = () => {
   const { services } = useKibana();
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<RegionPolicyResponse, Error, RegionPolicyBody>({
     mutationFn: async (body: RegionPolicyBody) => {
       return services.http.put<RegionPolicyResponse>(APIRoutes.REGION_POLICY, {
         body: JSON.stringify(body),
         version: ROUTE_VERSIONS.v1,
       });
     },
-    onSuccess: (data) => {
-      queryClient.setQueryData([REGION_POLICY_QUERY_KEY], data);
+    onSuccess: () => {
       services.notifications.toasts.addSuccess({
         title: i18n.translate('xpack.searchInferenceEndpoints.regionPolicy.saveSuccess', {
           defaultMessage: 'Region preferences saved',
         }),
       });
     },
-    onError: () => {
-      services.notifications.toasts.addDanger({
+    onError: (err) => {
+      services.notifications.toasts.addError(err, {
         title: i18n.translate('xpack.searchInferenceEndpoints.regionPolicy.saveError', {
           defaultMessage: 'Failed to save region preferences',
         }),
       });
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: [REGION_POLICY_QUERY_KEY] });
     },
   });
 };

@@ -73,15 +73,14 @@ describe('useInferenceSettings', () => {
 describe('useSaveInferenceSettings', () => {
   const mockPut = jest.fn();
   const mockAddSuccess = jest.fn();
-  const mockAddDanger = jest.fn();
-  const mockSetQueryData = jest.fn();
+  const mockAddError = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         http: { put: mockPut },
-        notifications: { toasts: { addSuccess: mockAddSuccess, addDanger: mockAddDanger } },
+        notifications: { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } },
       },
     });
   });
@@ -90,13 +89,8 @@ describe('useSaveInferenceSettings', () => {
     const responseData = { data: { features: [] } };
     mockPut.mockResolvedValue(responseData);
 
-    const { queryClient } = createWrapper();
-    jest.spyOn(queryClient, 'setQueryData').mockImplementation(mockSetQueryData);
-
-    const { result } = renderHook(() => useSaveInferenceSettings(), {
-      wrapper: ({ children }) =>
-        React.createElement(QueryClientProvider, { client: queryClient }, children),
-    });
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useSaveInferenceSettings(), { wrapper: Wrapper });
 
     const body = { features: [{ feature_id: 'f1', endpoints: [{ id: 'ep-1' }] }] };
 
@@ -112,12 +106,12 @@ describe('useSaveInferenceSettings', () => {
     });
   });
 
-  it('shows success toast and updates query cache on success', async () => {
+  it('shows success toast and invalidates query cache on success', async () => {
     const responseData = { data: { features: [] } };
     mockPut.mockResolvedValue(responseData);
 
     const { queryClient } = createWrapper();
-    jest.spyOn(queryClient, 'setQueryData').mockImplementation(mockSetQueryData);
+    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useSaveInferenceSettings(), {
       wrapper: ({ children }) =>
@@ -133,11 +127,14 @@ describe('useSaveInferenceSettings', () => {
     expect(mockAddSuccess).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Changes saved' })
     );
-    expect(mockSetQueryData).toHaveBeenCalledWith([INFERENCE_SETTINGS_QUERY_KEY], responseData);
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ queryKey: [INFERENCE_SETTINGS_QUERY_KEY] })
+    );
   });
 
   it('shows error toast on failure', async () => {
-    mockPut.mockRejectedValue(new Error('server error'));
+    const serverError = new Error('server error');
+    mockPut.mockRejectedValue(serverError);
 
     const { Wrapper } = createWrapper();
     const { result } = renderHook(() => useSaveInferenceSettings(), { wrapper: Wrapper });
@@ -146,9 +143,10 @@ describe('useSaveInferenceSettings', () => {
       result.current.mutate({ features: [] });
     });
 
-    await waitFor(() => expect(mockAddDanger).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(1));
 
-    expect(mockAddDanger).toHaveBeenCalledWith(
+    expect(mockAddError).toHaveBeenCalledWith(
+      serverError,
       expect.objectContaining({ title: 'Failed to save settings' })
     );
   });

@@ -105,15 +105,14 @@ describe('useRegionPolicy', () => {
 describe('useSaveRegionPolicy', () => {
   const mockPut = jest.fn();
   const mockAddSuccess = jest.fn();
-  const mockAddDanger = jest.fn();
-  const mockSetQueryData = jest.fn();
+  const mockAddError = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         http: { put: mockPut },
-        notifications: { toasts: { addSuccess: mockAddSuccess, addDanger: mockAddDanger } },
+        notifications: { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } },
       },
     });
   });
@@ -125,13 +124,8 @@ describe('useSaveRegionPolicy', () => {
     };
     mockPut.mockResolvedValue(responseData);
 
-    const { queryClient } = createWrapper();
-    jest.spyOn(queryClient, 'setQueryData').mockImplementation(mockSetQueryData);
-
-    const { result } = renderHook(() => useSaveRegionPolicy(), {
-      wrapper: ({ children }) =>
-        React.createElement(QueryClientProvider, { client: queryClient }, children),
-    });
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useSaveRegionPolicy(), { wrapper: Wrapper });
 
     const body = { allowed_regions: [{ csp: 'aws', region: 'eu-west-1' }] };
 
@@ -147,7 +141,7 @@ describe('useSaveRegionPolicy', () => {
     });
   });
 
-  it('shows success toast and updates query cache on success', async () => {
+  it('shows success toast and invalidates query cache on success', async () => {
     const responseData = {
       region_policy: { allowed_regions: [{ csp: 'aws', region: 'eu-west-1' }] },
       created_at: '2026-01-01',
@@ -155,7 +149,7 @@ describe('useSaveRegionPolicy', () => {
     mockPut.mockResolvedValue(responseData);
 
     const { queryClient } = createWrapper();
-    jest.spyOn(queryClient, 'setQueryData').mockImplementation(mockSetQueryData);
+    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useSaveRegionPolicy(), {
       wrapper: ({ children }) =>
@@ -171,11 +165,14 @@ describe('useSaveRegionPolicy', () => {
     expect(mockAddSuccess).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Region preferences saved' })
     );
-    expect(mockSetQueryData).toHaveBeenCalledWith([REGION_POLICY_QUERY_KEY], responseData);
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ queryKey: [REGION_POLICY_QUERY_KEY] })
+    );
   });
 
-  it('shows danger toast on error', async () => {
-    mockPut.mockRejectedValue(new Error('server error'));
+  it('shows error toast on error', async () => {
+    const serverError = new Error('server error');
+    mockPut.mockRejectedValue(serverError);
 
     const { Wrapper } = createWrapper();
     const { result } = renderHook(() => useSaveRegionPolicy(), { wrapper: Wrapper });
@@ -184,9 +181,10 @@ describe('useSaveRegionPolicy', () => {
       result.current.mutate({ allowed_regions: [] });
     });
 
-    await waitFor(() => expect(mockAddDanger).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(1));
 
-    expect(mockAddDanger).toHaveBeenCalledWith(
+    expect(mockAddError).toHaveBeenCalledWith(
+      serverError,
       expect.objectContaining({ title: 'Failed to save region preferences' })
     );
   });
