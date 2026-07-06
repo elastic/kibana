@@ -207,7 +207,7 @@ describe('useWorkflowConfiguration', () => {
   });
 
   describe('storage event synchronization', () => {
-    it('updates state when storage event is received for the same space', async () => {
+    it('routes storage-event updates through getWorkflowSettings (migration + validation)', async () => {
       mockUseSpaceId.mockReturnValue(testSpaceId);
       mockGetWorkflowSettings.mockReturnValue(DEFAULT_WORKFLOW_CONFIGURATION);
 
@@ -216,6 +216,36 @@ describe('useWorkflowConfiguration', () => {
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
+
+      // getWorkflowSettings re-reads (and migrates + validates) the value from
+      // local storage; the raw storage-event payload must NOT be trusted directly.
+      mockGetWorkflowSettings.mockReturnValue(testConfig);
+
+      const storageEvent = new StorageEvent('storage', {
+        key: 'elasticAssistantDefault.attackDiscovery.workflowConfig.test-space',
+        newValue: JSON.stringify({ some: 'raw legacy payload' }),
+      });
+
+      act(() => {
+        window.dispatchEvent(storageEvent);
+      });
+
+      await waitFor(() => {
+        expect(result.current.workflowConfiguration).toEqual(testConfig);
+      });
+    });
+
+    it('re-reads via getWorkflowSettings with the space ID on a storage event', async () => {
+      mockUseSpaceId.mockReturnValue(testSpaceId);
+      mockGetWorkflowSettings.mockReturnValue(DEFAULT_WORKFLOW_CONFIGURATION);
+
+      const { result } = renderHook(() => useWorkflowConfiguration());
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      mockGetWorkflowSettings.mockClear();
 
       const storageEvent = new StorageEvent('storage', {
         key: 'elasticAssistantDefault.attackDiscovery.workflowConfig.test-space',
@@ -227,7 +257,7 @@ describe('useWorkflowConfiguration', () => {
       });
 
       await waitFor(() => {
-        expect(result.current.workflowConfiguration).toEqual(testConfig);
+        expect(mockGetWorkflowSettings).toHaveBeenCalledWith(testSpaceId);
       });
     });
 
@@ -277,11 +307,9 @@ describe('useWorkflowConfiguration', () => {
       });
     });
 
-    it('handles invalid JSON in storage events gracefully', async () => {
+    it('falls back to validated settings for invalid stored data', async () => {
       mockUseSpaceId.mockReturnValue(testSpaceId);
       mockGetWorkflowSettings.mockReturnValue(DEFAULT_WORKFLOW_CONFIGURATION);
-
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       const { result } = renderHook(() => useWorkflowConfiguration());
 
@@ -296,14 +324,9 @@ describe('useWorkflowConfiguration', () => {
 
       window.dispatchEvent(storageEvent);
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error parsing workflow configuration from storage event:',
-        expect.any(Error)
-      );
-
-      expect(result.current.workflowConfiguration).toEqual(DEFAULT_WORKFLOW_CONFIGURATION);
-
-      consoleErrorSpy.mockRestore();
+      await waitFor(() => {
+        expect(result.current.workflowConfiguration).toEqual(DEFAULT_WORKFLOW_CONFIGURATION);
+      });
     });
   });
 });

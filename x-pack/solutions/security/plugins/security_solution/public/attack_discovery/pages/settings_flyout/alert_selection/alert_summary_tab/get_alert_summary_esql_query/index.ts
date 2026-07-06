@@ -40,13 +40,5 @@ export const getAlertSummaryEsqlQuery = ({
 ${getEsqlKeepStatement(tableStackBy0)}
 `;
 
-  // eslint-disable-next-line no-console
-  console.log('getAlertSummaryEsqlQuery:', {
-    esqlQueryProp: esqlQuery,
-    maxAlerts,
-    tableStackBy0,
-    resultQuery: result,
-  });
-
   return result;
 };

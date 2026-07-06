@@ -55,13 +55,10 @@ export const useWorkflowConfiguration = (): UseWorkflowConfigurationResult => {
       // Only respond to changes for our specific key
       if (event.key && event.key.includes('workflowConfig') && event.key.includes(spaceId)) {
         if (event.newValue) {
-          try {
-            const newSettings = JSON.parse(event.newValue);
-            setWorkflowConfigurationState(newSettings);
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error('Error parsing workflow configuration from storage event:', error);
-          }
+          // Re-read through getWorkflowSettings so the incoming value is migrated
+          // and validated (parity with the initial load), instead of trusting the
+          // raw JSON from the storage event.
+          setWorkflowConfigurationState(getWorkflowSettings(spaceId));
         } else {
           // Settings were cleared
           setWorkflowConfigurationState(DEFAULT_WORKFLOW_CONFIGURATION);

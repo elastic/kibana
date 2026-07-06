@@ -73,8 +73,6 @@ const ValidationPanelComponent: React.FC<ValidationPanelProps> = ({
     [workflowsAppUrl]
   );
 
-  const hasCustomWorkflows = workflows.length > 0;
-
   // Build the list of validation workflows, marking the real default if found.
   // If the real default validation workflow hasn't been registered yet (first run),
   // insert a fallback entry so the user always has a default option.
@@ -113,6 +111,15 @@ const ValidationPanelComponent: React.FC<ValidationPanelProps> = ({
       ...filtered,
     ];
   }, [defaultValidateRealId, workflows]);
+
+  // Whether the picker offers any custom (non-default) validation workflow to
+  // select. Based on the filtered picker list rather than the raw workflows so
+  // that lists containing only non-selectable workflows (e.g. managed workflows
+  // owned by other plugins) still surface the "no workflows available" state.
+  const hasCustomWorkflows = useMemo(
+    () => validationWorkflows.some((workflow) => !workflow.isDefault),
+    [validationWorkflows]
+  );
 
   const handleValidationWorkflowChange = useCallback(
     (workflowIds: string[]) => {

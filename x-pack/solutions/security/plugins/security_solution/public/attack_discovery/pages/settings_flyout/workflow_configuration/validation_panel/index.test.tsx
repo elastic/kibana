@@ -441,6 +441,37 @@ describe('ValidationPanel', () => {
     expect(screen.queryByTestId('noWorkflowsAvailable')).not.toBeInTheDocument();
   });
 
+  it('shows the no-workflows empty state when only non-selectable workflows are returned', () => {
+    mockUseWorkflowEditorLink.mockReturnValue({
+      editorUrl: null,
+      navigateToEditor: jest.fn(),
+      resolvedWorkflowId: null,
+    });
+
+    // A single managed workflow owned by another plugin is filtered out of the
+    // validation picker, leaving only the synthetic default entry — so there are
+    // no custom validation workflows to select.
+    mockUseListWorkflows.mockReturnValue(
+      mockSuccessResult([
+        {
+          description: 'Orchestrates KI feature identification',
+          id: 'system-streams-ki-onboarding',
+          managed: true,
+          name: '.streams-ki-onboarding',
+          tags: ['Streams'],
+        },
+      ])
+    );
+
+    render(
+      <TestProviders>
+        <ValidationPanel {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('noWorkflowsAvailable')).toBeInTheDocument();
+  });
+
   it('passes the agent builder URL to the NoWorkflowsAvailable component', () => {
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: null,

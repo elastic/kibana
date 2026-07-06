@@ -2,7 +2,7 @@
 
 ## What is "Edit with AI"?
 
-The **Edit with AI** button appears in the Attack Discovery settings flyout's workflow configuration panel. When clicked, it opens the Agent Builder sidebar with the [Threat Hunting agent](../../../../../../common/constants.ts), pre-loaded with the user's current ES|QL alert retrieval query as an attachment. The user then iterates on the query through natural-language conversation, and changes are synchronized back to the settings editor in real time.
+The **Edit with AI** button appears in the Attack Discovery settings flyout's workflow configuration panel. When clicked, it opens the Agent Builder sidebar via `openChat({ sessionTag: 'security', newConversation: true, autoSendInitialMessage: false, ... })`. It intentionally passes **no** `agentId`, so Agent Builder uses its default agent (the `sessionTag: 'security'` scopes the conversation to the security session). The chat is pre-loaded with the user's current ES|QL alert retrieval query as an attachment. The user then iterates on the query through natural-language conversation, and changes are synchronized back to the settings editor in real time.
 
 ## How it works
 

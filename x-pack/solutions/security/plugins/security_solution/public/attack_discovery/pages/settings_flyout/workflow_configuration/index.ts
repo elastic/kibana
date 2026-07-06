@@ -22,6 +22,8 @@ export { useFetchDefaultEsqlQuery } from './hooks/use_fetch_default_esql_query';
 export type { UseFetchDefaultEsqlQueryResult } from './hooks/use_fetch_default_esql_query';
 export { useListWorkflows } from './hooks/use_list_workflows';
 export { useWorkflowConfiguration } from './hooks/use_workflow_configuration';
+export { hasAtLeastOneRetrievalToggle } from './helpers/has_at_least_one_retrieval_toggle';
+export { hasEmptyRequiredRetrievalWorkflows } from './helpers/has_empty_required_retrieval_workflows';
 export { clearWorkflowSettings, getWorkflowSettings, setWorkflowSettings } from './local_storage';
 export { DEFAULT_WORKFLOW_CONFIGURATION, WORKFLOW_CONFIG_LOCAL_STORAGE_KEY } from './constants';
 export type {

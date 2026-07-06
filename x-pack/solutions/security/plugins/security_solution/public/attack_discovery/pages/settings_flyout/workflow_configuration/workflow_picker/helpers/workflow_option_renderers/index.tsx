@@ -49,7 +49,10 @@ export const renderWorkflowOption = (
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
       <EuiFlexItem grow style={{ minWidth: 0 }}>
-        <div className={contentClassName} style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div
+          className={contentClassName}
+          style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        >
           <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
         </div>
         {description ? (
@@ -102,7 +105,10 @@ export const renderSuperSelectDropdownDisplay = (workflow: {
         responsive={false}
         wrap={false}
       >
-        <EuiFlexItem grow={false} style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <EuiFlexItem
+          grow={false}
+          style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        >
           {getDisplayName(workflow)}
         </EuiFlexItem>
         {workflow.isDefault === true && (

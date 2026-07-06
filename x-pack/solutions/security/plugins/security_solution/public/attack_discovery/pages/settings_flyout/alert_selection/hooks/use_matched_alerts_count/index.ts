@@ -145,13 +145,6 @@ export const useMatchedAlertsCount = ({
 
   const dslCount = useMemo(() => {
     if (shouldSkipDsl || dslData == null) {
-      // eslint-disable-next-line no-console
-      console.log('useMatchedAlertsCount DSL: skipped or no data', {
-        shouldSkipDsl,
-        hasDslData: dslData != null,
-        'settings.size': settings.size,
-        'debouncedSettings.size': debouncedSettings.size,
-      });
       return null;
     }
 
@@ -165,15 +158,8 @@ export const useMatchedAlertsCount = ({
     }
 
     const capped = Math.min(totalHits, settings.size);
-    // eslint-disable-next-line no-console
-    console.log('useMatchedAlertsCount DSL count:', {
-      totalHits,
-      'settings.size': settings.size,
-      'debouncedSettings.size': debouncedSettings.size,
-      capped,
-    });
     return capped;
-  }, [debouncedSettings.size, dslData, settings.size, shouldSkipDsl]);
+  }, [dslData, settings.size, shouldSkipDsl]);
 
   // --- ES|QL count ---
   const [esqlCount, setEsqlCount] = useState<number | null>(null);
@@ -213,14 +199,10 @@ export const useMatchedAlertsCount = ({
           const rawResponse = response.rawResponse as { values?: unknown[][] };
           const total = rawResponse.values?.[0]?.[0];
           const count = typeof total === 'number' ? total : null;
-          // eslint-disable-next-line no-console
-          console.log('useMatchedAlertsCount ES|QL count:', { count, esqlCountQuery });
           setEsqlCount(count);
           setEsqlLoading(false);
         },
-        error: (err: unknown) => {
-          // eslint-disable-next-line no-console
-          console.error('useMatchedAlertsCount ES|QL error:', err);
+        error: () => {
           setEsqlCount(null);
           setEsqlLoading(false);
         },
