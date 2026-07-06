@@ -43,10 +43,15 @@ export const createTaskHandler = (deps: TaskHandlerDeps): TaskHandler => {
   return new TaskHandlerImpl(deps);
 };
 
-interface FailureOutcome {
-  serializedError: SerializedExecutionError;
-  terminalStatus: ExecutionStatus.failed | ExecutionStatus.aborted;
-}
+type FailureOutcome =
+  | {
+      error: SerializedExecutionError;
+      status: ExecutionStatus.failed;
+    }
+  | {
+      error?: undefined;
+      status: ExecutionStatus.aborted;
+    };
 
 class TaskHandlerImpl implements TaskHandler {
   private readonly deps: TaskHandlerDeps;
@@ -139,13 +144,12 @@ class TaskHandlerImpl implements TaskHandler {
     this.logger.error(`Execution ${executionId} failed: ${message}`);
 
     try {
-      // Converts the thrown error into the terminal status and persisted error shape.
-      const initialFailureOutcome: FailureOutcome = {
-        serializedError: serializeExecutionError(error),
-        terminalStatus: isRequestAbortedError(error)
-          ? ExecutionStatus.aborted
-          : ExecutionStatus.failed,
-      };
+      const initialFailureOutcome: FailureOutcome = isRequestAbortedError(error)
+        ? { status: ExecutionStatus.aborted }
+        : {
+            error: serializeExecutionError(error),
+            status: ExecutionStatus.failed,
+          };
 
       const finalFailureOutcome = await this.deliverFailureCallbackRequest({
         executionId,
@@ -153,11 +157,12 @@ class TaskHandlerImpl implements TaskHandler {
         initialFailureOutcome,
       });
 
-      await this.updateTerminalStatus({
+      // Only persist error details for failed executions, not aborted ones.
+      await executionClient.updateStatus(
         executionId,
-        executionClient,
-        finalFailureOutcome,
-      });
+        finalFailureOutcome.status,
+        finalFailureOutcome.error
+      );
     } catch (statusError) {
       this.logger.error(
         `Failed to update status for execution ${executionId}: ${statusError.message}`
@@ -185,44 +190,21 @@ class TaskHandlerImpl implements TaskHandler {
 
       await makeFailureCallbackRequestIfConfigured({
         callbackUrl: execution.metadata?.callback_url,
-        executionId,
-        // Only conversation executions have a conversation id to report back.
-        conversationId,
-        error: initialFailureOutcome.serializedError,
-        status: initialFailureOutcome.terminalStatus,
+        payload: {
+          execution_id: executionId,
+          // Only conversation executions have a conversation id to report back.
+          ...(conversationId ? { conversation_id: conversationId } : {}),
+          ...initialFailureOutcome,
+        },
       });
 
       return initialFailureOutcome;
     } catch (callbackError) {
       return {
-        serializedError: serializeExecutionError(callbackError),
-        terminalStatus: ExecutionStatus.failed,
+        error: serializeExecutionError(callbackError),
+        status: ExecutionStatus.failed,
       };
     }
-  }
-
-  /**
-   * Persists the terminal execution state, storing error details only for failed executions.
-   */
-  private async updateTerminalStatus({
-    executionId,
-    executionClient,
-    finalFailureOutcome,
-  }: {
-    executionId: string;
-    executionClient: AgentExecutionClient;
-    finalFailureOutcome: FailureOutcome;
-  }): Promise<void> {
-    if (finalFailureOutcome.terminalStatus === ExecutionStatus.aborted) {
-      await executionClient.updateStatus(executionId, ExecutionStatus.aborted);
-      return;
-    }
-
-    await executionClient.updateStatus(
-      executionId,
-      ExecutionStatus.failed,
-      finalFailureOutcome.serializedError
-    );
   }
 
   async cancel({ executionId }: { executionId: string }): Promise<void> {

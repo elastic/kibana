@@ -6,22 +6,13 @@
  */
 
 import pRetry, { AbortError } from 'p-retry';
-import {
-  ExecutionStatus,
-  type ChatEvent,
-  type SerializedExecutionError,
-} from '@kbn/agent-builder-common';
+import { ExecutionStatus, type ChatEvent } from '@kbn/agent-builder-common';
 import type {
+  CallbackPayload,
   ChatCallbackAbortedPayload,
   ChatCallbackFailurePayload,
-  ChatCallbackSuccessPayload,
 } from '../../../common/http_api/chat_callback';
 import { buildChatResponseFromEvents } from './utils/chat_response';
-
-type CallbackPayload =
-  | ChatCallbackSuccessPayload
-  | ChatCallbackFailurePayload
-  | ChatCallbackAbortedPayload;
 
 const callbackRetryOptions = {
   retries: 2,
@@ -43,12 +34,8 @@ export const makeSuccessCallbackRequestIfConfigured = async ({
   events: ChatEvent[];
   callbackUrl: string | undefined;
 }): Promise<void> => {
-  if (!callbackUrl) {
-    return;
-  }
-
-  await makeCallbackRequest({
-    url: callbackUrl,
+  await makeCallbackRequestIfConfigured({
+    callbackUrl,
     payload: {
       execution_id: executionId,
       status: ExecutionStatus.completed,
@@ -62,31 +49,27 @@ export const makeSuccessCallbackRequestIfConfigured = async ({
  * configured. No-op otherwise.
  */
 export const makeFailureCallbackRequestIfConfigured = async ({
-  executionId,
-  conversationId,
-  error,
-  status,
   callbackUrl,
+  payload,
 }: {
-  executionId: string;
-  conversationId?: string;
-  error: SerializedExecutionError;
-  status: ExecutionStatus.failed | ExecutionStatus.aborted;
   callbackUrl: string | undefined;
+  payload: ChatCallbackFailurePayload | ChatCallbackAbortedPayload;
+}): Promise<void> => {
+  await makeCallbackRequestIfConfigured({ callbackUrl, payload });
+};
+
+export const makeCallbackRequestIfConfigured = async ({
+  callbackUrl,
+  payload,
+}: {
+  callbackUrl: string | undefined;
+  payload: CallbackPayload;
 }): Promise<void> => {
   if (!callbackUrl) {
     return;
   }
 
-  await makeCallbackRequest({
-    url: callbackUrl,
-    payload: {
-      execution_id: executionId,
-      ...(conversationId ? { conversation_id: conversationId } : {}),
-      status,
-      error,
-    },
-  });
+  await makeCallbackRequest({ url: callbackUrl, payload });
 };
 
 export const makeCallbackRequest = async ({

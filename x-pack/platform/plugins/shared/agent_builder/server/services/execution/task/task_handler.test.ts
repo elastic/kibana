@@ -8,7 +8,6 @@
 import { of } from 'rxjs';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
-  AgentBuilderErrorCode,
   ChatEventType,
   ConversationAccessControlMode,
   ConversationRoundStatus,
@@ -163,10 +162,12 @@ describe('TaskHandler callback finalization', () => {
 
     expect(makeFailureCallbackRequestIfConfiguredMock).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
-      executionId: 'execution-1',
-      conversationId: 'conversation-1',
-      error: { code: 'internal_error', message: 'agent failed' },
-      status: ExecutionStatus.failed,
+      payload: {
+        execution_id: 'execution-1',
+        conversation_id: 'conversation-1',
+        error: { code: 'internal_error', message: 'agent failed' },
+        status: ExecutionStatus.failed,
+      },
     });
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
@@ -179,11 +180,6 @@ describe('TaskHandler callback finalization', () => {
     handleAgentExecutionMock.mockRejectedValue(
       createRequestAbortedError('Converse request was aborted')
     );
-    serializeExecutionErrorMock.mockReturnValueOnce({
-      code: AgentBuilderErrorCode.requestAborted,
-      message: 'Converse request was aborted',
-      meta: {},
-    });
 
     await createHandler().run({
       executionId: 'execution-1',
@@ -192,18 +188,16 @@ describe('TaskHandler callback finalization', () => {
 
     expect(makeFailureCallbackRequestIfConfiguredMock).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
-      executionId: 'execution-1',
-      conversationId: 'conversation-1',
-      error: {
-        code: AgentBuilderErrorCode.requestAborted,
-        message: 'Converse request was aborted',
-        meta: {},
+      payload: {
+        execution_id: 'execution-1',
+        conversation_id: 'conversation-1',
+        status: ExecutionStatus.aborted,
       },
-      status: ExecutionStatus.aborted,
     });
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
-      ExecutionStatus.aborted
+      ExecutionStatus.aborted,
+      undefined
     );
   });
 
@@ -212,16 +206,10 @@ describe('TaskHandler callback finalization', () => {
       createRequestAbortedError('Converse request was aborted')
     );
     makeFailureCallbackRequestIfConfiguredMock.mockRejectedValue(new Error('callback failed'));
-    serializeExecutionErrorMock
-      .mockReturnValueOnce({
-        code: AgentBuilderErrorCode.requestAborted,
-        message: 'Converse request was aborted',
-        meta: {},
-      })
-      .mockReturnValueOnce({
-        code: 'internal_error' as never,
-        message: 'callback failed',
-      });
+    serializeExecutionErrorMock.mockReturnValueOnce({
+      code: 'internal_error' as never,
+      message: 'callback failed',
+    });
 
     await createHandler().run({
       executionId: 'execution-1',
@@ -230,14 +218,11 @@ describe('TaskHandler callback finalization', () => {
 
     expect(makeFailureCallbackRequestIfConfiguredMock).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
-      executionId: 'execution-1',
-      conversationId: 'conversation-1',
-      error: {
-        code: AgentBuilderErrorCode.requestAborted,
-        message: 'Converse request was aborted',
-        meta: {},
+      payload: {
+        execution_id: 'execution-1',
+        conversation_id: 'conversation-1',
+        status: ExecutionStatus.aborted,
       },
-      status: ExecutionStatus.aborted,
     });
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
@@ -264,10 +249,11 @@ describe('TaskHandler callback finalization', () => {
 
     expect(makeFailureCallbackRequestIfConfiguredMock).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
-      executionId: 'execution-1',
-      conversationId: undefined,
-      error: { code: 'internal_error', message: 'agent failed' },
-      status: ExecutionStatus.failed,
+      payload: {
+        execution_id: 'execution-1',
+        error: { code: 'internal_error', message: 'agent failed' },
+        status: ExecutionStatus.failed,
+      },
     });
   });
 

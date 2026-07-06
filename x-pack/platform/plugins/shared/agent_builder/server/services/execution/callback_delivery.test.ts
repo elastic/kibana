@@ -205,9 +205,11 @@ describe('makeFailureCallbackRequestIfConfigured', () => {
 
     await makeFailureCallbackRequestIfConfigured({
       callbackUrl: undefined,
-      executionId: 'execution-1',
-      error,
-      status: ExecutionStatus.failed,
+      payload: {
+        execution_id: 'execution-1',
+        error,
+        status: ExecutionStatus.failed,
+      },
     });
 
     expect(fetchMock).not.toHaveBeenCalled();
@@ -218,10 +220,12 @@ describe('makeFailureCallbackRequestIfConfigured', () => {
 
     await makeFailureCallbackRequestIfConfigured({
       callbackUrl,
-      executionId: 'execution-1',
-      conversationId: 'conversation-1',
-      error,
-      status: ExecutionStatus.failed,
+      payload: {
+        execution_id: 'execution-1',
+        conversation_id: 'conversation-1',
+        error,
+        status: ExecutionStatus.failed,
+      },
     });
 
     const body = fetchMock.mock.calls[0][1]?.body as string;
@@ -238,16 +242,16 @@ describe('makeFailureCallbackRequestIfConfigured', () => {
 
     await makeFailureCallbackRequestIfConfigured({
       callbackUrl,
-      executionId: 'execution-1',
-      error,
-      status: ExecutionStatus.aborted,
+      payload: {
+        execution_id: 'execution-1',
+        status: ExecutionStatus.aborted,
+      },
     });
 
     const body = fetchMock.mock.calls[0][1]?.body as string;
     expect(JSON.parse(body)).toEqual({
       execution_id: 'execution-1',
       status: ExecutionStatus.aborted,
-      error,
     });
   });
 });
