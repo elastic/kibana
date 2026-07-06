@@ -806,7 +806,11 @@ describe('agentlessPolicyToPackagePolicy', () => {
     expect(result.policy_ids).toEqual([]);
     // Inputs are expanded back to the array shape the form components expect.
     expect(Array.isArray(result.inputs)).toBe(true);
-    expect(result.package).toEqual({ name: 'agentless_hello_world', title: 'Agentless Hello World', version: '0.5.0' });
+    expect(result.package).toEqual({
+      name: 'agentless_hello_world',
+      title: 'Agentless Hello World',
+      version: '0.5.0',
+    });
   });
 
   it('defaults the namespace when the policy has none', () => {
