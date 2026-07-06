@@ -11,15 +11,15 @@ import { getSignificantEventsAvailability } from '../../../routes/utils/assert_s
 import instructions from './instructions/discovery.md.text';
 import { SIGNIFICANT_EVENTS_DISCOVERY_TOOL_IDS } from './constants';
 
-export const SIGEVENTS_DISCOVERY_AGENT_ID = 'platform.streams.significant-events.discovery';
+export const SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID = 'platform.streams.sig-events.discovery';
 
-export function createSigEventsDiscoveryAgent({
+export function createSignificantEventsDiscoveryAgent({
   server,
 }: {
   server: StreamsServer;
 }): BuiltInAgentDefinition {
   return {
-    id: SIGEVENTS_DISCOVERY_AGENT_ID,
+    id: SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID,
     name: 'Significant Events Discovery',
     description:
       'Triages statistical detection signals across rules, correlates related detections into incident candidates using shared infrastructure, temporal proximity, and causal plausibility, and drafts structured discovery documents with root-cause hypotheses and supporting evidence.',
