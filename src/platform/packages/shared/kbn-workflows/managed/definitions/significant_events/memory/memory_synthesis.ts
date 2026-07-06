@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import CONVERSATION_SCRAPER_YAML from './conversation_scraper.yaml';
-import type { ManagedWorkflowDefinition } from '../../types';
+import MEMORY_SYNTHESIS_YAML from './memory_synthesis.yaml';
+import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID =
-  'system-streams-memory-conversation-scraper';
+export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID = 'system-streams-memory-synthesis';
 
-export const STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW = {
-  id: STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   pluginId: 'streams',
   version: 1,
   billable: false,
-  yaml: CONVERSATION_SCRAPER_YAML,
+  yaml: MEMORY_SYNTHESIS_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
