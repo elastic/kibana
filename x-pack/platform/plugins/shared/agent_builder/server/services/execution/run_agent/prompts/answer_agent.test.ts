@@ -49,7 +49,8 @@ describe('getStructuredAnswerPrompt', () => {
 
     const messages = await getStructuredAnswerPrompt(params);
 
-    expect((messages[0] as [string, string])[1]).not.toContain('Current date');
+    const systemMessage = (messages[0] as ['system', string])[1];
+    expect(systemMessage).not.toContain('Current date');
     expect(convertPreviousRounds).toHaveBeenCalledWith(
       expect.objectContaining({ conversationTimestamp: now })
     );
