@@ -19,10 +19,6 @@ export type SourceType = Extract<
 
 export type ConfiguredSource = Extract<StreamsV2.Source, { type: SourceType }>;
 
-export interface SourcesUnitDefinition extends Omit<StreamsV2.UnitDefinition, 'sources'> {
-  sources: ConfiguredSource[];
-}
-
 export type SourceStatus = 'live' | 'provisioning' | 'failed';
 
 export interface SourceApiKey {

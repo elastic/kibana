@@ -18,12 +18,17 @@ import {
 } from '../source_api_keys';
 import type { SourceEnvironmentLoader } from '../source_environment';
 import {
-  createConfiguredSource,
   createRuntimeMetadata,
   createSourceViewModel,
+  createUnitSource,
+  getConfiguredSources,
+  getUnitSources,
+  toConfiguredSource,
+  withUnitSources,
 } from '../source_models';
 import { createSourceId, getAvailableSourceTypes, type SourceEnvironment } from '../source_helpers';
 import { getFormattedError } from '../../../../util/errors';
+import type { Unit } from '../../../../services/unit_repository';
 import type {
   ConfiguredSource,
   RevealedApiKey,
@@ -32,7 +37,6 @@ import type {
   SourceStatus,
   SourceType,
   SourceViewModel,
-  SourcesUnitDefinition,
 } from '../types';
 
 type ApiKeyOperation = 'load' | 'generate' | 'delete' | 'persist';
@@ -66,13 +70,13 @@ export interface DeleteApiKeyOutput {
 
 export interface SourcesParentEvent {
   type: 'unit.changed';
-  unitDefinition: SourcesUnitDefinition;
+  unitDefinition: Unit;
   sourceId: string;
   intent: 'create' | 'delete';
 }
 
 export interface SourcesStateInput {
-  unitDefinition: SourcesUnitDefinition;
+  unitDefinition: Unit;
   metadataBySourceId: Record<string, SourceRuntimeMetadata>;
   apiKeysBySourceId?: Record<string, SourceApiKey[]>;
   statusBySourceId?: Record<string, SourceStatus>;
@@ -93,7 +97,7 @@ export interface SourceCreationContext {
 }
 
 export interface SourcesStateContext {
-  unitDefinition: SourcesUnitDefinition;
+  unitDefinition: Unit;
   metadataBySourceId: Record<string, SourceRuntimeMetadata>;
   apiKeysBySourceId: Record<string, SourceApiKey[]>;
   statusBySourceId: Record<string, SourceStatus>;
@@ -113,12 +117,12 @@ export interface SourcesStateContext {
 }
 
 export type SourcesStateEvent =
-  | { type: 'unit.loaded'; unitDefinition: SourcesUnitDefinition }
-  | { type: 'unit.persisted'; sourceId: string; unitDefinition: SourcesUnitDefinition }
+  | { type: 'unit.loaded'; unitDefinition: Unit }
+  | { type: 'unit.persisted'; sourceId: string; unitDefinition: Unit }
   | {
       type: 'unit.persistenceFailed';
       sourceId: string;
-      unitDefinition: SourcesUnitDefinition;
+      unitDefinition: Unit;
       message: string;
       intent: 'create' | 'delete';
     }
@@ -163,14 +167,14 @@ export const getSourceNameValidationError = ({
   unitDefinition,
 }: {
   sourceName: string;
-  unitDefinition: SourcesUnitDefinition;
+  unitDefinition: Unit;
 }): SourceNameValidationError | undefined => {
   const normalizedSourceName = normalizeSourceName(sourceName);
   if (!normalizedSourceName) {
     return 'required';
   }
 
-  return unitDefinition.sources.some(
+  return getUnitSources(unitDefinition).some(
     ({ name }) => name && normalizeSourceName(name) === normalizedSourceName
   )
     ? 'duplicate'
@@ -182,13 +186,13 @@ const getCreationFormErrors = ({
   unitDefinition,
 }: {
   sourceName: string;
-  unitDefinition: SourcesUnitDefinition;
+  unitDefinition: Unit;
 }): SourceCreationFormErrors => ({
   sourceName: getSourceNameValidationError({ sourceName, unitDefinition }),
 });
 
-const hasSource = (unitDefinition: SourcesUnitDefinition, sourceId: string): boolean =>
-  unitDefinition.sources.some(({ id }) => id === sourceId);
+const hasSource = (unitDefinition: Unit, sourceId: string): boolean =>
+  getUnitSources(unitDefinition).some(({ id }) => id === sourceId);
 
 const createUnconfiguredNodeId = (): string =>
   `unconfigured-source-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
@@ -214,13 +218,14 @@ const rebuildSourceSidecars = (
     | 'sourceEnvironment'
     | 'selectedSourceId'
   >,
-  unitDefinition: SourcesUnitDefinition
+  unitDefinition: Unit
 ) => {
-  const sourceIds = new Set(unitDefinition.sources.map(({ id }) => id));
+  const configuredSources = getConfiguredSources(unitDefinition);
+  const sourceIds = new Set(configuredSources.map(({ id }) => id));
   return {
     unitDefinition,
     metadataBySourceId: Object.fromEntries(
-      unitDefinition.sources.map((source) => [
+      configuredSources.map((source) => [
         source.id,
         context.metadataBySourceId[source.id] ??
           createRuntimeMetadata(source, context.sourceEnvironment),
@@ -337,7 +342,7 @@ export const sourcesStateMachine = setup({
               }
             : context.creationContext,
         metadataBySourceId: Object.fromEntries(
-          context.unitDefinition.sources.map((source) => {
+          getConfiguredSources(context.unitDefinition).map((source) => {
             const resolvedMetadata = createRuntimeMetadata(source, sourceEnvironment);
             return [
               source.id,
@@ -364,7 +369,7 @@ export const sourcesStateMachine = setup({
         return {};
       }
       const sidecars = rebuildSourceSidecars(context, event.unitDefinition);
-      const sourceIds = new Set(event.unitDefinition.sources.map(({ id }) => id));
+      const sourceIds = new Set(getConfiguredSources(event.unitDefinition).map(({ id }) => id));
       return {
         ...sidecars,
         hasReceivedUnit: true,
@@ -432,10 +437,10 @@ export const sourcesStateMachine = setup({
         };
       }
       return {
-        unitDefinition: {
-          ...context.unitDefinition,
-          sources: context.unitDefinition.sources.filter(({ id }) => id !== sourceId),
-        },
+        unitDefinition: withUnitSources(
+          context.unitDefinition,
+          getUnitSources(context.unitDefinition).filter(({ id }) => id !== sourceId)
+        ),
         metadataBySourceId: withoutKey(context.metadataBySourceId, sourceId),
         apiKeysBySourceId: withoutKey(context.apiKeysBySourceId, sourceId),
         statusBySourceId: withoutKey(context.statusBySourceId, sourceId),
@@ -499,9 +504,13 @@ export const sourcesStateMachine = setup({
       const name = sourceName.trim();
       const id = createSourceId({
         name,
-        existingIds: context.unitDefinition.sources.map((source) => source.id),
+        existingIds: getUnitSources(context.unitDefinition).map((source) => source.id),
       });
-      const source = createConfiguredSource({ id, name, type });
+      const unitSource = createUnitSource({ id, name, type });
+      const source = toConfiguredSource(unitSource);
+      if (!source) {
+        return {};
+      }
       const metadata = createRuntimeMetadata(source, context.sourceEnvironment);
       return {
         creationContext: {
@@ -518,13 +527,12 @@ export const sourcesStateMachine = setup({
               (nodeId) => nodeId !== context.creationContext?.associatedUnconfiguredNodeId
             )
           : context.unconfiguredNodeIds,
-        unitDefinition: {
-          ...context.unitDefinition,
-          sources: [
-            ...context.unitDefinition.sources.filter(({ id: sourceId }) => sourceId !== source.id),
-            source,
-          ],
-        },
+        unitDefinition: withUnitSources(context.unitDefinition, [
+          ...getUnitSources(context.unitDefinition).filter(
+            ({ id: sourceId }) => sourceId !== unitSource.id
+          ),
+          unitSource,
+        ]),
         metadataBySourceId: {
           ...context.metadataBySourceId,
           [source.id]: metadata,
@@ -556,10 +564,10 @@ export const sourcesStateMachine = setup({
         return {};
       }
       return {
-        unitDefinition: {
-          ...context.unitDefinition,
-          sources: context.unitDefinition.sources.filter(({ id }) => id !== event.sourceId),
-        },
+        unitDefinition: withUnitSources(
+          context.unitDefinition,
+          getUnitSources(context.unitDefinition).filter(({ id }) => id !== event.sourceId)
+        ),
         metadataBySourceId: withoutKey(context.metadataBySourceId, event.sourceId),
         apiKeysBySourceId: withoutKey(context.apiKeysBySourceId, event.sourceId),
         statusBySourceId: withoutKey(context.statusBySourceId, event.sourceId),
@@ -780,7 +788,9 @@ export const sourcesStateMachine = setup({
       (event.type === 'unit.loaded' || event.type === 'unit.persisted') &&
       Boolean(
         context.selectedSourceId &&
-          !event.unitDefinition.sources.some(({ id }) => id === context.selectedSourceId)
+          !getConfiguredSources(event.unitDefinition).some(
+            ({ id }) => id === context.selectedSourceId
+          )
       ),
     targetsViewedSource: ({ context, event }) =>
       (event.type === 'apiKey.generate' || event.type === 'apiKey.delete') &&
@@ -952,7 +962,7 @@ export const sourcesStateMachine = setup({
             id: 'loadSourceApiKeys',
             src: 'loadApiKeys',
             input: ({ context }) => {
-              const source = context.unitDefinition.sources.find(
+              const source = getConfiguredSources(context.unitDefinition).find(
                 ({ id }) => id === context.selectedSourceId
               );
               if (!source) {
@@ -976,7 +986,7 @@ export const sourcesStateMachine = setup({
                 id: 'generateViewedSourceApiKey',
                 src: 'generateApiKey',
                 input: ({ context }) => {
-                  const source = context.unitDefinition.sources.find(
+                  const source = getConfiguredSources(context.unitDefinition).find(
                     ({ id }) => id === context.selectedSourceId
                   );
                   if (!source) {
@@ -1033,7 +1043,7 @@ export const getSourceViewModels = (context: SourcesStateContext): SourceViewMod
     apiKeysBySourceId,
     sourceEnvironment,
   } = context;
-  const sourceViewModels = unitDefinition.sources.map((source) =>
+  const sourceViewModels = getConfiguredSources(unitDefinition).map((source) =>
     createSourceViewModel({
       source,
       metadata: metadataBySourceId[source.id] ?? createRuntimeMetadata(source, sourceEnvironment),
