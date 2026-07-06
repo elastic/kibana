@@ -208,7 +208,7 @@ You run in one of two modes, selected from the triggering event:
 
 ## Number of runs
 
-Trigger the flaky test runner at most 3 times per PR; run a given config up to 50 times at most. To know how many runs you have already triggered, count the comments in `pr-issue-comments.json` whose body starts with `/flaky ` (authored by `kibanamachine`). Never post a `/flaky` comment that would exceed 3 total.
+Trigger the flaky test runner at most 5 times per PR; run a given config up to 50 times at most. To know how many runs you have already triggered, count the comments in `pr-issue-comments.json` whose body starts with `/flaky ` (authored by `kibanamachine`). Never post a `/flaky` comment that would exceed 5 total.
 
 ## State
 
@@ -256,16 +256,15 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
    - Deduplicate; include each config once. If you cannot resolve any config, add `flaky-fix-check:skipped`, post a comment asking a human to identify the config, and stop.
    - If the PR touches a page object in one of the Scout packages (e.g., `@kbn/scout`, `@kbn/scout-oblt`, etc.) determine if it is worthwhile to run extra configs to test the fix is stable and won't create flakiness.
 
-4. **Trigger the run.** Confirm you have not already triggered 3 runs (count prior `/flaky ` comments). Then post **two** comments:
+4. **Trigger the run.** Confirm you have not already triggered 5 runs (count prior `/flaky ` comments). Then post the trigger command as its own comment (it must start with `/flaky ` so the trigger workflow picks it up):
 
-   - First, a short **rationale** comment (1–3 sentences): which config(s) you are running and why (which targeted test(s) they exercise).
-   - Then a **separate** comment whose body is exactly the trigger command on its own (it must start with `/flaky ` so the trigger workflow picks it up):
+   ```
+   /flaky <type>:<path>:50 [<type>:<path>:50 ...]
+   ```
 
-     ```
-     /flaky <type>:<path>:10 [<type>:<path>:10 ...]
-     ```
+   Use `:50` per config. `<type>` is `ftrConfig` or `scoutConfig`. Keep all configs on the single `/flaky` line.
 
-     Use `:10` per config. `<type>` is `ftrConfig` or `scoutConfig`. Keep all configs on the single `/flaky` line.
+   The `/flaky` comment is the only comment this step needs. Add a separate one-sentence rationale comment **only** when the config choice isn't obvious from the diff (e.g. you added an extra config to guard a shared page object) — skip it for a routine first run rather than restate which test you're exercising.
 
 5. **Mark state.** Add the `flaky-fix-check:started` label (if it doesn't already exist). Do not wait for results. Stop here.
 
@@ -302,10 +301,10 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
    | Situation                                                      | Action                                                                                                                                                                                                                                                                                                                                             |
    | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
    | Every config green **and** targeted test ran                   | **Passed.** Remove `flaky-fix-check:started` and add `flaky-fix-check:passed`. Do not post any comment.                                                                                                                                                                                                                                          |
-   | Targeted test still **fails** and fewer than 3 runs triggered  | **Iterate.** From the failure artifacts, derive a revised, minimal test-side fix. Check out the PR head branch, apply the change, and push it. Then post a rationale comment and a separate `/flaky` comment to re-run against the new commit. A run's results only count for the commit they ran on, so re-run every config your change affects: always the config(s) where the targeted test still failed, plus any previously-green config that exercises code your revision touched (e.g. a shared Scout page object). Reuse the config paths from your prior `/flaky` comment (add one only if the fix now touches files under a different config); you may keep trusting an earlier green only for configs your change can't affect. Only re-trigger after an actual code change — never burn budget re-running an unchanged patch hoping for a luckier result. |
+   | Targeted test still **fails** and fewer than 5 runs triggered  | **Iterate.** From the failure artifacts, derive a revised, minimal test-side fix. Check out the PR head branch, apply the change, and push it. Then post a `/flaky` comment to re-run against the new commit — the pushed commit message carries the reasoning, so add a separate rationale comment only when the change or its motivation isn't clear from that commit. A run's results only count for the commit they ran on, so re-run every config your change affects: always the config(s) where the targeted test still failed, plus any previously-green config that exercises code your revision touched (e.g. a shared Scout page object). Reuse the config paths from your prior `/flaky` comment (add one only if the fix now touches files under a different config); you may keep trusting an earlier green only for configs your change can't affect. Only re-trigger after an actual code change — never burn budget re-running an unchanged patch hoping for a luckier result. |
    | Targeted test **passes** but only an **unrelated** test failed | Investigate whether the PR is responsible. If you are confident the failure is unrelated (lane pollution / pre-existing), remove `flaky-fix-check:started`, add `flaky-fix-check:passed`, and post a very concise comment calling out the unrelated failure. If you cannot rule out the PR, treat it as inconclusive (see below).                  |
-   | Targeted test still **fails** after 3 runs (fix did not hold)  | **Failed.** Remove `flaky-fix-check:started` and add `flaky-fix-check:failed`. Post a brief summary of the runs and a recommendation for the owning team.                                                                                                                                                                                        |
-   | 3 runs exhausted without a clear verdict (ambiguous / only unrelated failures) | **Inconclusive.** Remove `flaky-fix-check:started` and add `flaky-fix-check:inconclusive`. Post a brief recommendation for the owning team on next steps.                                                                                                                                                        |
+   | Targeted test still **fails** after 5 runs (fix did not hold)  | **Failed.** Remove `flaky-fix-check:started` and add `flaky-fix-check:failed`. Post a brief summary of the runs and a recommendation for the owning team.                                                                                                                                                                                        |
+   | 5 runs exhausted without a clear verdict (ambiguous / only unrelated failures) | **Inconclusive.** Remove `flaky-fix-check:started` and add `flaky-fix-check:inconclusive`. Post a brief recommendation for the owning team on next steps.                                                                                                                                                        |
 
 5. **Always** leave the PR in a coherent state: the correct label(s) set, and either a `/flaky` re-trigger comment or a terminal summary comment.
 
@@ -319,7 +318,8 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 
 ## Guardrails
 
-- Never exceed 3 total `/flaky` triggers for this PR.
+- Never exceed 5 total `/flaky` triggers for this PR.
+- Be economical with comments: post one only when it tells a reader something they can't already get from the `/flaky` command, the pushed commit, the runner's own result comment, or the labels. Keep any comment you do post to a sentence or two, and prefer no comment over a redundant or restating one. (The `passed` verdict posts nothing at all.)
 - The `/flaky` command must be its own comment and start with `/flaky ` (it is consumed by `.github/workflows/trigger-flaky.yml`).
 - Never include the literal phrase `Flaky Test Runner Stats` in any comment you post — that header is how this workflow detects the runner's results comment, and reusing it would make the workflow re-trigger on its own comment.
 - Do not weaken assertions, wrap assertions in `retry()`, bump timeouts as the primary fix, or strip tags to skip the test (see the `flaky-test-investigator` skill's pitfalls). A revised fix must address a root cause and follow the testing best practices in `docs/extend/testing/` (`scout-best-practices.md`, `ui-best-practices.md`, `api-best-practices.md`).
