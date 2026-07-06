@@ -4,12 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiCallOutProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { asPercent } from '@kbn/observability-plugin/common';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { ANOMALY_ALERT_SEVERITY_TYPES } from '../../../../../common/rules/apm_rule_types';
+import {
+  ANOMALY_ALERT_SEVERITY_TYPES,
+  getApmMlDetectorLabel,
+} from '../../../../../common/rules/apm_rule_types';
 
 export const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType => {
   if (ruleAggType === '95th') return LatencyAggregationType.p95;
@@ -42,21 +47,54 @@ export function formatSeverityLabel(alertSeverity: ML_ANOMALY_SEVERITY): string 
   });
 }
 
-export function formatAnomalySeverityThreshold(alertEvaluationThreshold: number): string {
+function getThresholdSeverityLabel(alertEvaluationThreshold: number): string {
   const severityMatch = ANOMALY_ALERT_SEVERITY_TYPES.find(
     (s) => s.threshold === alertEvaluationThreshold
   );
 
-  return i18n.translate('xpack.apm.alertDetails.anomalySeveritySubtitle', {
-    defaultMessage: `{severity, select,
-      critical {Alert when critical or above}
-      major {Alert when major or above}
-      minor {Alert when minor or above}
-      warning {Alert when warning or above}
-      other {Alert when {severity} or above}
-    }`,
+  return severityMatch?.type ?? String(alertEvaluationThreshold);
+}
+
+function formatDetectorTitleLabel(detectorLabel: string): string {
+  return detectorLabel.charAt(0).toUpperCase() + detectorLabel.slice(1);
+}
+
+export function formatAnomalyCalloutTitle({
+  alertSeverity,
+  detectorType,
+}: {
+  alertSeverity: ML_ANOMALY_SEVERITY;
+  detectorType: AnomalyDetectorType;
+}): string {
+  return i18n.translate('xpack.apm.alertDetails.anomalyCalloutTitle', {
+    defaultMessage: '{severity} APM anomaly detected - {detectorType}',
     values: {
-      severity: severityMatch?.type ?? String(alertEvaluationThreshold),
+      severity: formatSeverityLabel(alertSeverity),
+      detectorType: formatDetectorTitleLabel(getApmMlDetectorLabel(detectorType)),
     },
   });
+}
+
+export function formatAnomalyCalloutBody(alertEvaluationThreshold: number): string {
+  return i18n.translate('xpack.apm.alertDetails.anomalyCalloutBody', {
+    defaultMessage:
+      'Alert when an anomaly with severity {thresholdSeverity, select, critical {critical} major {major} minor {minor} warning {warning} other {{thresholdSeverity}}} or above is detected.',
+    values: {
+      thresholdSeverity: getThresholdSeverityLabel(alertEvaluationThreshold),
+    },
+  });
+}
+
+export function getAnomalyCalloutColor(
+  alertSeverity: ML_ANOMALY_SEVERITY
+): EuiCallOutProps['color'] {
+  switch (alertSeverity) {
+    case ML_ANOMALY_SEVERITY.CRITICAL:
+      return 'danger';
+    case ML_ANOMALY_SEVERITY.MAJOR:
+    case ML_ANOMALY_SEVERITY.MINOR:
+      return 'warning';
+    default:
+      return 'primary';
+  }
 }
