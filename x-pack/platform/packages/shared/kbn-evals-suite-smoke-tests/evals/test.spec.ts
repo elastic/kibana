@@ -7,6 +7,7 @@
 
 import { expect } from '@playwright/test';
 import { MessageRole } from '@kbn/inference-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { Evaluator } from '@kbn/evals';
 import { evaluate, tags } from '@kbn/evals';
 import { replaySnapshot, createGcsRepository } from '@kbn/es-snapshot-loader';
@@ -99,7 +100,7 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
 
   evaluate(
     'smoke tests: trace-retrieval',
-    async ({ executorClient, inferenceClient, evaluators }) => {
+    async ({ executorClient, agentBuilderClient, evaluators }) => {
       const { inputTokens, outputTokens } = evaluators.traceBasedEvaluators;
 
       const result = await executorClient.runExperiment(
@@ -113,11 +114,11 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
           ],
           task: async (example) => {
             const { prompt } = example.input! as { prompt: string };
-            const response = await inferenceClient.chatComplete({
-              stream: false,
-              messages: [{ role: MessageRole.User, content: prompt }],
+            const response = await agentBuilderClient.converse({
+              agentId: agentBuilderDefaultAgentId,
+              input: prompt,
             });
-            return { response: response.content };
+            return { response: response.message };
           },
         },
         [inputTokens, outputTokens]
