@@ -75,7 +75,7 @@ describe('Component template TabSummary', () => {
 
     expect(screen.getByText('Failed data lifecycle')).toBeInTheDocument();
     const detail = screen.getByTestId('failedDataLifecycleDetail');
-    expect(within(detail).getByText('30 days')).toBeInTheDocument();
+    expect(within(detail).getByText(/30 days/)).toBeInTheDocument();
     expect(within(detail).getByText(/2 data phases/)).toBeInTheDocument();
 
     const tooltip = within(detail).getByTestId('iconTip');

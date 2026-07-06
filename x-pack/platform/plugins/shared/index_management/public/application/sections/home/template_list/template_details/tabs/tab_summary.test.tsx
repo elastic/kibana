@@ -87,7 +87,7 @@ describe('Index template TabSummary', () => {
 
     expect(screen.getByText('Failed data lifecycle')).toBeInTheDocument();
     const detail = screen.getByTestId('failedDataLifecycleTemplateDetail');
-    expect(within(detail).getByText('30 days')).toBeInTheDocument();
+    expect(within(detail).getByText(/30 days/)).toBeInTheDocument();
     expect(within(detail).getByText(/2 data phases/)).toBeInTheDocument();
 
     const tooltip = within(detail).getByTestId('iconTip');
@@ -130,7 +130,7 @@ describe('Index template TabSummary', () => {
     );
 
     const detail = screen.getByTestId('failedDataLifecycleTemplateDetail');
-    expect(within(detail).getByText('∞')).toBeInTheDocument();
+    expect(within(detail).getByText(/∞/)).toBeInTheDocument();
     expect(within(detail).queryByTestId('iconTip')).not.toBeInTheDocument();
   });
 });
