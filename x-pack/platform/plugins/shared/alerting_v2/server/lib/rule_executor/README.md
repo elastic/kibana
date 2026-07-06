@@ -167,6 +167,8 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 7 | `DirectorStep` | Enrich alert-type events with episode state. |
 | 8 | `StoreAlertEventsStep` | Persist the final batch into `.rule-events`. |
 
+The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden.
+
 ## Recovery behavior
 
 Recovery is implemented in `CreateRecoveryEventsStep` after `CreateAlertEventsStep`, so the current batch already contains breach documents when recovery logic runs.

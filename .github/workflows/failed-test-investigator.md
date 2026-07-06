@@ -22,8 +22,18 @@ permissions:
 if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'failed-test') && (github.event.action != 'labeled' || github.event.label.name == 'failed-test')) }}"
 
 concurrency:
-  group: 'failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}'
+  # Keep one investigation lane per issue. Unrelated label events get their own group suffix so they can skip without canceling an in-flight investigation.
+  group: >-
+    failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
+      (
+        github.event.action == 'labeled' &&
+        github.event.label.name != 'failed-test' &&
+        github.event.label.name
+      ) ||
+      'investigate'
+    }}
   cancel-in-progress: true
+  job-discriminator: ${{ github.event.issue.number || github.event.inputs.issue_number }}
 
 env:
   ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
@@ -42,34 +52,14 @@ engine:
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
     ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
-    CLAUDE_CODE_EFFORT_LEVEL: xhigh
+    CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
 tools:
   github:
     toolsets: [default, actions, search]
   web-fetch:
-  bash:
-    [
-      'cat',
-      'head',
-      'tail',
-      'grep',
-      'wc',
-      'sort',
-      'uniq',
-      'date',
-      'yq',
-      'jq',
-      'echo',
-      'ls',
-      'pwd',
-      'git:*',
-      'gh:*',
-      'bk:*',
-      'node',
-      'curl',
-    ]
+  bash: true
 
 network:
   allowed:
@@ -117,7 +107,7 @@ safe-outputs:
   add-labels:
     allowed:
       - failure:ai-fixable
-      - failure:test-design
+      - failure:test-needs-update
       - failure:test-environment
       - failure:application
       - failure:ci-environment
@@ -126,12 +116,14 @@ safe-outputs:
     target: *issue_number
 
 strict: false
-timeout-minutes: 20
+timeout-minutes: 35
 ---
 
 # Failed Test Investigator
 
 Investigate a failed-test issue, classify the failure, and propose a fix when appropriate.
+
+This run is killed at a hard timeout and posts a single, write-once comment that cannot be edited or replaced. If you run out of time before posting, nothing is recorded. The objective is a correct comment that ships (an investigation that is "more thorough" but never posts is a failure).
 
 ## Target issue
 
@@ -140,15 +132,21 @@ Investigate a failed-test issue, classify the failure, and propose a fix when ap
 
 ## Investigate
 
-Investigate the test failure(s) using the `flaky-test-investigator` skill. Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.).
+Investigate the test failure(s) using the `flaky-test-investigator` skill (path: `.agents/skills/flaky-test-investigator`). Read the files in the folder directly, do not invoke the skill directly as that is disabled in this environment.
+
+Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.).
 
 Every conclusion must cite specific evidence. Do not guess.
+
+## Environment constraints
+
+**Scratch files**: write throwaway files inside the repository checkout (the current working directory). Redirecting (`>`) elsewhere (e.g. `/tmp/...`) may be blocked — use a path under the repo root.
 
 ## Classify
 
 Set `classification` based on where the evidence points:
 
-- **`test-design`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
+- **`test-needs-update`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
 - **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference).
 - **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug).
 - **`ci-environment`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
@@ -170,7 +168,7 @@ Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong in
 
 Add exactly one classification label to the issue that matches the chosen `classification`:
 
-- `failure:test-design`: when `classification` is `test-design`
+- `failure:test-needs-update`: when `classification` is `test-needs-update`
 - `failure:test-environment`: when `classification` is `test-environment`
 - `failure:application`: when `classification` is `application`
 - `failure:ci-environment`: when `classification` is `ci-environment`
@@ -184,14 +182,6 @@ Add `failure:ai-fixable` to the issue if we are confident that a fix is availabl
 
 - Mention a commit (or small set of commits, last 3 months) only when evidence strongly implicates it.
 - Never speculate or use attribution as a fallback for weak evidence.
-
-## References
-
-- Link repository files with Markdown GitHub links — never bare paths.
-- Prefer blob links with line anchors: `[path/to/file.ts](https://github.com/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/path/to/file.ts#L123-L140)`.
-- For historical evidence, use a commit link instead of the default-branch blob link.
-- Always link commits — never bare SHAs.
-- Bare paths (`file.ts:123`) are allowed only as a supplement to a link.
 
 ## Comment format
 

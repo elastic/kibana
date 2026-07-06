@@ -20,6 +20,8 @@ export {
   getInitialESQLQuery,
   getESQLWithSafeLimit,
   appendToESQLQuery,
+  escapeStringValue,
+  buildJoinedFilter,
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
   appendLimitToQuery,
@@ -92,6 +94,9 @@ export {
   type ESQLColumnsWithHighlights,
   type ESQLHighlightTags,
   type ESQLIndexPatterns,
+  classifyESQLSource,
+  isSingleSource,
+  type ESQLSourceKind,
 } from './src';
 
-export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';
+export { ENABLE_ESQL, ESQL_APPROXIMATION_FEATURE_FLAG_KEY, GROUP_NOT_SET_VALUE } from './constants';

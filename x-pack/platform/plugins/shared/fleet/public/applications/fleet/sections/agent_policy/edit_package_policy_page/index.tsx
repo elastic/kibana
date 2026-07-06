@@ -48,6 +48,7 @@ import {
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
 import {
+  applyIlmPolicyChange,
   applyNamespaceCustomizationChange,
   computeDefaultVarGroupSelections,
   type VarGroupSelection,
@@ -186,6 +187,7 @@ export const EditPackagePolicyForm = memo<{
     return [];
   }, [packageInfo]);
   const namespaceCustomizationEnabledRef = useRef<boolean>(false);
+  const ilmPolicyRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (newAgentPolicyName) {
@@ -371,6 +373,15 @@ export const EditPackagePolicyForm = memo<{
           notifications,
           packageInfo.title ?? packageInfo.name
         );
+        await applyIlmPolicyChange(
+          packageInfo.name,
+          packageInfo.version,
+          packagePolicy.namespace,
+          ilmPolicyRef.current,
+          packageInfo,
+          notifications,
+          packageInfo.title ?? packageInfo.name
+        );
       }
       setIsEdited(false);
       application.navigateToUrl(successRedirectPath);
@@ -485,6 +496,12 @@ export const EditPackagePolicyForm = memo<{
               agentPolicies={agentPolicies}
               onNamespaceCustomizationEnabledChange={(enabled, isInit) => {
                 namespaceCustomizationEnabledRef.current = enabled;
+                if (!isInit) {
+                  setIsEdited(true);
+                }
+              }}
+              onIlmPolicyChange={(ilmPolicy, isInit) => {
+                ilmPolicyRef.current = ilmPolicy;
                 if (!isInit) {
                   setIsEdited(true);
                 }

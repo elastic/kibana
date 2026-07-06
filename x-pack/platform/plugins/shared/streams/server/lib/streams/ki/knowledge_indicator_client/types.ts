@@ -7,8 +7,7 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IDataStreamClient } from '@kbn/data-streams';
-import type { Feature, StreamQuery } from '@kbn/streams-schema';
-import type { IRulesManagementClient } from './rules/rules_management_client';
+import type { FeatureUpsert, StreamQuery } from '@kbn/significant-events-schema';
 import type { knowledgeIndicatorsMappings } from '../data_stream';
 import type { StoredKnowledgeIndicator } from '../data_stream';
 import type { KnowledgeIndicatorType } from '../fields';
@@ -21,7 +20,7 @@ export type KnowledgeIndicatorDataStreamClient = IDataStreamClient<
 >;
 
 interface KIBulkIndexFeatureOperation {
-  index: { feature: Feature };
+  index: { feature: FeatureUpsert };
 }
 interface KIBulkIndexQueryOperation {
   index: { query: StreamQuery & { rule_backed?: boolean; rule_id?: string } };
@@ -45,7 +44,6 @@ export type KIBulkOperation =
 export interface KnowledgeIndicatorClientDeps {
   dataStreamClient: KnowledgeIndicatorDataStreamClient;
   esClient: ElasticsearchClient;
-  rulesManagementClient: IRulesManagementClient;
   soClient: SavedObjectsClientContract;
   logger: Logger;
 }
