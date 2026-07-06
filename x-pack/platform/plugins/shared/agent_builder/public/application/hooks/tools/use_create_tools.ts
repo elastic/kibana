@@ -6,6 +6,7 @@
  */
 
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import type { ToolDefinition } from '@kbn/agent-builder-common';
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { produce } from 'immer';
@@ -38,7 +39,13 @@ export const useCreateToolService = ({ onSuccess, onError }: UseCreateToolServic
     CreateToolPayload
   >({
     mutationFn: (tool) => toolsService.create(tool),
-    onSuccess,
+    onSuccess: (response, variables, context) => {
+      queryClient.setQueryData<ToolDefinition[]>(queryKeys.tools.all, (previousTools) => [
+        ...(previousTools ?? []),
+        response,
+      ]);
+      onSuccess?.(response, variables, context);
+    },
     onError,
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.tools.all }),
   });
