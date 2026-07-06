@@ -562,6 +562,9 @@ describe('metric visualization', () => {
                 "color": Array [
                   "static-color",
                 ],
+                "density": Array [
+                  "compact",
+                ],
                 "iconAlign": Array [
                   "right",
                 ],
@@ -610,9 +613,6 @@ describe('metric visualization', () => {
                 ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
-                ],
-                "density": Array [
-                  "compact",
                 ],
                 "subtitle": Array [
                   "subtitle",
@@ -665,6 +665,9 @@ describe('metric visualization', () => {
                 "color": Array [
                   "static-color",
                 ],
+                "density": Array [
+                  "compact",
+                ],
                 "iconAlign": Array [
                   "right",
                 ],
@@ -716,9 +719,6 @@ describe('metric visualization', () => {
                 ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
-                ],
-                "density": Array [
-                  "compact",
                 ],
                 "subtitle": Array [
                   "subtitle",
@@ -1008,6 +1008,9 @@ describe('metric visualization', () => {
               "color": Array [
                 "static-color",
               ],
+              "density": Array [
+                "compact",
+              ],
               "iconAlign": Array [
                 "right",
               ],
@@ -1037,9 +1040,6 @@ describe('metric visualization', () => {
               ],
               "secondaryLabelPosition": Array [
                 "before",
-              ],
-              "density": Array [
-                "compact",
               ],
               "subtitle": Array [
                 "subtitle",
@@ -1280,6 +1280,7 @@ describe('metric visualization', () => {
     expect(visualization.clearLayer(fullState, 'some-id', 'indexPattern1')).toMatchInlineSnapshot(`
       Object {
         "applyColorTo": "background",
+        "density": "compact",
         "icon": "empty",
         "iconAlign": "right",
         "layerId": "first",
@@ -1287,7 +1288,6 @@ describe('metric visualization', () => {
         "primaryAlign": "right",
         "primaryPosition": "bottom",
         "secondaryAlign": "right",
-        "density": "compact",
         "titlesTextAlign": "left",
         "valueFontMode": "default",
       }
