@@ -10,7 +10,10 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { SimplifiedCreatePackagePolicyRequestBodySchema } from '../models/package_policy_schema';
-import type { AgentlessPolicyResponseSchema } from '../models/agentless_policy_schema';
+import {
+  AgentlessPolicySchema,
+  type AgentlessPolicyResponseSchema,
+} from '../models/agentless_policy_schema';
 import type { AgentlessPolicy } from '../models/agentless_policy';
 
 import type { ListResult } from './common';
@@ -317,3 +320,188 @@ export interface ListAgentlessPoliciesRequest {
 }
 
 export type ListAgentlessPoliciesResponse = ListResult<AgentlessPolicy>;
+
+/**
+ * Request body shared by the bulk upgrade and the upgrade dry-run endpoints.
+ *
+ * Only `policyIds` is accepted: the target is always the *installed* package version
+ * (mirrors the package-policy bulk upgrade default), so no explicit `pkgVersion` is
+ * exposed. Stays in agentless vocabulary (`policyIds`, matching the `bulk_throughput`
+ * endpoint) rather than the package-policy `packagePolicyIds` wording.
+ */
+export const BulkUpgradeAgentlessPoliciesRequestSchema = {
+  body: schema.object(
+    {
+      policyIds: schema.arrayOf(schema.string({ maxLength: 256 }), {
+        maxSize: 1000,
+        meta: {
+          description:
+            'IDs of the agentless policies to upgrade to their installed package version.',
+        },
+      }),
+    },
+    { meta: { id: 'bulk_upgrade_agentless_policies_request' } }
+  ),
+};
+
+/**
+ * Request body for the upgrade dry-run endpoint. Extends the bulk-upgrade body with an
+ * optional `pkgVersion` so callers can preview a migration to a *not-yet-installed* target
+ * version — the UI upgrade flow computes the preview before installing the new package
+ * (mirrors the package-policy dry-run's `packageVersion`). When omitted, the target
+ * defaults to the installed package version.
+ */
+export const AgentlessPolicyUpgradeDryRunRequestSchema = {
+  body: schema.object(
+    {
+      policyIds: schema.arrayOf(schema.string({ maxLength: 256 }), {
+        maxSize: 1000,
+        meta: {
+          description: 'IDs of the agentless policies to preview upgrading.',
+        },
+      }),
+      pkgVersion: schema.maybe(
+        schema.string({
+          maxLength: 256,
+          meta: {
+            description:
+              'Target package version to preview the upgrade against. Defaults to the installed package version.',
+          },
+        })
+      ),
+    },
+    { meta: { id: 'agentless_policy_upgrade_dry_run_request' } }
+  ),
+};
+
+/**
+ * Per-policy result of a bulk upgrade. Mirrors the package-policy
+ * `UpgradePackagePolicyResponseItem`: a `success` flag plus an optional
+ * `statusCode`/`body` carrying the per-policy failure. As with package-policy,
+ * `success: true` means the policy's saved object was upgraded; the live agentless
+ * workload is reconciled asynchronously by a background deploy task (with the
+ * deployment-sync task as a backstop), so success does not guarantee the workload
+ * is already running the new version.
+ */
+export const BulkUpgradeAgentlessPolicyResultSchema = schema.object(
+  {
+    id: schema.string({ maxLength: 256, meta: { description: 'The ID of the agentless policy.' } }),
+    name: schema.maybe(
+      schema.string({ maxLength: 256, meta: { description: 'The name of the agentless policy.' } })
+    ),
+    success: schema.boolean({
+      meta: {
+        description:
+          "Whether the policy's saved object was upgraded successfully. The live workload is reconciled asynchronously in the background.",
+      },
+    }),
+    statusCode: schema.maybe(
+      schema.number({
+        meta: { description: 'HTTP-like status code when the upgrade failed for this policy.' },
+      })
+    ),
+    body: schema.maybe(
+      schema.object({
+        message: schema.string({
+          maxLength: 4096,
+          meta: { description: 'Error message when the upgrade failed for this policy.' },
+        }),
+      })
+    ),
+  },
+  { meta: { id: 'bulk_upgrade_agentless_policy_result' } }
+);
+
+export const BulkUpgradeAgentlessPoliciesResponseSchema = schema.arrayOf(
+  BulkUpgradeAgentlessPolicyResultSchema,
+  { maxSize: 10000 }
+);
+
+/**
+ * Per-policy result of an upgrade dry-run. Rather than leaking the raw Fleet-internal
+ * `[PackagePolicy, DryRunPackagePolicy]` diff, it summarizes the change via
+ * `currentVersion`/`proposedVersion` and `hasErrors`/`errors`. Only on a clean dry-run
+ * (`hasErrors: false`) does it also include the migrated config as a clean {@link AgentlessPolicy}
+ * in `proposedPolicy`, meant to be edited and saved via the agentless PUT — not applied as-is
+ * (to apply an upgrade untouched, use `_upgrade`). On error, `proposedPolicy` is omitted.
+ */
+export const AgentlessPolicyUpgradeDryRunResultSchema = schema.object(
+  {
+    id: schema.string({ maxLength: 256, meta: { description: 'The ID of the agentless policy.' } }),
+    name: schema.maybe(
+      schema.string({ maxLength: 256, meta: { description: 'The name of the agentless policy.' } })
+    ),
+    hasErrors: schema.boolean({
+      meta: { description: 'Whether the dry-run migration produced any errors.' },
+    }),
+    currentVersion: schema.maybe(
+      schema.string({
+        maxLength: 256,
+        meta: { description: 'The current installed package version of the policy.' },
+      })
+    ),
+    proposedVersion: schema.maybe(
+      schema.string({
+        maxLength: 256,
+        meta: { description: 'The package version the policy would be upgraded to.' },
+      })
+    ),
+    // Returned only when the dry-run is clean (`hasErrors: false`); omitted on migration errors.
+    // Intended for the edit-and-upgrade flow (edit it, then submit via PUT), not a no-edit apply
+    // of `_upgrade`. See the schema-level doc comment above for the full contract.
+    proposedPolicy: schema.maybe(AgentlessPolicySchema),
+    errors: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          message: schema.string({
+            maxLength: 4096,
+            meta: { description: 'Human-readable migration error.' },
+          }),
+        }),
+        {
+          maxSize: 1000,
+          meta: { description: 'Migration errors encountered while computing the upgrade.' },
+        }
+      )
+    ),
+    statusCode: schema.maybe(
+      schema.number({
+        meta: { description: 'HTTP-like status code when the dry-run failed for this policy.' },
+      })
+    ),
+    body: schema.maybe(
+      schema.object({
+        message: schema.string({
+          maxLength: 4096,
+          meta: { description: 'Error message when the dry-run failed for this policy.' },
+        }),
+      })
+    ),
+  },
+  { meta: { id: 'agentless_policy_upgrade_dry_run_result' } }
+);
+
+export const AgentlessPolicyUpgradeDryRunResponseSchema = schema.arrayOf(
+  AgentlessPolicyUpgradeDryRunResultSchema,
+  { maxSize: 10000 }
+);
+
+export interface BulkUpgradeAgentlessPoliciesRequest {
+  body: TypeOf<typeof BulkUpgradeAgentlessPoliciesRequestSchema.body>;
+}
+
+export type BulkUpgradeAgentlessPolicyResult = TypeOf<
+  typeof BulkUpgradeAgentlessPolicyResultSchema
+>;
+
+export type BulkUpgradeAgentlessPoliciesResponse = TypeOf<
+  typeof BulkUpgradeAgentlessPoliciesResponseSchema
+>;
+
+export type AgentlessPolicyUpgradeDryRunResult = TypeOf<
+  typeof AgentlessPolicyUpgradeDryRunResultSchema
+>;
+
+export type AgentlessPolicyUpgradeDryRunResponse = TypeOf<
+  typeof AgentlessPolicyUpgradeDryRunResponseSchema
+>;
