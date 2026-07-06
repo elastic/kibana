@@ -121,6 +121,7 @@ export const registerSearchRoute = ({
             if (hit.description !== undefined) item.description = hit.description;
             if (hit.references !== undefined) item.references = hit.references;
             if (hit.tags !== undefined) item.tags = hit.tags;
+            if (hit.permissions !== undefined) item.permissions = hit.permissions;
             return item;
           }),
         };

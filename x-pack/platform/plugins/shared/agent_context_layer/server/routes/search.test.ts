@@ -113,6 +113,57 @@ describe('registerSearchRoute', () => {
     expect(results[0]).not.toHaveProperty('content');
   });
 
+  it('includes permissions in the response when requested via fields', async () => {
+    const permissions = {
+      kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+      elasticsearch: { indices: [{ name: 'metrics-*' }] },
+    };
+    const mockResults: SmlSearchResult[] = [
+      {
+        id: 'chunk-1',
+        type: 'dashboard',
+        title: 'Test Dashboard',
+        origin: { uri: 'dashboard-1' },
+        permissions,
+      },
+    ];
+    mockSmlService.search.mockResolvedValue({ results: mockResults });
+
+    const response = await callHandler({
+      query: 'test',
+      size: 10,
+      fields: ['permissions'],
+    });
+    expect(mockSmlService.search).toHaveBeenCalledWith(
+      expect.objectContaining({ fields: ['permissions'] })
+    );
+    const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
+    const results = (body as any).results;
+    expect(results[0].permissions).toEqual(permissions);
+  });
+
+  it('omits permissions from the response when the service result has no permissions', async () => {
+    // Mirrors what the real service returns when `fields` doesn't include
+    // 'permissions': the `permissions` property is absent from the hit
+    // entirely (see includePermissions gating in sml_service.ts), not merely
+    // undefined. This asserts the route's mapping doesn't add it out of
+    // thin air.
+    const mockResults: SmlSearchResult[] = [
+      {
+        id: 'chunk-1',
+        type: 'dashboard',
+        title: 'Test Dashboard',
+        origin: { uri: 'dashboard-1' },
+      },
+    ];
+    mockSmlService.search.mockResolvedValue({ results: mockResults });
+
+    const response = await callHandler({ query: 'test', size: 10 });
+    const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
+    const results = (body as any).results;
+    expect(results[0]).not.toHaveProperty('permissions');
+  });
+
   it('passes constraints and agent-supplied filters through to sml.search', async () => {
     mockSmlService.search.mockResolvedValue({ results: [] });
     await callHandler({

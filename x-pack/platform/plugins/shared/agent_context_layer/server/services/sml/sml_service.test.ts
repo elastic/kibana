@@ -564,6 +564,39 @@ describe('SmlService', () => {
       expect(result.results[0]).not.toHaveProperty('permissions');
     });
 
+    it('attaches permissions when fields includes permissions (includePermissions branch)', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(false),
+        values: [
+          makeEsqlRow('chunk-1', 'lens', 'My Viz', 'ref-1', ['saved_object:lens/get'], {
+            esIndices: ['metrics-*'],
+            includeContent: false,
+          }),
+        ],
+      } as any);
+
+      const result = await smlService.search({
+        query: 'viz',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+        fields: ['permissions'],
+      });
+
+      expect(result.results[0]).toEqual({
+        id: 'chunk-1',
+        type: 'lens',
+        title: 'My Viz',
+        origin: { uri: 'ref-1' },
+        permissions: makePermissions(['saved_object:lens/get'], ['metrics-*']),
+      });
+    });
+
     it('returns only the requested fields when fields param is provided', async () => {
       const service = createSmlService();
       service.setup({ logger });

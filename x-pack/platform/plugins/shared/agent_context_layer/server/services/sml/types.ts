@@ -274,12 +274,16 @@ export interface SmlDocument {
  * lookup tool (`sml_read`) when they need it.
  *
  * `permissions` is retained here so callers (route / tool wrapper) can apply
- * post-hoc authorization filtering; downstream consumers should not expose it
- * in their response shape.
+ * post-hoc authorization filtering. Callers should not expose it
+ * unconditionally or by default — the `sml_search` LLM tool wrapper never
+ * forwards it, by construction (it whitelists an explicit output shape).
  *
- * Optional fields (`content`, `description`, `tags`, `references`) are omitted
- * when the caller passes a `fields` array that excludes them. `spaces` and
- * `permissions` are internal pipeline details — not present in results.
+ * Optional fields (`content`, `description`, `tags`, `references`,
+ * `spaces`, `permissions`) are omitted unless the caller passes a `fields`
+ * array that includes them. The `_search` HTTP route currently only wires
+ * `permissions` through to callers that request it; `spaces` is computed
+ * here but not yet forwarded by that route (TODO: wire `spaces` through
+ * `SmlSearchHttpResultItem` the same way, see search-team#15114).
  */
 export interface SmlSearchResult {
   id: string;

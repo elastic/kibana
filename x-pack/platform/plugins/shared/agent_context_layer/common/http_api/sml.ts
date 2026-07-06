@@ -76,6 +76,7 @@ export interface SmlSearchHttpResultItem {
   content?: string;
   references?: Array<{ uri: string }>;
   tags?: string[];
+  permissions?: SmlHttpItem['permissions'];
 }
 
 /**
