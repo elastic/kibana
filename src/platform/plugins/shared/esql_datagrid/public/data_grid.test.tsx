@@ -11,9 +11,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import DataGrid from './data_grid';
 
 jest.mock('@kbn/unified-data-table', () => {
@@ -27,16 +27,9 @@ jest.mock('@kbn/unified-data-table', () => {
 });
 
 describe('DataGrid', () => {
+  const data = dataPluginMock.createStartContract();
   const dataView = { toSpec: jest.fn() } as unknown as DataView;
-  const core = {
-    theme: {},
-    uiSettings: {},
-    notifications: { toasts: {} },
-    chrome: {},
-  } as unknown as CoreStart;
-  const data = {
-    query: { timefilter: { timefilter: { getTime: jest.fn() } } },
-  } as unknown as DataPublicPluginStart;
+  const core = coreMock.createStart();
   const fieldFormats = {} as unknown as FieldFormatsStart;
   const query = { esql: 'from foo' };
 
