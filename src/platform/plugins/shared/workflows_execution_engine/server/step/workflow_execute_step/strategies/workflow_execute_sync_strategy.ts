@@ -249,7 +249,7 @@ export class WorkflowExecuteSyncStrategy {
       );
     } catch (error) {
       // Best-effort: a read failure must not crash the parent step.
-      this.workflowLogger?.logDebug(
+      this.workflowLogger.logDebug(
         `Failed to read child step executions for failure enrichment: ${
           error instanceof Error ? error.message : String(error)
         }`
