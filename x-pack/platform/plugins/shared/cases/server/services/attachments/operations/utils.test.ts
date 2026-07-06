@@ -5,9 +5,46 @@
  * 2.0.
  */
 
-import { transformAttributesForMode } from './utils';
+import { assertLegacyWriteableAttachmentType, transformAttributesForMode } from './utils';
+import { isUnifiedOnlyAttachment } from '../../type_guards';
 import { createUserAttachment } from '../test_utils';
-import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '../../../../common/constants';
+import {
+  LEGACY_LENS_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
+  LENS_SO_TYPE,
+  SECURITY_TIMELINE_ATTACHMENT_TYPE,
+} from '../../../../common/constants';
+import { AttachmentType } from '../../../../common/types/domain';
+
+const basicAttributes = {
+  created_at: '2026-05-29T00:00:00.000Z',
+  created_by: { username: 'tester', full_name: null, email: null },
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: null,
+  updated_by: null,
+};
+
+const createByValueLens = () =>
+  ({
+    type: LENS_ATTACHMENT_TYPE,
+    owner: 'cases',
+    data: { state: { visualization: {} } },
+    ...basicAttributes,
+  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+
+// A saved-object reference lens carries `metadata.soType` and, optionally, a
+// snapshot of the referenced SO under `data.attributes`. It has no by-value
+// legacy form.
+const createByReferenceLens = (withSnapshot = false) =>
+  ({
+    type: LENS_ATTACHMENT_TYPE,
+    owner: 'cases',
+    attachmentId: 'lens-1',
+    metadata: { title: 'My lens', soType: LENS_SO_TYPE },
+    ...(withSnapshot ? { data: { attributes: { title: 'My lens' } } } : {}),
+    ...basicAttributes,
+  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
 
 describe('transformAttributesForMode', () => {
   it('maps legacy user comments to unified schema when mode is unified', () => {
@@ -99,5 +136,70 @@ describe('transformAttributesForMode', () => {
     if (out.isUnified) {
       expect(out.attributes.type).toBe('discoverSession');
     }
+  });
+
+  // By-value lens keeps a legacy `persistableState` representation, so mode=legacy
+  // must still downgrade it (this is the pre-existing hybrid behavior).
+  it('downgrades by-value lens to legacy persistableState in legacy mode', () => {
+    const out = transformAttributesForMode({ attributes: createByValueLens(), mode: 'legacy' });
+    expect(out.isUnified).toBe(false);
+    if (!out.isUnified) {
+      expect(out.attributes.type).toBe(AttachmentType.persistableState);
+      expect(out.attributes.persistableStateAttachmentTypeId).toBe(LEGACY_LENS_ATTACHMENT_TYPE);
+    }
+  });
+
+  // A Lens-by-reference instance has no by-value legacy form, so it must stay on
+  // the unified branch even for mode=legacy — otherwise toLegacySchema would
+  // fabricate a bogus persistableState from the snapshot and drop attachmentId.
+  it.each([
+    ['without a data snapshot', false],
+    ['with a data snapshot', true],
+  ])('keeps a Lens-by-reference attachment unified in legacy mode (%s)', (_desc, withSnapshot) => {
+    const out = transformAttributesForMode({
+      attributes: createByReferenceLens(withSnapshot as boolean),
+      mode: 'legacy',
+    });
+    expect(out.isUnified).toBe(true);
+    if (out.isUnified) {
+      expect(out.attributes).toMatchObject({
+        type: LENS_ATTACHMENT_TYPE,
+        attachmentId: 'lens-1',
+        metadata: { soType: LENS_SO_TYPE },
+      });
+    }
+  });
+});
+
+describe('isUnifiedOnlyAttachment', () => {
+  it('is false for by-value lens (has a legacy persistableState form)', () => {
+    expect(isUnifiedOnlyAttachment(createByValueLens())).toBe(false);
+  });
+
+  it('is true for a Lens-by-reference attachment (no legacy form)', () => {
+    expect(isUnifiedOnlyAttachment(createByReferenceLens())).toBe(true);
+    expect(isUnifiedOnlyAttachment(createByReferenceLens(true))).toBe(true);
+  });
+
+  it('is false for legacy user comments', () => {
+    expect(isUnifiedOnlyAttachment(createUserAttachment().attributes)).toBe(false);
+  });
+});
+
+describe('assertLegacyWriteableAttachmentType', () => {
+  it('does not throw for by-value lens', () => {
+    expect(() => assertLegacyWriteableAttachmentType(createByValueLens())).not.toThrow();
+  });
+
+  it('does not throw for legacy user comments', () => {
+    expect(() =>
+      assertLegacyWriteableAttachmentType(createUserAttachment().attributes)
+    ).not.toThrow();
+  });
+
+  it('throws a 400 for a Lens-by-reference attachment', () => {
+    expect(() => assertLegacyWriteableAttachmentType(createByReferenceLens())).toThrow(
+      /has no legacy representation/
+    );
   });
 });
