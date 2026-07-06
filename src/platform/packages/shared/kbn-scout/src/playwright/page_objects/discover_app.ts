@@ -13,8 +13,7 @@ import type { ScoutPage } from '..';
 import { DataGrid } from './data_grid';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
-import { DataViewEditorPage } from './data_view_editor_page';
-import { resolveSelector } from '../utils/locator_helper';
+import { resolveSelector } from '../utils';
 
 const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 
@@ -108,25 +107,35 @@ export class DiscoverApp {
   }
 
   private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
-    const editor = new DataViewEditorPage(this.page);
-    await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
+    // Minimal inline interaction with the data view editor flyout. The full
+    // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
+    // `kbn-scout` is a base package and must not depend on a plugin, so the few
+    // steps Discover needs are driven directly here.
+    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
+    const form = this.page.testSubj.locator('indexPatternEditorForm');
+    const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
+    const timestampField = this.page.testSubj.locator('timestampField');
+
+    await flyout.waitFor({ state: 'visible' });
 
     // FTR passes the base name and relies on the editor auto-appending `*` as the
     // user types. Scout sets the title verbatim (`fill`), so append the wildcard
     // here to preserve that contract (`name`, `* will be added automatically`).
-    await editor.setTitle(name.endsWith('*') ? name : `${name}*`);
+    await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
+    // wait for async title validation to settle before continuing.
+    await form.and(this.page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
 
     // wait for timestamp options; default @timestamp applies.
-    await editor.timestampField
+    await timestampField
       .and(this.page.locator('[data-is-loading="0"]'))
       .waitFor({ state: 'visible', timeout: 30_000 });
 
     if (adHoc) {
       await this.page.testSubj.click('exploreIndexPatternButton');
-      await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'hidden' });
     } else {
-      await editor.save();
+      await this.page.testSubj.click('saveIndexPatternButton');
     }
+    await flyout.waitFor({ state: 'hidden' });
 
     await this.waitUntilTabIsLoaded();
   }
@@ -179,16 +188,27 @@ export class DiscoverApp {
     await menuItem.click();
   }
 
-  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
-    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
-    await this.page.testSubj.hover('dscHideSidebarButton'); // cancel tooltips
-    await this.waitForDiscoverPage();
-    await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
+  private async dismissHoverOverlays() {
+    await this.page.mouse.move(0, 0);
   }
 
-  async saveSearch(name: string) {
+  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
+    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
+    await this.dismissHoverOverlays();
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
     await this.page.testSubj.click('discoverSaveButton');
     await this.page.testSubj.fill('savedObjectTitle', name);
+    if (storeTimeRange !== undefined) {
+      const switchControl = this.page.testSubj.locator('storeTimeWithSearch');
+      await switchControl.waitFor({ state: 'visible' });
+      const isChecked = (await switchControl.getAttribute('aria-checked')) === 'true';
+      if (isChecked !== storeTimeRange) {
+        await switchControl.click();
+      }
+    }
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
   }
@@ -524,6 +544,15 @@ export class DiscoverApp {
     await this.page.testSubj.click('unifiedHistogramEditVisualization');
   }
 
+  async openLensEditFlyout() {
+    await this.page.testSubj.locator('unifiedHistogramEditFlyoutVisualization').click();
+    await this.getLensEditFlyout().waitFor({ state: 'visible' });
+  }
+
+  getLensEditFlyout(): Locator {
+    return this.page.testSubj.locator('lnsChartSwitchPopover');
+  }
+
   async getTheColumnFromGrid(): Promise<string[]> {
     const columnLocators = await this.page.testSubj.locator('unifiedDataTableColumnTitle').all();
     return await Promise.all(columnLocators.map((locator) => locator.innerText()));
@@ -655,6 +684,11 @@ export class DiscoverApp {
 
   async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
     return this.codeEditor.getCodeEditorValue(nthIndex);
+  }
+
+  async openSidebar() {
+    await this.page.testSubj.locator('dscShowSidebarButton').click();
+    await this.waitUntilFieldListHasCountOfFields();
   }
 
   async addBreakdownFieldFromSidebar(

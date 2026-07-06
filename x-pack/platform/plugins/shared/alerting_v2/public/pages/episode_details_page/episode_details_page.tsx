@@ -35,6 +35,7 @@ import { AlertEpisodeDetailsHeaderSection } from '@kbn/alerting-v2-episodes-ui/c
 import { AlertEpisodeOverviewListSection } from '@kbn/alerting-v2-episodes-ui/components/details/overview_list_section';
 import { AlertEpisodeRuleOverviewPanelSection } from '@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section';
 import { AlertEpisodeLifecycleHeatmapSection } from '@kbn/alerting-v2-episodes-ui/components/details/lifecycle_heatmap_section';
+import { AlertEpisodeTrendChartSection } from '@kbn/alerting-v2-episodes-ui/components/details/trend_chart_section';
 import { AlertEpisodeSeverityHeatmapSection } from '@kbn/alerting-v2-episodes-ui/components/details/severity_heatmap_section';
 import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/components/details/related_section';
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
@@ -46,6 +47,7 @@ import { CenterJustifiedSpinner } from '../../components/center_justified_spinne
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
+import { EpisodeTimelineTab } from './components/episode_timeline_tab';
 import * as i18n from './translations';
 
 interface EpisodeRouteParams {
@@ -54,7 +56,7 @@ interface EpisodeRouteParams {
 
 type EpisodeDetailsSidebarPanel = 'episode_details' | 'runbook';
 
-type EpisodeDetailsMainPanel = 'overview' | 'metadata';
+type EpisodeDetailsMainPanel = 'overview' | 'metadata' | 'timeline';
 
 export function EpisodeDetailsPage() {
   const { euiTheme } = useEuiTheme();
@@ -347,6 +349,13 @@ export function EpisodeDetailsPage() {
                 },
               ]
             : []),
+          {
+            id: 'timeline',
+            'data-test-subj': 'alertingV2EpisodeDetailsMainTabTimeline',
+            label: i18n.TIMELINE_TAB_TITLE,
+            isSelected: actualMainPanel === 'timeline',
+            onClick: () => setMainPanel('timeline'),
+          },
         ],
       }}
     >
@@ -383,6 +392,8 @@ export function EpisodeDetailsPage() {
               grow
               paddingSize="none"
               css={css`
+                min-width: 0;
+
                 ${smallMediaQuery} {
                   [class*='InternalDocViewerTable'] {
                     display: block;
@@ -405,7 +416,13 @@ export function EpisodeDetailsPage() {
                 }
               `}
             >
-              {actualMainPanel === 'metadata' ? (
+              {actualMainPanel === 'timeline' ? (
+                <EpisodeTimelineTab
+                  episodeId={episodeId}
+                  groupHash={groupHash}
+                  services={{ data, spaces, userProfile: services.userProfile }}
+                />
+              ) : actualMainPanel === 'metadata' ? (
                 <AlertEpisodeMetadataSection episodeId={episodeId} services={metadataServices} />
               ) : (
                 <EuiPanel
@@ -423,17 +440,21 @@ export function EpisodeDetailsPage() {
                     }
                   `}
                 >
-                  <AlertEpisodeLifecycleHeatmapSection
-                    episodeId={episodeId}
-                    services={detailsServices}
-                  />
-                  <EuiSpacer size="l" />
-                  <AlertEpisodeSeverityHeatmapSection
-                    episodeId={episodeId}
-                    services={detailsServices}
-                  />
-                  <EuiSpacer size="l" />
-                  <AlertEpisodesRelatedSection episodeId={episodeId} services={detailsServices} />
+                  <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+                    <AlertEpisodeTrendChartSection
+                      episodeId={episodeId}
+                      services={detailsServices}
+                    />
+                    <AlertEpisodeLifecycleHeatmapSection
+                      episodeId={episodeId}
+                      services={detailsServices}
+                    />
+                    <AlertEpisodeSeverityHeatmapSection
+                      episodeId={episodeId}
+                      services={detailsServices}
+                    />
+                    <AlertEpisodesRelatedSection episodeId={episodeId} services={detailsServices} />
+                  </EuiFlexGroup>
                 </EuiPanel>
               )}
             </EuiSplitPanel.Inner>
