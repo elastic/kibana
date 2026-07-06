@@ -10,13 +10,14 @@ import { useCallback, useMemo } from 'react';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryListItem } from '../types/change_history_list_item';
 import type { ListChangeHistoryResult } from '../types/list_change_history_params';
-import { DEFAULT_CHANGE_HISTORY_PAGE_SIZE } from '../types/change_history_constants';
+import { useChangeHistoryConfig } from '../provider/use_change_history_config';
 import { changeHistoryListQueryKey } from './change_history_list_query_key';
 
 export interface UseChangeHistoryListArgs {
   adapter: ChangeHistoryAdapter;
   objectId: string;
   enabled?: boolean;
+  /** Overrides provider `listPageSize` for this query only. */
   pageSize?: number;
 }
 
@@ -37,8 +38,10 @@ export const useChangeHistoryList = ({
   adapter,
   objectId,
   enabled = true,
-  pageSize = DEFAULT_CHANGE_HISTORY_PAGE_SIZE,
+  pageSize: pageSizeArg,
 }: UseChangeHistoryListArgs): UseChangeHistoryListResult => {
+  const { scope, listPageSize } = useChangeHistoryConfig();
+  const pageSize = pageSizeArg ?? listPageSize;
   const {
     data,
     error,
@@ -49,7 +52,7 @@ export const useChangeHistoryList = ({
     hasNextPage,
     refetch: refetchQuery,
   } = useInfiniteQuery<ListChangeHistoryResult, Error>(
-    changeHistoryListQueryKey({ objectId, pageSize }),
+    changeHistoryListQueryKey({ objectId, pageSize, scope }),
     ({ signal, pageParam = 0 }) =>
       adapter.listChanges({
         objectId,
@@ -65,7 +68,20 @@ export const useChangeHistoryList = ({
     }
   );
 
-  const items = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data?.pages]);
+  const items = useMemo(() => {
+    if (!data?.pages) {
+      return [];
+    }
+
+    const updates = new Map<string, ChangeHistoryListItem>();
+    for (const page of data.pages) {
+      for (const updatedItem of page.updatedItems ?? []) {
+        updates.set(updatedItem.id, updatedItem);
+      }
+    }
+
+    return data.pages.flatMap((page) => page.items.map((item) => updates.get(item.id) ?? item));
+  }, [data?.pages]);
   const total = data?.pages[0]?.total ?? 0;
   const isFetchingFirstPage = isFetching && !isFetchingNextPage;
 

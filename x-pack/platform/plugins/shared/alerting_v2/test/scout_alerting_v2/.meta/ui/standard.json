@@ -1,5 +1,5 @@
 {
-  "sha1": "65a34fc635241d5ea447ab3a874bc952c2b91189",
+  "sha1": "1901bdb54d913413aeac61bd32dc5e463886ab2c",
   "tests": [
     {
       "id": "a3a9f820a79c452-b8b452a1ef0f11e",
@@ -41,19 +41,6 @@
       }
     },
     {
-      "id": "a3a9f820a79c452-db351a61fa1773d",
-      "title": "ComposeDiscoverFlyout — create and edit flows cancel: closing flyout via Cancel button dismisses without saving",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 269,
-        "column": 9
-      }
-    },
-    {
       "id": "a3a9f820a79c452-34e6c15d6389044",
       "title": "ComposeDiscoverFlyout — create and edit flows sandbox: Apply commits query, closing without Apply discards changes",
       "expectedStatus": "passed",
@@ -62,7 +49,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 283,
+        "line": 269,
         "column": 9
       }
     },
@@ -75,7 +62,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 313,
+        "line": 299,
         "column": 9
       }
     },
@@ -88,7 +75,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 334,
+        "line": 320,
         "column": 9
       }
     },
@@ -101,7 +88,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 363,
+        "line": 349,
         "column": 9
       }
     },
@@ -114,7 +101,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 385,
+        "line": 371,
         "column": 9
       }
     },
@@ -181,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/execution_history_smoke.spec.ts",
-        "line": 21,
+        "line": 32,
         "column": 7
       }
     },

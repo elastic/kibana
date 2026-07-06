@@ -305,17 +305,23 @@ export const useEditSuccessfulLifecycleFlyout = ({
     return { dsl: {} };
   }, [applyPayload, definition.effective_lifecycle]);
 
+  const hasChanges = useMemo(
+    () => !!nextLifecycle && !isEqual(definition.stream.ingest.lifecycle, nextLifecycle),
+    [definition.stream.ingest.lifecycle, nextLifecycle]
+  );
+
+  // The Apply button stays enabled even when nothing changed for accessibility;
+  // applying without changes is handled as a no-op in `onApply`.
   const isApplyDisabled = useMemo(() => {
     if (!definition.privileges.lifecycle) return true;
     if (!applyPayload) return true;
     if (!nextLifecycle) return true;
     if (inheritLifecycle && inheritedFetchEnabled && inheritedEffectiveLifecycleOrNull === null)
       return true;
-    return isEqual(definition.stream.ingest.lifecycle, nextLifecycle) || updateInProgress;
+    return updateInProgress;
   }, [
     applyPayload,
     definition.privileges.lifecycle,
-    definition.stream.ingest.lifecycle,
     inheritLifecycle,
     inheritedFetchEnabled,
     inheritedEffectiveLifecycleOrNull,
@@ -531,6 +537,10 @@ export const useEditSuccessfulLifecycleFlyout = ({
           onCancel={closeFlyout}
           onApply={() => {
             if (!nextLifecycle) return;
+            if (!hasChanges) {
+              closeFlyout();
+              return;
+            }
             if (inheritLifecycle) {
               updateLifecycle(nextLifecycle);
               return;

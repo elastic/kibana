@@ -15,8 +15,8 @@ import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_ris
 import type { EntityRiskScoresState } from '../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '.';
-import { ObservedEntity } from '../shared/components/observed_entity';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import { ObservedEntity } from '../../../flyout_v2/entity/shared/components/observed_entity';
+import type { ObservedEntityData } from '../../../flyout_v2/entity/shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
@@ -72,7 +72,7 @@ export const ServicePanelContent = ({
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
             entityType={EntityType.service}
-            entityId={entityRecord?.entity.id}
+            entityId={entityRecord?.entity?.id}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
           />
           <EuiHorizontalRule />
@@ -107,7 +107,7 @@ export const ServicePanelContent = ({
         />
       )}
       <ObservedEntity
-        observedData={{ ...observedService, entityId: entityRecord?.entity.id }}
+        observedData={{ ...observedService, entityId: entityRecord?.entity?.id }}
         contextID={contextID}
         scopeId={scopeId}
         observedFields={observedFields}
