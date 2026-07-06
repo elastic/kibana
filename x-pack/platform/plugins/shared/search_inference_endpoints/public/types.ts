@@ -95,3 +95,6 @@ export interface EndpointDeprecationInfo {
   status: EisModelStatus;
   metadata: EisInferenceEndpointMetadata;
 }
+
+/** Ordered list of EIS geo codes for display in the region picker. */
+export const GEO_ORDER = ['apac', 'eu', 'us', 'other'] as const;

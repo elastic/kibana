@@ -20,6 +20,7 @@ import {
   isCspRegion,
 } from '../../common/type_guards';
 import type { MultiSelectFilterOption } from '../components/filter/multi_select_filter';
+import { GEO_ORDER } from '../types';
 
 // Inference ID prefixes for internal Elastic endpoints kept for backwards
 // compatibility that must not be surfaced in the UI.
@@ -332,8 +333,7 @@ const GEO_DISPLAY_NAMES: Record<string, string> = {
  */
 export const getGeoDisplayName = (geo: string): string => GEO_DISPLAY_NAMES[geo] ?? geo;
 
-/** Ordered list of EIS geo codes for display in the region picker. */
-export const GEO_ORDER = ['apac', 'eu', 'us', 'other'] as const;
+export { GEO_ORDER } from '../types';
 
 export interface RegionZoneCount {
   geo: string;
