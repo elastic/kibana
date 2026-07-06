@@ -355,7 +355,10 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
            */}
           <div
             css={[styles.editorLayer, showGraph ? styles.layerHidden : styles.layerVisible]}
-            aria-hidden={showGraph}
+          <div
+            css={[styles.editorLayer, showGraph ? styles.layerHidden : styles.layerVisible]}
+            {...(showGraph ? { inert: '' } : {})}
+          >
           >
             <React.Suspense fallback={<EuiLoadingSpinner />}>
               <WorkflowYAMLEditor
