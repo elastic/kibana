@@ -22,54 +22,42 @@ export interface XDomain {
   max?: number;
   minInterval?: number;
 }
-
-const getDateHistogramMeta = (
+const getTimeVisMeta = (
   datatableUtilitites: DatatableUtilitiesService,
   layers: CommonXYDataLayerConfig[]
 ) => {
-  return layers
-    .map(({ xAccessor, table }) => {
-      const xColumn = xAccessor ? getColumnByAccessor(xAccessor, table.columns) : null;
-      const meta = xColumn && datatableUtilitites.getDateHistogramMeta(xColumn);
-      return meta ? { meta, field: xColumn?.meta.field } : undefined;
-    })
-    .find(Boolean);
-};
-
-const getAppliedTimeRange = (
-  datatableUtilitites: DatatableUtilitiesService,
-  layers: CommonXYDataLayerConfig[]
-) => {
-  return layers
-    .map(({ xAccessor, table }) => {
-      const xColumn = xAccessor ? getColumnByAccessor(xAccessor, table.columns) : null;
-      return xColumn ? datatableUtilitites.getColumnTimeRange(xColumn) : undefined;
-    })
-    .find(Boolean);
-};
-
-const getComputedDomain = (
-  datatableUtilitites: DatatableUtilitiesService,
-  layers: CommonXYDataLayerConfig[]
-): { min: number; max: number } | undefined => {
+  let dateHistogram:
+    | {
+        meta: NonNullable<ReturnType<typeof datatableUtilitites.getDateHistogramMeta>>;
+        field: string | undefined;
+      }
+    | undefined;
+  let appliedTimeRange: ReturnType<typeof datatableUtilitites.getColumnTimeRange> | undefined;
   const domains: { min: number; max: number }[] = [];
+
   for (const { xAccessor, table } of layers) {
     const xColumn = xAccessor ? getColumnByAccessor(xAccessor, table.columns) : null;
-    const computedDomain = xColumn
-      ? datatableUtilitites.getDateHistogramMeta(xColumn)?.domain
-      : undefined;
-    if (computedDomain) {
-      domains.push(computedDomain);
-    }
-  }
+    if (!xColumn) continue;
 
-  if (domains.length === 0) {
-    return undefined;
+    const meta = datatableUtilitites.getDateHistogramMeta(xColumn); // called ONCE per layer
+    if (meta) {
+      dateHistogram ??= { meta, field: xColumn.meta.field }; // first match only
+      if (meta.domain) domains.push(meta.domain); // all layers
+    }
+
+    appliedTimeRange ??= datatableUtilitites.getColumnTimeRange(xColumn); // first match only
   }
 
   return {
-    min: Math.min(...domains.map(({ min }) => min)),
-    max: Math.max(...domains.map(({ max }) => max)),
+    dateHistogram,
+    appliedTimeRange,
+    computedDomain:
+      domains.length === 0
+        ? undefined
+        : {
+            min: Math.min(...domains.map(({ min }) => min)),
+            max: Math.max(...domains.map(({ max }) => max)),
+          },
   };
 };
 
@@ -131,7 +119,10 @@ export const getXDomain = (
     }
   }
 
-  const dateHistogram = getDateHistogramMeta(datatableUtilitites, layers);
+  const { dateHistogram, appliedTimeRange, computedDomain } = getTimeVisMeta(
+    datatableUtilitites,
+    layers
+  );
 
   const from = dateHistogram?.meta?.timeRange?.from;
   const to = dateHistogram?.meta?.timeRange?.to;
@@ -143,7 +134,6 @@ export const getXDomain = (
   };
 
   if (!isFullyQualified(baseDomain)) {
-    const appliedTimeRange = getAppliedTimeRange(datatableUtilitites, layers);
     if (appliedTimeRange?.from && appliedTimeRange?.to) {
       const clampedDomain = {
         min: moment(appliedTimeRange.from).valueOf(),
@@ -166,7 +156,6 @@ export const getXDomain = (
 
   // The domain extent (min/max) comes from the precomputed domain from ES|QL and directly from the data for DSL/agg
   // responses (which already contain the full grid via extended_bounds + min_doc_count: 0).
-  const computedDomain = getComputedDomain(datatableUtilitites, layers);
   const domainMin = computedDomain ? computedDomain.min : Math.min(xValues[0], baseDomain.min);
   const domainMaxValue = computedDomain
     ? computedDomain.max
