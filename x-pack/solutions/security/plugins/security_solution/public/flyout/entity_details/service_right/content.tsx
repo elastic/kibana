@@ -66,7 +66,7 @@ export const ServicePanelContent = ({
   return (
     <>
       <EntityHighlightsAccordion
-        entityIdentifier={entityRecord ? entityRecord.entity.id : serviceName}
+        entityIdentifier={entityRecord?.entity?.id ?? serviceName}
         entityType={EntityType.service}
         entityRecord={entityRecord}
         refetchEntityRecord={refetchEntityRecord}
