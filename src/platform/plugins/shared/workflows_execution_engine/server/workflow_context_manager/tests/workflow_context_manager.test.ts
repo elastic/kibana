@@ -577,11 +577,11 @@ describe('WorkflowContextManager', () => {
       const stackFrames: StackFrame[] = [
         {
           stepId: 'outerForeachStep',
-          nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+          nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
         },
         {
           stepId: 'innerForeachStep',
-          nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep' }],
+          nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep', nodeType: 'enter-foreach' }],
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
@@ -667,7 +667,7 @@ describe('WorkflowContextManager', () => {
       const stackFrames: StackFrame[] = [
         {
           stepId: 'outerForeachStep',
-          nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+          nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
@@ -713,7 +713,7 @@ describe('WorkflowContextManager', () => {
       const stackFrames: StackFrame[] = [
         {
           stepId: 'outerForeachStep',
-          nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+          nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
@@ -760,11 +760,11 @@ describe('WorkflowContextManager', () => {
         const stackFrames: StackFrame[] = [
           {
             stepId: 'outerForeachStep',
-            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
           },
           {
             stepId: 'innerForeachStep',
-            nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep' }],
+            nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep', nodeType: 'enter-foreach' }],
           },
         ];
         testContainer = createTestContainer(workflow, { stackFrames });
@@ -949,15 +949,15 @@ describe('WorkflowContextManager', () => {
         const stackFrames: StackFrame[] = [
           {
             stepId: 'outerForeachStep',
-            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
           },
           {
             stepId: 'innerForeachStep',
-            nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep' }],
+            nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep', nodeType: 'enter-foreach' }],
           },
           {
             stepId: 'deepForeachStep',
-            nestedScopes: [{ nodeId: 'enterForeach_deepForeachStep' }],
+            nestedScopes: [{ nodeId: 'enterForeach_deepForeachStep', nodeType: 'enter-foreach' }],
           },
         ];
         testContainer = createTestContainer(workflow, { stackFrames });
@@ -1048,7 +1048,7 @@ describe('WorkflowContextManager', () => {
         const stackFrames: StackFrame[] = [
           {
             stepId: 'outerForeachStep',
-            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
           },
         ];
         testContainer = createTestContainer(workflow, { stackFrames });
@@ -1079,7 +1079,7 @@ describe('WorkflowContextManager', () => {
         const stackFrames: StackFrame[] = [
           {
             stepId: 'outerForeachStep',
-            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
           },
         ];
         testContainer = createTestContainer(workflow, { stackFrames });
@@ -1141,7 +1141,7 @@ describe('WorkflowContextManager', () => {
       const stackFrames: StackFrame[] = [
         {
           stepId: 'poll_loop',
-          nestedScopes: [{ nodeId: 'enterWhile_poll_loop' }],
+          nestedScopes: [{ nodeId: 'enterWhile_poll_loop', nodeType: 'enter-while' }],
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
@@ -1172,7 +1172,7 @@ describe('WorkflowContextManager', () => {
       const stackFrames: StackFrame[] = [
         {
           stepId: 'poll_loop',
-          nestedScopes: [{ nodeId: 'enterWhile_poll_loop' }],
+          nestedScopes: [{ nodeId: 'enterWhile_poll_loop', nodeType: 'enter-while' }],
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
@@ -1203,7 +1203,7 @@ describe('WorkflowContextManager', () => {
       const stackFrames: StackFrame[] = [
         {
           stepId: 'poll_loop',
-          nestedScopes: [{ nodeId: 'enterWhile_poll_loop' }],
+          nestedScopes: [{ nodeId: 'enterWhile_poll_loop', nodeType: 'enter-while' }],
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });
@@ -1244,11 +1244,11 @@ describe('WorkflowContextManager', () => {
       const stackFrames: StackFrame[] = [
         {
           stepId: 'outer_loop',
-          nestedScopes: [{ nodeId: 'enterWhile_outer_loop' }],
+          nestedScopes: [{ nodeId: 'enterWhile_outer_loop', nodeType: 'enter-while' }],
         },
         {
           stepId: 'inner_loop',
-          nestedScopes: [{ nodeId: 'enterWhile_inner_loop' }],
+          nestedScopes: [{ nodeId: 'enterWhile_inner_loop', nodeType: 'enter-while' }],
         },
       ];
       testContainer = createTestContainer(workflow, { stackFrames });

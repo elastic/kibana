@@ -12,6 +12,7 @@ import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
 import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
+import { WorkflowGraphSetupError } from './workflow_graph_setup_error';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
@@ -34,7 +35,6 @@ import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/wor
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 
 import { WorkflowEventLoggerService } from '../workflow_event_logger';
-import { WorkflowGraphSetupError } from '../workflow_graph_setup_error';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export async function setupDependencies(
