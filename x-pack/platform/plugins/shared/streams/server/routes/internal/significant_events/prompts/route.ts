@@ -103,7 +103,7 @@ export const getStreamsPromptRoute = createServerRoute({
   },
 });
 
-export const internalPromptsRoutes = {
+export const internalSignificantEventsPromptsRoutes = {
   ...setStreamsPromptRoute,
   ...getStreamsPromptRoute,
   ...resetStreamsPromptRoute,
