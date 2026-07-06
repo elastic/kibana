@@ -39,4 +39,13 @@ describe('expandJestImplicitConsumers', () => {
 
     expect(expanded.has('@kbn/encrypted-saved-objects-plugin')).toBe(false);
   });
+
+  it('adds encrypted_saved_objects when an upstream plugin changes its server config', () => {
+    const affected = new Set(['@kbn/alerting-v2-plugin']);
+    const changedFiles = ['x-pack/platform/plugins/shared/alerting_v2/server/config.ts'];
+
+    const expanded = expandJestImplicitConsumers(affected, changedFiles);
+
+    expect(expanded.has('@kbn/encrypted-saved-objects-plugin')).toBe(true);
+  });
 });
