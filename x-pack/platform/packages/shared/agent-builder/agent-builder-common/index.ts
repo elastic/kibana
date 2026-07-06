@@ -18,7 +18,8 @@ export {
   type ToolDefinition,
   type ToolDefinitionWithSchema,
   platformCoreTools,
-  platformStreamsSigEventsTools,
+  platformCoreCasesTools,
+  platformSignificantEventsTools,
   attachmentTools,
   internalTools,
   defaultAgentToolIds,
@@ -61,6 +62,7 @@ export {
   isSkillNotFoundError,
   isAgentBuilderError,
   isAgentNotFoundError,
+  isAgentUnavailableError,
   isConversationNotFoundError,
   isPluginNotFoundError,
   isBadRequestError,
@@ -74,6 +76,7 @@ export {
   createToolNotFoundError,
   createSkillNotFoundError,
   createAgentNotFoundError,
+  createAgentUnavailableError,
   createConversationNotFoundError,
   createPluginNotFoundError,
   createBadRequestError,
@@ -85,6 +88,7 @@ export {
   type AgentBuilderToolNotFoundError,
   type AgentBuilderSkillNotFoundError,
   type AgentBuilderAgentNotFoundError,
+  type AgentBuilderAgentUnavailableError,
   type AgentBuilderConversationNotFoundError,
   type AgentBuilderPluginNotFoundError,
   type AgentBuilderBadRequestError,
@@ -137,9 +141,12 @@ export {
   type AgentDeleteRequest,
 } from './agents';
 export {
+  ConversationAccessControlMode,
+  getDefaultConversationAccessControl,
   type RoundInput,
   type ConverseInput,
   type AssistantResponse,
+  type ConversationAccessControl,
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
@@ -278,6 +285,7 @@ export {
   type PluginManifestMetadata,
   type PluginDefinition,
 } from './plugins';
+export type { RendererDefinition, RendererPayloadOf } from './renderers';
 export { EffortLevels, type EffortLevel } from './model_provider';
 export {
   type OAuthClient,
