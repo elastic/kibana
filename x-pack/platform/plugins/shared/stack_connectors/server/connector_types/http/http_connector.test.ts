@@ -399,6 +399,39 @@ describe('config validation', () => {
       );
     });
 
+    test('returns error when OAuth2 password grant username is provided without password', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'https://token.example.com',
+      };
+
+      expect(() => {
+        validateConnector(connectorType, { config, secrets: { ...emptySecrets, user: 'bob' } });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled"`
+      );
+    });
+
+    test('returns error when OAuth2 password grant password is provided without username', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'https://token.example.com',
+      };
+
+      expect(() => {
+        validateConnector(connectorType, {
+          config,
+          secrets: { ...emptySecrets, password: 'supersecret' },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled"`
+      );
+    });
+
     test('succeeds when OAuth2 password grant credentials are provided', () => {
       const config: ConnectorTypeConfigType = {
         ...emptyConfig,
