@@ -56,8 +56,8 @@ export function registerInternalSmlRoutes({
       path: `${internalApiPath}/sml/_attach`,
       validate: {
         body: schema.object({
-          conversation_id: schema.string(),
-          chunk_ids: schema.arrayOf(schema.string(), {
+          conversation_id: schema.string({ maxLength: 256 }),
+          chunk_ids: schema.arrayOf(schema.string({ minLength: 1, maxLength: 1024 }), {
             minSize: 1,
             maxSize: SML_HTTP_ATTACH_ITEMS_MAX,
           }),

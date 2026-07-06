@@ -84,8 +84,8 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     ...adminInteractiveCookieHeader,
   });
 
-  apiTest('POST /internal/agent_builder/ce/_search autocomplete', async ({ apiClient }) => {
-    const response = await apiClient.post(`${INTERNAL_CONTEXT_ENGINE}/ce/_search`, {
+  apiTest('POST /internal/context_engine/_search autocomplete', async ({ apiClient }) => {
+    const response = await apiClient.post(`${INTERNAL_CONTEXT_ENGINE}/_search`, {
       headers: ih(),
       body: { query: 'pacif', size: 20 },
       responseType: 'json',
@@ -100,9 +100,9 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   });
 
   apiTest(
-    'POST /internal/agent_builder/ce/_search wildcard returns item fields',
+    'POST /internal/context_engine/_search wildcard returns item fields',
     async ({ apiClient }) => {
-      const response = await apiClient.post(`${INTERNAL_CONTEXT_ENGINE}/ce/_search`, {
+      const response = await apiClient.post(`${INTERNAL_CONTEXT_ENGINE}/_search`, {
         headers: ih(),
         body: { query: '*', size: 10 },
         responseType: 'json',
@@ -119,8 +119,8 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     }
   );
 
-  apiTest('POST /internal/agent_builder/ce/_search rejects empty query', async ({ apiClient }) => {
-    const response = await apiClient.post(`${INTERNAL_CONTEXT_ENGINE}/ce/_search`, {
+  apiTest('POST /internal/context_engine/_search rejects empty query', async ({ apiClient }) => {
+    const response = await apiClient.post(`${INTERNAL_CONTEXT_ENGINE}/_search`, {
       headers: ih(),
       body: { query: '' },
       responseType: 'json',

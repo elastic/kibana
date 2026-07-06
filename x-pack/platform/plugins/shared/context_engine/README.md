@@ -74,7 +74,9 @@ setup(core, { contextEngine }) {
 |--------|-----------------|
 | `agentBuilderPlatform` | `visualization`, `connector` |
 | `agentBuilderDashboards` | `dashboard` |
-| `workflowsManagement` | `workflow` |
+| `agentBuilderWorkflows` | `workflow` |
+| `alertingVTwo` | `alerting_v2_rule`, `alerting_v2_action_policy` |
+| `streams` | `significant_event` |
 
 ## Feature gating
 

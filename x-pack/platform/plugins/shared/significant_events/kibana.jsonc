@@ -28,9 +28,9 @@
     ],
     "optionalPlugins": [
       "agentBuilder",
-      "contextEngine",
       "alertingVTwo",
       "cloud",
+      "contextEngine",
       "esql",
       "serverless",
       "globalSearch",
