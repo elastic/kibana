@@ -64,7 +64,8 @@ export const transformDashboardIn = (
     );
 
     const { pinnedPanels, references: controlGroupReferences } = transformPinnedPanelsIn(
-      pinned_panels ?? []
+      pinned_panels ?? [],
+      useGASchemas
     );
 
     const attributes = {

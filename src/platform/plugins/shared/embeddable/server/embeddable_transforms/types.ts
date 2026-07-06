@@ -40,7 +40,7 @@ export type EmbeddableTransforms<
    */
   transformIn?: (
     state: EmbeddableState,
-    useGASchemas: boolean
+    useGASchemas?: boolean
   ) => {
     state: StoredEmbeddableState;
     references?: Reference[];
