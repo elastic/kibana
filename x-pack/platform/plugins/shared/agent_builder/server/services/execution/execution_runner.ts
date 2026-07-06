@@ -195,8 +195,7 @@ const handleConversationExecution = async ({
     : EMPTY;
 
   // Merge all event streams
-  const effectiveConversationId =
-    conversation.operation === 'CREATE' ? conversation.id : conversationId;
+  const effectiveConversationId = conversation.id;
 
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
   const connectorProvider = getConnectorProvider(chatModel.getConnector());
@@ -249,9 +248,7 @@ const handleConversationExecution = async ({
                 });
 
               // snapshot telemetry tracking
-              if (effectiveConversationId) {
-                trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
-              }
+              trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
 
               // EBT tracking
               analyticsService?.reportRoundComplete({
