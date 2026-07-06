@@ -94,7 +94,11 @@ describe('WaitForInputStepImpl', () => {
       const schema = {
         type: 'object',
         properties: {
-          approved: { type: 'boolean', title: 'Approve isolation?', default: '{{inputs.approved}}' },
+          approved: {
+            type: 'boolean',
+            title: 'Approve isolation?',
+            default: '{{inputs.approved}}',
+          },
         },
         required: ['approved'],
       };
