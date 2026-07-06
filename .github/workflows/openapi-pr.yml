@@ -21,7 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      # TODO: switch to @v1 once elastic/docs-actions#207 merges and tags a release
-      - uses: elastic/docs-actions/openapi/lint@355df64f39af21900e4d84afefd093f6b16bc841
+      - uses: elastic/docs-actions/openapi/lint@v1
         with:
           spec-path: ${{ matrix.spec }}
