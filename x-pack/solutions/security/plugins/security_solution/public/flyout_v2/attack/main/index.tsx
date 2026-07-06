@@ -5,19 +5,41 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
+import React, { memo, useCallback, useState } from 'react';
+import {
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
+import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
 import { NotesDetails } from '../../shared/tools/notes';
 import { useKibana } from '../../../common/lib/kibana';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 import { Footer } from './footer';
+
+type AttackFlyoutTabId = 'overview' | 'json';
+
+export const OVERVIEW_TAB_TEST_ID = 'attack-flyout-overview-tab-button';
+export const JSON_TAB_TEST_ID = 'attack-flyout-json-tab-button';
+export const JSON_TAB_CONTENT_TEST_ID = 'attack-flyout-json-tab';
+
+const OVERVIEW_TAB_LABEL = i18n.translate('xpack.securitySolution.flyout.attack.overviewTabLabel', {
+  defaultMessage: 'Overview',
+});
+const JSON_TAB_LABEL = i18n.translate('xpack.securitySolution.flyout.attack.jsonTabLabel', {
+  defaultMessage: 'JSON',
+});
 
 export interface AttackFlyoutProps {
   /**
@@ -49,6 +71,8 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
   const store = useStore();
   const history = useHistory();
 
+  const [selectedTabId, setSelectedTabId] = useState<AttackFlyoutTabId>('overview');
+
   const onShowNotes = useCallback(() => {
     overlays.openSystemFlyout(
       flyoutProviders({
@@ -67,7 +91,32 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
         <Header hit={hit} onAttackUpdated={onAttackUpdated} onShowNotes={onShowNotes} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="attack-flyout-body">
-        <OverviewTab hit={hit} />
+        <EuiTabs>
+          <EuiTab
+            isSelected={selectedTabId === 'overview'}
+            onClick={() => setSelectedTabId('overview')}
+            data-test-subj={OVERVIEW_TAB_TEST_ID}
+          >
+            {OVERVIEW_TAB_LABEL}
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTabId === 'json'}
+            onClick={() => setSelectedTabId('json')}
+            data-test-subj={JSON_TAB_TEST_ID}
+          >
+            {JSON_TAB_LABEL}
+          </EuiTab>
+        </EuiTabs>
+        <EuiSpacer size="m" />
+        {selectedTabId === 'json' ? (
+          <SharedJsonTab
+            value={hit.raw as unknown as Record<string, unknown>}
+            showFooterOffset={false}
+            data-test-subj={JSON_TAB_CONTENT_TEST_ID}
+          />
+        ) : (
+          <OverviewTab hit={hit} />
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter data-test-subj="attack-flyout-footer">
         <Footer attack={attack} hit={hit} onAttackUpdated={onAttackUpdated} />
