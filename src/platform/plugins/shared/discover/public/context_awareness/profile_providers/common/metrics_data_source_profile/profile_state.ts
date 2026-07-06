@@ -22,6 +22,6 @@ export const METRICS_AGGREGATION_STATE_DEF: ProfileStateDefinition<MetricsAggreg
   defaultState: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
 };
 
-export const registerMetricsAggregationStateDefinitions = (registry: ProfileStateRegistry) => {
+export const registerMetricsProfileStateDefinitions = (registry: ProfileStateRegistry) => {
   registry.registerDefinition(METRICS_AGGREGATION_STATE_DEF);
 };
