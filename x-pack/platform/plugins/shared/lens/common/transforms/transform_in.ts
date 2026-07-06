@@ -31,7 +31,7 @@ export const getTransformIn = (
   transformDrilldownsIn: DrilldownTransforms['transformIn'],
   isDashboardAppRequest: boolean
 ): LensTransformIn => {
-  return function transformIn(config, useGASchemas) {
+  return function transformIn(config, useGASchemas = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT) {
     const { state: storedConfig, references: drilldownReferences } = transformDrilldownsIn(config);
 
     if (isByRefLensConfig(storedConfig)) {

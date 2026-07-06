@@ -63,7 +63,8 @@ export function transformDashboardOut(
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
     legacyControls,
     pinned_panels,
-    references
+    references,
+    useGASchemas
   );
 
   const timeRange =
