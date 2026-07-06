@@ -349,6 +349,6 @@ export const workflowYamlDiffAttachmentUiDefinition: AttachmentUIDefinition<Work
         : i18n.translate('workflowsManagement.attachmentRenderers.diff.label', {
             defaultMessage: 'Workflow changes',
           }),
-    getIcon: () => 'merge',
+    getIcon: () => 'compare',
     renderInlineContent: ({ attachment }) => <DiffInlineContent attachment={attachment} />,
   };

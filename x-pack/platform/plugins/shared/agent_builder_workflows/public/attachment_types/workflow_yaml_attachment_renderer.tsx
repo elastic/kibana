@@ -149,12 +149,14 @@ const WorkflowYamlCanvasContent: React.FC<{
   const workflowId = savedWorkflowId ?? attachment.data.workflowId;
 
   const isPersisted = Boolean(attachment.origin);
+  const [isSaving, setIsSaving] = useState(false); // TODO: replace with /workflows_management/public/entities/workflows/model/use_save_yaml.ts or something along the lines
 
   const handleSave = useCallback(async () => {
     if (!updateOrigin) {
       return;
     }
 
+    setIsSaving(true);
     const id = await saveWorkflow({
       workflowApi,
       notifications,
@@ -168,6 +170,7 @@ const WorkflowYamlCanvasContent: React.FC<{
     if (id && !workflowId) {
       setSavedWorkflowId(id);
     }
+    setIsSaving(false);
   }, [
     workflowApi,
     notifications,
@@ -206,7 +209,7 @@ const WorkflowYamlCanvasContent: React.FC<{
   }, [workflowApi, notifications, application, attachment.data.yaml, telemetry, queryClient]);
 
   useEffect(() => {
-    if (!ready) {
+    if (!ready || !registerActionButtons) {
       return;
     }
 
@@ -215,9 +218,13 @@ const WorkflowYamlCanvasContent: React.FC<{
     if (workflowId && isPersisted) {
       if (canUpdateWorkflow) {
         buttons.push({
-          label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.override', {
-            defaultMessage: 'Override',
-          }),
+          label: isSaving
+            ? i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saving', {
+                defaultMessage: 'Saving...',
+              })
+            : i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.override', {
+                defaultMessage: 'Override',
+              }),
           icon: 'save',
           type: ActionButtonType.PRIMARY,
           handler: handleSave,
@@ -225,9 +232,13 @@ const WorkflowYamlCanvasContent: React.FC<{
       }
       if (canCreateWorkflow) {
         buttons.push({
-          label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveAsNew', {
-            defaultMessage: 'Save as new',
-          }),
+          label: isSaving
+            ? i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saving', {
+                defaultMessage: 'Saving...',
+              })
+            : i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveAsNew', {
+                defaultMessage: 'Save as new',
+              }),
           icon: 'copy',
           type: ActionButtonType.SECONDARY,
           handler: handleSaveAsNew,
@@ -257,16 +268,13 @@ const WorkflowYamlCanvasContent: React.FC<{
       });
     }
 
-    if (!registerActionButtons) {
-      return;
-    }
-
     registerActionButtons(buttons);
   }, [
     ready,
     isSidebar,
     workflowId,
     isPersisted,
+    isSaving,
     handleSave,
     handleSaveAsNew,
     isOnWorkflowPage,
