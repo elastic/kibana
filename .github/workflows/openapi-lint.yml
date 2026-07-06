@@ -1,4 +1,4 @@
-name: OpenAPI lint
+name: openapi-lint
 
 on:
   pull_request:
