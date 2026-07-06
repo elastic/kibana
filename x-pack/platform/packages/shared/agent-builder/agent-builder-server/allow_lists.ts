@@ -8,7 +8,7 @@
 import {
   platformCoreTools,
   platformCoreCasesTools,
-  platformStreamsSigEventsTools,
+  platformSignificantEventsTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 
@@ -22,7 +22,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Cases CRUD tools, registered by the Cases plugin
   ...Object.values(platformCoreCasesTools),
   // Streams / Significant Events
-  ...Object.values(platformStreamsSigEventsTools),
+  ...Object.values(platformSignificantEventsTools),
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,

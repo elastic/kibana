@@ -6,7 +6,7 @@
  */
 
 import {
-  STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   getManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
 import {
@@ -16,9 +16,11 @@ import {
 } from '../../../common/constants';
 
 // The continuous onboarding workflow YAML lives in the managed workflow
-// definition (kbn-workflows/managed/definitions/streams_ki/continuous_onboarding.yaml).
+// definition (kbn-workflows/managed/definitions/significant_events/knowledge_indicators/continuous_onboarding.yaml).
 // These tests keep that YAML in sync with the streams constants.
-const definition = getManagedWorkflowDefinition(STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID);
+const definition = getManagedWorkflowDefinition(
+  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID
+);
 
 const getWorkflowYaml = (): string => {
   if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
@@ -43,11 +45,11 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
   });
 
   it('uses the correct timeout', () => {
-    assertYamlContains(`timeout: "${COORDINATOR_INTERVAL_MINUTES - 1}m"`);
+    assertYamlContains(`timeout: '${COORDINATOR_INTERVAL_MINUTES - 1}m'`);
   });
 
   it('uses the correct coordinator interval', () => {
-    assertYamlContains(`every: "${COORDINATOR_INTERVAL_MINUTES}m"`);
+    assertYamlContains(`every: '${COORDINATOR_INTERVAL_MINUTES}m'`);
   });
 
   it('uses the correct maxScheduledStreams input', () => {
@@ -80,7 +82,7 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
   });
 
   it('uses the correct poll delay duration', () => {
-    assertYamlContains(`duration: "${POLL_DELAY_SECONDS}s"`);
+    assertYamlContains(`duration: '${POLL_DELAY_SECONDS}s'`);
   });
 
   it('calls the eligibility endpoint with the correct query params', () => {
@@ -99,7 +101,7 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
 
   it('starts onboarding via workflow.executeAsync for the managed onboarding workflow', () => {
     assertYamlContains('type: workflow.executeAsync');
-    assertYamlContains('workflow-id: "system-streams-ki-onboarding"');
+    assertYamlContains("workflow-id: 'system-streams-ki-onboarding'");
   });
 
   it('runs both features identification and queries generation', () => {
