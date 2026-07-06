@@ -204,8 +204,18 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
-  async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
+  /**
+   * Opens the "Save Discover session" modal (resolving the app-menu overflow if
+   * needed) without submitting it. Useful for asserting the modal's contents,
+   * e.g. whether the "Store time with session" switch is present.
+   */
+  async openSaveSearchModal() {
     await this.clickAppMenuItem('discoverSaveButton');
+    await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'visible' });
+  }
+
+  async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
+    await this.openSaveSearchModal();
     await this.page.testSubj.fill('savedObjectTitle', name);
     if (storeTimeRange !== undefined) {
       const switchControl = this.page.testSubj.locator('storeTimeWithSearch');
@@ -220,7 +230,7 @@ export class DiscoverApp {
   }
 
   async saveSearchAsNew(name: string) {
-    await this.clickAppMenuItem('discoverSaveButton');
+    await this.openSaveSearchModal();
     await this.page.testSubj.fill('savedObjectTitle', name);
     const checkbox = this.page.testSubj.locator('saveAsNewCheckbox');
     if (!(await checkbox.isChecked())) {

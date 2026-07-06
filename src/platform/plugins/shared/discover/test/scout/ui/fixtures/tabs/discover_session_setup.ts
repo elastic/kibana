@@ -8,12 +8,7 @@
  */
 
 import type { ScoutPage, ScoutTestFixtures } from '@kbn/scout';
-import {
-  addFieldColumn,
-  changeVisShape,
-  createDataViewFromSearchBar,
-  saveDiscoverSession,
-} from './helpers';
+import { addFieldColumn, changeVisShape, createDataViewFromSearchBar } from './helpers';
 import { AD_HOC_TAB, ESQL_TAB, PERSISTED_TAB } from './discover_session_test_data';
 
 export const createMultiTabDiscoverSession = async (
@@ -54,5 +49,5 @@ export const createMultiTabDiscoverSession = async (
   await unifiedTabs.editTabLabel(2, ESQL_TAB.label);
 
   await unifiedTabs.selectTab(0);
-  await saveDiscoverSession(page, sessionName, { storeTimeRange: true });
+  await discover.saveSearch(sessionName, { storeTimeRange: true });
 };

@@ -14,38 +14,33 @@
  * in the save dialog depending on whether any tab uses a time-based source.
  */
 
-import { spaceTest, type ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../../fixtures/common';
-import {
-  createDataViewFromSearchBar,
-  openSaveDiscoverSessionModal,
-  waitForTabStateToPersist,
-} from '../../fixtures/tabs/helpers';
+import { spaceTest, testData } from '../../fixtures/common';
+import { createDataViewFromSearchBar, waitForTabStateToPersist } from '../../fixtures/tabs/helpers';
 
 const AD_HOC_WITH_TIME_RANGE = 'log';
 const AD_HOC_WITHOUT_TIME_RANGE = 'logs';
 const PERSISTED_WITHOUT_TIME_RANGE = 'without-timefield';
 
 spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-classic' }, () => {
+  // Each case builds three tabs and reloads between assertions, which exceeds
+  // the default per-test timeout.
   spaceTest.setTimeout(180_000);
 
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
-    await scoutSpace.savedObjects.load(testData.INDEX_PATTERN_WITHOUT_TIMEFIELD_ARCHIVE);
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
-    await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+  spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.setupDiscoverDefaults();
+    await discoverScoutSpace.savedObjects.load(testData.INDEX_PATTERN_WITHOUT_TIMEFIELD_ARCHIVE);
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
+  spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
   spaceTest(
@@ -54,7 +49,7 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
       const { discover, unifiedTabs } = pageObjects;
 
       const expectTimeSwitchVisible = async () => {
-        await openSaveDiscoverSessionModal(page);
+        await discover.openSaveSearchModal();
         await expect(page.testSubj.locator('storeTimeWithSearch')).toBeVisible();
         await closeSaveModal(page);
       };
@@ -174,7 +169,7 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
       const { discover, unifiedTabs } = pageObjects;
 
       const expectTimeSwitchMissing = async () => {
-        await openSaveDiscoverSessionModal(page);
+        await discover.openSaveSearchModal();
         await expect(page.testSubj.locator('storeTimeWithSearch')).toBeHidden();
         await closeSaveModal(page);
       };

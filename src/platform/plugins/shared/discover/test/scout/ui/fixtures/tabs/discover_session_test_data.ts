@@ -15,7 +15,7 @@ export const PERSISTED_TAB = {
   dataView: 'logstash-*',
   column1: 'referer',
   column2: 'bytes',
-  hitCount: '9',
+  hitCount: 9,
   chartIntervalTitle: 'Hour',
   chartIntervalValue: 'h',
 };
@@ -28,7 +28,7 @@ export const AD_HOC_TAB = {
   dataView: 'logs*',
   column1: 'geo.src',
   column2: 'bytes',
-  hitCount: '6,045',
+  hitCount: 6045,
 };
 
 export const ESQL_TAB = {
@@ -37,5 +37,5 @@ export const ESQL_TAB = {
   time: { from: 'Sep 20, 2015 @ 12:00:00.000', to: 'Sep 22, 2015 @ 12:00:00.000' },
   timeISO: { start: '2015-09-20T12:00:00.000Z', end: '2015-09-22T12:00:00.000Z' },
   visShape: 'Line',
-  hitCount: '50',
+  hitCount: 50,
 };

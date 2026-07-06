@@ -14,64 +14,6 @@ type DiscoverApp = ScoutTestFixtures['pageObjects']['discover'];
 
 const NO_TIME_FILTER_OPTION = "--- I don't want to use the time filter ---";
 
-export const openSaveDiscoverSessionModal = async (page: ScoutPage) => {
-  const saveButton = page.testSubj.locator('discoverSaveButton');
-  if (await saveButton.isVisible()) {
-    await saveButton.click();
-    return;
-  }
-
-  const overflowButton = page.testSubj.locator('app-menu-overflow-button');
-  const popover = page.testSubj.locator('app-menu-popover');
-
-  if (await popover.isVisible()) {
-    await overflowButton.click();
-    await expect(popover).toBeHidden();
-  }
-
-  await expect(overflowButton).toBeVisible();
-  await expect(async () => {
-    await overflowButton.click();
-    await expect(popover).toBeVisible({ timeout: 5_000 });
-  }).toPass({ timeout: 30_000 });
-
-  await expect(saveButton).toBeVisible();
-  await saveButton.click();
-};
-
-/**
- * Saves a Discover session with options that are not covered by the shared page object.
- */
-export const saveDiscoverSession = async (
-  page: ScoutPage,
-  name: string,
-  options?: { saveAsNew?: boolean; storeTimeRange?: boolean }
-) => {
-  await openSaveDiscoverSessionModal(page);
-  await page.testSubj.fill('savedObjectTitle', name);
-
-  if (options?.saveAsNew !== undefined) {
-    const checkbox = page.testSubj.locator('saveAsNewCheckbox');
-    if (options.saveAsNew) {
-      await checkbox.check();
-    } else {
-      await checkbox.uncheck();
-    }
-  }
-
-  if (options?.storeTimeRange !== undefined) {
-    const toggle = page.testSubj.locator('storeTimeWithSearch');
-    if (options.storeTimeRange) {
-      await toggle.check();
-    } else {
-      await toggle.uncheck();
-    }
-  }
-
-  await page.testSubj.click('confirmSaveSavedObjectButton');
-  await expect(page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
-};
-
 /**
  * Creates an ad-hoc or persisted data view from the Discover search bar.
  * Mirrors the FTR `dataViews.createFromSearchBar` behavior.
@@ -203,13 +145,6 @@ export const getCurrentVisTitle = async (page: ScoutPage): Promise<string> => {
 export const addFieldColumn = async (page: ScoutPage, field: string) => {
   await page.testSubj.fill('fieldListFiltersFieldSearch', field);
   await page.testSubj.click(`fieldToggle-${field}`);
-};
-
-/**
- * Returns the hit count text from the Discover query hits element.
- */
-export const getHitCount = async (page: ScoutPage): Promise<string> => {
-  return page.testSubj.innerText('discoverQueryHits');
 };
 
 /**

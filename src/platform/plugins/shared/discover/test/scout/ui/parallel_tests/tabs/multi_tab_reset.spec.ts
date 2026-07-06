@@ -11,12 +11,11 @@
  * Multi-tab Discover session reset and uninitialized-tab restore flows.
  */
 
-import { spaceTest, type ScoutTestFixtures } from '@kbn/scout';
+import type { ScoutTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../../fixtures/common';
+import { spaceTest } from '../../fixtures/common';
 import {
   createDataViewFromSearchBar,
-  saveDiscoverSession,
   selectDataViewMode,
   waitForTabStateToPersist,
 } from '../../fixtures/tabs/helpers';
@@ -25,24 +24,22 @@ spaceTest.describe(
   'tabs - multi-tab Discover session reset behavior',
   { tag: '@local-stateful-classic' },
   () => {
+    // Builds up to six tabs and reloads to assert per-tab restoration, which
+    // exceeds the default per-test timeout.
     spaceTest.setTimeout(180_000);
 
-    spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
-      await scoutSpace.savedObjects.load(testData.KIBANA_SAMPLE_DATA_FLIGHTS_INDEX_PATTERN_ARCHIVE);
-      await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
-      await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+    spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
+      await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.waitUntilTabIsLoaded();
     });
 
-    spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await scoutSpace.savedObjects.cleanStandardList();
+    spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+      await discoverScoutSpace.teardownDiscoverDefaults();
     });
 
     spaceTest(
@@ -61,7 +58,7 @@ spaceTest.describe(
             'Untitled 2',
             'Untitled 3',
           ]);
-          await saveDiscoverSession(page, sessionName);
+          await discover.saveSearch(sessionName);
           await expect(page.testSubj.locator('breadcrumb last')).toHaveText(sessionName);
         });
 
@@ -178,7 +175,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('save as new session', async () => {
-          await saveDiscoverSession(page, sessionName);
+          await discover.saveSearch(sessionName);
           await expect(page.testSubj.locator('breadcrumb last')).toHaveText(sessionName);
         });
 

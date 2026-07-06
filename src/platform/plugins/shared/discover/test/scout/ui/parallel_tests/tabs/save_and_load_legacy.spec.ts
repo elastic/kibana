@@ -14,30 +14,25 @@
  * tab and can be extended with additional tabs and re-saved.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../../fixtures/common';
-import { saveDiscoverSession, getHitCount } from '../../fixtures/tabs/helpers';
+import { spaceTest } from '../../fixtures/common';
 
 const LEGACY_SESSION_NAME = 'A Saved Search';
 const UPDATED_SESSION_NAME = 'Updated legacy session';
 
 spaceTest.describe('tabs - legacy Discover sessions', { tag: '@local-stateful-classic' }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
-    await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+  spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.setupDiscoverDefaults();
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
+  spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
   spaceTest(
@@ -50,7 +45,7 @@ spaceTest.describe('tabs - legacy Discover sessions', { tag: '@local-stateful-cl
 
       await expect(page.testSubj.locator('breadcrumb last')).toHaveText(LEGACY_SESSION_NAME);
       expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled']);
-      expect(await getHitCount(page)).toBe('14,004');
+      expect(await discover.getHitCountInt()).toBe(14_004);
     }
   );
 
@@ -73,7 +68,7 @@ spaceTest.describe('tabs - legacy Discover sessions', { tag: '@local-stateful-cl
       });
 
       await spaceTest.step('save as new session', async () => {
-        await saveDiscoverSession(page, UPDATED_SESSION_NAME, { saveAsNew: true });
+        await discover.saveSearchAsNew(UPDATED_SESSION_NAME);
         await expect(page.testSubj.locator('breadcrumb last')).toHaveText(UPDATED_SESSION_NAME);
         expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled', 'Untitled 2']);
       });

@@ -143,19 +143,6 @@ export class UnifiedTabs {
     await this.hideTabPreview();
   }
 
-  async editTabLabel(index: number, newLabel: string) {
-    const tab = await this.getTab(index);
-    await tab.dblclick();
-
-    const input = this.page.locator(
-      `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.editTabLabelInputPrefix}"]`
-    );
-    await input.waitFor({ state: 'visible' });
-    await input.fill(newLabel);
-    await input.press('Enter');
-    await tab.getByText(newLabel, { exact: true }).waitFor({ state: 'visible' });
-  }
-
   /**
    * Clicks the "New tab" button without waiting for the new tab to settle.
    * Prefer `createNewTab()` for the common case; use this only when a test
