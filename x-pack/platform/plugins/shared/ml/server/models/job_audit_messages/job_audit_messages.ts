@@ -81,6 +81,9 @@ export function jobAuditMessagesProvider(
       end?: string;
     }
   ) {
+    // check that the job exists and the user has permission to access it
+    await mlClient.getJobs({ job_id: jobId });
+
     let gte = null;
     if (jobId !== undefined && from === undefined) {
       const jobs = await mlClient.getJobs({ job_id: jobId });
@@ -190,6 +193,9 @@ export function jobAuditMessagesProvider(
    * @param jobIds
    */
   async function getAuditMessagesSummary(jobIds: string[]): Promise<AuditMessage[]> {
+    // check that the jobs exist and the user has permission to access them
+    await mlClient.getJobs({ job_id: jobIds.join(',') });
+
     // TODO This is the current default value of the cluster setting `search.max_buckets`.
     // This should possibly consider the real settings in a future update.
     const maxBuckets = 10000;
@@ -446,6 +452,9 @@ export function jobAuditMessagesProvider(
     jobIds: string[],
     earliestMs?: number
   ): Promise<JobsErrorsResponse> {
+    // check that the jobs exist and the user has permission to access them
+    await mlClient.getJobs({ job_id: jobIds.join(',') });
+
     const body = await asInternalUser.search(
       {
         index: ML_NOTIFICATION_INDEX_PATTERN,
