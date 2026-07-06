@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 
 import { sendListAgentlessPolicies } from '../../../../../hooks';
+import type { RequestError } from '../../../../../hooks';
 
 /**
  * Read agentless deployments through the agentless policies LIST API instead of the
@@ -26,7 +27,7 @@ export const useAgentlessPolicies = ({
 }) => {
   const { data, isLoading, error, refetch } = useQuery<
     Awaited<ReturnType<typeof sendListAgentlessPolicies>>,
-    Error
+    RequestError
   >(
     ['agentlessPolicies', page, perPage, kuery],
     () => sendListAgentlessPolicies({ page, perPage, kuery }),
