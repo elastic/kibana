@@ -13,7 +13,7 @@ import { selectUnit } from '@formatjs/intl-utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useParams } from 'react-router-dom';
-import type { AppHeaderBadge } from '@kbn/app-header';
+import type { AppHeaderBadge, AppHeaderTab } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -210,35 +210,41 @@ export const WorkflowDetailHeader = React.memo(
       return undefined;
     }, [hasUnsavedChanges, isSchemaValid]);
 
-    const viewToggleItem = useMemo<AppMenuItemType>(
-      () =>
-        isExecutionsTab
-          ? {
-              id: 'viewWorkflow',
-              order: 1,
-              label: i18n.translate('workflows.workflowDetailHeader.workflowButton', {
-                defaultMessage: 'Workflow',
-              }),
-              iconType: 'grid',
-              run: () => setActiveTab('workflow'),
-              testId: 'workflowDetailWorkflowButton',
-            }
-          : {
-              id: 'viewExecutions',
-              order: 1,
-              label: i18n.translate('workflows.workflowDetailHeader.executionsButton', {
-                defaultMessage: 'Executions',
-              }),
-              iconType: 'videoPlayer',
-              run: () => setActiveTab('executions'),
-              disableButton: !canReadVisibleWorkflowExecution,
-              tooltipContent: !canReadVisibleWorkflowExecution
-                ? executionsTabDisabledTooltip
-                : undefined,
-              testId: 'workflowDetailExecutionsButton',
-            },
-      [isExecutionsTab, setActiveTab, canReadVisibleWorkflowExecution, executionsTabDisabledTooltip]
-    );
+    const tabs = useMemo<AppHeaderTab[] | undefined>(() => {
+      if (!workflowId) {
+        return undefined;
+      }
+      return [
+        {
+          id: 'workflow',
+          label: i18n.translate('workflows.workflowDetailHeader.workflowButton', {
+            defaultMessage: 'Workflow',
+          }),
+          isSelected: !isExecutionsTab,
+          onClick: () => setActiveTab('workflow'),
+          'data-test-subj': 'workflowDetailWorkflowButton',
+        },
+        {
+          id: 'executions',
+          label: i18n.translate('workflows.workflowDetailHeader.executionsButton', {
+            defaultMessage: 'Executions',
+          }),
+          isSelected: isExecutionsTab,
+          onClick: () => setActiveTab('executions'),
+          disabled: !canReadVisibleWorkflowExecution,
+          toolTipContent: !canReadVisibleWorkflowExecution
+            ? executionsTabDisabledTooltip
+            : undefined,
+          'data-test-subj': 'workflowDetailExecutionsButton',
+        },
+      ];
+    }, [
+      workflowId,
+      isExecutionsTab,
+      setActiveTab,
+      canReadVisibleWorkflowExecution,
+      executionsTabDisabledTooltip,
+    ]);
 
     const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
       WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
@@ -298,9 +304,6 @@ export const WorkflowDetailHeader = React.memo(
 
     const appMenu = useMemo<AppMenuConfig>(() => {
       const items: AppMenuItemType[] = [];
-      if (workflowId) {
-        items.push(viewToggleItem);
-      }
       if (!isVisualEditorEnabled) {
         items.push({
           id: 'runWorkflow',
@@ -360,7 +363,6 @@ export const WorkflowDetailHeader = React.memo(
       };
     }, [
       isExecutionsTab,
-      viewToggleItem,
       isVisualEditorEnabled,
       handleSaveWorkflow,
       canSaveWorkflow,
@@ -398,6 +400,7 @@ export const WorkflowDetailHeader = React.memo(
               },
             }}
             badges={badges}
+            tabs={tabs}
             menu={appMenu}
             docLink={WORKFLOWS_DOCUMENTATION_URL}
             showAddIntegrations
