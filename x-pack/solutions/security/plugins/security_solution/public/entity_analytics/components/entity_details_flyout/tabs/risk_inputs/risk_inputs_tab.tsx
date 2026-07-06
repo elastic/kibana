@@ -365,9 +365,9 @@ const RiskInputsTabContent = <T extends EntityType>({
   const latestRiskScore = isResolutionView ? resolutionRiskScore : entityRiskScore;
   const activeRiskScore = pitRiskScore ?? latestRiskScore;
   const activeInspectRiskScore = isResolutionView ? inspectResolutionRiskScore : inspectRiskScore;
-  const activeRiskScoreLoading = isResolutionView
-    ? loadingResolutionRiskScore
-    : loadingRiskScore || (pitSelectionActive && pitFetching);
+  const activeRiskScoreLoading =
+    (isResolutionView ? loadingResolutionRiskScore : loadingRiskScore) ||
+    (pitSelectionActive && pitFetching);
   const activeRiskScoreRefetch = isResolutionView ? refetchResolutionRiskScore : refetch;
 
   useQueryInspector({
