@@ -326,6 +326,22 @@ describe('runTool', () => {
       })
     );
   });
+
+  it('scopes the ES client with space-level project routing for CPS support', async () => {
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    await runTool({
+      toolExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(runnerDeps.elasticsearch.client.asScoped).toHaveBeenCalledWith(runnerDeps.request, {
+      projectRouting: 'space',
+    });
+  });
 });
 
 describe('runInternalTool - confirmation policy', () => {
