@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
@@ -20,7 +20,7 @@ import type { StreamsServer } from '../../../types';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { createEventToolHandler } from './handler';
 
-export const STREAMS_CREATE_EVENT_TOOL_ID = platformStreamsSigEventsTools.createEvent;
+export const STREAMS_CREATE_EVENT_TOOL_ID = platformSignificantEventsTools.createEvent;
 
 const createEventSchema = z.object({
   status: significantEventStatusSchema.optional().describe(
