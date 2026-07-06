@@ -58,11 +58,16 @@ export const isAttachmentRuleOpenOnFormPage = (
 };
 
 const isOnRuleDetailsPage = (ruleId: string, pathname: string): boolean => {
-  if (!pathname.includes(RULES_PATH)) return false;
+  if (!pathname.includes(RULES_PATH) || pathname.includes('/edit')) {
+    return false;
+  }
   const match = pathname.match(/\/id\/([^/]+)/);
-  if (!match) return false;
+  if (!match) {
+    return false;
+  }
+
   const pathRuleId = decodeURIComponent(match[1]);
-  return pathRuleId === ruleId && !pathname.includes('/edit');
+  return pathRuleId === ruleId;
 };
 
 export const shouldShowViewRuleButton = (
