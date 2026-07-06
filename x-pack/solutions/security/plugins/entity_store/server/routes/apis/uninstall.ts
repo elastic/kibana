@@ -20,7 +20,7 @@ const bodySchema = z.object({
     .optional()
     .default(ALL_ENTITY_TYPES)
     .describe(
-      'Deprecated in 9.6.0. Use `DELETE /uninstall/{entityType}` to uninstall a single entity type. ' +
+      'Deprecated in 9.6.0. Use `DELETE /api/security/entity_store/uninstall/{entityType}` to uninstall a single entity type. ' +
         'Retained for backward compatibility. Entity types to uninstall; defaults to all installed types.'
     )
     .meta({ deprecated: true }),
@@ -34,7 +34,7 @@ export function registerUninstall(router: EntityStorePluginRouter) {
       summary: 'Uninstall the Entity Store',
       description:
         'Uninstall the Entity Store, removing engines and associated resources for the specified ' +
-        'entity types. To remove a single entity type, use `DELETE /uninstall/{entityType}` instead. ' +
+        'entity types. To remove a single entity type, use `DELETE /api/security/entity_store/uninstall/{entityType}` instead. ' +
         'Uninstalling the last remaining entity type (via either endpoint) removes the shared Entity ' +
         'Store resources as well (global configuration, status/history tasks, entity maintainers).',
       options: {

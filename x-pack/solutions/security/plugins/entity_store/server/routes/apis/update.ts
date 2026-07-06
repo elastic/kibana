@@ -30,7 +30,7 @@ export function registerUpdate(router: EntityStorePluginRouter) {
       description:
         'Update the Entity Store log extraction configuration. This applies to all entity types. ' +
         'Cadence settings (`frequency`, `delay`, `lookbackPeriod`) can also be set individually per ' +
-        'entity type via `PUT /update/{entityType}`; a value set for a specific type takes ' +
+        'entity type via `PUT /api/security/entity_store/update/{entityType}`; a value set for a specific type takes ' +
         'precedence over this shared setting for that type only. Supplying a cadence field here is ' +
         'a request for the whole store: it applies the new value to every entity type, replacing ' +
         'any value that type had configured individually (including types with a different default ' +

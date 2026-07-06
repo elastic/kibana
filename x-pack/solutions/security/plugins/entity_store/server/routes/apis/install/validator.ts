@@ -19,7 +19,7 @@ export const BodySchema = z.object({
     .optional()
     .default(ALL_ENTITY_TYPES)
     .describe(
-      'Deprecated in 9.6.0. Use `POST /install/{entityType}` to install a single entity type. ' +
+      'Deprecated in 9.6.0. Use `POST /api/security/entity_store/install/{entityType}` to install a single entity type. ' +
         'Retained for backward compatibility; installs all listed types uniformly.'
     )
     .meta({ deprecated: true }),

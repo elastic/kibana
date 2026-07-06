@@ -33,16 +33,20 @@ export function registerInstallByType(router: EntityStorePluginRouter) {
       summary: 'Install a single entity type',
       description:
         'Install the Entity Store for a single entity type. Accepts the same `logExtraction` ' +
-        'shape as `POST /install`, scoped to just this type: if the Entity Store is not installed ' +
+        'shape as `POST /api/security/entity_store/install`, scoped to just this type: if the Entity Store is not installed ' +
         'yet, this bootstraps it (shared indices/templates, global configuration, entity ' +
-        'maintainers) for this one type; if the store is already installed by other types, only ' +
-        'this type is added. A no-op if this type is already installed. Cadence fields ' +
+        'maintainers) for this one type; if the store is already installed for other types, only ' +
+        'this type is added. If this type is already installed, the request succeeds without making changes. Cadence fields ' +
         "(`frequency`, `delay`, `lookbackPeriod`) become this type's own cadence, distinct from " +
         "the shared value; fields left unset use the type's default cadence (e.g. Service/Generic " +
         'install at a reduced cadence). Every other field (index patterns, volume limits, etc.) ' +
-        'is applied to the shared configuration, the same as `POST /install`.',
+        'is applied to the shared configuration, the same as `POST /api/security/entity_store/install`.',
       options: {
         tags: ['oas-tag:Security entity store'],
+        availability: {
+          since: '9.5.0',
+          stability: 'stable',
+        },
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

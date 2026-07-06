@@ -29,9 +29,13 @@ export function registerUninstallByType(router: EntityStorePluginRouter) {
         'Uninstall a single entity type, removing its engine and associated resources. ' +
         'Uninstalling the last remaining entity type also removes the shared Entity Store ' +
         'resources (global configuration, status/history tasks, entity maintainers) — the ' +
-        'same as calling `POST /uninstall` for all types.',
+        'same as calling `POST /api/security/entity_store/uninstall` for all types.',
       options: {
         tags: ['oas-tag:Security entity store'],
+        availability: {
+          since: '9.5.0',
+          stability: 'stable',
+        },
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

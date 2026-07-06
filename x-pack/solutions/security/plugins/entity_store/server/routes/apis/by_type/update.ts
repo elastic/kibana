@@ -37,9 +37,13 @@ export function registerUpdateByType(router: EntityStorePluginRouter) {
         'entity type. Only the fields supplied are changed; there is no way to clear a field ' +
         'back to the shared global value — set it explicitly to the value you want, including ' +
         "the type's default if desired. All other log extraction settings (index patterns, " +
-        'volume limits, etc.) remain store-wide only and can be changed via `PUT /update`.',
+        'volume limits, etc.) remain store-wide only and can be changed via `PUT /api/security/entity_store/update`.',
       options: {
         tags: ['oas-tag:Security entity store'],
+        availability: {
+          since: '9.5.0',
+          stability: 'stable',
+        },
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
