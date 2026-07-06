@@ -53,14 +53,10 @@ export type AddRuleAttachmentToChatButtonProps = (
   | AddRuleAttachmentFromRuleResponseProps
 ) & {
   pathway: AgentBuilderAddToChatTelemetry['pathway'];
-  disabled?: boolean;
-  disabledTooltip?: string;
 };
 
 export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButtonProps> = ({
   pathway,
-  disabled,
-  disabledTooltip,
   ...props
 }) => {
   const { services } = useKibana();
@@ -142,8 +138,6 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   return (
     <NewAgentBuilderAttachment
       onClick={handleClick}
-      disabled={disabled}
-      disabledTooltip={disabledTooltip}
       telemetry={{
         pathway,
         attachments: ['rule'],
