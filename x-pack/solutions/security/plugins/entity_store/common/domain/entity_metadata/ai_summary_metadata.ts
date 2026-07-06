@@ -41,7 +41,7 @@ export interface AiSummaryMetadataDoc {
   'ai_summary.generated_by': string;
   'ai_summary.generated_at': number;
   'ai_summary.highlights': AiSummaryHighlightItem[];
-  'ai_summary.recommendedActions'?: string[] | null;
+  'ai_summary.recommended_actions'?: string[] | null;
   'ai_summary.anomaly_job_ids'?: string[];
   'ai_summary.variant_id'?: string;
   'ai_summary.staleness': AiSummaryMetadataStaleness;
