@@ -396,16 +396,18 @@ class FleetServerHostService {
 
     // Store secret values if enabled; if not, store plain text values
     if (await isSecretStorageEnabled(esClient, soClient)) {
-      const secretsRes = await extractAndUpdateFleetServerHostsSecrets({
-        oldFleetServerHost: originalItem,
-        fleetServerHostUpdate: data,
-        esClient,
-        secretHashes: data.is_preconfigured ? options?.secretHashes : undefined,
-      });
+      if (data.secrets !== undefined) {
+        const secretsRes = await extractAndUpdateFleetServerHostsSecrets({
+          oldFleetServerHost: originalItem,
+          fleetServerHostUpdate: data,
+          esClient,
+          secretHashes: data.is_preconfigured ? options?.secretHashes : undefined,
+        });
 
-      updateData.secrets = secretsRes.fleetServerHostUpdate
-        .secrets as FleetServerHostSOAttributes['secrets'];
-      secretsToDelete = secretsRes.secretsToDelete;
+        updateData.secrets = secretsRes.fleetServerHostUpdate
+          .secrets as FleetServerHostSOAttributes['secrets'];
+        secretsToDelete = secretsRes.secretsToDelete;
+      }
     } else {
       if (
         (!data.ssl?.key && data.secrets?.ssl?.key) ||
