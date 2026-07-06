@@ -1,5 +1,5 @@
 {
-  "title": "Large language model performance matrix for Elastic Security",
+  "title": "Agent Builder LLM performance matrix for Elastic Security",
   "branch": "main",
   "lookbackDays": 14,
   "defaultScale": 10,
@@ -7,41 +7,88 @@
   "notRecommendedBelow": 0,
   "notRecommendedLabel": "Not recommended",
   "notRecommendedCountsAsZeroInOverall": true,
+  "showOverall": false,
   "overall": {
-    "label": "Overall",
-    "mode": "weighted"
+    "label": "Overall Score",
+    "mode": "mean"
   },
   "columns": [
     {
       "id": "alert_triage",
       "label": "Alert Triage",
-      "suites": ["security-alert-triage"],
+      "group": "Agent Builder",
+      "suites": ["security-alert-triage", "security-alerts-rag-regression"],
       "weight": 1
     },
     {
       "id": "detection_engineering",
       "label": "Detection Engineering",
-      "suites": ["security-esql-generation-regression", "security-ai-rules"],
+      "group": "Agent Builder",
+      "suites": ["security-ai-rules", "security-esql-generation-regression"],
       "weight": 1
     },
     {
       "id": "investigation",
       "label": "Investigation",
-      "suites": ["attack-discovery", "security-alerts-rag-regression"],
-      "weight": 1
-    },
-    {
-      "id": "kb_retrieval",
-      "label": "KB Retrieval",
-      "suites": ["security-alerts-rag-regression"],
+      "group": "Agent Builder",
+      "suites": ["entity-analytics-v2", "agent-builder"],
       "weight": 1
     },
     {
       "id": "workflow_execution",
       "label": "Workflow Execution",
-      "suites": ["endpoint"],
+      "group": "Agent Builder",
+      "suites": ["workflows", "lead-generation"],
+      "weight": 1
+    },
+    {
+      "id": "multi_step_execution",
+      "label": "Multi-step execution",
+      "group": "Agent Builder",
+      "suites": ["agent-builder"],
+      "weight": 1
+    },
+    {
+      "id": "attack_discovery",
+      "label": "Attack Discovery",
+      "suites": ["attack-discovery"],
+      "weight": 1
+    },
+    {
+      "id": "automatic_migration",
+      "label": "Automatic Migration",
+      "suites": ["security-automatic-migrations"],
       "weight": 1
     }
+  ],
+  "composites": [
+    {
+      "id": "agent_builder_score",
+      "label": "Agent Builder Score",
+      "from": [
+        "alert_triage",
+        "detection_engineering",
+        "investigation",
+        "workflow_execution",
+        "multi_step_execution"
+      ]
+    },
+    {
+      "id": "overall_score",
+      "label": "Overall Score",
+      "from": ["agent_builder_score", "attack_discovery", "automatic_migration"]
+    }
+  ],
+  "layout": [
+    "alert_triage",
+    "detection_engineering",
+    "investigation",
+    "workflow_execution",
+    "multi_step_execution",
+    "agent_builder_score",
+    "attack_discovery",
+    "automatic_migration",
+    "overall_score"
   ],
   "models": [
     {

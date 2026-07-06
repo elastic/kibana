@@ -178,6 +178,109 @@ describe('buildMatrix', () => {
     expect(matrix.proprietary[0].cells.triage).toEqual({ kind: 'score', value: 2 });
   });
 
+  describe('composites', () => {
+    const compositeConfig: MatrixConfig = parseMatrixConfig({
+      showOverall: false,
+      columns: [
+        { id: 'c1', label: 'C1', group: 'Group', suites: ['s1'] },
+        { id: 'c2', label: 'C2', group: 'Group', suites: ['s2'] },
+        { id: 'feat', label: 'Feat', suites: ['s3'] },
+      ],
+      composites: [
+        { id: 'group_score', label: 'Group Score', from: ['c1', 'c2'] },
+        { id: 'overall_score', label: 'Overall Score', from: ['group_score', 'feat'] },
+      ],
+      layout: ['c1', 'c2', 'group_score', 'feat', 'overall_score'],
+      models: [
+        { id: 'm1', label: 'M1' },
+        { id: 'm2', label: 'M2' },
+      ],
+    });
+
+    const suite = (suiteId: string, mean: number) => ({
+      suiteId,
+      experimentId: `e-${suiteId}`,
+      datasets: [{ datasetId: 'd', datasetName: 'D', evaluators: [evaluator(mean)] }],
+    });
+
+    it('averages base cells into a composite and layers composites of composites', () => {
+      const matrix = buildMatrix(
+        [{ modelId: 'm1', suites: [suite('s1', 0.8), suite('s2', 0.6)] }],
+        compositeConfig
+      );
+      const row = matrix.proprietary[0];
+
+      expect(row.cells.group_score).toEqual({ kind: 'score', value: 7 });
+      // feat has no data -> missing, so overall = group_score only = 7.
+      expect(row.cells.feat).toEqual({ kind: 'missing' });
+      expect(row.cells.overall_score).toEqual({ kind: 'score', value: 7 });
+    });
+
+    it('counts "Not recommended" sources as 0 inside a composite', () => {
+      const matrix = buildMatrix(
+        [{ modelId: 'm1', suites: [suite('s1', 0), suite('s2', 0.6)] }],
+        compositeConfig
+      );
+      const row = matrix.proprietary[0];
+
+      expect(row.cells.c1).toEqual({ kind: 'not-recommended' });
+      // mean(0, 6) = 3.
+      expect(row.cells.group_score).toEqual({ kind: 'score', value: 3 });
+    });
+
+    it('marks a composite missing when none of its sources have data', () => {
+      const matrix = buildMatrix([{ modelId: 'm1', suites: [suite('s3', 0.9)] }], compositeConfig);
+      const row = matrix.proprietary[0];
+
+      expect(row.cells.group_score).toEqual({ kind: 'missing' });
+      // overall = feat only = 9.
+      expect(row.cells.overall_score).toEqual({ kind: 'score', value: 9 });
+    });
+
+    it('builds display columns in layout order and suppresses the legacy overall', () => {
+      const matrix = buildMatrix(
+        [{ modelId: 'm1', suites: [suite('s1', 0.8), suite('s2', 0.6)] }],
+        compositeConfig
+      );
+
+      expect(matrix.displayColumns?.map((column) => column.id)).toEqual([
+        'c1',
+        'c2',
+        'group_score',
+        'feat',
+        'overall_score',
+      ]);
+      expect(matrix.displayColumns?.find((column) => column.id === 'group_score')?.kind).toBe(
+        'composite'
+      );
+      expect(matrix.displayColumns?.some((column) => column.kind === 'overall')).toBe(false);
+      expect(matrix.displayColumns?.find((column) => column.id === 'c1')?.group).toBe('Group');
+    });
+
+    it('ranks rows by the final composite (Overall Score) descending', () => {
+      const matrix = buildMatrix(
+        [
+          { modelId: 'm1', suites: [suite('s1', 0.3), suite('s2', 0.3)] },
+          { modelId: 'm2', suites: [suite('s1', 0.9), suite('s2', 0.9)] },
+        ],
+        compositeConfig
+      );
+
+      expect(matrix.proprietary.map((row) => row.modelLabel)).toEqual(['M2', 'M1']);
+    });
+
+    it('throws when the layout references an unknown id', () => {
+      const badConfig = parseMatrixConfig({
+        columns: [{ id: 'c1', label: 'C1', suites: ['s1'] }],
+        layout: ['c1', 'nope'],
+        models: [{ id: 'm1', label: 'M1' }],
+      });
+      expect(() => buildMatrix([{ modelId: 'm1', suites: [suite('s1', 0.5)] }], badConfig)).toThrow(
+        /unknown column\/composite id/
+      );
+    });
+  });
+
   it('sorts rows by overall score descending', () => {
     const matrix = buildMatrix(
       [

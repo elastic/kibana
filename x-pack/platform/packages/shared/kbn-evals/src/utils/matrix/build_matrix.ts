@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { MatrixColumnConfig, MatrixConfig, MatrixModelConfig } from './load_matrix_config';
+import type {
+  MatrixColumnConfig,
+  MatrixCompositeConfig,
+  MatrixConfig,
+  MatrixModelConfig,
+} from './load_matrix_config';
 import type { AggregatedModelScores } from './query_matrix_scores';
 
 /** A single matrix cell: either a numeric 0-10 score or "Not recommended". */
@@ -14,17 +19,31 @@ export type MatrixCell =
   | { kind: 'not-recommended' }
   | { kind: 'missing' };
 
+/** Synthetic id for the legacy single "Overall" column. */
+export const OVERALL_COLUMN_ID = '__overall__';
+
+/** A column as rendered, left-to-right, including derived composite columns. */
+export interface MatrixDisplayColumn {
+  id: string;
+  label: string;
+  group?: string;
+  kind: 'base' | 'composite' | 'overall';
+}
+
 export interface MatrixRow {
   modelId: string;
   modelLabel: string;
   openSource: boolean;
-  /** Column id -> cell. */
+  /** Column/composite id -> cell. */
   cells: Record<string, MatrixCell>;
   overall: MatrixCell;
 }
 
 export interface Matrix {
-  columns: Array<{ id: string; label: string }>;
+  columns: Array<{ id: string; label: string; group?: string }>;
+  composites?: Array<{ id: string; label: string; group?: string }>;
+  /** Full ordered render list (base + composite + legacy overall). */
+  displayColumns?: MatrixDisplayColumn[];
   overallLabel: string;
   proprietary: MatrixRow[];
   openSource: MatrixRow[];
@@ -150,6 +169,97 @@ const computeOverall = (cells: Record<string, MatrixCell>, config: MatrixConfig)
 };
 
 /**
+ * Computes a composite cell as the equal-weighted mean of its referenced cells.
+ * Mirrors {@link computeOverall}: "Not recommended" sources contribute 0 (when
+ * configured) and missing sources are skipped, so a composite reflects the data
+ * that exists rather than being dragged to "missing" by not-yet-wired columns.
+ */
+const computeComposite = (
+  cells: Record<string, MatrixCell>,
+  composite: MatrixCompositeConfig,
+  config: MatrixConfig
+): MatrixCell => {
+  let sum = 0;
+  let count = 0;
+  let hasAnyData = false;
+
+  for (const refId of composite.from) {
+    const cell = cells[refId];
+    if (!cell || cell.kind === 'missing') {
+      continue;
+    }
+
+    hasAnyData = true;
+
+    if (cell.kind === 'not-recommended') {
+      if (config.notRecommendedCountsAsZeroInOverall) {
+        count += 1;
+      }
+      continue;
+    }
+
+    sum += cell.value;
+    count += 1;
+  }
+
+  if (!hasAnyData || count === 0) {
+    return { kind: 'missing' };
+  }
+
+  const value = roundTo(sum / count, config.decimals);
+  if (value <= config.notRecommendedBelow) {
+    return { kind: 'not-recommended' };
+  }
+  return { kind: 'score', value };
+};
+
+/** Resolves the left-to-right render order of base + composite (+ overall) columns. */
+const buildDisplayColumns = (config: MatrixConfig): MatrixDisplayColumn[] => {
+  const baseById = new Map(config.columns.map((column) => [column.id, column]));
+  const compositeById = new Map(config.composites.map((composite) => [composite.id, composite]));
+
+  let ordered: MatrixDisplayColumn[];
+  if (config.layout) {
+    ordered = config.layout.map((id): MatrixDisplayColumn => {
+      const base = baseById.get(id);
+      if (base) {
+        return { id, label: base.label, group: base.group, kind: 'base' };
+      }
+      const composite = compositeById.get(id);
+      if (composite) {
+        return { id, label: composite.label, group: composite.group, kind: 'composite' };
+      }
+      throw new Error(`Matrix config "layout" references unknown column/composite id: "${id}"`);
+    });
+  } else {
+    ordered = [
+      ...config.columns.map(
+        (column): MatrixDisplayColumn => ({
+          id: column.id,
+          label: column.label,
+          group: column.group,
+          kind: 'base',
+        })
+      ),
+      ...config.composites.map(
+        (composite): MatrixDisplayColumn => ({
+          id: composite.id,
+          label: composite.label,
+          group: composite.group,
+          kind: 'composite',
+        })
+      ),
+    ];
+  }
+
+  if (config.showOverall) {
+    ordered.push({ id: OVERALL_COLUMN_ID, label: config.overall.label, kind: 'overall' });
+  }
+
+  return ordered;
+};
+
+/**
  * Pure transform from aggregated eval scores + config into a renderable matrix.
  * Models are emitted in config order; models absent from the data are skipped.
  */
@@ -177,6 +287,14 @@ export const buildMatrix = (aggregated: AggregatedModelScores[], config: MatrixC
       );
     }
 
+    // Composites are computed in declared order so a later composite can
+    // reference the cell of an earlier one (e.g. Overall Score <- Agent Builder
+    // Score). References resolve against base cells plus composites computed so
+    // far; an unresolved reference simply contributes nothing (treated missing).
+    for (const composite of config.composites) {
+      cells[composite.id] = computeComposite(cells, composite, config);
+    }
+
     const row: MatrixRow = {
       modelId: modelConfig.id,
       modelLabel: modelConfig.label,
@@ -188,16 +306,34 @@ export const buildMatrix = (aggregated: AggregatedModelScores[], config: MatrixC
     (modelConfig.openSource ? openSource : proprietary).push(row);
   }
 
-  const sortByOverallDesc = (a: MatrixRow, b: MatrixRow): number => {
-    const aValue = a.overall.kind === 'score' ? a.overall.value : -1;
-    const bValue = b.overall.kind === 'score' ? b.overall.value : -1;
-    return bValue - aValue;
+  // Rank by the final composite (e.g. Overall Score) when composites exist,
+  // otherwise by the legacy Overall column.
+  const primaryId =
+    config.composites.length > 0
+      ? config.composites[config.composites.length - 1].id
+      : OVERALL_COLUMN_ID;
+
+  const sortValue = (row: MatrixRow): number => {
+    const cell = primaryId === OVERALL_COLUMN_ID ? row.overall : row.cells[primaryId];
+    return cell && cell.kind === 'score' ? cell.value : -1;
   };
 
+  const sortByPrimaryDesc = (a: MatrixRow, b: MatrixRow): number => sortValue(b) - sortValue(a);
+
   return {
-    columns: config.columns.map((column) => ({ id: column.id, label: column.label })),
+    columns: config.columns.map((column) => ({
+      id: column.id,
+      label: column.label,
+      group: column.group,
+    })),
+    composites: config.composites.map((composite) => ({
+      id: composite.id,
+      label: composite.label,
+      group: composite.group,
+    })),
+    displayColumns: buildDisplayColumns(config),
     overallLabel: config.overall.label,
-    proprietary: proprietary.sort(sortByOverallDesc),
-    openSource: openSource.sort(sortByOverallDesc),
+    proprietary: proprietary.sort(sortByPrimaryDesc),
+    openSource: openSource.sort(sortByPrimaryDesc),
   };
 };

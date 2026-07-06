@@ -240,6 +240,21 @@ package. The Security taxonomy lives at
 the `kibana-evals-security-matrix` Buildkite pipeline, which uploads the artifacts to
 GCS for the docs-content sync workflow.
 
+#### Config structure
+
+| Field                                  | Purpose                                                                                              |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `columns[]`                            | **Base** (data-backed) columns. Each maps `suites`/`datasetIds`/`evaluators` -> a scaled 0-10 cell. |
+| `columns[].group`                      | Optional grouped-header label (e.g. `"Agent Builder"`) carried into the JSON artifact for the docs page. |
+| `composites[]`                         | **Derived** columns: `{ id, label, group?, from: [...] }`. Cell = equal-weighted mean of the `from` cells. |
+| `composites[].from`                    | Ids of base columns or **earlier** composites, so composites can be layered (e.g. an Overall Score that averages an Agent Builder Score composite alongside standalone feature columns). |
+| `layout`                               | Explicit left-to-right order of base + composite ids. Omit to render base columns then composites.   |
+| `showOverall`                          | Renders the legacy single weighted/mean "Overall" column at the far right. Set `false` when the layout already expresses Overall as a composite (avoids a duplicate trailing column). |
+| `notRecommendedCountsAsZeroInOverall`  | When set, `"Not recommended"` sources count as 0 in composites and the legacy Overall; missing sources are skipped so a composite reflects the data that exists. |
+
+Composite/legacy-Overall ranking: rows sort by the **final composite** (e.g. Overall
+Score) when composites exist, otherwise by the legacy Overall column.
+
 ### `env` -- List environment variables
 
 ```bash

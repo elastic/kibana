@@ -303,6 +303,22 @@ The Security taxonomy is
 [`.buildkite/pipelines/evals/security_matrix.config.json`](../../../../../.buildkite/pipelines/evals/security_matrix.config.json).
 Other teams can add their own config + pipeline to opt in.
 
+The Security config follows the Agent Builder matrix shape from
+[security-team#17904](https://github.com/elastic/security-team/issues/17904): five
+data-backed **Agent Builder** sub-columns (Alert Triage, Detection Engineering,
+Investigation, Workflow Execution, Multi-step execution) sharing a `group`, two
+standalone feature columns (Attack Discovery, Automatic Migration), and two
+**composite** columns derived from them -- `Agent Builder Score` (mean of the five
+sub-columns) and `Overall Score` (mean of Agent Builder Score + the two standalone
+features). Composites are declared via `composites[]` (each averaging the cells of
+the base columns / earlier composites it lists in `from`), ordered explicitly via
+`layout`, and `showOverall: false` suppresses the legacy trailing Overall since the
+layout expresses Overall as a composite. Columns whose suites are not yet wired on
+the golden cluster (e.g. `attack-discovery`, the new multi-step suite) render as
+empty/`Not recommended` and are simply skipped by the composite means until data
+lands -- so the matrix shows the gaps without tanking every model's score. See
+[`CLI.md`](./CLI.md#config-structure) for the full field reference.
+
 **CI + publishing.** The [`kibana-evals-security-matrix`](../../../../../.buildkite/pipeline-resource-definitions/evals/kibana-evals-security-matrix.yml)
 Buildkite pipeline runs `matrix` weekly (after the weekly evals), uploads the
 artifacts as a Buildkite artifact, and (once a bucket is provisioned) to GCS under

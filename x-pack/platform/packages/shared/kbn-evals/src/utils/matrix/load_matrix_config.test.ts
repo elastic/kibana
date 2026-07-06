@@ -23,9 +23,40 @@ describe('parseMatrixConfig', () => {
     expect(config.notRecommendedLabel).toBe('Not recommended');
     expect(config.notRecommendedCountsAsZeroInOverall).toBe(true);
     expect(config.overall).toEqual({ label: 'Overall', mode: 'weighted' });
+    expect(config.showOverall).toBe(true);
+    expect(config.composites).toEqual([]);
+    expect(config.layout).toBeUndefined();
     expect(config.columns[0].weight).toBe(1);
+    expect(config.columns[0].group).toBeUndefined();
     expect(config.models[0].openSource).toBe(false);
     expect(config.excludeEvaluators).toEqual([...DEFAULT_EXCLUDED_EVALUATORS]);
+  });
+
+  it('accepts grouped columns, composites, a layout, and showOverall', () => {
+    const config = parseMatrixConfig({
+      ...minimalConfig,
+      showOverall: false,
+      columns: [
+        { id: 'a', label: 'A', group: 'Agent Builder', suites: ['s-a'] },
+        { id: 'b', label: 'B', group: 'Agent Builder', suites: ['s-b'] },
+      ],
+      composites: [{ id: 'ab', label: 'AB Score', from: ['a', 'b'] }],
+      layout: ['a', 'b', 'ab'],
+    });
+
+    expect(config.showOverall).toBe(false);
+    expect(config.columns[0].group).toBe('Agent Builder');
+    expect(config.composites).toEqual([{ id: 'ab', label: 'AB Score', from: ['a', 'b'] }]);
+    expect(config.layout).toEqual(['a', 'b', 'ab']);
+  });
+
+  it('throws when a composite has no source columns', () => {
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        composites: [{ id: 'ab', label: 'AB', from: [] }],
+      })
+    ).toThrow();
   });
 
   it('allows overriding the evaluator exclusion list (including emptying it)', () => {

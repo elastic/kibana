@@ -6,7 +6,13 @@
  */
 
 import type { MatrixConfig } from './load_matrix_config';
-import type { Matrix, MatrixCell, MatrixRow } from './build_matrix';
+import {
+  OVERALL_COLUMN_ID,
+  type Matrix,
+  type MatrixCell,
+  type MatrixDisplayColumn,
+  type MatrixRow,
+} from './build_matrix';
 
 export interface RenderedMatrix {
   /** CSV for the proprietary-models table (first row = header). */
@@ -39,34 +45,60 @@ const csvEscape = (value: string): string => {
   return value;
 };
 
-const buildHeader = (matrix: Matrix): string[] => [
+/**
+ * Resolves the ordered render columns. Prefers the explicit `displayColumns`
+ * computed by {@link buildMatrix}; falls back to base columns + a trailing
+ * Overall for matrices constructed without it (e.g. in tests).
+ */
+const resolveDisplayColumns = (matrix: Matrix): MatrixDisplayColumn[] => {
+  if (matrix.displayColumns) {
+    return matrix.displayColumns;
+  }
+  return [
+    ...matrix.columns.map(
+      (column): MatrixDisplayColumn => ({ id: column.id, label: column.label, kind: 'base' })
+    ),
+    { id: OVERALL_COLUMN_ID, label: matrix.overallLabel, kind: 'overall' },
+  ];
+};
+
+const cellForColumn = (row: MatrixRow, column: MatrixDisplayColumn): MatrixCell =>
+  column.kind === 'overall' ? row.overall : row.cells[column.id] ?? { kind: 'missing' };
+
+const buildHeader = (displayColumns: MatrixDisplayColumn[]): string[] => [
   'Model',
-  ...matrix.columns.map((column) => column.label),
-  matrix.overallLabel,
+  ...displayColumns.map((column) => column.label),
 ];
 
-const rowToValues = (matrix: Matrix, row: MatrixRow, notRecommendedLabel: string): string[] => [
+const rowToValues = (
+  displayColumns: MatrixDisplayColumn[],
+  row: MatrixRow,
+  notRecommendedLabel: string
+): string[] => [
   row.modelLabel,
-  ...matrix.columns.map((column) => cellToString(row.cells[column.id], notRecommendedLabel)),
-  cellToString(row.overall, notRecommendedLabel),
+  ...displayColumns.map((column) => cellToString(cellForColumn(row, column), notRecommendedLabel)),
 ];
 
-const renderCsv = (matrix: Matrix, rows: MatrixRow[], notRecommendedLabel: string): string => {
+const renderCsv = (
+  displayColumns: MatrixDisplayColumn[],
+  rows: MatrixRow[],
+  notRecommendedLabel: string
+): string => {
   const lines = [
-    buildHeader(matrix),
-    ...rows.map((row) => rowToValues(matrix, row, notRecommendedLabel)),
+    buildHeader(displayColumns),
+    ...rows.map((row) => rowToValues(displayColumns, row, notRecommendedLabel)),
   ];
   return lines.map((cells) => cells.map(csvEscape).join(',')).join('\n') + '\n';
 };
 
 const renderMarkdownTable = (
-  matrix: Matrix,
+  displayColumns: MatrixDisplayColumn[],
   rows: MatrixRow[],
   notRecommendedLabel: string
 ): string => {
-  const header = buildHeader(matrix);
+  const header = buildHeader(displayColumns);
   const separator = header.map(() => ':---');
-  const body = rows.map((row) => rowToValues(matrix, row, notRecommendedLabel));
+  const body = rows.map((row) => rowToValues(displayColumns, row, notRecommendedLabel));
 
   const toRow = (cells: string[]): string => `| ${cells.join(' | ')} |`;
 
@@ -75,9 +107,10 @@ const renderMarkdownTable = (
 
 export const renderMatrix = (matrix: Matrix, config: MatrixConfig): RenderedMatrix => {
   const { notRecommendedLabel } = config;
+  const displayColumns = resolveDisplayColumns(matrix);
 
-  const proprietaryCsv = renderCsv(matrix, matrix.proprietary, notRecommendedLabel);
-  const openSourceCsv = renderCsv(matrix, matrix.openSource, notRecommendedLabel);
+  const proprietaryCsv = renderCsv(displayColumns, matrix.proprietary, notRecommendedLabel);
+  const openSourceCsv = renderCsv(displayColumns, matrix.openSource, notRecommendedLabel);
 
   const markdown = [
     `# ${config.title}`,
@@ -88,13 +121,13 @@ export const renderMatrix = (matrix: Matrix, config: MatrixConfig): RenderedMatr
     '## Proprietary models',
     '',
     matrix.proprietary.length > 0
-      ? renderMarkdownTable(matrix, matrix.proprietary, notRecommendedLabel)
+      ? renderMarkdownTable(displayColumns, matrix.proprietary, notRecommendedLabel)
       : '_No proprietary models with results._',
     '',
     '## Open-source models',
     '',
     matrix.openSource.length > 0
-      ? renderMarkdownTable(matrix, matrix.openSource, notRecommendedLabel)
+      ? renderMarkdownTable(displayColumns, matrix.openSource, notRecommendedLabel)
       : '_No open-source models with results._',
     '',
   ].join('\n');
@@ -104,6 +137,8 @@ export const renderMatrix = (matrix: Matrix, config: MatrixConfig): RenderedMatr
       title: config.title,
       generatedAt: new Date().toISOString(),
       columns: matrix.columns,
+      composites: matrix.composites ?? [],
+      displayColumns,
       overallLabel: matrix.overallLabel,
       proprietary: matrix.proprietary,
       openSource: matrix.openSource,

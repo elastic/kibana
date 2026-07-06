@@ -78,6 +78,48 @@ describe('renderMatrix', () => {
     expect(parsed.openSource[0].modelLabel).toBe('GPT OSS 120B');
   });
 
+  it('renders composite columns in displayColumns order (no trailing legacy overall)', () => {
+    const compositeMatrix: Matrix = {
+      columns: [
+        { id: 'a', label: 'Alert Triage', group: 'Agent Builder' },
+        { id: 'b', label: 'Investigation', group: 'Agent Builder' },
+      ],
+      composites: [
+        { id: 'ab', label: 'Agent Builder Score' },
+        { id: 'overall_score', label: 'Overall Score' },
+      ],
+      displayColumns: [
+        { id: 'a', label: 'Alert Triage', group: 'Agent Builder', kind: 'base' },
+        { id: 'b', label: 'Investigation', group: 'Agent Builder', kind: 'base' },
+        { id: 'ab', label: 'Agent Builder Score', kind: 'composite' },
+        { id: 'overall_score', label: 'Overall Score', kind: 'composite' },
+      ],
+      overallLabel: 'Overall',
+      proprietary: [
+        {
+          modelId: 'm',
+          modelLabel: 'Claude',
+          openSource: false,
+          cells: {
+            a: { kind: 'score', value: 8.6 },
+            b: { kind: 'score', value: 7.4 },
+            ab: { kind: 'score', value: 8 },
+            overall_score: { kind: 'score', value: 8 },
+          },
+          overall: { kind: 'score', value: 8 },
+        },
+      ],
+      openSource: [],
+    };
+
+    const { proprietaryCsv } = renderMatrix(compositeMatrix, config);
+    // No trailing "Overall" column; composites appear in declared layout order.
+    expect(proprietaryCsv.split('\n')[0]).toBe(
+      'Model,Alert Triage,Investigation,Agent Builder Score,Overall Score'
+    );
+    expect(proprietaryCsv).toContain('Claude,8.6,7.4,8,8');
+  });
+
   it('escapes CSV fields that contain commas or quotes', () => {
     const cfgWithComma = parseMatrixConfig({
       title: 'X',

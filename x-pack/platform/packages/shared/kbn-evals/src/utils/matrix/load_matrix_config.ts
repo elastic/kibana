@@ -31,6 +31,12 @@ const columnSchema = schema.object({
   id: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
   /** Human-facing column header (e.g. "Alert Triage"). */
   label: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
+  /**
+   * Optional grouped-header label (e.g. "Agent Builder"). Columns sharing a
+   * `group` render under one spanning header in the published docs page. Carried
+   * through to the JSON artifact; the flat CSV/markdown keep one header row.
+   */
+  group: schema.maybe(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH })),
   /** `suite.id` values whose scores contribute to this column. */
   suites: schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
     minSize: 1,
@@ -54,8 +60,32 @@ const columnSchema = schema.object({
    * scale. Set to 1 for evaluators that already emit a 0-10 score.
    */
   scale: schema.maybe(schema.number({ min: 0 })),
-  /** Relative weight of this column in the Overall score. Defaults to 1. */
+  /** Relative weight of this column in the legacy Overall score. Defaults to 1. */
   weight: schema.number({ defaultValue: 1, min: 0 }),
+});
+
+/**
+ * A derived ("composite") column whose cell is the equal-weighted mean of other
+ * columns' cells. `from` may reference base columns or earlier-defined
+ * composites, so composites can be layered (e.g. "Overall Score" averages the
+ * "Agent Builder Score" composite alongside two standalone feature columns).
+ *
+ * Aggregation mirrors the legacy Overall: "Not recommended" sources count as 0
+ * (when `notRecommendedCountsAsZeroInOverall` is set) and missing sources are
+ * skipped, so a composite reflects the data that actually exists.
+ */
+const compositeSchema = schema.object({
+  /** Stable identifier for the composite (used as the CSV/JSON key). */
+  id: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
+  /** Human-facing column header (e.g. "Agent Builder Score"). */
+  label: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
+  /** Optional grouped-header label (see `columnSchema.group`). */
+  group: schema.maybe(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH })),
+  /** Column/composite ids whose cells are averaged into this composite. */
+  from: schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
+    minSize: 1,
+    maxSize: MAX_ARRAY_SIZE,
+  }),
 });
 
 const modelSchema = schema.object({
@@ -114,8 +144,9 @@ export const matrixConfigSchema = schema.object({
     maxLength: MAX_STRING_LENGTH,
   }),
   /**
-   * When true, "Not recommended" cells count as 0 in the Overall score (matches
-   * the published matrix behavior where failures drag the average down).
+   * When true, "Not recommended" cells count as 0 in the Overall score and in
+   * composite columns (matches the published matrix behavior where failures drag
+   * the average down).
    */
   notRecommendedCountsAsZeroInOverall: schema.boolean({ defaultValue: true }),
   /**
@@ -133,12 +164,31 @@ export const matrixConfigSchema = schema.object({
       defaultValue: 'weighted',
     }),
   }),
+  /**
+   * Renders the legacy single "Overall" column (weighted/mean over every base
+   * column) at the far right. Set to `false` when the layout expresses its own
+   * Overall via a composite, to avoid a duplicate trailing column.
+   */
+  showOverall: schema.boolean({ defaultValue: true }),
   columns: schema.arrayOf(columnSchema, { minSize: 1, maxSize: MAX_ARRAY_SIZE }),
+  /** Derived columns averaged from base columns / earlier composites. */
+  composites: schema.arrayOf(compositeSchema, { defaultValue: [], maxSize: MAX_ARRAY_SIZE }),
+  /**
+   * Explicit left-to-right display order of base + composite column ids. When
+   * omitted, base columns render first (config order), then composites. The
+   * legacy Overall column (when `showOverall`) is always appended last.
+   */
+  layout: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
+      maxSize: MAX_ARRAY_SIZE,
+    })
+  ),
   models: schema.arrayOf(modelSchema, { minSize: 1, maxSize: MAX_ARRAY_SIZE }),
 });
 
 export type MatrixConfig = TypeOf<typeof matrixConfigSchema>;
 export type MatrixColumnConfig = TypeOf<typeof columnSchema>;
+export type MatrixCompositeConfig = TypeOf<typeof compositeSchema>;
 export type MatrixModelConfig = TypeOf<typeof modelSchema>;
 
 export const parseMatrixConfig = (raw: unknown): MatrixConfig => matrixConfigSchema.validate(raw);
