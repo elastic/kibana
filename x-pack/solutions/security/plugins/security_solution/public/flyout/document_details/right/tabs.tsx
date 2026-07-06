@@ -10,15 +10,13 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './test_ids';
 import type { RightPanelPaths } from '.';
 import { JsonTab } from '../../../flyout_v2/document/main/tabs/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from '../../../flyout_v2/document/main/tabs/table_tab';
 import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
-import { CellActionsMode, SecurityCellActions } from '../../../common/components/cell_actions';
-import { getSourcererScopeId } from '../../../helpers';
+import { CellActions } from '../shared/components/cell_actions';
 import { useDocumentDetailsContext } from '../shared/context';
 
 export interface RightPanelTabType {
@@ -29,21 +27,16 @@ export interface RightPanelTabType {
 }
 
 /**
- * Cell action renderer for the document details flyout Table tab. Uses the `detailsFlyout` trigger,
- * which (unlike the `default` trigger) also registers the `toggleColumn`/`toggleUserAssetField`
- * actions, so the flyout keeps its full set of cell actions (6 visible on a typical field).
+ * Cell action renderer for the document details flyout Table tab. Reuses the expandable flyout's
+ * `CellActions` wrapper, which supplies the full metadata the cell actions rely on — notably
+ * `alertsTableRef` (required by `toggleColumn`), plus `scopeId`, `isObjectArray`, and the
+ * rule-preview `disabledActionTypes`. This keeps the legacy flyout's cell actions behaving exactly
+ * as they did before the table logic moved to `flyout_v2`.
  */
-const detailsFlyoutCellActionRenderer: CellActionRenderer = ({ field, value, children, scopeId }) => (
-  <SecurityCellActions
-    data={{ field, value: value ?? [] }}
-    triggerId={SECURITY_CELL_ACTIONS_DETAILS_FLYOUT}
-    mode={CellActionsMode.HOVER_DOWN}
-    visibleCellActions={6}
-    sourcererScopeId={getSourcererScopeId(scopeId)}
-    metadata={{ scopeId }}
-  >
+const detailsFlyoutCellActionRenderer: CellActionRenderer = ({ field, value, children }) => (
+  <CellActions field={field} value={value as string[] | string | null | undefined}>
     {children}
-  </SecurityCellActions>
+  </CellActions>
 );
 
 /**

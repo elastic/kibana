@@ -97,10 +97,16 @@ jest.mock('../utils/table_tab_columns', () => ({
   },
 }));
 
-// An alert document so the "hide alert fields" setting is available.
+// An alert document so the "hide alert fields" setting is available. `fields` is populated (as it
+// is on real hits) because the table derives its rows from the ES `fields` via
+// `getTimelineFieldsDataFromHit`.
 const hit = buildDataTableRecord({
   _id: 'test-id',
   _index: 'test-index',
+  fields: {
+    'event.kind': ['signal'],
+    'kibana.alert.workflow_status': ['open'],
+  },
   _source: {
     event: { kind: 'signal' },
     kibana: { alert: { workflow_status: 'open' } },
