@@ -84,24 +84,9 @@ export const alertsTool = (
     ) => {
       // Default to the current space's alerts alias. This stays scoped to the
       // active space, unlike the cross-space `.alerts-security.alerts-*` wildcard.
+      // When the space has no alerts index, runSearchTool resolves no sources and
+      // returns a "no matching resource" result, still scoped to the space.
       const searchIndex = index ?? `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
-
-      // When defaulting to the space alias, confirm it exists first. Running
-      // ES|QL against a missing alias throws an "Unknown index" error, which
-      // pushed the model to retry against the cross-space wildcard. Returning an
-      // empty result keeps the search scoped to the current space.
-      if (index === undefined) {
-        const spaceAlertsExist = await esClient.asCurrentUser.indices.exists({
-          index: searchIndex,
-          expand_wildcards: 'all',
-        });
-        if (!spaceAlertsExist) {
-          logger.debug(
-            `alerts tool: no alerts index found for space "${spaceId}" (${searchIndex})`
-          );
-          return { results: [] };
-        }
-      }
 
       // Enhance the query with KEEP clause instructions if searching alerts index
       const enhancedQuery = enhanceQueryForAlerts(nlQuery, searchIndex, isCount);
