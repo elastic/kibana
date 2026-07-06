@@ -390,7 +390,7 @@ export class EntityMaintainersClient {
       esClient,
       cpsEsClient,
       crudClient,
-      resolutionRulesClient: new ResolutionRulesClient(soClient, status.metadata.namespace, logger),
+      resolutionRulesClient: new ResolutionRulesClient(soClient, this.namespace, logger),
       entityMetadataClient,
     };
   }
