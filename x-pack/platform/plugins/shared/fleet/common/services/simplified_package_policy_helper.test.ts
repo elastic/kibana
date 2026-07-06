@@ -10,6 +10,7 @@ import { PackagePolicyValidationError } from '../errors';
 import type { AgentlessPolicy } from '../types/models/agentless_policy';
 
 import nginxPackageInfo from '../../server/services/package_policies/fixtures/package_info/nginx_1.5.0.json';
+import agentlessHelloWorldPackageInfo from '../../server/services/package_policies/fixtures/package_info/agentless_hello_world_0.5.0.json';
 
 import {
   simplifiedPackagePolicytoNewPackagePolicy,
@@ -781,7 +782,7 @@ describe('agentlessPolicyToPackagePolicy', () => {
       name: 'my-agentless',
       namespace: 'default',
       description: 'a description',
-      package: { name: 'nginx', title: 'Nginx', version: '1.5.0' },
+      package: { name: 'agentless_hello_world', title: 'Agentless Hello World', version: '0.5.0' },
       inputs: {},
       created_at: '2026-06-30T00:00:00.000Z',
       created_by: 'elastic',
@@ -793,7 +794,7 @@ describe('agentlessPolicyToPackagePolicy', () => {
   it('expands the agentless policy into the full package policy form shape', () => {
     const result = agentlessPolicyToPackagePolicy(
       baseAgentlessPolicy(),
-      nginxPackageInfo as unknown as PackageInfo
+      agentlessHelloWorldPackageInfo as unknown as PackageInfo
     );
 
     expect(result.id).toBe('agentless-1');
@@ -805,13 +806,13 @@ describe('agentlessPolicyToPackagePolicy', () => {
     expect(result.policy_ids).toEqual([]);
     // Inputs are expanded back to the array shape the form components expect.
     expect(Array.isArray(result.inputs)).toBe(true);
-    expect(result.package).toEqual({ name: 'nginx', title: 'Nginx', version: '1.5.0' });
+    expect(result.package).toEqual({ name: 'agentless_hello_world', title: 'Agentless Hello World', version: '0.5.0' });
   });
 
   it('defaults the namespace when the policy has none', () => {
     const result = agentlessPolicyToPackagePolicy(
       baseAgentlessPolicy({ namespace: undefined }),
-      nginxPackageInfo as unknown as PackageInfo
+      agentlessHelloWorldPackageInfo as unknown as PackageInfo
     );
 
     expect(result.namespace).toBe('default');
@@ -823,7 +824,7 @@ describe('agentlessPolicyToPackagePolicy', () => {
         global_data_tags: [{ name: 'team', value: 'fleet' }],
         additional_datastreams_permissions: ['logs-test-123'],
       }),
-      nginxPackageInfo as unknown as PackageInfo
+      agentlessHelloWorldPackageInfo as unknown as PackageInfo
     );
 
     expect(result.global_data_tags).toEqual([{ name: 'team', value: 'fleet' }]);
@@ -834,7 +835,7 @@ describe('agentlessPolicyToPackagePolicy', () => {
     it('maps an enabled connector to supports_cloud_connector + cloud_connector_id', () => {
       const result = agentlessPolicyToPackagePolicy(
         baseAgentlessPolicy({ cloud_connector: { enabled: true, cloud_connector_id: 'cc-1' } }),
-        nginxPackageInfo as unknown as PackageInfo
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
       );
 
       expect(result.supports_cloud_connector).toBe(true);
@@ -844,7 +845,7 @@ describe('agentlessPolicyToPackagePolicy', () => {
     it('treats a null connector as disabled', () => {
       const result = agentlessPolicyToPackagePolicy(
         baseAgentlessPolicy({ cloud_connector: null }),
-        nginxPackageInfo as unknown as PackageInfo
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
       );
 
       expect(result.supports_cloud_connector).toBe(false);
@@ -854,7 +855,7 @@ describe('agentlessPolicyToPackagePolicy', () => {
     it('treats an absent connector as disabled', () => {
       const result = agentlessPolicyToPackagePolicy(
         baseAgentlessPolicy(),
-        nginxPackageInfo as unknown as PackageInfo
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
       );
 
       expect(result.supports_cloud_connector).toBe(false);
@@ -927,28 +928,32 @@ describe('agentlessPolicyToPackagePolicy', () => {
     // Build a realistic simplified GET payload by running the create-side
     // converters first, so the fixture matches the actual wire format rather
     // than being hand-authored.
+    // Shared simplified GET/create input for both the built GET payload and the expected PUT body,
+    // so any divergence is produced by the converters under test, not by hand-authored drift.
+    const simplifiedInputs = {
+      'agentless_hello_world-cel': {
+        streams: {
+          'agentless_hello_world.generic': { vars: { url: 'https://custom.example.com' } },
+        },
+      },
+    };
+
     const buildGetResponse = (): AgentlessPolicy => {
       const fullPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(
         {
-          name: 'nginx-1',
+          name: 'hello_world-1',
           namespace: 'default',
           policy_ids: [],
           supports_agentless: true,
-          inputs: {
-            'nginx-logfile': {
-              streams: {
-                'nginx.error': { vars: { tags: ['test', 'nginx-error'] } },
-              },
-            },
-          },
+          inputs: simplifiedInputs,
         },
-        nginxPackageInfo as unknown as PackageInfo
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
       );
 
       const requestBody = toNewAgentlessPolicy(
         { ...fullPackagePolicy, id: 'agentless-1' },
         undefined,
-        nginxPackageInfo as unknown as PackageInfo
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
       );
 
       return {
@@ -956,7 +961,7 @@ describe('agentlessPolicyToPackagePolicy', () => {
         name: requestBody.name,
         namespace: requestBody.namespace,
         description: requestBody.description,
-        package: { ...requestBody.package, title: 'Nginx' },
+        package: { ...requestBody.package, title: 'Agentless Hello World' },
         inputs: requestBody.inputs,
         vars: requestBody.vars,
         global_data_tags: requestBody.global_data_tags,
@@ -977,30 +982,27 @@ describe('agentlessPolicyToPackagePolicy', () => {
         {
           ...simplifiedPackagePolicytoNewPackagePolicy(
             {
-              name: 'nginx-1',
+              name: 'hello_world-1',
               namespace: 'default',
               policy_ids: [],
               supports_agentless: true,
-              inputs: {
-                'nginx-logfile': {
-                  streams: {
-                    'nginx.error': { vars: { tags: ['test', 'nginx-error'] } },
-                  },
-                },
-              },
+              inputs: simplifiedInputs,
             },
-            nginxPackageInfo as unknown as PackageInfo
+            agentlessHelloWorldPackageInfo as unknown as PackageInfo
           ),
           id: 'agentless-1',
         },
         undefined,
-        nginxPackageInfo as unknown as PackageInfo
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
       );
 
       const roundTripped = toNewAgentlessPolicy(
-        agentlessPolicyToPackagePolicy(getResponse, nginxPackageInfo as unknown as PackageInfo),
+        agentlessPolicyToPackagePolicy(
+          getResponse,
+          agentlessHelloWorldPackageInfo as unknown as PackageInfo
+        ),
         undefined,
-        nginxPackageInfo as unknown as PackageInfo
+        agentlessHelloWorldPackageInfo as unknown as PackageInfo
       );
 
       expect(roundTripped.inputs).toEqual(expectedRequestBody.inputs);
