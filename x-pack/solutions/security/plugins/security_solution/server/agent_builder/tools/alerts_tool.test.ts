@@ -34,6 +34,7 @@ describe('alertsTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
+    mockEsClient.asCurrentUser.indices.exists.mockResolvedValue(true);
   });
 
   describe('schema', () => {
@@ -150,6 +151,68 @@ describe('alertsTool', () => {
 
       const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
       expect(callArgs.index).toBe(`${DEFAULT_ALERTS_INDEX}-custom-space`);
+    });
+
+    it('checks that the space alerts alias exists when index is not provided', async () => {
+      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+
+      await tool.handler(
+        { query: 'find all alerts' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents as ToolHandlerContext['events'],
+          spaceId: 'custom-space',
+        })
+      );
+
+      expect(mockEsClient.asCurrentUser.indices.exists).toHaveBeenCalledWith({
+        index: `${DEFAULT_ALERTS_INDEX}-custom-space`,
+        expand_wildcards: 'all',
+      });
+    });
+
+    it('returns empty results when the space alerts alias does not exist', async () => {
+      mockEsClient.asCurrentUser.indices.exists.mockResolvedValue(false);
+
+      const result = await tool.handler(
+        { query: 'find all alerts' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents as ToolHandlerContext['events'],
+          spaceId: 'empty-space',
+        })
+      );
+
+      expect(result).toEqual({ results: [] });
+    });
+
+    it('does not call runSearchTool when the space alerts alias does not exist', async () => {
+      mockEsClient.asCurrentUser.indices.exists.mockResolvedValue(false);
+
+      await tool.handler(
+        { query: 'find all alerts' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents as ToolHandlerContext['events'],
+          spaceId: 'empty-space',
+        })
+      );
+
+      expect(runSearchTool).not.toHaveBeenCalled();
+    });
+
+    it('does not check alias existence when an explicit index is provided', async () => {
+      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+
+      await tool.handler(
+        { query: 'find alerts', index: '.alerts-security.alerts-custom' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents as ToolHandlerContext['events'],
+        })
+      );
+
+      expect(mockEsClient.asCurrentUser.indices.exists).not.toHaveBeenCalled();
     });
 
     it('calls runSearchTool with explicit index when provided', async () => {

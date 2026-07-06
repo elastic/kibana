@@ -23,7 +23,7 @@ const alertsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Specific alerts index to search against. If not provided, will search against .alerts-security.alerts-* pattern.'
+      "Specific alerts index or alias to search against. Leave this unset to search the current Kibana space's security alerts, which is the correct default for almost all requests. Do not pass a cross-space pattern such as `.alerts-security.alerts-*`, as it can return alerts from other spaces."
     ),
   isCount: z
     .boolean()
@@ -82,7 +82,26 @@ export const alertsTool = (
       { query: nlQuery, index, isCount },
       { esClient, modelProvider, spaceId, events }
     ) => {
+      // Default to the current space's alerts alias. This stays scoped to the
+      // active space, unlike the cross-space `.alerts-security.alerts-*` wildcard.
       const searchIndex = index ?? `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+
+      // When defaulting to the space alias, confirm it exists first. Running
+      // ES|QL against a missing alias throws an "Unknown index" error, which
+      // pushed the model to retry against the cross-space wildcard. Returning an
+      // empty result keeps the search scoped to the current space.
+      if (index === undefined) {
+        const spaceAlertsExist = await esClient.asCurrentUser.indices.exists({
+          index: searchIndex,
+          expand_wildcards: 'all',
+        });
+        if (!spaceAlertsExist) {
+          logger.debug(
+            `alerts tool: no alerts index found for space "${spaceId}" (${searchIndex})`
+          );
+          return { results: [] };
+        }
+      }
 
       // Enhance the query with KEEP clause instructions if searching alerts index
       const enhancedQuery = enhanceQueryForAlerts(nlQuery, searchIndex, isCount);
