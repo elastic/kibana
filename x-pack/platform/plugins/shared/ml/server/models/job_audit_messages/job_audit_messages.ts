@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import moment from 'moment';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -17,6 +18,7 @@ import type { MLSavedObjectService } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
 
 const SIZE = 1000;
+const ML_NOTIFICATIONS_INDEX_PREFIX = '.ml-notifications-';
 const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 } as const;
 
 type LevelName = keyof typeof LEVEL;
@@ -363,6 +365,16 @@ export function jobAuditMessagesProvider(
     jobId: string,
     notificationIndices: string[]
   ): Promise<{ success: boolean; last_cleared: number }> {
+    notificationIndices.every((index) => {
+      if (!index.startsWith(ML_NOTIFICATIONS_INDEX_PREFIX)) {
+        throw Boom.badRequest(`Invalid notification index: ${index}`);
+      }
+      return true;
+    });
+
+    // check that the job exists and the user has permission to access it
+    await mlClient.getJobs({ job_id: jobId });
+
     const newClearedMessage = {
       job_id: jobId,
       job_type: 'anomaly_detection',
