@@ -5,14 +5,22 @@
  * 2.0.
  */
 
+import { truncate } from 'lodash';
 import {
   createServerStepDefinition,
   type WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { updateAssetCriticalityStepCommonDefinition } from '../../../common/workflow/steps/update_asset_criticality';
+import {
+  MAX_WORKFLOW_MESSAGE_LENGTH,
+  updateAssetCriticalityStepCommonDefinition,
+} from '../../../common/workflow/steps/update_asset_criticality';
 import type { EntityStoreStartContract } from '../../types';
+
+// Leaves room for the base message (which includes the caller-controlled `entity_id`) so the
+// combined message still fits within `MAX_WORKFLOW_MESSAGE_LENGTH` after truncation below.
+const MAX_RECALC_ERROR_MESSAGE_LENGTH = 200;
 
 export const getUpdateAssetCriticalityStepDefinition = (
   getCreateCRUDClient: () => Promise<EntityStoreStartContract['createCRUDClient']>,
@@ -78,8 +86,10 @@ export const getUpdateAssetCriticalityStepDefinition = (
               // Risk score recalculation is a side effect of a successful criticality update, so
               // its failure (e.g. no risk engine configured for this space) should not fail the
               // step or roll back the write that already committed.
-              const recalcErrorMessage =
-                recalcError instanceof Error ? recalcError.message : 'Unknown error occurred';
+              const recalcErrorMessage = truncate(
+                recalcError instanceof Error ? recalcError.message : 'Unknown error occurred',
+                { length: MAX_RECALC_ERROR_MESSAGE_LENGTH, omission: '…' }
+              );
               message += ` but risk score recalculation failed: ${recalcErrorMessage}`;
             }
           } else {
@@ -91,7 +101,10 @@ export const getUpdateAssetCriticalityStepDefinition = (
         return {
           output: {
             success: true,
-            message,
+            // `entity_id` (up to `MAX_ENTITY_ID_VALUE_LENGTH` chars) is interpolated above, so the
+            // combined message can exceed the output schema's `MAX_WORKFLOW_MESSAGE_LENGTH` even
+            // after capping the recalculation error detail; truncate to guarantee schema validity.
+            message: truncate(message, { length: MAX_WORKFLOW_MESSAGE_LENGTH, omission: '…' }),
           },
         };
       } catch (error) {
@@ -101,7 +114,12 @@ export const getUpdateAssetCriticalityStepDefinition = (
         throw new ExecutionError({
           type: 'ApiError',
           message: error instanceof Error ? error.message : 'Unknown error occurred',
-          details: { error },
+          details: {
+            error:
+              error instanceof Error
+                ? { name: error.name, message: error.message }
+                : { message: 'Unknown error occurred' },
+          },
         });
       }
     },

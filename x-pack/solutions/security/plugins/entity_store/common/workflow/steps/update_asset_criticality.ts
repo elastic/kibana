@@ -18,9 +18,12 @@ const MAX_ENTITY_ID_VALUE_LENGTH = 1000;
 
 /**
  * Workflow messages are typically short text strings (~1000 characters). We use 1000 here to
- * safely accommodate them while preventing unbounded string input (DoS).
+ * safely accommodate them while preventing unbounded string input (DoS). The server handler
+ * truncates its output message to this same limit, since it interpolates the (up to
+ * `MAX_ENTITY_ID_VALUE_LENGTH`-long) `entity_id` and, on failure, an upstream error message of
+ * unbounded length.
  */
-const MAX_WORKFLOW_MESSAGE_LENGTH = 1000;
+export const MAX_WORKFLOW_MESSAGE_LENGTH = 1500;
 
 export const updateAssetCriticalityInputSchema = z.object({
   entity_type: EntityType.describe(

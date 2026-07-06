@@ -12,6 +12,7 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { MAX_WORKFLOW_MESSAGE_LENGTH } from '../../../common/workflow/steps/update_asset_criticality';
 import type { EntityStoreStartContract } from '../../types';
 
 const fakeRequest = { fake: true };
@@ -273,6 +274,26 @@ describe('updateAssetCriticalityStepDefinition', () => {
             'but risk score recalculation failed: risk engine not configured',
         },
       });
+    });
+
+    it('truncates the output message to stay within the schema limit, even with a long entity_id and a long recalculation error', async () => {
+      const longEntityId = `host:${'a'.repeat(990)}`;
+      const callKibanaApi = jest.fn().mockRejectedValue(new Error('x'.repeat(5000)));
+      const mockContext = createMockContext(
+        { ...input, entity_id: longEntityId },
+        {},
+        { 'recalculate-risk-score': true },
+        callKibanaApi
+      );
+
+      const result = await updateAssetCriticalityStepDefinition.handler(mockContext);
+      const { output } = result;
+
+      expect(output).toBeDefined();
+      expect(output?.success).toBe(true);
+      expect(output?.message).toBeDefined();
+      expect(output?.message?.length).toBeLessThanOrEqual(MAX_WORKFLOW_MESSAGE_LENGTH);
+      expect(output?.message?.endsWith('…')).toBe(true);
     });
   });
 });
