@@ -22,26 +22,32 @@ const meta: Meta<typeof FormattedRelativeEnhanced> = {
 export default meta;
 type Story = StoryObj<typeof FormattedRelativeEnhanced>;
 
-const Row = ({ label, value }: { label: string; value: Date }) => (
-  <div style={{ display: 'flex', gap: 16, padding: '4px 0', fontFamily: 'monospace' }}>
-    <span style={{ width: 220, color: '#69707d' }}>{label}</span>
-    <FormattedRelativeEnhanced value={value} />
-  </div>
-);
+const Row = ({ value }: { value: Date }) => {
+  const days = Math.abs(moment().diff(moment(value), 'days'));
+  const label = `${moment(value).format('MMM D')}  (${days}d ago)`;
+  return (
+    <div style={{ display: 'flex', gap: 24, padding: '4px 0', fontFamily: 'monospace' }}>
+      <span style={{ width: 220, color: '#69707d' }}>{label}</span>
+      <FormattedRelativeEnhanced value={value} />
+    </div>
+  );
+};
 
+// Dates hand-picked to cross the previous calendar month by different elapsed
+// distances — this is where selectUnit's calendar arithmetic mis-picks "month".
+// The rows below the divider are regressions kept "unchanged" cases.
 export const CalendarBoundaries: Story = {
   render: () => {
-    const now = moment();
+    const startOfMonth = moment().startOf('month').hour(12).minute(0).second(0);
     return (
       <div style={{ padding: 16 }}>
-        <Row label="30 seconds ago" value={now.clone().subtract(30, 'seconds').toDate()} />
-        <Row label="5 minutes ago" value={now.clone().subtract(5, 'minutes').toDate()} />
-        <Row label="2 hours ago" value={now.clone().subtract(2, 'hours').toDate()} />
-        <Row label="5 days ago" value={now.clone().subtract(5, 'days').toDate()} />
-        <Row label="16 days ago" value={now.clone().subtract(16, 'days').toDate()} />
-        <Row label="45 days ago" value={now.clone().subtract(45, 'days').toDate()} />
-        <Row label="6 months ago" value={now.clone().subtract(6, 'months').toDate()} />
-        <Row label="2 years ago" value={now.clone().subtract(2, 'years').toDate()} />
+        <Row value={startOfMonth.clone().subtract(1, 'day').toDate()} />
+        <Row value={startOfMonth.clone().subtract(6, 'days').toDate()} />
+        <Row value={startOfMonth.clone().subtract(14, 'days').toDate()} />
+        <div style={{ borderTop: '1px dashed #d3dae6', margin: '8px 0' }} />
+        <Row value={moment().subtract(45, 'days').toDate()} />
+        <Row value={moment().subtract(6, 'months').toDate()} />
+        <Row value={moment().subtract(2, 'years').toDate()} />
       </div>
     );
   },
