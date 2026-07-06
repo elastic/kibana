@@ -11,7 +11,14 @@ import type { PhaseName } from '@kbn/streams-schema';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 
-import { getBoundsHelpTextValues, getUnitSelectOptions, useBlurCommitDraft } from '../../../shared';
+import {
+  formatDuration,
+  getPhaseBoundName,
+  getTimingBoundHelpText,
+  getUnitSelectOptions,
+  useBlurCommitDraft,
+  type HelpTextBound,
+} from '../../../shared';
 import { getRelativeBoundsInMs } from '../utils';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';
 import { getMinAgeFieldsToValidateOnChange } from '../schema';
@@ -79,32 +86,29 @@ const MinAgeFieldControl = ({
 
   const minAgePhases = ['warm', 'cold', 'frozen', 'delete'] as const;
   type MinAgePhase = (typeof minAgePhases)[number];
-  const { lowerBoundMs, upperBoundMs } = getRelativeBoundsInMs(
+  // Only the previous phase acts as a boundary here. The hot phase is not configurable (min age 0),
+  // so a phase with no earlier configured phase (e.g. the first enabled phase after hot) shows no
+  // help text.
+  const { lowerBoundPhase } = getRelativeBoundsInMs(
     minAgePhases,
     phaseName as MinAgePhase,
     getPhaseMinAgeMs
   );
 
-  const { min, max } = getBoundsHelpTextValues({
-    lowerBoundMs,
-    upperBoundMs,
-    unit: currentUnit,
-  });
+  const toPhaseBound = (phase: MinAgePhase | undefined): HelpTextBound | undefined => {
+    if (!phase) return undefined;
+    const value = formatDuration(
+      getValues(`_meta.${phase}.minAgeValue`),
+      getValues(`_meta.${phase}.minAgeUnit`),
+      { integerOnly: true, minExclusive: 0 }
+    );
+    if (!value) return undefined;
+    return { name: getPhaseBoundName(phase), value };
+  };
 
-  const helpText =
-    upperBoundMs === undefined
-      ? i18n.translate('xpack.streams.editIlmPhasesFlyout.minAgeHelpLowerBound', {
-          defaultMessage: 'Must be larger than {min} based on current configuration.',
-          values: { min },
-        })
-      : i18n.translate('xpack.streams.editIlmPhasesFlyout.minAgeHelpRange', {
-          defaultMessage:
-            'Must be larger than {min} and smaller than {max} based on current configuration.',
-          values: {
-            min,
-            max,
-          },
-        });
+  const helpText = getTimingBoundHelpText({
+    lower: toPhaseBound(lowerBoundPhase),
+  });
 
   return (
     <EuiFormRow label={fieldLabel} helpText={helpText} isInvalid={isInvalid} error={errorMessage}>
@@ -179,7 +183,7 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
 
   const fieldLabel = isDeletePhase
     ? i18n.translate('xpack.streams.editIlmPhasesFlyout.deleteAfterLabel', {
-        defaultMessage: 'Delete after data stored',
+        defaultMessage: 'Delete after',
       })
     : i18n.translate('xpack.streams.editIlmPhasesFlyout.moveAfterLabel', {
         defaultMessage: 'Move data after',

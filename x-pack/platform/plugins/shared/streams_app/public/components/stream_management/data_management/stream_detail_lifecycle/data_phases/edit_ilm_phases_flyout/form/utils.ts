@@ -7,36 +7,46 @@
 
 export {
   formatDuration,
-  formatMillisecondsInUnit,
   parseInterval,
   parseIntervalWithDefaultUnit,
   toMilliseconds,
 } from '../../shared';
 
+export interface RelativeBounds<P extends string> {
+  lowerBoundMs: number;
+  /** The previous phase that produced the lower bound, if any actually constrains it. */
+  lowerBoundPhase: P | undefined;
+}
+
+/**
+ * Compute the lower bound for a phase's timing/interval based on the previous phases: the largest
+ * value among earlier phases, and which phase set it. Help text only references the previous
+ * (lower) boundary, so no upper bound is computed.
+ */
 export function getRelativeBoundsInMs<P extends string>(
   orderedPhases: ReadonlyArray<P>,
   currentPhase: P,
   getValueMsForPhase: (phase: P) => number | null,
   { defaultLowerBoundMs = 0 }: { defaultLowerBoundMs?: number } = {}
-): { lowerBoundMs: number; upperBoundMs: number | undefined } {
+): RelativeBounds<P> {
   const currentIndex = orderedPhases.indexOf(currentPhase);
   if (currentIndex < 0) {
-    return { lowerBoundMs: defaultLowerBoundMs, upperBoundMs: undefined };
+    return { lowerBoundMs: defaultLowerBoundMs, lowerBoundPhase: undefined };
   }
 
   const previousPhases = currentIndex > 0 ? orderedPhases.slice(0, currentIndex) : [];
-  const nextPhases = orderedPhases.slice(currentIndex + 1);
 
-  const lowerBoundMs = previousPhases.reduce((maxMs, phase) => {
+  let lowerBoundMs = defaultLowerBoundMs;
+  let lowerBoundPhase: P | undefined;
+  for (const phase of previousPhases) {
     const ms = getValueMsForPhase(phase);
-    return ms === null ? maxMs : Math.max(maxMs, ms);
-  }, defaultLowerBoundMs);
+    if (ms === null) continue;
+    // Track the previous phase that sets the largest (binding) lower bound.
+    if (ms > lowerBoundMs) {
+      lowerBoundMs = ms;
+      lowerBoundPhase = phase;
+    }
+  }
 
-  const upperBoundMs = nextPhases.reduce<number | undefined>((minMs, phase) => {
-    const ms = getValueMsForPhase(phase);
-    if (ms === null) return minMs;
-    return minMs === undefined ? ms : Math.min(minMs, ms);
-  }, undefined);
-
-  return { lowerBoundMs, upperBoundMs };
+  return { lowerBoundMs, lowerBoundPhase };
 }

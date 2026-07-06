@@ -1046,4 +1046,40 @@ describe('EditIlmPhasesFlyout', () => {
       }
     });
   });
+
+  describe('min age boundary help text', () => {
+    const setup = () =>
+      renderFlyout({
+        initialPhases: {
+          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+          warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+          frozen: { name: 'frozen', size_in_bytes: 0, min_age: '40d' },
+          delete: { name: 'delete', min_age: '50d' },
+        },
+      });
+
+    it('shows no help text on the first configurable phase (hot is not a boundary)', async () => {
+      setup();
+      await tick();
+      // warm's only earlier phase is hot (min age 0, not configurable) so there is no boundary.
+      expect(withinPhase('warm').queryByText(/Must occur after/)).toBeNull();
+    });
+
+    it('references the previous configured phase for later phases', async () => {
+      setup();
+      await tick();
+      expect(
+        withinPhase('frozen').getByText('Must occur after the warm phase (30d).')
+      ).toBeInTheDocument();
+      expect(
+        withinPhase('delete').getByText('Must occur after the frozen phase (40d).')
+      ).toBeInTheDocument();
+    });
+
+    it('does not reference a later phase (no upper bound)', async () => {
+      setup();
+      await tick();
+      expect(withinPhase('frozen').queryByText(/before the/)).toBeNull();
+    });
+  });
 });

@@ -33,7 +33,8 @@ import { useDataPhasesFlyoutStyles } from '../shared';
 import { useIlmPhasesColorAndDescription } from '../../hooks/use_ilm_phases_color_and_description';
 import {
   formatDuration,
-  getAfterFieldHelpText,
+  getPhaseBoundName,
+  getTimingBoundHelpText,
   getDoubledDurationFromPrevious,
   parseIntervalWithDefaultUnit,
   type PreservedTimeUnit,
@@ -446,17 +447,22 @@ export const EditDlmPhasesFlyout = ({
   const renderDeletePanel = () => {
     if (!deleteEnabled) return null;
     const isHidden = selectedPhase !== 'delete';
-    const previousPhase: PhaseName = frozenEnabled ? 'frozen' : 'hot';
     const previousPhaseAfter = frozenEnabled
       ? formatDuration(
           methods.getValues('frozen.afterValue'),
-          methods.getValues('frozen.afterUnit')
+          methods.getValues('frozen.afterUnit'),
+          {
+            integerOnly: true,
+            minInclusive: 0,
+          }
         )
       : undefined;
-    const deleteAfterHelpText = getAfterFieldHelpText({
-      previousPhase,
-      previousPhaseAfter,
-    });
+    const deleteAfterHelpText =
+      frozenEnabled && previousPhaseAfter
+        ? getTimingBoundHelpText({
+            lower: { name: getPhaseBoundName('frozen'), value: previousPhaseAfter },
+          })
+        : undefined;
 
     return (
       <div hidden={isHidden} data-test-subj={`${dataTestSubj}Panel-delete`}>

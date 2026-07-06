@@ -12,17 +12,17 @@ describe('edit_ilm_phases_flyout/form/utils', () => {
     const phases = ['warm', 'cold', 'frozen', 'delete'] as const;
     type Phase = (typeof phases)[number];
 
-    it('returns default bounds when phase is not in the ordered list', () => {
-      const { lowerBoundMs, upperBoundMs } = getRelativeBoundsInMs(
+    it('returns default lower bound when phase is not in the ordered list', () => {
+      const { lowerBoundMs, lowerBoundPhase } = getRelativeBoundsInMs(
         phases,
         'hot' as unknown as Phase,
         () => null
       );
       expect(lowerBoundMs).toBe(0);
-      expect(upperBoundMs).toBeUndefined();
+      expect(lowerBoundPhase).toBeUndefined();
     });
 
-    it('computes bounds from previous/max and next/min values', () => {
+    it('computes the lower bound and its binding phase from the max of previous values', () => {
       const values: Record<Phase, number | null> = {
         warm: 20,
         cold: 30,
@@ -34,23 +34,23 @@ describe('edit_ilm_phases_flyout/form/utils', () => {
 
       expect(getRelativeBoundsInMs(phases, 'warm', get)).toEqual({
         lowerBoundMs: 0,
-        upperBoundMs: 30,
+        lowerBoundPhase: undefined,
       });
       expect(getRelativeBoundsInMs(phases, 'cold', get)).toEqual({
         lowerBoundMs: 20,
-        upperBoundMs: 40,
+        lowerBoundPhase: 'warm',
       });
       expect(getRelativeBoundsInMs(phases, 'frozen', get)).toEqual({
         lowerBoundMs: 30,
-        upperBoundMs: 60,
+        lowerBoundPhase: 'cold',
       });
       expect(getRelativeBoundsInMs(phases, 'delete', get)).toEqual({
         lowerBoundMs: 40,
-        upperBoundMs: undefined,
+        lowerBoundPhase: 'frozen',
       });
     });
 
-    it('ignores phases that return null', () => {
+    it('ignores previous phases that return null', () => {
       const values: Record<Phase, number | null> = {
         warm: 20,
         cold: null,
@@ -60,18 +60,18 @@ describe('edit_ilm_phases_flyout/form/utils', () => {
 
       const get = (p: Phase) => values[p];
 
-      // For cold: previous=max(warm)=20, next=min(frozen)=40 (delete ignored)
-      expect(getRelativeBoundsInMs(phases, 'cold', get)).toEqual({
+      // For frozen: previous = max(warm=20, cold=null) = 20, bound by warm.
+      expect(getRelativeBoundsInMs(phases, 'frozen', get)).toEqual({
         lowerBoundMs: 20,
-        upperBoundMs: 40,
+        lowerBoundPhase: 'warm',
       });
     });
 
-    it('allows overriding default lower bound', () => {
+    it('allows overriding default lower bound without attributing it to a phase', () => {
       const get = () => null;
       expect(getRelativeBoundsInMs(phases, 'warm', get, { defaultLowerBoundMs: 123 })).toEqual({
         lowerBoundMs: 123,
-        upperBoundMs: undefined,
+        lowerBoundPhase: undefined,
       });
     });
   });
