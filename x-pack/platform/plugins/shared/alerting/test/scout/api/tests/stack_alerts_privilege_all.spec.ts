@@ -22,8 +22,8 @@ apiTest.describe(
   { tag: DEPLOYMENT_AGNOSTIC_WITHOUT_SERVERLESS_OBS },
   () => {
     let state: StackAlertsPrivilegeState;
-    let withAllPrivilegeCreds: RoleApiCredentials;
-    let withAllPrivilegeCookieHeader: Record<string, string>;
+    let stackAlertsAllCreds: RoleApiCredentials;
+    let stackAlertsAllCookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ apiClient, requestAuth, samlAuth }) => {
       // setupStackAlertsPrivilegeTests polls up to ~120s for the event-log entry and
@@ -32,7 +32,7 @@ apiTest.describe(
       apiTest.setTimeout(300_000);
       state = await setupStackAlertsPrivilegeTests(apiClient, requestAuth, samlAuth);
 
-      withAllPrivilegeCreds = await requestAuth.getApiKeyForCustomRole({
+      stackAlertsAllCreds = await requestAuth.getApiKeyForCustomRole({
         kibana: [{ base: [], feature: { stackAlertsOnly: ['all'] }, spaces: ['*'] }],
         elasticsearch: { cluster: [], indices: [] },
       });
@@ -41,7 +41,7 @@ apiTest.describe(
         kibana: [{ base: [], feature: { stackAlertsOnly: ['all'] }, spaces: ['*'] }],
         elasticsearch: { cluster: [], indices: [] },
       });
-      withAllPrivilegeCookieHeader = session.cookieHeader;
+      stackAlertsAllCookieHeader = session.cookieHeader;
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
@@ -51,7 +51,7 @@ apiTest.describe(
     for (const spec of RULE_SPECS) {
       apiTest(`cannot create a ${spec.ruleTypeId} rule`, async ({ apiClient }) => {
         const response = await apiClient.post('api/alerting/rule', {
-          headers: { ...COMMON_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
+          headers: { ...COMMON_HEADERS, ...stackAlertsAllCreds.apiKeyHeader },
           body: {
             name: 'Should fail',
             rule_type_id: spec.ruleTypeId,
@@ -72,7 +72,7 @@ apiTest.describe(
       const rule = state.createdRules[0];
       const spec = RULE_SPECS.find((s) => s.ruleTypeId === rule.ruleTypeId);
       const response = await apiClient.put(`api/alerting/rule/${rule.ruleId}`, {
-        headers: { ...COMMON_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
+        headers: { ...COMMON_HEADERS, ...stackAlertsAllCreds.apiKeyHeader },
         body: {
           name: 'Updated name',
           schedule: { interval: '2m' },
@@ -88,7 +88,7 @@ apiTest.describe(
     apiTest('cannot delete a rule', async ({ apiClient }) => {
       const rule = state.createdRules[0];
       const response = await apiClient.delete(`api/alerting/rule/${rule.ruleId}`, {
-        headers: { ...COMMON_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
+        headers: { ...COMMON_HEADERS, ...stackAlertsAllCreds.apiKeyHeader },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(403);
@@ -97,7 +97,7 @@ apiTest.describe(
     apiTest('cannot mute all alerts on a rule', async ({ apiClient }) => {
       const rule = state.createdRules[0];
       const response = await apiClient.post(`api/alerting/rule/${rule.ruleId}/_mute_all`, {
-        headers: { ...COMMON_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
+        headers: { ...COMMON_HEADERS, ...stackAlertsAllCreds.apiKeyHeader },
       });
       expect(response).toHaveStatusCode(403);
     });
@@ -105,7 +105,7 @@ apiTest.describe(
     apiTest('cannot snooze a rule', async ({ apiClient }) => {
       const rule = state.createdRules[0];
       const response = await apiClient.post(`internal/alerting/rule/${rule.ruleId}/_snooze`, {
-        headers: { ...COMMON_HEADERS, ...withAllPrivilegeCookieHeader },
+        headers: { ...COMMON_HEADERS, ...stackAlertsAllCookieHeader },
         body: {
           snooze_schedule: {
             duration: 3600000,
@@ -126,7 +126,7 @@ apiTest.describe(
         const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
         const response = await apiClient.post(
           `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
-          { headers: { ...COMMON_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader } }
+          { headers: { ...COMMON_HEADERS, ...stackAlertsAllCreds.apiKeyHeader } }
         );
         expect(response).toHaveStatusCode(204);
       });
@@ -135,7 +135,7 @@ apiTest.describe(
         const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
         const response = await apiClient.post(
           `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
-          { headers: { ...COMMON_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader } }
+          { headers: { ...COMMON_HEADERS, ...stackAlertsAllCreds.apiKeyHeader } }
         );
         expect(response).toHaveStatusCode(204);
       });
@@ -143,7 +143,7 @@ apiTest.describe(
 
     apiTest('can find alerts via RAC', async ({ apiClient }) => {
       const response = await apiClient.post('internal/rac/alerts/find', {
-        headers: { ...COMMON_HEADERS, ...withAllPrivilegeCookieHeader },
+        headers: { ...COMMON_HEADERS, ...stackAlertsAllCookieHeader },
         body: {
           rule_type_ids: ['.es-query'],
           consumers: ['stackAlerts'],
@@ -169,7 +169,7 @@ apiTest.describe(
 
     apiTest('can acknowledge a real alert via bulk update', async ({ apiClient }) => {
       const response = await apiClient.post('internal/rac/alerts/bulk_update', {
-        headers: { ...COMMON_HEADERS, ...withAllPrivilegeCookieHeader },
+        headers: { ...COMMON_HEADERS, ...stackAlertsAllCookieHeader },
         body: {
           status: 'acknowledged',
           ids: [state.realAlertId],
