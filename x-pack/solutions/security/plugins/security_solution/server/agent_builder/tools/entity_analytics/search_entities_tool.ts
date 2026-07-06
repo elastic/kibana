@@ -804,10 +804,11 @@ export const searchEntitiesTool = (
         const [coreStart] = await core.getStartServices();
         coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
           toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+          actionType: 'read',
           entityTypes: params.entityTypes ?? [],
           spaceId,
           success,
-          entitiesReturned,
+          resultCount: entitiesReturned,
           errorMessage,
         });
       }

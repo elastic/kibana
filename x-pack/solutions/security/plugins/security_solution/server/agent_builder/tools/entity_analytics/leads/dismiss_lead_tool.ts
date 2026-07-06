@@ -16,6 +16,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import { getLeadToolAvailability } from './lead_availability';
 import { createLeadDataClient } from '../../../../lib/entity_analytics/lead_generation/lead_data_client';
 import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
 import { securityTool } from '../../constants';
 
 export const SECURITY_DISMISS_LEAD_TOOL_ID = securityTool('dismiss_lead');
@@ -51,6 +52,11 @@ export const dismissLeadTool = (
     handler: async (params, { request, spaceId, esClient, prompts, callContext }) => {
       logger.debug(`${SECURITY_DISMISS_LEAD_TOOL_ID} tool called for lead ${params.id}`);
 
+      let success = true;
+      let errorMessage: string | undefined;
+      let hitlOutcome: ConfirmationStatus | undefined;
+      let awaitingPrompt = false;
+
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
@@ -58,13 +64,15 @@ export const dismissLeadTool = (
           !privileges.adhoc.has_write_permissions ||
           !privileges.scheduled.has_write_permissions
         ) {
+          success = false;
+          errorMessage = 'You do not have permission to dismiss leads in this space.';
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.error,
                 data: {
-                  message: 'You do not have permission to dismiss leads in this space.',
+                  message: errorMessage,
                 },
               },
             ],
@@ -73,8 +81,10 @@ export const dismissLeadTool = (
 
         const promptId = `dismiss_lead.confirm.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
+        hitlOutcome = status;
 
         if (status === ConfirmationStatus.unprompted) {
+          awaitingPrompt = true;
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Dismiss lead',
@@ -107,12 +117,14 @@ export const dismissLeadTool = (
         const dismissed = await dataClient.dismissLead(params.id);
 
         if (!dismissed) {
+          success = false;
+          errorMessage = `Lead not found: ${params.id}`;
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.error,
-                data: { message: `Lead not found: ${params.id}` },
+                data: { message: errorMessage },
               },
             ],
           };
@@ -128,7 +140,8 @@ export const dismissLeadTool = (
           ],
         };
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        success = false;
+        errorMessage = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`[DismissLead] Error dismissing lead ${params.id}: ${errorMessage}`);
         return {
           results: [
@@ -139,6 +152,18 @@ export const dismissLeadTool = (
             },
           ],
         };
+      } finally {
+        if (!awaitingPrompt) {
+          const [coreStart] = await core.getStartServices();
+          coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
+            toolId: SECURITY_DISMISS_LEAD_TOOL_ID,
+            actionType: 'mutation',
+            spaceId,
+            success,
+            errorMessage,
+            hitlOutcome,
+          });
+        }
       }
     },
   };

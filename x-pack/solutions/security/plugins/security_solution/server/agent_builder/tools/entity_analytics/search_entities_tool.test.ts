@@ -1094,7 +1094,7 @@ describe('searchEntitiesTool', () => {
     });
 
     describe('telemetry', () => {
-      it('reports success=true and entitiesReturned=N when entities are found', async () => {
+      it('reports success=true and resultCount=N when entities are found', async () => {
         (executeEsql as jest.Mock).mockResolvedValueOnce({
           columns: [{ name: 'entity.id', type: 'keyword' }],
           values: [['host:server1'], ['user:alice'], ['host:server2']],
@@ -1109,16 +1109,17 @@ describe('searchEntitiesTool', () => {
           ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
           {
             toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            actionType: 'read',
             entityTypes: ['host', 'user'],
             spaceId: 'default',
             success: true,
-            entitiesReturned: 3,
+            resultCount: 3,
             errorMessage: undefined,
           }
         );
       });
 
-      it('reports success=true and entitiesReturned=0 when no entities are found', async () => {
+      it('reports success=true and resultCount=0 when no entities are found', async () => {
         (executeEsql as jest.Mock).mockResolvedValueOnce({
           columns: [{ name: 'entity.id', type: 'keyword' }],
           values: [],
@@ -1133,10 +1134,11 @@ describe('searchEntitiesTool', () => {
           ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
           {
             toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            actionType: 'read',
             entityTypes: ['host'],
             spaceId: 'default',
             success: true,
-            entitiesReturned: 0,
+            resultCount: 0,
             errorMessage: undefined,
           }
         );
@@ -1154,10 +1156,11 @@ describe('searchEntitiesTool', () => {
           ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
           {
             toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            actionType: 'read',
             entityTypes: ['user'],
             spaceId: 'default',
             success: false,
-            entitiesReturned: 0,
+            resultCount: 0,
             errorMessage: 'ES|QL failure',
           }
         );

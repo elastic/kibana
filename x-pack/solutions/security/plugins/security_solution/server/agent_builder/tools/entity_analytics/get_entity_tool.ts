@@ -819,10 +819,11 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
         const [coreStart] = await core.getStartServices();
         coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
           toolId: SECURITY_GET_ENTITY_TOOL_ID,
+          actionType: 'read',
           entityTypes: params.entityType ? [params.entityType] : [],
           spaceId,
           success,
-          entitiesReturned,
+          resultCount: entitiesReturned,
           errorMessage,
         });
       }

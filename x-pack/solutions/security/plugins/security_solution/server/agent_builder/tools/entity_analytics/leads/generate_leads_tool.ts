@@ -29,6 +29,7 @@ import { fetchCandidateEntities } from '../../../../lib/entity_analytics/lead_ge
 import { resolveChatModel } from '../../../../lib/entity_analytics/lead_generation/utils';
 import { runLeadGenerationInBackground } from '../../../../lib/entity_analytics/lead_generation/run_background_pipeline';
 import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
 import { securityTool } from '../../constants';
 
 // kibanaVersion is only used in RiskScoreDataClient write methods (index template creation).
@@ -111,17 +112,24 @@ export const generateLeadsTool = (
     ) => {
       logger.debug(`${SECURITY_GENERATE_LEADS_TOOL_ID} tool called`);
 
+      let success = true;
+      let errorMessage: string | undefined;
+      let hitlOutcome: ConfirmationStatus | undefined;
+      let awaitingPrompt = false;
+
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
         if (!privileges.adhoc.has_write_permissions) {
+          success = false;
+          errorMessage = 'You do not have permission to generate leads in this space.';
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.error,
                 data: {
-                  message: 'You do not have permission to generate leads in this space.',
+                  message: errorMessage,
                 },
               },
             ],
@@ -130,8 +138,10 @@ export const generateLeadsTool = (
 
         const promptId = `generate_leads.confirm.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
+        hitlOutcome = status;
 
         if (status === ConfirmationStatus.unprompted) {
+          awaitingPrompt = true;
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Generate investigation leads',
@@ -163,6 +173,8 @@ export const generateLeadsTool = (
           const allConnectors = await actionsClient.getAll();
           const resolution = resolveConnectorIdByName(allConnectors, params.connectorName);
           if ('error' in resolution) {
+            success = false;
+            errorMessage = resolution.error;
             return {
               results: [
                 {
@@ -180,14 +192,16 @@ export const generateLeadsTool = (
         }
 
         if (!resolvedConnectorId) {
+          success = false;
+          errorMessage =
+            'No AI connector is configured for lead generation. Provide a connectorName argument, or configure one via the Lead Generation settings.';
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.error,
                 data: {
-                  message:
-                    'No AI connector is configured for lead generation. Provide a connectorName argument, or configure one via the Lead Generation settings.',
+                  message: errorMessage,
                 },
               },
             ],
@@ -246,7 +260,8 @@ export const generateLeadsTool = (
           ],
         };
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        success = false;
+        errorMessage = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`[LeadGeneration] Error starting lead generation: ${errorMessage}`);
         return {
           results: [
@@ -257,6 +272,18 @@ export const generateLeadsTool = (
             },
           ],
         };
+      } finally {
+        if (!awaitingPrompt) {
+          const [coreStart] = await core.getStartServices();
+          coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
+            toolId: SECURITY_GENERATE_LEADS_TOOL_ID,
+            actionType: 'mutation',
+            spaceId,
+            success,
+            errorMessage,
+            hitlOutcome,
+          });
+        }
       }
     },
   };

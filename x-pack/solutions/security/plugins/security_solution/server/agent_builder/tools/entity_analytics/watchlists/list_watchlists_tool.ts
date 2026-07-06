@@ -13,6 +13,7 @@ import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
 import { getWatchlistToolAvailability } from './watchlist_availability';
@@ -70,6 +71,10 @@ Do NOT use this tool to find out which watchlists a specific entity belongs to â
         `${SECURITY_LIST_WATCHLISTS_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
 
+      let success = true;
+      let resultCount = 0;
+      let errorMessage: string | undefined;
+
       try {
         const [, startPlugins] = await core.getStartServices();
         const { security } = startPlugins;
@@ -82,6 +87,8 @@ Do NOT use this tool to find out which watchlists a specific entity belongs to â
           action: 'read watchlists',
         });
         if (!accessResult.allowed) {
+          success = false;
+          errorMessage = accessResult.result.data.message;
           return { results: [accessResult.result] };
         }
 
@@ -109,6 +116,7 @@ Do NOT use this tool to find out which watchlists a specific entity belongs to â
           updatedAt: w.updatedAt,
         }));
 
+        resultCount = watchlists.length;
         return {
           results: [
             {
@@ -122,7 +130,8 @@ Do NOT use this tool to find out which watchlists a specific entity belongs to â
           ],
         };
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        success = false;
+        errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return {
           results: [
             {
@@ -132,6 +141,16 @@ Do NOT use this tool to find out which watchlists a specific entity belongs to â
             },
           ],
         };
+      } finally {
+        const [coreStart] = await core.getStartServices();
+        coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
+          toolId: SECURITY_LIST_WATCHLISTS_TOOL_ID,
+          actionType: 'read',
+          spaceId,
+          success,
+          resultCount,
+          errorMessage,
+        });
       }
     },
   };

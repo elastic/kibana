@@ -17,6 +17,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import { getIndexForWatchlist } from '../../../../lib/entity_analytics/watchlists/entities/utils';
 import { createManualEntityService } from '../../../../lib/entity_analytics/watchlists/entity_sources/manual/service';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
 import { formatEntityIdsForPrompt } from './entity_ids_preview';
@@ -78,6 +79,12 @@ Entities not present in the entity store are reported as \`not_found\` in the re
         )}`
       );
 
+      let success = true;
+      let resultCount = 0;
+      let errorMessage: string | undefined;
+      let hitlOutcome: ConfirmationStatus | undefined;
+      let awaitingPrompt = false;
+
       try {
         const [, startPlugins] = await core.getStartServices();
         const { security } = startPlugins;
@@ -90,6 +97,8 @@ Entities not present in the entity store are reported as \`not_found\` in the re
           action: 'modify watchlist membership',
         });
         if (!accessResult.allowed) {
+          success = false;
+          errorMessage = accessResult.result.data.message;
           return { results: [accessResult.result] };
         }
 
@@ -103,9 +112,11 @@ Entities not present in the entity store are reported as \`not_found\` in the re
 
         const promptId = `watchlists.add_entities_to_watchlist.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
+        hitlOutcome = status;
 
         if (status === ConfirmationStatus.unprompted) {
           const noun = params.entityIds.length === 1 ? 'entity' : 'entities';
+          awaitingPrompt = true;
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Add entities to watchlist',
@@ -149,6 +160,7 @@ Entities not present in the entity store are reported as \`not_found\` in the re
 
         const result = await service.assign(params.entityIds);
 
+        resultCount = result.successful;
         return {
           results: [
             {
@@ -163,7 +175,8 @@ Entities not present in the entity store are reported as \`not_found\` in the re
           ],
         };
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        success = false;
+        errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return {
           results: [
             {
@@ -173,6 +186,19 @@ Entities not present in the entity store are reported as \`not_found\` in the re
             },
           ],
         };
+      } finally {
+        if (!awaitingPrompt) {
+          const [coreStart] = await core.getStartServices();
+          coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
+            toolId: SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
+            actionType: 'mutation',
+            spaceId,
+            success,
+            resultCount,
+            errorMessage,
+            hitlOutcome,
+          });
+        }
       }
     },
   };
