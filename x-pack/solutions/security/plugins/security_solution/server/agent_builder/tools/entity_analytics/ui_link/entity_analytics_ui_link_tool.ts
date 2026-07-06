@@ -11,6 +11,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
 import { securityTool } from '../../constants';
+import { checkWatchlistAccess } from '../watchlists/check_watchlist_access';
 import { buildUiLinkUrl, type BuildUiLinkArgs } from './urls';
 import { resolveWatchlistByName } from './resolve_watchlist';
 
@@ -81,7 +82,7 @@ export const entityAnalyticsUiLinkTool = (
 - \`watchlist_edit\` — a specific watchlist's edit flyout (pass \`watchlist\` = the watchlist id or name; the tool resolves it).
 - \`entity_resolution\` — a SINGLE entity's Resolution ("Add entities to resolution group") flyout (requires \`entityType\` and \`entityId\` from \`security.get_entity\`; \`entityName\` is optional — it only sets the header title).`,
   schema: entityAnalyticsUiLinkSchema,
-  handler: async (rawArgs, { logger, spaceId, esClient, savedObjectsClient }) => {
+  handler: async (rawArgs, { logger, spaceId, esClient, savedObjectsClient, request }) => {
     const args = rawArgs as EntityAnalyticsUiLinkToolArgs;
     let linkArgs: BuildUiLinkArgs;
 
@@ -115,6 +116,20 @@ export const entityAnalyticsUiLinkTool = (
             "intent 'watchlist_edit' requires 'watchlist' (the watchlist id or name)."
           );
         }
+        const [, startPlugins] = await core.getStartServices();
+        const { security } = startPlugins;
+
+        const accessResult = await checkWatchlistAccess({
+          request,
+          security,
+          spaceId,
+          type: 'read',
+          action: 'read watchlists',
+        });
+        if (!accessResult.allowed) {
+          return { results: [accessResult.result] };
+        }
+
         const client = new WatchlistConfigClient({
           soClient: savedObjectsClient,
           esClient: esClient.asCurrentUser,

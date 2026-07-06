@@ -15,6 +15,14 @@ jest.mock('../../../../lib/entity_analytics/watchlists/management/watchlist_conf
   WatchlistConfigClient: jest.fn().mockImplementation(() => ({ get: mockGet, list: mockList })),
 }));
 
+const mockGetUserWatchlistPrivileges = jest.fn();
+jest.mock(
+  '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges',
+  () => ({
+    getUserWatchlistPrivileges: (...args: unknown[]) => mockGetUserWatchlistPrivileges(...args),
+  })
+);
+
 import {
   entityAnalyticsUiLinkTool,
   entityAnalyticsUiLinkSchema,
@@ -24,7 +32,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 const core = {
   getStartServices: jest
     .fn()
-    .mockResolvedValue([{ http: { basePath: { serverBasePath: '/kbn' } } }]),
+    .mockResolvedValue([{ http: { basePath: { serverBasePath: '/kbn' } } }, {}]),
 } as unknown as SecuritySolutionPluginCoreSetupDependencies;
 
 const handlerContext = {
@@ -32,6 +40,7 @@ const handlerContext = {
   spaceId: 'my-space',
   esClient: { asCurrentUser: {} },
   savedObjectsClient: {},
+  request: {},
 } as never;
 
 const runHandler = async (
@@ -52,6 +61,13 @@ const urlOf = async (
 beforeEach(() => {
   mockGet.mockReset();
   mockList.mockReset();
+  mockGetUserWatchlistPrivileges.mockReset();
+  mockGetUserWatchlistPrivileges.mockResolvedValue({
+    privileges: {},
+    has_all_required: true,
+    has_read_permissions: true,
+    has_write_permissions: true,
+  });
 });
 
 describe('entityAnalyticsUiLinkTool', () => {
@@ -115,6 +131,22 @@ describe('entityAnalyticsUiLinkTool', () => {
       });
       expect(results[0].type).toBe(ToolResultType.error);
       expect((results[0].data as { message: string }).message).toContain('boom');
+    });
+
+    it('errors with a permission message and skips lookups when the user lacks read access', async () => {
+      mockGetUserWatchlistPrivileges.mockResolvedValue({
+        privileges: {},
+        has_all_required: false,
+        has_read_permissions: false,
+        has_write_permissions: false,
+      });
+      const { results } = await runHandler({
+        intent: 'watchlist_edit',
+        watchlist: 'wl-comp',
+      });
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(mockGet).not.toHaveBeenCalled();
+      expect(mockList).not.toHaveBeenCalled();
     });
   });
 });
