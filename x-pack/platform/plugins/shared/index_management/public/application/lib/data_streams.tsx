@@ -35,6 +35,12 @@ export const resolveLifecycleForSummary = (
     return lifecycle;
   }
 
+  // An explicitly disabled lifecycle must be surfaced as "Disabled" instead of falling back to
+  // the implicit hot-only phase, which is only meant for streams/templates with no lifecycle set.
+  if (lifecycle?.enabled === false) {
+    return lifecycle;
+  }
+
   return hasDataStream ? HOT_ONLY_ES_LIFECYCLE : lifecycle;
 };
 
@@ -187,6 +193,25 @@ export const countDlmDataPhases = (lifecycle?: EsLifecycle): number => {
   return count;
 };
 
+export const getDownsamplingCount = (lifecycle?: EsLifecycle): number => {
+  const downsampling: unknown = lifecycle?.downsampling;
+  return Array.isArray(downsampling) ? downsampling.length : 0;
+};
+
+export const getDlmDataPhasesLabel = (count: number): string =>
+  i18n.translate('xpack.idxMgmt.dataStreamList.dlmDataPhasesCount', {
+    defaultMessage: '{count, plural, one {# data phase} other {# data phases}}',
+    values: { count },
+  });
+
+export const getDlmDownsamplingStepsLabel = (count: number): string | undefined =>
+  count > 0
+    ? i18n.translate('xpack.idxMgmt.dataStreamList.dlmDownsamplingStepsCount', {
+        defaultMessage: '{count, plural, one {# downsample step} other {# downsample steps}}',
+        values: { count },
+      })
+    : undefined;
+
 const getDlmLifecycleRetentionLabel = (lifecycle?: EsLifecycle): string => {
   if (!lifecycle?.enabled) {
     return i18n.translate('xpack.idxMgmt.dataStreamList.dataRetentionDisabled', {
@@ -212,11 +237,12 @@ export const getDlmLifecycleDurationLabel = (
 
 export interface FormatDlmLifecycleSummaryOptions {
   includePhaseCount?: boolean;
+  includeDownsampling?: boolean;
 }
 
 export const formatDlmLifecycleSummary = (
   lifecycle?: EsLifecycle,
-  { includePhaseCount = false }: FormatDlmLifecycleSummaryOptions = {}
+  { includePhaseCount = false, includeDownsampling = false }: FormatDlmLifecycleSummaryOptions = {}
 ): string | React.ReactElement => {
   if (!includePhaseCount) {
     return getDlmLifecycleDurationLabel(lifecycle, { infiniteAsIcon: true });
@@ -229,10 +255,10 @@ export const formatDlmLifecycleSummary = (
     return retentionLabel;
   }
 
-  const phasesLabel = i18n.translate('xpack.idxMgmt.dataStreamList.dlmDataPhasesCount', {
-    defaultMessage: '{count, plural, one {# data phase} other {# data phases}}',
-    values: { count: phaseCount },
-  });
+  const phasesLabel = getDlmDataPhasesLabel(phaseCount);
+  const downsamplingLabel = includeDownsampling
+    ? getDlmDownsamplingStepsLabel(getDownsamplingCount(lifecycle))
+    : undefined;
 
-  return [retentionLabel, phasesLabel].join(' · ');
+  return [retentionLabel, phasesLabel, downsamplingLabel].filter(Boolean).join(' · ');
 };
