@@ -8,6 +8,7 @@
  */
 
 import {
+  getDataSourceCategoryFromESQLQuery,
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
@@ -160,10 +161,36 @@ describe('getSourceCommandFromESQLQuery', () => {
     expect(getSourceCommandFromESQLQuery('TS metrics-*')).toBe('TS');
   });
 
+  it('should support all registered source commands when requested', () => {
+    expect(getSourceCommandFromESQLQuery('ROW a = 1', '*')).toBe('ROW');
+    expect(getSourceCommandFromESQLQuery('SHOW INFO', '*')).toBe('SHOW');
+    expect(
+      getSourceCommandFromESQLQuery(
+        'PROMQL index=metrics-* step=1m start=?_tstart end=?_tend (avg(cpu_usage))',
+        '*'
+      )
+    ).toBe('PROMQL');
+  });
+
+  it('should only match the provided source commands', () => {
+    expect(getSourceCommandFromESQLQuery('FROM metrics-*', new Set(['PROMQL']))).toBe('');
+    expect(
+      getSourceCommandFromESQLQuery(
+        'PROMQL index=metrics-* step=1m start=?_tstart end=?_tend (avg(cpu_usage))',
+        new Set(['PROMQL'])
+      )
+    ).toBe('PROMQL');
+  });
+
   it('should return an empty string for empty or missing input', () => {
     expect(getSourceCommandFromESQLQuery('')).toBe('');
     expect(getSourceCommandFromESQLQuery(undefined)).toBe('');
     expect(getSourceCommandFromESQLQuery('STATS count()')).toBe('');
+  });
+
+  it('should return an empty string for invalid queries', () => {
+    expect(getSourceCommandFromESQLQuery('FROM logs-* | ???')).toBe('');
+    expect(getSourceCommandFromESQLQuery('FROM logs-* | ???', '*')).toBe('');
   });
 
   it('should return FROM when the query starts with SET and then FROM', () => {
@@ -180,5 +207,52 @@ describe('getSourceCommandFromESQLQuery', () => {
         '// a comment before the query\nFROM kibana_sample_data_logstsdb'
       )
     ).toBe('FROM');
+  });
+});
+
+describe('getDataSourceCategoryFromESQLQuery', () => {
+  it('should return logs for logs data sources', () => {
+    expect(getDataSourceCategoryFromESQLQuery('FROM logs-*')).toBe('logs');
+    expect(getDataSourceCategoryFromESQLQuery('FROM logs.test')).toBe('logs');
+    expect(getDataSourceCategoryFromESQLQuery('FROM logs')).toBe('logs');
+  });
+
+  it('should return metrics for TS and PROMQL metrics data sources', () => {
+    expect(getDataSourceCategoryFromESQLQuery('TS metrics-*')).toBe('metrics');
+    expect(
+      getDataSourceCategoryFromESQLQuery(
+        'PROMQL index=metrics-* step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
+      )
+    ).toBe('metrics');
+    expect(
+      getDataSourceCategoryFromESQLQuery(
+        'PROMQL index=remote_cluster:metrics-* step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
+      )
+    ).toBe('metrics');
+  });
+
+  it('should return traces for traces data sources', () => {
+    expect(getDataSourceCategoryFromESQLQuery('FROM traces-*')).toBe('traces');
+  });
+
+  it('should strip remote cluster prefixes and source selectors before categorizing', () => {
+    expect(getDataSourceCategoryFromESQLQuery('FROM remote_cluster:logs-*::data')).toBe('logs');
+  });
+
+  it('should return unknown for ROW and SHOW queries', () => {
+    expect(getDataSourceCategoryFromESQLQuery('ROW a = 1')).toBe('unknown');
+    expect(getDataSourceCategoryFromESQLQuery('SHOW INFO')).toBe('unknown');
+  });
+
+  it('should return unknown for invalid queries', () => {
+    expect(getDataSourceCategoryFromESQLQuery('FROM logs-* | ???')).toBe('unknown');
+  });
+
+  it('should return unknown for mixed sources', () => {
+    expect(getDataSourceCategoryFromESQLQuery('FROM logs-*,metrics-*')).toBe('unknown');
+  });
+
+  it('should return unknown for unmatched sources', () => {
+    expect(getDataSourceCategoryFromESQLQuery('FROM kibana_sample_data_logs')).toBe('unknown');
   });
 });
