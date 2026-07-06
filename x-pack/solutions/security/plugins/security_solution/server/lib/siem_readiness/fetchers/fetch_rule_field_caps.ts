@@ -6,25 +6,79 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { IndexToRulesMap, MissingFieldsEntry, RequiredField } from '@kbn/siem-readiness';
+import type {
+  IndexToRulesMap,
+  MissingFieldDetail,
+  MissingFieldsEntry,
+  RequiredField,
+} from '@kbn/siem-readiness';
+
+type FieldMappingStatus = 'mapped' | 'partial' | 'missing';
+
+interface FieldMappingResult {
+  status: FieldMappingStatus;
+  unmappedIn: string[];
+}
 
 /**
- * Returns the set of fields that are mapped in the given indices, or null when the
- * fieldCaps request fails — callers use null to skip the group without blocking others.
+ * Extracts the parent data stream name from a backing index name.
+ * Backing indices follow the pattern: .ds-{data_stream_name}-YYYY.MM.DD-NNNNNN
  */
-const fetchPresentFields = async (
+const extractDataStreamName = (indexName: string): string | undefined => {
+  const match = indexName.match(/^\.ds-(.+)-\d{4}\.\d{2}\.\d{2}-\d+$/);
+  return match?.[1];
+};
+
+const normalizeIndexNames = (indexNames: string[]): string[] => {
+  const normalized = indexNames.map((indexName) => extractDataStreamName(indexName) ?? indexName);
+  return [...new Set(normalized)];
+};
+
+const toIndexArray = (indices: string | string[]): string[] =>
+  Array.isArray(indices) ? indices : [indices];
+
+/**
+ * Classifies each requested field as mapped, partially mapped, or fully unmapped across
+ * the given indices using fieldCaps with include_unmapped. Returns null when the request
+ * fails — callers use null to skip the group without blocking others.
+ */
+const fetchFieldMappingStatus = async (
   esClient: ElasticsearchClient,
   indices: string[],
   fields: string[]
-): Promise<Set<string> | null> => {
+): Promise<Map<string, FieldMappingResult> | null> => {
   try {
     const response = await esClient.fieldCaps({
       index: indices,
       fields,
+      include_unmapped: true,
       ignore_unavailable: true,
       allow_no_indices: true,
     });
-    return new Set(Object.keys(response.fields ?? {}));
+
+    const results = new Map<string, FieldMappingResult>();
+
+    for (const field of fields) {
+      const caps = response.fields?.[field];
+      if (!caps) {
+        results.set(field, { status: 'missing', unmappedIn: normalizeIndexNames(indices) });
+      } else {
+        const hasUnmapped = 'unmapped' in caps;
+        const hasMapped = Object.keys(caps).some((type) => type !== 'unmapped');
+        const unmappedIndices = caps.unmapped?.indices ?? indices;
+        const unmappedIn = normalizeIndexNames(toIndexArray(unmappedIndices));
+
+        if (hasMapped && !hasUnmapped) {
+          results.set(field, { status: 'mapped', unmappedIn: [] });
+        } else if (hasMapped && hasUnmapped) {
+          results.set(field, { status: 'partial', unmappedIn });
+        } else {
+          results.set(field, { status: 'missing', unmappedIn });
+        }
+      }
+    }
+
+    return results;
   } catch {
     return null;
   }
@@ -32,13 +86,17 @@ const fetchPresentFields = async (
 
 /**
  * For each enabled rule that declares `required_fields`, checks whether those fields
- * are mapped in the indices the rule queries.
+ * are mapped in every index the rule queries.
+ *
+ * Uses fieldCaps with include_unmapped so a field mapped in only some queried indices
+ * is flagged as partial (the rule matches partially). Fields unmapped in all queried
+ * indices are flagged as missing (the rule silently matches nothing).
  *
  * Rules that share the same (indexPatterns, requiredFieldNames) combination share one
  * `fieldCaps` call — this deduplication keeps the number of ES requests proportional
  * to unique (indexPattern, fieldSet) pairs, not to the number of rules.
  *
- * Returns one entry per rule that has at least one unmapped required field.
+ * Returns one entry per rule that has at least one partial or missing required field.
  * Rules with empty `required_fields` are skipped (no call, no entry).
  */
 export const fetchRuleFieldCaps = async ({
@@ -99,28 +157,45 @@ export const fetchRuleFieldCaps = async ({
     }
   }
 
+  // Groups are independent, so run their fieldCaps calls concurrently.
+  // fetchFieldMappingStatus never rejects (it returns null on failure), so Promise.all is safe.
+  const groupList = [...groups.values()];
+  const fieldStatusByGroup = await Promise.all(
+    groupList.map(({ indices, fields }) => fetchFieldMappingStatus(esClient, indices, fields))
+  );
+
   const results: MissingFieldsEntry[] = [];
 
-  for (const { indices, fields, ruleIds } of groups.values()) {
+  groupList.forEach(({ ruleIds }, groupIndex) => {
     // null signals that fieldCaps failed for this group — skip it so one bad group
     // doesn't block the others.
-    const presentFields = await fetchPresentFields(esClient, indices, fields);
+    const fieldStatus = fieldStatusByGroup[groupIndex];
+    if (!fieldStatus) return;
 
-    if (presentFields) {
-      for (const ruleId of ruleIds) {
-        const requiredFieldNames = ruleRequiredFields.get(ruleId)?.map((f) => f.name) ?? [];
-        const missingFields = requiredFieldNames.filter((f) => !presentFields.has(f));
+    for (const ruleId of ruleIds) {
+      const requiredFieldNames = ruleRequiredFields.get(ruleId)?.map((f) => f.name) ?? [];
+      const fieldDetails: MissingFieldDetail[] = [];
 
-        if (missingFields.length > 0) {
-          results.push({
-            ruleId,
-            ruleName: ruleNames.get(ruleId) ?? ruleId,
-            missingFields,
+      for (const fieldName of requiredFieldNames) {
+        const mapping = fieldStatus.get(fieldName);
+        if (mapping && mapping.status !== 'mapped') {
+          fieldDetails.push({
+            name: fieldName,
+            status: mapping.status,
+            ...(mapping.unmappedIn.length > 0 ? { unmappedIn: mapping.unmappedIn } : {}),
           });
         }
       }
+
+      if (fieldDetails.length > 0) {
+        results.push({
+          ruleId,
+          ruleName: ruleNames.get(ruleId) ?? ruleId,
+          fields: fieldDetails,
+        });
+      }
     }
-  }
+  });
 
   return results;
 };

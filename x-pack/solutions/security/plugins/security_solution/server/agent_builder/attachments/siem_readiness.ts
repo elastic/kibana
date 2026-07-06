@@ -314,17 +314,19 @@ The attachment contains:
 
 Each actionable finding includes:
 - category, severity (CRITICAL | WARNING | INFORMATIONAL), message, resource
-- type (optional): 'missingField' for Quality findings about unmapped required fields; for Continuity findings: pipeline_failure | silence | volume_drop_warning | volume_drop_critical
+- type (optional): 'missing_field' for Quality findings about unmapped required fields; for Continuity findings: pipeline_failure | silence | volume_drop_warning | volume_drop_critical
 - affectedRules: detection rules impacted by this finding
 - affectedTactics: MITRE ATT&CK tactics with rule counts (total vs affected)
 - affectedPlatform: primary platform impacted (e.g., AWS, Endpoint, Azure)
 - recommendedActions: links to relevant Kibana pages and case creation
 
 Quality attachments include an additional missingFieldsByRule array:
-- Each entry: { ruleId, ruleName, missingFields: string[] }
-- A rule appears here when its required_fields (fields it declares it needs) are not mapped in the indices it queries
-- Effect: the rule runs without error but matches zero events — silently broken
-- Distinct from sparse fields: missing = not in the mapping at all; sparse = in the mapping but rarely populated in actual data
+- Each entry: { ruleId, ruleName, fields: [{ name, status: 'missing' | 'partial', unmappedIn?: string[] }] }
+- A rule appears here when its declared required_fields are not fully mapped across all indices it queries
+- required_fields is an informational property (it documents what the rule expects; it does not itself drive the query), so an unmapped required field is a strong signal — not a guarantee — that the rule under-matches
+- status 'missing': field is unmapped in every queried index — the rule may silently fail to match events it is meant to detect
+- status 'partial': field is mapped in some indices but unmapped in others — the rule may match only partially; unmappedIn lists the affected indices/data streams
+- Distinct from sparse fields: missing/partial = not in the mapping (fully or in some indices); sparse = in the mapping but rarely populated in actual data
 
 Continuity pipeline items include silence and volume health fields:
 - silenceMs: milliseconds since the last event (null if stream never received events)

@@ -305,8 +305,33 @@ describe('getQualityTool', () => {
 
   describe('handler — missing rule-required fields (Phase 2.5)', () => {
     const missingFieldsFixture = [
-      { ruleId: 'rule-1', ruleName: 'Suspicious Login', missingFields: ['user.name', 'source.ip'] },
-      { ruleId: 'rule-2', ruleName: 'Malware Detected', missingFields: ['process.hash.sha256'] },
+      {
+        ruleId: 'rule-1',
+        ruleName: 'Suspicious Login',
+        fields: [
+          { name: 'user.name', status: 'missing' as const },
+          { name: 'source.ip', status: 'missing' as const },
+        ],
+      },
+      {
+        ruleId: 'rule-2',
+        ruleName: 'Malware Detected',
+        fields: [{ name: 'process.hash.sha256', status: 'missing' as const }],
+      },
+    ];
+
+    const partialFieldsFixture = [
+      {
+        ruleId: 'rule-3',
+        ruleName: 'Cross Source Rule',
+        fields: [
+          {
+            name: 'user.name',
+            status: 'partial' as const,
+            unmappedIn: ['logs-aws.cloudtrail-default'],
+          },
+        ],
+      },
     ];
 
     it('returns missingFieldsByRule verbatim from fetchRuleFieldCaps', async () => {
@@ -322,7 +347,7 @@ describe('getQualityTool', () => {
       expect(data.missingFieldsByRule).toEqual(missingFieldsFixture);
     });
 
-    it('emits one WARNING missingField finding per unmapped field, naming the rule and field', async () => {
+    it('emits one WARNING missing_field finding per unmapped field, naming the rule and field', async () => {
       mockGetQuality.mockResolvedValueOnce(makePayload());
       mockFetchRuleFieldCaps.mockResolvedValueOnce(missingFieldsFixture);
 
@@ -332,7 +357,7 @@ describe('getQualityTool', () => {
       )) as ToolHandlerStandardReturn;
 
       const data = (result.results[0] as OtherResult<QualityPayload>).data;
-      const missingFindings = data.actionableFindings!.filter((f) => f.type === 'missingField');
+      const missingFindings = data.actionableFindings!.filter((f) => f.type === 'missing_field');
 
       // One finding per (rule, field) pair: 2 + 1 = 3
       expect(missingFindings).toHaveLength(3);
@@ -344,9 +369,30 @@ describe('getQualityTool', () => {
       const userNameFinding = missingFindings.find((f) => f.resource === 'user.name');
       expect(userNameFinding?.message).toContain('Suspicious Login');
       expect(userNameFinding?.message).toContain('user.name');
+      expect(userNameFinding?.message).toContain('not mapped in any of its queried indices');
     });
 
-    it('keeps missingField findings even though their resource is a field name, not a categorized index', async () => {
+    it('emits a partial-gap finding with the affected indices in the message', async () => {
+      mockGetQuality.mockResolvedValueOnce(makePayload());
+      mockFetchRuleFieldCaps.mockResolvedValueOnce(partialFieldsFixture);
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const data = (result.results[0] as OtherResult<QualityPayload>).data;
+      const partialFinding = data.actionableFindings!.find((f) => f.resource === 'user.name');
+
+      expect(partialFinding?.severity).toBe('WARNING');
+      expect(partialFinding?.type).toBe('missing_field');
+      expect(partialFinding?.message).toContain('Cross Source Rule');
+      expect(partialFinding?.message).toContain('unmapped in some queried indices');
+      expect(partialFinding?.message).toContain('logs-aws.cloudtrail-default');
+      expect(partialFinding?.message).toContain('may match only partially');
+    });
+
+    it('keeps missing_field findings even though their resource is a field name, not a categorized index', async () => {
       // No ECS quality items at all — only rule-required-field findings should come through,
       // and they must survive the category filter (field names are never in the category map).
       mockGetQuality.mockResolvedValueOnce(makePayload({ items: [] }));
@@ -359,7 +405,7 @@ describe('getQualityTool', () => {
 
       const data = (result.results[0] as OtherResult<QualityPayload>).data;
       expect(data.actionableFindings).toHaveLength(3);
-      expect(data.actionableFindings!.every((f) => f.type === 'missingField')).toBe(true);
+      expect(data.actionableFindings!.every((f) => f.type === 'missing_field')).toBe(true);
       // Missing-field findings are not enriched with a category (resource is a field, not an index).
       expect(data.actionableFindings!.every((f) => f.category === undefined)).toBe(true);
     });
@@ -392,10 +438,30 @@ describe('getQualityTool', () => {
       const data = (result.results[0] as OtherResult<QualityPayload>).data;
       expect(data.status).toBe('actionsRequired');
       expect(data.summary).toContain('incompatible ECS field mappings');
-      expect(data.summary).toContain('rule(s) have required fields not mapped');
+      expect(data.summary).toContain('rule(s) have required fields not fully mapped');
     });
 
-    it('emits no missingField findings and stays healthy when nothing is unmapped', async () => {
+    it('adds an incomplete-list caveat to the summary when rulesPartial is true', async () => {
+      mockGetSharedContext.mockResolvedValueOnce({
+        ...mockSharedContext,
+        reverseMapResult: {
+          ...mockSharedContext.reverseMapResult,
+          errors: { pipelineMap: false, categoryMap: false, rulesPartial: true },
+        },
+      });
+      mockGetQuality.mockResolvedValueOnce(makePayload());
+      mockFetchRuleFieldCaps.mockResolvedValueOnce([]);
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const data = (result.results[0] as OtherResult<QualityPayload>).data;
+      expect(data.summary).toContain('may be incomplete');
+    });
+
+    it('emits no missing_field findings and stays healthy when nothing is unmapped', async () => {
       mockGetQuality.mockResolvedValueOnce(
         makePayload({ items: [makeQualityResult(IDENTITY_INDEX, 0)] })
       );
@@ -408,7 +474,7 @@ describe('getQualityTool', () => {
 
       const data = (result.results[0] as OtherResult<QualityPayload>).data;
       expect(data.missingFieldsByRule).toHaveLength(0);
-      expect(data.actionableFindings!.some((f) => f.type === 'missingField')).toBe(false);
+      expect(data.actionableFindings!.some((f) => f.type === 'missing_field')).toBe(false);
       expect(data.status).toBe('healthy');
     });
   });

@@ -17,6 +17,8 @@ const makeRequiredField = (name: string, type = 'keyword'): RequiredField => ({
   ecs: true,
 });
 
+const keywordCap = { keyword: { aggregatable: true, searchable: true, type: 'keyword' } };
+
 const makeEsClient = (fieldsByCall: Array<Record<string, unknown>>) => {
   let callCount = 0;
   return {
@@ -40,17 +42,20 @@ describe('fetchRuleFieldCaps', () => {
         ['rule-1', [makeRequiredField('process.command_line')]],
       ]);
 
-      const esClient = makeEsClient([{ 'process.command_line': { keyword: {} } }]);
+      const esClient = makeEsClient([{ 'process.command_line': keywordCap }]);
 
       const result = await fetchRuleFieldCaps({ esClient, indexToRules, ruleRequiredFields });
 
       expect(result).toHaveLength(0);
       expect(esClient.fieldCaps).toHaveBeenCalledTimes(1);
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(
+        expect.objectContaining({ include_unmapped: true })
+      );
     });
   });
 
-  describe('when a required field is not mapped', () => {
-    it('returns one entry with the missing field', async () => {
+  describe('when a required field is not mapped in any queried index', () => {
+    it('returns one entry with status missing', async () => {
       const indexToRules: IndexToRulesMap = new Map([
         ['logs-endpoint-000001', [makeRule('rule-1', 'Rule 1')]],
       ]);
@@ -61,15 +66,86 @@ describe('fetchRuleFieldCaps', () => {
         ],
       ]);
 
-      // Only process.command_line is present; process.parent.name is absent
-      const esClient = makeEsClient([{ 'process.command_line': { keyword: {} } }]);
+      // Only process.command_line is mapped; process.parent.name is absent
+      const esClient = makeEsClient([{ 'process.command_line': keywordCap }]);
 
       const result = await fetchRuleFieldCaps({ esClient, indexToRules, ruleRequiredFields });
 
       expect(result).toHaveLength(1);
       expect(result[0].ruleId).toBe('rule-1');
       expect(result[0].ruleName).toBe('Rule 1');
-      expect(result[0].missingFields).toEqual(['process.parent.name']);
+      expect(result[0].fields).toEqual([
+        {
+          name: 'process.parent.name',
+          status: 'missing',
+          unmappedIn: ['logs-endpoint-000001'],
+        },
+      ]);
+    });
+  });
+
+  describe('when a required field is partially mapped across queried indices', () => {
+    it('returns status partial with unmappedIn listing the gap indices', async () => {
+      const indexToRules: IndexToRulesMap = new Map([
+        ['logs-endpoint-000001', [makeRule('rule-1', 'Rule 1')]],
+        ['logs-aws.cloudtrail-default', [makeRule('rule-1', 'Rule 1')]],
+      ]);
+      const ruleRequiredFields = new Map<string, RequiredField[]>([
+        ['rule-1', [makeRequiredField('user.name')]],
+      ]);
+
+      const esClient = makeEsClient([
+        {
+          'user.name': {
+            ...keywordCap,
+            unmapped: {
+              aggregatable: false,
+              searchable: false,
+              type: 'unmapped',
+              indices: ['logs-aws.cloudtrail-default'],
+            },
+          },
+        },
+      ]);
+
+      const result = await fetchRuleFieldCaps({ esClient, indexToRules, ruleRequiredFields });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].fields).toEqual([
+        {
+          name: 'user.name',
+          status: 'partial',
+          unmappedIn: ['logs-aws.cloudtrail-default'],
+        },
+      ]);
+    });
+
+    it('normalizes backing index names to data stream names in unmappedIn', async () => {
+      const indexToRules: IndexToRulesMap = new Map([
+        ['logs-endpoint-000001', [makeRule('rule-1', 'Rule 1')]],
+        ['.ds-logs-aws.cloudtrail-default-2026.01.01-000001', [makeRule('rule-1', 'Rule 1')]],
+      ]);
+      const ruleRequiredFields = new Map<string, RequiredField[]>([
+        ['rule-1', [makeRequiredField('user.name')]],
+      ]);
+
+      const esClient = makeEsClient([
+        {
+          'user.name': {
+            ...keywordCap,
+            unmapped: {
+              aggregatable: false,
+              searchable: false,
+              type: 'unmapped',
+              indices: ['.ds-logs-aws.cloudtrail-default-2026.01.01-000001'],
+            },
+          },
+        },
+      ]);
+
+      const result = await fetchRuleFieldCaps({ esClient, indexToRules, ruleRequiredFields });
+
+      expect(result[0].fields[0].unmappedIn).toEqual(['logs-aws.cloudtrail-default']);
     });
   });
 
@@ -84,13 +160,16 @@ describe('fetchRuleFieldCaps', () => {
       ]);
 
       const esClient = makeEsClient([
-        { 'process.command_line': { keyword: {} }, 'user.name': { keyword: {} } },
+        { 'process.command_line': keywordCap, 'user.name': keywordCap },
       ]);
 
       const result = await fetchRuleFieldCaps({ esClient, indexToRules, ruleRequiredFields });
 
       // Both rules share the same group → only 1 fieldCaps call
       expect(esClient.fieldCaps).toHaveBeenCalledTimes(1);
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(
+        expect.objectContaining({ include_unmapped: true })
+      );
       // Neither rule has missing fields
       expect(result).toHaveLength(0);
     });
@@ -106,8 +185,8 @@ describe('fetchRuleFieldCaps', () => {
 
       // Both calls return all fields present
       const esClient = makeEsClient([
-        { 'process.command_line': { keyword: {} } },
-        { 'process.parent.name': { keyword: {} } },
+        { 'process.command_line': keywordCap },
+        { 'process.parent.name': keywordCap },
       ]);
 
       const result = await fetchRuleFieldCaps({ esClient, indexToRules, ruleRequiredFields });
@@ -168,7 +247,7 @@ describe('fetchRuleFieldCaps', () => {
           // First call (rule-1 group) throws
           .mockRejectedValueOnce(new Error('index_not_found_exception'))
           // Second call (rule-2 group) succeeds with the field present
-          .mockResolvedValueOnce({ fields: { 'aws.cloudtrail.event_name': { keyword: {} } } }),
+          .mockResolvedValueOnce({ fields: { 'aws.cloudtrail.event_name': keywordCap } }),
       } as unknown as ElasticsearchClient;
 
       const result = await fetchRuleFieldCaps({ esClient, indexToRules, ruleRequiredFields });

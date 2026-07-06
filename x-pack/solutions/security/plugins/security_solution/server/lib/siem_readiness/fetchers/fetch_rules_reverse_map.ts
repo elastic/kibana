@@ -300,12 +300,9 @@ export const fetchRulesReverseMap = async ({
 
       for (const ruleData of result.data) {
         // Capture required_fields so fetch_rule_field_caps can check mapping coverage.
-        // The alerting framework stores this as camelCase requiredFields inside params
-        // (convert_rule_response_to_alerting_rule maps required_fields → requiredFields).
-        const rule = ruleData as unknown as AlertingRule;
-        const requiredFields =
-          (rule.params as { requiredFields?: RequiredField[] }).requiredFields ?? [];
-        ruleRequiredFields.set(rule.id, requiredFields);
+        // findRules returns FindResult<RuleParams>, so params.requiredFields is already
+        // typed here (requiredFields lives on the shared BaseRuleParams).
+        ruleRequiredFields.set(ruleData.id, ruleData.params.requiredFields ?? []);
 
         const anyFailed = await processRule(ruleData, ruleCtx);
         if (anyFailed) {

@@ -121,7 +121,7 @@ Rules:
 - Always show all three blast radius fields for every finding, even if some are empty ("—" or "none").
 - Do NOT merge the blast radius into prose — keep it as explicit labeled sub-bullets.
 - If \`affectedPlatform\` is undefined in the data, show "—".
-- **Exception — \`missingField\` findings**: omit the Affected Platform / Rules / Tactics sub-bullets entirely. These findings already name the affected rule directly in the message text ("Rule X requires field Y…"). Blast radius is not applicable — the rule IS the problem, not a collateral victim of a data issue.
+- **Exception — \`missing_field\` findings**: omit the Affected Platform / Rules / Tactics sub-bullets entirely. These findings already name the affected rule directly in the message text ("Rule X requires field Y…"). Blast radius is not applicable — the rule IS the problem, not a collateral victim of a data issue.
 - If \`blastRadiusStatus === 'unavailable'\`, show "unavailable (lookup failed)" for all three fields — never "none".
 - If \`blastRadiusStatus === 'partial'\`, append "(may be incomplete)" to Affected Rules and Affected Tactics labels.
 
@@ -222,14 +222,14 @@ Playbook guidance:
   - The count in \`summary\` reflects the number of categorized indices checked, not total ES indices.
 - \`actionableFindings\`: array of \`{ category, severity, message, resource, type }\`
   - ECS incompatibility findings: \`type\` is absent; \`resource\` is the index name
-  - Missing-field findings: \`type === 'missingField'\`; \`resource\` is the unmapped field name; \`message\` names the rule and field
-- \`missingFieldsByRule\`: array of \`{ ruleId, ruleName, missingFields: string[] }\` — enabled rules whose \`required_fields\` are not mapped in the indices they query. These rules **silently match nothing** — they run without errors but produce zero alerts for events that should trigger them. Distinct from sparse fields (Ticket F): a missing field is absent from the mapping entirely; a sparse field is mapped but rarely populated in actual data.
+  - Missing-field findings: \`type === 'missing_field'\`; \`resource\` is the unmapped field name; \`message\` names the rule, field, and whether the gap is full (unmapped everywhere) or partial (unmapped in specific indices)
+- \`missingFieldsByRule\`: array of \`{ ruleId, ruleName, fields: [{ name, status: 'missing' | 'partial', unmappedIn?: string[] }] }\` — enabled rules whose declared \`required_fields\` are not fully mapped in the indices they query. Note: \`required_fields\` is an informational property the rule author uses to document the fields the rule expects; it does not itself drive the query, so an unmapped required field is a strong signal — not a guarantee — that the rule under-matches. \`status: 'missing'\` means the field is unmapped in every queried index (the rule may silently fail to match events it is meant to detect). \`status: 'partial'\` means the field is mapped in some indices but not others (the rule may match only events from some data sources); \`unmappedIn\` lists the affected indices/data streams. Distinct from sparse fields (Ticket F): missing/partial = absent from the mapping; sparse = mapped but rarely populated in actual data.
 - When reporting: "N of M checked indices have incompatible fields" — N and M are both counts of categorized indices only.
-- When reporting missing fields: group by rule name, list each unmapped field. Example: "Rule 'Suspicious PowerShell Execution' requires process.command_line — not mapped in logs-endpoint.events.process-*".
+- When reporting missing fields: group by rule name, list each field with its status. Example full gap: "Rule 'Suspicious PowerShell Execution' requires process.command_line — not mapped in any queried indices". Example partial gap: "Rule 'Suspicious Login' requires user.name — unmapped in logs-aws.cloudtrail-default (may match only partially)".
 
 ### Investigation examples (Quality)
 - "Which rules have required fields not mapped in my endpoint indices?" → call \`get_quality\`, inspect \`missingFieldsByRule\`, filter by rules whose indices match \`logs-endpoint.*\`
-- "Are any of my detection rules silently broken due to field mapping gaps?" → call \`get_quality\`, inspect \`missingFieldsByRule\`; a non-empty array means rules are running but cannot match
+- "Are any of my detection rules silently broken due to field mapping gaps?" → call \`get_quality\`, inspect \`missingFieldsByRule\`; entries with \`status: 'missing'\` likely fail to match anything for the intended data, entries with \`status: 'partial'\` may match only some data sources. Because \`required_fields\` is a documented expectation rather than the rule's actual query, present these as strong signals to investigate, not confirmed failures.
 
 ### Continuity (\`get_continuity\`)
 - \`status\`: \`healthy | actionsRequired | noData\`

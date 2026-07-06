@@ -154,7 +154,7 @@ export type ContinuityFindingType =
   | 'volume_drop_critical';
 
 /** Finding sub-type across all SIEM readiness dimensions. Used to route recommended actions. */
-export type SiemReadinessFindingType = ContinuityFindingType | 'missingField';
+export type SiemReadinessFindingType = ContinuityFindingType | 'missing_field';
 
 export interface AffectedRule {
   id: string;
@@ -173,10 +173,18 @@ export interface RecommendedAction {
   href: string;
 }
 
+export interface MissingFieldDetail {
+  name: string;
+  status: 'missing' | 'partial';
+  /** Data streams / indices where the field is unmapped. For 'partial' this is the subset
+   *  that lacks the field; for 'missing' it is all queried indices (may be omitted). */
+  unmappedIn?: string[];
+}
+
 export interface MissingFieldsEntry {
   ruleId: string;
   ruleName: string;
-  missingFields: string[];
+  fields: MissingFieldDetail[];
 }
 
 export interface ActionableFinding {
