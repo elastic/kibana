@@ -41,6 +41,7 @@ export function useServiceFlyoutTransactions({
   transactionType,
   latencyAggregationType,
   searchQuery,
+  refreshToken,
 }: {
   http: HttpStart;
   notifications: NotificationsStart;
@@ -51,6 +52,7 @@ export function useServiceFlyoutTransactions({
   transactionType?: string;
   latencyAggregationType?: LatencyAggregationType;
   searchQuery: string;
+  refreshToken?: number;
 }) {
   const enabled = !!transactionType && !!latencyAggregationType;
 
@@ -134,6 +136,7 @@ export function useServiceFlyoutTransactions({
       serverSearchQuery,
       enabled,
       dataSource,
+      refreshToken,
     ]
   );
 

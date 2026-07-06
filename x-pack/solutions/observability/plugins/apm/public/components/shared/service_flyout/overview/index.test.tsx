@@ -95,6 +95,13 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     expect(transactionsSectionProps?.start).not.toBe('now-15m');
     expect(transactionsSectionProps?.end).not.toBe('now');
   });
+
+  it('forwards refreshToken to ServiceFlyoutTransactionsSection', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview({ refreshToken: 42 });
+
+    expect(transactionsSectionProps?.refreshToken).toBe(42);
+  });
 });
 
 describe('ServiceFlyoutOverview infrastructure section visibility', () => {

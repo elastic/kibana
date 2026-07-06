@@ -229,6 +229,7 @@ export function ServiceFlyoutOverview({
             end={end}
             transactionType={transactionType}
             latencyAggregationType={latencyAggregationType}
+            refreshToken={refreshToken}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

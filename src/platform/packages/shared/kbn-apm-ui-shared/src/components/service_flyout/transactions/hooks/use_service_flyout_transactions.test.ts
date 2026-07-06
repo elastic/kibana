@@ -363,4 +363,24 @@ describe('useServiceFlyoutTransactions', () => {
       expect(http.get).not.toHaveBeenCalled();
     });
   });
+
+  it('re-fetches when refreshToken changes', async () => {
+    const http = makeHttp({
+      transactionGroups: [],
+      maxCountExceeded: false,
+      hasActiveAlerts: false,
+    });
+
+    const { rerender } = renderHook(
+      ({ refreshToken }: { refreshToken: number }) =>
+        useServiceFlyoutTransactions({ http, ...BASE_PARAMS, refreshToken }),
+      { initialProps: { refreshToken: 0 } }
+    );
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(1));
+
+    rerender({ refreshToken: 1 });
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+  });
 });
