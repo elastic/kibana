@@ -108,7 +108,6 @@ import {
   WATCHLISTS_PRIVILEGES_URL,
 } from '../../../common/entity_analytics/watchlists/constants';
 import { RISK_SCORE_HISTORY_URL } from '../../../common/entity_analytics/risk_score/constants';
-import type { EntityType } from '../../../common/entity_analytics/types';
 import type { UploadWatchlistCsvResponse } from '../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import {
   GENERATE_LEADS_URL,
