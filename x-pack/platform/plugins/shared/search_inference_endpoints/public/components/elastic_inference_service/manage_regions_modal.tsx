@@ -142,7 +142,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           />
         )}
 
-        {!isLoading && totalRegions === 0 && (
+        {!isLoading && !isError && totalRegions === 0 && (
           <EuiCallOut
             announceOnMount
             title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.noRegions.title', {
