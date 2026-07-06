@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useReducer, useMemo } from 'react';
+import React, { useEffect, useMemo, useReducer, useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { css } from '@emotion/react';
 import { EuiFormRow, htmlIdGenerator, EuiButtonGroup, EuiIconTip, useEuiTheme } from '@elastic/eui';
@@ -37,6 +37,20 @@ export interface CustomizablePaletteProps {
   showExtraActions?: boolean;
 }
 
+function shouldSyncPaletteState(
+  localState: {
+    activePalette: PaletteOutput<CustomPaletteParams>;
+    colorRanges: ReturnType<typeof toColorRanges>;
+  },
+  activePalette: PaletteOutput<CustomPaletteParams>,
+  colorRangesToShow: ReturnType<typeof toColorRanges>
+) {
+  return (
+    (localState.activePalette !== activePalette || colorRangesToShow !== localState.colorRanges) &&
+    allRangesValid(localState.colorRanges, localState.activePalette.params?.rangeType === 'percent')
+  );
+}
+
 export const CustomizablePalette = ({
   palettes,
   activePalette,
@@ -58,23 +72,52 @@ export const CustomizablePalette = ({
     activePalette,
     colorRanges: colorRangesToShow,
   });
+  // Preserve the latest callback without rearming the unmount cleanup on each render.
+  const setPaletteRef = useRef(setPalette);
+  const latestPaletteStateRef = useRef({
+    activePalette,
+    colorRangesToShow,
+    localState,
+  });
+
+  useEffect(() => {
+    setPaletteRef.current = setPalette;
+  }, [setPalette]);
+
+  useEffect(() => {
+    latestPaletteStateRef.current = {
+      activePalette,
+      colorRangesToShow,
+      localState,
+    };
+  }, [activePalette, colorRangesToShow, localState]);
 
   useDebounce(
     () => {
-      if (
-        (localState.activePalette !== activePalette ||
-          colorRangesToShow !== localState.colorRanges) &&
-        allRangesValid(
-          localState.colorRanges,
-          localState.activePalette.params?.rangeType === 'percent'
-        )
-      ) {
+      if (shouldSyncPaletteState(localState, activePalette, colorRangesToShow)) {
         setPalette(localState.activePalette);
       }
     },
     250,
-    [localState]
+    [activePalette, colorRangesToShow, localState, setPalette]
   );
+
+  useEffect(() => {
+    return () => {
+      const latestPaletteState = latestPaletteStateRef.current;
+
+      // Closing the flyout should not drop local palette edits that have not debounced yet.
+      if (
+        shouldSyncPaletteState(
+          latestPaletteState.localState,
+          latestPaletteState.activePalette,
+          latestPaletteState.colorRangesToShow
+        )
+      ) {
+        setPaletteRef.current(latestPaletteState.localState.activePalette);
+      }
+    };
+  }, []);
 
   const { euiTheme } = useEuiTheme();
 

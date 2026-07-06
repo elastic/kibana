@@ -21,6 +21,7 @@ import type {
 import { CustomizablePalette } from './palette_configuration';
 import { getPaletteRegistry } from './mocks/palettes_registry';
 import { act } from 'react-dom/test-utils';
+import type { PaletteConfigurationActions } from './types';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -195,6 +196,28 @@ describe('palette panel', () => {
           reverse: false,
         }),
       });
+    });
+
+    it('flushes local palette edits on unmount before the debounce window elapses', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+      const dispatch = instance
+        .find('ColorRanges')
+        .prop('dispatch') as React.Dispatch<PaletteConfigurationActions>;
+
+      act(() => {
+        dispatch({
+          type: 'deleteColorRange',
+          payload: { index: 0, dataBounds: props.dataBounds, palettes: props.palettes },
+        });
+      });
+
+      expect(props.setPalette).not.toHaveBeenCalled();
+
+      act(() => {
+        instance.unmount();
+      });
+
+      expect(props.setPalette).toHaveBeenCalledTimes(1);
     });
   });
 

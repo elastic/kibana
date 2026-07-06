@@ -216,6 +216,8 @@ function getPassivelyShrunkSliderBoundsForRange(
   nextRange: [number, number],
   step: number
 ): [number, number] {
+  // Only collapse stale headroom after blur, once a thumb has drifted far enough
+  // away from its own edge to make the slider hard to use.
   if (!isRangeWithinBounds(nextRange, currentBounds)) {
     return mergeSliderBoundsWithRange(currentBounds, nextRange, step);
   }
@@ -523,6 +525,8 @@ export function ProgressBarControls({
       return;
     }
 
+    // Hold slider ownership for the full pointer gesture so prop sync cannot
+    // snap the thumb back while the drag is still in progress.
     sliderGestureActive.current = true;
 
     const handleGestureEnd = () => {

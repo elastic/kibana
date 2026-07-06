@@ -348,6 +348,8 @@ function resolveExplicitProgressBarPaletteStops(
   const firstVisibleStopIndex = upperBounds.findIndex(({ stop }) => stop > domain.min);
   const visibleColorIndex =
     firstVisibleStopIndex === -1 ? upperBounds.length - 1 : firstVisibleStopIndex;
+  // Carry the first visible color back to the active domain start so cropped
+  // custom ranges do not render a leading gap in the progress-bar preview.
   const visibleStops = [{ color: upperBounds[visibleColorIndex].color, stop: domain.min }];
 
   for (let index = visibleColorIndex + 1; index < upperBounds.length; index++) {
