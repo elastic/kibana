@@ -32,7 +32,7 @@
     "@kbn/as-code-shared-transforms",
     "@kbn/data-views-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
   ],
   "exclude": ["target/**/*"]
 }

@@ -2,10 +2,17 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["jest", "node"]
+    "types": [
+      "jest",
+      "node"
+    ]
   },
-  "include": ["**/*.ts"],
-  "exclude": ["target/**/*"],
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-visualizations-common",
