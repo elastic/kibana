@@ -16,12 +16,14 @@ import { createMarkersAndDecorations } from './create_yaml_validation_markers_an
 import { useGetPropertyHandler } from './property_handlers/use_get_property_handler';
 import { runWorkflowYamlValidations } from './run_workflow_yaml_validations';
 import { validateConnectorIds } from './validate_connector_ids';
+import { validateGraphBuild } from './validate_graph_build';
 import { validateStepProperties } from './validate_step_properties';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
   selectConnectors,
   selectEditorWorkflowLookup,
+  selectGraphBuildError,
   selectIsWorkflowTab,
   selectWorkflowDefinition,
   selectWorkflows,
@@ -69,6 +71,7 @@ export function useYamlValidation(
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
   const workflowGraph = useSelector(selectWorkflowGraph);
   const workflowDefinition = useSelector(selectWorkflowDefinition);
+  const graphBuildError = useSelector(selectGraphBuildError);
   const lineCounter = useSelector(selectYamlLineCounter);
   const isWorkflowTab = useSelector(selectIsWorkflowTab);
   const connectors = useSelector(selectConnectors);
@@ -150,7 +153,12 @@ export function useYamlValidation(
         : [];
 
       results.push(
-        ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl)
+        ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
+        // Surface graph-build failures (valid YAML that compiles to an
+        // unsupported graph, e.g. waitForInput inside a parallel branch) as a
+        // precise, step-anchored marker instead of the generic fallback error.
+        // Editor-only: needs the live graphBuildError from the store.
+        ...validateGraphBuild(graphBuildError, workflowLookup, lineCounter)
       );
 
       if (stepPropertyItems.length > 0) {
@@ -193,6 +201,7 @@ export function useYamlValidation(
     lineCounter,
     workflowDefinition,
     workflowGraph,
+    graphBuildError,
     yamlDocument,
     application,
     isWorkflowTab,
