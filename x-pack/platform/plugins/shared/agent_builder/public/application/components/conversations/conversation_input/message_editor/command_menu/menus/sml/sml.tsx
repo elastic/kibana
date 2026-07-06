@@ -19,6 +19,31 @@ import { capAtFirstSpace, buildNoMatchSelection } from '../../utils/no_match_bad
 import { CommandMenuList } from '../components/command_menu_list';
 import type { CommandMenuListOption } from '../components/command_menu_list';
 
+interface ResultsPreferExactMatch<T> {
+  readonly results: readonly T[];
+  readonly hasExactMatch: boolean;
+}
+
+/** Reorders `results` so an exact (case-insensitive) `title` match is first. */
+const getResultsPreferExactMatch = <T extends { title: string }>(
+  results: readonly T[],
+  title: string
+): ResultsPreferExactMatch<T> => {
+  const lowerTitle = title.toLowerCase();
+  const exactIndex = results.findIndex((item) => item.title.toLowerCase() === lowerTitle);
+  if (exactIndex <= 0) {
+    return { results, hasExactMatch: exactIndex === 0 };
+  }
+  return {
+    results: [
+      results[exactIndex],
+      ...results.slice(0, exactIndex),
+      ...results.slice(exactIndex + 1),
+    ],
+    hasExactMatch: true,
+  };
+};
+
 export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
   ({ query, onSelect }, ref) => {
     const agentId = useAgentId();
@@ -31,28 +56,15 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
     // Only commit on Space once there's a confirmed exact name match — not
     // just "some results exist" or "more might arrive" — so Space is free to
     // be typed normally the rest of the time instead of being swallowed.
-    const exactMatchIndex = useMemo(() => {
-      if (!canSelectOnSpace) {
-        return -1;
-      }
-      const lowerName = title.toLowerCase();
-      return results.findIndex((item) => item.title.toLowerCase() === lowerName);
-    }, [results, title, canSelectOnSpace]);
-    const spaceSelection = exactMatchIndex !== -1;
+    const { results: orderedResults, hasExactMatch } = useMemo(
+      () =>
+        canSelectOnSpace
+          ? getResultsPreferExactMatch(results, title)
+          : { results, hasExactMatch: false },
+      [results, title, canSelectOnSpace]
+    );
+    const spaceSelection = hasExactMatch;
     const noMatch = canSelectOnSpace && results.length === 0 && !isLoading;
-
-    // Sort the exact match to the front so it's the one Space (or Enter)
-    // commits, rather than whatever the API happened to rank first.
-    const orderedResults = useMemo(() => {
-      if (exactMatchIndex <= 0) {
-        return results;
-      }
-      return [
-        results[exactMatchIndex],
-        ...results.slice(0, exactMatchIndex),
-        ...results.slice(exactMatchIndex + 1),
-      ];
-    }, [results, exactMatchIndex]);
 
     const smlMenuLabelStyles = useMemo(
       () => ({
