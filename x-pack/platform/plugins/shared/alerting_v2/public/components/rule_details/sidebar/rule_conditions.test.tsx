@@ -102,6 +102,24 @@ describe('RuleConditions', () => {
     );
   });
 
+  it('renders only the recovery segment (not recomposed with base) for a composed query', () => {
+    renderConditions({
+      ...alertRule,
+      query: {
+        format: 'composed',
+        base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
+        breach: { segment: 'WHERE avg(cpu) > 0.9' },
+        recovery: { segment: 'WHERE avg(cpu) < 0.5' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryConditionQuery')).toHaveTextContent(
+      'WHERE avg(cpu) < 0.5'
+    );
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryConditionQuery')).not.toHaveTextContent(
+      'FROM metrics-*'
+    );
+  });
+
   it('renders Default recovery with a dash for the condition row when recovery_strategy is not query', () => {
     renderConditions({
       ...alertRule,

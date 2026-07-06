@@ -7,16 +7,17 @@
 
 import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
-import {
-  getBreachEsqlQuery,
-  getRecoverEsqlQuery,
-  getRootEsqlQuery,
-} from '@kbn/alerting-v2-schemas';
+import { getBreachEsqlQuery, getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useRule } from '../rule_context';
-import { EMPTY_VALUE, formatAlertDelay, formatRecoveryDelay } from '../utils';
+import {
+  EMPTY_VALUE,
+  formatAlertDelay,
+  formatRecoveryDelay,
+  getRecoverEsqlSegment,
+} from '../utils';
 import { RuleDetailsTable } from './rule_details_table';
 
 const MODE_LABELS: Record<string, string> = {
@@ -43,7 +44,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
   const isAlertMode = rule.kind === 'alert';
   const isSummary = variant === 'summary';
   const dataSource = getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE;
-  const recoveryQuery = getRecoverEsqlQuery(rule.query, rule.recovery_strategy);
+  const recoveryCondition = getRecoverEsqlSegment(rule.query, rule.recovery_strategy);
 
   const conditionItems = [
     {
@@ -118,16 +119,16 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
             title: i18n.translate('xpack.alertingV2.ruleDetails.recoveryCondition', {
               defaultMessage: 'Recovery condition',
             }),
-            description: recoveryQuery ? null : EMPTY_VALUE,
+            description: recoveryCondition ? null : EMPTY_VALUE,
             'data-test-subj': 'alertingV2RuleDetailsRecoveryCondition',
-            fullWidthContent: recoveryQuery ? (
+            fullWidthContent: recoveryCondition ? (
               <EuiCodeBlock
                 language="esql"
                 isCopyable
                 paddingSize="s"
                 data-test-subj="alertingV2RuleDetailsRecoveryConditionQuery"
               >
-                {recoveryQuery}
+                {recoveryCondition}
               </EuiCodeBlock>
             ) : null,
           },
