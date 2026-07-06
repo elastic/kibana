@@ -161,12 +161,10 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
   ]);
 
   useEffect(() => {
-    if (onRuntimeFieldsChange != null) {
-      onRuntimeFieldsChange(
+    onRuntimeFieldsChange?.(
         runtimeFieldResolution.runtimeFields,
         runtimeFieldResolution.hasUntypedFields
       );
-    }
   }, [onRuntimeFieldsChange, runtimeFieldResolution]);
 
   return (

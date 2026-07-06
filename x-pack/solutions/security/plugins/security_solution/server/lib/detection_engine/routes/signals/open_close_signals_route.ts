@@ -16,10 +16,7 @@ import {
 } from '@kbn/security-solution-features/constants';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import {
-  DEFAULT_ALERTS_INDEX,
-  DETECTION_ENGINE_SIGNALS_STATUS_URL,
-} from '../../../../../common/constants';
+import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
@@ -68,7 +65,6 @@ export const setSignalsStatusRoute = (
         const esClient = core.elasticsearch.client.asCurrentUser;
         const siemClient = securitySolution?.getAppClient();
         const siemResponse = buildSiemResponse(response);
-        const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
         const closingReason = await validateClosingReason({
           core,
@@ -83,6 +79,7 @@ export const setSignalsStatusRoute = (
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
+        const alertsIndex = siemClient.getAlertsIndex();
         const user = core.security.authc.getCurrentUser();
 
         const clusterId = sender.getClusterID();
@@ -115,7 +112,7 @@ export const setSignalsStatusRoute = (
             // Use common operation for "by IDs" case
             const body = await updateAlertsWorkflowStatus({
               context,
-              index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+              index: alertsIndex,
               ids: request.body.signal_ids,
               status,
               reason,
@@ -142,7 +139,7 @@ export const setSignalsStatusRoute = (
               status,
               query,
               { conflicts: conflicts ?? 'abort' },
-              spaceId,
+              alertsIndex,
               esClient,
               user,
               logger,
@@ -184,14 +181,13 @@ const updateSignalsStatusByQuery = async (
   status: SetAlertsStatusRequestBody['status'],
   query: estypes.QueryDslQueryContainer,
   options: { conflicts: 'abort' | 'proceed' },
-  spaceId: string,
+  index: string,
   esClient: ElasticsearchClient,
   user: AuthenticatedUser | null,
   logger: Logger,
   reason?: string,
   runtimeMappings?: estypes.MappingRuntimeFields
 ) => {
-  const index = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
   const hasRuntimeMappings = runtimeMappings != null && Object.keys(runtimeMappings).length > 0;
 
   const request: estypes.UpdateByQueryRequest & {
