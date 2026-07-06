@@ -23,6 +23,10 @@ const EXPECTED_BUILT_IN_IDS = [
   'data.set',
   'workflow.execute',
   'workflow.executeAsync',
+  'workflow.output',
+  'workflow.fail',
+  'parallel',
+  'merge',
 ];
 
 describe('builtInStepDefinitions', () => {
