@@ -291,6 +291,7 @@ tags:
   - description: You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.
     name: Security Timeline API
     x-displayName: Security timeline
+  - name: significant_events
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
@@ -60196,7 +60197,7 @@ paths:
           description: List of queries linked to the stream.
       summary: Get stream queries
       tags:
-        - streams
+        - significant_events
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -60307,7 +60308,7 @@ paths:
           description: Bulk operation completed successfully.
       summary: Bulk update queries
       tags:
-        - streams
+        - significant_events
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -60360,7 +60361,7 @@ paths:
           description: The query was removed successfully.
       summary: Remove a query from a stream
       tags:
-        - streams
+        - significant_events
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -60443,7 +60444,7 @@ paths:
           description: The query was added or updated successfully.
       summary: Upsert a query to a stream
       tags:
-        - streams
+        - significant_events
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -60552,7 +60553,7 @@ paths:
           description: Significant events for the stream.
       summary: Read the significant events
       tags:
-        - streams
+        - significant_events
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless

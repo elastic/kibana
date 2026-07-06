@@ -337,6 +337,7 @@ tags:
   - description: Manage Kibana short URLs.
     name: short url
     x-displayName: Short URLs
+  - name: significant_events
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
@@ -66112,7 +66113,7 @@ paths:
           description: List of queries linked to the stream.
       summary: Get stream queries
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -66223,7 +66224,7 @@ paths:
           description: Bulk operation completed successfully.
       summary: Bulk update queries
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -66276,7 +66277,7 @@ paths:
           description: The query was removed successfully.
       summary: Remove a query from a stream
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -66359,7 +66360,7 @@ paths:
           description: The query was added or updated successfully.
       summary: Upsert a query to a stream
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -66468,7 +66469,7 @@ paths:
           description: Significant events for the stream.
       summary: Read the significant events
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
