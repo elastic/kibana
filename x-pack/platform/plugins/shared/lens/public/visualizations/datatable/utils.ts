@@ -36,6 +36,10 @@ type ProgressBarPaletteParams =
   | Pick<CustomPaletteState, 'range' | 'colors' | 'stops'>;
 
 type ProgressBarPalette = PaletteOutput<ProgressBarPaletteParams>;
+type ProgressBarPaletteStopInput =
+  | number
+  | Pick<ColorStop, 'stop'>
+  | Pick<ColorStop, 'color' | 'stop'>;
 
 export function getColumnAlignment<C extends { alignment?: 'left' | 'right' | 'center' }>(
   { alignment }: C,
@@ -276,7 +280,7 @@ export function getProgressBarPaletteStops(
   dataBounds: DataBounds,
   palette?: ProgressBarPalette,
   colors?: string[],
-  stops?: Array<number | Pick<ColorStop, 'stop' | 'color'>>
+  stops?: ProgressBarPaletteStopInput[]
 ): Array<{ color: string; stop: number }> {
   const explicitPaletteStops = resolveExplicitProgressBarPaletteStops(
     dataBounds,
@@ -328,7 +332,7 @@ function resolveExplicitProgressBarPaletteStops(
   domain: DataBounds,
   palette: ProgressBarPalette | undefined,
   colors: string[] | undefined,
-  stops: Array<number | Pick<ColorStop, 'stop' | 'color'>> | undefined
+  stops: ProgressBarPaletteStopInput[] | undefined
 ): Array<{ color: string; stop: number }> {
   const explicitStops = toExplicitStopPairs(colors, stops);
   if (!explicitStops.length) {
@@ -372,11 +376,13 @@ function resolveExplicitProgressBarPaletteStops(
 
 function toExplicitStopPairs(
   colors: string[] | undefined,
-  stops: Array<number | Pick<ColorStop, 'stop' | 'color'>> | undefined
+  stops: ProgressBarPaletteStopInput[] | undefined
 ): Array<{ color: string; stop: number }> {
   return (stops ?? []).reduce<Array<{ color: string; stop: number }>>((acc, rawStop, index) => {
     const stop = typeof rawStop === 'number' ? rawStop : rawStop?.stop;
-    const color = colors?.[index] ?? (typeof rawStop === 'number' ? undefined : rawStop.color);
+    const color =
+      colors?.[index] ??
+      (typeof rawStop === 'number' ? undefined : 'color' in rawStop ? rawStop.color : undefined);
 
     if (color != null && stop != null) {
       acc.push({ color, stop });
