@@ -8,8 +8,5 @@
 import { z } from '@kbn/zod/v4';
 
 export const ruleIdParamsSchema = z.object({
-  id: z
-    .string()
-    .max(100)
-    .describe('The stable identifier of the entity resolution rule.'),
+  id: z.string().max(100).describe('The stable identifier of the entity resolution rule.'),
 });
