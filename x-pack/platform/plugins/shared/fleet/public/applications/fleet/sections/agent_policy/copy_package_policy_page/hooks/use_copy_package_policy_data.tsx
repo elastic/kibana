@@ -13,6 +13,7 @@ import {
   sendGetSettings,
   useGetOnePackagePolicyQuery,
 } from '../../../../hooks';
+import type { RequestError } from '../../../../hooks';
 import type { PackagePolicy } from '../../../../types';
 import { agentlessPolicyToPackagePolicy } from '../../../../../../../common/services';
 
@@ -28,12 +29,12 @@ import { agentlessPolicyToPackagePolicy } from '../../../../../../../common/serv
 export function useCopyPackagePolicyData(
   packagePolicyId: string,
   { isAgentless }: { isAgentless: boolean }
-): { item?: PackagePolicy; isLoading: boolean; isError: boolean; error: Error | null } {
+): { item?: PackagePolicy; isLoading: boolean; isError: boolean; error: RequestError | null } {
   const packagePolicyQuery = useGetOnePackagePolicyQuery(packagePolicyId, {
     enabled: !isAgentless,
   });
 
-  const agentlessPolicyQuery = useQuery<PackagePolicy, Error>(
+  const agentlessPolicyQuery = useQuery<PackagePolicy, RequestError>(
     ['copyAgentlessPolicy', packagePolicyId],
     async () => {
       const { item: agentlessPolicy } = await sendGetAgentlessPolicy(packagePolicyId);
@@ -63,14 +64,10 @@ export function useCopyPackagePolicyData(
     };
   }
 
-  // Normalize the error to Error | null for consistent typing with the agentless path.
-  const packagePolicyError =
-    packagePolicyQuery.error instanceof Error ? packagePolicyQuery.error : null;
-
   return {
     item: packagePolicyQuery.data?.item,
     isLoading: packagePolicyQuery.isLoading,
     isError: packagePolicyQuery.isError,
-    error: packagePolicyError,
+    error: packagePolicyQuery.error ?? null,
   };
 }
