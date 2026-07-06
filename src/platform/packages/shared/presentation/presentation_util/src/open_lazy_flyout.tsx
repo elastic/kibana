@@ -59,12 +59,20 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const type = flyoutProps?.type ?? panelFlyoutTypeFromParent ?? 'push';
   const ownFocus = flyoutProps?.ownFocus ?? panelFlyoutTypeFromParent !== 'overlay';
 
+  // Capture the element that had focus when the flyout was opened so focus can be
+  // returned to it when the flyout closes. This keeps keyboard and screen reader
+  // users on the triggering element (e.g. a panel action button) instead of
+  // sending them to the top of the DOM (WCAG 2.4.3 Focus Order).
+  const previouslyFocusedElement =
+    document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
   const onClose = () => {
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
-    if (triggerId) {
-      focusFirstFocusable(document.getElementById(triggerId));
-    }
+    const triggerElement = triggerId
+      ? document.getElementById(triggerId)
+      : previouslyFocusedElement;
+    focusFirstFocusable(triggerElement);
   };
 
   const flyoutRef = core.overlays.openFlyout(

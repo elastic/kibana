@@ -76,7 +76,10 @@ const createClickHandler =
         event.preventDefault();
       }
     }
-    (event.currentTarget as HTMLElement).blur();
+    // Keep focus on the triggering button while the action executes so that
+    // overlays opened by the action (e.g. the panel settings flyout) can return
+    // focus here when they close, instead of dropping focus to the top of the
+    // DOM (WCAG 2.4.3 Focus Order).
     action.execute(context);
   };
 

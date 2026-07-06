@@ -106,4 +106,50 @@ describe('openLazyFlyout', () => {
       })
     );
   });
+
+  describe('focus management', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      document.body.innerHTML = '';
+    });
+
+    const getOnClose = () =>
+      (openFlyout.mock.calls[0] as unknown as [unknown, { onClose: () => void }])[1].onClose;
+
+    it('returns focus to the element that was focused when the flyout was opened', () => {
+      const trigger = document.createElement('button');
+      document.body.appendChild(trigger);
+      trigger.focus();
+
+      openLazyFlyout({ core, loadContent });
+
+      // Simulate the flyout taking focus away from the trigger.
+      const insideFlyout = document.createElement('input');
+      document.body.appendChild(insideFlyout);
+      insideFlyout.focus();
+
+      getOnClose()();
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(trigger);
+    });
+
+    it('returns focus to the triggerId element when provided', () => {
+      const trigger = document.createElement('button');
+      trigger.id = 'myTrigger';
+      document.body.appendChild(trigger);
+
+      openLazyFlyout({ core, loadContent, flyoutProps: { triggerId: 'myTrigger' } });
+
+      getOnClose()();
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(trigger);
+    });
+  });
 });
