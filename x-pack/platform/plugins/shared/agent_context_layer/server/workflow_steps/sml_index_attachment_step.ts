@@ -11,7 +11,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { contextEngineAddEntryStepCommonDefinition } from '../../common/workflow_steps/sml_index_attachment_step';
 import { apiPrivileges } from '../../common/features';
-import type { SmlChunk } from '../services/sml/types';
+import type { SmlChunk, SmlPermissions } from '../services/sml/types';
 import type { AgentContextLayerPluginStart } from '../types';
 
 /**
@@ -50,12 +50,14 @@ import type { AgentContextLayerPluginStart } from '../types';
  *    dev/test with security disabled) we follow the standard "no security
  *    plugin → open access" convention used by the SML read path.
  *
- * The `getTypeDefinition` guard intentionally only fires on the `upsert`
- * branch: writes against an unregistered type are nonsensical (no
- * `getSmlData` hook to fall back to, no `toAttachment` for downstream
- * consumers), but `delete` must remain functional even after a plugin
- * that registered the type is disabled — otherwise stale chunks become
- * unreachable from the workflow surface.
+ * Unregistered-type handling lives in the indexer, not here. Content-mode
+ * writes accept any `attachmentType`: a `getPermissions` hook is always
+ * authoritative and rejects a supplied `permissions` as a conflict;
+ * otherwise the supplied `permissions` (if any) is stamped as-is, letting
+ * workflow authors scope ad-hoc content to specific ES indices/Kibana
+ * privileges without registering an SML type. `delete` calls
+ * `deleteAttachment` directly so cleanup keeps working even after the
+ * registering plugin is disabled.
  *
  * The handler defers resolving the AGL start contract until execution
  * time so the step can be registered during plugin `setup()` and still
@@ -134,12 +136,6 @@ export const createContextEngineAddEntryStepDefinition = ({
             ingestionMethod: 'all',
           });
         } else {
-          if (!startContract.getTypeDefinition(attachmentType)) {
-            return {
-              error: new Error(`Unknown Context Engine entry type: '${attachmentType}'`),
-            };
-          }
-
           const chunks: SmlChunk[] = input.chunks.map((chunk) => ({
             type: chunk.type,
             title: chunk.title,
@@ -150,17 +146,17 @@ export const createContextEngineAddEntryStepDefinition = ({
             ...(chunk.references !== undefined
               ? { references: chunk.references.map((uri) => ({ uri })) }
               : {}),
-            // Map the workflow input's flat permission lists into the nested
-            // SML permissions shape: `permissions` -> Kibana privilege names,
-            // `elasticsearchIndices` -> ES index / alias / data-stream names
-            // that gate the chunk behind the viewer's ES `read` privilege.
-            permissions: {
-              kibana: { privileges: (chunk.permissions ?? []).map((name) => ({ name })) },
-              elasticsearch: {
-                indices: (chunk.elasticsearchIndices ?? []).map((name) => ({ name })),
-              },
-            },
           }));
+
+          // Input schema leaves elasticsearch/kibana optional; fold in empty
+          // arrays to match the fully-shaped `SmlPermissions` the contract expects.
+          const permissions: SmlPermissions | undefined =
+            input.permissions !== undefined
+              ? {
+                  kibana: { privileges: input.permissions.kibana?.privileges ?? [] },
+                  elasticsearch: { indices: input.permissions.elasticsearch?.indices ?? [] },
+                }
+              : undefined;
 
           await startContract.indexAttachment({
             request,
@@ -172,6 +168,7 @@ export const createContextEngineAddEntryStepDefinition = ({
             // for the user-facing `upsert` action.
             action: 'create',
             content: chunks,
+            ...(permissions !== undefined ? { permissions } : {}),
           });
         }
 

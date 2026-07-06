@@ -21,12 +21,9 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/config-schema'
   - '@kbn/agent-builder-server'
-  - '@kbn/lens-embeddable-utils'
   - '@kbn/agent-builder-genai-utils'
-  - '@kbn/agent-builder-tools-base'
   - '@kbn/agent-builder-common'
   - '@kbn/zod'
-  - '@kbn/agent-builder-plugin'
   - '@kbn/core-lifecycle-server'
   - '@kbn/esql-language'
   - '@kbn/inference-common'
@@ -34,7 +31,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/agent-builder-browser'
-  - '@kbn/cases-plugin'
   - '@kbn/core-http-server'
   - '@kbn/spaces-plugin'
   - '@kbn/core-http-server-mocks'
@@ -44,11 +40,11 @@ dependsOn:
   - '@kbn/connector-specs'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/management-settings-ids'
-  - '@kbn/core-spaces-common'
   - '@kbn/agent-context-layer-plugin'
   - '@kbn/actions-plugin'
   - '@kbn/logging-mocks'
   - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod
