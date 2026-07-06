@@ -29,7 +29,9 @@ export class AlertDetailsPage {
   }
 
   getChartPanel(chartTitle: string): Locator {
-    return this.page.locator('.euiPanel').filter({ hasText: chartTitle });
+    return this.page
+      .locator('.euiPanel')
+      .filter({ has: this.page.getByRole('heading', { name: chartTitle, exact: true }) });
   }
 
   getOpenActionsButton(chartTitle: string): Locator {
