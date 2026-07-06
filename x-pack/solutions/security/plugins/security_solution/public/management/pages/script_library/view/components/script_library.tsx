@@ -37,9 +37,6 @@ import { DiscardChangesModal } from './discard_changes_modal';
 import { NoDataEmptyPrompt } from './no_data_empty_prompt';
 import { ScriptLibraryFilters } from './data_filters';
 
-export const SCRIPT_LIBRARY_PAGE_STORAGE_KEY =
-  'securitySolution.endpointManagement.scriptLibrary.showNewPageBanner';
-
 interface ScriptLibraryProps {
   'data-test-subj'?: string;
 }
