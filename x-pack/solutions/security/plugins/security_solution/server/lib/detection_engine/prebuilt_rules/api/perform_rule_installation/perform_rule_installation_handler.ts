@@ -21,14 +21,16 @@ import {
 } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
+import {
+  aggregatePrebuiltRuleErrors,
+  type PrebuiltRulesInstallError,
+} from '../../logic/aggregate_prebuilt_rule_errors';
 import { PREBUILT_RULES_BULK_CREATE_BATCH_SIZE } from '../../constants';
 import { ensureLatestRulesPackageInstalled } from '../../logic/integrations/ensure_latest_rules_package_installed';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import type { RuleSignatureId, RuleVersion } from '../../../../../../common/api/detection_engine';
-import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { excludeLicenseRestrictedRules } from '../../logic/utils';
 
 export const performRuleInstallationHandler = async (
@@ -62,7 +64,7 @@ export const performRuleInstallationHandler = async (
       rule_id: RuleSignatureId;
       version: RuleVersion;
     }> = [];
-    const ruleErrors: Array<PromisePoolError<{ rule_id: string; name?: string }>> = [];
+    const ruleErrors: PrebuiltRulesInstallError[] = [];
     const installedRules: InstalledRuleBasicInfo[] = [];
     const skippedRules: SkippedRuleInstall[] = [];
 
