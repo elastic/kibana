@@ -8,15 +8,15 @@
  */
 
 import YAML, { LineCounter } from 'yaml';
+import type { WorkflowDetailDto } from '@kbn/workflows';
 import { HIGHLIGHTED_STEP_TRIGGER, setCursorPosition, setWorkflow, setYamlString } from './slice';
 import type { ComputedData } from './types';
-import { createMockStore } from '../__mocks__/store.mock';
-import type { MockStore } from '../__mocks__/store.mock';
-import type { WorkflowDetailDto } from '@kbn/workflows';
 import {
   createStepInfo,
   createWorkflowLookup,
 } from '../../../../shared/test_utils/step_info_factory';
+import { createMockStore } from '../__mocks__/store.mock';
+import type { MockStore } from '../__mocks__/store.mock';
 
 // Mock the computation utility
 jest.mock('./utils/computation', () => ({
