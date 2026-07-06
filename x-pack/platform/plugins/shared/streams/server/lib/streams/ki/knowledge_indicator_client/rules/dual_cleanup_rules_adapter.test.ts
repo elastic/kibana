@@ -184,19 +184,16 @@ describe('DualCleanupRulesAdapter', () => {
       expect(ids).toEqual(['r-1']);
     });
 
-    it('swallows errors from the legacy client and logs a warning', async () => {
+    it('propagates errors from the legacy client instead of silently returning a partial union', async () => {
+      // Unlike bulkDeleteRules/cleanupLegacyRule, a partial union here feeds
+      // reconcileStream's delete-by-absence decision — must propagate, not degrade.
       const primary = makeMockClient();
       const legacy = makeMockClient();
       primary.findOwnedRuleIds.mockResolvedValueOnce(['r-1']);
       legacy.findOwnedRuleIds.mockRejectedValueOnce(new Error('legacy gone'));
       const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
 
-      const ids = await adapter.findOwnedRuleIds('my-stream');
-
-      expect(ids).toEqual(['r-1']);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Legacy findOwnedRuleIds failed')
-      );
+      await expect(adapter.findOwnedRuleIds('my-stream')).rejects.toThrow('legacy gone');
     });
 
     it('propagates errors from the primary client', async () => {

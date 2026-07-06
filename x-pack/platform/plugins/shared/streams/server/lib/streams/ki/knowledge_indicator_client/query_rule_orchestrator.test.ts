@@ -184,33 +184,12 @@ describe('QueryRuleOrchestrator', () => {
       } as unknown as Feature;
     }
 
-    /**
-     * Phase 1 calls getQueryLinks with `ruleUnbacked: 'include'` (sees every
-     * link); phase 2 calls it without that filter, which the real reader
-     * defaults to rule-backed-only. Both phases pass `includeExpired: true`.
-     */
     function makeReconcileReader({
       links = [] as QueryLink[],
       features = [] as Feature[],
     }: { links?: QueryLink[]; features?: Feature[] } = {}) {
       return {
-        getQueryLinks: jest
-          .fn()
-          .mockImplementation((_streams: string[], filters?: { ruleUnbacked?: string }) =>
-            Promise.resolve(
-              filters?.ruleUnbacked === 'include' ? links : links.filter((l) => l.rule_backed)
-            )
-          ),
-        // Used internally by deleteQueries (invoked by reconcileStream to
-        // apply tombstones). Returns every link regardless of includeExpired —
-        // that toggle's own behavior is covered by indicator_reader.test.ts.
-        getStreamToQueryLinksMap: jest.fn().mockImplementation((streams: string[]) => {
-          const result: Record<string, QueryLink[]> = {};
-          for (const name of streams) {
-            result[name] = links.filter((l) => l.stream_name === name);
-          }
-          return Promise.resolve(result);
-        }),
+        getQueryLinks: jest.fn().mockResolvedValue(links),
         getFeatures: jest.fn().mockResolvedValue({ hits: features }),
       } as unknown as jest.Mocked<IndicatorReader>;
     }
@@ -408,17 +387,14 @@ describe('QueryRuleOrchestrator', () => {
       } as unknown as jest.Mocked<IndicatorWriter>;
       // The rule for 'rule-1' no longer exists in the alerting framework.
       rulesClient.findOwnedRuleIds.mockResolvedValue([]);
-      const link = makeReconcileLink({ expires_at: undefined }); // durable, so phase 1 skips it
+      const link = makeReconcileLink({ expires_at: undefined }); // durable, so grounding never applies
       const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
       const summary = await orchestrator.reconcileStream(definition);
 
-      // The orphan-rule sweep (phase 2's `orphans` branch) finds nothing to
-      // delete — there's no live rule to enumerate. Deletion instead comes
-      // from the seam tombstoning the query, whose own best-effort uninstall
-      // step calls bulkDeleteRules(['rule-1']) — a no-op against the alerting
-      // framework since the rule is already gone.
+      // `orphans` is empty (no live rule to enumerate) — the seam is what
+      // tombstones the query, whose own uninstall no-ops on the already-gone rule.
       expect(writer.bulk).toHaveBeenCalledWith(
         STREAM,
         expect.arrayContaining([{ delete: { type: 'query', id: 'q-1' } }])
@@ -443,26 +419,22 @@ describe('QueryRuleOrchestrator', () => {
       expect(summary.tombstoned).toBe(0);
     });
 
-    it('collects failures from phase 1 without aborting phase 2', async () => {
+    it('counts a query only once when it is both ungrounded and seam-eligible', async () => {
       const rulesClient = makeReconcileRulesClient();
-      rulesClient.findOwnedRuleIds.mockResolvedValue(['orphan-rule']);
-      const reader = {
-        getQueryLinks: jest
-          .fn()
-          .mockImplementationOnce(() => Promise.reject(new Error('ES unavailable'))) // phase 1
-          .mockImplementationOnce(() => Promise.resolve([])), // phase 2
-        getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
-      } as unknown as jest.Mocked<IndicatorReader>;
-      const logger = loggerMock.create();
-      const orchestrator = makeReconcileOrchestrator({ rulesClient, reader, logger });
+      const writer = {
+        bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+      } as unknown as jest.Mocked<IndicatorWriter>;
+      // Expired (ground-truth candidate) and its rule isn't owned (seam candidate too).
+      rulesClient.findOwnedRuleIds.mockResolvedValue([]);
+      const link = makeReconcileLink({ expires_at: '2020-01-01T00:00:00.000Z' });
+      const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
+      const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
       const summary = await orchestrator.reconcileStream(definition);
 
-      expect(summary.tombstoned).toBe(0);
-      expect(summary.orphanRulesDeleted).toBe(1); // phase 2 still ran
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('reconcileStream ungrounded-query cleanup failed')
-      );
+      expect(writer.bulk).toHaveBeenCalledTimes(1);
+      expect(writer.bulk).toHaveBeenCalledWith(STREAM, [{ delete: { type: 'query', id: 'q-1' } }]);
+      expect(summary.tombstoned).toBe(1);
     });
   });
 });
