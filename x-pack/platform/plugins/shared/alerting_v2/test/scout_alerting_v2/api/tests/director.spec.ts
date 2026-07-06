@@ -1443,6 +1443,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           },
           recovery_strategy: 'none',
           no_data_strategy: 'recover',
+          state_transition: { pending_count: 0, recovering_count: 1 },
         })
       );
 

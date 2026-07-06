@@ -1405,6 +1405,144 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
+    "recovery_strategy 'query' emits no_data for an absent group that has no data",
+    async ({ apiServices }) => {
+      const HOST = 'host-query-no-data';
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': HOST,
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      // Breach on severity=high, recover only on severity=recovered, and a
+      // no_data query that reports the host present whenever any doc exists.
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-query-no-data' },
+          recovery_strategy: 'query',
+          no_data_strategy: 'emit',
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            recovery: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            no_data: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
+            },
+          },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      const breachedEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+      const breachedHash = breachedEvents[0].group_hash;
+
+      // Remove the group entirely: neither the breach nor the recovery query
+      // matches, and the no_data query reports no data for the group.
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': HOST } },
+      });
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'no_data' });
+
+      const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'no_data',
+      });
+      expect(noDataEvents.length).toBeGreaterThanOrEqual(1);
+      expect(noDataEvents[0].group_hash).toBe(breachedHash);
+
+      // A group with no data must not recover under the query strategy.
+      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'recovered',
+      });
+      expect(recoveredEvents).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    "recovery_strategy 'query' keeps a group breached when the breach and recovery queries both match it",
+    async ({ apiServices }) => {
+      const HOST = 'host-breach-beats-recovery';
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': HOST,
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-breach-beats-recovery' },
+          recovery_strategy: 'query',
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            recovery: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      const initialBreached = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+      const breachedHash = initialBreached[0].group_hash;
+      const baseline = initialBreached.length;
+
+      // Make the recovery query match the SAME group while it is still
+      // breaching: keep the high doc and add a recovered doc so both queries
+      // return the group in the same execution. Breach must win.
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': HOST,
+            severity: 'recovered',
+            value: 0,
+          },
+        ],
+      });
+
+      // The group must keep producing breach events...
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, baseline + 1, {
+        status: 'breached',
+      });
+
+      // ...and must never recover while it is also breaching.
+      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'recovered',
+      });
+      expect(recoveredEvents.every((event) => event.group_hash !== breachedHash)).toBe(true);
+    }
+  );
+
+  apiTest(
     'emits recovery events only for groups that stop breaching when others keep breaching',
     async ({ apiServices }) => {
       // Both groups breach first.
