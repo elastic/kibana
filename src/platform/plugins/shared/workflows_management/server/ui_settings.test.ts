@@ -10,6 +10,7 @@
 import { createCoreSetupMock } from '@kbn/core-lifecycle-server-mocks/src/core_setup.mock';
 import {
   WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+  WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
 } from '@kbn/workflows';
@@ -59,11 +60,22 @@ describe('Workflows Management UI Settings', () => {
     );
   });
 
-  it('should register UI settings only once', () => {
+  it('should register UI settings and global UI settings only once', () => {
     registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
 
     expect(coreSetupMock.uiSettings.register).toHaveBeenCalledTimes(1);
-    expect(coreSetupMock.uiSettings.registerGlobal).not.toHaveBeenCalled();
+    expect(coreSetupMock.uiSettings.registerGlobal).toHaveBeenCalledTimes(1);
+    expect(coreSetupMock.uiSettings.registerGlobal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [WORKFLOWS_LIBRARY_ENABLED_SETTING_ID]: expect.objectContaining({
+          name: 'Workflow Template Library',
+          value: false,
+          readonly: true,
+          readonlyMode: 'ui',
+          requiresPageReload: true,
+        }),
+      })
+    );
   });
 
   it('should include license text if serverless is false', () => {
