@@ -8,7 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
-import { type IngestStreamLifecycle, type Streams } from '@kbn/streams-schema';
+import {
+  type IngestStreamLifecycle,
+  type IngestStreamLifecycleDSL,
+  type PhaseName,
+  type Streams,
+} from '@kbn/streams-schema';
 import {
   Streams as StreamsSchema,
   effectiveToIngestLifecycle,
@@ -34,6 +39,8 @@ import { SectionPanel } from '../common/section_panel';
 import { buildDlmPreviewModel, type IlmPhasesMap } from '../common/data_lifecycle/preview_models';
 import type { EditDeletePhaseFlyoutValue } from '../data_phases/edit_delete_phase_flyout';
 import { EditDeletePhaseFlyout } from '../data_phases/edit_delete_phase_flyout';
+import { EditDlmPhasesFlyout } from '../data_phases/edit_dlm_phases_flyout';
+import type { EditDataPhasesFlyoutChangeMeta } from '../data_phases/shared';
 import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
@@ -41,6 +48,7 @@ import { IngestionCard } from './cards/ingestion_card';
 import { LifecycleSummary } from './lifecycle_summary';
 import { IngestionRate } from './ingestion_rate';
 import { useEditSuccessfulLifecycleFlyout } from './hooks/use_edit_successful_lifecycle_flyout';
+import { useDlmFrozenPhaseGating } from '../hooks/use_dlm_frozen_phase_gating';
 
 const StreamDetailGeneralDataInner = ({
   definition,
@@ -90,6 +98,8 @@ const StreamDetailGeneralDataInner = ({
   const [isEditSuccessfulDeletePhaseFlyoutOpen, setIsEditSuccessfulDeletePhaseFlyoutOpen] =
     useState(false);
   const [isEditDataPhasesFlyoutOpen, setIsEditDataPhasesFlyoutOpen] = useState(false);
+  const [selectedDataPhase, setSelectedDataPhase] = useState<PhaseName | undefined>(undefined);
+  const [dataPhaseInvalidPhases, setDataPhaseInvalidPhases] = useState<PhaseName[]>([]);
   const closeSuccessfulLifecycleFlyoutRef = useRef<() => void>(() => {});
 
   useUnsavedChangesPrompt({
@@ -217,6 +227,98 @@ const StreamDetailGeneralDataInner = ({
     setIsEditSuccessfulDeletePhaseFlyoutOpen(true);
   }, [successfulLifecycleFlyout.isOpen, isEditDataPhasesFlyoutOpen, isExternalFlyoutOpen]);
 
+  // Frozen phase is not available in serverless
+  const dataPhaseFlowEnabled = !isServerless;
+
+  // Points at `openEditDataPhasesFlyout` (defined below) so the gating hook can resume the flow once
+  // a default repository is created - without a forward reference.
+  const openDataPhasesFlyoutRef = useRef<(phase: PhaseName) => void>(() => {});
+
+  // Only fetch frozen-phase gating data (snapshot repositories, license) when the data-phase flow
+  // is actually offered for this DLM stream.
+  const frozenPhaseGating = useDlmFrozenPhaseGating({
+    definition,
+    enabled:
+      dataPhaseFlowEnabled &&
+      Boolean(definition.privileges.lifecycle) &&
+      !isIlmLifecycle(definition.effective_lifecycle),
+    // When the "default repository required" modal resolves (repo created + Refresh), resume adding
+    // the frozen phase by opening the flyout.
+    onFrozenGatingResolved: useCallback(() => openDataPhasesFlyoutRef.current('frozen'), []),
+  });
+
+  const { confirmOverride: confirmDataPhasesOverride, modal: dataPhasesOverrideModal } =
+    useOverrideSettingsConfirmation({ definition });
+
+  const closeEditDataPhasesFlyout = useCallback(() => {
+    setIsEditDataPhasesFlyoutOpen(false);
+    setSelectedDataPhase(undefined);
+    setDataPhaseInvalidPhases([]);
+  }, []);
+
+  const openEditDataPhasesFlyout = useCallback(
+    (phase: PhaseName) => {
+      // If the flyout is already open, just navigate to the phase tab (e.g. clicking a phase on
+      // the timeline). The flyout's own logic enables the phase with defaults when needed.
+      if (isEditDataPhasesFlyoutOpen) {
+        setSelectedDataPhase(phase);
+        return;
+      }
+      if (
+        successfulLifecycleFlyout.isOpen ||
+        isEditSuccessfulDeletePhaseFlyoutOpen ||
+        isExternalFlyoutOpen
+      ) {
+        return;
+      }
+      // Gating only applies when *adding* a not-yet-configured frozen phase. Editing an existing
+      // frozen phase must always open the flyout — e.g. to change or remove it — regardless of the
+      // license/default-repository state.
+      const baseline = effectiveToIngestLifecycle(definition.effective_lifecycle);
+      const isFrozenConfigured = 'dsl' in baseline && baseline.dsl.frozen_after !== undefined;
+      if (
+        !(phase === 'frozen' && isFrozenConfigured) &&
+        frozenPhaseGating.handleAddPhaseGating(phase)
+      ) {
+        return;
+      }
+      setSelectedDataPhase(phase);
+      setIsEditDataPhasesFlyoutOpen(true);
+    },
+    [
+      isEditDataPhasesFlyoutOpen,
+      successfulLifecycleFlyout.isOpen,
+      isEditSuccessfulDeletePhaseFlyoutOpen,
+      isExternalFlyoutOpen,
+      definition.effective_lifecycle,
+      frozenPhaseGating,
+    ]
+  );
+
+  // Keep the ref current so the gating hook's resume callback opens the latest flyout handler.
+  openDataPhasesFlyoutRef.current = openEditDataPhasesFlyout;
+
+  const dataPhasesInitialDsl: IngestStreamLifecycleDSL['dsl'] = React.useMemo(() => {
+    const baseline = effectiveToIngestLifecycle(definition.effective_lifecycle);
+    return 'dsl' in baseline ? baseline.dsl : {};
+  }, [definition.effective_lifecycle]);
+
+  const onSaveDataPhases = (next: IngestStreamLifecycleDSL['dsl']) => {
+    // Preserve any existing DSL settings (e.g. downsample steps) while replacing the
+    // frozen/delete phase configuration produced by the flyout.
+    const { frozen_after: _frozen, data_retention: _retention, ...restDsl } = dataPhasesInitialDsl;
+
+    const applyDataPhases = async () => {
+      const saved = await updateLifecycle({ dsl: { ...restDsl, ...next } });
+      if (saved) {
+        closeEditDataPhasesFlyout();
+      }
+    };
+
+    // On the first override of inherited index-template settings, confirm with the user.
+    confirmDataPhasesOverride(applyDataPhases);
+  };
+
   const {
     confirmOverride: confirmSuccessfulDeletePhaseOverride,
     modal: successfulDeletePhaseOverrideModal,
@@ -314,13 +416,77 @@ const StreamDetailGeneralDataInner = ({
     ]
   );
 
+  const dataPhasesBaselineOutput: IngestStreamLifecycleDSL['dsl'] = React.useMemo(
+    () => ({
+      ...(dataPhasesInitialDsl.frozen_after !== undefined
+        ? { frozen_after: dataPhasesInitialDsl.frozen_after }
+        : {}),
+      ...(dataPhasesInitialDsl.data_retention !== undefined
+        ? { data_retention: dataPhasesInitialDsl.data_retention }
+        : {}),
+    }),
+    [dataPhasesInitialDsl.data_retention, dataPhasesInitialDsl.frozen_after]
+  );
+
+  const setDataPhasesPreview = useCallback(
+    (next: IngestStreamLifecycleDSL['dsl'], meta?: EditDataPhasesFlyoutChangeMeta) => {
+      setDataPhaseInvalidPhases(meta?.invalidPhases ?? []);
+      const baseline = effectiveToIngestLifecycle(definition.effective_lifecycle);
+      const downsampleSteps = 'dsl' in baseline ? baseline.dsl.downsample ?? null : null;
+      const model = buildDlmPreviewModel({
+        isServerless,
+        hotColor: isServerless ? euiTheme.colors.severity.success : ilmPhases.hot.color,
+        hotDescription: ilmPhases.hot.description,
+        deletePhaseColor: ilmPhases.delete.color,
+        deletePhaseDescription: ilmPhases.delete.description,
+        frozenAfter: next.frozen_after,
+        frozenColor: ilmPhases.frozen.color,
+        frozenDescription: ilmPhases.frozen.description,
+        retentionPeriod: next.data_retention,
+        downsampleSteps,
+        indexMode: definition.index_mode ?? 'standard',
+      });
+
+      setPreviewIsActive(true);
+      setPreviewHasUnsavedChanges(!isEqual(next, dataPhasesBaselineOutput));
+      setPreviewTimelineModel({ phases: model.phases, downsampleSteps: model.downsampleSteps });
+      setPreviewRetentionPeriod(model.retentionPeriod);
+      setPreviewDataPhasesCount(model.dataPhasesCount);
+      setPreviewDownsampleStepsCount(model.downsampleStepsCount);
+    },
+    [
+      dataPhasesBaselineOutput,
+      definition.effective_lifecycle,
+      definition.index_mode,
+      euiTheme.colors.severity.success,
+      ilmPhases.delete.color,
+      ilmPhases.delete.description,
+      ilmPhases.frozen.color,
+      ilmPhases.frozen.description,
+      ilmPhases.hot.color,
+      ilmPhases.hot.description,
+      isServerless,
+      setPreviewDataPhasesCount,
+      setPreviewDownsampleStepsCount,
+      setPreviewHasUnsavedChanges,
+      setPreviewIsActive,
+      setPreviewRetentionPeriod,
+      setPreviewTimelineModel,
+    ]
+  );
+
   useEffect(() => {
     if (isEditSuccessfulDeletePhaseFlyoutOpen) {
       setDeletePhasePreview(successfulDeletePhaseInitialPreviewValue);
       return;
     }
 
-    if (isEditDataPhasesFlyoutOpen || isDslDownsampleFlyoutOpen) {
+    if (isEditDataPhasesFlyoutOpen) {
+      setDataPhasesPreview(dataPhasesBaselineOutput);
+      return;
+    }
+
+    if (isDslDownsampleFlyoutOpen) {
       return;
     }
 
@@ -331,6 +497,8 @@ const StreamDetailGeneralDataInner = ({
     isDslDownsampleFlyoutOpen,
     clearLifecyclePreview,
     setDeletePhasePreview,
+    setDataPhasesPreview,
+    dataPhasesBaselineOutput,
     successfulDeletePhaseInitialPreviewValue,
   ]);
 
@@ -380,6 +548,22 @@ const StreamDetailGeneralDataInner = ({
               refreshDefinition={refreshDefinition}
               onEditSuccessfulLifecycle={successfulLifecycleFlyout.openFlyout}
               onAddDeletePhase={openEditSuccessfulDeletePhaseFlyout}
+              onAddDataPhase={openEditDataPhasesFlyout}
+              dataPhaseSelectedPhase={isEditDataPhasesFlyoutOpen ? selectedDataPhase : undefined}
+              dataPhaseInvalidPhases={
+                isEditDataPhasesFlyoutOpen ? dataPhaseInvalidPhases : undefined
+              }
+              frozenPhaseGating={{
+                excludeFrozen: frozenPhaseGating.excludeFrozen,
+                ...frozenPhaseGating.addPhaseBadges,
+                onUpgradeEnterprise: frozenPhaseGating.flyoutProps.onUpgradeEnterprise,
+                createDefaultRepositoryHref:
+                  frozenPhaseGating.flyoutProps.createDefaultRepositoryHref,
+                onRefreshDefaultRepository:
+                  frozenPhaseGating.flyoutProps.onRefreshDefaultRepository,
+                isRefreshingDefaultRepository:
+                  frozenPhaseGating.flyoutProps.isRefreshingDefaultRepository,
+              }}
               isExternalFlyoutOpen={isAnySuccessfulFlyoutOpen}
               isDataPhaseFlyoutOpen={isEditDataPhasesFlyoutOpen}
               onDataPhaseFlyoutOpenChange={setIsEditDataPhasesFlyoutOpen}
@@ -432,6 +616,24 @@ const StreamDetailGeneralDataInner = ({
       ) : null}
 
       {successfulDeletePhaseOverrideModal}
+
+      {isEditDataPhasesFlyoutOpen ? (
+        <EditDlmPhasesFlyout
+          initialDsl={dataPhasesInitialDsl}
+          selectedPhase={selectedDataPhase}
+          setSelectedPhase={setSelectedDataPhase}
+          onChange={setDataPhasesPreview}
+          onSave={onSaveDataPhases}
+          onClose={closeEditDataPhasesFlyout}
+          isSaving={updateInProgress}
+          canCreateRepository={Boolean(definition.privileges.create_snapshot_repository)}
+          {...frozenPhaseGating.flyoutProps}
+          data-test-subj="streamsEditDataPhasesFlyout"
+        />
+      ) : null}
+
+      {dataPhasesOverrideModal}
+      {frozenPhaseGating.modals}
     </>
   );
 };
