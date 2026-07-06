@@ -34,6 +34,10 @@ interface UseAgentBuilderIntegrationParams {
 interface OpenAgentChatOptions {
   initialMessage?: string;
   autoSendInitialMessage?: boolean;
+  // Internal: auto-open path from the mount effect. Tags the chat-opened /
+  // session-completed events with `autoOpened: true` so analysts can filter
+  // out non-deliberate opens when measuring engagement.
+  isAutoOpen?: boolean;
 }
 
 interface UseAgentBuilderIntegrationReturn {
@@ -67,6 +71,7 @@ export const useAgentBuilderIntegration = ({
   const attachmentBridgeRef = useRef<AttachmentBridge | null>(null);
   const trackerRef = useRef<ProposalTracker | null>(null);
   const chatOpenedReportedRef = useRef(false);
+  const sessionAutoOpenedRef = useRef(false);
   const conversationIdRef = useRef<string | undefined>(undefined);
   const validationErrorsRef = useRef(validationErrors);
   validationErrorsRef.current = validationErrors;
@@ -244,9 +249,11 @@ export const useAgentBuilderIntegration = ({
           proposalsAccepted: records.filter((r) => r.status === 'accepted').length,
           proposalsDeclined: records.filter((r) => r.status === 'declined').length,
           proposalsPending: records.filter((r) => r.status === 'pending').length,
+          autoOpened: sessionAutoOpenedRef.current,
         });
       }
       chatOpenedReportedRef.current = false;
+      sessionAutoOpenedRef.current = false;
       conversationIdRef.current = undefined;
 
       if (debounceTimer) {
@@ -303,10 +310,12 @@ export const useAgentBuilderIntegration = ({
       chatRefHandle.current = chatRef;
 
       if (!chatOpenedReportedRef.current) {
+        sessionAutoOpenedRef.current = options?.isAutoOpen === true;
         telemetry.reportWorkflowAiChatOpened({
           entryPoint: 'workflow_editor',
           sessionType: workflowId ? 'edit' : 'create',
           workflowId,
+          autoOpened: sessionAutoOpenedRef.current,
         });
         chatOpenedReportedRef.current = true;
       }
@@ -331,7 +340,7 @@ export const useAgentBuilderIntegration = ({
     if (!isEditorMounted || !agentBuilder || !isExperimentalEnabled) return;
     if (hasAutoOpenedRef.current) return;
     hasAutoOpenedRef.current = true;
-    openAgentChat();
+    openAgentChat({ isAutoOpen: true });
   }, [isEditorMounted, agentBuilder, isExperimentalEnabled, openAgentChat]);
 
   return {

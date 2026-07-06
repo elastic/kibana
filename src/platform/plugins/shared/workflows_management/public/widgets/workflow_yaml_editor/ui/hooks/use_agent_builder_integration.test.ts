@@ -19,6 +19,15 @@ jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
 }));
 jest.mock('../../../../hooks/use_kibana');
+const mockTelemetry = {
+  reportWorkflowAiChatOpened: jest.fn(),
+  reportWorkflowAiSessionCompleted: jest.fn(),
+  reportAiProposalReceived: jest.fn(),
+  reportAiProposalResolved: jest.fn(),
+};
+jest.mock('../../../../hooks/use_telemetry', () => ({
+  useTelemetry: () => mockTelemetry,
+}));
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: jest.fn(),
@@ -454,6 +463,55 @@ describe('useAgentBuilderIntegration', () => {
       );
 
       expect(agentBuilder.openChat).not.toHaveBeenCalled();
+    });
+
+    it('tags chat-opened and session-completed telemetry with autoOpened=true on auto-open', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { unmount } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-1',
+        })
+      );
+
+      expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+      expect(mockTelemetry.reportWorkflowAiChatOpened).toHaveBeenCalledWith({
+        entryPoint: 'workflow_editor',
+        sessionType: 'edit',
+        workflowId: 'wf-1',
+        autoOpened: true,
+      });
+
+      unmount();
+      expect(mockTelemetry.reportWorkflowAiSessionCompleted).toHaveBeenCalledWith(
+        expect.objectContaining({ autoOpened: true })
+      );
+    });
+
+    it('does not re-emit chat-opened when the user opens the chat after an auto-open', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { result } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-1',
+        })
+      );
+
+      expect(mockTelemetry.reportWorkflowAiChatOpened).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        result.current.openAgentChat();
+      });
+
+      expect(mockTelemetry.reportWorkflowAiChatOpened).toHaveBeenCalledTimes(1);
     });
 
     it('does not auto-open when experimental features are disabled', () => {
