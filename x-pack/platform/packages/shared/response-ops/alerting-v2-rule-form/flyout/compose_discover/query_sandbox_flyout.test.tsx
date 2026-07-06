@@ -283,22 +283,74 @@ describe('QuerySandboxFlyout — Apply gating', () => {
     await userEvent.click(screen.getByTestId('querySandboxApply'));
 
     await waitFor(() => expect(onApply).toHaveBeenCalledTimes(1));
-    expect(screen.queryByTestId('querySandboxApplyErrors')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('querySandboxValidationError')).not.toBeInTheDocument();
   });
 
-  it('blocks apply and shows the offending tab and message when validation fails', async () => {
+  it('switches to the offending tab and blocks apply when validation fails elsewhere', async () => {
     const onApply = jest.fn();
+    const onTabChange = jest.fn();
     mockValidateTabQueries.mockResolvedValue([{ tab: 'alert', messages: ['bad query'] }]);
 
-    renderSandbox({ onApply, tabs: ['base', 'alert'], activeTab: 'base' });
+    renderSandbox({ onApply, onTabChange, tabs: ['base', 'alert'], activeTab: 'base' });
 
     await userEvent.click(screen.getByTestId('querySandboxApply'));
 
-    expect(await screen.findByText('Alert query: bad query')).toBeInTheDocument();
+    await waitFor(() => expect(onTabChange).toHaveBeenCalledWith('alert'));
+    expect(onApply).not.toHaveBeenCalled();
+    // Not yet visible — the flyout is still on 'base', a controlled prop the mock onTabChange doesn't update.
+    expect(screen.queryByTestId('querySandboxValidationError')).not.toBeInTheDocument();
+  });
+
+  it('shows the inline error once the offending tab becomes active', async () => {
+    const onApply = jest.fn();
+    const onTabChange = jest.fn();
+    mockValidateTabQueries.mockResolvedValue([{ tab: 'alert', messages: ['bad query'] }]);
+
+    const { rerender } = renderSandbox({
+      onApply,
+      onTabChange,
+      tabs: ['base', 'alert'],
+      activeTab: 'base',
+    });
+
+    await userEvent.click(screen.getByTestId('querySandboxApply'));
+    await waitFor(() => expect(onTabChange).toHaveBeenCalledWith('alert'));
+
+    // Simulate the parent responding to onTabChange by making 'alert' active.
+    act(() => {
+      rerender(
+        <QueryClientProvider client={testQueryClient}>
+          <IntlProvider locale="en">
+            <QuerySandboxFlyout
+              {...defaultProps}
+              onApply={onApply}
+              onTabChange={onTabChange}
+              tabs={['base', 'alert']}
+              activeTab="alert"
+            />
+          </IntlProvider>
+        </QueryClientProvider>
+      );
+    });
+
+    expect(await screen.findByText('bad query')).toBeInTheDocument();
+  });
+
+  it('shows the inline error immediately when the failing tab is already active', async () => {
+    const onApply = jest.fn();
+    const onTabChange = jest.fn();
+    mockValidateTabQueries.mockResolvedValue([{ tab: 'alert', messages: ['bad query'] }]);
+
+    renderSandbox({ onApply, onTabChange, tabs: ['base', 'alert'], activeTab: 'alert' });
+
+    await userEvent.click(screen.getByTestId('querySandboxApply'));
+
+    expect(await screen.findByText('bad query')).toBeInTheDocument();
+    expect(onTabChange).not.toHaveBeenCalled();
     expect(onApply).not.toHaveBeenCalled();
   });
 
-  it('shows the bare message in unified (no-tabs) mode', async () => {
+  it('shows the error inline in unified (no-tabs) mode without switching tabs', async () => {
     const onApply = jest.fn();
     mockValidateTabQueries.mockResolvedValue([{ tab: 'alert', messages: ['bad query'] }]);
 

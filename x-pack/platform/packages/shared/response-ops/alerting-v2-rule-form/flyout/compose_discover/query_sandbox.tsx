@@ -101,6 +101,12 @@ export interface QuerySandboxProps {
     onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
     readOnly?: boolean;
   };
+  /**
+   * Static validation error messages for the active tab's query — e.g. from a
+   * blocked Apply. Rendered next to the editor, independent of `hasRun`/`isError`
+   * (which only reflect query *execution*, not static validation).
+   */
+  validationError?: string[];
 }
 
 const VISIBLE_ROWS = 10;
@@ -124,6 +130,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   helpText,
   tabProps,
   headerActions,
+  validationError,
 }) => {
   const services = useRuleFormServices();
   const isReadOnly = !onQueryChange;
@@ -181,6 +188,14 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     data: services.data,
     tab: tabProps?.activeTab,
   });
+
+  /*
+   * A run's results/error only describe the query text that was executed. Once
+   * the user edits the query, that outcome is stale, so we fall back to the
+   * "Run your query" prompt rather than leaving a now-irrelevant error or grid
+   * on screen — matching how the Apply validation error clears on edit.
+   */
+  const isQueryRunCurrent = hasRun && query.trim() === lastExecutedQuery;
 
   const hasAutoRunRef = useRef(false);
 
@@ -375,7 +390,29 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
       </EuiPanel>
       <EuiSpacer size="s" />
 
-      {hasRun && !isLoading && !isError && (
+      {validationError && validationError.length > 0 && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="error"
+            data-test-subj="querySandboxValidationError"
+            title={i18n.translate(
+              'xpack.alertingV2.composeDiscover.querySandbox.validationErrorTitle',
+              { defaultMessage: 'Resolve query errors before applying changes' }
+            )}
+          >
+            <ul>
+              {validationError.map((message, index) => (
+                <li key={index}>{message}</li>
+              ))}
+            </ul>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
+      {isQueryRunCurrent && !isLoading && !isError && (
         <EuiText size="xs" color="subdued">
           {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.resultCountLabel', {
             defaultMessage: '{count, plural, one {# result} other {# results}}',
@@ -386,7 +423,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
       <EuiSpacer size="m" />
 
-      {!hasRun && (
+      {!isQueryRunCurrent && !isLoading && (
         <EuiEmptyPrompt
           iconType="playFilled"
           title={
@@ -412,7 +449,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         />
       )}
 
-      {hasRun && isLoading && (
+      {isQueryRunCurrent && isLoading && (
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="l" />
@@ -420,7 +457,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         </EuiFlexGroup>
       )}
 
-      {hasRun && isError && (
+      {isQueryRunCurrent && isError && (
         <EuiCallOut
           announceOnMount
           color="danger"
@@ -433,7 +470,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         </EuiCallOut>
       )}
 
-      {hasRun && !isLoading && !isError && rows.length === 0 && query.trim() && (
+      {isQueryRunCurrent && !isLoading && !isError && rows.length === 0 && query.trim() && (
         <EuiEmptyPrompt
           iconType="search"
           title={
@@ -455,7 +492,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         />
       )}
 
-      {hasRun && !isLoading && !isError && rows.length > 0 && (
+      {isQueryRunCurrent && !isLoading && !isError && rows.length > 0 && (
         <>
           <ComposeDiscoverChart
             query={lastExecutedQuery ?? query}

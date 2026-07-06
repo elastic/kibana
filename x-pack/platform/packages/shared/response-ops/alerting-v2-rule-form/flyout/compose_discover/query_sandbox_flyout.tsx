@@ -13,10 +13,8 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/code-editor';
@@ -27,7 +25,7 @@ import { useEsqlCallbacks } from '../../form/hooks/use_esql_callbacks';
 import type { QueryTab } from './types';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
-import { TAB_DEFINITIONS, isAlertTabDisabled } from './compose_discover_tabs';
+import { isAlertTabDisabled } from './compose_discover_tabs';
 import { validateTabQueries, type TabValidationError } from './validate_tab_queries';
 
 /**
@@ -218,11 +216,16 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       setApplyErrors(errors);
       if (errors.length === 0) {
         onApply();
+        return;
+      }
+      const [firstError] = errors;
+      if (firstError.tab !== activeTab) {
+        onTabChange?.(firstError.tab);
       }
     } finally {
       setIsValidating(false);
     }
-  }, [onApply, validationQueries, esqlCallbacks]);
+  }, [onApply, validationQueries, esqlCallbacks, activeTab, onTabChange]);
 
   /*
    * Unified composed mode: the editor holds the whole pipeline, so write it to
@@ -239,17 +242,13 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   );
 
   /*
-   * Flatten the per-tab errors into display rows. In tabs mode each row is
-   * prefixed with the tab label so the user knows where to look; in unified
-   * (no-tabs) mode there is only one query, so we show the bare message.
+   * The active tab's own validation error, if any. handleApply already moved
+   * the user to the first offending tab, so at most one entry is ever
+   * relevant to what's currently on screen.
    */
-  const applyErrorItems = useMemo(
-    () =>
-      applyErrors.flatMap(({ tab, messages }) => {
-        const label = tabs?.length ? TAB_DEFINITIONS.find((t) => t.id === tab)?.label : undefined;
-        return messages.map((message) => (label ? `${label}: ${message}` : message));
-      }),
-    [applyErrors, tabs]
+  const activeValidationError = useMemo(
+    () => applyErrors.find((e) => e.tab === activeTab)?.messages,
+    [applyErrors, activeTab]
   );
 
   const tabProps: QuerySandboxProps['tabProps'] = useMemo(() => {
@@ -307,33 +306,12 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           helpText={helpText}
           headerActions={headerActions}
           tabProps={tabProps}
+          validationError={activeValidationError}
         />
       </EuiFlyoutBody>
 
       {onApply && (
         <EuiFlyoutFooter>
-          {applyErrorItems.length > 0 && (
-            <>
-              <EuiCallOut
-                announceOnMount
-                color="danger"
-                iconType="error"
-                size="s"
-                data-test-subj="querySandboxApplyErrors"
-                title={i18n.translate(
-                  'xpack.alertingV2.composeDiscover.querySandbox.applyBlockedTitle',
-                  { defaultMessage: 'Resolve query errors before applying changes' }
-                )}
-              >
-                <ul>
-                  {applyErrorItems.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
-              </EuiCallOut>
-              <EuiSpacer size="s" />
-            </>
-          )}
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
