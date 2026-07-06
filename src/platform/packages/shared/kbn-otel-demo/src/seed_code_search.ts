@@ -10,19 +10,24 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ElasticsearchConfig } from './read_kibana_config';
+import { applyCodeScenario } from './apply_code_scenario';
+import { getCodeScenarioById } from './code_scenarios';
+import { ensureOtelDemoAtVersion, OTEL_DEMO_REPOSITORY, SCS_CACHE_DIR } from './otel_demo_source';
 
-const OTEL_DEMO_REPO_URL = 'https://github.com/open-telemetry/opentelemetry-demo.git';
-const OTEL_DEMO_REPOSITORY = 'open-telemetry/opentelemetry-demo';
 const SCS_REPO_URL = 'https://github.com/elastic/semantic-code-search.git';
 
-// Cached outside the Kibana repo so it persists across branches and is never committed.
-const SCS_CACHE_DIR = path.join(os.homedir(), '.kbn-otel-scs');
 const SCS_BIN = path.join(SCS_CACHE_DIR, 'packages', 'cli', 'dist', 'src', 'bin.js');
 // Tracks which version is currently indexed so --version changes trigger a re-index.
 const INDEXED_VERSION_FILE = path.join(SCS_CACHE_DIR, '.indexed-version');
+const CODE_SCENARIO_STATE_PATH = path.join(
+  REPO_ROOT,
+  'data',
+  'demo_environments',
+  'code_scenario_state.json'
+);
 
 interface SeedCodeSearchOptions {
   elasticsearch: ElasticsearchConfig;
@@ -30,6 +35,12 @@ interface SeedCodeSearchOptions {
   kibanaUrl: string;
   version: string;
   log: ToolingLog;
+  codeScenarioId?: string;
+  codeScenarioRepoDir?: string;
+}
+
+interface CodeScenarioState {
+  activeCodeScenarioId?: string;
 }
 
 /**
@@ -77,25 +88,6 @@ async function ensureScs(log: ToolingLog): Promise<[string, ...string[]]> {
   return ['node', SCS_BIN];
 }
 
-/**
- * Returns a local path to the OTel demo repo checked out at the given tag.
- * Cached per-version under SCS_CACHE_DIR so repeated runs skip the clone.
- */
-async function ensureOtelDemoAtVersion(version: string, log: ToolingLog): Promise<string> {
-  const repoDir = path.join(SCS_CACHE_DIR, 'repos', `opentelemetry-demo-${version}`);
-  if (fs.existsSync(repoDir)) {
-    log.info(`Using cached OTel demo source at ${repoDir}`);
-    return repoDir;
-  }
-  log.info(`Cloning OTel demo at tag v${version} to ${repoDir} ...`);
-  await execa(
-    'git',
-    ['clone', '--depth', '1', '--branch', `v${version}`, OTEL_DEMO_REPO_URL, repoDir],
-    { stdio: 'inherit' }
-  );
-  return repoDir;
-}
-
 function getIndexedVersion(): string | null {
   try {
     return fs.readFileSync(INDEXED_VERSION_FILE, 'utf-8').trim() || null;
@@ -124,18 +116,50 @@ async function chunksIndexHasDocs(esHosts: string, username: string, password: s
   }
 }
 
+async function readCodeScenarioState(): Promise<CodeScenarioState> {
+  try {
+    const state = await fs.promises.readFile(CODE_SCENARIO_STATE_PATH, 'utf8');
+    return JSON.parse(state) as CodeScenarioState;
+  } catch {
+    return {};
+  }
+}
+
+async function writeCodeScenarioState(state: CodeScenarioState): Promise<void> {
+  await fs.promises.mkdir(path.dirname(CODE_SCENARIO_STATE_PATH), { recursive: true });
+  await fs.promises.writeFile(
+    CODE_SCENARIO_STATE_PATH,
+    `${JSON.stringify(state, null, 2)}\n`,
+    'utf8'
+  );
+}
+
 export async function seedCodeSearch({
   elasticsearch,
   kibanaCredentials,
   kibanaUrl,
   version,
   log,
+  codeScenarioId,
+  codeScenarioRepoDir,
 }: SeedCodeSearchOptions) {
-  const [scsBin, repoDir] = await Promise.all([
-    ensureScs(log),
-    ensureOtelDemoAtVersion(version, log),
-  ]);
+  const scsBin = await ensureScs(log);
   const [exe, ...prefixArgs] = scsBin;
+  let repoDir: string;
+  let forceReindex = false;
+
+  if (codeScenarioId) {
+    const scenario = getCodeScenarioById(codeScenarioId);
+    if (!scenario) {
+      throw new Error(`Unknown code scenario: ${codeScenarioId}`);
+    }
+    repoDir = codeScenarioRepoDir || (await applyCodeScenario({ version, scenario, log }));
+    forceReindex = true;
+  } else {
+    repoDir = await ensureOtelDemoAtVersion(version, log);
+    const previousState = await readCodeScenarioState();
+    forceReindex = Boolean(previousState.activeCodeScenarioId);
+  }
 
   // scs reads ES credentials from environment variables
   const env = {
@@ -147,7 +171,8 @@ export async function seedCodeSearch({
     SCS_ELASTICSEARCH_INFERENCE_ID: '.elser-2-elasticsearch',
   };
 
-  // Skip re-index only when the same version is already indexed.
+  // Skip re-index only when the same version is already indexed and no re-index is forced
+  // (a code scenario is requested, or one was previously active and must be reset).
   // If --version changes, force a clean re-index so indexed source matches the deployed demo.
   const indexedVersion = getIndexedVersion();
   const hasDocs = await chunksIndexHasDocs(
@@ -156,10 +181,18 @@ export async function seedCodeSearch({
     elasticsearch.password
   );
 
-  if (indexedVersion === version && hasDocs) {
+  if (!forceReindex && indexedVersion === version && hasDocs) {
     log.info(`Existing code index found for v${version} — skipping re-index.`);
   } else {
-    if (indexedVersion && indexedVersion !== version) {
+    if (codeScenarioId) {
+      log.info(
+        `Indexing OTel demo v${version} with code scenario ${codeScenarioId} (--clean). May take several minutes.`
+      );
+    } else if (forceReindex) {
+      log.info(
+        `Re-indexing clean OTel demo v${version} after code scenario reset (--clean). May take several minutes.`
+      );
+    } else if (indexedVersion && indexedVersion !== version) {
       log.info(`Version changed (${indexedVersion} → ${version}) — re-indexing with --clean.`);
     } else {
       log.info(
@@ -195,4 +228,5 @@ export async function seedCodeSearch({
   );
 
   log.info('Agentic interfaces installed.');
+  await writeCodeScenarioState({ activeCodeScenarioId: codeScenarioId });
 }
