@@ -19,11 +19,10 @@ import type {
 import { isAlertConditionStepId } from '../types';
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { FormValues } from '../../../form/types';
-import { getBreachQuery } from '../../../form/utils/query_helpers';
-import { getEsqlSummaryState } from './esql_query_summary_section';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
-import { isActionValid } from '../../../actions_form';
+import { isAlertConditionStepValid } from '../validation/committed_query_validation';
+import { isNotificationsStepValid } from '../validation/notifications_validation';
 import { ModeSelect } from '../../../form/fields/mode_select';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
 import { ScheduleField } from '../../../form/fields/schedule_field';
@@ -63,21 +62,14 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         onManualSplit={props.onManualSplit}
       />
     ),
-    validate: (methods, s) => {
-      if (!s.queryCommitted) {
-        return false;
-      }
-      const query = methods.getValues('query');
-      /*
-       * Alert rules require a valid alert condition to advance (#621/#623): the
-       * heuristic split must succeed (composed base + alert segment). no_where,
-       * split-failed and empty all block Next.
-       */
-      if (methods.getValues('kind') === 'alert') {
-        return getEsqlSummaryState(s.queryCommitted, query) === 'success';
-      }
-      return getBreachQuery(query).trim().length > 0;
-    },
+    fields: ['query'],
+    uiGate: (s) => s.queryCommitted,
+    validate: (methods, s) =>
+      isAlertConditionStepValid(
+        methods.getValues('query'),
+        methods.getValues('kind'),
+        s.queryCommitted
+      ),
   },
   builderCondition: {
     id: 'builderCondition',
@@ -85,6 +77,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       defaultMessage: 'Alert Condition',
     }),
     render: () => null,
+    uiGate: (s) => s.queryCommitted,
     validate: (_methods, s) => s.queryCommitted,
   },
   recoveryCondition: {
@@ -107,7 +100,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       defaultMessage: 'Details & Artifacts',
     }),
     render: () => <DetailsAndArtifactsStep />,
-    validate: async (methods) => methods.trigger(['metadata.name']),
+    fields: ['metadata.name'],
   },
   notifications: {
     id: 'notifications',
@@ -127,11 +120,8 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         )}
       </>
     ),
-    validate: (methods) => {
-      const notifs = methods.getValues('notifications');
-      if (!notifs) return true;
-      return notifs.workflows.every(isActionValid);
-    },
+    fields: ['notifications'],
+    validate: (methods) => isNotificationsStepValid(methods.getValues('notifications')),
   },
 };
 

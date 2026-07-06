@@ -56,6 +56,7 @@ import {
 } from './rule_builder';
 import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { isBuilderConditionStepId } from './types';
+import { validateStep } from './validate_step';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import {
@@ -862,8 +863,8 @@ export function ComposeDiscoverFlyout({
     if (hasValidationErrors) {
       return;
     }
-    if (currentStep?.validate) {
-      const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
+    if (currentStep) {
+      const valid = await validateStep(currentStep, methods, uiState, baseServices, builderState);
       if (!valid) return;
     }
     dispatch({ type: 'GO_NEXT', isAlert, isBuilderMode });
@@ -883,8 +884,8 @@ export function ComposeDiscoverFlyout({
     if (hasValidationErrors) {
       return;
     }
-    if (currentStep?.validate) {
-      const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
+    if (currentStep) {
+      const valid = await validateStep(currentStep, methods, uiState, baseServices, builderState);
       if (!valid) return;
     }
     handleSubmit();
