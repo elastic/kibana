@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { type ActionButton, ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -21,6 +20,13 @@ import {
 import { type RuleAttachmentIntent, getRuleTypeLabel } from './helpers';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import { getNonEsqlRuleActionDisabledReason } from '../../components/translations';
+import {
+  APPLY_TO_FORM,
+  EDIT_RULE_SETTINGS,
+  VIEW_RULE,
+  UPDATE_RULE,
+  CREATE_RULE,
+} from './translations';
 
 interface BuildRuleActionButtonsParams {
   rule: RuleResponse | null;
@@ -66,13 +72,7 @@ export const buildRuleActionButtons = ({
 
   const buttons: ActionButton[] = [
     {
-      label: isRuleFormOpen
-        ? i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.applyToForm', {
-            defaultMessage: 'Apply to form',
-          })
-        : i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.editRuleSettings', {
-            defaultMessage: 'Edit rule settings',
-          }),
+      label: isRuleFormOpen ? APPLY_TO_FORM : EDIT_RULE_SETTINGS,
       icon: 'pencil' as const,
       type: ActionButtonType.SECONDARY,
       handler: () => {
@@ -87,9 +87,7 @@ export const buildRuleActionButtons = ({
     ...(showViewRule && ruleId
       ? [
           {
-            label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.viewRule', {
-              defaultMessage: 'View rule',
-            }),
+            label: VIEW_RULE,
             icon: 'popout' as const,
             type: ActionButtonType.SECONDARY,
             handler: () => {
@@ -102,9 +100,7 @@ export const buildRuleActionButtons = ({
       : []),
     isUpdate
       ? {
-          label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.updateRule', {
-            defaultMessage: 'Update rule',
-          }),
+          label: UPDATE_RULE,
           icon: 'save',
           type: ActionButtonType.PRIMARY,
           disabled: !isEsql,
@@ -121,9 +117,7 @@ export const buildRuleActionButtons = ({
           },
         }
       : {
-          label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.createRule', {
-            defaultMessage: 'Create rule',
-          }),
+          label: CREATE_RULE,
           icon: 'plusInCircle',
           type: ActionButtonType.PRIMARY,
           disabled: !isEsql,

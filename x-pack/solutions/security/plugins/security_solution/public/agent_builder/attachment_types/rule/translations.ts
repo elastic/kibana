@@ -71,3 +71,81 @@ export const ESQL_TYPE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.esqlRuleTypeDescription',
   { defaultMessage: 'ES|QL' }
 );
+
+export const APPLY_TO_FORM = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.applyToForm',
+  { defaultMessage: 'Apply to form' }
+);
+
+export const EDIT_RULE_SETTINGS = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.editRuleSettings',
+  { defaultMessage: 'Edit rule settings' }
+);
+
+export const VIEW_RULE = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.viewRule',
+  { defaultMessage: 'View rule' }
+);
+
+export const UPDATE_RULE = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.updateRule',
+  { defaultMessage: 'Update rule' }
+);
+
+export const CREATE_RULE = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.createRule',
+  { defaultMessage: 'Create rule' }
+);
+
+export const SAVING_TEXT = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.savingText',
+  { defaultMessage: 'Saving…' }
+);
+
+export const DESCRIPTION_HEADING = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.descriptionHeading',
+  { defaultMessage: 'Description' }
+);
+
+export const SEVERITY_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.severityLabel',
+  { defaultMessage: 'Severity:' }
+);
+
+export const RISK_SCORE_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.riskScoreLabel',
+  { defaultMessage: 'Risk Score:' }
+);
+
+export const TAGS_HEADING = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.tagsHeading',
+  { defaultMessage: 'Tags' }
+);
+
+export const MITRE_HEADING = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.mitreHeading',
+  { defaultMessage: 'MITRE ATT&CK' }
+);
+
+export const INTERVAL_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.intervalLabel',
+  { defaultMessage: 'Interval:' }
+);
+
+export const LOOKBACK_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.lookbackLabel',
+  { defaultMessage: 'Lookback time:' }
+);
+
+export const LIMITATIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.limitationsTitle',
+  { defaultMessage: 'AI rule creation limitations' }
+);
+
+export const LIMITATIONS_BODY = i18n.translate(
+  'xpack.securitySolution.agentBuilder.ruleAttachment.limitationsBody',
+  {
+    defaultMessage:
+      'Only ES|QL rules are supported. Requires existing index data. Severity and risk score default to Low / 21 — ask the assistant to change them.',
+  }
+);

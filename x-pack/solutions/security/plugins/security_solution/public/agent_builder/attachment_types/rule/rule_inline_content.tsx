@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiCallOut,
@@ -29,7 +28,20 @@ import { FiltersDisplay } from './filters_display';
 import { RuleTypeDetails } from './rule_type_details';
 import { parseRuleFromAttachment, getRuleTypeLabel, getQueryLabel } from './helpers';
 import type { RuleAttachment } from './helpers';
-import { INDEX_FIELD_LABEL, RULE_TYPE_FIELD_LABEL } from './translations';
+import {
+  INDEX_FIELD_LABEL,
+  RULE_TYPE_FIELD_LABEL,
+  SAVING_TEXT,
+  DESCRIPTION_HEADING,
+  SEVERITY_LABEL,
+  RISK_SCORE_LABEL,
+  TAGS_HEADING,
+  MITRE_HEADING,
+  INTERVAL_LABEL,
+  LOOKBACK_LABEL,
+  LIMITATIONS_TITLE,
+  LIMITATIONS_BODY,
+} from './translations';
 
 const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiText size="s">
@@ -68,23 +80,13 @@ const SeverityRiskScore: React.FC<{
   <EuiText size="s">
     {severity && (
       <>
-        <strong>
-          {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.severityLabel', {
-            defaultMessage: 'Severity:',
-          })}
-        </strong>{' '}
-        {severity.charAt(0).toUpperCase() + severity.slice(1)}
+        <strong>{SEVERITY_LABEL}</strong> {severity.charAt(0).toUpperCase() + severity.slice(1)}
         {riskScore !== undefined && <>{' | '}</>}
       </>
     )}
     {riskScore !== undefined && (
       <>
-        <strong>
-          {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.riskScoreLabel', {
-            defaultMessage: 'Risk Score:',
-          })}
-        </strong>{' '}
-        {riskScore}
+        <strong>{RISK_SCORE_LABEL}</strong> {riskScore}
       </>
     )}
   </EuiText>
@@ -130,9 +132,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.savingText', {
-                  defaultMessage: 'Saving…',
-                })}
+                {SAVING_TEXT}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -152,12 +152,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
       {rule.description && (
         <>
           <EuiSpacer size="s" />
-          <SectionHeading>
-            {i18n.translate(
-              'xpack.securitySolution.agentBuilder.ruleAttachment.descriptionHeading',
-              { defaultMessage: 'Description' }
-            )}
-          </SectionHeading>
+          <SectionHeading>{DESCRIPTION_HEADING}</SectionHeading>
           <EuiSpacer size="xs" />
           <EuiText size="s">{rule.description}</EuiText>
         </>
@@ -211,11 +206,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
       {rule.tags && rule.tags.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <SectionHeading>
-            {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.tagsHeading', {
-              defaultMessage: 'Tags',
-            })}
-          </SectionHeading>
+          <SectionHeading>{TAGS_HEADING}</SectionHeading>
           <EuiSpacer size="xs" />
           <TagsBadgeList tags={rule.tags} />
         </>
@@ -224,11 +215,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
       {rule.threat && rule.threat.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <SectionHeading>
-            {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.mitreHeading', {
-              defaultMessage: 'MITRE ATT&CK',
-            })}
-          </SectionHeading>
+          <SectionHeading>{MITRE_HEADING}</SectionHeading>
           <EuiSpacer size="xs" />
           <EuiFlexGrid columns={2} gutterSize="m" responsive={false}>
             {rule.threat.map((entry, threatIndex) => (
@@ -247,22 +234,11 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
         <>
           <EuiSpacer size="s" />
           <EuiText size="s">
-            <strong>
-              {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.intervalLabel', {
-                defaultMessage: 'Interval:',
-              })}
-            </strong>{' '}
-            {schedule?.interval ?? interval}
+            <strong>{INTERVAL_LABEL}</strong> {schedule?.interval ?? interval}
             {schedule?.lookback && (
               <>
                 {' | '}
-                <strong>
-                  {i18n.translate(
-                    'xpack.securitySolution.agentBuilder.ruleAttachment.lookbackLabel',
-                    { defaultMessage: 'Lookback time:' }
-                  )}
-                </strong>{' '}
-                {schedule.lookback}
+                <strong>{LOOKBACK_LABEL}</strong> {schedule.lookback}
               </>
             )}
           </EuiText>
@@ -270,21 +246,8 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
       )}
 
       <EuiSpacer size="s" />
-      <EuiCallOut
-        size="s"
-        color="primary"
-        iconType="info"
-        title={i18n.translate(
-          'xpack.securitySolution.agentBuilder.ruleAttachment.limitationsTitle',
-          { defaultMessage: 'AI rule creation limitations' }
-        )}
-      >
-        <EuiText size="xs">
-          {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.limitationsBody', {
-            defaultMessage:
-              'Only ES|QL rules are supported. Requires existing index data. Severity and risk score default to Low / 21 — ask the assistant to change them.',
-          })}
-        </EuiText>
+      <EuiCallOut size="s" color="primary" iconType="info" title={LIMITATIONS_TITLE}>
+        <EuiText size="xs">{LIMITATIONS_BODY}</EuiText>
       </EuiCallOut>
     </EuiPanel>
   );

@@ -7,7 +7,6 @@
 
 import type { Subscription } from 'rxjs';
 import { mergeMap } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
@@ -23,6 +22,14 @@ import { transformInput, transformOutput } from './transforms';
 import { securitySolutionQueryClient } from '../../common/containers/query_client/query_client_provider';
 import { RULE_MANAGEMENT_FILTERS_QUERY_KEY } from '../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import type { AiRuleCreationService } from './ai_rule_creation_store';
+import {
+  SAVE_RULE_FAILED_TITLE,
+  RULE_UPDATED_TITLE,
+  RULE_SAVED_TITLE,
+  ORIGIN_LINK_FAILED_TITLE,
+  ORIGIN_LINK_FAILED_TEXT,
+  UNKNOWN_ERROR_MESSAGE,
+} from './translations';
 
 // Strip server-assigned fields from attachment text — `id`/`rule_id` in the text causes the
 // agent to skip `attachment_id` and mint a new card instead of updating the existing one.
@@ -65,9 +72,7 @@ export const createAiRuleCreationHandler = ({
             .join('; ');
           aiRuleCreation.clearSaving(attachmentId);
           notifications.toasts.addDanger({
-            title: i18n.translate('xpack.securitySolution.saveRuleHandler.saveFailedTitle', {
-              defaultMessage: 'Failed to save rule',
-            }),
+            title: SAVE_RULE_FAILED_TITLE,
             text: summary,
           });
           return;
@@ -92,15 +97,7 @@ export const createAiRuleCreationHandler = ({
               rule: transformOutput(ruleProps),
             });
           }
-          notifications.toasts.addSuccess(
-            isUpdate
-              ? i18n.translate('xpack.securitySolution.saveRuleHandler.updatedTitle', {
-                  defaultMessage: 'Rule updated',
-                })
-              : i18n.translate('xpack.securitySolution.saveRuleHandler.savedTitle', {
-                  defaultMessage: 'Rule saved',
-                })
-          );
+          notifications.toasts.addSuccess(isUpdate ? RULE_UPDATED_TITLE : RULE_SAVED_TITLE);
 
           // A post-save form edit must not clobber the attachment.
           aiRuleCreation.deactivateFormSync();
@@ -147,19 +144,8 @@ export const createAiRuleCreationHandler = ({
             } catch {
               // Non-fatal, but the card may still read "Create rule" — a second click would duplicate.
               notifications.toasts.addWarning({
-                title: i18n.translate(
-                  'xpack.securitySolution.saveRuleHandler.originLinkFailedTitle',
-                  {
-                    defaultMessage: 'Rule saved, but the chat card could not be linked to it',
-                  }
-                ),
-                text: i18n.translate(
-                  'xpack.securitySolution.saveRuleHandler.originLinkFailedText',
-                  {
-                    defaultMessage:
-                      'The rule was saved successfully. Refresh the conversation before saving from this card again to avoid creating a duplicate.',
-                  }
-                ),
+                title: ORIGIN_LINK_FAILED_TITLE,
+                text: ORIGIN_LINK_FAILED_TEXT,
               });
             }
           }
@@ -171,13 +157,9 @@ export const createAiRuleCreationHandler = ({
           const message =
             (err as { body?: { message?: string } })?.body?.message ??
             (err as Error)?.message ??
-            i18n.translate('xpack.securitySolution.saveRuleHandler.unknownErrorMessage', {
-              defaultMessage: 'Unknown error',
-            });
+            UNKNOWN_ERROR_MESSAGE;
           notifications.toasts.addDanger({
-            title: i18n.translate('xpack.securitySolution.saveRuleHandler.saveFailedTitle', {
-              defaultMessage: 'Failed to save rule',
-            }),
+            title: SAVE_RULE_FAILED_TITLE,
             text: message,
           });
         }
