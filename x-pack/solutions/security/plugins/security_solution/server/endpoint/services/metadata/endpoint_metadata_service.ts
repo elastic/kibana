@@ -367,7 +367,6 @@ export class EndpointMetadataService {
     logger.debug(() => `Retrieving host metadata list using: ${stringify(queryOptions)}`);
 
     const ccsEnabled = await this.endpointContext.isCcsEnabled();
-
     const endpointPolicies = await this.getAllEndpointPackagePolicies();
     const endpointPolicyIds = uniq(endpointPolicies.flatMap((policy) => policy.policy_ids));
     const unitedIndexQuery = await buildUnitedIndexQuery(
@@ -470,6 +469,7 @@ export class EndpointMetadataService {
     const query = getESQueryHostMetadataByIDs(endpointIDs, ccsEnabled);
 
     this.logger.get('getMetadataForEndpoints').debug(() => `with query: ${stringify(query)}`);
+
     const searchResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
 
     await this.ensureDataValidForSpace(searchResult);
