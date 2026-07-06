@@ -14,6 +14,10 @@ import type {
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { AuthMode, GetTokenOpts } from '@kbn/connector-specs';
+import {
+  ConnectorResponseSizeLimitError,
+  getResponseContentLengthBytes,
+} from '@kbn/connector-specs';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
@@ -108,6 +112,31 @@ const logMaxContentLengthError = ({
       requestResponseHeaders: pickSafeHeaders(axiosError.request?.res?.headers),
     })}`
   );
+};
+
+/**
+ * Converts an Axios `maxContentLength` rejection into a typed
+ * `ConnectorResponseSizeLimitError` so downstream layers (action executor,
+ * workflow step) can detect the size-limit case via `errorName` instead of
+ * string-matching the Axios message. Non-size errors are returned unchanged.
+ */
+const toConnectorResponseSizeLimitError = ({
+  error,
+  maxContentLength,
+}: {
+  error: unknown;
+  maxContentLength: number;
+}): unknown => {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  if (!errorMessage.includes(MAX_CONTENT_LENGTH_ERROR_MESSAGE)) {
+    return error;
+  }
+
+  return new ConnectorResponseSizeLimitError({
+    message: errorMessage,
+    limitBytes: maxContentLength,
+    contentLengthBytes: getResponseContentLengthBytes(error),
+  });
 };
 
 export interface GetAxiosInstanceWithAuthFnOpts {
@@ -220,7 +249,12 @@ export const getAxiosInstanceWithAuth = ({
           logger,
           maxContentLength: configuredMaxContentLength,
         });
-        return Promise.reject(error);
+        return Promise.reject(
+          toConnectorResponseSizeLimitError({
+            error,
+            maxContentLength: configuredMaxContentLength,
+          })
+        );
       });
 
       return configuredAxiosInstance;

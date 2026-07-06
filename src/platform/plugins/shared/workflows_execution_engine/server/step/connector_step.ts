@@ -29,16 +29,13 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
  */
 const CONNECTOR_TYPES_WITH_LAYER_1 = new Set<string>(['http']);
 
-// Axios internal error message format — no typed error code is exposed for this case,
-// so regex matching is the only reliable detection method.
-const ACTIONS_MAX_CONTENT_LENGTH_ERROR_PATTERN = /maxContentLength size of (\d+) exceeded/;
+// errorName set by the Actions executor when it catches a typed
+// ConnectorResponseSizeLimitError (see action_executor.ts).
+const CONNECTOR_RESPONSE_SIZE_LIMIT_ERROR_NAME = 'ConnectorResponseSizeLimitError';
 
-const getActionsMaxContentLengthLimit = (errorMessage: string): number | undefined => {
-  const match = errorMessage.match(ACTIONS_MAX_CONTENT_LENGTH_ERROR_PATTERN);
-  if (!match) {
-    return undefined;
-  }
-  return Number(match[1]);
+const getLimitBytes = (errorMeta: Record<string, unknown> | undefined): number | undefined => {
+  const limitBytes = errorMeta?.limitBytes;
+  return typeof limitBytes === 'number' ? limitBytes : undefined;
 };
 
 const getContentLengthBytes = (
@@ -190,7 +187,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
         }
       }
 
-      const { data, status, message, serviceMessage, errorMeta } = output;
+      const { data, status, message, serviceMessage, errorName, errorMeta } = output;
 
       if (status === 'ok') {
         return {
@@ -201,14 +198,13 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
       } else {
         const errorMsg = serviceMessage ?? message ?? 'Unknown error';
 
-        if (errorMsg.includes('maxContentLength')) {
+        if (errorName === CONNECTOR_RESPONSE_SIZE_LIMIT_ERROR_NAME) {
           if (!usesWorkflowTransportLimit) {
-            const limitBytes = getActionsMaxContentLengthLimit(errorMsg);
             return {
               input: withInputs,
               output: undefined,
               error: new ActionsResponseContentLengthLimitError(step.name, {
-                limitBytes,
+                limitBytes: getLimitBytes(errorMeta),
                 contentLengthBytes: getContentLengthBytes(errorMeta),
                 estimatedOutputBytes: getEstimatedOutputBytes(errorMeta),
                 canOverrideWithMaxStepSize: isSpecConnector,

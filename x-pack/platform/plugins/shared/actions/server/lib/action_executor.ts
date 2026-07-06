@@ -21,7 +21,10 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { isConnectorAuthorizationError } from '@kbn/connector-specs';
+import {
+  isConnectorAuthorizationError,
+  isConnectorResponseSizeLimitError,
+} from '@kbn/connector-specs';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
@@ -602,6 +605,27 @@ export class ActionExecutor {
                 connectorName: name,
                 authMethod: err.authMethod,
                 reason: err.reason,
+              },
+              error: err,
+              retry: false,
+              errorSource: TaskErrorSource.USER,
+            };
+          } else if (isConnectorResponseSizeLimitError(err)) {
+            rawResult = {
+              actionId,
+              status: 'error',
+              message: 'an error occurred while running the action',
+              serviceMessage: err.message,
+              errorName: 'ConnectorResponseSizeLimitError',
+              errorMeta: {
+                connectorName: name,
+                ...(err.limitBytes !== undefined ? { limitBytes: err.limitBytes } : {}),
+                ...(err.contentLengthBytes !== undefined
+                  ? { contentLengthBytes: err.contentLengthBytes }
+                  : {}),
+                ...(err.estimatedOutputBytes !== undefined
+                  ? { estimatedOutputBytes: err.estimatedOutputBytes }
+                  : {}),
               },
               error: err,
               retry: false,

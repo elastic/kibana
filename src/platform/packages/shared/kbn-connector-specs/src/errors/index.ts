@@ -12,3 +12,8 @@ export {
   isConnectorAuthorizationError,
 } from './connector_authorization_error';
 export type { ConnectorAuthorizationReason } from './connector_authorization_error';
+
+export {
+  ConnectorResponseSizeLimitError,
+  isConnectorResponseSizeLimitError,
+} from './connector_response_size_limit_error';
