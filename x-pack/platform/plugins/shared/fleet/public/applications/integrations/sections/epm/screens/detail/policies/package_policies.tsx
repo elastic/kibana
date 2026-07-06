@@ -90,15 +90,19 @@ export const PackagePoliciesPage = ({
   // FULL package info: the detail page's `packageInfo` is fetched without `full: true`, so its
   // policy templates carry no `inputs` and the expansion would throw `Input not found`. Fetch the
   // full manifest only when agentless policies are possible.
-  const { data: agentlessFullPackageInfoData, isLoading: isAgentlessFullPackageInfoLoading } =
-    useGetPackageInfoByKeyQuery(
-      name,
-      version,
-      { full: true, prerelease: true },
-      // Only the agentless-API adapter path needs the full manifest; the legacy source
-      // returns full package policies that need no re-expansion.
-      { enabled: canHaveAgentlessPolicies && agentlessUIEnabled }
-    );
+  const {
+    data: agentlessFullPackageInfoData,
+    isLoading: isAgentlessFullPackageInfoLoading,
+    error: agentlessFullPackageInfoError,
+    refetch: refetchAgentlessFullPackageInfo,
+  } = useGetPackageInfoByKeyQuery(
+    name,
+    version,
+    { full: true, prerelease: true },
+    // Only the agentless-API adapter path needs the full manifest; the legacy source
+    // returns full package policies that need no re-expansion.
+    { enabled: canHaveAgentlessPolicies && agentlessUIEnabled }
+  );
   const agentlessFullPackageInfo = agentlessFullPackageInfoData?.item;
 
   // Helper function to map raw policies data for consumption by the table
@@ -253,8 +257,15 @@ export const PackagePoliciesPage = ({
     ? {
         total: agentlessData?.total ?? 0,
         isLoading: agentlessIsLoading || isAgentlessFullPackageInfoLoading,
-        error: agentlessError as Error | null,
-        refresh: refreshAgentlessPolicies,
+        // The table needs both requests: a failed manifest fetch would otherwise leave the
+        // table silently empty while the LIST-sourced count badge shows the real total.
+        error: agentlessError ?? agentlessFullPackageInfoError ?? null,
+        refresh: () => {
+          refreshAgentlessPolicies();
+          if (agentlessFullPackageInfoError) {
+            refetchAgentlessFullPackageInfo();
+          }
+        },
       }
     : {
         total: legacyAgentlessData?.total ?? 0,

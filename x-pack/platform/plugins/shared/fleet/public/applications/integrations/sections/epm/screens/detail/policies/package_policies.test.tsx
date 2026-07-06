@@ -64,8 +64,9 @@ jest.mock('./components/agent_based_table', () => ({
   AgentBasedPackagePoliciesTable: () => null,
 }));
 
+const mockAgentlessTable = jest.fn().mockReturnValue(null);
 jest.mock('./components/agentless_table', () => ({
-  AgentlessPackagePoliciesTable: () => null,
+  AgentlessPackagePoliciesTable: (props: unknown) => mockAgentlessTable(props),
 }));
 
 const packageInfo = {
@@ -77,6 +78,8 @@ const packageInfo = {
 
 const getInstallStatusMock = jest.requireMock('../../../../../hooks')
   .useGetPackageInstallStatus as jest.Mock;
+const useGetPackageInfoByKeyQueryMock = jest.requireMock('../../../../../hooks')
+  .useGetPackageInfoByKeyQuery as jest.Mock;
 
 const renderPage = () => {
   getInstallStatusMock.mockReturnValue(() => ({
@@ -98,6 +101,18 @@ const legacyAgentlessCall = () =>
     );
 
 describe('PackagePoliciesPage agentless table source', () => {
+  beforeEach(() => {
+    // Re-establish defaults for mocks whose return values are overridden per test
+    // (jest.clearAllMocks does not reset mockReturnValue implementations).
+    useGetPackageInfoByKeyQueryMock.mockReturnValue({ data: undefined, isLoading: false });
+    jest.mocked(useAgentlessPolicies).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+      resendRequest: jest.fn(),
+    } as unknown as ReturnType<typeof useAgentlessPolicies>);
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -113,6 +128,35 @@ describe('PackagePoliciesPage agentless table source', () => {
     const legacyCall = legacyAgentlessCall();
     expect(legacyCall).toBeDefined();
     expect(legacyCall![1]).toEqual({ enabled: false });
+  });
+
+  it('surfaces a full package info fetch failure in the agentless table and retries it', () => {
+    const manifestError = new Error('registry unavailable');
+    const refetchFullPackageInfo = jest.fn();
+    useGetPackageInfoByKeyQueryMock.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: manifestError,
+      refetch: refetchFullPackageInfo,
+    });
+    const resendAgentlessRequest = jest.fn();
+    jest.mocked(useAgentlessPolicies).mockReturnValue({
+      data: { items: [], total: 3, page: 1, perPage: 10 },
+      isLoading: false,
+      error: null,
+      resendRequest: resendAgentlessRequest,
+    } as unknown as ReturnType<typeof useAgentlessPolicies>);
+
+    renderPage();
+
+    const tableProps = mockAgentlessTable.mock.calls.at(-1)![0];
+    // The manifest error must reach the table: without it the table would render its
+    // "no policies" empty state while the count badge shows the LIST total.
+    expect(tableProps.error).toBe(manifestError);
+
+    tableProps.refreshPackagePolicies();
+    expect(resendAgentlessRequest).toHaveBeenCalled();
+    expect(refetchFullPackageInfo).toHaveBeenCalled();
   });
 
   it('sources the agentless table from the legacy package-policy API when the agentless policies UI is disabled', () => {
