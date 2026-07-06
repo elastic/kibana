@@ -361,5 +361,19 @@ describe('CaseViewSidebar (redesign)', () => {
       expect(await screen.findByTestId('case-view-template-fields')).toBeInTheDocument();
       expect(screen.getByTestId('case-view-sidebar-template-fields-settings')).toBeInTheDocument();
     });
+
+    it('does not render the template settings popover for users without update permissions', async () => {
+      renderWithTestingProviders(<CaseViewSidebar caseData={caseData} />, {
+        wrapperProps: { permissions: noUpdateCasesPermissions() },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('case-view-page-sidebar')).toBeInTheDocument();
+      });
+
+      expect(
+        screen.queryByTestId('case-view-sidebar-template-fields-settings')
+      ).not.toBeInTheDocument();
+    });
   });
 });

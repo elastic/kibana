@@ -128,11 +128,13 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
           id="templateFields"
           title={templateFieldsTitle}
           extraAction={
-            <TemplateSettingsPopover
-              caseData={caseData}
-              isTemplatesEnabled={isTemplatesV2Enabled}
-              data-test-subj="case-view-sidebar-template-fields-settings"
-            />
+            permissions.update ? (
+              <TemplateSettingsPopover
+                caseData={caseData}
+                isTemplatesEnabled={isTemplatesV2Enabled}
+                data-test-subj="case-view-sidebar-template-fields-settings"
+              />
+            ) : undefined
           }
           isOpen={isOpen('templateFields')}
           onToggle={onToggle}
