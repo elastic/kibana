@@ -73,12 +73,12 @@ export function isInferenceEndpointWithDisplayCreatorMetadata(
   );
 }
 
-/**
- * Returns true when `value` is a valid {@link CspRegion} object (has both `csp` and `region` as
- * non-empty strings). The optional `geo` field is not validated — its absence is allowed.
- */
 export const isCspRegion = (value: unknown): value is CspRegion => {
   if (!value || typeof value !== 'object') return false;
-  const v = value as Record<string, unknown>;
-  return typeof v.csp === 'string' && typeof v.region === 'string';
+  return (
+    'csp' in value &&
+    'region' in value &&
+    typeof value.csp === 'string' &&
+    typeof value.region === 'string'
+  );
 };
