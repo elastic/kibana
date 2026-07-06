@@ -15,6 +15,7 @@ import {
   isTerminalStatus,
 } from '@kbn/workflows';
 
+import type { EsDocumentWithVersion } from '../repositories/document_version';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
@@ -190,17 +191,27 @@ export async function maybeDrainConcurrencyQueueBeforeEnqueue({
 }
 
 export async function maybeDrainConcurrencyQueueAfterTerminal(params: {
+  workflowExecutionWithVersion: EsDocumentWithVersion<EsWorkflowExecution>;
   workflowExecutionRepository: WorkflowExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
   logger: Logger;
-  workflowRunId: string;
   spaceId: string;
 }): Promise<void> {
-  const { workflowExecutionRepository, workflowTaskManager, logger, workflowRunId, spaceId } =
-    params;
+  const {
+    workflowExecutionWithVersion,
+    workflowExecutionRepository,
+    workflowTaskManager,
+    logger,
+    spaceId,
+  } = params;
+  const workflowRunId = workflowExecutionWithVersion.doc.id;
 
   try {
-    const doc = await workflowExecutionRepository.getWorkflowExecutionById(workflowRunId, spaceId);
+    const doc = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowRunId,
+      spaceId,
+      workflowExecutionWithVersion.version.index
+    );
     if (!doc || !isTerminalStatus(doc.status)) {
       return;
     }

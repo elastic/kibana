@@ -60,7 +60,8 @@ export async function checkAndSkipIfExistingScheduledExecution(
 
   // There's already a non-terminal scheduled execution - create SKIPPED execution
   if (runningExecutions.length > 0) {
-    const existingExecution = runningExecutions[0]?._source;
+    const existingWorkflowExecutionWithVersion = runningExecutions[0];
+    const existingExecution = existingWorkflowExecutionWithVersion.doc;
     if (!existingExecution) {
       return false;
     }
@@ -104,9 +105,9 @@ export async function checkAndSkipIfExistingScheduledExecution(
         return false;
       }
       await markExecutionFailedTaskRecovery(
+        existingWorkflowExecutionWithVersion,
         workflowExecutionRepository,
         stepExecutionRepository,
-        existingExecution.id,
         {
           message: taskRecoveryMessages.scheduledStale,
         }

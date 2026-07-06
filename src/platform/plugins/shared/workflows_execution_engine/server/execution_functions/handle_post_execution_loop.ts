@@ -14,10 +14,11 @@ import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_dra
 import type { WorkflowsMeteringService } from '../metering';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { InternalResumeWorkflowExecution } from '../types';
+import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export async function handlePostExecutionLoop({
-  workflowRunId,
+  workflowExecutionState,
   spaceId,
   logger,
   fakeRequest,
@@ -27,7 +28,7 @@ export async function handlePostExecutionLoop({
   meteringService,
   cloudSetup,
 }: {
-  workflowRunId: string;
+  workflowExecutionState: WorkflowExecutionState;
   spaceId: string;
   logger: Logger;
   fakeRequest: KibanaRequest;
@@ -37,8 +38,13 @@ export async function handlePostExecutionLoop({
   meteringService?: WorkflowsMeteringService;
   cloudSetup?: CloudSetup;
 }): Promise<void> {
+  const workflowRunId = workflowExecutionState.getWorkflowExecution().id;
   const finalExecution = await workflowExecutionRepository
-    .getWorkflowExecutionById(workflowRunId, spaceId)
+    .getWorkflowExecutionById(
+      workflowRunId,
+      spaceId,
+      workflowExecutionState.getWorkflowExecutionVersion().index
+    )
     .catch((err) => {
       logger.warn(
         `Failed to fetch execution after loop (execution=${workflowRunId}): ${

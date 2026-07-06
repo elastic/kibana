@@ -17,7 +17,12 @@ import {
   WORKFLOWS_EXECUTIONS_DS,
 } from '@kbn/workflows';
 import { bulkUpdateDocuments, resolveVersions } from './bulk_update_documents';
-import type { DocumentVersionsById, EsDocumentVersion } from './document_version';
+import type {
+  DocumentVersionsById,
+  EsDocumentVersion,
+  EsDocumentWithVersion,
+} from './document_version';
+import { extractVersionFromBulkItem } from './document_version';
 import { getDocumentsById } from './get_doc_by_id';
 import { resolveWriteIndex } from './resolve_write_index';
 import type { WorkflowExecutionsDataStreamClient } from './workflow_executions_data_stream';
@@ -50,13 +55,16 @@ export class WorkflowExecutionRepository {
    */
   public async getWorkflowExecutionById(
     workflowExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    index?: string
   ): Promise<EsWorkflowExecution | null> {
     try {
-      const writeIndex = await resolveWriteIndex({
-        esClient: this.esClient,
-        dataStreamName: this.dataStreamName,
-      });
+      const writeIndex =
+        index ??
+        (await resolveWriteIndex({
+          esClient: this.esClient,
+          dataStreamName: this.dataStreamName,
+        }));
       const docs = await getDocumentsById<EsWorkflowExecution>({
         esClient: this.esClient,
         ids: [workflowExecutionId],
@@ -84,13 +92,16 @@ export class WorkflowExecutionRepository {
    */
   public async getWorkflowExecutionWithVersion(
     workflowExecutionId: string,
-    spaceId: string
-  ): Promise<{ doc: EsWorkflowExecution; version: EsDocumentVersion } | null> {
+    spaceId: string,
+    index?: string
+  ): Promise<EsDocumentWithVersion<EsWorkflowExecution> | null> {
     try {
-      const writeIndex = await resolveWriteIndex({
-        esClient: this.esClient,
-        dataStreamName: this.dataStreamName,
-      });
+      const writeIndex =
+        index ??
+        (await resolveWriteIndex({
+          esClient: this.esClient,
+          dataStreamName: this.dataStreamName,
+        }));
       const docs = await getDocumentsById<EsWorkflowExecution>({
         esClient: this.esClient,
         ids: [workflowExecutionId],
@@ -99,7 +110,7 @@ export class WorkflowExecutionRepository {
         entityName: 'workflow execution',
       });
       const hit = docs.find(({ doc }) => doc.spaceId === spaceId);
-      return hit ? { doc: hit.doc, version: hit.version } : null;
+      return hit ? { id: hit.doc.id, doc: hit.doc, version: hit.version } : null;
     } catch (error: unknown) {
       if (this.isNotFoundError(error)) {
         return null;
@@ -131,21 +142,35 @@ export class WorkflowExecutionRepository {
   public async createWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>,
     options: { refresh?: boolean | 'wait_for' } = {}
-  ): Promise<Partial<EsWorkflowExecution>> {
+  ): Promise<EsDocumentWithVersion<EsWorkflowExecution>> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for creation');
     }
 
     const doc = this.withTimestamp(workflowExecution);
 
-    await this.dataStreamClient.create({
+    const response = await this.dataStreamClient.create({
       // The data stream client's document type is derived structurally from the
       // (cast) index mappings and does not line up with the richer domain type
       // `EsWorkflowExecution`; bridge it the same way the mappings are bridged.
       documents: [{ _id: workflowExecution.id, ...doc }] as Array<{ _id: string }>,
     });
 
-    return doc;
+    if (!response.items[0]) {
+      throw new Error('Failed to create workflow execution');
+    }
+
+    const version = extractVersionFromBulkItem(response.items[0].create)?.version;
+
+    if (!version) {
+      throw new Error('Failed to create workflow execution');
+    }
+
+    return {
+      id: workflowExecution.id,
+      doc: doc as EsWorkflowExecution,
+      version,
+    };
   }
 
   /**
@@ -161,7 +186,10 @@ export class WorkflowExecutionRepository {
     executions: Array<Partial<EsWorkflowExecution>>,
     options: { refresh?: boolean | 'wait_for' } = {}
   ): Promise<
-    Array<{ id: string; result: Partial<EsWorkflowExecution> } | { id: string; error: string }>
+    Array<
+      | EsDocumentWithVersion<Partial<EsWorkflowExecution>>
+      | { doc: Partial<EsWorkflowExecution>; error: string }
+    >
   > {
     if (executions.length === 0) {
       return [];
@@ -180,17 +208,34 @@ export class WorkflowExecutionRepository {
       refresh: options.refresh ?? false,
     });
 
-    return bulkResponse.items.map((item, idx) => {
+    const results: Array<
+      | EsDocumentWithVersion<Partial<EsWorkflowExecution>>
+      | { doc: Partial<EsWorkflowExecution>; error: string }
+    > = [];
+
+    for (let idx = 0; idx < bulkResponse.items.length; idx++) {
+      const item = bulkResponse.items[idx];
       const op = item.create ?? item.index;
       const id = executions[idx].id as string;
-      if (op?.error) {
-        return { id, error: op.error.reason ?? JSON.stringify(op.error) };
+      if (op?.error && docs[idx]) {
+        results.push({ doc: docs[idx], error: op.error.reason ?? JSON.stringify(op.error) });
+      } else if (docs[idx]) {
+        const version = extractVersionFromBulkItem(item.create)?.version;
+
+        if (!version) {
+          results.push({ doc: docs[idx], error: 'Failed to create workflow execution' });
+        } else {
+          const docWithVersion: EsDocumentWithVersion<Partial<EsWorkflowExecution>> = {
+            id: docs[idx].id as string,
+            doc: docs[idx],
+            version,
+          };
+          results.push(docWithVersion);
+        }
       }
-      return {
-        id,
-        result: docs[idx],
-      };
-    });
+    }
+
+    return results;
   }
 
   /**
@@ -336,7 +381,7 @@ export class WorkflowExecutionRepository {
     workflowId: string,
     spaceId: string,
     triggeredBy?: string
-  ) {
+  ): Promise<EsDocumentWithVersion<EsWorkflowExecution>[]> {
     const filterClauses: Array<Record<string, unknown>> = [
       { term: { workflowId } },
       { term: { spaceId } },
@@ -362,7 +407,11 @@ export class WorkflowExecutionRepository {
       },
     });
 
-    return response.hits.hits;
+    return response.hits.hits.map((hit) => ({
+      id: hit._source?.id ?? (hit._id as string),
+      doc: hit._source as EsWorkflowExecution,
+      version: extractVersionFromBulkItem(hit)?.version as EsDocumentVersion,
+    }));
   }
 
   /**

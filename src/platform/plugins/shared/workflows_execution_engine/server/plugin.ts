@@ -20,8 +20,6 @@ import {
   ExecutionStatus,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
-  WORKFLOWS_EXECUTIONS_DS,
-  WORKFLOWS_STEP_EXECUTIONS_DS,
 } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
@@ -61,16 +59,12 @@ import {
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
+import type { EsDocumentWithVersion } from './repositories/document_version';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
-import {
-  initializeStepExecutionsClient,
-  initializeStepExecutionsDataStream,
-} from './repositories/step_executions_data_stream';
+import { initializeStepExecutionsDataStream } from './repositories/step_executions_data_stream';
 import type { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
-import {
-  initializeWorkflowExecutionsClient,
-  initializeWorkflowExecutionsDataStream,
-} from './repositories/workflow_executions_data_stream';
+import { initializeWorkflowExecutionsDataStream } from './repositories/workflow_executions_data_stream';
+import { initMigrationTask, scheduleMigrationTask } from './tasks/migration_task/migration_task';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -100,8 +94,6 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import {
-  WORKFLOW_MIGRATION_TASK_ID,
-  WORKFLOW_MIGRATION_TASK_TYPE,
   WORKFLOW_RESUME_TASK_TYPE,
   WORKFLOW_RUN_TASK_TYPE,
   WORKFLOW_SCHEDULED_TASK_TYPE,
@@ -111,7 +103,6 @@ import {
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
-import { initMigrationTask, scheduleMigrationTask } from './tasks/migration_task/migration_task';
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -216,8 +207,20 @@ export class WorkflowsExecutionEnginePlugin
           const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
-              const { workflowRunId, spaceId } =
+              const { workflowRunId, spaceId, index } =
                 taskInstance.params as StartWorkflowExecutionParams;
+              const workflowExecutionWithVersion =
+                await this.workflowExecutionRepository.getWorkflowExecutionWithVersion(
+                  workflowRunId,
+                  spaceId,
+                  index
+                );
+
+              if (!workflowExecutionWithVersion) {
+                throw new Error(
+                  `Failed to run workflow: workflow execution ${workflowRunId} not found`
+                );
+              }
 
               // Add queue delay metrics to APM trace for observability
               const now = Date.now();
@@ -257,6 +260,7 @@ export class WorkflowsExecutionEnginePlugin
                 await setupRepositories(coreStart);
 
               const interruptedOutcome = await resolveInterruptedWorkflowRunTask({
+                workflowExecutionWithVersion,
                 workflowExecutionRepository,
                 stepExecutionRepository,
                 workflowRunId,
@@ -270,7 +274,7 @@ export class WorkflowsExecutionEnginePlugin
                   workflowExecutionRepository,
                   workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
                   logger,
-                  workflowRunId,
+                  workflowExecutionWithVersion,
                   spaceId,
                 });
                 return;
@@ -278,7 +282,7 @@ export class WorkflowsExecutionEnginePlugin
 
               try {
                 const runResult = await runWorkflow({
-                  workflowRunId,
+                  workflowExecutionWithVersion,
                   spaceId,
                   taskAbortController,
                   config,
@@ -299,7 +303,7 @@ export class WorkflowsExecutionEnginePlugin
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
                   stepExecutionRepository,
-                  workflowRunId,
+                  workflowExecutionWithVersion,
                   spaceId,
                   taskAttempts: taskInstance.attempts,
                   maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
@@ -333,8 +337,20 @@ export class WorkflowsExecutionEnginePlugin
           const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
-              const { workflowRunId, spaceId } =
+              const { workflowRunId, spaceId, index } =
                 taskInstance.params as ResumeWorkflowExecutionParams;
+              const workflowExecutionWithVersion =
+                await this.workflowExecutionRepository.getWorkflowExecutionWithVersion(
+                  workflowRunId,
+                  spaceId,
+                  index
+                );
+
+              if (!workflowExecutionWithVersion) {
+                throw new Error(
+                  `Failed to resume workflow: workflow execution ${workflowRunId} not found`
+                );
+              }
 
               // Add queue delay metrics to APM trace for observability
               const now = Date.now();
@@ -358,7 +374,7 @@ export class WorkflowsExecutionEnginePlugin
                 if (resumeDelayMs !== null) {
                   currentTransaction.setLabel('resume_delay_ms', resumeDelayMs);
                 }
-                currentTransaction.setLabel('workflow_run_id', workflowRunId);
+                currentTransaction.setLabel('workflow_run_id', workflowExecutionWithVersion.doc.id);
                 currentTransaction.setLabel('space_id', spaceId);
               }
 
@@ -379,9 +395,9 @@ export class WorkflowsExecutionEnginePlugin
                 await setupRepositories(coreStart);
 
               const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
+                workflowExecutionWithVersion,
                 workflowExecutionRepository,
                 stepExecutionRepository,
-                workflowRunId,
                 spaceId,
                 taskAttempts: taskInstance.attempts,
                 logger,
@@ -393,7 +409,7 @@ export class WorkflowsExecutionEnginePlugin
 
               try {
                 await resumeWorkflow({
-                  workflowRunId,
+                  workflowExecutionWithVersion,
                   spaceId,
                   taskAbortController,
                   config,
@@ -408,7 +424,7 @@ export class WorkflowsExecutionEnginePlugin
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
                   stepExecutionRepository,
-                  workflowRunId,
+                  workflowExecutionWithVersion,
                   spaceId,
                   taskAttempts: taskInstance.attempts,
                   maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
@@ -601,9 +617,10 @@ export class WorkflowsExecutionEnginePlugin
 
               // Use refresh: 'wait_for' to ensure the execution is immediately searchable
               // for deduplication checks by subsequent scheduled tasks
-              await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-                refresh: 'wait_for',
-              });
+              const workflowExecutionWithVersion =
+                await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
+                  refresh: 'wait_for',
+                });
 
               // Check concurrency limits and apply collision strategy if needed
               const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
@@ -628,7 +645,7 @@ export class WorkflowsExecutionEnginePlugin
               const [, , workflowsExecutionEngine] = await core.getStartServices();
 
               await runWorkflow({
-                workflowRunId: workflowExecution.id,
+                workflowExecutionWithVersion,
                 spaceId: workflowExecution.spaceId,
                 taskAbortController,
                 logger,
@@ -744,7 +761,7 @@ export class WorkflowsExecutionEnginePlugin
       request: KibanaRequest,
       options: { refresh: boolean | 'wait_for' } = { refresh: false }
     ): Promise<{
-      workflowExecution: WorkflowExecutionForInputRendering;
+      workflowExecutionWithVersion: EsDocumentWithVersion<WorkflowExecutionForInputRendering>;
       repository: WorkflowExecutionRepository;
     }> => {
       await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
@@ -776,24 +793,34 @@ export class WorkflowsExecutionEnginePlugin
       // When a check will run, the caller dictates the strategy: manual/UI paths use
       // refresh:true (immediate, no latency for the user); async paths use refresh:'wait_for'
       // (piggybacks on the scheduled cycle, lower cluster cost).
-      await this.workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-        refresh: workflowExecution.concurrencyGroupKey ? options.refresh : false,
-      });
+      const workflowExecutionWithVersion =
+        await this.workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
+          refresh: workflowExecution.concurrencyGroupKey ? options.refresh : false,
+        });
 
-      return { workflowExecution, repository: this.workflowExecutionRepository };
+      return {
+        workflowExecutionWithVersion: {
+          doc: workflowExecution,
+          version: workflowExecutionWithVersion.version,
+          id: workflowExecutionWithVersion.id,
+        },
+        repository: this.workflowExecutionRepository,
+      };
     };
 
     // Helper function to create a task instance
     const createTaskInstance = (
-      workflowExecution: Partial<EsWorkflowExecution>,
+      workflowExecutionWithVersion: EsDocumentWithVersion<Partial<EsWorkflowExecution>>,
       scope: string[]
     ) => {
+      const workflowExecution = workflowExecutionWithVersion.doc;
       return {
         id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
         taskType: WORKFLOW_RUN_TASK_TYPE,
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
+          workflowExecutionWithVersion,
         } as StartWorkflowExecutionParams,
         state: {
           lastRunAt: null,
@@ -834,13 +861,14 @@ export class WorkflowsExecutionEnginePlugin
         }
       }
 
-      const { workflowExecution } = await createAndPersistWorkflowExecution(
+      const { workflowExecutionWithVersion } = await createAndPersistWorkflowExecution(
         workflow,
         context,
         'manual',
         request,
         { refresh: true }
       );
+      const workflowExecution = workflowExecutionWithVersion.doc;
 
       const inputsValid = await validateWorkflowInputs(
         workflowExecution,
@@ -885,7 +913,8 @@ export class WorkflowsExecutionEnginePlugin
         const [, , workflowsExecutionEngine] = await this.coreSetup.getStartServices();
 
         await runWorkflow({
-          workflowRunId: workflowExecution.id,
+          workflowExecutionWithVersion:
+            workflowExecutionWithVersion as EsDocumentWithVersion<EsWorkflowExecution>,
           spaceId: workflowExecution.spaceId,
           taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
           logger: this.logger,
@@ -898,7 +927,7 @@ export class WorkflowsExecutionEnginePlugin
         });
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
-        const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
+        const taskInstance = createTaskInstance(workflowExecutionWithVersion, ['workflows']);
         await plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest });
         this.logger.debug(
           `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
@@ -915,13 +944,14 @@ export class WorkflowsExecutionEnginePlugin
     const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, request) => {
       await checkLicense(plugins.licensing);
 
-      const { workflowExecution } = await createAndPersistWorkflowExecution(
+      const { workflowExecutionWithVersion } = await createAndPersistWorkflowExecution(
         workflow,
         context,
         'alert',
         request,
         { refresh: 'wait_for' }
       );
+      const workflowExecution = workflowExecutionWithVersion.doc;
 
       // Check concurrency limits and apply collision strategy if needed
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
@@ -943,7 +973,7 @@ export class WorkflowsExecutionEnginePlugin
 
       // Always schedule a task (never execute directly)
       const taskInstance = createTaskInstance(
-        workflowExecution,
+        workflowExecutionWithVersion,
         generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
       );
 
@@ -1037,7 +1067,10 @@ export class WorkflowsExecutionEnginePlugin
 
       // Map per-doc bulk errors back to results; keep succeeded items for the
       // concurrency + task-scheduling passes.
-      const succeeded: PreparedItem[] = [];
+      const succeeded: {
+        idx: number;
+        workflowExecutionWithVersion: EsDocumentWithVersion<Partial<EsWorkflowExecution>>;
+      }[] = [];
       for (let i = 0; i < prepared.length; i++) {
         const p = prepared[i];
         const writeResult = bulkWriteResults[i];
@@ -1047,7 +1080,7 @@ export class WorkflowsExecutionEnginePlugin
             error: { message: writeResult.error },
           };
         } else {
-          succeeded.push(p);
+          succeeded.push({ idx: p.idx, workflowExecutionWithVersion: writeResult });
         }
       }
 
@@ -1060,7 +1093,7 @@ export class WorkflowsExecutionEnginePlugin
       for (const p of succeeded) {
         results[p.idx] = {
           status: 'scheduled',
-          workflowExecutionId: p.workflowExecution.id as string,
+          workflowExecutionId: p.workflowExecutionWithVersion.id as string,
         };
       }
 
@@ -1070,19 +1103,29 @@ export class WorkflowsExecutionEnginePlugin
       // with max=1 and strategy='drop', drop every item; with
       // 'cancel-in-progress' they would also race to cancel each other.
       // Items without a key, and items in different groups, stay parallel.
-      const keylessItems: PreparedItem[] = [];
+      const keylessItems: {
+        idx: number;
+        workflowExecutionWithVersion: EsDocumentWithVersion<Partial<EsWorkflowExecution>>;
+      }[] = [];
       const bucketsByGroup = new Map<string, PreparedItem[]>();
       for (const p of succeeded) {
-        const groupKey = p.workflowExecution.concurrencyGroupKey;
+        const groupKey = p.workflowExecutionWithVersion.doc.concurrencyGroupKey;
         if (!groupKey) {
           keylessItems.push(p);
         } else {
-          const bucketKey = `${p.workflowExecution.spaceId ?? 'default'}:${groupKey}`;
+          const bucketKey = `${
+            p.workflowExecutionWithVersion.doc.spaceId ?? 'default'
+          }:${groupKey}`;
           const existing = bucketsByGroup.get(bucketKey);
           if (existing) {
-            existing.push(p);
+            existing.push({
+              idx: p.idx,
+              workflowExecution: p.workflowExecutionWithVersion.doc,
+            });
           } else {
-            bucketsByGroup.set(bucketKey, [p]);
+            bucketsByGroup.set(bucketKey, [
+              { idx: p.idx, workflowExecution: p.workflowExecutionWithVersion.doc },
+            ]);
           }
         }
       }
@@ -1104,7 +1147,9 @@ export class WorkflowsExecutionEnginePlugin
         });
       };
       await Promise.all([
-        ...keylessItems.map(runCheck),
+        ...keylessItems.map((p) =>
+          runCheck({ idx: p.idx, workflowExecution: p.workflowExecutionWithVersion.doc })
+        ),
         ...Array.from(bucketsByGroup.values()).map(async (bucket) => {
           for (const p of bucket) {
             await maybeDrainConcurrencyQueueBeforeEnqueue({
@@ -1123,8 +1168,8 @@ export class WorkflowsExecutionEnginePlugin
       if (toSchedule.length > 0) {
         const tasks = toSchedule.map((p) =>
           createTaskInstance(
-            p.workflowExecution,
-            generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
+            p.workflowExecutionWithVersion,
+            generateExecutionTaskScope(p.workflowExecutionWithVersion.doc as EsWorkflowExecution)
           )
         );
         await plugins.taskManager.bulkSchedule(tasks, { request });

@@ -35,7 +35,8 @@ export async function cancelWorkflowIfRequested(
     try {
       const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
         workflowExecutionState.getWorkflowExecution().id,
-        workflowExecutionState.getWorkflowExecution().spaceId
+        workflowExecutionState.getWorkflowExecution().spaceId,
+        workflowExecutionState.getWorkflowExecutionVersion().index
       );
 
       if (!currentExecution?.cancelRequested) {

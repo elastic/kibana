@@ -24,10 +24,12 @@ export const WORKFLOW_MIGRATION_TASK_ID = 'workflow:migrate-executions';
 
 export interface StartWorkflowExecutionParams {
   workflowRunId: string;
+  index: string;
   spaceId: string;
 }
 
 export interface ResumeWorkflowExecutionParams {
   workflowRunId: string;
+  index: string;
   spaceId: string;
 }

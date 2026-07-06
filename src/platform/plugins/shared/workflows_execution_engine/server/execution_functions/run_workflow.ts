@@ -9,6 +9,7 @@
 
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
@@ -20,6 +21,7 @@ import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
+import type { EsDocumentWithVersion } from '../repositories/document_version';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
@@ -33,7 +35,7 @@ export interface RunWorkflowResult {
 }
 
 export async function runWorkflow({
-  workflowRunId,
+  workflowExecutionWithVersion,
   spaceId,
   taskAbortController,
   logger,
@@ -44,7 +46,7 @@ export async function runWorkflow({
   meteringService,
   internalResumeWorkflowExecution,
 }: {
-  workflowRunId: string;
+  workflowExecutionWithVersion: EsDocumentWithVersion<EsWorkflowExecution>;
   spaceId: string;
   taskAbortController: AbortController;
   logger: Logger;
@@ -70,7 +72,7 @@ export async function runWorkflow({
     esClient,
     telemetryClient,
   } = await setupDependencies(
-    workflowRunId,
+    workflowExecutionWithVersion,
     spaceId,
     logger,
     config,
@@ -78,6 +80,8 @@ export async function runWorkflow({
     fakeRequest,
     workflowsExecutionEngine
   );
+
+  const workflowRunId = workflowExecutionWithVersion.doc.id;
 
   setupSpan?.end();
 
@@ -100,7 +104,7 @@ export async function runWorkflow({
   });
   if (handledQueuedRun) {
     await handlePostExecutionLoop({
-      workflowRunId,
+      workflowExecutionState,
       spaceId,
       logger,
       fakeRequest,

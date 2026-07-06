@@ -13,7 +13,7 @@ import type {
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
-import type { EsDocumentVersion } from '../repositories/document_version';
+import type { EsDocumentVersion, EsDocumentWithVersion } from '../repositories/document_version';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { sumTokenUsage } from '../utils';
 
@@ -87,7 +87,6 @@ export type StepIoStateAccessor = Pick<
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, StepExecutionMetadata> = new Map();
   private workflowExecution!: EsWorkflowExecution;
-  private workflowExecutionRepository: WorkflowExecutionRepository;
   private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;
   private stepDocumentsChanges: Map<string, Partial<StepExecutionMetadata>> = new Map();
 
@@ -97,7 +96,7 @@ export class WorkflowExecutionState {
    * version lookup. `undefined` means "unknown" -> the next flush resolves
    * fresh (the safe, pre-optimization path).
    */
-  private workflowExecutionVersion: EsDocumentVersion | undefined = undefined;
+  private workflowExecutionVersion: EsDocumentVersion;
 
   private lastFailedStepContext: FailedStepContext | undefined = undefined;
 
@@ -108,22 +107,12 @@ export class WorkflowExecutionState {
    */
   private stepIdExecutionIdIndex = new Map<string, string[]>();
 
-  constructor(workflowExecutionRepository: WorkflowExecutionRepository);
   constructor(
-    initialWorkflowExecution: EsWorkflowExecution,
-    workflowExecutionRepository: WorkflowExecutionRepository
-  );
-  constructor(
-    initialWorkflowExecutionOrRepository: EsWorkflowExecution | WorkflowExecutionRepository,
-    workflowExecutionRepository?: WorkflowExecutionRepository
+    initialWorkflowExecutionWithVersion: EsDocumentWithVersion<EsWorkflowExecution>,
+    private workflowExecutionRepository: WorkflowExecutionRepository
   ) {
-    if (workflowExecutionRepository) {
-      this.workflowExecution = initialWorkflowExecutionOrRepository as EsWorkflowExecution;
-      this.workflowExecutionRepository = workflowExecutionRepository;
-    } else {
-      this.workflowExecutionRepository =
-        initialWorkflowExecutionOrRepository as WorkflowExecutionRepository;
-    }
+    this.workflowExecution = initialWorkflowExecutionWithVersion.doc;
+    this.workflowExecutionVersion = initialWorkflowExecutionWithVersion.version;
   }
 
   public async load(workflowExecutionId: string, spaceId: string): Promise<void> {
@@ -142,6 +131,10 @@ export class WorkflowExecutionState {
 
   public getWorkflowExecution(): EsWorkflowExecution {
     return this.workflowExecution;
+  }
+
+  public getWorkflowExecutionVersion(): EsDocumentVersion {
+    return this.workflowExecutionVersion;
   }
 
   public getWorkflowExecutionStatus(): EsWorkflowExecution['status'] {

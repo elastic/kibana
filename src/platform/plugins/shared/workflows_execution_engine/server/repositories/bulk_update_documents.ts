@@ -97,6 +97,7 @@ export const resolveVersions = async <TDocument extends IdentifiedDocument>({
   }
 
   const writeIndex = await resolveWriteIndex({ esClient, dataStreamName });
+
   return resolveDocumentVersionsByIds<TDocument>({
     esClient,
     ids,

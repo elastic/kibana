@@ -8,6 +8,7 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import { WorkflowRepository } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { setupRepositories } from './setup_repositories';
@@ -21,6 +22,7 @@ import {
   mergeEmitterWorkflowIntoEventChainVisited,
 } from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
+import type { EsDocumentWithVersion } from '../repositories/document_version';
 import { NodesFactory } from '../step/nodes_factory';
 import { setWorkflowEventChainContext } from '../trigger_events/event_context/event_chain_context';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
@@ -34,7 +36,7 @@ import { WorkflowEventLoggerService } from '../workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export async function setupDependencies(
-  workflowRunId: string,
+  workflowExecutionWithVersion: EsDocumentWithVersion<EsWorkflowExecution>,
   spaceId: string,
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
@@ -43,6 +45,8 @@ export async function setupDependencies(
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart
 ) {
   const { coreStart, actions, taskManager, workflowsExtensions } = dependencies;
+
+  const workflowRunId = workflowExecutionWithVersion.doc.id;
 
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
@@ -65,8 +69,10 @@ export async function setupDependencies(
     );
   }
 
-  const workflowExecutionState = new WorkflowExecutionState(workflowExecutionRepository);
-  await workflowExecutionState.load(workflowRunId, spaceId);
+  const workflowExecutionState = new WorkflowExecutionState(
+    workflowExecutionWithVersion,
+    workflowExecutionRepository
+  );
   const workflowExecution = workflowExecutionState.getWorkflowExecution();
 
   const eventChainDepth = extractEventChainDepthFromExecution(workflowExecution) ?? -1;

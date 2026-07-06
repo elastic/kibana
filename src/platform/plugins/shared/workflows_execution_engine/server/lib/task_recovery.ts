@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 
+import type { EsDocumentWithVersion } from '../repositories/document_version';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -39,6 +40,7 @@ export type InterruptedWorkflowRunTaskOutcome = 'run_workflow' | 'task_complete'
  * because resumption is human-driven via the resume API.
  */
 export async function resolveInterruptedWorkflowRunTask({
+  workflowExecutionWithVersion,
   workflowExecutionRepository,
   stepExecutionRepository,
   workflowRunId,
@@ -46,6 +48,7 @@ export async function resolveInterruptedWorkflowRunTask({
   taskAttempts,
   logger,
 }: {
+  workflowExecutionWithVersion: EsDocumentWithVersion<EsWorkflowExecution>;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
   workflowRunId: string;
@@ -59,7 +62,8 @@ export async function resolveInterruptedWorkflowRunTask({
 
   const execution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
-    spaceId
+    spaceId,
+    workflowExecutionWithVersion.version.index
   );
 
   if (!execution) {
@@ -79,9 +83,9 @@ export async function resolveInterruptedWorkflowRunTask({
   }
 
   await markExecutionFailedTaskRecovery(
+    workflowExecutionWithVersion,
     workflowExecutionRepository,
     stepExecutionRepository,
-    workflowRunId,
     {
       message: taskRecoveryMessages.workflowRunInterrupted,
     }
@@ -102,16 +106,16 @@ export type InterruptedWorkflowResumeTaskOutcome = 'resume_workflow' | 'task_com
  * If still `waiting_for_input`, invoke the resume handler again - the first attempt never completed.
  */
 export async function resolveInterruptedWorkflowResumeTask({
+  workflowExecutionWithVersion,
   workflowExecutionRepository,
   stepExecutionRepository,
-  workflowRunId,
   spaceId,
   taskAttempts,
   logger,
 }: {
+  workflowExecutionWithVersion: EsDocumentWithVersion<EsWorkflowExecution>;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
-  workflowRunId: string;
   spaceId: string;
   taskAttempts: number;
   logger: Logger;
@@ -120,9 +124,12 @@ export async function resolveInterruptedWorkflowResumeTask({
     return 'resume_workflow';
   }
 
+  const workflowRunId = workflowExecutionWithVersion.doc.id;
+
   const execution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
-    spaceId
+    spaceId,
+    workflowExecutionWithVersion.version.index
   );
 
   if (!execution) {
@@ -144,9 +151,9 @@ export async function resolveInterruptedWorkflowResumeTask({
   }
 
   await markExecutionFailedTaskRecovery(
+    workflowExecutionWithVersion,
     workflowExecutionRepository,
     stepExecutionRepository,
-    workflowRunId,
     {
       message: taskRecoveryMessages.workflowResumeInterrupted,
     }
@@ -160,9 +167,9 @@ export async function resolveInterruptedWorkflowResumeTask({
 }
 
 export async function markExecutionFailedTaskRecovery(
+  workflowExecutionWithVersion: EsDocumentWithVersion<EsWorkflowExecution>,
   workflowExecutionRepository: WorkflowExecutionRepository,
   stepExecutionRepository: StepExecutionRepository,
-  executionId: string,
   {
     message,
     type = TASK_RECOVERY_ERROR_TYPE,
@@ -175,13 +182,16 @@ export async function markExecutionFailedTaskRecovery(
   const finishedAt = new Date().toISOString();
 
   await workflowExecutionRepository.updateWorkflowExecution({
-    id: executionId,
+    id: workflowExecutionWithVersion.doc.id,
     status: ExecutionStatus.FAILED,
     error,
     finishedAt,
   });
 
-  await stepExecutionRepository.markNonTerminalStepsFailed(executionId, error);
+  await stepExecutionRepository.markNonTerminalStepsFailed(
+    workflowExecutionWithVersion.doc.id,
+    error
+  );
 }
 
 /**
@@ -192,18 +202,18 @@ export async function markExecutionFailedTaskRecovery(
  * **`maxAttempts`** (`WORKFLOW_RUN_TASK_MAX_ATTEMPTS` vs **`WORKFLOW_RESUME_TASK_MAX_ATTEMPTS`**).
  */
 export async function resolveExhaustedWorkflowRunTask({
+  workflowExecutionWithVersion,
   workflowExecutionRepository,
   stepExecutionRepository,
-  workflowRunId,
   spaceId,
   taskAttempts,
   maxAttempts,
   error,
   logger,
 }: {
+  workflowExecutionWithVersion: EsDocumentWithVersion<EsWorkflowExecution>;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
-  workflowRunId: string;
   spaceId: string;
   taskAttempts: number;
   maxAttempts: number;
@@ -213,11 +223,13 @@ export async function resolveExhaustedWorkflowRunTask({
   if (taskAttempts < maxAttempts) {
     return;
   }
+  const workflowRunId = workflowExecutionWithVersion.doc.id;
 
   try {
     const execution = await workflowExecutionRepository.getWorkflowExecutionById(
-      workflowRunId,
-      spaceId
+      workflowExecutionWithVersion.doc.id,
+      spaceId,
+      workflowExecutionWithVersion.version.index
     );
     if (
       execution &&
@@ -226,9 +238,9 @@ export async function resolveExhaustedWorkflowRunTask({
     ) {
       const lastMessage = error instanceof Error ? error.message : String(error);
       await markExecutionFailedTaskRecovery(
+        workflowExecutionWithVersion,
         workflowExecutionRepository,
         stepExecutionRepository,
-        workflowRunId,
         {
           type: 'TaskAttemptsExhaustedError',
           message: buildTaskAttemptsExhaustedMessage(lastMessage),

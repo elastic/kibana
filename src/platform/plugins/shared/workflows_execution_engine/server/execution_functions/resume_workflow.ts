@@ -8,12 +8,14 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
+import type { EsDocumentWithVersion } from '../repositories/document_version';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
@@ -22,7 +24,7 @@ import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
 export async function resumeWorkflow({
-  workflowRunId,
+  workflowExecutionWithVersion,
   spaceId,
   taskAbortController,
   dependencies,
@@ -33,7 +35,7 @@ export async function resumeWorkflow({
   meteringService,
   internalResumeWorkflowExecution,
 }: {
-  workflowRunId: string;
+  workflowExecutionWithVersion: EsDocumentWithVersion<EsWorkflowExecution>;
   spaceId: string;
   taskAbortController: AbortController;
   logger: Logger;
@@ -56,7 +58,7 @@ export async function resumeWorkflow({
     workflowTaskManager,
     workflowExecutionRepository,
   } = await setupDependencies(
-    workflowRunId,
+    workflowExecutionWithVersion,
     spaceId,
     logger,
     config,
@@ -64,6 +66,7 @@ export async function resumeWorkflow({
     fakeRequest,
     workflowsExecutionEngine
   );
+  const workflowRunId = workflowExecutionWithVersion.doc.id;
 
   const loadedExecution = workflowExecutionState.getWorkflowExecution();
   if (isTerminalStatus(loadedExecution.status)) {
@@ -103,7 +106,7 @@ export async function resumeWorkflow({
   }
 
   await handlePostExecutionLoop({
-    workflowRunId,
+    workflowExecutionState,
     spaceId,
     logger,
     fakeRequest,

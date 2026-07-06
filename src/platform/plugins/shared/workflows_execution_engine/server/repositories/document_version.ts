@@ -17,29 +17,41 @@ export interface EsDocumentVersion {
   primaryTerm: number;
 }
 
+export interface EsDocumentWithVersion<TDocument> {
+  id: string;
+  version: EsDocumentVersion;
+  doc: TDocument;
+}
+
 /**
  * Extracts the OCC version (`index` / `seqNo` / `primaryTerm`) from a single
- * bulk-response item (an `update` or `create` action result). Returns
- * `undefined` when the item errored or did not include version metadata, so
- * callers can safely skip failed items when refreshing a version cache.
+ * ES response item — either a bulk-response item (an `update` or `create`
+ * action result) or a search hit (which requires `seq_no_primary_term: true`
+ * on the search request). Returns `undefined` when the item errored or did not
+ * include version metadata, so callers can safely skip failed items when
+ * refreshing a version cache.
  */
 export const extractVersionFromBulkItem = (
-  op: estypes.BulkResponseItem | undefined
+  op: estypes.BulkResponseItem | estypes.SearchHit | undefined
 ): { id: string; version: EsDocumentVersion } | undefined => {
-  if (
-    !op ||
-    op.error ||
-    !op._id ||
-    op._seq_no === undefined ||
-    op._primary_term === undefined ||
-    !op._index
-  ) {
+  if (!op) {
+    return undefined;
+  }
+
+  // Only bulk-response items carry an `error`; a search hit never does.
+  if ('error' in op && op.error) {
+    return undefined;
+  }
+
+  const { _id: id, _index: index, _seq_no: seqNo, _primary_term: primaryTerm } = op;
+
+  if (!id || !index || seqNo === undefined || primaryTerm === undefined) {
     return undefined;
   }
 
   return {
-    id: op._id,
-    version: { index: op._index, seqNo: op._seq_no, primaryTerm: op._primary_term },
+    id,
+    version: { index, seqNo, primaryTerm },
   };
 };
 
