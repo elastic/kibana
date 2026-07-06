@@ -138,9 +138,6 @@ test.describe(
       kbnUrl,
       pageObjects: { stackAlertsPage },
     }) => {
-      // Generous budget: the first navigation compiles the alerts app bundle in
-      // dev mode (a no-op against the pre-built distributable used in CI).
-      test.setTimeout(180_000);
       // The `stackAlerts`-consumer alert's rule is readable via `stackAlerts: read`.
       await browserAuth.loginWithCustomRole(STACK_RULES_AND_OBS_ALERTS_ROLE);
       await stackAlertsPage.gotoAlertForRule(kbnUrl, stackRuleUuid);
@@ -161,7 +158,6 @@ test.describe(
       kbnUrl,
       pageObjects: { stackAlertsPage },
     }) => {
-      test.setTimeout(180_000);
       // The `logs`-consumer alert is visible via `observabilityAlerts: read`, but
       // its rule is not readable (no `logs` rule read), so the name is plain text.
       await browserAuth.loginWithCustomRole(STACK_RULES_AND_OBS_ALERTS_ROLE);

@@ -26,10 +26,6 @@ apiTest.describe(
     let stackAlertsAllCookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ apiClient, requestAuth, samlAuth }) => {
-      // setupStackAlertsPrivilegeTests polls up to ~120s for the event-log entry and
-      // another ~120s for the alert to be indexed, which exceeds Playwright's default
-      // 60s hook timeout on slower (e.g. serverless) lanes.
-      apiTest.setTimeout(300_000);
       state = await setupStackAlertsPrivilegeTests(apiClient, requestAuth, samlAuth);
 
       stackAlertsAllCreds = await requestAuth.getApiKeyForCustomRole({

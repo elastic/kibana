@@ -98,11 +98,6 @@ test.describe(
       }
     });
 
-    // Extra budget for first-run dev-mode bundle compilation (no-op in CI).
-    test.beforeEach(() => {
-      test.setTimeout(180_000);
-    });
-
     test.afterAll(async ({ esClient }) => {
       await esClient
         .deleteByQuery({

@@ -107,40 +107,42 @@ export const setupStackAlertsPrivilegeTests = async (
 
   let realAlertId: string | undefined;
   let realAlertIndex: string | undefined;
-  const pollIntervalMs = 2000;
-  const maxAttempts = 60; // ~120s; alert indexing can lag rule execution on serverless
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const findResponse = await apiClient.post('internal/rac/alerts/find', {
-      headers: adminSessionHeaders,
-      body: {
-        rule_type_ids: ['.es-query'],
-        consumers: ['stackAlerts'],
-        query: {
-          bool: {
-            filter: [
-              { term: { 'kibana.alert.rule.uuid': enabledRuleId } },
-              { term: { 'kibana.alert.status': 'active' } },
-            ],
+  // Alert indexing can lag rule execution (especially on serverless), so poll the
+  // alerts index until the active alert for the enabled rule becomes searchable.
+  await expect
+    .poll(
+      async () => {
+        const findResponse = await apiClient.post('internal/rac/alerts/find', {
+          headers: adminSessionHeaders,
+          body: {
+            rule_type_ids: ['.es-query'],
+            consumers: ['stackAlerts'],
+            query: {
+              bool: {
+                filter: [
+                  { term: { 'kibana.alert.rule.uuid': enabledRuleId } },
+                  { term: { 'kibana.alert.status': 'active' } },
+                ],
+              },
+            },
+            size: 1,
           },
-        },
-        size: 1,
+          responseType: 'json',
+        });
+        const alertDoc = (
+          findResponse.body as { hits?: { hits?: Array<{ _id: string; _index: string }> } }
+        )?.hits?.hits?.[0];
+        realAlertId = alertDoc?._id;
+        realAlertIndex = alertDoc?._index;
+        return Boolean(alertDoc);
       },
-      responseType: 'json',
-    });
-    expect(findResponse).toHaveStatusCode(200);
-    const findBody = findResponse.body as {
-      hits?: { hits?: Array<{ _id: string; _index: string }> };
-    };
-    const alertDoc = findBody?.hits?.hits?.[0];
-    if (alertDoc) {
-      realAlertId = alertDoc._id;
-      realAlertIndex = alertDoc._index;
-      break;
-    }
-    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
-  }
-  expect(realAlertId, 'expected an alert to be generated for the enabled rule').toBeDefined();
-  expect(realAlertIndex, 'expected an alert index for the enabled rule').toBeDefined();
+      {
+        timeout: 30_000,
+        intervals: [2_000],
+        message: 'expected an alert to be generated for the enabled rule',
+      }
+    )
+    .toBe(true);
 
   // .es-query with groupBy: 'all' always uses this instance id (see constants.ts).
   // Mute only after the alert is indexed — validate_alerts_existence=true searches the alert index.
