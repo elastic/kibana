@@ -73,7 +73,7 @@ describe('DataRetentionValue', () => {
 
     const link = screen.getByTestId('retentionValue');
     expect(link).toHaveTextContent('my_policy');
-    expect(link).toHaveAttribute('data-href', '/test/my_policy');
+    expect(link).toHaveAttribute('href', '/test/my_policy');
     expect(screen.getByText('ILM')).toBeInTheDocument();
 
     fireEvent.click(link);

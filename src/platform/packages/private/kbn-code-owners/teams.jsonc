@@ -93,6 +93,9 @@
   {
     "id": "context-eng",
     "name": "Context Eng",
+    "areas": [
+      "platform"
+    ],
     "github": {
       "team": "elastic/context-eng"
     }
