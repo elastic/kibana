@@ -58,6 +58,7 @@ import type {
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import {
   parseWorkflowYamlToJSON,
+  parseYamlToJSONWithoutValidation,
   stringifyWorkflowDefinition,
   WorkflowValidationError,
 } from '@kbn/workflows-yaml';
@@ -71,6 +72,7 @@ import type {
   WorkflowsService,
 } from './workflows_management_service';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
+import { formatWorkflowDiagnostic } from '../../common/lib/format_workflow_diagnostic';
 import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
@@ -537,10 +539,7 @@ export class WorkflowsManagementApi {
       params.request
     );
     if (!validation.valid || !validation.parsedWorkflow) {
-      const errorMessages = validation.diagnostics
-        .filter((d) => d.severity === 'error')
-        .map((d) => d.message);
-      throw new WorkflowValidationError('Workflow validation failed', errorMessages);
+      throw buildWorkflowValidationError(validation, params.yaml);
     }
 
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
@@ -700,10 +699,7 @@ export class WorkflowsManagementApi {
 
     const validation = await this.workflowsService.validateWorkflow(resolvedYaml, spaceId, request);
     if (!validation.valid || !validation.parsedWorkflow) {
-      const errorMessages = validation.diagnostics
-        .filter((d) => d.severity === 'error')
-        .map((d) => d.message);
-      throw new WorkflowValidationError('Workflow validation failed', errorMessages);
+      throw buildWorkflowValidationError(validation, resolvedYaml);
     }
 
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
@@ -747,10 +743,7 @@ export class WorkflowsManagementApi {
   ): Promise<string> {
     const validation = await this.workflowsService.validateWorkflow(workflowYaml, spaceId, request);
     if (!validation.valid || !validation.parsedWorkflow) {
-      const errorMessages = validation.diagnostics
-        .filter((d) => d.severity === 'error')
-        .map((d) => d.message);
-      throw new WorkflowValidationError('Workflow validation failed', errorMessages);
+      throw buildWorkflowValidationError(validation, workflowYaml);
     }
 
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
@@ -1023,3 +1016,32 @@ export class WorkflowsManagementApi {
 
 const waitMs = (durationMs: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, durationMs));
+
+/**
+ * Builds a `WorkflowValidationError` from a failed validation result, formatting
+ * each error diagnostic into a location-annotated message.
+ *
+ * When the workflow fails *schema* validation, `validation.parsedWorkflow` is
+ * absent (nothing typed to resolve step names against), so we fall back to an
+ * unvalidated raw-YAML parse purely to recover the step/branch `name`s. This is
+ * best-effort: if even the raw parse fails, the formatter degrades to numbered
+ * labels (`step #1 › step #2`).
+ */
+function buildWorkflowValidationError(
+  validation: ValidateWorkflowResponseDto,
+  yaml: string
+): WorkflowValidationError {
+  let stepsForNaming: Pick<WorkflowYaml, 'steps'> | undefined = validation.parsedWorkflow;
+  if (!stepsForNaming) {
+    const rawParse = parseYamlToJSONWithoutValidation(yaml);
+    if (rawParse.success) {
+      stepsForNaming = rawParse.json as Pick<WorkflowYaml, 'steps'>;
+    }
+  }
+
+  const errorMessages = validation.diagnostics
+    .filter((d) => d.severity === 'error')
+    .map((d) => formatWorkflowDiagnostic(d, stepsForNaming));
+
+  return new WorkflowValidationError('Workflow validation failed', errorMessages);
+}
