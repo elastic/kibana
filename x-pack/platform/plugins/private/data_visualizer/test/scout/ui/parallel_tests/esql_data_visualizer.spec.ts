@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+/* eslint-disable playwright/expect-expect */
+
 import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import { tags, test as scoutTest } from '@kbn/scout';
 import { spaceTest } from '../fixtures';
 import type { ExtParallelRunTestFixtures } from '../fixtures';
 import type { MetricFieldVisConfig, NonMetricFieldVisConfig } from '../fixtures/types';
 import {
+  assertMetricFieldsDocCounts,
   assertNonMetricFieldContents,
   assertNumberFieldContents,
   assertTableRowCount,
@@ -216,9 +219,9 @@ const runEsqlDataVisualizerTests = async ({
 
     await pageObjects.indexDataVisualizer.waitForTotalDocCountHeader();
 
-    if (data.expected.hasDocCountChart) {
-      await pageObjects.indexDataVisualizer.waitForTotalDocCountChart();
-    }
+    await pageObjects.indexDataVisualizer.waitForTotalDocCountChartIfNeeded(
+      data.expected.hasDocCountChart
+    );
 
     await pageObjects.indexDataVisualizer.waitForDataVisualizerTable();
     await pageObjects.indexDataVisualizer.waitForFieldCountPanel();
@@ -242,19 +245,11 @@ const runEsqlDataVisualizerTests = async ({
   });
 
   await scoutTest.step(`${data.suiteTitle} updates data when limit size changes`, async () => {
-    if (data.expected.initialLimitSize !== undefined) {
-      for (const fieldRow of data.expected.metricFields as Array<Required<MetricFieldVisConfig>>) {
-        await assertNumberFieldContents(
-          pageObjects.dataVisualizerTable,
-          fieldRow.fieldName,
-          data.expected.initialLimitSize,
-          undefined,
-          false,
-          false,
-          false
-        );
-      }
-    }
+    await assertMetricFieldsDocCounts(
+      pageObjects.dataVisualizerTable,
+      data.expected.metricFields as Array<Required<MetricFieldVisConfig>>,
+      data.expected.initialLimitSize
+    );
 
     await pageObjects.dataVisualizerSelector.setLimitSize(10000);
 

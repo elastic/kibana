@@ -42,8 +42,8 @@ test.describe('index based actions panel on basic license', { tag: tags.stateful
     });
 
     await scoutTest.step('navigates to Discover page', async () => {
-      await expect(mlDataVisualizerActions.createAdvancedJobCard).not.toBeVisible();
-      await expect(mlDataVisualizerActions.createDataFrameAnalyticsCard).not.toBeVisible();
+      await expect(mlDataVisualizerActions.createAdvancedJobCard).toBeHidden();
+      await expect(mlDataVisualizerActions.createDataFrameAnalyticsCard).toBeHidden();
       await expect(mlDataVisualizerActions.actionsPanel).toBeVisible();
       await expect(mlDataVisualizerActions.viewInDiscoverCard).toBeVisible();
 

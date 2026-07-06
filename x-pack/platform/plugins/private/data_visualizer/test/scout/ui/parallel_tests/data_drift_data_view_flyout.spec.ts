@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable playwright/expect-expect */
+
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';

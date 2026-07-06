@@ -49,9 +49,7 @@ export const runIndexDataVisualizerTests = async ({
     await indexDataVisualizer.waitForTotalDocCountChart();
     await indexDataVisualizer.waitForDataVisualizerTable();
 
-    if (testData.rowsPerPage) {
-      await dataVisualizerTable.ensureNumRowsPerPage(testData.rowsPerPage);
-    }
+    await dataVisualizerTable.ensureNumRowsPerPageIfNeeded(testData.rowsPerPage);
 
     await dataVisualizerTable.waitForSearchPanel();
     await dataVisualizerTable.waitForFieldTypeInput();
@@ -69,20 +67,18 @@ export const runIndexDataVisualizerTests = async ({
     await indexDataVisualizer.waitForVisibleFieldsCount(testData.expected.populatedFieldsCount);
     await indexDataVisualizer.waitForTotalFieldsCount(testData.expected.totalFieldsCount);
 
-    if (testData.expected.filters) {
-      for (const filter of testData.expected.filters) {
-        await expect
-          .poll(() =>
-            hasFilterBadge(page, {
-              field: filter.key,
-              value: filter.value,
-              enabled: filter.enabled ?? true,
-              pinned: filter.pinned ?? false,
-              negated: filter.negated ?? false,
-            })
-          )
-          .toBe(true);
-      }
+    for (const filter of testData.expected.filters ?? []) {
+      await expect
+        .poll(() =>
+          hasFilterBadge(page, {
+            field: filter.key,
+            value: filter.value,
+            enabled: filter.enabled ?? true,
+            pinned: filter.pinned ?? false,
+            negated: filter.negated ?? false,
+          })
+        )
+        .toBe(true);
     }
 
     for (const fieldRow of testData.expected.metricFields as Array<

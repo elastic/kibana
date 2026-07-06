@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable playwright/expect-expect */
+
 import { tags, test as scoutTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../fixtures';
@@ -14,7 +16,7 @@ import {
   farequoteKQLFiltersSearchTestData,
   farequoteLuceneFiltersSearchTestData,
 } from '../fixtures/expected_field_stats_random_sampler';
-import { hasFilterBadge } from '../fixtures/filter_bar_assertions';
+import { hasFilterBadge, removeFirstPresentFilter } from '../fixtures/filter_bar_assertions';
 
 const PINNED_FILTER = {
   key: 'type',
@@ -92,16 +94,14 @@ const runFilterTests = async ({
       data.expected.totalDocCountFormatted
     );
 
-    if (data.expected.filters) {
-      for (const filter of data.expected.filters) {
-        await assertFilterBarFilterContent(page, pageObjects, {
-          key: filter.key,
-          value: filter.value,
-          enabled: true,
-          pinned: false,
-          negated: false,
-        });
-      }
+    for (const filter of data.expected.filters ?? []) {
+      await assertFilterBarFilterContent(page, pageObjects, {
+        key: filter.key,
+        value: filter.value,
+        enabled: true,
+        pinned: false,
+        negated: false,
+      });
     }
 
     await assertFilterBarFilterContent(page, pageObjects, PINNED_FILTER);
@@ -153,15 +153,7 @@ spaceTest.describe(
     });
 
     spaceTest.afterEach(async ({ page }) => {
-      for (const field of [PINNED_FILTER.key, 'type.keyword', 'type']) {
-        const filterBadge = page.testSubj.locator(`~filter & ~filter-key-${field}`);
-        if ((await filterBadge.count()) === 0) {
-          continue;
-        }
-        await filterBadge.click();
-        await page.testSubj.click('deleteFilter');
-        break;
-      }
+      await removeFirstPresentFilter(page, [PINNED_FILTER.key, 'type.keyword', 'type']);
     });
 
     spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+/* eslint-disable playwright/expect-expect */
+
 import type { KbnClient, ScoutSpaceParallelFixture } from '@kbn/scout';
 import { tags, test as scoutTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../fixtures';
 import type { ExtParallelRunTestFixtures } from '../fixtures';
 import type { MetricFieldVisConfig, TestData } from '../fixtures/types';
@@ -18,6 +21,7 @@ import {
 import {
   assertViewModeToggleNotExists,
   clickViewModeFieldStatsButton,
+  selectDiscoverSource,
 } from '../fixtures/discover_field_stats';
 
 const PINNED_FILTER = {
@@ -85,11 +89,11 @@ const runDashboardFieldStatsTests = async ({
 
     await pageObjects.discover.goto({ queryMode: 'classic' });
 
-    if (data.isSavedSearch) {
-      await pageObjects.discover.loadSavedSearch(data.sourceIndexOrSavedSearch);
-    } else {
-      await pageObjects.discover.selectDataView(data.sourceIndexOrSavedSearch);
-    }
+    await selectDiscoverSource(
+      pageObjects.discover,
+      data.sourceIndexOrSavedSearch,
+      data.isSavedSearch
+    );
 
     await pageObjects.datePicker.setAbsoluteRange({
       from: testData.DISCOVER_TIME_RANGE.start,
@@ -165,11 +169,9 @@ const runDashboardFieldStatsTests = async ({
         space: scoutSpace.id,
       });
 
-      if (!dashboardId) {
-        throw new Error(`Dashboard '${dashboardTitle}' was not found`);
-      }
+      expect(dashboardId, `Dashboard '${dashboardTitle}' was not found`).toBeTruthy();
 
-      await pageObjects.dashboard.openDashboardWithId(dashboardId);
+      await pageObjects.dashboard.openDashboardWithId(dashboardId!);
       await pageObjects.dashboard.ensureEditMode();
       await pageObjects.dashboard.addSavedSearch(savedSearchTitle);
 

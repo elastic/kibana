@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable playwright/expect-expect */
+
 import { tags, test as scoutTest } from '@kbn/scout';
 import { test, testData } from '../fixtures';
 import type { DataVisualizerTestFixtures } from '../../../scout/ui/fixtures';

@@ -91,6 +91,14 @@ export class IndexDataVisualizer {
       .waitFor({ state: 'visible' });
   }
 
+  async waitForTotalDocCountChartIfNeeded(shouldWait: boolean) {
+    if (!shouldWait) {
+      return;
+    }
+
+    await this.waitForTotalDocCountChart();
+  }
+
   async waitForDataVisualizerTable() {
     await this.page.testSubj.locator('~dataVisualizerTable-loaded').waitFor({ state: 'visible' });
   }

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable playwright/expect-expect */
+
 import { tags, test as scoutTest } from '@kbn/scout';
 import { spaceTest } from '../fixtures';
 import { assertDataDriftPageContent } from '../fixtures/data_drift_steps';
@@ -51,9 +53,7 @@ spaceTest.describe(
         );
         await assertDataDriftPageContent({ pageObjects, testData: driftTestData });
 
-        if (driftTestData.dataViewName !== undefined) {
-          await dataDrift.waitForDataViewTitle(driftTestData.dataViewName);
-        }
+        await dataDrift.waitForDataViewTitleIfNeeded(driftTestData.dataViewName);
 
         await dataDrift.waitForTotalDocumentCount('Reference', driftTestData.totalDocCount);
         await dataDrift.waitForTotalDocumentCount('Comparison', driftTestData.totalDocCount);

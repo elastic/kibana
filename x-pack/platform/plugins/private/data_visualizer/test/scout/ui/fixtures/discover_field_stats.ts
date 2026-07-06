@@ -8,6 +8,23 @@
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
+interface DiscoverSourceSelector {
+  loadSavedSearch(title: string): Promise<void>;
+  selectDataView(name: string): Promise<void>;
+}
+
+export const selectDiscoverSource = async (
+  discover: DiscoverSourceSelector,
+  sourceIndexOrSavedSearch: string,
+  isSavedSearch?: boolean
+) => {
+  if (isSavedSearch) {
+    await discover.loadSavedSearch(sourceIndexOrSavedSearch);
+  } else {
+    await discover.selectDataView(sourceIndexOrSavedSearch);
+  }
+};
+
 export const assertViewModeToggleNotExists = async (page: ScoutPage) => {
   await expect(page.testSubj.locator('dscViewModeToggle')).toBeHidden({ timeout: 2000 });
 };

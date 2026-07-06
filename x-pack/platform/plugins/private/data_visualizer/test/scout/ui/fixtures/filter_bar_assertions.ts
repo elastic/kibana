@@ -55,3 +55,15 @@ export const hasFilterBadge = async (
 
   return false;
 };
+
+export const removeFirstPresentFilter = async (page: ScoutPage, fields: string[]) => {
+  for (const field of fields) {
+    const filterBadge = page.testSubj.locator(`~filter & ~filter-key-${field}`);
+    if ((await filterBadge.count()) === 0) {
+      continue;
+    }
+    await filterBadge.click();
+    await page.testSubj.click('deleteFilter');
+    return;
+  }
+};

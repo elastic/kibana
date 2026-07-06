@@ -79,6 +79,14 @@ export class DataDrift {
     );
   }
 
+  async waitForDataViewTitleIfNeeded(dataViewName?: string) {
+    if (dataViewName === undefined) {
+      return;
+    }
+
+    await this.waitForDataViewTitle(dataViewName);
+  }
+
   async waitForTimeRangeSelectorSection() {
     await this.timeRangeSelectorSection.waitFor({ state: 'visible' });
   }

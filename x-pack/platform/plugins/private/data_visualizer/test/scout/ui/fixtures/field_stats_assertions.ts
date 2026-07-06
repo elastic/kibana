@@ -149,6 +149,28 @@ export const assertNumberFieldContents = async (
   await table.ensureDetailsClosed(fieldName);
 };
 
+export const assertMetricFieldsDocCounts = async (
+  table: DataVisualizerTable,
+  metricFields: Array<{ fieldName: string }>,
+  docCountFormatted: string | undefined
+) => {
+  if (docCountFormatted === undefined) {
+    return;
+  }
+
+  for (const fieldRow of metricFields) {
+    await assertNumberFieldContents(
+      table,
+      fieldRow.fieldName,
+      docCountFormatted,
+      undefined,
+      false,
+      false,
+      false
+    );
+  }
+};
+
 export const assertNonMetricFieldContents = async (
   table: DataVisualizerTable,
   fieldType: string,

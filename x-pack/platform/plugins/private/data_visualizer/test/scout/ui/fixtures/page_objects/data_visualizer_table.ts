@@ -345,6 +345,14 @@ export class DataVisualizerTable {
     });
   }
 
+  async ensureNumRowsPerPageIfNeeded(n?: 10 | 25 | 50) {
+    if (n === undefined) {
+      return;
+    }
+
+    await this.ensureNumRowsPerPage(n);
+  }
+
   async ensureNumRowsPerPage(n: 10 | 25 | 50) {
     await this.paginationButton.waitFor({ state: 'visible', timeout: 10_000 });
     await this.paginationButton.click();
