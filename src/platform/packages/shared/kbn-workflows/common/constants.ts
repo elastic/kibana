@@ -28,11 +28,6 @@ export const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID = 'workflows:ui:show
 export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStatsBar:enabled';
 
 /**
- * Hidden Advanced Setting gate for workflow versioning (change-history writes and read routes).
- */
-export const WORKFLOWS_VERSIONING_SETTING_ID = 'workflows:versioning:enabled';
-
-/**
  * Global Advanced Setting gating the Workflow Template Library tech preview.
  *
  * Registered as a global uiSetting (not per-space) so the same toggle is
