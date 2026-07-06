@@ -479,7 +479,7 @@ describe('buildExecutionHistoryItem', () => {
       ).toEqual(['rule-a', 'rule-b']);
     });
 
-    it('intersects on top of search narrowing', () => {
+    it('unions on top of search narrowing', () => {
       const event = eventWithRules(['rule-a', 'rule-b', 'rule-c', 'rule-d']);
       const historyItem = buildExecutionHistoryItem(
         event,
@@ -492,9 +492,74 @@ describe('buildExecutionHistoryItem', () => {
         },
         ['rule-b', 'rule-d']
       );
-      // Intersection of search-scoped {a,b,c} with mandatory {b,d} = {b}
+      // Union of search-scoped {a,b,c} with mandatory {b,d} = {a,b,c,d}
+      expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-a', 'rule-b', 'rule-c', 'rule-d']);
+      expect(historyItem?.totalRuleCount).toBe(4);
+    });
+  });
+
+  describe('union of search-derived and mandatory rule filters', () => {
+    const eventWithRules = (ruleIds: string[]): IValidatedEvent =>
+      buildEvent({
+        kibana: {
+          saved_objects: [
+            { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' },
+            ...ruleIds.map((id) => ({ type: RULE_SAVED_OBJECT_TYPE, id })),
+          ],
+          alerting_v2: { dispatcher: {} },
+        },
+      });
+
+    it('applies mandatoryRuleIds alone when there is no active search', () => {
+      const event = eventWithRules(['rule-a', 'rule-b', 'rule-c']);
+      const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, undefined, ['rule-b']);
       expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-b']);
       expect(historyItem?.totalRuleCount).toBe(1);
+    });
+
+    it('narrows to mandatoryRuleIds when search matches the policy but not any rules', () => {
+      const event = eventWithRules(['rule-a', 'rule-b', 'rule-c']);
+      const historyItem = buildExecutionHistoryItem(
+        event,
+        EMPTY_NAME_MAPS,
+        { policyIds: ['policy-1'], ruleIds: [], hasMatches: true, matches: null },
+        ['rule-b']
+      );
+      expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-b']);
+      expect(historyItem?.totalRuleCount).toBe(1);
+    });
+
+    it('returns all rules when policy is search-matched and no mandatoryRuleIds is provided', () => {      
+      const event = eventWithRules(['rule-a', 'rule-b']);
+      const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, {
+        policyIds: ['policy-1'],
+        ruleIds: [],
+        hasMatches: true,
+        matches: null,
+      });
+      expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-a', 'rule-b']);
+    });
+
+    it('returns all rules when neither search nor mandatoryRuleIds narrows', () => {
+      const event = eventWithRules(['rule-a', 'rule-b']);
+      const historyItem = buildExecutionHistoryItem(
+        event,
+        EMPTY_NAME_MAPS,
+        undefined,
+        undefined
+      );
+      expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-a', 'rule-b']);
+    });
+
+    it('returns null when the union does not intersect any event rules', () => {      
+      const event = eventWithRules(['rule-a']);
+      const historyItem = buildExecutionHistoryItem(
+        event,
+        EMPTY_NAME_MAPS,
+        { policyIds: [], ruleIds: ['rule-x'], hasMatches: true, matches: null },
+        ['rule-y']
+      );
+      expect(historyItem).toBeNull();
     });
   });
 });

@@ -83,13 +83,23 @@ export function collectIdsFromEvents(events: IValidatedEvent[]): {
 export function getRelevantRuleIdsFromLogEvent(
   policyId: string,
   allRuleIds: string[],
-  matchingSearchIds?: ResolvedSearchIds
+  matchingSearchIds?: ResolvedSearchIds,
+  mandatoryRuleIds?: string[]
 ): string[] {
-  if (!matchingSearchIds || matchingSearchIds.policyIds.includes(policyId)) {
-    return allRuleIds;
-  }
+  const searchNarrows = matchingSearchIds !== undefined 
+    && !matchingSearchIds.policyIds.includes(policyId);
+  const mandatoryActive = mandatoryRuleIds !== undefined && mandatoryRuleIds.length > 0;
 
-  return allRuleIds.filter((ruleId) => matchingSearchIds.ruleIds.includes(ruleId));
+  if (!searchNarrows && !mandatoryActive) {
+    return allRuleIds;
+  }  
+
+  const relevantRuleIds = new Set<string>([
+    ...(searchNarrows ? matchingSearchIds.ruleIds : []),
+    ...(mandatoryActive ? mandatoryRuleIds : []),
+  ]);
+
+  return allRuleIds.filter((id) => relevantRuleIds.has(id));
 }
 
 /**
@@ -128,15 +138,12 @@ export function buildExecutionHistoryItem(
     .filter((so) => so.type === RULE_SAVED_OBJECT_TYPE)
     .map((so) => so.id);
   const allRuleIds = [...referencedRuleIds, ...(dispatcher.rule_ids ?? [])].filter(isString);
-  const searchScopedRuleIds = getRelevantRuleIdsFromLogEvent(
+  const relevantRuleIds = getRelevantRuleIdsFromLogEvent(
     policyId,
     allRuleIds,
-    matchingSearchIds
+    matchingSearchIds,
+    mandatoryRuleIds
   );
-  const relevantRuleIds =
-    mandatoryRuleIds && mandatoryRuleIds.length > 0
-      ? searchScopedRuleIds.filter((id) => mandatoryRuleIds.includes(id))
-      : searchScopedRuleIds;
   if (relevantRuleIds.length === 0) return null;
 
   const totalRuleCount = relevantRuleIds.length;
