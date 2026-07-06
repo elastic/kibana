@@ -279,7 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(body.replacements).toEqual(expect.any(Object));
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
 
       // check if anonymization fields are working
@@ -313,7 +313,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(Object.values(body.replacements)).toEqual(['un-existent-host']);
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
     });
 

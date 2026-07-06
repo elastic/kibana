@@ -372,7 +372,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // Prompt and replacements
       expect(body.replacements).toBeDefined();
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
     });
 
@@ -425,7 +425,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // Prompt and replacements
       expect(body.replacements).toBeDefined();
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
     });
 
@@ -445,7 +445,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.vulnerabilities).toEqual([]);
       expect(body.summary.anomalies).toEqual([]);
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
     });
 
