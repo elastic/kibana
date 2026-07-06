@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
@@ -115,10 +115,69 @@ export function ContextualServiceMapSection({
     serviceName,
   });
 
+  const titleRow = (
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xs">
+          <h2>{SERVICE_MAP_PANEL_TITLE}</h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiLink href={fullMapHref} data-test-subj={exploreLinkTestSubj}>
+          {EXPLORE_IN_SERVICE_MAP_LABEL}
+        </EuiLink>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const controls = (
+    <ContextualServiceMapControls
+      baseMaxHops={baseMaxHops}
+      maxVisibleNodes={maxVisibleNodes}
+      onBaseMaxHopsChange={onBaseMaxHopsChange}
+      onMaxVisibleNodesChange={onMaxVisibleNodesChange}
+      onCollapseAll={resetExpansions}
+      hasExpandedNodes={expandedNodeIds.size > 0}
+    />
+  );
+
+  const mapGraphPanel = (
+    <EuiPanel
+      hasBorder
+      paddingSize="none"
+      css={
+        sectionHeight !== undefined
+          ? { overflow: 'hidden', height: '100%' }
+          : { overflow: 'hidden', height: panelHeight }
+      }
+      data-test-subj={embeddableContainerTestSubj}
+    >
+      <ServiceMapEmbeddable
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        environment={environment}
+        kuery={kuery}
+        serviceName={serviceName}
+        core={core}
+        enableContextualMap
+        contextualMapBaseMaxHops={baseMaxHops}
+        contextualMapMaxVisibleNodes={maxVisibleNodes}
+        onContextualMapBaseMaxHopsChange={onBaseMaxHopsChange}
+        onContextualMapMaxVisibleNodesChange={onMaxVisibleNodesChange}
+        contextualMapExpandedNodeIds={expandedNodeIds}
+        onContextualMapExpand={onExpand}
+        onContextualMapCollapse={onCollapse}
+        hideContextControls
+        showFocusMapInPopover
+        clearKueryOnPopoverNavigation
+        embeddableMinHeight={embeddableMinHeight}
+      />
+    </EuiPanel>
+  );
+
   return (
     <EuiPanel
       hasBorder
-      paddingSize="m"
       data-test-subj={sectionTestSubj}
       css={
         sectionHeight !== undefined
@@ -126,78 +185,25 @@ export function ContextualServiceMapSection({
           : undefined
       }
     >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        css={sectionHeight !== undefined ? { flex: 1, minHeight: 0 } : undefined}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3>{SERVICE_MAP_PANEL_TITLE}</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="primary"
-                href={fullMapHref}
-                data-test-subj={exploreLinkTestSubj}
-              >
-                {EXPLORE_IN_SERVICE_MAP_LABEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <ContextualServiceMapControls
-            baseMaxHops={baseMaxHops}
-            maxVisibleNodes={maxVisibleNodes}
-            onBaseMaxHopsChange={onBaseMaxHopsChange}
-            onMaxVisibleNodesChange={onMaxVisibleNodesChange}
-            onCollapseAll={resetExpansions}
-            hasExpandedNodes={expandedNodeIds.size > 0}
-          />
-        </EuiFlexItem>
-
-        <EuiFlexItem
-          grow={sectionHeight !== undefined}
-          css={sectionHeight !== undefined ? { minHeight: 0 } : undefined}
-        >
-          <EuiPanel
-            hasBorder
-            paddingSize="none"
-            css={
-              sectionHeight !== undefined
-                ? { overflow: 'hidden', height: '100%' }
-                : { overflow: 'hidden', height: panelHeight }
-            }
-            data-test-subj={embeddableContainerTestSubj}
-          >
-            <ServiceMapEmbeddable
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              environment={environment}
-              kuery={kuery}
-              serviceName={serviceName}
-              core={core}
-              enableContextualMap
-              contextualMapBaseMaxHops={baseMaxHops}
-              contextualMapMaxVisibleNodes={maxVisibleNodes}
-              onContextualMapBaseMaxHopsChange={onBaseMaxHopsChange}
-              onContextualMapMaxVisibleNodesChange={onMaxVisibleNodesChange}
-              contextualMapExpandedNodeIds={expandedNodeIds}
-              onContextualMapExpand={onExpand}
-              onContextualMapCollapse={onCollapse}
-              hideContextControls
-              showFocusMapInPopover
-              clearKueryOnPopoverNavigation
-              embeddableMinHeight={embeddableMinHeight}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {sectionHeight !== undefined ? (
+        <EuiFlexGroup direction="column" gutterSize="s" css={{ flex: 1, minHeight: 0 }}>
+          <EuiFlexItem grow={false}>{titleRow}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{controls}</EuiFlexItem>
+          <EuiFlexItem grow css={{ minHeight: 0 }}>
+            {mapGraphPanel}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>{titleRow}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiFlexItem grow={false}>{controls}</EuiFlexItem>
+              <EuiFlexItem>{mapGraphPanel}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </EuiPanel>
   );
 }

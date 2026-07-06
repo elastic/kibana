@@ -10,6 +10,9 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { ContextualServiceMapSection } from '../../service_map/contextual_map/contextual_service_map_section';
 
+/** Graph area height on service overview (default contextual map is 400px). */
+const SERVICE_OVERVIEW_CONTEXTUAL_MAP_PANEL_HEIGHT = 320;
+
 export function ServiceOverviewServiceMapSection() {
   const { serviceName } = useApmServiceContext();
   const {
@@ -27,6 +30,8 @@ export function ServiceOverviewServiceMapSection() {
       rangeTo={rangeTo}
       environment={environment}
       kuery={kuery}
+      panelHeight={SERVICE_OVERVIEW_CONTEXTUAL_MAP_PANEL_HEIGHT}
+      embeddableMinHeight={0}
       sectionTestSubj="apmServiceOverviewServiceMapSection"
       exploreLinkTestSubj="apmServiceOverviewExploreInServiceMap"
       embeddableContainerTestSubj="apmServiceOverviewServiceMapEmbeddableContainer"
