@@ -200,7 +200,13 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   const styles = {
     // Left column holds the back link + metadata; nudged down so the back link
     // sits a little below the top while the preview panel reaches the top edge.
-    leftColumn: css({ width: '30%', paddingTop: euiTheme.size.l }),
+    leftColumn: css({
+      flexBasis: 450,
+      maxWidth: 450,
+      minWidth: 0,
+      paddingTop: euiTheme.size.l,
+      width: '30%',
+    }),
     // 48px between the back link and the icons row (Figma "Content Container" gap).
     leftStack: css({ gap: euiTheme.size.xxxl }),
     // 32px between the title block and the details block (Figma "Container" gap).
