@@ -33,6 +33,8 @@ export interface TemplateDetailProps {
   slug: string;
   /** Called once the template body has loaded — e.g. to set breadcrumbs. */
   onLoaded?: (template: TemplateBody) => void;
+  /** Optional navigation control rendered at the top of the metadata column. */
+  backButton?: React.ReactNode;
 }
 
 /** App icons for the known solutions; unknown solutions render without one. */
@@ -50,7 +52,7 @@ const capitalize = (value: string): string =>
  * and category badges, step/trigger icons) plus a read-only preview of the
  * template's workflow definition.
  */
-export const TemplateDetail = React.memo<TemplateDetailProps>(({ slug, onLoaded }) => {
+export const TemplateDetail = React.memo<TemplateDetailProps>(({ slug, onLoaded, backButton }) => {
   const { data, isLoading, isError } = useTemplate(slug);
   const { euiTheme } = useEuiTheme();
 
@@ -99,6 +101,12 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(({ slug, onLoaded 
         <EuiFlexGroup gutterSize="m" alignItems="flexStart">
           <EuiFlexItem grow={false} css={{ width: '30%' }}>
             <EuiFlexGroup direction="column" gutterSize="m">
+              {backButton ? (
+                <EuiFlexItem grow={false} css={{ alignSelf: 'flex-start' }}>
+                  {backButton}
+                </EuiFlexItem>
+              ) : null}
+
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
                   <EuiFlexItem grow={false}>
@@ -190,29 +198,33 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(({ slug, onLoaded 
               height: '100%',
               border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
               backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+              boxSizing: 'border-box',
+              minHeight: 0,
+              overflow: 'hidden',
+              padding: euiTheme.size.s,
+              position: 'relative',
             }}
           >
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup direction="column" alignItems="center">
-                  <EuiFlexItem grow={false} css={{ padding: `${euiTheme.size.s} 0` }}>
-                    <EuiBadge color="warning" style={{ padding: `0 ${euiTheme.size.l}` }}>
-                      {i18n.translate('workflows.library.templateDetail.previewTitle', {
-                        defaultMessage: 'Preview',
-                      })}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow css={{ minHeight: 0, overflow: 'hidden' }}>
-                <WorkflowYamlPreview
-                  yaml={previewYaml}
-                  height="100%"
-                  data-test-subj="workflowLibraryTemplateDetail-preview"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiBadge
+              color="warning"
+              style={{
+                left: '50%',
+                padding: `0 ${euiTheme.size.l}`,
+                position: 'absolute',
+                top: euiTheme.size.s,
+                transform: 'translateX(-50%)',
+                zIndex: euiTheme.levels.content,
+              }}
+            >
+              {i18n.translate('workflows.library.templateDetail.previewTitle', {
+                defaultMessage: 'Preview',
+              })}
+            </EuiBadge>
+            <WorkflowYamlPreview
+              yaml={previewYaml}
+              height="100%"
+              data-test-subj="workflowLibraryTemplateDetail-preview"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

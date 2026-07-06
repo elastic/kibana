@@ -85,6 +85,18 @@ describe('TemplateDetail', () => {
     expect(screen.getByTestId('workflowLibraryTemplateDetail-version')).toHaveTextContent('v1.2.0');
   });
 
+  it('should render the optional back button in the metadata column', () => {
+    render(
+      <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
+        <TemplateDetail
+          slug="my-template"
+          backButton={<button type="button">{'Back to Library'}</button>}
+        />
+      </WorkflowsUiServicesProvider>
+    );
+    expect(screen.getByRole('button', { name: 'Back to Library' })).toBeInTheDocument();
+  });
+
   it('should render humanized category badges and the solution badge under their labels', () => {
     renderDetail();
     expect(screen.getByText('Solutions:')).toBeInTheDocument();

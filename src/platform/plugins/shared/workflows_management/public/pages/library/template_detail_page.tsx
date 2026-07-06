@@ -96,26 +96,29 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
       css={[kbnFullBodyHeightCss(), css({ backgroundColor: euiTheme.colors.backgroundBasePlain })]}
       data-test-subj="workflowLibraryTemplateDetailPage"
     >
-      <EuiFlexItem grow={false} css={css({ padding: `${euiTheme.size.l} ${euiTheme.size.l} 0` })}>
-        <EuiButtonEmpty
-          size="xs"
-          flush="left"
-          iconType="arrowLeft"
-          onClick={goToLibrary}
-          data-test-subj="workflowLibraryTemplateDetailBackButton"
-        >
-          {backToLibraryLabel}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
       <EuiFlexItem
         css={css({
           minHeight: 0,
           overflow: 'hidden',
-          padding: `${euiTheme.size.m} ${euiTheme.size.l} ${euiTheme.size.l}`,
+          padding: euiTheme.size.l,
           width: '100%',
         })}
       >
-        <TemplateDetail slug={slug} onLoaded={handleTemplateLoaded} />
+        <TemplateDetail
+          slug={slug}
+          onLoaded={handleTemplateLoaded}
+          backButton={
+            <EuiButtonEmpty
+              size="xs"
+              flush="left"
+              iconType="arrowLeft"
+              onClick={goToLibrary}
+              data-test-subj="workflowLibraryTemplateDetailBackButton"
+            >
+              {backToLibraryLabel}
+            </EuiButtonEmpty>
+          }
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
