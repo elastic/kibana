@@ -36,6 +36,28 @@ jest.mock('../ilm_phase_select/ilm_phase_select', () => ({
   },
 }));
 
+jest.mock('../../../../../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    core: {
+      docLinks: {
+        links: {
+          observability: {
+            downsamplingConcepts: 'https://www.elastic.co',
+          },
+        },
+      },
+    },
+    dependencies: {
+      start: {
+        streams: {
+          streamsRepositoryClient: {},
+        },
+      },
+    },
+    isServerless: false,
+  }),
+}));
+
 const DATA_TEST_SUBJ = 'streamsEditIlmPhasesFlyout';
 
 const tick = async () => {
