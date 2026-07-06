@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { debugTelemetryRoute } from './debug_telemetry';
 
-export const debugTelemetryRouteDefinitions = {
-  debugTelemetry: debugTelemetryRoute,
-};
+export const ASSET_CRITICALITY_UPDATED_TOOL_EVENT = 'asset_criticality_updated' as const;
 
-export type { DebugTelemetryResponse } from './debug_telemetry';
+export interface AssetCriticalityUpdatedToolEventData {
+  entityType: string;
+}
