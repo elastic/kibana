@@ -218,6 +218,7 @@ export const createParser = () => {
       }
     },
     newLine = function () {
+      if (ch == '\r') next(); // handle CRLF: skip \r before \n
       if (ch == '\n') next();
     },
     word = function () {
@@ -430,7 +431,7 @@ export const createParser = () => {
 
   let url = function () {
       let url = '';
-      while (ch && ch != '\n') {
+      while (ch && ch != '\n' && ch != '\r') {
         url += ch;
         next();
       }

@@ -1767,7 +1767,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -2738,7 +2738,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -3684,7 +3684,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -4965,7 +4965,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -11395,7 +11395,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -11457,7 +11457,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -11569,7 +11569,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -11656,7 +11656,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -11753,7 +11753,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -25474,7 +25474,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: Array of anonymization fields to update.
@@ -26818,7 +26818,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: List of prompts to be updated.
@@ -48363,7 +48363,7 @@ components:
         - params
     Security_Detections_API_RuleActionAlertsFilter:
       additionalProperties: true
-      description: |
+      description: |+
         Object containing an action’s conditional filters.
 
         - `timeframe` (object, optional): Object containing the time frame for when this action can be run.
@@ -51210,7 +51210,7 @@ components:
               - 10.0.2.15
               - fe80::21a6:63d3:d70e:e3ad
               - 127.0.0.1
-              - '::1'
+              - ::1
             mac:
               - 08:00:27:b1:1d:5a
             name: WinDev2104Eval
@@ -51631,7 +51631,7 @@ components:
       properties: {}
     Security_Endpoint_Management_API_Kuery:
       description: A KQL string.
-      example: 'united.endpoint.host.os.name : ''Windows'''
+      example: "united.endpoint.host.os.name : 'Windows'"
       type: string
     Security_Endpoint_Management_API_MetadataListResponse:
       example:
@@ -51690,7 +51690,7 @@ components:
                 id: 0cfead88e2024bd8a27476352b5ab264
                 ip:
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                   - 10.0.2.15
                   - fe80::2ac7:8e15:b957:2fa1
                 mac:
@@ -51774,7 +51774,7 @@ components:
                   - 10.0.2.15
                   - fe80::21a6:63d3:d70e:e3ad
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                 mac:
                   - 08:00:27:b1:1d:5a
                 name: WinDev2104Eval
@@ -55199,7 +55199,7 @@ components:
           example: Bad Request
           type: string
         message:
-          example: 'Invalid value ''foo'' supplied to: [...]'
+          example: "Invalid value 'foo' supplied to: [...]"
           type: string
         statusCode:
           example: 400
@@ -55216,7 +55216,10 @@ components:
           example: Unauthorized
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+          example: |-
+            [security_exception
+            	Root causes:
+            		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
           type: string
         statusCode:
           example: 401
@@ -55233,7 +55236,10 @@ components:
           example: Unauthorized
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+          example: |-
+            [security_exception
+            	Root causes:
+            		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
           type: string
         statusCode:
           example: 403
