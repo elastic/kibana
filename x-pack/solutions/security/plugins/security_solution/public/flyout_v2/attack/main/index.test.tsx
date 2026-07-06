@@ -13,7 +13,6 @@ import { AttackFlyout, JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID
 import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
-
 jest.mock('./footer', () => ({
   Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
     <button
