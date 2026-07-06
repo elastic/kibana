@@ -381,7 +381,7 @@ steps:
           EVAL_SUITE_ID: 'workflows'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_MODEL_GROUPS: *security_oss_models
           EVAL_SERVER_CONFIG_SET: 'evals_workflows'
         timeout_in_minutes: 60
         agents:
@@ -479,7 +479,7 @@ steps:
           EVAL_SUITE_ID: 'lead-generation'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_MODEL_GROUPS: *security_oss_models
           EVAL_SERVER_CONFIG_SET: 'evals_lead_generation'
         timeout_in_minutes: 60
         agents:
