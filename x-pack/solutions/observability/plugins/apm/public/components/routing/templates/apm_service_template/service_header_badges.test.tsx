@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { ServiceHeaderBadges } from './service_header_badges';
@@ -18,7 +18,6 @@ jest.mock('../../../../context/service_slo/use_service_slo_context', () => ({
   useServiceSloContext: () => mockUseServiceSloContext(),
 }));
 
-const mockNavigateToUrl = jest.fn();
 const mockUseApmPluginContext = jest.fn();
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => mockUseApmPluginContext(),
@@ -118,7 +117,6 @@ function setupMocks({
   mockUseApmPluginContext.mockReturnValue({
     core: {
       application: {
-        navigateToUrl: mockNavigateToUrl,
         capabilities: {
           slo: { read: canReadSlos },
           ml: { canGetJobs: canReadMlJobs },
@@ -168,7 +166,6 @@ function setupMocks({
 describe('ServiceHeaderBadges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockNavigateToUrl.mockClear();
   });
 
   it('shows alerts badge when there are active alerts', () => {
@@ -180,13 +177,12 @@ describe('ServiceHeaderBadges', () => {
     expect(badge).toHaveTextContent('5');
   });
 
-  it('navigates to alerts tab via SPA when the alerts badge is clicked', () => {
+  it('renders the alerts badge as a link to the alerts tab', () => {
     setupMocks({ alertsCount: 3 });
     renderBadges();
 
-    const badge = screen.getByTestId('serviceHeaderAlertsBadge');
-    fireEvent.click(badge);
-    expect(mockNavigateToUrl).toHaveBeenCalledWith('/services/test-service/alerts');
+    const href = screen.getByTestId('serviceHeaderAlertsBadge').closest('a')?.getAttribute('href');
+    expect(href).toBe(defaultProps.alertsTabHref);
   });
 
   it('hides alerts badge when alertsCount is 0', () => {
@@ -313,15 +309,6 @@ describe('ServiceHeaderBadges', () => {
     renderBadges();
 
     expect(screen.getByTestId('apmAnomaliesBadge').closest('a')).toBeNull();
-  });
-
-  it('renders the alerts badge as non-interactive when already on the alerts tab', () => {
-    setupMocks({ alertsCount: 3 });
-    renderBadges();
-
-    const badge = screen.getByTestId('serviceHeaderAlertsBadge');
-    fireEvent.click(badge);
-    expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
   it('hides anomalies badge when ML jobs cannot be read even if anomaly score data is present', () => {
