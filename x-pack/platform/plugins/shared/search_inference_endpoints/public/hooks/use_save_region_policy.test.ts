@@ -28,13 +28,20 @@ describe('useSaveRegionPolicy', () => {
   const mockPut = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
+  const mockAddDanger = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         http: { put: mockPut },
-        notifications: { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } },
+        notifications: {
+          toasts: {
+            addSuccess: mockAddSuccess,
+            addError: mockAddError,
+            addDanger: mockAddDanger,
+          },
+        },
       },
     });
   });
@@ -109,5 +116,30 @@ describe('useSaveRegionPolicy', () => {
       serverError,
       expect.objectContaining({ title: 'Failed to save region preferences' })
     );
+  });
+
+  it('shows a danger toast with the reason on a 409 conflict', async () => {
+    const conflictError = Object.assign(new Error('Conflict'), {
+      response: { status: 409 },
+      body: { message: 'Policy would deny endpoints currently in use.' },
+    });
+    mockPut.mockRejectedValue(conflictError);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useSaveRegionPolicy(), { wrapper: Wrapper });
+
+    act(() => {
+      result.current.mutate({ allowed_regions: [] });
+    });
+
+    await waitFor(() => expect(mockAddDanger).toHaveBeenCalledTimes(1));
+
+    expect(mockAddDanger).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Region policy update blocked',
+        text: 'Policy would deny endpoints currently in use.',
+      })
+    );
+    expect(mockAddError).not.toHaveBeenCalled();
   });
 });
