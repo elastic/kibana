@@ -18,7 +18,6 @@ import {
   DEFAULT_PRIMARY_LABELS_ALIGNMENT,
   DEFAULT_PRIMARY_POSITION,
   DEFAULT_PRIMARY_VALUE_ALIGNMENT,
-  DEFAULT_SPACING,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
 } from '../../../../transforms/charts/metric/defaults';
@@ -66,6 +65,7 @@ const NULLABLE_VIZ_ACCESSORS = [
 const ACCESSOR = 'metric_accessor';
 const TRENDLINE_LAYER_ID = `${DEFAULT_LAYER_ID}_trendline`;
 const SECONDARY_TRENDLINE_COLUMN = `${ACCESSOR}_secondary_trendlineX0`;
+const LEGACY_METRIC_SPACING = 'small';
 
 // `applyColorTo` only supports targeting the value or the background; other legacy values
 // (e.g. `bar`) are dropped by the transform.
@@ -146,7 +146,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
 
     // Absent sizing round-trips through the API as `auto`, which maps back to `valueFontMode: 'default'`.
     viz.valueFontMode = viz.valueFontMode ?? 'default';
-    viz.spacing = viz.spacing ?? DEFAULT_SPACING;
+    viz.spacing = viz.spacing ?? LEGACY_METRIC_SPACING;
 
     if (viz.breakdownByAccessor && viz.maxCols == null) {
       viz.maxCols = LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS;

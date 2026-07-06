@@ -85,6 +85,7 @@ const ACCESSOR = 'metric_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
+const LEGACY_METRIC_SPACING = 'small' as const;
 
 type MetricStyling = NonNullable<MetricConfig['styling']>;
 type MetricIconName = NonNullable<NonNullable<MetricStyling['icon']>['name']>;
@@ -189,7 +190,7 @@ function convertStylingToAPIFormat(
   const iconName = visualization.icon ? iconCompat.toAPI(visualization.icon) : undefined;
 
   return stripUndefined({
-    spacing: visualization.spacing ?? DEFAULT_SPACING,
+    spacing: visualization.spacing ?? LEGACY_METRIC_SPACING,
     icon: iconName
       ? {
           name: iconName,
