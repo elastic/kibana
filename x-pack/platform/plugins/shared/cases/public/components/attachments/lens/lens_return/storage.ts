@@ -17,7 +17,6 @@ export interface PendingLensAttach {
   caseOwner: string;
   savedObjectId: string;
   title: string;
-  createdAt: number;
 }
 
 const isPendingLensAttach = (value: unknown): value is PendingLensAttach => {
@@ -27,8 +26,7 @@ const isPendingLensAttach = (value: unknown): value is PendingLensAttach => {
     typeof record.caseId === 'string' &&
     typeof record.caseOwner === 'string' &&
     typeof record.savedObjectId === 'string' &&
-    typeof record.title === 'string' &&
-    typeof record.createdAt === 'number'
+    typeof record.title === 'string'
   );
 };
 

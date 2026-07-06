@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import type { EuiButtonProps } from '@elastic/eui';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { FormattedRelativePreferenceDate } from '../../../formatted_date';
 import { SavedObjectLink } from './saved_object_link';
@@ -33,7 +34,7 @@ export interface SavedObjectRowProps {
   /** Override the default "Attach" action button label. */
   actionLabel?: string;
   /** Override the default "Attach" action icon. */
-  actionIconType?: string;
+  actionIconType?: EuiButtonProps['iconType'];
 }
 
 const SavedObjectRowComponent: React.FC<SavedObjectRowProps> = ({

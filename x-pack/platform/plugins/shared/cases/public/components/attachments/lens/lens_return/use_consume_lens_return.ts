@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { first } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { useCreateAttachments } from '../../../../containers/use_create_attachments';
@@ -63,7 +63,7 @@ export const useConsumeLensReturn = ({ caseId }: UseConsumeLensReturnArgs): void
     let cancelled = false;
 
     const run = async () => {
-      const currentAppId = await currentAppId$.pipe(first()).toPromise();
+      const currentAppId = await firstValueFrom(currentAppId$, { defaultValue: undefined });
       if (cancelled || !currentAppId) {
         return;
       }

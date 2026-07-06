@@ -35,7 +35,6 @@ const validRecord = {
   caseOwner: 'cases',
   savedObjectId: 'lens-1',
   title: 'Top hosts',
-  createdAt: 1700000000000,
 };
 
 describe('pending lens attach storage', () => {

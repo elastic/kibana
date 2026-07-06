@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { LENS_ATTACHMENT_TYPE, LENS_SO_TYPE } from '../../../../constants/attachments';
+import { MAX_ATTACHMENT_ID_LENGTH, MAX_OWNER_LENGTH } from '../../../../constants';
 import { jsonValueSchema } from '../../../../schema_zod';
 import { buildSavedObjectMetadataSchema, TimeRangeSchema } from '../saved_object/v2';
 
@@ -20,7 +21,7 @@ export type LensPersistableAttachmentData = z.infer<typeof LensPersistableAttach
 export const LensPersistableAttachmentPayloadSchema = z
   .object({
     type: z.literal(LENS_ATTACHMENT_TYPE),
-    owner: z.string(),
+    owner: z.string().max(MAX_OWNER_LENGTH),
     data: LensPersistableAttachmentDataSchema,
   })
   .strict();
@@ -48,8 +49,8 @@ export type LensSavedObjectAttachmentMetadata = z.infer<
 export const LensSavedObjectAttachmentPayloadSchema = z
   .object({
     type: z.literal(LENS_ATTACHMENT_TYPE),
-    owner: z.string(),
-    attachmentId: z.string(),
+    owner: z.string().max(MAX_OWNER_LENGTH),
+    attachmentId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
     metadata: LensSavedObjectAttachmentMetadataSchema,
     data: LensSavedObjectAttachmentDataSchema.optional(),
   })

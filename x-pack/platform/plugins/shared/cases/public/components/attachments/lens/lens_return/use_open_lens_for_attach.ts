@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { first } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsMainApplication } from '../../../../common/hooks';
 import type { FoundSavedObject } from '../../common/saved_object/types';
@@ -50,7 +50,7 @@ export const useOpenLensForAttach = ({ caseId, caseOwner }: UseOpenLensForAttach
       if (!stateTransfer) {
         return;
       }
-      const currentAppId = await currentAppId$.pipe(first()).toPromise();
+      const currentAppId = await firstValueFrom(currentAppId$, { defaultValue: undefined });
       if (!currentAppId) {
         return;
       }
@@ -61,7 +61,6 @@ export const useOpenLensForAttach = ({ caseId, caseOwner }: UseOpenLensForAttach
         caseOwner,
         savedObjectId: savedObject.id,
         title,
-        createdAt: Date.now(),
       });
 
       // Path-based navigation to the Lens edit route for the existing SO.

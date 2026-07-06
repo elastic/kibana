@@ -28,7 +28,6 @@ const pending = {
   caseOwner: 'cases',
   savedObjectId: 'lens-1',
   title: 'Top hosts',
-  createdAt: Date.now(),
 };
 
 describe('useConsumeLensReturn', () => {
