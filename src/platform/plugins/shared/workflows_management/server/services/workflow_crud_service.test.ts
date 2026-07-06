@@ -89,7 +89,6 @@ const makeDeps = (
       asScoped: jest.fn(),
       asSystemUser: jest.fn(),
     } as any,
-    workflowVersioningEnabled: true,
     ...depsOverrides,
   };
   return { deps, client };
@@ -115,39 +114,6 @@ const lightweightWorkflowYaml = [
 ].join('\n');
 
 describe('WorkflowCrudService', () => {
-  describe('logWorkflowChangesAfterWrite', () => {
-    it('does not touch change history when workflow versioning is disabled', async () => {
-      const asScoped = jest.fn(() => {
-        throw new Error('asScoped should not be called when versioning is disabled');
-      });
-      const asSystemUser = jest.fn(() => {
-        throw new Error('asSystemUser should not be called when versioning is disabled');
-      });
-      const { deps } = makeDeps(undefined, {
-        workflowVersioningEnabled: false,
-        changeHistoryService: {
-          isInitialized: () => false,
-          initialize: jest.fn().mockResolvedValue(undefined),
-          getHistory: jest.fn(),
-          asScoped,
-          asSystemUser,
-        },
-      });
-      const service = new WorkflowCrudService(deps);
-
-      await service.logWorkflowChangesAfterWrite({
-        workflows: [{ id: 'wf-1', document: makeSource() }],
-        action: WorkflowChangeHistoryAction.workflowUpdate,
-        spaceId: 'default',
-        timestamp: new Date(),
-      });
-
-      expect(asScoped).not.toHaveBeenCalled();
-      expect(asSystemUser).not.toHaveBeenCalled();
-      expect(mockedLogWorkflowChanges).not.toHaveBeenCalled();
-    });
-  });
-
   describe('prepareWorkflowDocumentForStorage', () => {
     it('uses lightweight validation only when explicitly requested', async () => {
       const { deps } = makeDeps();
@@ -1481,31 +1447,6 @@ describe('WorkflowCrudService', () => {
       expect(client.index).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({ version: 13, enabled: false }),
-        })
-      );
-    });
-
-    it('does not increment version when workflow versioning uiSetting is disabled', async () => {
-      const { deps, client } = makeDeps(undefined, { workflowVersioningEnabled: false });
-      client.search.mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              _id: 'wf-1',
-              _source: makeSource({ version: 12 }),
-              _seq_no: 2,
-              _primary_term: 1,
-            },
-          ],
-        },
-      });
-
-      const service = new WorkflowCrudService(deps);
-      await service.updateWorkflow('wf-1', { enabled: false }, 'default', request);
-
-      expect(client.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ version: 12, enabled: false }),
         })
       );
     });
