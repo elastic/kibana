@@ -24,7 +24,6 @@ import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
@@ -40,14 +39,11 @@ import {
 } from '../common/constants';
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
-import { registerRules } from './lib/sig_events/rules/register_rules';
-import { getSigEventsTuningConfig } from './lib/sig_events/helpers/get_sig_events_tuning_config';
+import { registerRules } from './lib/significant_events/rules/register_rules';
+import { getSignificantEventsTuningConfig } from './lib/significant_events/helpers/get_significant_events_tuning_config';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
-import {
-  isSignificantEventsAlertingV2Active,
-  logAlertingV2PluginUnavailable,
-  readSignificantEventsAlertingV2UiEnabled,
-} from './lib/sig_events/significant_events_alerting_v2';
+import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
+import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
@@ -59,7 +55,11 @@ import type {
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
-import { KnowledgeIndicatorService, initializeKnowledgeIndicatorsTemplate } from './lib/streams/ki';
+import {
+  type KnowledgeIndicatorClient,
+  KnowledgeIndicatorService,
+  initializeKnowledgeIndicatorsTemplate,
+} from './lib/streams/ki';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
@@ -67,7 +67,7 @@ import {
   createSignificantEventsClients,
   createSignificantEventsServices,
   initializeSignificantEventsTemplates,
-} from './lib/sig_events/significant_events_clients';
+} from './lib/significant_events/significant_events_clients';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { createMemoryToolsOptions, registerStreamsAgentBuilder } from './agent_builder/register';
@@ -87,14 +87,17 @@ import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 import { isInvestigationEnabled } from './lib/investigations/is_investigation_enabled';
 import { installInvestigationWorkflow } from './lib/investigations/install_investigation_workflow';
 import {
-  STREAMS_INVESTIGATION_ENABLED_FLAG,
-  STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
+  SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG,
+  SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
 } from '../common/feature_flags';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StreamsPluginSetup {}
+export interface StreamsPluginSetup {
+  registerKnowledgeIndicatorClientProvider(
+    provider: (request: KibanaRequest) => Promise<KnowledgeIndicatorClient>
+  ): void;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginStart {}
 
@@ -117,6 +120,7 @@ export class StreamsPlugin
   private patternExtractionService?: PatternExtractionService;
   private streamsGetScopedClients?: GetScopedClients;
   private subscriptions: Subscription[] = [];
+  private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClient>;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -202,7 +206,7 @@ export class StreamsPlugin
           rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
         }),
         contentService.getClient(),
-        getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
+        getSignificantEventsTuningConfig(globalUiSettingsClient, this.logger),
       ]);
 
       const space = pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -213,67 +217,42 @@ export class StreamsPlugin
         space,
       });
 
-      let significantEventsAlertingV2StatePromise:
-        | Promise<{
-            alertingV2UiEnabled: boolean;
-            alertingV2Active: boolean;
-            alertingV2RulesClient?: RulesClientApi;
-          }>
-        | undefined;
+      const getAlertingRulesClient = async () =>
+        pluginsStart.alerting.getRulesClientWithRequestInSpace(
+          request,
+          DEFAULT_SPACE_ID,
+          rulesClientOptions
+        );
 
-      const getSignificantEventsAlertingV2State = () => {
-        significantEventsAlertingV2StatePromise ??= (async () => {
-          const alertingV2UiEnabled = await readSignificantEventsAlertingV2UiEnabled(
-            uiSettingsClient,
-            this.logger
-          );
-          const alertingV2RulesClient = pluginsStart.alertingVTwo
-            ? await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
-                request,
-                DEFAULT_SPACE_ID
-              )
-            : undefined;
+      const getAlertingV2RulesClient = async () =>
+        pluginsStart.alertingVTwo
+          ? pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID)
+          : undefined;
 
-          if (alertingV2UiEnabled && !alertingV2RulesClient) {
-            logAlertingV2PluginUnavailable(this.logger);
-          }
+      const resolveSignificantEventsAlertingContext =
+        createSignificantEventsAlertingContextResolver({
+          uiSettingsClient,
+          getAlertingRulesClient,
+          getAlertingV2RulesClient,
+          logger: this.logger,
+        });
 
-          return {
-            alertingV2UiEnabled,
-            alertingV2Active: isSignificantEventsAlertingV2Active(
-              alertingV2UiEnabled,
-              alertingV2RulesClient
-            ),
-            alertingV2RulesClient,
+      const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
+        knowledgeIndicatorService.getClient({
+          esClient: scopedClusterClient.asInternalUser,
+          soClient,
+          context,
+          config: tuningConfig,
+        });
+
+      let kiClientPromise: ReturnType<typeof createKnowledgeIndicatorClient> | undefined;
+      const getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient> = this.kiProvider
+        ? () => this.kiProvider!(request)
+        : () => {
+            kiClientPromise ??= (async () =>
+              createKnowledgeIndicatorClient(await resolveSignificantEventsAlertingContext()))();
+            return kiClientPromise;
           };
-        })();
-        return significantEventsAlertingV2StatePromise;
-      };
-
-      let kiClientPromise: ReturnType<typeof knowledgeIndicatorService.getClient> | undefined;
-      const getKnowledgeIndicatorClient = () => {
-        kiClientPromise ??= (async () => {
-          const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
-          const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
-            request,
-            DEFAULT_SPACE_ID,
-            rulesClientOptions
-          );
-          return knowledgeIndicatorService.getClient({
-            esClient: scopedClusterClient.asInternalUser,
-            soClient,
-            alertingRulesClient: rulesClient,
-            alertingV2RulesClient,
-            config: tuningConfig,
-          });
-        })();
-        return kiClientPromise;
-      };
-
-      const getAlertingV2RulesClient = async (): Promise<RulesClientApi | undefined> => {
-        const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
-        return alertingV2RulesClient;
-      };
 
       const license = await licensing.getLicense();
       const isSecurityEnabled = license.getFeature('security').isEnabled;
@@ -297,11 +276,11 @@ export class StreamsPlugin
         soClient,
         attachmentClient,
         streamsClient,
+        getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
         ...significantEventsClients,
         inferenceClient,
         contentClient,
-        getAlertingV2RulesClient,
         fieldsMetadataClient,
         licensing,
         uiSettingsClient,
@@ -585,7 +564,11 @@ export class StreamsPlugin
       logger: this.logger,
     });
 
-    return {};
+    return {
+      registerKnowledgeIndicatorClientProvider: (provider) => {
+        this.kiProvider = provider;
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: StreamsPluginStartDependencies): StreamsPluginStart {
@@ -619,7 +602,7 @@ export class StreamsPlugin
     // The initial flag state is handled by the startup install/registration below,
     // hence `skip(1)`.
     const memoryEnabled$ = core.featureFlags
-      .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
+      .getBooleanValue$(SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
       .pipe(
         distinctUntilChanged(),
         skip(1),
@@ -627,7 +610,7 @@ export class StreamsPlugin
       );
 
     const investigationEnabled$ = core.featureFlags
-      .getBooleanValue$(STREAMS_INVESTIGATION_ENABLED_FLAG, false)
+      .getBooleanValue$(SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG, false)
       .pipe(
         distinctUntilChanged(),
         skip(1),
