@@ -159,6 +159,7 @@ export class TaskStore {
   private _invalidationSoClient?: SavedObjectsClientContract;
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
+  // @ts-expect-error requestTimeouts is no longer used since removing update_by_query strategy
   private requestTimeouts: RequestTimeoutsConfig;
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
@@ -1245,55 +1246,6 @@ export class TaskStore {
       }),
     });
     return body;
-  }
-
-  public async updateByQuery(
-    opts: UpdateByQuerySearchOpts = {},
-    updateByQueryOpts: UpdateByQueryOpts = {}
-  ): Promise<UpdateByQueryResult> {
-    return this.executionContextRunner.run(() => this._updateByQuery(opts, updateByQueryOpts), {
-      id: 'update-by-query',
-    });
-  }
-
-  private async _updateByQuery(
-    opts: UpdateByQuerySearchOpts = {},
-    { max_docs: max_docs }: UpdateByQueryOpts = {}
-  ): Promise<UpdateByQueryResult> {
-    const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
-    const { sort, ...rest } = opts;
-    try {
-      const { total, updated, version_conflicts } = await this.esClient.updateByQuery(
-        {
-          index: this.index,
-          ignore_unavailable: true,
-          refresh: true,
-          conflicts: 'proceed',
-          ...rest,
-          max_docs,
-          query,
-          // @ts-expect-error According to the docs, sort should be a comma-separated list of fields and goes in the querystring.
-          // However, this one is using a "body" format?
-          body: { sort },
-        },
-        { requestTimeout: this.requestTimeouts.update_by_query, retryOnTimeout: false }
-      );
-
-      const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(
-        updated,
-        version_conflicts,
-        max_docs
-      );
-
-      return {
-        total: total || 0,
-        updated: updated || 0,
-        version_conflicts: conflictsCorrectedForContinuation,
-      };
-    } catch (e) {
-      this.errors$.next(e);
-      throw e;
-    }
   }
 
   public async getDocVersions(esIds: string[]): Promise<Map<string, ConcreteTaskInstanceVersion>> {

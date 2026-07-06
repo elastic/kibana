@@ -35,7 +35,6 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk } from './lib/result_type';
-import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MsearchError } from './lib/errors';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import type {
@@ -4256,44 +4255,6 @@ describe('TaskStore', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         "[report][id] Failed to validate the task's state. Allowing read operation to proceed because allow_reading_invalid_state is true. Error: [TaskValidator] failed to migrate to version 1 because the data returned from the up migration doesn't match the schema: [foo]: expected value of type [string] but got [number]"
       );
-    });
-  });
-
-  describe('updateByQuery', () => {
-    let store: TaskStore;
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-
-    beforeAll(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      store = new TaskStore({
-        logger: mockLogger(),
-        index: 'tasky',
-        taskManagerId: '',
-        serializer,
-        esClient,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-        adHocTaskCounter,
-        allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
-        savedObjectsService: coreStart.savedObjects,
-        security: coreStart.security,
-        getIsSecurityEnabled: () => true,
-        executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
-      });
-    });
-    test('should pass requestTimeout and retryOnTimeout', async () => {
-      esClient.updateByQuery.mockResponse({
-        hits: { hits: [], total: 0, updated: 100, version_conflicts: 0 },
-      } as UpdateByQueryResponse);
-      await store.updateByQuery({ script: { source: '' } }, { max_docs: 10 });
-      expect(esClient.updateByQuery).toHaveBeenCalledWith(expect.any(Object), {
-        requestTimeout: 1000,
-        retryOnTimeout: false,
-      });
     });
   });
 

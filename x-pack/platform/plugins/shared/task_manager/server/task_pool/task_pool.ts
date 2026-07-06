@@ -20,7 +20,6 @@ import { isTaskSavedObjectNotFoundError } from '../lib/is_task_not_found_error';
 import type { TaskManagerStat } from '../task_events';
 import type { ICapacity } from './types';
 import { CLAIM_STRATEGY_MGET } from '../config';
-import { WorkerCapacity } from './worker_capacity';
 import { CostCapacity } from './cost_capacity';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 
@@ -75,7 +74,7 @@ export class TaskPool {
         break;
 
       default:
-        this.capacityCalculator = new WorkerCapacity({
+        this.capacityCalculator = new CostCapacity({
           capacity$: opts.capacity$,
           logger: this.logger,
         });

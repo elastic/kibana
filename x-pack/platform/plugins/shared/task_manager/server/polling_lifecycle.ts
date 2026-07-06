@@ -18,10 +18,7 @@ import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
 import type { TaskManagerConfig } from './config';
-import {
-  CLAIM_STRATEGY_UPDATE_BY_QUERY,
-  WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS,
-} from './config';
+import { WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS } from './config';
 
 import type {
   TaskMarkRunning,
@@ -51,7 +48,6 @@ import type { ApiKeyStrategy } from './api_key_strategy';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import type { TaskTypeDictionary } from './task_type_dictionary';
-import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import type { ClaimOwnershipResult } from './task_claimers';
 import type { TaskPartitioner } from './lib/task_partitioner';
@@ -210,15 +206,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.taskClaiming.events.subscribe(emitEvent);
 
     let pollIntervalDelay$: Observable<number> | undefined;
-    if (claimStrategy === CLAIM_STRATEGY_UPDATE_BY_QUERY) {
-      pollIntervalDelay$ = delayOnClaimConflicts(
-        this.capacityConfiguration$,
-        this.pollIntervalConfiguration$,
-        this.events$,
-        config.version_conflict_threshold,
-        config.monitored_stats_running_average_window
-      ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
-    }
 
     this.poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,

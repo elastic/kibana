@@ -110,8 +110,6 @@ export class TaskClaiming {
     this.taskClaimer = getTaskClaimer(this.logger, opts.strategy);
     this.events$ = new Subject<TaskClaim>();
     this.taskPartitioner = opts.taskPartitioner;
-
-    this.logger.info(`using task claiming strategy: ${opts.strategy}`);
   }
 
   private partitionIntoClaimingBatches(definitions: TaskTypeDictionary): TaskClaimingBatches {
