@@ -10,7 +10,9 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('Getting user profile when security is disabled in Elasticsearch', () => {
+  describe('Getting user profile when security is disabled in Elasticsearch', function () {
+    this.tags('skipFIPS');
+
     it('returns 404 for unauthenticated requests', async () => {
       await supertestWithoutAuth.get('/internal/security/user_profile').expect(404);
     });

@@ -112,6 +112,8 @@ export type {
   DatasourceStates,
   DatasourceState,
   TextBasedField,
+  ColumnBuildHints,
+  BuildColumnBaseOptions,
 } from './datasources/types';
 
 export type {
@@ -257,6 +259,7 @@ export {
   isPersistedByReferenceAnnotationsLayer,
   isPersistedByValueAnnotationsLayer,
   isPersistedLinkedByValueAnnotationsLayer,
+  isRuntimeByReferenceAnnotationsLayer,
 } from './visualizations/xy/persistence';
 export type {
   LensEmbeddableInput,
@@ -388,6 +391,7 @@ export {
   LENS_PARTITION_DEFAULT_PERCENT_DECIMALS,
 } from './visualizations/partition/constants';
 export {
+  LENS_TAGCLOUD_ID,
   TAGCLOUD_ORIENTATION,
   TAGCLOUD_SCALE_OPTIONS,
   LENS_TAGCLOUD_DEFAULT_STATE,

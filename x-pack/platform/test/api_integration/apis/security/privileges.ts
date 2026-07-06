@@ -88,6 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_manage_templates',
       ],
       observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+      observabilityAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
       agentBuilder: [
         'all',
         'read',
@@ -115,6 +116,8 @@ export default function ({ getService }: FtrProviderContext) {
         'workflow_read',
         'workflow_execution_read',
         'workflow_execution_cancel',
+        'workflow_read_managed',
+        'workflow_execution_read_managed',
         'workflow_update_managed',
       ],
       searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],

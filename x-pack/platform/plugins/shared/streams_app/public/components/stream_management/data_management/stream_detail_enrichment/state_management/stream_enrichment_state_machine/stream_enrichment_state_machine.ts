@@ -19,6 +19,9 @@ import {
   addDeterministicCustomIdentifiers,
   addDeterministicCustomIdentifiersFromIngestProcessing,
   checkAdditiveChanges,
+  conditionToESQL,
+  convertUIStepsToDSL,
+  isConditionBlock,
   validateStreamlang,
   validateStreamlangModeCompatibility,
 } from '@kbn/streamlang';
@@ -50,6 +53,7 @@ import {
   createDataSourceMachineImplementations,
   dataSourceMachine,
 } from '../data_source_state_machine';
+import { findConditionById } from '../data_source_state_machine/fetch_more_actor';
 import { interactiveModeMachine } from '../interactive_mode_machine';
 import { createInteractiveModeMachineImplementations } from '../interactive_mode_machine/interactive_mode_machine';
 import {
@@ -297,6 +301,8 @@ export const streamEnrichmentMachine = setup({
     sendResetToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
 
+    fetchMoreSamples: getPlaceholderFor(createFetchMoreSamplesAction),
+
     filterByCondition: ({ context }, params: { conditionId: string }) => {
       context.interactiveModeRef?.send({
         type: 'step.filterByCondition',
@@ -495,6 +501,9 @@ export const streamEnrichmentMachine = setup({
               on: {
                 'simulation.refresh': {
                   actions: [{ type: 'refreshDataSources' }],
+                },
+                'simulation.fetchMore': {
+                  actions: [{ type: 'fetchMoreSamples' }],
                 },
               },
               states: {
@@ -712,6 +721,7 @@ export const createStreamEnrichmentMachineImplementations = ({
   actions: {
     refreshDefinition,
     syncUrlState: createUrlSyncAction({ urlStateStorageContainer }),
+    fetchMoreSamples: createFetchMoreSamplesAction(),
     notifyUpsertStreamSuccess: createUpsertStreamSuccessNofitier({
       toasts: core.notifications.toasts,
     }),
@@ -720,6 +730,33 @@ export const createStreamEnrichmentMachineImplementations = ({
     }),
   },
 });
+
+function createFetchMoreSamplesAction() {
+  return ({ context }: { context: StreamEnrichmentContextType }) => {
+    const selectedConditionId = context.simulatorRef.getSnapshot().context.selectedConditionId;
+    if (!selectedConditionId) return;
+
+    const steps = context.simulatorRef.getSnapshot().context.steps;
+    const condition = findConditionById(steps, selectedConditionId);
+    if (!condition) return;
+
+    const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
+    if (!activeDataSourceRef) return;
+
+    const conditionIndex = steps.findIndex(
+      (s) => isConditionBlock(s) && s.customIdentifier === selectedConditionId
+    );
+    const stepsBeforeCondition = conditionIndex > 0 ? steps.slice(0, conditionIndex) : [];
+    const processingSteps = convertUIStepsToDSL(stepsBeforeCondition);
+    const conditionEsql = conditionToESQL(condition);
+
+    activeDataSourceRef.send({
+      type: 'dataSource.fetchMore',
+      conditionEsql,
+      processingSteps,
+    });
+  };
+}
 
 const hasChanges = (nextStreamlangDSL: StreamlangDSL, previousStreamlangDSL: StreamlangDSL) => {
   const isValidSchema = isStreamlangDSLSchema(nextStreamlangDSL);

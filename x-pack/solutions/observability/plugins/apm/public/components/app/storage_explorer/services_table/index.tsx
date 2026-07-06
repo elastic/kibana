@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { downloadJson } from '../../../../utils/download_json';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
@@ -41,7 +42,6 @@ import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { SizeLabel } from './size_label';
 import { joinByKey } from '../../../../../common/utils/join_by_key';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 interface StorageExplorerItem {
   serviceName: string;
@@ -235,21 +235,24 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
         </EuiScreenReaderOnly>
       ),
       render: ({ serviceName }: { serviceName: string }) => {
+        const isExpanded = Boolean(itemIdToExpandedRowMap[serviceName]);
+        const toggleLabel = isExpanded
+          ? i18n.translate('xpack.apm.storageExplorer.table.collapse', {
+              defaultMessage: 'Collapse',
+            })
+          : i18n.translate('xpack.apm.storageExplorer.table.expand', {
+              defaultMessage: 'Expand',
+            });
+
         return (
-          <EuiButtonIcon
-            data-test-subj={`storageDetailsButton_${serviceName}`}
-            onClick={() => toggleRowDetails(serviceName)}
-            aria-label={
-              itemIdToExpandedRowMap[serviceName]
-                ? i18n.translate('xpack.apm.storageExplorer.table.collapse', {
-                    defaultMessage: 'Collapse',
-                  })
-                : i18n.translate('xpack.apm.storageExplorer.table.expand', {
-                    defaultMessage: 'Expand',
-                  })
-            }
-            iconType={itemIdToExpandedRowMap[serviceName] ? 'chevronSingleUp' : 'chevronSingleDown'}
-          />
+          <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj={`storageDetailsButton_${serviceName}`}
+              onClick={() => toggleRowDetails(serviceName)}
+              aria-label={toggleLabel}
+              iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+            />
+          </EuiToolTip>
         );
       },
     },

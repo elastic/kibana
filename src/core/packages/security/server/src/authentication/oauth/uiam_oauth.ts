@@ -52,6 +52,7 @@ export interface UiamOAuthConnectionResponse {
 
 export interface CreateUiamOAuthClientParams {
   resource: string;
+  project_id: string;
   client_name?: string;
   client_type?: UiamOAuthClientType;
   client_metadata?: Record<string, string>;

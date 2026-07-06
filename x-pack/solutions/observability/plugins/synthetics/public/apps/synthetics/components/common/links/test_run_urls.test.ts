@@ -58,6 +58,50 @@ describe('getTestRunDetailRelativeLink', () => {
       })
     ).toBe('/monitor/mon-1/test-run/cg-1?spaceId=team-a');
   });
+
+  it('appends remoteName when provided so the destination page can route the query at the correct cluster', () => {
+    expect(
+      getTestRunDetailRelativeLink({
+        monitorId: 'mon-1',
+        checkGroup: 'cg-1',
+        locationId: 'loc-1',
+        remoteName: 'cluster-one',
+      })
+    ).toBe('/monitor/mon-1/test-run/cg-1?locationId=loc-1&remoteName=cluster-one');
+  });
+
+  it('omits remoteName when it is an empty string', () => {
+    expect(
+      getTestRunDetailRelativeLink({
+        monitorId: 'mon-1',
+        checkGroup: 'cg-1',
+        locationId: 'loc-1',
+        remoteName: '',
+      })
+    ).toBe('/monitor/mon-1/test-run/cg-1?locationId=loc-1');
+  });
+
+  it('appends spaceId and remoteName together when both are provided', () => {
+    expect(
+      getTestRunDetailRelativeLink({
+        monitorId: 'mon-1',
+        checkGroup: 'cg-1',
+        locationId: 'loc-1',
+        spaceId: 'team-a',
+        remoteName: 'cluster-one',
+      })
+    ).toBe('/monitor/mon-1/test-run/cg-1?locationId=loc-1&spaceId=team-a&remoteName=cluster-one');
+  });
+
+  it('keeps remoteName even when locationId is undefined', () => {
+    expect(
+      getTestRunDetailRelativeLink({
+        monitorId: 'mon-1',
+        checkGroup: 'cg-1',
+        remoteName: 'cluster-one',
+      })
+    ).toBe('/monitor/mon-1/test-run/cg-1?remoteName=cluster-one');
+  });
 });
 
 describe('getTestRunDetailLink', () => {
@@ -71,5 +115,19 @@ describe('getTestRunDetailLink', () => {
         spaceId: 'team-a',
       })
     ).toBe('/s/foo/app/synthetics/monitor/mon-1/test-run/cg-1?locationId=loc-1&spaceId=team-a');
+  });
+
+  it('prefixes basePath and reuses the relative link, including remoteName', () => {
+    expect(
+      getTestRunDetailLink({
+        basePath: '/s/foo',
+        monitorId: 'mon-1',
+        checkGroup: 'cg-1',
+        locationId: 'loc-1',
+        remoteName: 'cluster-one',
+      })
+    ).toBe(
+      '/s/foo/app/synthetics/monitor/mon-1/test-run/cg-1?locationId=loc-1&remoteName=cluster-one'
+    );
   });
 });

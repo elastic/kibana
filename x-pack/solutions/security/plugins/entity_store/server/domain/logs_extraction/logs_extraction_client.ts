@@ -10,6 +10,7 @@ import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import { entityStoreMetrics } from '../../monitor/metrics';
 import type {
   EntityType,
   ManagedEntityDefinition,
@@ -38,11 +39,12 @@ import {
   resolveMainExtractionWindow,
   validateExtractionWindow,
 } from './extraction_window';
-import { capAtMaxLogsPerWindow } from './effective_page_limits';
+import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_limits';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
+import { resolveClosedIndexAdjustments } from '../../infra/elasticsearch/resolve_closed_indices';
 import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
@@ -57,7 +59,7 @@ import {
   type EntityStoreGlobalStateClient,
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
-import type { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
+import type { RemoteLogsExtractionClient } from './remote';
 import { EntityStoreNotRunningError } from '../errors';
 import type { LogExtractionUpdateParams } from '../../routes/constants';
 
@@ -79,6 +81,7 @@ interface LogsExtractionOptions {
 
 interface ExtractedLogsSummarySuccess {
   success: true;
+  isRemote: boolean;
   count: number;
   pages: number;
   scannedIndices: string[];
@@ -89,6 +92,7 @@ interface ExtractedLogsSummarySuccess {
 
 interface ExtractedLogsSummaryError {
   success: false;
+  isRemote: boolean;
   error: Error;
 }
 
@@ -101,7 +105,7 @@ export interface LogsExtractionClientDependencies {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
-  ccsLogsExtractionClient: CcsLogsExtractionClient;
+  remoteLogsExtractionClient: RemoteLogsExtractionClient;
 }
 
 export class LogsExtractionClient {
@@ -111,8 +115,7 @@ export class LogsExtractionClient {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
-  ccsLogsExtractionClient: CcsLogsExtractionClient;
-
+  remoteLogsExtractionClient: RemoteLogsExtractionClient;
   constructor({
     logger,
     namespace,
@@ -120,7 +123,7 @@ export class LogsExtractionClient {
     dataViewsService,
     engineDescriptorClient,
     globalStateClient,
-    ccsLogsExtractionClient,
+    remoteLogsExtractionClient,
   }: LogsExtractionClientDependencies) {
     this.logger = logger;
     this.namespace = namespace;
@@ -128,7 +131,7 @@ export class LogsExtractionClient {
     this.dataViewsService = dataViewsService;
     this.engineDescriptorClient = engineDescriptorClient;
     this.globalStateClient = globalStateClient;
-    this.ccsLogsExtractionClient = ccsLogsExtractionClient;
+    this.remoteLogsExtractionClient = remoteLogsExtractionClient;
   }
 
   private async getLogExtractionConfigAndState(
@@ -148,15 +151,18 @@ export class LogsExtractionClient {
   ): Promise<ExtractedLogsSummary> {
     this.logger.debug('starting entity extraction');
 
+    let isRemote = false;
+
     try {
       const { config, engineState } = await this.getLogExtractionConfigAndState(type);
       const entityDefinition = getEntityDefinition(type, this.namespace);
       const {
+        isRemote: resolvedIsRemote,
         count,
         pages,
         indexPatterns,
         lastSearchTimestamp,
-        ccsError,
+        remoteError,
         logsCapDeferred,
         logsCapApplied,
         logsProcessed,
@@ -168,8 +174,11 @@ export class LogsExtractionClient {
         entityDefinition,
       });
 
+      isRemote = resolvedIsRemote;
+
       const operationResult = {
         success: true as const,
+        isRemote,
         count,
         pages,
         scannedIndices: indexPatterns,
@@ -186,7 +195,7 @@ export class LogsExtractionClient {
         // Cursor is already persisted at the last completed slice end inside runMainExtractionLoop;
         // do not overwrite it — only clear any stale error.
         await this.engineDescriptorClient.update(type, {
-          error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : null,
+          error: remoteError ? { message: remoteError.message, action: 'extractLogs' } : null,
         });
       } else {
         await this.engineDescriptorClient.update(type, {
@@ -195,13 +204,13 @@ export class LogsExtractionClient {
             paginationId: null,
             lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
           },
-          error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : null,
+          error: remoteError ? { message: remoteError.message, action: 'extractLogs' } : null,
         });
       }
 
       return operationResult;
     } catch (error) {
-      return await this.handleError(error, type);
+      return await this.handleError(error, type, isRemote);
     }
   }
 
@@ -263,11 +272,12 @@ export class LogsExtractionClient {
     opts?: LogsExtractionOptions;
     entityDefinition: ManagedEntityDefinition;
   }): Promise<{
+    isRemote: boolean;
     count: number;
     pages: number;
     indexPatterns: string[];
     lastSearchTimestamp: string;
-    ccsError?: Error;
+    remoteError?: Error;
     logsCapDeferred: boolean;
     logsCapApplied: boolean;
     logsProcessed: number;
@@ -276,7 +286,6 @@ export class LogsExtractionClient {
       config.additionalIndexPatterns,
       config.excludedIndexPatterns
     );
-    const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
     const mainPromise = this.runMainPath({
       type,
@@ -284,37 +293,38 @@ export class LogsExtractionClient {
       engineState,
       opts,
       entityDefinition,
+      latestIndex: getLatestEntitiesIndexName(this.namespace),
       indexPatterns: localIndexPatterns,
-      latestIndex,
     });
 
-    if (remoteIndexPatterns.length > 0) {
-      const ccsPromise = this.ccsLogsExtractionClient.extractToUpdates({
-        type,
-        remoteIndexPatterns,
-        docsLimit: config.docsLimit,
-        maxLogsPerPage: config.maxLogsPerPage,
-        lookbackPeriod: config.lookbackPeriod,
-        delay: config.delay,
-        frequency: config.frequency,
-        entityDefinition,
-        abortController: opts?.abortController,
-        windowOverride: opts?.specificWindow,
-        maxTimeWindowSize: config.maxTimeWindowSize,
-        maxLogsPerWindow: config.maxLogsPerWindow,
-        maxLogsPerWindowCapBehavior: config.maxLogsPerWindowCapBehavior,
-      });
+    const remoteStrategyIndexPatterns = this.remoteLogsExtractionClient.strategy.buildPatterns({
+      localIndexPatterns,
+      remoteIndexPatterns,
+    });
+    const remotePromise = this.remoteLogsExtractionClient.extractToUpdates({
+      type,
+      entityDefinition,
+      remoteIndexPatterns: remoteStrategyIndexPatterns,
+      docsLimit: config.docsLimit,
+      maxLogsPerPage: config.maxLogsPerPage,
+      lookbackPeriod: config.lookbackPeriod,
+      delay: config.delay,
+      frequency: config.frequency,
+      maxTimeWindowSize: config.maxTimeWindowSize,
+      maxLogsPerWindow: config.maxLogsPerWindow,
+      maxLogsPerWindowCapBehavior: config.maxLogsPerWindowCapBehavior,
+      abortController: opts?.abortController,
+      windowOverride: opts?.specificWindow,
+    });
 
-      const [mainResult, ccsResult] = await Promise.all([mainPromise, ccsPromise]);
+    const [mainResult, remoteResult] = await Promise.all([mainPromise, remotePromise]);
 
-      return {
-        ...mainResult,
-        indexPatterns: [...localIndexPatterns, ...remoteIndexPatterns],
-        ccsError: ccsResult.error,
-      };
-    }
-
-    return await mainPromise;
+    return {
+      ...mainResult,
+      isRemote: remoteStrategyIndexPatterns.length > 0,
+      indexPatterns: [...localIndexPatterns, ...remoteStrategyIndexPatterns],
+      remoteError: remoteResult.error,
+    };
   }
 
   /**
@@ -374,10 +384,21 @@ export class LogsExtractionClient {
         this.logger.warn(
           `Entity extraction volume cap reached for entity type "${type}": processed ${result.logsProcessed} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}". This is a manual (force) run — cursor is not persisted.`
         );
+        entityStoreMetrics.extractionLogsCapApplied.add(1, {
+          entity_type: type,
+          namespace: this.namespace,
+          behavior: maxLogsPerWindowCapBehavior,
+          remote: false,
+        });
         if (maxLogsPerWindowCapBehavior === 'drop') {
           lastSearchTimestamp = toDateISO;
         }
       }
+      entityStoreMetrics.extractionLogsProcessed.record(result.logsProcessed, {
+        entity_type: type,
+        namespace: this.namespace,
+        remote: false,
+      });
       return {
         ...result,
         lastSearchTimestamp,
@@ -454,6 +475,12 @@ export class LogsExtractionClient {
         this.logger.warn(
           `Entity extraction volume cap reached for entity type "${type}": processed ${totalLogs} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}".`
         );
+        entityStoreMetrics.extractionLogsCapApplied.add(1, {
+          entity_type: type,
+          namespace: this.namespace,
+          behavior: maxLogsPerWindowCapBehavior,
+          remote: false,
+        });
         if (maxLogsPerWindowCapBehavior === 'drop') {
           this.logger.warn(
             `Dropping remaining logs in window. Advancing cursor to end of window: ${effectiveWindowEnd}.`
@@ -464,6 +491,11 @@ export class LogsExtractionClient {
             `Deferring remaining logs in window. Task will resume from last processed position on next run.`
           );
         }
+        entityStoreMetrics.extractionLogsProcessed.record(totalLogs, {
+          entity_type: type,
+          namespace: this.namespace,
+          remote: false,
+        });
         return {
           count: totalCount,
           pages: totalPages,
@@ -481,6 +513,11 @@ export class LogsExtractionClient {
       currentEngineState = FRESH_ENGINE_LOG_EXTRACTION_STATE;
     }
 
+    entityStoreMetrics.extractionLogsProcessed.record(totalLogs, {
+      entity_type: type,
+      namespace: this.namespace,
+      remote: false,
+    });
     return {
       count: totalCount,
       pages: totalPages,
@@ -522,6 +559,11 @@ export class LogsExtractionClient {
   }) {
     const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
+    // Escalates above the target probability (up to an exact, unsampled probe) once
+    // maxLogsPerPage is too small for the sampling estimator to be accurate — see
+    // pickSampleProbability. Computed once per loop invocation: effectiveMaxLogsPerPage is
+    // fixed for the whole loop.
+    const effectiveSampleProbability = pickSampleProbability(effectiveMaxLogsPerPage);
     let totalCount = 0;
     let totalLogs = 0;
     let pages = 0;
@@ -529,7 +571,14 @@ export class LogsExtractionClient {
     let logsCapTimestamp: string | undefined;
     let state: EngineLogExtractionState = { ...initialEngineState };
 
-    const onAbort = () => this.logger.debug('Aborting execution mid logs extraction');
+    const onAbort = () => {
+      this.logger.debug('Aborting execution mid logs extraction');
+      entityStoreMetrics.extractionTaskAborted.add(1, {
+        entity_type: type,
+        namespace: this.namespace,
+        remote: false,
+      });
+    };
     opts?.abortController?.signal.addEventListener('abort', onAbort);
 
     /** One-shot `paginationId` from a prior run: consumed by the first bounded extraction batch for entity-level pagination. */
@@ -563,24 +612,45 @@ export class LogsExtractionClient {
           toDateISO,
           logsPageCursorStart,
           maxLogsPerPage: effectiveMaxLogsPerPage,
+          sampleProbability: effectiveSampleProbability,
           opts,
         });
 
-        if (!probe.hasLogsToProcess) {
+        if (!probe.hasLogsToProcess && effectiveSampleProbability >= 1) {
+          // Sampling wasn't active for this probe (maxLogsPerPage was too small — see
+          // pickSampleProbability), so an empty, exact result is definitive: no real docs
+          // remain. Stop immediately rather than running a redundant sweep extraction.
           break;
         }
 
-        let logsPageCursorEnd = probe.logsPaginationCursor;
         lastLogsPages = probe.isLastLogsPage;
+
+        let logsPageCursorEnd: LogSlicePaginationParams;
+        if (probe.hasLogsToProcess && !probe.isLastLogsPage) {
+          logsPageCursorEnd = probe.logsPaginationCursor;
+        } else {
+          // if the probe doesn't have more pages to process
+          // we keep the natural end of the window as the end cursor
+          // This is important because on low document count
+          // a sampled probe may return 0 documents. We need to still
+          // do a final extraction with the effective end of the window
+          // to ensure we don't miss any documents that may have been missed by the probe.
+          logsPageCursorEnd = { timestampCursor: toDateISO };
+        }
 
         const bumpedCursorEnd = this.detectLogSliceStall(
           logsPageCursorStart,
           logsPageCursorEnd,
-          probe.sliceLogCount,
+          !lastLogsPages,
           effectiveMaxLogsPerPage
         );
         if (bumpedCursorEnd) {
           logsPageCursorEnd = bumpedCursorEnd;
+          entityStoreMetrics.extractionLogsPerPageDropped.add(1, {
+            entity_type: type,
+            namespace: this.namespace,
+            remote: false,
+          });
         } else {
           totalLogs += probe.sliceLogCount;
 
@@ -645,6 +715,7 @@ export class LogsExtractionClient {
     toDateISO,
     logsPageCursorStart,
     maxLogsPerPage,
+    sampleProbability,
     opts,
   }: {
     indexPatterns: string[];
@@ -653,6 +724,7 @@ export class LogsExtractionClient {
     toDateISO: string;
     logsPageCursorStart: LogSlicePaginationParams | undefined;
     maxLogsPerPage: number;
+    sampleProbability: number;
     opts?: LogsExtractionOptions;
   }): Promise<LogPaginationCursor> {
     const logPaginationCursorProbeQuery = buildLogPaginationCursorProbeEsql({
@@ -662,19 +734,32 @@ export class LogsExtractionClient {
       toDateISO,
       logsPageCursorStart,
       maxLogsPerPage,
+      sampleProbability,
     });
 
+    const probeStart = Date.now();
     const logPaginationCursorProbeResponse = await executeEsqlQuery({
       esClient: this.esClient,
       query: logPaginationCursorProbeQuery,
       abortController: opts?.abortController,
+      telemetry: {
+        name: 'probe_query',
+        namespace: this.namespace,
+        type,
+      },
+    });
+    entityStoreMetrics.extractionProbeQueryDurationMs.record(Date.now() - probeStart, {
+      entity_type: type,
+      namespace: this.namespace,
+      remote: false,
     });
 
     const parsedLogPaginationCursor = parseLogPaginationCursorRow(logPaginationCursorProbeResponse);
 
     const interpretedLogPaginationCursor = interpretLogPaginationCursorRows(
       parsedLogPaginationCursor,
-      maxLogsPerPage
+      maxLogsPerPage,
+      sampleProbability
     );
 
     if (parsedLogPaginationCursor) {
@@ -683,16 +768,7 @@ export class LogsExtractionClient {
       );
     }
 
-    if (!interpretedLogPaginationCursor.hasLogsToProcess) {
-      return { hasLogsToProcess: false };
-    }
-
-    return {
-      hasLogsToProcess: true,
-      logsPaginationCursor: interpretedLogPaginationCursor.logsPaginationCursor,
-      isLastLogsPage: interpretedLogPaginationCursor.isLastLogsPage,
-      sliceLogCount: interpretedLogPaginationCursor.sliceLogCount,
-    };
+    return interpretedLogPaginationCursor;
   }
 
   /**
@@ -751,6 +827,7 @@ export class LogsExtractionClient {
         logsPageCursorStart,
         logsPageCursorEnd,
       });
+
       recoveryIdForBounded = undefined;
 
       this.logger.debug(
@@ -761,10 +838,21 @@ export class LogsExtractionClient {
         }`
       );
 
+      const queryStart = Date.now();
       const esqlResponse = await executeEsqlQuery({
         esClient: this.esClient,
         query,
         abortController: opts?.abortController,
+        telemetry: {
+          name: 'extraction_query',
+          namespace: this.namespace,
+          type,
+        },
+      });
+      entityStoreMetrics.extractionQueryDurationMs.record(Date.now() - queryStart, {
+        entity_type: type,
+        namespace: this.namespace,
+        remote: false,
       });
 
       addedToTotalCount += esqlResponse.values.length;
@@ -774,6 +862,7 @@ export class LogsExtractionClient {
       }
 
       this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
+      const ingestStart = Date.now();
       await ingestEntities({
         esClient: this.esClient,
         esqlResponse,
@@ -782,6 +871,23 @@ export class LogsExtractionClient {
         targetIndex: latestIndex,
         logger: this.logger,
         abortController: opts?.abortController,
+        refresh: true,
+        onDropped: () =>
+          entityStoreMetrics.extractionBulkDropped.add(1, {
+            entity_type: type,
+            namespace: this.namespace,
+            remote: false,
+          }),
+      });
+      entityStoreMetrics.extractionIngestDurationMs.record(Date.now() - ingestStart, {
+        entity_type: type,
+        namespace: this.namespace,
+        remote: false,
+      });
+      entityStoreMetrics.extractionEntitiesUpserted.add(esqlResponse.values.length, {
+        entity_type: type,
+        namespace: this.namespace,
+        remote: false,
       });
 
       if (pagination) {
@@ -811,21 +917,21 @@ export class LogsExtractionClient {
     };
   }
 
-  /** Returns the bumped slice-end cursor when a stall is detected, null otherwise. Logs a warning on stall. */
+  /**
+   * Returns the bumped slice-end cursor when a stall is detected, null otherwise. Logs a
+   * warning on stall. `isFullPage` is `true` when the (possibly sampled) probe saturated its
+   * limit — i.e. this iteration was not resolved as the last page.
+   */
   private detectLogSliceStall(
     sliceStart: LogSlicePaginationParams | undefined,
     sliceEnd: LogSlicePaginationParams,
-    sliceLogCount: number,
-    maxLogsPerPage: number
+    isFullPage: boolean,
+    effectiveMaxLogsPerPage: number
   ): LogSlicePaginationParams | null {
-    if (
-      sliceStart &&
-      sliceStart.timestampCursor === sliceEnd.timestampCursor &&
-      sliceLogCount >= maxLogsPerPage
-    ) {
+    if (sliceStart && sliceStart.timestampCursor === sliceEnd.timestampCursor && isFullPage) {
       const bumpedTs = moment(sliceEnd.timestampCursor).add(1, 'ms').toISOString();
       this.logger.warn(
-        `Log-slice probe stalled at ${sliceEnd.timestampCursor} with a full page (${sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
+        `Log-slice probe stalled at ${sliceEnd.timestampCursor} with a saturated page; advancing cursor by 1ms. Docs sharing this timestamp beyond the configured per-page limit (${effectiveMaxLogsPerPage}) will be dropped.`
       );
       return { timestampCursor: bumpedTs };
     }
@@ -845,26 +951,33 @@ export class LogsExtractionClient {
     });
   }
 
-  private async handleError(error: any, type: EntityType): Promise<ExtractedLogsSummary> {
-    this.logger.error(error);
-
+  private async handleError(
+    error: any,
+    type: EntityType,
+    isRemote: boolean
+  ): Promise<ExtractedLogsSummary> {
     if (
       SavedObjectsErrorHelpers.isNotFoundError(error) ||
       error instanceof EntityStoreNotRunningError
     ) {
-      return { success: false, error: new Error(`Entity store is not started for type ${type}`) };
+      return {
+        success: false,
+        isRemote,
+        error: new Error(`Entity store is not started for type ${type}`),
+      };
     }
 
     await this.engineDescriptorClient.update(type, {
       error: { message: error.message, action: 'extractLogs' },
     });
-    return { success: false, error };
+    return { success: false, isRemote, error };
   }
 
   /**
-   * Returns local and remote (CCS) index patterns separately.
-   * Main extraction uses local only (LOOKUP JOIN does not support CCS).
-   * CCS extraction uses remote only.
+   * Returns local index patterns and remote patterns separately.
+   * Cluster-prefixed patterns (`cluster1:logs-*`) go to remote (CCS strategy).
+   * Unqualified patterns stay local; CPS strategy reuses local patterns for linked projects.
+   * Main extraction uses local patterns only (LOOKUP JOIN does not support remote).
    */
   public async getLocalAndRemoteIndexPatterns(
     additionalIndexPatterns: string[] = [],
@@ -885,6 +998,15 @@ export class LogsExtractionClient {
       }
     });
 
+    // Pre-flight: find data streams with closed backing indices and build adjustments.
+    // Open backing indices must be added as positives BEFORE any negations.
+    const { openBackingIndices, negations: closedNegations } = await resolveClosedIndexAdjustments(
+      this.esClient,
+      localIndexPatterns,
+      this.logger
+    );
+    localIndexPatterns.push(...openBackingIndices);
+
     // Append after includes: ES negation only subtracts from earlier entries in the same expression.
     // e.g. `logs-*,-logs-proxy-*` excludes proxy logs, but `-logs-proxy-*,logs-*` does not.
     excludedIndexPatterns.forEach((pattern) => {
@@ -894,6 +1016,9 @@ export class LogsExtractionClient {
         localIndexPatterns.push(`-${pattern}`);
       }
     });
+
+    // Closed-index negations go last — after all positive includes and user exclusions.
+    localIndexPatterns.push(...closedNegations);
 
     return { localIndexPatterns, remoteIndexPatterns };
   }
@@ -910,8 +1035,9 @@ export class LogsExtractionClient {
   }
 
   /**
-   * Builds the full list of index patterns (updates, additional, security data view)
-   * including CCS remote indices, without filtering by alerts or CCS.
+   * Builds the full list of index patterns (updates, additional, security data view),
+   * including cluster-prefixed patterns from the data view, without alerts or
+   * local/remote splitting applied.
    */
   private async getAllIndexPatternsIncludingRemote(
     additionalIndexPatterns: string[] = []

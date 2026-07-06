@@ -26,6 +26,7 @@ export const useInvalidateEpisodeQueries = () => {
       Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.actionsAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.groupActionsAll() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.actionsHistoryAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.listAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.episodeAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.episodeEventsAll() }),
@@ -33,6 +34,7 @@ export const useInvalidateEpisodeQueries = () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.tagSuggestionsAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.tagOptionsAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.histogramAll() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.kpisAll() }),
       ]),
     [queryClient]
   );

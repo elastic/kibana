@@ -200,4 +200,243 @@ describe('ActionsPopover', () => {
     expect(updateMonitorEnabledState).toHaveBeenCalledTimes(1);
     expect(updateMonitorEnabledState.mock.calls[0]).toEqual([true]);
   });
+
+  describe('remote (CCS) monitor', () => {
+    let remoteMonitor: OverviewStatusMetaData;
+
+    beforeEach(() => {
+      remoteMonitor = {
+        ...testMonitor,
+        remote: { remoteName: 'cluster-1', kibanaUrl: 'https://remote.example.com' },
+      };
+    });
+
+    describe('with a known remote.kibanaUrl', () => {
+      // "Go to monitor" intentionally stays in-app for remote monitors —
+      // the local Synthetics details page reads remote data via CCS when
+      // `?remoteName=<alias>` is in the URL — so it is *not* part of the
+      // 3-state remote-redirect set (Edit / Clone / Enable-Disable).
+      it('keeps Go to monitor as in-app navigation (local detailUrl with remoteName)', () => {
+        jest
+          .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
+          .mockReturnValue('/a/test/detail/url?remoteName=cluster-1');
+
+        const { getByTestId } = render(
+          <ActionsPopover
+            isPopoverOpen={true}
+            position="relative"
+            setIsPopoverOpen={jest.fn()}
+            monitor={remoteMonitor}
+            locationId={remoteMonitor.locations[0].id}
+          />
+        );
+
+        const goToMonitor = getByTestId('actionsPopoverGoToMonitor');
+        expect(goToMonitor).toHaveAttribute('href', '/a/test/detail/url?remoteName=cluster-1');
+        expect(goToMonitor).not.toHaveAttribute('target');
+      });
+
+      it('passes monitor.remote.remoteName through to useMonitorDetailLocator', () => {
+        const detailLocatorSpy = jest
+          .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
+          .mockReturnValue('/a/test/detail/url');
+
+        render(
+          <ActionsPopover
+            isPopoverOpen={true}
+            position="relative"
+            setIsPopoverOpen={jest.fn()}
+            monitor={remoteMonitor}
+            locationId={remoteMonitor.locations[0].id}
+          />
+        );
+
+        expect(detailLocatorSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ remoteName: 'cluster-1' })
+        );
+      });
+
+      it('redirects Edit / Clone / Disable to the origin cluster', () => {
+        const { getByTestId } = render(
+          <ActionsPopover
+            isPopoverOpen={true}
+            position="relative"
+            setIsPopoverOpen={jest.fn()}
+            monitor={remoteMonitor}
+            locationId={remoteMonitor.locations[0].id}
+          />
+        );
+
+        const editLink = getByTestId('editMonitorLink');
+        expect(editLink).toHaveAttribute(
+          'href',
+          'https://remote.example.com/app/synthetics/edit-monitor/1lkjelre'
+        );
+        expect(editLink).toHaveAttribute('target', '_blank');
+
+        const cloneLink = getByTestId('cloneMonitorLink');
+        expect(cloneLink).toHaveAttribute(
+          'href',
+          'https://remote.example.com/app/synthetics/add-monitor?cloneId=1lkjelre'
+        );
+        expect(cloneLink).toHaveAttribute('target', '_blank');
+      });
+
+      // No deep link or destination handler exists yet for remote
+      // enable/disable, so the action stays disabled with the standard
+      // "no remote equivalent" tooltip.
+      it('keeps Enable/Disable disabled because the destination has no URL handler', () => {
+        const { getByTestId } = render(
+          <ActionsPopover
+            isPopoverOpen={true}
+            position="relative"
+            setIsPopoverOpen={jest.fn()}
+            monitor={remoteMonitor}
+            locationId={remoteMonitor.locations[0].id}
+          />
+        );
+
+        const enableToggle = getByTestId('syntheticsActionsPopoverEnableMonitor');
+        expect(enableToggle).toBeDisabled();
+        expect(enableToggle).not.toHaveAttribute('href');
+      });
+
+      it('keeps Run test manually disabled because the action has no remote equivalent', () => {
+        const { getByTestId } = render(
+          <ActionsPopover
+            isPopoverOpen={true}
+            position="relative"
+            setIsPopoverOpen={jest.fn()}
+            monitor={remoteMonitor}
+            locationId={remoteMonitor.locations[0].id}
+          />
+        );
+
+        const runTest = getByTestId('syntheticsActionsPopoverRunTestManually');
+        expect(runTest).toBeDisabled();
+        expect(runTest).not.toHaveAttribute('href');
+      });
+
+      it('keeps Create SLO disabled because the action has no remote equivalent', () => {
+        const { getByTestId } = render(
+          <ActionsPopover
+            isPopoverOpen={true}
+            position="relative"
+            setIsPopoverOpen={jest.fn()}
+            monitor={remoteMonitor}
+            locationId={remoteMonitor.locations[0].id}
+          />
+        );
+
+        expect(getByTestId('createSLOBtn')).toBeDisabled();
+      });
+
+      // The Synthetics overview embeddable filter schema can only narrow by
+      // saved-object IDs; the dashboard's overview-status query has no
+      // remote-cluster filter and doesn't narrow pings by `monitor.id`. For a
+      // remote monitor that means the embeddable cannot isolate the single
+      // configId — `SingleMonitorView` then violates its "exactly one
+      // monitor" invariant and throws "Failed to load Kibana asset". Until
+      // the schema/query learn about remote clusters, this action mirrors
+      // the other local-only actions and stays disabled for remote monitors.
+      it('keeps Add to dashboard disabled because the embeddable filter cannot isolate a remote monitor', () => {
+        const { getByTestId } = render(
+          <ActionsPopover
+            isPopoverOpen={true}
+            position="relative"
+            setIsPopoverOpen={jest.fn()}
+            monitor={remoteMonitor}
+            locationId={remoteMonitor.locations[0].id}
+          />
+        );
+
+        expect(getByTestId('syntheticsActionsPopoverAddToDashboard')).toBeDisabled();
+      });
+    });
+
+    describe('with an undefined remote.kibanaUrl', () => {
+      let remoteMonitorWithoutUrl: OverviewStatusMetaData;
+
+      beforeEach(() => {
+        remoteMonitorWithoutUrl = {
+          ...testMonitor,
+          remote: { remoteName: 'cluster-1' },
+        };
+      });
+
+      // "Go to monitor" is intentionally outside the 3-state pattern — it
+      // navigates to the local details page (which renders remote data via
+      // CCS) regardless of `remote.kibanaUrl`. Only Edit / Clone need the
+      // remote `kibanaUrl` because they must run on the origin cluster.
+      // Enable/Disable is permanently disabled for remote regardless of
+      // `kibanaUrl` (no destination URL handler today), so it isn't covered
+      // by this scenario.
+      it('disables Edit / Clone but keeps Go to monitor enabled', () => {
+        jest
+          .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
+          .mockReturnValue('/a/test/detail/url?remoteName=cluster-1');
+
+        const { getByTestId } = render(
+          <ActionsPopover
+            isPopoverOpen={true}
+            position="relative"
+            setIsPopoverOpen={jest.fn()}
+            monitor={remoteMonitorWithoutUrl}
+            locationId={remoteMonitorWithoutUrl.locations[0].id}
+          />
+        );
+
+        expect(getByTestId('actionsPopoverGoToMonitor')).toHaveAttribute(
+          'href',
+          '/a/test/detail/url?remoteName=cluster-1'
+        );
+        expect(getByTestId('editMonitorLink')).toBeDisabled();
+        expect(getByTestId('cloneMonitorLink')).toBeDisabled();
+
+        // No href is attached when disabled — clicking does not navigate.
+        expect(getByTestId('editMonitorLink')).not.toHaveAttribute('href');
+        expect(getByTestId('cloneMonitorLink')).not.toHaveAttribute('href');
+      });
+
+      it('falls back to the `kibanaUrl` prop when supplied (e.g. from the flyout)', () => {
+        const { getByTestId } = render(
+          <ActionsPopover
+            isPopoverOpen={true}
+            position="relative"
+            setIsPopoverOpen={jest.fn()}
+            monitor={remoteMonitorWithoutUrl}
+            locationId={remoteMonitorWithoutUrl.locations[0].id}
+            kibanaUrl="https://from-prop.example.com"
+          />
+        );
+
+        expect(getByTestId('editMonitorLink')).toHaveAttribute(
+          'href',
+          'https://from-prop.example.com/app/synthetics/edit-monitor/1lkjelre'
+        );
+        expect(getByTestId('cloneMonitorLink')).toHaveAttribute(
+          'href',
+          'https://from-prop.example.com/app/synthetics/add-monitor?cloneId=1lkjelre'
+        );
+      });
+    });
+
+    it('prefers the `kibanaUrl` prop over `monitor.remote.kibanaUrl`', () => {
+      const { getByTestId } = render(
+        <ActionsPopover
+          isPopoverOpen={true}
+          position="relative"
+          setIsPopoverOpen={jest.fn()}
+          monitor={remoteMonitor}
+          locationId={remoteMonitor.locations[0].id}
+          kibanaUrl="https://from-prop.example.com"
+        />
+      );
+
+      expect(getByTestId('editMonitorLink')).toHaveAttribute(
+        'href',
+        'https://from-prop.example.com/app/synthetics/edit-monitor/1lkjelre'
+      );
+    });
+  });
 });

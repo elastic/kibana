@@ -16,6 +16,9 @@ export const queryKeys = {
   groupActionsAll: () => [...queryKeys.all, 'group-actions'] as const,
   groupActions: (spaceId: string, groupHashes: string[]) =>
     [...queryKeys.groupActionsAll(), spaceId, ...groupHashes] as const,
+  actionsHistoryAll: () => [...queryKeys.all, 'actions-history'] as const,
+  actionsHistory: (spaceId: string, episodeId: string, groupHash: string) =>
+    [...queryKeys.actionsHistoryAll(), spaceId, episodeId, groupHash] as const,
   listAll: () => [...queryKeys.all, 'list'] as const,
   list: (
     spaceId: string,
@@ -30,6 +33,9 @@ export const queryKeys = {
   episodeEventsAll: () => [...queryKeys.all, 'episode-events'] as const,
   episodeEvents: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeEventsAll(), spaceId, episodeId] as const,
+  episodeTrendAll: () => [...queryKeys.all, 'episode-trend'] as const,
+  episodeTrend: (spaceId: string, episodeId: string, metricLabels: string[]) =>
+    [...queryKeys.episodeTrendAll(), spaceId, episodeId, ...metricLabels] as const,
   relatedSameGroupEpisodes: (
     spaceId: string,
     ruleId: string,
@@ -79,4 +85,12 @@ export const queryKeys = {
     timeRange: TimeRange | undefined,
     breakdownField: string | undefined
   ) => [...queryKeys.histogramAll(), spaceId, filterState, timeRange, breakdownField] as const,
+  currentUserProfile: () => [...queryKeys.all, 'current-user-profile'] as const,
+  kpisAll: () => [...queryKeys.all, 'kpis'] as const,
+  kpis: (
+    spaceId: string,
+    filterState?: EpisodesFilterState,
+    timeRange?: { from: string; to: string } | null,
+    currentUserUid?: string
+  ) => [...queryKeys.kpisAll(), spaceId, filterState, timeRange, currentUserUid] as const,
 };

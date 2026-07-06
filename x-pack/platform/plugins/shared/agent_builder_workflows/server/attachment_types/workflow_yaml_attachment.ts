@@ -119,12 +119,17 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
             `Current Workflow YAML:\n\n\`\`\`yaml\n${data.yaml}\n\`\`\`` +
             `${validationSection}\n\n` +
             `Use \`${platformCoreTools.generateWorkflow}\` to create or modify this workflow. It emits a diff card in chat and updates this attachment.\n` +
+            `Use \`${platformCoreTools.executeWorkflow}\` with \`attachmentId\` set to this attachment's id to run this workflow end-to-end (no save required).\n` +
             `Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.`,
         };
       },
     };
   },
-  getTools: () => [...Object.values(workflowTools), platformCoreTools.generateWorkflow],
+  getTools: () => [
+    ...Object.values(workflowTools),
+    platformCoreTools.generateWorkflow,
+    platformCoreTools.executeWorkflow,
+  ],
   getAgentDescription: () =>
     `${WORKFLOW_YAML_ATTACHMENT_TYPE} attachments represent the current state of an Elastic Workflow YAML document.\n` +
     `The workflow YAML and any validation errors are shown in the attachment content — do NOT call attachment_read to re-read them.\n\n` +

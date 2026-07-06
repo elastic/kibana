@@ -10,6 +10,11 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const REPORTS_FOLDER = __dirname;
 
+/**
+ * Purpose: Reporting smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { reporting, dashboard } = getPageObjects(['reporting', 'dashboard']);
   const browser = getService('browser');
@@ -21,8 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // NOTE: Occasionally, you may need to run the test and copy the "session" image file and replace the
   // "baseline" image file to reflect current renderings. The source and destination file paths can be found in
   // the debug logs.
-  // Failing: See https://github.com/elastic/kibana/issues/232040
-  describe.skip('dashboard reporting: creates a map report', () => {
+  describe('dashboard reporting: creates a map report', () => {
     // helper function to check the difference between the new image and the baseline
     const measurePngDifference = async (fileName: string) => {
       const url = await reporting.getReportURL(60000);

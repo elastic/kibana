@@ -53,7 +53,7 @@ export const dataDedupeStepDefinition = createServerStepDefinition({
   ...dataDedupeStepCommonDefinition,
   handler: async (context) => {
     try {
-      const items = context.contextManager.renderInputTemplate(context.config.items);
+      const items = context.config.items;
       const strategy = context.config.strategy || 'keep_first';
       const { keys } = context.input;
 

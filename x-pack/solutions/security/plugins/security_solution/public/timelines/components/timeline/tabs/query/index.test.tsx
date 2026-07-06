@@ -11,7 +11,6 @@ import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -70,7 +69,6 @@ jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../../sourcerer/containers');
 jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
@@ -183,10 +181,6 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
   });
 };
 
-const useSourcererDataViewMocked = jest.fn().mockReturnValue({
-  ...mockSourcererScope,
-});
-
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
 const useTimelineEventsSpy = jest.spyOn(useTimelineEventsModule, 'useTimelineEvents');
@@ -250,8 +244,6 @@ describe.skip('query tab with unified timeline', () => {
 
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
 
-    (useSourcererDataView as jest.Mock).mockImplementation(useSourcererDataViewMocked);
-
     jest.mocked(useDataView).mockReturnValue(withIndices(mockSourcererScope.selectedPatterns));
 
     jest.mocked(useBrowserFields).mockReturnValue(mockBrowserFields);
@@ -308,7 +300,7 @@ describe.skip('query tab with unified timeline', () => {
     it(
       'should hide row-renderers when disabled',
       async () => {
-        renderTestComponents();
+        const { container } = renderTestComponents();
         await waitFor(() => {
           expect(screen.getByTestId('discoverDocTable')).toBeVisible();
         });
@@ -319,12 +311,12 @@ describe.skip('query tab with unified timeline', () => {
         expect(screen.getByTestId('row-renderers-modal')).toBeVisible();
 
         fireEvent.click(screen.getByTestId('disable-all'));
-
         expect(
-          within(screen.getAllByTestId('renderer-checkbox')[0]).getByRole('checkbox')
+          screen.getAllByTestId('renderer-checkbox')[0].querySelector('[type="checkbox"]')
         ).not.toBeChecked();
-
-        fireEvent.click(screen.getByLabelText('Closes this modal window'));
+        fireEvent.click(
+          container.closest('body')!.querySelector('[aria-label="Closes this modal window"]')!
+        );
 
         expect(screen.queryByTestId('row-renderers-modal')).not.toBeInTheDocument();
 
@@ -783,7 +775,7 @@ describe.skip('query tab with unified timeline', () => {
 
         expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
         expect(
-          within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
+          screen.getByTestId('dataGridColumnSortingButton').querySelector('[role="marquee"]')
         ).toHaveTextContent('1');
 
         fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
@@ -812,7 +804,7 @@ describe.skip('query tab with unified timeline', () => {
 
         expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
         expect(
-          within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
+          screen.getByTestId('dataGridColumnSortingButton').querySelector('[role="marquee"]')
         ).toHaveTextContent('1');
 
         fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
@@ -913,8 +905,8 @@ describe.skip('query tab with unified timeline', () => {
           expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
             String(customColumnOrder.length + 1)
           );
+          expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
         });
-        expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
       },
       SPECIAL_TEST_TIMEOUT
     );

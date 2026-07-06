@@ -12,6 +12,10 @@ export const labels = {
     title: i18n.translate('xpack.security.management.applicationConnectionsTitle', {
       defaultMessage: 'Application connections',
     }),
+    pageCallout: i18n.translate('xpack.security.management.applicationConnectionsPageCallout', {
+      defaultMessage:
+        'Manage connections for OAuth-based applications. Currently, only MCP clients are supported.',
+    }),
     manageClientsLink: i18n.translate(
       'xpack.security.management.applicationConnections.manageClientsLink',
       { defaultMessage: 'Manage MCP clients' }
@@ -94,6 +98,10 @@ export const labels = {
     allRevokedClientLabel: i18n.translate(
       'xpack.security.management.applicationConnections.columns.allRevokedClientLabel',
       { defaultMessage: 'All connections for this client are already revoked' }
+    ),
+    noConnectionsClientLabel: i18n.translate(
+      'xpack.security.management.applicationConnections.columns.noConnectionsClientLabel',
+      { defaultMessage: 'This client has no connections yet' }
     ),
   },
   connectionColumns: {
@@ -183,11 +191,11 @@ export const labels = {
   emptyPrompt: {
     title: i18n.translate(
       'xpack.security.management.applicationConnectionsEmptyPrompt.emptyTitle',
-      { defaultMessage: 'No MCP clients (OAuth)' }
+      { defaultMessage: 'No application connections' }
     ),
     message: i18n.translate(
       'xpack.security.management.applicationConnectionsEmptyPrompt.emptyMessage',
-      { defaultMessage: 'Get started with MCP clients (OAuth).' }
+      { defaultMessage: 'Get started by creating MCP clients (OAuth).' }
     ),
     addButton: i18n.translate(
       'xpack.security.management.applicationConnectionsEmptyPrompt.addButton',
@@ -222,6 +230,14 @@ export const labels = {
       'xpack.security.management.applicationConnections.update.emptyValidationError',
       { defaultMessage: 'Connection name cannot be empty.' }
     ),
+    tooLongValidationError: (maxLength: number) =>
+      i18n.translate(
+        'xpack.security.management.applicationConnections.update.tooLongValidationError',
+        {
+          defaultMessage: 'Connection name must be {maxLength} characters or fewer.',
+          values: { maxLength },
+        }
+      ),
     successToast: (name: string) =>
       i18n.translate('xpack.security.management.applicationConnections.update.successToast', {
         defaultMessage: "Renamed connection to ''{name}''",

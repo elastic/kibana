@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PromQLParser } from '@elastic/esql';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getQueryPosition } from './query_position';
 import { getPreGroupedAggregationName } from '../../promql';
+import { parsePromqlAutocompleteQuery } from '../../../../../language/shared/parse_for_autocomplete_query';
 import { buildVectorSuggestions } from './query_positions/suggestion_helpers';
 import { positionHandlers } from './query_positions/dispatcher';
 
@@ -31,9 +31,9 @@ export function suggestForPromqlQuery(input: SuggestForPromqlQueryInput): ISugge
     return buildVectorSuggestions(columns, [], shouldWrap);
   }
 
-  const { root } = PromQLParser.parse(queryText);
-  const position = getQueryPosition(root, cursorRelative, queryText);
-  const preGroupedAgg = getPreGroupedAggregationName(queryText.slice(0, cursorRelative));
+  const { correctedQuery, root } = parsePromqlAutocompleteQuery(queryText);
+  const position = getQueryPosition(root, cursorRelative, correctedQuery);
+  const preGroupedAgg = getPreGroupedAggregationName(correctedQuery.slice(0, cursorRelative));
 
   return (
     positionHandlers[position.type]?.({

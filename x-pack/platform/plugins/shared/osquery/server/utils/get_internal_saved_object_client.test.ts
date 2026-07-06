@@ -6,7 +6,7 @@
  */
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
   createInternalSavedObjectsClientForSpaceId,
@@ -21,7 +21,6 @@ describe('get_internal_saved_object_client', () => {
 
     coreStart.savedObjects.createInternalRepository = jest.fn();
     coreStart.savedObjects.getScopedClient = jest.fn().mockReturnValue(mockScopedClient);
-    coreStart.http.basePath.set = jest.fn();
 
     return coreStart;
   };
@@ -34,24 +33,31 @@ describe('get_internal_saved_object_client', () => {
     expect(coreStart.savedObjects.createInternalRepository).toHaveBeenCalledTimes(1);
   });
 
-  it('returns scoped client without setting base path for default space', () => {
+  it('returns scoped client for default space', () => {
     const coreStart = createCoreStartMock();
 
     const client = getInternalSavedObjectsClientForSpaceId(coreStart, DEFAULT_SPACE_ID);
 
-    expect(coreStart.http.basePath.set).not.toHaveBeenCalled();
-    expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(expect.any(Object), {
-      excludedExtensions: [SECURITY_EXTENSION_ID],
-    });
+    expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: DEFAULT_SPACE_ID }),
+      {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+      }
+    );
     expect(client).toEqual({ scoped: true });
   });
 
-  it('sets base path for non-default space', () => {
+  it('sets spaceId for non-default space', () => {
     const coreStart = createCoreStartMock();
 
     getInternalSavedObjectsClientForSpaceId(coreStart, 'space-a');
 
-    expect(coreStart.http.basePath.set).toHaveBeenCalledWith(expect.any(Object), '/s/space-a');
+    expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'space-a' }),
+      {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+      }
+    );
   });
 
   it('creates internal scoped client for active space', async () => {

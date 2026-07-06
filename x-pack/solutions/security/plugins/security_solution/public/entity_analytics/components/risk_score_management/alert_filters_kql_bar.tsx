@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from '@emotion/styled';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
@@ -23,12 +23,12 @@ import {
 } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { PageScope } from '../../../data_view_manager/constants';
-import { useSourcererDataView } from '../../../sourcerer/containers';
+import { PageLoader } from '../../../common/components/page_loader';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from '../../translations';
 import type { UIAlertFilter } from './common';
+import { PageScope } from '../../../data_view_manager/constants';
 
 const COMBOBOX_LABEL_MAPPING = {
   user: 'Users',
@@ -218,15 +218,14 @@ export const AlertFiltersKqlBar: React.FC<AlertFiltersKqlBarProps> = ({
   onFiltersChange,
   filters = [],
   placeholder = i18n.ALERT_FILTERS_PLACEHOLDER,
-  compressed = true,
   'data-test-subj': dataTestSubj = 'alertFiltersKqlBar',
 }) => {
-  const { sourcererDataView } = useSourcererDataView(PageScope.explore);
+  const { dataView, status } = useDataView(PageScope.explore);
+
   const {
     unifiedSearch: {
       ui: { SearchBar },
     },
-    data,
   } = useKibana().services;
 
   const [query, setQuery] = useState<Query>({
@@ -234,26 +233,7 @@ export const AlertFiltersKqlBar: React.FC<AlertFiltersKqlBarProps> = ({
     language: 'kuery',
   });
 
-  const [dataView, setDataView] = useState<DataView | null>(null);
   const [validationError, setValidationError] = useState<string | undefined>();
-
-  // Create DataView asynchronously to ensure fields are properly populated
-  useEffect(() => {
-    let dv: DataView;
-    const createDataView = async () => {
-      if (sourcererDataView) {
-        dv = await data.dataViews.create(sourcererDataView);
-        setDataView(dv);
-      }
-    };
-    createDataView();
-
-    return () => {
-      if (dv?.id) {
-        data.dataViews.clearInstanceCache(dv.id);
-      }
-    };
-  }, [data.dataViews, sourcererDataView]);
 
   const handleQueryChange = useCallback((payload: { query?: Query }) => {
     if (payload.query) {
@@ -327,8 +307,8 @@ export const AlertFiltersKqlBar: React.FC<AlertFiltersKqlBarProps> = ({
     [filters, onFiltersChange]
   );
 
-  if (!dataView) {
-    return null;
+  if (status === 'pristine') {
+    return <PageLoader />;
   }
 
   return (

@@ -51,6 +51,7 @@
     "@kbn/unified-search-plugin",
     "@kbn/share-plugin",
     "@kbn/spaces-plugin",
+    "@kbn/core-spaces-common",
     "@kbn/data-views-plugin",
     "@kbn/charts-plugin",
     "@kbn/field-formats-plugin",
@@ -164,11 +165,15 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
     "@kbn/presentation-util",
+    "@kbn/presentation-util-plugin",
+    "@kbn/apm-api-shared",
+    "@kbn/apm-common",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/ebt-click",
     "@kbn/apm-types-shared",
     "@kbn/apm-common",
-    "@kbn/storybook"
+    "@kbn/storybook",
+    "@kbn/lens-embeddable-utils"
   ],
   "exclude": ["target/**/*"]
 }

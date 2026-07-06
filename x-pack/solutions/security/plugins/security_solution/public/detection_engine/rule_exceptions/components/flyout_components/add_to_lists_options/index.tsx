@@ -7,14 +7,14 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButtonIcon,
-  EuiText,
-  EuiRadio,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPopover,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
   EuiPopoverFooter,
+  EuiRadio,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 

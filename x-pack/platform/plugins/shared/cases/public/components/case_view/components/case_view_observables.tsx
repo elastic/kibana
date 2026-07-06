@@ -11,6 +11,8 @@ import type { OnUpdateFields } from '../types';
 import { OBSERVABLES_TAB } from '../../user_actions/translations';
 import { AttachmentAccordion } from './attachment_accordion';
 
+export const OBSERVABLES_FILTER_ID = 'observables';
+
 interface CaseViewObservablesProps {
   caseData: CaseUI;
   observables: ObservableUI[];

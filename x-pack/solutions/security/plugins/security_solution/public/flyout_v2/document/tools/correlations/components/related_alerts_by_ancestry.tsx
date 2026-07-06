@@ -6,15 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
 import { useFetchRelatedAlertsByAncestry } from '../../../main/hooks/use_fetch_related_alerts_by_ancestry';
 import { CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID } from './test_ids';
 import { getColumns } from '../utils/get_columns';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
-import { sourcererSelectors } from '../../../../../sourcerer/store';
 
 export interface RelatedAlertsByAncestryProps {
   /**
@@ -30,7 +27,7 @@ export interface RelatedAlertsByAncestryProps {
    */
   onShowAlert: (id: string, indexName: string) => void;
   /**
-   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of ChildLink (new flyout system)
+   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of OpenFlyoutLink (new flyout system)
    */
   useLegacyExpandableFlyout: boolean;
 }
@@ -44,17 +41,11 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
   onShowAlert,
   useLegacyExpandableFlyout,
 }) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const indices = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
+  const { indexPatterns } = useSecurityDefaultPatterns();
 
   const { loading, error, data, dataCount } = useFetchRelatedAlertsByAncestry({
     documentId,
-    indices,
+    indices: indexPatterns,
   });
 
   const columns = useMemo(

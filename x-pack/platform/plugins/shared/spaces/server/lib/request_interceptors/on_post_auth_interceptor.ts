@@ -6,11 +6,11 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 
 import type { Space } from '../../../common';
-import { addSpaceIdToPath } from '../../../common';
-import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
+import { ENTER_SPACE_PATH } from '../../../common/constants';
 import type { SpacesServiceStart } from '../../spaces_service';
 import type { SpacesPluginStartDeps } from '../../types';
 import { wrapError } from '../errors';

@@ -8,6 +8,8 @@
 /** Maximum number of consecutive breaches before transition */
 export const MAX_CONSECUTIVE_BREACHES = 1000;
 
+export const MAX_ESQL_QUERY_LENGTH = 10000;
+
 /** Maximum allowed duration for schedule and timeframe fields */
 export const MAX_DURATION = '365d';
 

@@ -17,7 +17,7 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import { buildWorkflowFilters } from '@kbn/workflows/server';
-import type { WorkflowListItemDto } from '@kbn/workflows/types/v1';
+import type { WorkflowListItemDto, WorkflowSortField } from '@kbn/workflows/types/v1';
 
 import type { WorkflowSearchDeps } from './types';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
@@ -28,9 +28,40 @@ import {
   buildConditionalTermsFilters,
   buildWorkflowTextSearchClause,
 } from '../api/lib/workflow_query_filters';
-import type { GetWorkflowsParams } from '../api/workflows_management_api';
+import type { GetWorkflowAggsOptions, GetWorkflowsParams } from '../api/workflows_management_api';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { workflowIndexName } from '../storage/workflow_storage';
+
+const ES_SORT_FIELDS: Record<WorkflowSortField, string> = {
+  name: 'name.keyword',
+  enabled: 'enabled',
+};
+
+const buildVisibilityContextFilter = (
+  managedFilter: GetWorkflowsParams['managedFilter'],
+  visibilityContext: GetWorkflowsParams['visibilityContext']
+): estypes.QueryDslQueryContainer | null => {
+  if (!visibilityContext) {
+    return null;
+  }
+
+  const contextFilter = { terms: { managedVisibilityContexts: visibilityContext } };
+
+  if (managedFilter === 'managed') {
+    return contextFilter;
+  }
+
+  if (managedFilter === 'all') {
+    return {
+      bool: {
+        should: [{ bool: { must_not: [{ term: { managed: true } }] } }, contextFilter],
+        minimum_should_match: 1,
+      },
+    };
+  }
+
+  return null;
+};
 
 interface WorkflowAggBucket {
   key: string | number | boolean;
@@ -125,15 +156,27 @@ export class WorkflowSearchService {
   async getWorkflows(
     params: GetWorkflowsParams,
     spaceId: string,
-    options?: { includeExecutionHistory?: boolean }
+    options?: { includeExecutionHistory?: boolean; includeManagedExecutionHistory?: boolean }
   ): Promise<WorkflowListDto> {
-    const { size = 100, page = 1, enabled, createdBy, tags, query, managedFilter } = params;
+    const {
+      size = 100,
+      page = 1,
+      enabled,
+      createdBy,
+      tags,
+      query,
+      managedFilter,
+      visibilityContext,
+      sortField,
+      sortOrder = 'asc',
+    } = params;
     const from = (page - 1) * size;
+    const resolvedManagedFilter = managedFilter ?? 'unmanaged';
 
     const { must, must_not } = buildWorkflowFilters({
       space: { id: spaceId, includeGlobal: true },
       deleted: 'not_deleted',
-      managed: managedFilter ?? 'unmanaged',
+      managed: resolvedManagedFilter,
     });
 
     must.push(
@@ -147,6 +190,20 @@ export class WorkflowSearchService {
     if (query) {
       must.push(buildWorkflowTextSearchClause(query));
     }
+    const visibilityContextFilter = buildVisibilityContextFilter(
+      resolvedManagedFilter,
+      visibilityContext
+    );
+    if (visibilityContextFilter) {
+      must.push(visibilityContextFilter);
+    }
+
+    const esSort = sortField
+      ? [
+          { [ES_SORT_FIELDS[sortField]]: { order: sortOrder } },
+          { updated_at: { order: 'desc' as const } },
+        ]
+      : [{ updated_at: { order: 'desc' as const } }];
 
     const searchResponse = await this.deps.workflowStorage.getClient().search({
       size,
@@ -155,7 +212,7 @@ export class WorkflowSearchService {
       query: {
         bool: { must, must_not },
       },
-      sort: [{ updated_at: { order: 'desc' } }],
+      sort: esSort,
     });
 
     const workflows = searchResponse.hits.hits
@@ -173,7 +230,9 @@ export class WorkflowSearchService {
       .filter((workflow): workflow is NonNullable<typeof workflow> => workflow !== null);
 
     if (options?.includeExecutionHistory && workflows.length > 0) {
-      const workflowIds = workflows.map((w) => w.id);
+      const workflowIds = workflows
+        .filter((workflow) => workflow.managed !== true || options.includeManagedExecutionHistory)
+        .map((workflow) => workflow.id);
       const executionHistory = await this.getRecentExecutionsForWorkflows(workflowIds, spaceId);
       workflows.forEach((workflow) => {
         workflow.history = executionHistory[workflow.id] || [];
@@ -193,7 +252,7 @@ export class WorkflowSearchService {
 
   async getWorkflowStats(
     spaceId: string,
-    options?: { includeExecutionStats?: boolean }
+    options?: { includeExecutionStats?: boolean; includeManagedExecutionStats?: boolean }
   ): Promise<WorkflowStatsDto> {
     const statsFilter = buildWorkflowFilters({
       space: { id: spaceId, includeGlobal: true },
@@ -225,13 +284,19 @@ export class WorkflowSearchService {
     };
 
     if (options?.includeExecutionStats) {
-      workflowsStats.executions = await this.getExecutionHistoryStats(spaceId);
+      workflowsStats.executions = await this.getExecutionHistoryStats(spaceId, {
+        includeManagedExecutions: options.includeManagedExecutionStats === true,
+      });
     }
 
     return workflowsStats;
   }
 
-  async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto> {
+  async getWorkflowAggs(
+    fields: string[],
+    spaceId: string,
+    options?: GetWorkflowAggsOptions
+  ): Promise<WorkflowAggsDto> {
     const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
 
     fields.forEach((field) => {
@@ -247,7 +312,7 @@ export class WorkflowSearchService {
       const aggsFilter = buildWorkflowFilters({
         space: { id: spaceId, includeGlobal: true },
         deleted: 'not_deleted',
-        managed: 'unmanaged',
+        managed: options?.managedFilter ?? 'unmanaged',
       });
       const aggsResponse = await this.deps.workflowStorage.getClient().search({
         size: 0,
@@ -286,7 +351,10 @@ export class WorkflowSearchService {
     }
   }
 
-  private async getExecutionHistoryStats(spaceId: string) {
+  private async getExecutionHistoryStats(
+    spaceId: string,
+    options?: { includeManagedExecutions?: boolean }
+  ) {
     try {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -300,6 +368,9 @@ export class WorkflowSearchService {
               { range: { createdAt: { gte: thirtyDaysAgo.toISOString() } } },
               { term: { spaceId } },
             ],
+            ...(options?.includeManagedExecutions
+              ? {}
+              : { must_not: [{ term: { managed: true } }] }),
           },
         },
         aggs: {
@@ -331,10 +402,12 @@ export class WorkflowSearchService {
       }));
     } catch (error) {
       if (!isIndexNotFoundError(error)) {
-        this.deps.logger.error('Failed to get execution history stats', error);
+        this.deps.logger.error('Failed to get execution history stats', { error: error as Error });
       } else {
         this.deps.logger.warn(
-          `Executions index not found when fetching execution history stats: ${error.message}`
+          `Executions index not found when fetching execution history stats: ${
+            (error as Error).message
+          }`
         );
       }
       return [];

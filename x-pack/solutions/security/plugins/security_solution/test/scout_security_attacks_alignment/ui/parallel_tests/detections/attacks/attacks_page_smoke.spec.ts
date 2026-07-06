@@ -24,7 +24,7 @@ spaceTest.describe(
       await scoutSpace.uiSettings.set({
         [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: true,
       });
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPlatformEngineer();
     });
 
     spaceTest.afterEach(async ({ scoutSpace }) => {
@@ -55,10 +55,12 @@ spaceTest.describe(
       await detectionsAttackDiscoveryPage.attacksTableSection.scrollIntoViewIfNeeded();
       await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.attacksListTable).toBeVisible();
-      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toHaveCount(1);
-      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toHaveCount(2);
       await expect(detectionsAttackDiscoveryPage.tableScheduleButtons).toHaveCount(1);
       await expect(detectionsAttackDiscoveryPage.tableScheduleButtons).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.manualAttackSubtitle).toHaveCount(1);
+      await expect(detectionsAttackDiscoveryPage.manualAttackSubtitle).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.attackRunByAvatar).toBeVisible();
     });
   }
 );

@@ -20,8 +20,18 @@ import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 /**
  * A string that does not contain only whitespace characters
  */
-export const NonEmptyString = lazySchema(() => z.string().min(1).superRefine(isNonEmptyString));
+export const NonEmptyString = lazySchema(() =>
+  z.string().min(1).max(100000).superRefine(isNonEmptyString)
+);
 export type NonEmptyString = z.infer<typeof NonEmptyString>;
+
+/**
+ * A JSON string that contains a valid ingest pipeline up to 10MiB
+ */
+export const NonEmptyIngestPipeline = lazySchema(() =>
+  z.string().min(1).max(10485760).superRefine(isNonEmptyString)
+);
+export type NonEmptyIngestPipeline = z.infer<typeof NonEmptyIngestPipeline>;
 
 /**
  * An identifier containing only alphanumeric characters and underscores
@@ -50,5 +60,5 @@ export type SemVer = z.infer<typeof SemVer>;
 /**
  * A universally unique identifier
  */
-export const UUID = lazySchema(() => z.string().uuid());
+export const UUID = lazySchema(() => z.string().max(36).uuid());
 export type UUID = z.infer<typeof UUID>;

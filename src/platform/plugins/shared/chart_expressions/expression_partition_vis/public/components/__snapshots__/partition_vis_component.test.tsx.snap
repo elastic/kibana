@@ -203,6 +203,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
               },
             ]
           }
+          footer="default"
           type="follow"
         />
         <Settings
@@ -702,6 +703,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -1157,6 +1159,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
               },
             ]
           }
+          footer="default"
           type="follow"
         />
         <Settings
@@ -1656,6 +1659,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -2171,6 +2175,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
               },
             ]
           }
+          footer="default"
           type="follow"
         />
         <Settings
@@ -2670,6 +2675,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -3187,6 +3193,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
               },
             ]
           }
+          footer="default"
           type="follow"
         />
         <Settings
@@ -3686,6 +3693,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -4141,6 +4149,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
               },
             ]
           }
+          footer="default"
           type="follow"
         />
         <Settings
@@ -4640,6 +4649,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -5050,6 +5060,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
               },
             ]
           }
+          footer="default"
           type="follow"
         />
         <Settings
@@ -5549,6 +5560,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
