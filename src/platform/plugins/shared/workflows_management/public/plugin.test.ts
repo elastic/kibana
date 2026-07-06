@@ -89,7 +89,7 @@ describe('WorkflowsPlugin', () => {
       expect(coreSetup.application.register).not.toHaveBeenCalled();
     });
 
-    it('should register only the workflows list deep link when executions view flag is off in bootstrap', () => {
+    it('should register the workflows list and library deep links but not executions when the executions view flag is off in bootstrap', () => {
       plugin = createPlugin(false);
       coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
         if (key === WORKFLOWS_UI_SETTING_ID) return true;
@@ -104,7 +104,12 @@ describe('WorkflowsPlugin', () => {
           id: PLUGIN_ID,
           title: 'Workflows',
           appRoute: '/app/workflows',
-          deepLinks: [expect.objectContaining({ id: 'workflowsList', path: '/' })],
+          // Library is registered by default at bootstrap; the executions link is
+          // gated by the flag (off here). Both are refined at start().
+          deepLinks: [
+            expect.objectContaining({ id: 'workflowsList', path: '/' }),
+            expect.objectContaining({ id: 'library', path: '/library' }),
+          ],
         })
       );
       expect(result).toEqual({});
@@ -158,6 +163,12 @@ describe('WorkflowsPlugin', () => {
         }) as any;
       };
 
+      // Deep-link visibility is driven by feature-flag settings read via
+      // settings.globalClient.get$. Which flags exist changes over time, so instead of
+      // stubbing a specific setting we serve a BehaviorSubject per requested key. This keeps
+      // the tests agnostic to the concrete flags and lets a test flip any/all of them.
+      const deepLinkSettings$ = new Map<string, BehaviorSubject<boolean>>();
+
       /**
        * Registers the workflows app via setup() and subscribes to its updater$
        * before start() runs, so the synchronous emission triggered by
@@ -170,6 +181,16 @@ describe('WorkflowsPlugin', () => {
         };
         coreSetup.uiSettings.get.mockImplementation(uiSettingsGetImpl);
         coreStart.uiSettings.get.mockImplementation(uiSettingsGetImpl);
+        // Real globalClient.get$ emits the current value synchronously (BehaviorSubject-like);
+        // the default mock returns a Subject that never emits, so combineLatest would never fire.
+        deepLinkSettings$.clear();
+        coreStart.settings.globalClient.get$.mockImplementation((key: string, fallback = false) => {
+          const existing = deepLinkSettings$.get(key);
+          if (existing) return existing;
+          const created = new BehaviorSubject<boolean>(Boolean(fallback));
+          deepLinkSettings$.set(key, created);
+          return created;
+        });
 
         plugin.setup(coreSetup, setupDeps as any);
 
@@ -248,6 +269,36 @@ describe('WorkflowsPlugin', () => {
           'classicSideNav',
           'projectSideNav',
         ]);
+      });
+
+      it('should emit visibleIn and deepLinks together in a single updater', () => {
+        setReadCapability(true);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        const combined = updates.filter((u) => u.visibleIn !== undefined);
+        expect(combined.length).toBeGreaterThanOrEqual(1);
+        // The race-condition fix means each updater carries both fields, not one or the other.
+        expect(combined[combined.length - 1].deepLinks).toBeDefined();
+      });
+
+      it('should re-emit the app updater when a deep-link feature-flag setting changes', () => {
+        setReadCapability(true);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        const emissionsBefore = updates.length;
+        // Flip whichever deep-link feature-flag settings the plugin subscribed to, without
+        // depending on any specific flag, and assert the change flows into the app updater.
+        expect(deepLinkSettings$.size).toBeGreaterThanOrEqual(1);
+        deepLinkSettings$.forEach((setting$) => setting$.next(!setting$.getValue()));
+
+        expect(updates.length).toBeGreaterThan(emissionsBefore);
+        expect(updates[updates.length - 1].deepLinks).toBeDefined();
       });
     });
   });
