@@ -518,6 +518,118 @@ export class StreamsPlugin
       this.server.agentBuilder = plugins.agentBuilder;
     }
 
+<<<<<<< HEAD
+=======
+    initializeSignificantEventsTemplates({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `Failed to initialize significant events templates: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
+
+    // Emits once when the memory feature flag transitions to enabled at runtime.
+    // The initial flag state is handled by the startup install/registration below,
+    // hence `skip(1)`.
+    const memoryEnabled$ = core.featureFlags
+      .getBooleanValue$(SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
+      .pipe(
+        distinctUntilChanged(),
+        skip(1),
+        filter((enabled) => enabled)
+      );
+
+    const investigationEnabled$ = core.featureFlags
+      .getBooleanValue$(SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG, false)
+      .pipe(
+        distinctUntilChanged(),
+        skip(1),
+        filter((enabled) => enabled)
+      );
+
+    initializeKnowledgeIndicatorsTemplate({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `Failed to initialize knowledge indicators template: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
+
+    if (plugins.workflowsExtensions) {
+      const { workflowsExtensions } = plugins;
+
+      void this.installManagedWorkflows(workflowsExtensions, core.featureFlags).catch(
+        (error: unknown) => {
+          this.logger.error(
+            `streams: Failed to install managed workflows: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      );
+
+      this.subscriptions.push(
+        memoryEnabled$.subscribe(() => {
+          void this.installMemoryWorkflowsIfEnabled(workflowsExtensions, core.featureFlags).catch(
+            (error: unknown) => {
+              this.logger.error(
+                `streams: Failed to install memory managed workflows after feature flag change: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            }
+          );
+        })
+      );
+
+      this.subscriptions.push(
+        investigationEnabled$.subscribe(() => {
+          void this.installInvestigationWorkflowIfEnabled(
+            workflowsExtensions,
+            core.featureFlags
+          ).catch((error: unknown) => {
+            this.logger.error(
+              `streams: Failed to install investigation managed workflow after feature flag change: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+          });
+        })
+      );
+    }
+
+    if (plugins.agentBuilder && this.server && this.streamsGetScopedClients) {
+      const isMemoryEnabled = () => isSignificantEventsMemoryEnabled(core.featureFlags);
+
+      const memoryToolsOptions = createMemoryToolsOptions({
+        getScopedClients: this.streamsGetScopedClients,
+        server: this.server,
+        logger: this.logger,
+      });
+
+      registerStreamsMemoryAgentBuilder({
+        agentBuilder: plugins.agentBuilder,
+        memoryToolsOptions,
+        logger: this.logger,
+        isMemoryEnabled,
+      })
+        .then(({ onMemoryEnabled }) => {
+          memoryEnabled$.subscribe(() => {
+            void onMemoryEnabled();
+          });
+        })
+        .catch((err) => {
+          this.logger.error(`Failed to register streams memory skills: ${err.message}`);
+        });
+    }
+
+>>>>>>> 2b6cd2fc44bef8d12b934be2822dd7fb3dfca964
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
     return {};
