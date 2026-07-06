@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { TechnicalPreviewBadge } from '../../../../../common/components/technical_preview_badge';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useRuleCustomizationsContext } from '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine';
@@ -133,7 +132,7 @@ const RuleActionsOverflowComponent = ({
                 });
               }}
             >
-              <TechnicalPreviewBadge label={i18nActions.RULE_CHANGES_HISTORY} />
+              {i18nActions.RULE_CHANGES_HISTORY}
             </EuiContextMenuItem>,
           ]
         : []),
