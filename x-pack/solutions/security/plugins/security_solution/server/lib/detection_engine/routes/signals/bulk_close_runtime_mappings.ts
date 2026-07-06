@@ -10,6 +10,17 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { RuntimeFieldType } from '../../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 
 /**
+ * Upper bound on `runtime_fields` entries accepted per request. Each entry
+ * synthesizes one Painless runtime field that ES evaluates per candidate
+ * document of the `_update_by_query`, so the count is capped to keep a
+ * single request from scheduling unbounded script work. Mirrored as
+ * `maxProperties` on `runtime_fields` in
+ * `set_signals_status_route.schema.yaml`; the OpenAPI-to-Zod generator does
+ * not translate `maxProperties`, so the route enforces this constant.
+ */
+export const MAX_RUNTIME_FIELDS_PER_REQUEST = 100;
+
+/**
  * A constant Painless source that reads the value of `fieldName` from
  * `_source`. Handles both nested-object storage (`{source: {ip_ecs: ...}}`)
  * and the flat-dotted-key fallback (`{"source.ip_ecs": ...}`), and emits

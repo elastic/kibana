@@ -211,6 +211,7 @@ components:
           default: abort
         runtime_fields:
           type: object
+          maxProperties: 100
           additionalProperties:
             $ref: '#/components/schemas/RuntimeFieldType'
           description: >-
@@ -221,7 +222,8 @@ components:
             Allows the `query` to reference non-ECS fields stored on the
             alert `_source` but not in the alerts index mapping — for
             example, runtime fields the rule's source index defined at the
-            time the alerts were created.
+            time the alerts were created. Limited to 100 entries per
+            request; larger maps are rejected.
       required: [query, status]
 
     CloseAlertsByQuery:
@@ -243,6 +245,7 @@ components:
           $ref: '../../../model/alert.schema.yaml#/components/schemas/Reason'
         runtime_fields:
           type: object
+          maxProperties: 100
           additionalProperties:
             $ref: '#/components/schemas/RuntimeFieldType'
           description: >-
@@ -253,7 +256,8 @@ components:
             Allows the `query` to reference non-ECS fields stored on the
             alert `_source` but not in the alerts index mapping — for
             example, runtime fields the rule's source index defined at the
-            time the alerts were created.
+            time the alerts were created. Limited to 100 entries per
+            request; larger maps are rejected.
       required: [query, status]
 
     SetAlertsStatusByQuery:

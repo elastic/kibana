@@ -63,7 +63,7 @@ export const SetAlertsStatusByQueryBase = lazySchema(() =>
     status: AlertStatusExceptClosed,
     conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
     /**
-     * Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created.
+     * Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created. Limited to 100 entries per request; larger maps are rejected.
      */
     runtime_fields: z.object({}).catchall(RuntimeFieldType).optional(),
   })
@@ -77,7 +77,7 @@ export const CloseAlertsByQuery = lazySchema(() =>
     conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
     reason: Reason.optional(),
     /**
-     * Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created.
+     * Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created. Limited to 100 entries per request; larger maps are rejected.
      */
     runtime_fields: z.object({}).catchall(RuntimeFieldType).optional(),
   })

@@ -29,7 +29,10 @@ import {
   updateAlertsWorkflowStatus,
 } from '../common/operations/update_alerts_workflow_status';
 import { validateClosingReason } from '../common/validators/validate_closing_reason';
-import { buildRuntimeMappingsFromFieldTypes } from './bulk_close_runtime_mappings';
+import {
+  buildRuntimeMappingsFromFieldTypes,
+  MAX_RUNTIME_FIELDS_PER_REQUEST,
+} from './bulk_close_runtime_mappings';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -121,6 +124,19 @@ export const setSignalsStatusRoute = (
             return response.ok({ body });
           } else {
             const { conflicts, query: rawQuery, runtime_fields: runtimeFields } = request.body;
+
+            // The schema documents this cap as `maxProperties`, but the
+            // generated Zod schema doesn't carry it — enforce it here so one
+            // request can't schedule unbounded runtime-script work on the
+            // `_update_by_query`.
+            const runtimeFieldCount = runtimeFields ? Object.keys(runtimeFields).length : 0;
+            if (runtimeFieldCount > MAX_RUNTIME_FIELDS_PER_REQUEST) {
+              return siemResponse.error({
+                statusCode: 400,
+                body: `runtime_fields is limited to ${MAX_RUNTIME_FIELDS_PER_REQUEST} entries per request, received ${runtimeFieldCount}`,
+              });
+            }
+
             // The schema validates `query` only as an open object (the route
             // is intentionally permissive about DSL shape); narrow it to the
             // ES DSL type once at the boundary so internal helpers stay

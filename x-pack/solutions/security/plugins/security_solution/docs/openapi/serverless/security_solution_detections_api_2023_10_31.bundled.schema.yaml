@@ -4584,7 +4584,9 @@ components:
             `_update_by_query` as `runtime_mappings`. Allows the `query` to
             reference non-ECS fields stored on the alert `_source` but not in
             the alerts index mapping — for example, runtime fields the rule's
-            source index defined at the time the alerts were created.
+            source index defined at the time the alerts were created. Limited to
+            100 entries per request; larger maps are rejected.
+          maxProperties: 100
           type: object
         status:
           enum:
@@ -9028,7 +9030,9 @@ components:
             `_update_by_query` as `runtime_mappings`. Allows the `query` to
             reference non-ECS fields stored on the alert `_source` but not in
             the alerts index mapping — for example, runtime fields the rule's
-            source index defined at the time the alerts were created.
+            source index defined at the time the alerts were created. Limited to
+            100 entries per request; larger maps are rejected.
+          maxProperties: 100
           type: object
         status:
           $ref: '#/components/schemas/AlertStatusExceptClosed'
