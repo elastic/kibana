@@ -310,6 +310,27 @@ describe('WorkflowEventPublisher', () => {
       await flushPromises();
       expect(logger.warn).not.toHaveBeenCalled();
     });
+
+    it('does not throw synchronously when emit throws synchronously, and logs a warning instead', async () => {
+      emit.mockImplementation(() => {
+        throw new Error('synchronous emit failure');
+      });
+
+      expect(() =>
+        publisher.emitAssetCriticalityUpdated([
+          {
+            entityId: 'host-1',
+            entityType: 'generic',
+            doc: { entity: { id: 'host-1' }, asset: { criticality: 'high_impact' } },
+            previousCriticality: undefined,
+          },
+        ])
+      ).not.toThrow();
+
+      await flushPromises();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 of 1'));
+    });
   });
 
   describe('emitRiskScoreChanged', () => {
@@ -428,6 +449,27 @@ describe('WorkflowEventPublisher', () => {
           previousScore: null,
         },
       ]);
+
+      await flushPromises();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 of 1'));
+    });
+
+    it('does not throw synchronously when emit throws synchronously, and logs a warning instead', async () => {
+      emit.mockImplementation(() => {
+        throw new Error('synchronous emit failure');
+      });
+
+      expect(() =>
+        publisher.emitRiskScoreChanged([
+          {
+            entityId: 'host-1',
+            entityType: 'generic',
+            doc: { entity: { id: 'host-1', risk: { calculated_score_norm: 75 } } },
+            previousScore: null,
+          },
+        ])
+      ).not.toThrow();
 
       await flushPromises();
       expect(logger.warn).toHaveBeenCalledTimes(1);

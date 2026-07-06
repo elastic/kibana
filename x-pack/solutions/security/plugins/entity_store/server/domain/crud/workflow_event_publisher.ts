@@ -113,18 +113,25 @@ export class WorkflowEventPublisher {
   public emitAssetCriticalityUpdated(targets: AssetCriticalityWorkflowEmitTarget[]): void {
     if (!this.emit || targets.length === 0) return;
     const emitPromises = targets.flatMap(({ entityId, entityType, doc, previousCriticality }) => {
-      const updatedCriticalityLevel = get(doc, ASSET_CRITICALITY_UPDATED_WATCHED_FIELDS[0]);
-      if (updatedCriticalityLevel === undefined) return [];
-      if (previousCriticality !== undefined && updatedCriticalityLevel === previousCriticality) {
-        return [];
+      try {
+        const updatedCriticalityLevel = get(doc, ASSET_CRITICALITY_UPDATED_WATCHED_FIELDS[0]);
+        if (updatedCriticalityLevel === undefined) return [];
+        if (previousCriticality !== undefined && updatedCriticalityLevel === previousCriticality) {
+          return [];
+        }
+        return [
+          this.emit!(ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID, {
+            entityId,
+            entityType,
+            criticalityLevel: updatedCriticalityLevel,
+          }),
+        ];
+      } catch (error) {
+        // A synchronous throw here (e.g. from `emit` itself) must not escape this
+        // fire-and-forget method; fold it into the same rejected-promise path as an
+        // async emit failure so it's logged as a warning instead of failing the caller.
+        return [Promise.reject(error)];
       }
-      return [
-        this.emit!(ENTITY_ASSET_CRITICALITY_UPDATED_TRIGGER_ID, {
-          entityId,
-          entityType,
-          criticalityLevel: updatedCriticalityLevel,
-        }),
-      ];
     });
 
     if (emitPromises.length === 0) return;
@@ -143,22 +150,28 @@ export class WorkflowEventPublisher {
   public emitRiskScoreChanged(targets: RiskScoreWorkflowEmitTarget[]): void {
     if (!this.emit || targets.length === 0) return;
     const emitPromises = targets.flatMap(({ entityId, entityType, doc, previousScore }) => {
-      const newScore = get(doc, RISK_SCORE_CHANGED_WATCHED_FIELDS[0]);
-      if (newScore === undefined) return [];
-      const signedDelta = previousScore != null ? newScore - previousScore : null;
-      if (signedDelta === 0) return [];
-      const direction = signedDelta != null ? (signedDelta > 0 ? 'increase' : 'decrease') : null;
-      const delta = signedDelta != null ? Math.abs(signedDelta) : null;
-      return [
-        this.emit!(ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID, {
-          entityId,
-          entityType,
-          score: newScore,
-          previousScore,
-          delta,
-          direction,
-        }),
-      ];
+      try {
+        const newScore = get(doc, RISK_SCORE_CHANGED_WATCHED_FIELDS[0]);
+        if (newScore === undefined) return [];
+        const signedDelta = previousScore != null ? newScore - previousScore : null;
+        if (signedDelta === 0) return [];
+        const direction = signedDelta != null ? (signedDelta > 0 ? 'increase' : 'decrease') : null;
+        const delta = signedDelta != null ? Math.abs(signedDelta) : null;
+        return [
+          this.emit!(ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID, {
+            entityId,
+            entityType,
+            score: newScore,
+            previousScore,
+            delta,
+            direction,
+          }),
+        ];
+      } catch (error) {
+        // See the matching catch in emitAssetCriticalityUpdated: fold synchronous
+        // throws into the rejected-promise path so they're logged, not propagated.
+        return [Promise.reject(error)];
+      }
     });
 
     if (emitPromises.length === 0) return;
