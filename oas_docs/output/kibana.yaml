@@ -62735,7 +62735,8 @@ paths:
                     - host
                     - service
                     - generic
-                  description: 'DEPRECATED: use `POST /install/{entityType}` to install a single entity type. Retained for backward compatibility; installs all listed types uniformly.'
+                  deprecated: true
+                  description: Deprecated in 9.6.0. Use `POST /install/{entityType}` to install a single entity type. Retained for backward compatibility; installs all listed types uniformly.
                   items:
                     enum:
                       - user
@@ -63678,7 +63679,8 @@ paths:
                     - host
                     - service
                     - generic
-                  description: 'DEPRECATED: use `DELETE /uninstall/{entityType}` to uninstall a single entity type. Retained for backward compatibility. Entity types to uninstall; defaults to all installed types.'
+                  deprecated: true
+                  description: Deprecated in 9.6.0. Use `DELETE /uninstall/{entityType}` to uninstall a single entity type. Retained for backward compatibility. Entity types to uninstall; defaults to all installed types.
                   items:
                     enum:
                       - user
