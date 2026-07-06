@@ -124,6 +124,8 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
   - '@kbn/core-chrome-layout-constants'
+  - '@kbn/significant-events-plugin'
+  - '@kbn/server-route-repository'
 tags:
   - plugin
   - prod
