@@ -449,13 +449,10 @@ export function InternalDashboardTopNav({
             isApproximate: isApproximate ?? false,
             onChange: dashboardApi.setIsApproximate,
             disabled: !hasEsqlPanel,
-            additionalText: i18n.translate(
-              'dashboard.esqlApproximationToggle.additionalText',
-              {
-                defaultMessage:
-                  'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
-              }
-            ),
+            additionalText: i18n.translate('dashboard.esqlApproximationToggle.additionalText', {
+              defaultMessage:
+                'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
+            }),
           }}
         />
       )}
