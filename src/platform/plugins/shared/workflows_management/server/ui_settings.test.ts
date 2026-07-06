@@ -12,7 +12,6 @@ import {
   WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
-  WORKFLOWS_VERSIONING_SETTING_ID,
 } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 import { registerUISettings } from './ui_settings';
@@ -64,24 +63,7 @@ describe('Workflows Management UI Settings', () => {
     registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
 
     expect(coreSetupMock.uiSettings.register).toHaveBeenCalledTimes(1);
-    expect(coreSetupMock.uiSettings.registerGlobal).toHaveBeenCalledTimes(1);
-  });
-
-  it('should register hidden workflow change history ui setting as global', () => {
-    registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
-
-    expect(coreSetupMock.uiSettings.registerGlobal).toHaveBeenCalledWith(
-      expect.objectContaining({
-        [WORKFLOWS_VERSIONING_SETTING_ID]: expect.objectContaining({
-          schema: expect.any(Object),
-          value: false,
-          readonly: true,
-          readonlyMode: 'ui',
-          requiresPageReload: true,
-          scope: 'global',
-        }),
-      })
-    );
+    expect(coreSetupMock.uiSettings.registerGlobal).not.toHaveBeenCalled();
   });
 
   it('should include license text if serverless is false', () => {
