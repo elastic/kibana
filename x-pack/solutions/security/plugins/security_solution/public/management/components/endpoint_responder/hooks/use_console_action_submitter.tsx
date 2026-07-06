@@ -229,6 +229,15 @@ export const useConsoleActionSubmitter = <
     setStore,
   ]);
 
+  // If we have an Action ID, but the overall status is `creating`, then set the status to pending.
+  // This status inconsistency can happen if the user closes the console while the action request is
+  // still being created
+  useEffect(() => {
+    if (actionId && status === 'creating') {
+      setStatus('pending');
+    }
+  }, [actionId, isPending, setStatus, status]);
+
   // If an error was returned while attempting to create the action request,
   // then set command status to error
   useEffect(() => {
