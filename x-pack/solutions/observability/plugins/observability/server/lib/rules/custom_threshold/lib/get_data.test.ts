@@ -66,6 +66,7 @@ const expectedNoDataResponse = {
   [UNGROUPED_FACTORY_KEY]: {
     value: null,
     trigger: false,
+    warn: false,
     bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
   },
 };

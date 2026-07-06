@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { callApmApi } from './create_call_apm_api';
 import { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
 import { ENVIRONMENT_ALL_VALUE } from '../../../common/environment_filter_values';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../common/correlations/constants';
+import { getApmInternalServices } from '../../plugin';
 
 export const fetchLatencyOverallSpanDistribution = (
   {
@@ -25,8 +25,9 @@ export const fetchLatencyOverallSpanDistribution = (
     isOtel: boolean;
   },
   signal: AbortSignal
-) =>
-  callApmApi('POST /internal/apm/latency/overall_distribution/spans', {
+) => {
+  const { callApmApi } = getApmInternalServices();
+  return callApmApi('POST /internal/apm/latency/overall_distribution/spans', {
     params: {
       body: {
         spanName,
@@ -42,3 +43,4 @@ export const fetchLatencyOverallSpanDistribution = (
     },
     signal,
   });
+};

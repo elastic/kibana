@@ -139,6 +139,9 @@ import {
 } from './lib/entity_analytics/entity_store/tasks';
 import { accessesFrequentlyMaintainer } from './lib/entity_analytics/maintainers/accesses';
 import { communicatesWithMaintainer } from './lib/entity_analytics/maintainers/communicates_with';
+import { administersMaintainer } from './lib/entity_analytics/maintainers/administers';
+import { supervisesMaintainer } from './lib/entity_analytics/maintainers/supervises';
+import { ownsMaintainer } from './lib/entity_analytics/maintainers/owns';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   allRiskScoreIndexPattern,
@@ -277,6 +280,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       logger,
       experimentalFeatures,
+      plugins.ml,
       {
         config: this.config,
         ml: plugins.ml,
@@ -287,10 +291,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger,
         isServerless: this.isServerless,
       },
-      this.isServerless
-    ).catch((error) => {
-      this.logger.error(`Error registering security tools: ${error}`);
-    });
+      this.isServerless,
+      this.pluginContext.env.packageInfo.version,
+      plugins.encryptedSavedObjects?.canEncrypt === true
+    );
     registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
@@ -385,6 +389,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (!experimentalFeatures.entityStoreDisabled) {
       plugins.entityStore?.registerEntityMaintainer(accessesFrequentlyMaintainer);
       plugins.entityStore?.registerEntityMaintainer(communicatesWithMaintainer);
+      plugins.entityStore?.registerEntityMaintainer(administersMaintainer);
+      plugins.entityStore?.registerEntityMaintainer(supervisesMaintainer);
+      plugins.entityStore?.registerEntityMaintainer(ownsMaintainer);
 
       registerEntityStoreFieldRetentionEnrichTask({
         getStartServices: core.getStartServices,
@@ -559,7 +566,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    registerCaseAttachments(plugins.cases.attachmentFramework);
+    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
     plugins.cases.attachmentFramework.registerUnified(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
@@ -847,7 +854,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions, core);
+      registerWorkflowSteps(plugins.workflowsExtensions, core, experimentalFeatures);
     }
 
     setupAlertsCapabilitiesSwitcher({

@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import {
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
@@ -23,6 +31,7 @@ import { EventKind } from './constants/event_kinds';
 import { Footer } from './footer';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
+import { JsonTab } from './tabs/json_tab';
 import { NotesDetails } from '../../shared/tools/notes';
 import { useKibana } from '../../../common/lib/kibana';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
@@ -41,6 +50,21 @@ const headerStyles = css`
     overflow: auto;
   }
 `;
+
+type DocumentFlyoutTabId = 'overview' | 'table' | 'json';
+
+export const OVERVIEW_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutOverviewTab';
+export const JSON_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutJsonTab';
+
+const OVERVIEW_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.document.overviewTabLabel',
+  {
+    defaultMessage: 'Overview',
+  }
+);
+const JSON_TAB_LABEL = i18n.translate('xpack.securitySolution.flyout.document.jsonTabLabel', {
+  defaultMessage: 'JSON',
+});
 
 export interface DocumentFlyoutProps {
   /**
@@ -74,6 +98,9 @@ export const DocumentFlyout = memo(
     const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
+
+    // The Table and JSON tabs are only available in Security Solution, not in Discover.
+    const [selectedTabId, setSelectedTabId] = useState<DocumentFlyoutTabId>('overview');
 
     const onShowNotes = useCallback(() => {
       overlays.openSystemFlyout(
@@ -110,11 +137,36 @@ export const DocumentFlyout = memo(
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <OverviewTab
-            hit={hit}
-            renderCellActions={renderCellActions}
-            onAlertUpdated={onAlertUpdated}
-          />
+          {isSecurityApp && (
+            <>
+              <EuiTabs>
+                <EuiTab
+                  isSelected={selectedTabId === 'overview'}
+                  onClick={() => setSelectedTabId('overview')}
+                  data-test-subj={OVERVIEW_TAB_TEST_ID}
+                >
+                  {OVERVIEW_TAB_LABEL}
+                </EuiTab>
+                <EuiTab
+                  isSelected={selectedTabId === 'json'}
+                  onClick={() => setSelectedTabId('json')}
+                  data-test-subj={JSON_TAB_TEST_ID}
+                >
+                  {JSON_TAB_LABEL}
+                </EuiTab>
+              </EuiTabs>
+              <EuiSpacer size="m" />
+            </>
+          )}
+          {selectedTabId === 'json' ? (
+            <JsonTab hit={hit} />
+          ) : (
+            <OverviewTab
+              hit={hit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
+          )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter css={footerStyles}>
           <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotes} />

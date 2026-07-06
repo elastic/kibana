@@ -72,6 +72,18 @@ export interface QuerySandboxProps {
   /** Required with `timeFieldOptions` when the parent gates autoRun on resolution. */
   isTimeFieldResolved?: boolean;
   /**
+   * Optional help text rendered above the editor. The caller is responsible for
+   * content and styling (e.g. `<EuiText size="s">`). A spacer is added automatically
+   * below it. Absent or `undefined` → nothing is rendered.
+   */
+  helpText?: React.ReactNode;
+  /**
+   * Optional actions rendered right-aligned in the ES|QL query header row, just before
+   * the Search button. Use for header-level controls such as Split / Merge buttons.
+   * Absent or `undefined` → nothing is rendered.
+   */
+  headerActions?: React.ReactNode;
+  /**
    * When provided, the editor panel renders `ComposeDiscoverTabs` with a tab
    * bar instead of a single `CodeEditor`. Absent or `[]` → single editor.
    */
@@ -109,7 +121,9 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   autoRun = false,
   timeFieldOptions: timeFieldOptionsProp,
   isTimeFieldResolved: isTimeFieldResolvedProp,
+  helpText,
   tabProps,
+  headerActions,
 }) => {
   const services = useRuleFormServices();
   const isReadOnly = !onQueryChange;
@@ -236,6 +250,12 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
   return (
     <div data-test-subj="querySandbox">
+      {helpText && (
+        <>
+          {helpText}
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
         <CpsPicker />
         <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
@@ -268,6 +288,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
             width="full"
           />
         </EuiFlexItem>
+        {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchTooltip', {
