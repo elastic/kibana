@@ -88,8 +88,7 @@
       "agentBuilder",
       "llmTasks",
       "cps",
-      "searchInferenceEndpoints",
-      "workflowsManagement"
+      "searchInferenceEndpoints"
     ],
     "requiredBundles": [
       "esUiShared",
