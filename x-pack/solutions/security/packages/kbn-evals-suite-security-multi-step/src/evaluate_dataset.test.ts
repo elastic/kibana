@@ -78,4 +78,14 @@ describe('toDatasetExample', () => {
     expect(wrapped.input?.turns).toHaveLength(2);
     expect(wrapped.output?.tool_sequence).toEqual(['security.alerts']);
   });
+
+  it('flattens turns into a question so the correctness judge gets a real user_query', () => {
+    const ex: MultiStepExample = {
+      input: { turns: ['hello', 'follow up'] },
+      expected: { reference: 'ref', tool_sequence: ['security.alerts'] },
+      metadata: { scenario: 'full_chain_triage_investigate_rule', dataset_split: ['base'] },
+    };
+    const wrapped = toDatasetExample(ex);
+    expect(wrapped.input?.question).toBe('Turn 1: hello\nTurn 2: follow up');
+  });
 });

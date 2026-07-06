@@ -128,6 +128,13 @@ const createDynamicSkillInvocationEvaluator = ({
 
 export interface MultiStepDatasetInput extends Record<string, unknown> {
   turns: string[];
+  /**
+   * Flattened multi-turn prompt for the LLM correctness judge. The shared
+   * `correctnessAnalysis` evaluator reads `input.question` to fill `user_query`;
+   * without it the judge sees `user_query: "undefined"` and unfairly scores
+   * Factuality/Relevance against a golden reference it can't contextualize.
+   */
+  question: string;
 }
 
 export interface MultiStepDatasetExpected {
@@ -150,7 +157,10 @@ export type MultiStepDatasetExample = Example<
 >;
 
 export const toDatasetExample = (ex: MultiStepExample): MultiStepDatasetExample => ({
-  input: { turns: ex.input.turns },
+  input: {
+    turns: ex.input.turns,
+    question: ex.input.turns.map((turn, i) => `Turn ${i + 1}: ${turn}`).join('\n'),
+  },
   output: {
     reference: ex.expected.reference,
     expected: ex.expected.reference,
