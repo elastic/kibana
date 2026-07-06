@@ -8,7 +8,7 @@
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useCallback, useEffect, useState } from 'react';
 import type { Assignee } from '../../../../user_profiles/types';
-import type { CurrentUserProfile } from '../../../../case_view/types';
+import type { CurrentUserProfile } from '../../../../types';
 
 export interface UseAssigneesPickerArgs {
   allAssignees: Assignee[];

@@ -30,7 +30,7 @@ describe('SidebarAccordionSection', () => {
     expect(screen.getByTestId('accordion-child')).toBeInTheDocument();
   });
 
-  it('does not render children when closed', () => {
+  it('keeps children mounted but inert when closed, so pending edits are not lost', () => {
     const onToggle = jest.fn();
 
     render(
@@ -46,7 +46,10 @@ describe('SidebarAccordionSection', () => {
     );
 
     expect(screen.getByText('Attributes')).toBeInTheDocument();
-    expect(screen.queryByTestId('accordion-child')).not.toBeInTheDocument();
+    expect(screen.getByTestId('accordion-child')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-sidebar-attributes')).not.toHaveClass(
+      'euiAccordion-isOpen'
+    );
   });
 
   it('renders extraAction when provided', () => {

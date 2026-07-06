@@ -83,3 +83,16 @@ export const SECTION_SETTINGS_ARIA = i18n.translate(
 export const ASSIGNED_TITLE = i18n.translate('xpack.cases.casesRedesign.details.assignedTitle', {
   defaultMessage: 'Assigned',
 });
+
+export const PARTICIPANTS_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.details.participantsTitle',
+  {
+    defaultMessage: 'Participants',
+  }
+);
+
+export const CLICK_TO_SEND_EMAIL = (email: string) =>
+  i18n.translate('xpack.cases.casesRedesign.details.clickToSendEmail', {
+    defaultMessage: 'Click to send email to {email}',
+    values: { email },
+  });

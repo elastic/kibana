@@ -20,7 +20,7 @@ import {
 import { noUpdateCasesPermissions, renderWithTestingProviders } from '../../../../common/mock';
 import { CaseViewSidebar } from './case_view_sidebar';
 import type { CaseUI } from '../../../../../common';
-import { ConnectorTypes } from '../../../../../common/types/domain';
+import { CaseSeverity, ConnectorTypes } from '../../../../../common/types/domain';
 import { CaseMetricsFeature } from '../../../../../common/types/api';
 import { useGetSupportedActionConnectors } from '../../../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../../../containers/use_get_tags';
@@ -159,7 +159,7 @@ describe('CaseViewSidebar (redesign)', () => {
 
     expect(
       (await screen.findByTestId('case-severity-selection')).classList.contains(
-        'euiSuperSelectControl-isLoading'
+        'euiSelect-isLoading'
       )
     ).toBeTruthy();
   });
@@ -171,9 +171,27 @@ describe('CaseViewSidebar (redesign)', () => {
 
     expect(
       (await screen.findByTestId('case-severity-selection')).classList.contains(
-        'euiSuperSelectControl-isLoading'
+        'euiSelect-isLoading'
       )
     ).not.toBeTruthy();
+  });
+
+  it('preserves a pending severity edit when the Attributes accordion is collapsed and reopened', async () => {
+    const user = userEvent.setup();
+
+    renderWithTestingProviders(<CaseViewSidebar caseData={caseData} />);
+
+    expect(await screen.findByTestId('case-severity-selection')).toHaveValue(CaseSeverity.LOW);
+
+    await user.selectOptions(screen.getByTestId('case-severity-selection'), CaseSeverity.CRITICAL);
+
+    expect(screen.getByTestId('template-field-confirm-severity')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('case-view-sidebar-attributes-toggle'));
+    await user.click(screen.getByTestId('case-view-sidebar-attributes-toggle'));
+
+    expect(screen.getByTestId('case-severity-selection')).toHaveValue(CaseSeverity.CRITICAL);
+    expect(screen.getByTestId('template-field-confirm-severity')).toBeInTheDocument();
   });
 
   it('should not render the assignees on basic license', () => {
@@ -256,7 +274,7 @@ describe('CaseViewSidebar (redesign)', () => {
       <CaseViewSidebar caseData={{ ...caseData, category: 'My category' }} />
     );
 
-    expect(await screen.findByText('My category'));
+    expect(await screen.findByDisplayValue('My category')).toBeInTheDocument();
   });
 
   describe('Assignees', () => {

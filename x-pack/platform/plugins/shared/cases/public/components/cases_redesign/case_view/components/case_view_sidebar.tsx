@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiScreenReaderOnly,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { isEqual } from 'lodash';
 import type { CaseSeverity, CaseUI } from '../../../../../common';
@@ -18,16 +26,15 @@ import { useGetSupportedActionConnectors } from '../../../../containers/configur
 import type { CaseUICustomField } from '../../../../../common/ui/types';
 import type { EditConnectorProps } from '../../../edit_connector';
 import { EditConnector } from '../../../edit_connector';
-import { EditTags } from '../../../case_view/components/edit_tags';
-import { UserList } from '../../../case_view/components/user_list';
 import { useOnUpdateField } from '../../../case_view/use_on_update_field';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
 import * as i18n from '../../../case_view/translations';
 import { CONNECTORS } from '../../../../common/translations';
-import { SeveritySidebarSelector } from '../../../severity/sidebar_selector';
-import { AssigneesFieldPanel } from './user_picker_field/assignees_field_panel';
+import { UserPickerFieldPanel } from './user_picker_field/user_picker_field_panel';
+import { SeverityField } from './severity_field';
 import type { Assignee } from '../../../user_profiles/types';
-import { EditCategory } from '../../../case_view/components/edit_category';
+import { CategoryField } from './category_field';
+import { TagsField } from './tags_field';
 import { parseCaseUsers } from '../../../utils';
 import { CustomFields } from '../../../case_view/components/custom_fields';
 import { useReplaceCustomField } from '../../../../containers/use_replace_custom_field';
@@ -39,7 +46,22 @@ import { SidebarAccordionSection } from './sidebar_accordion_section';
 import { SidebarSectionSettingsButton } from './sidebar_section_settings_button';
 import { useSidebarAccordionsState } from './use_sidebar_accordions_state';
 
+const isFieldUpdating = (isLoading: boolean, loadingKey: string | null, key: string): boolean =>
+  isLoading && loadingKey === key;
+
+const getIsLoadingAssigneeData = (
+  isLoading: boolean,
+  loadingKey: string | null,
+  isLoadingCaseUsers: boolean,
+  isLoadingCurrentUserProfile: boolean
+): boolean =>
+  isFieldUpdating(isLoading, loadingKey, 'assignees') ||
+  isLoadingCaseUsers ||
+  isLoadingCurrentUserProfile;
+
 export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
+  const { euiTheme } = useEuiTheme();
+  const fieldsGroupStyles = useMemo(() => css({ gap: euiTheme.size.m }), [euiTheme]);
   const { permissions } = useCasesContext();
   const { caseAssignmentAuthorized, pushToServiceAuthorized } = useCasesFeatures();
   const { isOpen, onToggle } = useSidebarAccordionsState();
@@ -56,7 +78,7 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
 
   const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
 
-  const { userProfiles, reporterAsArray } = parseCaseUsers({
+  const { userProfiles } = parseCaseUsers({
     caseUsers,
     createdBy: caseData.createdBy,
   });
@@ -68,8 +90,12 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
 
   const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({ caseData });
 
-  const isLoadingAssigneeData =
-    (isLoading && loadingKey === 'assignees') || isLoadingCaseUsers || isLoadingCurrentUserProfile;
+  const isLoadingAssigneeData = getIsLoadingAssigneeData(
+    isLoading,
+    loadingKey,
+    isLoadingCaseUsers,
+    isLoadingCurrentUserProfile
+  );
 
   const onSubmitTags = useCallback(
     (newTags: string[]) => onUpdateField({ key: 'tags', value: newTags }),
@@ -122,6 +148,9 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
 
   const templateFieldsTitle = templateData?.name ?? redesignI18n.TEMPLATE_FIELDS_TITLE;
 
+  const participants =
+    caseUsers != null ? [...caseUsers.participants, ...caseUsers.assignees] : undefined;
+
   return (
     <EuiFlexItem grow={2}>
       <EuiSpacer size="s" />
@@ -141,48 +170,47 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
           onToggle={onToggle}
           data-test-subj="case-view-sidebar-attributes"
         >
-          <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
+          <EuiFlexGroup direction="column" responsive={false} css={fieldsGroupStyles}>
             {caseAssignmentAuthorized ? (
-              <AssigneesFieldPanel
+              <UserPickerFieldPanel
+                isEditable
+                title={redesignI18n.ASSIGNED_TITLE}
+                dataTestSubj="case-view-assignees-field-panel"
                 caseAssignees={caseData.assignees}
                 currentUserProfile={currentUserProfile}
                 onAssigneesChanged={onUpdateAssignees}
                 isLoading={isLoadingAssigneeData}
                 userProfiles={userProfiles ?? new Map()}
+                caseId={caseData.id}
+                caseTitle={caseData.title}
               />
             ) : null}
-            <SeveritySidebarSelector
+            <SeverityField
               isDisabled={!permissions.update}
-              isLoading={isLoading && loadingKey === 'severity'}
+              isLoading={isFieldUpdating(isLoading, loadingKey, 'severity')}
               selectedSeverity={caseData.severity}
               onSeverityChange={onUpdateSeverity}
             />
-            <UserList
-              dataTestSubj="case-view-user-list-reporter"
-              theCase={caseData}
-              headline={i18n.REPORTER}
-              users={reporterAsArray}
-              userProfiles={userProfiles}
-            />
-            {caseUsers != null ? (
-              <UserList
-                dataTestSubj="case-view-user-list-participants"
-                theCase={caseData}
-                headline={i18n.PARTICIPANTS}
-                loading={isLoadingCaseUsers}
-                users={[...caseUsers.participants, ...caseUsers.assignees]}
-                userProfiles={userProfiles}
+            {participants != null ? (
+              <UserPickerFieldPanel
+                title={redesignI18n.PARTICIPANTS_TITLE}
+                users={participants}
+                userProfiles={userProfiles ?? new Map()}
+                isLoading={isLoadingCaseUsers}
+                dataTestSubj="case-view-participants-field-panel"
+                caseId={caseData.id}
+                caseTitle={caseData.title}
               />
             ) : null}
-            <EditTags
+            <TagsField
               tags={caseData.tags}
               onSubmit={onSubmitTags}
-              isLoading={isLoading && loadingKey === 'tags'}
+              isLoading={isFieldUpdating(isLoading, loadingKey, 'tags')}
             />
-            <EditCategory
+            <CategoryField
               category={caseData.category}
               onSubmit={onSubmitCategory}
-              isLoading={isLoading && loadingKey === 'category'}
+              isLoading={isFieldUpdating(isLoading, loadingKey, 'category')}
             />
           </EuiFlexGroup>
         </SidebarAccordionSection>
@@ -197,9 +225,11 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
           onToggle={onToggle}
           data-test-subj="case-view-sidebar-template-fields"
         >
-          <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
+          <EuiFlexGroup direction="column" responsive={false} css={fieldsGroupStyles}>
             <CustomFields
-              isLoading={(isLoading && loadingKey === 'customFields') || isUpdatingCustomField}
+              isLoading={
+                isFieldUpdating(isLoading, loadingKey, 'customFields') || isUpdatingCustomField
+              }
               customFields={caseData.customFields}
               customFieldsConfiguration={casesConfiguration.customFields}
               onSubmit={onSubmitCustomField}
@@ -231,7 +261,8 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
                 caseConnectors={caseConnectors}
                 supportedActionConnectors={supportedActionConnectors}
                 isLoading={
-                  isLoadingAllAvailableConnectors || (isLoading && loadingKey === 'connector')
+                  isLoadingAllAvailableConnectors ||
+                  isFieldUpdating(isLoading, loadingKey, 'connector')
                 }
                 onSubmit={onSubmitConnector}
                 key={caseData.connector.id}

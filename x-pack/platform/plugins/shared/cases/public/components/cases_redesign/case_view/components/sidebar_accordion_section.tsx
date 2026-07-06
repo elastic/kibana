@@ -8,13 +8,14 @@
 import type { FC, ReactNode } from 'react';
 import React, { useCallback } from 'react';
 import { EuiAccordion, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import type { SidebarAccordionId } from './use_sidebar_accordions_state';
 
 interface SidebarAccordionSectionProps {
-  id: string;
+  id: SidebarAccordionId;
   title: ReactNode;
   extraAction?: ReactNode;
   isOpen: boolean;
-  onToggle: (id: string, isOpen: boolean) => void;
+  onToggle: (id: SidebarAccordionId, isOpen: boolean) => void;
   children: ReactNode;
   'data-test-subj'?: string;
 }
@@ -51,12 +52,8 @@ export const SidebarAccordionSection: FC<SidebarAccordionSectionProps> = ({
         </EuiTitle>
       }
     >
-      {isOpen ? (
-        <>
-          <EuiSpacer size="m" />
-          {children}
-        </>
-      ) : null}
+      <EuiSpacer size="m" />
+      {children}
     </EuiAccordion>
   );
 };
