@@ -41,15 +41,15 @@ const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
 export type CreateRuleMigrationParams =
   | {
-    rules: CreateRuleMigrationRulesRequestBody;
-    migrationName: string;
-    vendor: 'splunk';
-  }
+      rules: CreateRuleMigrationRulesRequestBody;
+      migrationName: string;
+      vendor: 'splunk';
+    }
   | {
-    rules: CreateQRadarRuleMigrationRulesRequestBody;
-    migrationName: string;
-    vendor: 'qradar';
-  };
+      rules: CreateQRadarRuleMigrationRulesRequestBody;
+      migrationName: string;
+      vendor: 'qradar';
+    };
 
 export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMigrationStats> {
   public telemetry: SiemRulesMigrationsTelemetry;
@@ -166,7 +166,7 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
       }
     } catch (error) {
       if (migrationId) {
-        await api.deleteMigration({ migrationId }).catch(() => { });
+        await api.deleteMigration({ migrationId }).catch(() => {});
       }
       this.telemetry.reportSetupMigrationCreated({ count: 0, error, vendor });
       throw error;
