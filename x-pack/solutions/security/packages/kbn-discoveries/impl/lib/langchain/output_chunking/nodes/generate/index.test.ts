@@ -302,6 +302,38 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     });
   });
 
+  it('logs the raw response at debug when the response cannot be parsed', async () => {
+    const rawResponse = '<html>502 Bad Gateway returned by an intermediary proxy</html>';
+    const debugMessages: string[] = [];
+    const capturingLogger = {
+      debug: (fn: () => string) => {
+        debugMessages.push(fn());
+      },
+    } as unknown as Logger;
+
+    const mockLlmWithResponse = new FakeLLM({
+      response: rawResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions({
+      llm: mockLlmWithResponse,
+      generationSchema,
+    }).chain.invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(rawResponse);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlmWithResponse,
+      logger: capturingLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    await generateNode(initialGraphState);
+
+    expect(debugMessages.some((message) => message.includes(rawResponse))).toBe(true);
+  });
+
   it('returns unrefined results when combined responses pass validation', async () => {
     // split the response into two parts to simulate a valid response
     const splitIndex = 100; // arbitrary index

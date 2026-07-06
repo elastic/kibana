@@ -21,6 +21,7 @@ All implementation code lives under `impl/`:
 kbn-attack-discovery-schedules-common/
 ├── impl/
 │   ├── constants.ts                          # AAD config, alert context, app path
+│   ├── build_alert_id_to_attack_ids_map/     # buildAlertIdToAttackIdsMap, AttackWithAlertIds
 │   ├── data_client/                          # AttackDiscoveryScheduleDataClient (CRUD via RulesClient)
 │   ├── fields/
 │   │   ├── field_map.ts                      # Elasticsearch field map
@@ -51,7 +52,7 @@ kbn-attack-discovery-schedules-common/
 | `ATTACK_DISCOVERY_ALERTS_AAD_CONFIG` | Alerts-as-data configuration for the attack discovery rule type |
 | `ATTACK_DISCOVERY_ALERTS_CONTEXT` | Alert context identifier (`'security.attack.discovery'`) |
 | `SECURITY_APP_PATH` | Path to the security app (`'/app/security'`) |
-| `ALERTS_INDEX_PATTERN` | Security alerts index pattern (`'.alerts-security.alerts-'`) |
+| `ALERTS_INDEX_PATTERN` | Security alerts index pattern base (`'.alerts-security.alerts-'`); exported from `impl/update_alerts_with_attack_ids`, not `impl/constants.ts` |
 
 ### Data client
 
@@ -68,7 +69,7 @@ kbn-attack-discovery-schedules-common/
 |--------|------|-------------|
 | `attackDiscoveryAlertFieldMap` | Object | Elasticsearch `FieldMap` for attack discovery alert documents |
 | `ALERT_ATTACK_DISCOVERY` | Constant | Base field path |
-| `ALERT_ATTACK_DISCOVERY_*` | Constants | Individual alert field paths (27 constants) |
+| `ALERT_ATTACK_DISCOVERY_*` | Constants | Individual alert field paths (26 constants) |
 | `ALERT_ATTACK_IDS` | Constant | Alert-to-attack ID mapping field |
 | `ALERT_RISK_SCORE` | Constant | Risk score field |
 
@@ -95,6 +96,13 @@ kbn-attack-discovery-schedules-common/
 |--------|------|-------------|
 | `updateAlertsWithAttackIds` | Function | Updates security alerts with attack IDs via `updateByQuery` |
 | `UpdateAlertsWithAttackIdsParams` | Type | `{ alertIdToAttackIdsMap, esClient, spaceId }` |
+
+### Alert-to-attack ID mapping
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `buildAlertIdToAttackIdsMap` | Function | Builds a map of alert ID → attack IDs from a set of attacks |
+| `AttackWithAlertIds` | Type | Input shape (`{ alertIds, ... }`) consumed by `buildAlertIdToAttackIdsMap` |
 
 ### Types
 

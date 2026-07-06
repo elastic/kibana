@@ -33,6 +33,10 @@ export async function updateAlertsWithAttackIds({
   await esClient.updateByQuery({
     conflicts: 'proceed',
     index: `${ALERTS_INDEX_PATTERN}${spaceId}`,
+    // Force a refresh so the newly-stamped `kibana.alert.attack_ids` are
+    // immediately searchable and the Attacks page can group the alerts under
+    // the attack that was just created.
+    refresh: true,
     query: {
       ids: {
         values: alertIdsToUpdate,

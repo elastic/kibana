@@ -96,6 +96,6 @@ This decision should be revisited if any of the following conditions are met:
 
 - Epic: Workflow Schedule API (`kibana-9p4`)
 - Public schedule API: `elastic_assistant/server/routes/attack_discovery/schedules/public/`
-- Internal schedule API: `discoveries/server/routes/schedules/` (kibana-9p4.6)
+- Internal schedule API: `discoveries/server/routes/{get,post,put,delete}/schedules/` (kibana-9p4.6)
 - Shared package: `@kbn/attack-discovery-schedules-common` (kibana-9p4.1)
-- Generation workflow: `discoveries/server/routes/post/generate/helpers/execute_generation_workflow.ts`
+- Generation workflow: `@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow.ts`

@@ -19,6 +19,7 @@
     "@kbn/securitysolution-list-constants",
     "@kbn/elastic-assistant-common",
     "@kbn/data-views-plugin",
+    "@kbn/licensing-types",
   ],
   "exclude": ["target/**/*"]
 }

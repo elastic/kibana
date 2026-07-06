@@ -26,13 +26,13 @@ export const GetAttackDiscoveryGenerationsRequestQuery = lazySchema(() =>
      */
     end: z.string().optional(),
     /**
-     * Whether to filter by scheduled or ad-hoc attack discovery generations. If omitted, both types are returned. Use `true` to return only scheduled generations or `false` to return only ad-hoc (interactive or action-triggered) generations.
-     */
-    scheduled: BooleanFromString.optional(),
-    /**
      * The maximum number of generations to retrieve
      */
     size: z.coerce.number().min(1).optional().default(50),
+    /**
+     * Whether to filter by scheduled or ad-hoc attack discovery generations. If omitted, both types are returned. Use `true` to return only scheduled generations or `false` to return only ad-hoc (interactive or action-triggered) generations.
+     */
+    scheduled: BooleanFromString.optional(),
     /**
      * Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
      */

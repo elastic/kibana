@@ -712,9 +712,15 @@ const parseWorkflowReferenceData = ({
 };
 
 export const transformGetAttackDiscoveryGenerationsSearchResult = ({
+  ignoreDismissed = false,
   logger,
   rawResponse,
 }: {
+  /**
+   * When `true`, generations with a `generation-dismissed` event resolve to their
+   * underlying terminal status instead of `dismissed`. See `getGenerationStatusOrThrow`.
+   */
+  ignoreDismissed?: boolean;
   rawResponse: {
     aggregations: AggregationsAggregate | undefined;
   };
@@ -750,7 +756,7 @@ export const transformGetAttackDiscoveryGenerationsSearchResult = ({
         const generationEndTime = bucket.generation_end_time?.value_as_string ?? undefined;
         const generationStartTime = bucket.generation_start_time?.value_as_string;
         const loadingMessage: string | undefined = bucket.loading_message.buckets[0]?.key;
-        const status = getGenerationStatusOrThrow({ eventActions, executionUuid });
+        const status = getGenerationStatusOrThrow({ eventActions, executionUuid, ignoreDismissed });
 
         /**
          * Workflow tracking

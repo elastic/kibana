@@ -31,10 +31,17 @@ describe('updateAlertsWithAttackIds', () => {
       expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
     });
 
+    it('should call `updateByQuery` with `refresh` so newly-stamped alerts are immediately searchable', () => {
+      expect(esClient.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ refresh: true })
+      );
+    });
+
     it('should call `updateByQuery` with the expected params', () => {
       expect(esClient.updateByQuery).toHaveBeenCalledWith({
         conflicts: 'proceed',
         index: '.alerts-security.alerts-default',
+        refresh: true,
         query: {
           ids: {
             values: ['alert-id-1', 'alert-id-2', 'alert-id-3'],

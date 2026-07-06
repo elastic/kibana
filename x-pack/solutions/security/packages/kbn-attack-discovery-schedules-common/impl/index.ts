@@ -18,6 +18,16 @@ export {
   type FilterTags,
 } from './data_client';
 
+export {
+  backfillAttackIdsBestEffort,
+  type BackfillAttackIdsBestEffortParams,
+} from './backfill_attack_ids_best_effort';
+
+export {
+  buildAlertIdToAttackIdsMap,
+  type AttackWithAlertIds,
+} from './build_alert_id_to_attack_ids_map';
+
 export { attackDiscoveryAlertFieldMap } from './fields/field_map';
 
 export {

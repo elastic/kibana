@@ -91,22 +91,6 @@ export const AttackDiscoveryGeneration = lazySchema(() =>
      */
     duplicates_dropped_count: z.number().int().optional(),
     /**
-     * When generation ended (max event.end)
-     */
-    end: z.string().optional(),
-    /**
-     * Structured error category from server classification (optional; absent for successful generations)
-     */
-    error_category: z.string().optional(),
-    /**
-     * The unique identifier (kibana.alert.rule.execution.uuid) for the generation
-     */
-    execution_uuid: z.string(),
-    /**
-     * Workflow ID that caused the failure (optional; absent for successful generations)
-     */
-    failed_workflow_id: z.string().optional(),
-    /**
      * The number of attack discoveries generated before deduplication and hallucination filtering
      */
     generated_count: z.number().int().optional(),
@@ -115,38 +99,33 @@ export const AttackDiscoveryGeneration = lazySchema(() =>
      */
     hallucinations_filtered_count: z.number().int().optional(),
     /**
-     * Generation loading message (kibana.alert.rule.execution.status).
-     * Only present while status is 'started'; omitted for terminal runs.
-     */
-    loading_message: z.string().optional(),
-    /**
      * The number of attack discoveries successfully persisted after deduplication and hallucination filtering
      */
     persisted_count: z.number().int().optional(),
     /**
+     * When generation ended (max event.end)
+     */
+    end: z.string().optional(),
+    /**
+     * The unique identifier (kibana.alert.rule.execution.uuid) for the generation
+     */
+    execution_uuid: z.string(),
+    /**
+     * Generation loading message (kibana.alert.rule.execution.status)
+     */
+    loading_message: z.string().optional(),
+    /**
+     * Structured error category from server classification (optional; absent for successful generations)
+     */
+    error_category: z.string().optional(),
+    /**
+     * Workflow ID that caused the failure (optional; absent for successful generations)
+     */
+    failed_workflow_id: z.string().optional(),
+    /**
      * Reason for failed generations (event.reason)
      */
     reason: z.string().optional(),
-    /**
-     * Source metadata for scheduled generations (rule_id, rule_name, action_execution_uuid)
-     */
-    source_metadata: z
-      .object({
-        /**
-         * The action execution UUID from the alerting framework
-         */
-        action_execution_uuid: z.string().optional(),
-        /**
-         * The ID of the alerting rule that triggered this generation
-         */
-        rule_id: z.string().optional(),
-        /**
-         * The name of the alerting rule that triggered this generation
-         */
-        rule_name: z.string().optional(),
-      })
-      .nullable()
-      .optional(),
     /**
      * When generation started (min event.start)
      */
@@ -167,6 +146,26 @@ export const AttackDiscoveryGeneration = lazySchema(() =>
      * The workflow definition ID for deep linking
      */
     workflow_id: z.string().optional(),
+    /**
+     * Source metadata for scheduled generations (rule_id, rule_name, action_execution_uuid)
+     */
+    source_metadata: z
+      .object({
+        /**
+         * The action execution UUID from the alerting framework
+         */
+        action_execution_uuid: z.string().optional(),
+        /**
+         * The ID of the alerting rule that triggered this generation
+         */
+        rule_id: z.string().optional(),
+        /**
+         * The name of the alerting rule that triggered this generation
+         */
+        rule_name: z.string().optional(),
+      })
+      .nullable()
+      .optional(),
     /**
      * The workflow execution ID for monitoring
      */

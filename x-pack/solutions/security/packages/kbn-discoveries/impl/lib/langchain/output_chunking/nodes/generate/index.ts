@@ -55,6 +55,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
 
     let combinedResponse = ''; // mutable, because it must be accessed in the catch block
     let partialResponse = ''; // mutable, because it must be accessed in the catch block
+    let rawResponse = ''; // mutable, because it must be accessed in the catch block
 
     try {
       const query = getCombinedPromptFn({
@@ -73,7 +74,8 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         () => `generate node is invoking the chain (${llmType}), attempt ${generationAttempts}`
       );
 
-      const rawResponse = await chain.invoke({
+      // LOCAL MUTATION:
+      rawResponse = await chain.invoke({
         format_instructions: formatInstructions,
         query,
       });
@@ -155,6 +157,10 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
     } catch (error) {
       const parsingError = `generate node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
+      logger?.debug(
+        () =>
+          `generate node raw response that failed to parse (${llm._llmType()}) from attempt ${generationAttempts}:\n${rawResponse}`
+      );
 
       return {
         ...state,

@@ -21,6 +21,8 @@
     "@kbn/core",
     "@kbn/elastic-assistant-common",
     "@kbn/rule-data-utils",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/logging-mocks"
   ]
 }

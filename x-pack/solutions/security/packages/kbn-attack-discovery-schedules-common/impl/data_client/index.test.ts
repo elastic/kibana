@@ -505,4 +505,191 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       });
     });
   });
+
+  describe('by-ID isolation guard (filterTags)', () => {
+    const publicFilterTags = {
+      excludeTags: ['attack-discovery-schedule', 'attack-discovery-workflow'],
+    };
+    const taggedRule = getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams, {
+      tags: ['attack-discovery-workflow'],
+    });
+    const untaggedRule = getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams, {
+      tags: [],
+    });
+
+    describe('getSchedule', () => {
+      it('throws a 404 when the public client reads a workflow-tagged schedule by id', async () => {
+        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        const client = new AttackDiscoveryScheduleDataClient({
+          ...scheduleDataClientParams,
+          filterTags: publicFilterTags,
+        });
+
+        await expect(client.getSchedule('schedule-1')).rejects.toMatchObject({
+          output: { statusCode: 404 },
+        });
+      });
+
+      it('returns the schedule when the public client reads an untagged schedule by id', async () => {
+        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(untaggedRule);
+        const client = new AttackDiscoveryScheduleDataClient({
+          ...scheduleDataClientParams,
+          filterTags: publicFilterTags,
+        });
+
+        await expect(client.getSchedule('schedule-1')).resolves.toEqual(
+          expect.objectContaining({ id: expect.any(String) })
+        );
+      });
+
+      it('returns a workflow-tagged schedule when the internal client (no filterTags) reads by id', async () => {
+        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        const client = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+
+        await expect(client.getSchedule('schedule-1')).resolves.toEqual(
+          expect.objectContaining({ id: expect.any(String) })
+        );
+      });
+
+      it('throws a 404 when an includeTags filter is not satisfied', async () => {
+        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(untaggedRule);
+        const client = new AttackDiscoveryScheduleDataClient({
+          ...scheduleDataClientParams,
+          filterTags: { includeTags: ['attack-discovery-schedule'] },
+        });
+
+        await expect(client.getSchedule('schedule-1')).rejects.toMatchObject({
+          output: { statusCode: 404 },
+        });
+      });
+    });
+
+    describe('updateSchedule', () => {
+      it('throws a 404 for a workflow-tagged schedule (public client)', async () => {
+        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        const client = new AttackDiscoveryScheduleDataClient({
+          ...scheduleDataClientParams,
+          filterTags: publicFilterTags,
+        });
+
+        await expect(
+          client.updateSchedule(getAttackDiscoveryUpdateScheduleMock('schedule-1', {}))
+        ).rejects.toMatchObject({ output: { statusCode: 404 } });
+      });
+
+      it('does not call `rulesClient.update` when the guard rejects', async () => {
+        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        const client = new AttackDiscoveryScheduleDataClient({
+          ...scheduleDataClientParams,
+          filterTags: publicFilterTags,
+        });
+
+        await client
+          .updateSchedule(getAttackDiscoveryUpdateScheduleMock('schedule-1', {}))
+          .catch(() => {});
+
+        expect(scheduleDataClientParams.rulesClient.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('deleteSchedule', () => {
+      it('does not fetch the rule when filterTags is absent (internal client)', async () => {
+        const client = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+
+        await client.deleteSchedule({ id: 'schedule-1' });
+
+        expect(scheduleDataClientParams.rulesClient.get).not.toHaveBeenCalled();
+      });
+
+      it('throws a 404 for a workflow-tagged schedule (public client)', async () => {
+        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        const client = new AttackDiscoveryScheduleDataClient({
+          ...scheduleDataClientParams,
+          filterTags: publicFilterTags,
+        });
+
+        await expect(client.deleteSchedule({ id: 'schedule-1' })).rejects.toMatchObject({
+          output: { statusCode: 404 },
+        });
+      });
+
+      it('does not call `rulesClient.delete` when the guard rejects', async () => {
+        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        const client = new AttackDiscoveryScheduleDataClient({
+          ...scheduleDataClientParams,
+          filterTags: publicFilterTags,
+        });
+
+        await client.deleteSchedule({ id: 'schedule-1' }).catch(() => {});
+
+        expect(scheduleDataClientParams.rulesClient.delete).not.toHaveBeenCalled();
+      });
+
+      it('deletes an untagged schedule (public client)', async () => {
+        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(untaggedRule);
+        const client = new AttackDiscoveryScheduleDataClient({
+          ...scheduleDataClientParams,
+          filterTags: publicFilterTags,
+        });
+
+        await client.deleteSchedule({ id: 'schedule-1' });
+
+        expect(scheduleDataClientParams.rulesClient.delete).toHaveBeenCalledWith({
+          id: 'schedule-1',
+        });
+      });
+    });
+
+    describe('enableSchedule / disableSchedule', () => {
+      it('throws a 404 when enabling a workflow-tagged schedule (public client)', async () => {
+        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        const client = new AttackDiscoveryScheduleDataClient({
+          ...scheduleDataClientParams,
+          filterTags: publicFilterTags,
+        });
+
+        await expect(client.enableSchedule({ id: 'schedule-1' })).rejects.toMatchObject({
+          output: { statusCode: 404 },
+        });
+      });
+
+      it('does not call `rulesClient.enableRule` when the guard rejects', async () => {
+        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        const client = new AttackDiscoveryScheduleDataClient({
+          ...scheduleDataClientParams,
+          filterTags: publicFilterTags,
+        });
+
+        await client.enableSchedule({ id: 'schedule-1' }).catch(() => {});
+
+        expect(scheduleDataClientParams.rulesClient.enableRule).not.toHaveBeenCalled();
+      });
+
+      it('throws a 404 when disabling a workflow-tagged schedule (public client)', async () => {
+        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(taggedRule);
+        const client = new AttackDiscoveryScheduleDataClient({
+          ...scheduleDataClientParams,
+          filterTags: publicFilterTags,
+        });
+
+        await expect(client.disableSchedule({ id: 'schedule-1' })).rejects.toMatchObject({
+          output: { statusCode: 404 },
+        });
+      });
+
+      it('enables an untagged schedule (public client)', async () => {
+        (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(untaggedRule);
+        const client = new AttackDiscoveryScheduleDataClient({
+          ...scheduleDataClientParams,
+          filterTags: publicFilterTags,
+        });
+
+        await client.enableSchedule({ id: 'schedule-1' });
+
+        expect(scheduleDataClientParams.rulesClient.enableRule).toHaveBeenCalledWith({
+          id: 'schedule-1',
+        });
+      });
+    });
+  });
 });

@@ -8,15 +8,15 @@ The `@kbn/discoveries` package defines type-safe interfaces for invoking Attack 
 - `InvokeAttackDiscoveryGraphWithDocs` - for Attack Discovery
 - `InvokeDefendInsightsGraphWithDocs` - for Defend Insights
 
-These interfaces are used by the `attack-discovery.generate` workflow step, which is orchestrated by the `_generate` endpoint's pipeline.
+These interfaces are used by the `security.attack-discovery.generate` workflow step, which is orchestrated by the `_generate` endpoint's pipeline.
 
 ## Integration Pattern
 
 The `discoveries` plugin invokes graph generation through the workflow engine:
 
 1. `POST /internal/attack_discovery/_generate` validates the request and kicks off the orchestrated pipeline
-2. The pipeline runs alert retrieval, generation, and validation as separate workflow steps
-3. The `attack-discovery.generate` step uses `invokeAttackDiscoveryGraphWithAlerts` from `@kbn/discoveries`
+2. The pipeline runs alert retrieval, an optional gate phase, generation, and validation as separate workflow steps
+3. The `security.attack-discovery.generate` step uses `invokeAttackDiscoveryGraphWithAlerts`, a **deep import** from `@kbn/discoveries/impl/attack_discovery/graphs/invoke_graph_with_alerts` (not a root export)
 4. Results are persisted by the validation step
 
 ## Testing Strategy

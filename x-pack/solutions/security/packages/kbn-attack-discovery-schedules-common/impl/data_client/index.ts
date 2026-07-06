@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger } from '@kbn/core/server';
@@ -79,6 +80,67 @@ export class AttackDiscoveryScheduleDataClient {
     return applyTags != null ? [...applyTags] : [];
   }
 
+  /**
+   * Returns true when the given rule tags satisfy this client's `filterTags`,
+   * mirroring `buildTagFilter()` semantics: ALL `includeTags` must be present
+   * AND NO `excludeTags` may be present. When `filterTags` is not configured
+   * (e.g. the internal/workflow client, which is intentionally a superset),
+   * every schedule is visible.
+   */
+  private tagsSatisfyFilter(tags: string[] | undefined): boolean {
+    const { filterTags } = this.options;
+    if (filterTags == null) {
+      return true;
+    }
+
+    const ruleTags = tags ?? [];
+    const { includeTags, excludeTags } = filterTags;
+
+    if (
+      includeTags != null &&
+      includeTags.length > 0 &&
+      !includeTags.every((tag) => ruleTags.includes(tag))
+    ) {
+      return false;
+    }
+
+    if (
+      excludeTags != null &&
+      excludeTags.length > 0 &&
+      excludeTags.some((tag) => ruleTags.includes(tag))
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Guards by-ID access so a client can only act on schedules its `filterTags`
+   * would surface via `findSchedules`. On mismatch we throw the same not-found
+   * error the saved objects layer throws for a missing id, so a filtered-out
+   * schedule is indistinguishable from one that does not exist (no existence
+   * disclosure) and each route's `transformError` yields a 404.
+   */
+  private assertScheduleVisible(id: string, tags: string[] | undefined): void {
+    if (!this.tagsSatisfyFilter(tags)) {
+      throw Boom.notFound(`Saved object [alert/${id}] not found`);
+    }
+  }
+
+  /**
+   * For by-ID mutations that don't otherwise read the rule, fetch it ONLY when
+   * `filterTags` is configured (the internal client, which has no `filterTags`,
+   * skips this extra read) and assert visibility before mutating.
+   */
+  private assertVisibleIfFiltered = async (id: string): Promise<void> => {
+    if (this.options.filterTags == null) {
+      return;
+    }
+    const rule = await this.options.rulesClient.get<AttackDiscoveryScheduleParams>({ id });
+    this.assertScheduleVisible(id, rule.tags);
+  };
+
   public findSchedules = async ({
     page = 0,
     perPage,
@@ -103,6 +165,7 @@ export class AttackDiscoveryScheduleDataClient {
 
   public getSchedule = async (id: string): Promise<AttackDiscoverySchedule> => {
     const rule = await this.options.rulesClient.get<AttackDiscoveryScheduleParams>({ id });
+    this.assertScheduleVisible(id, rule.tags);
     const schedule = convertAlertingRuleToSchedule(rule);
     return schedule;
   };
@@ -122,8 +185,10 @@ export class AttackDiscoveryScheduleDataClient {
         alertTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
         consumer: ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
         enabled,
-        tags: this.buildTags(),
         ...restScheduleAttributes,
+        // Applied AFTER the spread so a future caller-supplied `tags` can never
+        // silently defeat the isolation tagging the internal API relies on.
+        tags: this.buildTags(),
       },
     });
     const schedule = convertAlertingRuleToSchedule(rule);
@@ -141,6 +206,7 @@ export class AttackDiscoveryScheduleDataClient {
     });
 
     const existingRule = await this.options.rulesClient.get<AttackDiscoveryScheduleParams>({ id });
+    this.assertScheduleVisible(id, existingRule.tags);
     const existingTags = existingRule.tags ?? [];
     const mergedTags = [...new Set([...existingTags, ...this.buildTags()])];
 
@@ -158,14 +224,17 @@ export class AttackDiscoveryScheduleDataClient {
   };
 
   public deleteSchedule = async (ruleToDelete: { id: string }) => {
+    await this.assertVisibleIfFiltered(ruleToDelete.id);
     await this.options.rulesClient.delete(ruleToDelete);
   };
 
   public enableSchedule = async (ruleToEnable: { id: string }) => {
+    await this.assertVisibleIfFiltered(ruleToEnable.id);
     await this.options.rulesClient.enableRule(ruleToEnable);
   };
 
   public disableSchedule = async (ruleToDisable: { id: string }) => {
+    await this.assertVisibleIfFiltered(ruleToDisable.id);
     await this.options.rulesClient.disableRule(ruleToDisable);
   };
 

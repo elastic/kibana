@@ -13,10 +13,17 @@ export {
 
 export {
   AttackDiscoveryScheduleDataClient,
-  type AttackDiscoveryScheduleDataClientParams,
   type CreateAttackDiscoveryScheduleDataClientParams,
-  type FilterTags,
 } from './impl/data_client';
+
+export { backfillAttackIdsBestEffort } from './impl/backfill_attack_ids_best_effort';
+
+export {
+  buildAlertIdToAttackIdsMap,
+  type AttackWithAlertIds,
+} from './impl/build_alert_id_to_attack_ids_map';
+
+export { deduplicateAttackDiscoveries } from './impl/deduplicate_attack_discoveries';
 
 export { attackDiscoveryAlertFieldMap } from './impl/fields/field_map';
 
@@ -51,6 +58,10 @@ export {
   ALERT_RISK_SCORE,
 } from './impl/fields/field_names';
 
+export { getScheduledIndexPattern } from './impl/get_scheduled_index_pattern';
+
+export { normalizeAttackDiscovery } from './impl/normalize_attack_discovery';
+
 export { AttackDiscoveryScheduleParamsExtended } from './impl/schedule_params_extended';
 
 export {
@@ -59,7 +70,6 @@ export {
   createScheduleExecutionSummary,
   generateAttackDiscoveryAlertHash,
   transformToBaseAlertDocument,
-  type AttackDiscoveryAlertDocumentBase,
 } from './impl/transforms';
 
 export {
@@ -72,7 +82,5 @@ export type {
   AttackDiscoveryAlertDocument,
   AttackDiscoveryExecutorOptions,
   AttackDiscoveryScheduleContext,
-  AttackDiscoveryScheduleFindOptions,
-  AttackDiscoveryScheduleSort,
   AttackDiscoveryScheduleType,
 } from './impl/types';

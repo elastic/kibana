@@ -13,15 +13,16 @@ The package is `shared-common` (`kibana.jsonc`), meaning it can be imported by b
 ```
 kbn-discoveries-schemas/
 ├── schemas/
-│   ├── common_attributes.schema.yaml      # Shared: Replacements, InsightType, Provider, ApiConfig
+│   ├── common_attributes.schema.yaml      # Shared: Replacements, Provider, ApiConfig
 │   ├── anonymization_fields/              # AnonymizationFieldResponse (internal)
-│   ├── attack_discovery/                  # AttackDiscoveryApiAlert, CreateAttackDiscoveryAlertsParams (internal)
+│   ├── attack_discovery/                  # AttackDiscoveryApiAlert (internal)
 │   ├── common/
-│   │   └── schedules/                     # InsightsSchedule, InsightsScheduleCreateProps, etc.
+│   │   ├── error_category/                # ERROR_CATEGORIES, ErrorCategory
+│   │   └── schedules/                     # AttackDiscoverySchedule, *CreateProps, *UpdateProps, WorkflowConfig, workflow_config_validation
 │   ├── routes/
 │   │   ├── post/generate/                 # PostGenerateRequestBody, PostGenerateResponse
-│   │   ├── post/generate_workflow/        # PostGenerateWorkflowRequestBody, PostGenerateWorkflowResponse
-│   │   ├── post/validate/                 # PostValidateRequestBody, PostValidateResponse
+│   │   ├── post/generate_workflow/        # PostGenerateWorkflow* (generated but NOT exported — route removed)
+│   │   ├── post/validate/                 # PostValidateRequestBody, PostValidateResponse (types exported; no standalone route)
 │   │   ├── post/schedules/               # Create, Enable, Disable schedule routes
 │   │   ├── get/schedules/                 # Find, Get schedule routes
 │   │   ├── put/schedules/                 # Update schedule route
@@ -45,17 +46,24 @@ Each schema YAML file produces a corresponding `.gen.ts` file containing Zod sch
 | Export | Description |
 |--------|-------------|
 | `PostGenerateRequestBody`, `PostGenerateResponse` | `POST _generate` (orchestrated pipeline) |
-| `PostGenerateWorkflowRequestBody`, `PostGenerateWorkflowResponse` | `POST _generate_workflow` (custom workflow) |
-| `PostValidateRequestBody`, `PostValidateResponse` | `POST _validate` (validate and persist) |
+| `PostValidateRequestBody`, `PostValidateResponse` | Validation types (still exported; the standalone `_validate` route was removed — validation runs inside the pipeline) |
+
+> `PostGenerateWorkflowRequestBody`/`PostGenerateWorkflowResponse` are still generated under `routes/post/generate_workflow/` but are **not exported** from `index.ts` — that route was removed.
 
 ### Common attributes
 
 | Export | Description |
 |--------|-------------|
 | `Replacements` | Anonymization replacement map |
-| `InsightType` | `'attack_discovery'` or `'defend_insights'` |
 | `Provider` | LLM provider identifier |
 | `ApiConfig` | Connector configuration. Only `connector_id` is required; `action_type_id` is resolved from the connector at runtime when omitted |
+
+### Error category
+
+| Export | Description |
+|--------|-------------|
+| `ERROR_CATEGORIES` | The canonical bounded list of `error_category` enum values |
+| `ErrorCategory` | Union type of `ERROR_CATEGORIES` |
 
 ### Attack Discovery
 
@@ -74,17 +82,18 @@ Each schema YAML file produces a corresponding `.gen.ts` file containing Zod sch
 
 | Export | Description |
 |--------|-------------|
-| `InsightsSchedule`, `InsightsScheduleCreateProps`, `InsightsScheduleUpdateProps` | Schedule CRUD shapes |
-| `InsightsScheduleParams`, `InsightsApiConfig` | Schedule parameters and API config |
-| `IntervalSchedule`, `ScheduleAction`, `ScheduleActionFrequency`, etc. | Schedule sub-types |
-| `WorkflowConfig` | Workflow configuration within a schedule |
-| `CreateInsightsScheduleRequestBody`, `CreateInsightsScheduleResponse` | Create schedule route |
-| `FindInsightsSchedulesRequestQuery`, `FindInsightsSchedulesResponse` | Find schedules route |
-| `GetInsightsScheduleRequestParams`, `GetInsightsScheduleResponse` | Get schedule route |
-| `UpdateInsightsScheduleRequestBody`, `UpdateInsightsScheduleResponse` | Update schedule route |
-| `DeleteInsightsScheduleRequestParams`, `DeleteInsightsScheduleResponse` | Delete schedule route |
-| `EnableInsightsScheduleRequestParams`, `EnableInsightsScheduleResponse` | Enable schedule route |
-| `DisableInsightsScheduleRequestParams`, `DisableInsightsScheduleResponse` | Disable schedule route |
+| `AttackDiscoverySchedule`, `AttackDiscoveryScheduleCreateProps`, `AttackDiscoveryScheduleUpdateProps` | Schedule CRUD shapes |
+| `AttackDiscoveryScheduleParams`, `AttackDiscoveryApiConfig` | Schedule parameters and API config |
+| `IntervalSchedule`, `ScheduleAction`, `ScheduleGeneralAction`, `ScheduleSystemAction`, `ScheduleActionFrequency`, `ScheduleActionNotifyWhen`, `ScheduleExecution`, `ScheduleExecutionStatus` | Schedule sub-types |
+| `WorkflowConfig` | Workflow configuration within a schedule (three retrieval toggles) |
+| `WorkflowConfigWithRetrievalToggle`, `hasAtLeastOneRetrievalToggle`, `AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE` | At-least-one-toggle validation refinement + helper + message |
+| `CreateAttackDiscoveryScheduleRequestBody`, `CreateAttackDiscoveryScheduleResponse` | Create schedule route |
+| `FindAttackDiscoverySchedulesRequestQuery`, `FindAttackDiscoverySchedulesResponse` | Find schedules route |
+| `GetAttackDiscoveryScheduleRequestParams`, `GetAttackDiscoveryScheduleResponse` | Get schedule route |
+| `UpdateAttackDiscoveryScheduleRequestBody`, `UpdateAttackDiscoveryScheduleRequestParams`, `UpdateAttackDiscoveryScheduleResponse` | Update schedule route |
+| `DeleteAttackDiscoveryScheduleRequestParams`, `DeleteAttackDiscoveryScheduleResponse` | Delete schedule route |
+| `EnableAttackDiscoveryScheduleRequestParams`, `EnableAttackDiscoveryScheduleResponse` | Enable schedule route |
+| `DisableAttackDiscoveryScheduleRequestParams`, `DisableAttackDiscoveryScheduleResponse` | Disable schedule route |
 
 ## Regenerating types
 

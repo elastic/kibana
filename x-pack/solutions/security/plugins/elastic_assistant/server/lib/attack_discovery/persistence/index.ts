@@ -353,12 +353,20 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     authenticatedUser,
     eventLogIndex,
     executionUuid,
+    ignoreDismissed = false,
     logger,
     spaceId,
   }: {
     authenticatedUser: AuthenticatedUser;
     eventLogIndex: string;
     executionUuid: string;
+    /**
+     * When `true`, a dismissed generation resolves to its underlying terminal
+     * status instead of `dismissed`. Callers displaying a single generation's
+     * actual outcome (e.g. the workflow execution details flyout) pass `true`;
+     * the dismiss route relies on the default (`false`) to observe dismissal.
+     */
+    ignoreDismissed?: boolean;
     logger: Logger;
     spaceId: string;
   }): Promise<PostAttackDiscoveryGenerationsDismissResponse> => {
@@ -377,6 +385,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       eventLogIndex,
       generationsQuery: generationByIdQuery,
       getAttackDiscoveryGenerationsParams: { size: 1 },
+      ignoreDismissed,
       logger,
       spaceId,
     });

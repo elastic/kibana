@@ -17,6 +17,7 @@
   "kbn_references": [
     "@kbn/actions-plugin",
     "@kbn/alerts-as-data-utils",
+    "@kbn/attack-discovery-schedules-common",
     "@kbn/core",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-elasticsearch-server-mocks",
@@ -34,6 +35,9 @@
     "@kbn/utility-types",
     "@kbn/workflows",
     "@kbn/workflows-management-plugin",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/i18n",
+    "@kbn/inference-common",
+    "@kbn/core-http-server-mocks"
   ]
 }

@@ -144,6 +144,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       inference: startPlugins.inference,
       searchInferenceEndpoints: startPlugins.searchInferenceEndpoints,
       savedObjectsClient,
+      security: startPlugins.security,
       telemetry: core.analytics,
 
       // Note: elserInferenceId is used here to enable setting up the KB using a different ELSER model, which

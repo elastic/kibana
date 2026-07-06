@@ -194,6 +194,36 @@ ${ATTACK_DISCOVERY_REFINE}
     });
   });
 
+  it('logs the raw response at debug when the response cannot be parsed', async () => {
+    const rawResponse = '<html>502 Bad Gateway returned by an intermediary proxy</html>';
+    const localLogger = loggerMock.create();
+
+    const mockLlmWithResponse = new FakeLLM({
+      response: rawResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions({
+      llm: mockLlmWithResponse,
+      generationSchema,
+    }).chain.invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(rawResponse);
+
+    const refineNode = getRefineNode({
+      llm: mockLlmWithResponse,
+      logger: localLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    await refineNode(initialGraphState);
+
+    const debugMessages = (localLogger.debug as jest.Mock).mock.calls.map(([arg]) =>
+      typeof arg === 'function' ? (arg as () => string)() : String(arg)
+    );
+
+    expect(debugMessages.some((message) => message.includes(rawResponse))).toBe(true);
+  });
+
   it('handles hallucinations', async () => {
     const hallucinatedResponse =
       'tactics like **Credential Access**, **Command and Control**, and **Persistence**.",\n      "entitySummaryMarkdown": "Malware detected on host **{{ host.name hostNameValue }}**';

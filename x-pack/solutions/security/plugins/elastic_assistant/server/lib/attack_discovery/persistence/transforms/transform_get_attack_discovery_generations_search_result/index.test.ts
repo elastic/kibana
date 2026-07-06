@@ -97,6 +97,57 @@ describe('transformGetAttackDiscoveryGenerationsSearchResult', () => {
     ]);
   });
 
+  describe('ignoreDismissed', () => {
+    const dismissedButSucceededRawResponse = {
+      aggregations: {
+        generations: {
+          buckets: [
+            {
+              key: 'exec-uuid-dismissed',
+              doc_count: 1,
+              alerts_context_count: { value: 1 },
+              connector_id: { buckets: [{ key: 'test-connector', doc_count: 1 }] },
+              discoveries: { value: 2 },
+              event_actions: {
+                buckets: [
+                  { key: 'generation-started', doc_count: 1 },
+                  { key: 'generation-succeeded', doc_count: 1 },
+                  { key: 'generation-dismissed', doc_count: 1 },
+                ],
+              },
+              event_reason: { buckets: [{ key: 'test-reason', doc_count: 1 }] },
+              loading_message: { buckets: [{ key: 'Loading...', doc_count: 1 }] },
+              generation_end_time: { value_as_string: '2025-07-30T00:00:00Z' },
+              generation_start_time: { value_as_string: '2025-07-29T00:00:00Z' },
+              workflow_id: { buckets: [] },
+              workflow_reference: { buckets: [] },
+              workflow_run_id: { buckets: [] },
+            },
+          ],
+        },
+      },
+    };
+
+    it('resolves a dismissed generation to its underlying status when ignoreDismissed is true', () => {
+      const result = transformGetAttackDiscoveryGenerationsSearchResult({
+        ignoreDismissed: true,
+        logger,
+        rawResponse: dismissedButSucceededRawResponse,
+      });
+
+      expect(result.generations[0].status).toBe('succeeded');
+    });
+
+    it('keeps the dismissed status when ignoreDismissed is false (default)', () => {
+      const result = transformGetAttackDiscoveryGenerationsSearchResult({
+        logger,
+        rawResponse: dismissedButSucceededRawResponse,
+      });
+
+      expect(result.generations[0].status).toBe('dismissed');
+    });
+  });
+
   it('returns step_event_actions derived from per-step-type lifecycle counts', () => {
     const rawResponse = {
       aggregations: {
