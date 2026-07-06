@@ -20,7 +20,7 @@ import {
 
 /** Minimal valid dashboard link object — uses a placeholder destination ID */
 const DASHBOARD_LINK = {
-  type: 'dashboardLink' as const,
+  type: 'dashboard_link' as const,
   destination: 'test-dashboard-id',
   options: {
     use_filters: false,
@@ -137,7 +137,7 @@ apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
-      '[request body.links.0]: expected "type" to be one of ["dashboardLink", "externalLink"] but got ["invalidLinkType"]'
+      '[request body.links.0]: expected "type" to be one of ["dashboard_link", "external_link"] but got ["invalidLinkType"]'
     );
   });
 
