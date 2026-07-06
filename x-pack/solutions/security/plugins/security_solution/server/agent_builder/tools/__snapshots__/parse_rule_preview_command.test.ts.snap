@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`parseRulePreviewCommand — snapshots: error messages --anomaly-threshold is a float 1`] = `
+Object {
+  "kind": "error",
+  "message": "--anomaly-threshold must be an integer between 0 and 100, got \\"2.5\\"",
+}
+`;
+
+exports[`parseRulePreviewCommand — snapshots: error messages --anomaly-threshold is out of range (> 100) 1`] = `
+Object {
+  "kind": "error",
+  "message": "--anomaly-threshold must be an integer between 0 and 100, got \\"999\\"",
+}
+`;
+
 exports[`parseRulePreviewCommand — snapshots: error messages --threat-mapping is a JSON object (not an array) 1`] = `
 Object {
   "kind": "error",

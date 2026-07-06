@@ -376,6 +376,13 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             demandOption: true,
             desc: 'Minimum anomaly score to alert (0–100)',
           })
+          .coerce('anomaly-threshold', (v: number) => {
+            if (!Number.isInteger(v) || v < 0 || v > 100)
+              throw new Error(
+                `--anomaly-threshold must be an integer between 0 and 100, got "${v}"`
+              );
+            return v;
+          })
           .example('$0 machine_learning --job-id my-ml-job --anomaly-threshold 75', '')
           .example('$0 machine_learning --job-id job-a --job-id job-b --anomaly-threshold 50', ''),
       (argv: HandlerArgv) => {

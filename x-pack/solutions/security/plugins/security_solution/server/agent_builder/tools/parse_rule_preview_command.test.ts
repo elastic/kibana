@@ -351,6 +351,36 @@ describe('parseRulePreviewCommand — numeric / JSON validation', () => {
     }
   });
 
+  it('returns kind:error when --anomaly-threshold is a float (API requires integer)', () => {
+    const result = parseRulePreviewCommand(
+      'machine_learning --job-id my-ml-job --anomaly-threshold 2.5'
+    );
+    expect(result.kind).toBe('error');
+    if (result.kind === 'error') {
+      expect(result.message).toContain('anomaly-threshold');
+    }
+  });
+
+  it('returns kind:error when --anomaly-threshold is above 100', () => {
+    const result = parseRulePreviewCommand(
+      'machine_learning --job-id my-ml-job --anomaly-threshold 999'
+    );
+    expect(result.kind).toBe('error');
+    if (result.kind === 'error') {
+      expect(result.message).toContain('anomaly-threshold');
+    }
+  });
+
+  it('returns kind:error when --anomaly-threshold is below 0', () => {
+    const result = parseRulePreviewCommand(
+      'machine_learning --job-id my-ml-job --anomaly-threshold -1'
+    );
+    expect(result.kind).toBe('error');
+    if (result.kind === 'error') {
+      expect(result.message).toContain('anomaly-threshold');
+    }
+  });
+
   it('returns kind:error for invalid JSON in --threat-mapping', () => {
     const result = parseRulePreviewCommand(
       'threat_match --query "*:*" --threat-query "*:*" --threat-index idx --threat-mapping not-json'
@@ -947,6 +977,14 @@ describe('parseRulePreviewCommand — snapshots: error messages', () => {
     [
       '--threshold-value is NaN',
       'threshold --query "process.name: *" --threshold-value not-a-number',
+    ],
+    [
+      '--anomaly-threshold is a float',
+      'machine_learning --job-id my-ml-job --anomaly-threshold 2.5',
+    ],
+    [
+      '--anomaly-threshold is out of range (> 100)',
+      'machine_learning --job-id my-ml-job --anomaly-threshold 999',
     ],
     [
       '--threat-mapping is invalid JSON',
