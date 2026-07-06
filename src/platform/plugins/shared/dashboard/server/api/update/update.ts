@@ -90,7 +90,6 @@ export async function update(
       requestCtx,
       strictValidationSchema,
       updateBody,
-      useGASchemas,
       serverTiming,
       isDashboardAppRequest,
       id

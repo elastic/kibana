@@ -125,6 +125,7 @@ function transformPanel(
       embeddableConfig,
       panelReferences,
       containerReferences,
+      undefined,
       useGASchemas
     ) ?? defaultTransform(embeddableConfig);
 

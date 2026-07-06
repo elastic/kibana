@@ -135,7 +135,7 @@ describe('getTransformOut', () => {
       references: [],
     };
 
-    const result = transformOut(storedState, [], undefined, false);
+    const result = transformOut(storedState, [], undefined, undefined, false);
 
     expect(getDurationFormat(result)).toEqual({
       type: 'duration',
@@ -165,7 +165,7 @@ describe('getTransformOut', () => {
       references: [],
     };
 
-    const result = transformOut(storedState, [], undefined, true);
+    const result = transformOut(storedState, [], undefined, undefined, true);
 
     expect(getDurationFormat(result)).toEqual({
       type: 'duration',

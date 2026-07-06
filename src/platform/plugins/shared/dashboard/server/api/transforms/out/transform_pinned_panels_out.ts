@@ -140,8 +140,8 @@ function transformPanels(
           config,
           [],
           containerReferences,
-          useGASchemas,
-          panel.id
+          panel.id,
+          useGASchemas
         ) as DashboardPinnedPanel['config'];
       }
       if (schema) {

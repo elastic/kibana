@@ -28,12 +28,12 @@ export type EmbeddableTransforms<
     storedState: StoredEmbeddableState,
     panelReferences?: Reference[],
     containerReferences?: Reference[],
-    useGASchemas?: boolean,
     /**
      * @deprecated ID is passed as an argument for legacy reference names that require it
      * to fetch their old references. It should not be used for new reference names.
      */
-    id?: string
+    id?: string,
+    useGASchemas?: boolean
   ) => EmbeddableState;
   /**
    * Converts EmbeddableState into StoredEmbeddableState and extracts references
