@@ -14,7 +14,10 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../../../common';
-import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import {
+  SecurityRuleChangeTrackingAction,
+  type SecurityRuleChangeTracking,
+} from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleResponse, RuleToImport } from '../../../../../../../common/api/detection_engine';
 import { ruleToImportHasVersion } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
@@ -33,7 +36,10 @@ import { getReferencedExceptionLists } from '../../import/gather_referenced_exce
 import type { IRuleSourceImporter } from '../../import/rule_source_importer';
 import { importRule as importRuleSingle } from './import_rule';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { RULE_MANAGEMENT_IMPORT_BATCH_SIZE } from '../../../api/constants';
+import {
+  RULE_MANAGEMENT_BULK_IMPORT_BATCH_SIZE,
+  RULE_MANAGEMENT_IMPORT_BATCH_SIZE,
+} from '../../../api/constants';
 
 interface BulkImportRulesOptions {
   actionsClient: ActionsClient;
@@ -45,6 +51,7 @@ interface BulkImportRulesOptions {
     overwriteRules: boolean;
     ruleSourceImporter: IRuleSourceImporter;
     allowMissingConnectorSecrets?: boolean;
+    changeTracking?: SecurityRuleChangeTracking<never>;
   };
 }
 
@@ -84,7 +91,13 @@ export const bulkImportRules = async ({
   mlAuthz,
   args,
 }: BulkImportRulesOptions): Promise<BulkImportRulesResult> => {
-  const { rules, overwriteRules, ruleSourceImporter, allowMissingConnectorSecrets } = args;
+  const {
+    rules,
+    overwriteRules,
+    ruleSourceImporter,
+    allowMissingConnectorSecrets,
+    changeTracking,
+  } = args;
   if (rules.length === 0) return { responses: [] };
 
   const responses: Array<BulkImportRuleSuccess | RuleImportErrorObject> = [];
@@ -236,10 +249,8 @@ export const bulkImportRules = async ({
 
   const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
     rules: bulkInputs,
-    changeTracking: {
-      action: SecurityRuleChangeTrackingAction.ruleImport,
-      metadata: { bulkCount: rules.length },
-    },
+    batchSize: RULE_MANAGEMENT_BULK_IMPORT_BATCH_SIZE,
+    changeTracking: { ...changeTracking, action: SecurityRuleChangeTrackingAction.ruleImport },
   });
 
   for (const id of successfulIds) {
