@@ -6,12 +6,15 @@
  */
 
 import type { MutableRefObject } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonGroup,
   EuiColorPicker,
   EuiDualRange,
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -29,7 +32,6 @@ import type {
   CellDecorationFillConfig,
   CellDecorationValueRange,
 } from '@kbn/lens-common';
-import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import {
   DEFAULT_PROGRESS_BAR_COLOR,
@@ -81,6 +83,14 @@ const autoValueRangeTooltip = i18n.translate(
   }
 );
 
+const customValueRangeTooltip = i18n.translate(
+  'xpack.lens.table.progressBar.valueRange.customTooltip',
+  {
+    defaultMessage:
+      'Custom lets you change the range. You can also reverse color order or tweak color stops in the color palette editor.',
+  }
+);
+
 const valueRangeModeOptions = [
   {
     id: `${idPrefix}auto`,
@@ -97,6 +107,7 @@ const valueRangeModeOptions = [
     label: i18n.translate('xpack.lens.table.progressBar.valueRange.custom', {
       defaultMessage: 'Custom',
     }),
+    toolTipContent: customValueRangeTooltip,
     'data-test-subj': 'lnsDatatable_progressBar_valueRange_custom',
   },
 ];
@@ -112,66 +123,174 @@ const colorLabel = i18n.translate('xpack.lens.table.progressBar.color.label', {
 const valueRangeLabel = i18n.translate('xpack.lens.table.progressBar.valueRange.label', {
   defaultMessage: 'Value range',
 });
+const minValueRangeLabel = i18n.translate('xpack.lens.table.progressBar.valueRange.minLabel', {
+  defaultMessage: 'Minimum value range',
+});
+const maxValueRangeLabel = i18n.translate('xpack.lens.table.progressBar.valueRange.maxLabel', {
+  defaultMessage: 'Maximum value range',
+});
 
-/**
- * `EuiDualRange` (`EuiRangeTrack`) hard-validates that `max` and every tick value
- * are within `[min, max]` and land exactly on the `step` grid, throwing otherwise.
- * Palette stops and data values can be fractional or off-grid (e.g. percent stops),
- * so we choose a fine, range-derived step and snap/clamp every fed value to it.
- */
-const TARGET_STEP_SUBDIVISIONS = 100;
+const MANUAL_INPUT_SYNC_DELAY_MS = 250;
+const PASSIVE_SLIDER_BOUND_RESET_THRESHOLD = 0.33;
 
-/**
- * Returns a positive step that evenly subdivides `[min, max]` so EUI's step-grid
- * validation passes for any value we clamp into the range.
- */
-function getSafeStep(min: number, max: number): number {
-  const span = Math.abs(max - min);
-  if (!Number.isFinite(span) || span <= 0) return 1;
-  // Prefer an integer step for clean inputs when the span is large enough,
-  // otherwise fall back to an exact fractional subdivision of the span.
-  const integerStep = Math.max(1, Math.floor(span / TARGET_STEP_SUBDIVISIONS));
-  if (span % integerStep === 0) return integerStep;
-  return span / TARGET_STEP_SUBDIVISIONS;
+function getDecimalPlaces(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+
+  const valueText = String(value).toLowerCase();
+  const scientificMatch = valueText.match(/e-(\d+)$/);
+
+  if (scientificMatch) {
+    const exponent = Number(scientificMatch[1]);
+    const mantissa = valueText.split('e-')[0] ?? '';
+    const mantissaDecimals = mantissa.split('.')[1]?.length ?? 0;
+    return exponent + mantissaDecimals;
+  }
+
+  return valueText.split('.')[1]?.length ?? 0;
 }
 
-/** Clamps `value` into `[min, max]` and snaps it to the nearest `min + k*step`. */
-function snapToStep(value: number, min: number, max: number, step: number): number {
-  const clamped = Math.min(Math.max(value, min), max);
-  if (!Number.isFinite(step) || step <= 0) return clamped;
-  const snapped = min + Math.round((clamped - min) / step) * step;
-  // Guard against floating drift pushing us a hair outside the bounds.
-  return Math.min(Math.max(snapped, min), max);
+function getDecimalPlacesFromInputText(value: string): number {
+  const trimmedValue = value.trim().toLowerCase();
+  if (trimmedValue === '' || !Number.isFinite(Number(trimmedValue))) return 0;
+
+  const scientificMatch = trimmedValue.match(/e-(\d+)$/);
+  if (scientificMatch) {
+    const exponent = Number(scientificMatch[1]);
+    const mantissa = trimmedValue.split('e-')[0] ?? '';
+    const mantissaDecimals = mantissa.split('.')[1]?.length ?? 0;
+    return exponent + mantissaDecimals;
+  }
+
+  return trimmedValue.split('.')[1]?.length ?? 0;
+}
+
+function getPrecisionUnit(decimalPlaces: number): number {
+  return 10 ** -decimalPlaces;
+}
+
+function formatRangeInputValue(value: number): string {
+  return Number.isFinite(value) ? String(value) : '';
+}
+
+function parseRangeInputValue(value: string): number | undefined {
+  if (value.trim() === '') {
+    return undefined;
+  }
+
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) ? numericValue : undefined;
+}
+
+function areNumericRangesEqual(
+  left: [number, number] | undefined,
+  right: [number, number] | undefined
+): boolean {
+  return left?.[0] === right?.[0] && left?.[1] === right?.[1];
+}
+
+function areRangeInputValuesEqual(left: [string, string], right: [string, string]): boolean {
+  return left[0] === right[0] && left[1] === right[1];
+}
+
+function getSliderBoundsForRange(range: [number, number], step: number): [number, number] {
+  if (range[0] === range[1]) {
+    return [range[0] - step, range[1] + step];
+  }
+
+  return range;
+}
+
+function mergeSliderBoundsWithRange(
+  currentBounds: [number, number],
+  nextRange: [number, number],
+  step: number
+): [number, number] {
+  return getSliderBoundsForRange(
+    [Math.min(currentBounds[0], nextRange[0]), Math.max(currentBounds[1], nextRange[1])],
+    step
+  );
+}
+
+function getPassivelyShrunkSliderBoundsForRange(
+  currentBounds: [number, number],
+  nextRange: [number, number],
+  step: number
+): [number, number] {
+  if (!isRangeWithinBounds(nextRange, currentBounds)) {
+    return mergeSliderBoundsWithRange(currentBounds, nextRange, step);
+  }
+
+  const [boundsMin, boundsMax] = currentBounds;
+  const boundsWidth = boundsMax - boundsMin;
+
+  if (boundsWidth <= 0) {
+    return getSliderBoundsForRange(nextRange, step);
+  }
+
+  const lowerRatio = (nextRange[0] - boundsMin) / boundsWidth;
+  const upperRatio = (nextRange[1] - boundsMin) / boundsWidth;
+  const shouldShrinkMin = lowerRatio > PASSIVE_SLIDER_BOUND_RESET_THRESHOLD;
+  const shouldShrinkMax = upperRatio < 1 - PASSIVE_SLIDER_BOUND_RESET_THRESHOLD;
+
+  if (!shouldShrinkMin && !shouldShrinkMax) {
+    return currentBounds;
+  }
+
+  return getSliderBoundsForRange(
+    [shouldShrinkMin ? nextRange[0] : boundsMin, shouldShrinkMax ? nextRange[1] : boundsMax],
+    step
+  );
+}
+
+function isRangeWithinBounds(
+  [rangeMin, rangeMax]: [number, number],
+  [boundsMin, boundsMax]: [number, number]
+): boolean {
+  return rangeMin >= boundsMin && rangeMax <= boundsMax;
+}
+
+function clearTimeoutRef(timeoutRef: MutableRefObject<ReturnType<typeof setTimeout> | undefined>) {
+  if (timeoutRef.current) {
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = undefined;
+  }
+}
+
+function getParsedRangeFromInputValues(nextValues: [string, string]): [number, number] | undefined {
+  const nextMin = parseRangeInputValue(nextValues[0]);
+  const nextMax = parseRangeInputValue(nextValues[1]);
+
+  if (nextMin == null || nextMax == null) {
+    return undefined;
+  }
+
+  return [nextMin, nextMax];
+}
+
+export function getAdjustedRangeForInputChange(
+  inputIndex: 0 | 1,
+  nextValues: [string, string]
+): [number, number] | undefined {
+  const nextRange = getParsedRangeFromInputValues(nextValues);
+  if (nextRange == null) {
+    return undefined;
+  }
+
+  const [nextMin, nextMax] = nextRange;
+
+  if (inputIndex === 0 && nextMin > nextMax) {
+    return [nextMin, nextMin];
+  }
+
+  if (inputIndex === 1 && nextMax < nextMin) {
+    return [nextMax, nextMax];
+  }
+
+  return [nextMin, nextMax];
 }
 
 function normalizeRange([min, max]: [number, number]): [number, number] {
   return min <= max ? [min, max] : [max, min];
-}
-
-function getNextNiceBound(value: number): number {
-  const absoluteValue = Math.abs(value);
-  if (!Number.isFinite(absoluteValue) || absoluteValue <= 0) {
-    return 1;
-  }
-
-  const magnitude = 10 ** Math.floor(Math.log10(absoluteValue));
-  const normalizedValue = absoluteValue / magnitude;
-
-  if (normalizedValue < 1) return magnitude;
-  if (normalizedValue < 2) return 2 * magnitude;
-  if (normalizedValue < 5) return 5 * magnitude;
-  return 10 * magnitude;
-}
-
-/**
- * Short unit appended to the range inputs, derived from the column's value format.
- * Hidden for the default number format (no meaningful unit), shown for explicit
- * formats such as bytes or percent. Mirrors "formatting is inherited from Value Format".
- */
-function getFormatUnit(formatter?: IFieldFormat): string | undefined {
-  const id = formatter?.type?.id;
-  if (!id || id === 'number') return undefined;
-  return formatter?.type?.title || undefined;
 }
 
 export interface ProgressBarControlsProps {
@@ -182,7 +301,6 @@ export interface ProgressBarControlsProps {
   paletteService: PaletteRegistry;
   panelRef: MutableRefObject<HTMLDivElement | null>;
   isInlineEditing?: boolean;
-  formatter?: IFieldFormat;
   onUpdate: (newColumn: Partial<ColumnState>) => void;
 }
 
@@ -198,7 +316,6 @@ export function ProgressBarControls({
   paletteService,
   panelRef,
   isInlineEditing,
-  formatter,
   onUpdate,
 }: ProgressBarControlsProps) {
   const { fillMode } = fillStyle;
@@ -209,6 +326,30 @@ export function ProgressBarControls({
     () => getProgressBarDomain({ fillStyle, palette }, dataBounds),
     [dataBounds, fillStyle, palette]
   );
+  const [sessionCustomRange, setSessionCustomRange] = useState<[number, number] | undefined>(() =>
+    effectiveRange.mode === 'custom' &&
+    typeof effectiveRange.min === 'number' &&
+    Number.isFinite(effectiveRange.min) &&
+    typeof effectiveRange.max === 'number' &&
+    Number.isFinite(effectiveRange.max)
+      ? normalizeRange([effectiveRange.min, effectiveRange.max])
+      : undefined
+  );
+
+  useEffect(() => {
+    if (
+      effectiveRange.mode === 'custom' &&
+      typeof effectiveRange.min === 'number' &&
+      Number.isFinite(effectiveRange.min) &&
+      typeof effectiveRange.max === 'number' &&
+      Number.isFinite(effectiveRange.max)
+    ) {
+      const nextRange = normalizeRange([effectiveRange.min, effectiveRange.max]);
+      setSessionCustomRange((currentRange) =>
+        areNumericRangesEqual(currentRange, nextRange) ? currentRange : nextRange
+      );
+    }
+  }, [effectiveRange.max, effectiveRange.min, effectiveRange.mode]);
 
   const setBarColor = useCallback(
     (nextFillMode: CellDecorationFillMode) => {
@@ -216,42 +357,26 @@ export function ProgressBarControls({
 
       const nextFillStyle: CellDecorationFillConfig = { ...fillStyle, fillMode: nextFillMode };
       const update: Partial<ColumnState> = {};
-
-      // Carry the committed custom bounds across the fill-mode switch (and the
-      // single<->palette range-store handoff) so a Custom range survives even
-      // when the active mode is Auto. The bounds are inert until Custom is
-      // active for the new fill mode.
-      const rememberedMin = fillStyle.valueRange?.min ?? effectiveRange.min;
-      const rememberedMax = fillStyle.valueRange?.max ?? effectiveRange.max;
-      const nextValueRange: CellDecorationValueRange = {
-        mode: effectiveRange.mode,
-        min: rememberedMin,
-        max: rememberedMax,
-      };
+      const nextValueRange: CellDecorationValueRange =
+        effectiveRange.mode === 'custom' && sessionCustomRange
+          ? {
+              mode: 'custom',
+              min: sessionCustomRange[0],
+              max: sessionCustomRange[1],
+            }
+          : { mode: effectiveRange.mode };
 
       if (nextFillMode === 'single') {
         nextFillStyle.color = fillStyle.color ?? DEFAULT_PROGRESS_BAR_COLOR;
         nextFillStyle.valueRange = nextValueRange;
       } else {
-        // Moving to solid/gradient: ensure a palette exists; sync the custom
-        // range onto the palette params so colors and bar share one domain.
         nextFillStyle.valueRange = nextValueRange;
-        const nextPalette: PaletteOutput<CustomPaletteParams> = {
-          ...palette,
-          params: {
-            ...palette.params,
-            ...(isCustomRange
-              ? { rangeType: 'number', rangeMin: effectiveRange.min, rangeMax: effectiveRange.max }
-              : {}),
-          },
-        };
-        update.palette = nextPalette;
       }
 
       update.fillStyle = nextFillStyle;
       onUpdate(update);
     },
-    [fillMode, fillStyle, isCustomRange, effectiveRange, palette, onUpdate]
+    [fillMode, fillStyle, effectiveRange, onUpdate, sessionCustomRange]
   );
 
   const setSingleColor = useCallback(
@@ -266,62 +391,37 @@ export function ProgressBarControls({
       if (mode === effectiveRange.mode) return;
 
       // Seed Custom from the previously committed custom bounds when known,
-      // otherwise from the current rendered domain. For positive-only auto
-      // ranges this preserves the visible 0 baseline instead of jumping to the
-      // raw data minimum.
-      const min = fillStyle.valueRange?.min ?? currentDomain.min;
-      const max = fillStyle.valueRange?.max ?? currentDomain.max;
-
-      // The committed bounds are retained on `fillStyle.valueRange` across the
-      // Auto round-trip so the last custom range survives the toggle.
-      const nextValueRange: CellDecorationValueRange = { mode, min, max };
-
-      if (usesPalette) {
-        const nextPalette: PaletteOutput<CustomPaletteParams> = {
-          ...palette,
-          params: {
-            ...palette.params,
-            ...(mode === 'custom'
-              ? { rangeType: 'number', rangeMin: min, rangeMax: max }
-              : { rangeMin: undefined, rangeMax: undefined }),
-          },
-        };
+      // otherwise from the current rendered domain.
+      if (mode === 'custom') {
+        const [min, max] = sessionCustomRange ?? [currentDomain.min, currentDomain.max];
         onUpdate({
-          palette: nextPalette,
-          fillStyle: { ...fillStyle, valueRange: nextValueRange },
+          fillStyle: { ...fillStyle, valueRange: { mode: 'custom', min, max } },
         });
-      } else {
-        onUpdate({
-          fillStyle: { ...fillStyle, valueRange: nextValueRange },
-        });
+        return;
       }
+
+      onUpdate({
+        fillStyle: { ...fillStyle, valueRange: { mode: 'auto' } },
+      });
     },
-    [currentDomain, effectiveRange, usesPalette, palette, fillStyle, onUpdate]
+    [currentDomain, effectiveRange, fillStyle, onUpdate, sessionCustomRange]
   );
 
   const setCustomRange = useCallback(
     ([min, max]: [number, number]) => {
-      // Persist the bounds on `fillStyle.valueRange` for every fill mode so they
-      // are remembered when toggling Auto/Custom; palette fills additionally
-      // mirror them onto the palette range that drives solid/gradient colors.
+      // Persist the bounds on `fillStyle.valueRange` so the active progress-bar
+      // range remains the source of truth regardless of the palette mode.
       const nextValueRange: CellDecorationValueRange = { mode: 'custom', min, max };
+      setSessionCustomRange((currentRange) => {
+        const nextRange: [number, number] = [min, max];
+        return areNumericRangesEqual(currentRange, nextRange) ? currentRange : nextRange;
+      });
 
-      if (usesPalette) {
-        const nextPalette: PaletteOutput<CustomPaletteParams> = {
-          ...palette,
-          params: { ...palette.params, rangeType: 'number', rangeMin: min, rangeMax: max },
-        };
-        onUpdate({
-          palette: nextPalette,
-          fillStyle: { ...fillStyle, valueRange: nextValueRange },
-        });
-      } else {
-        onUpdate({
-          fillStyle: { ...fillStyle, valueRange: nextValueRange },
-        });
-      }
+      onUpdate({
+        fillStyle: { ...fillStyle, valueRange: nextValueRange },
+      });
     },
-    [usesPalette, palette, fillStyle, onUpdate]
+    [fillStyle, onUpdate]
   );
 
   const { inputValue: singleColor, handleInputChange: handleSingleColorChange } =
@@ -334,129 +434,397 @@ export function ProgressBarControls({
   // data bounds, but guard once more so the slider math below stays finite even
   // if the data bounds themselves are degenerate.
   const rangeValue = useMemo<[number, number]>(() => {
-    const lower =
-      typeof effectiveRange.min === 'number' && Number.isFinite(effectiveRange.min)
+    const sourceMin =
+      effectiveRange.mode === 'custom' &&
+      typeof effectiveRange.min === 'number' &&
+      Number.isFinite(effectiveRange.min)
         ? effectiveRange.min
-        : 0;
-    const upper =
-      typeof effectiveRange.max === 'number' && Number.isFinite(effectiveRange.max)
+        : currentDomain.min;
+    const sourceMax =
+      effectiveRange.mode === 'custom' &&
+      typeof effectiveRange.max === 'number' &&
+      Number.isFinite(effectiveRange.max)
         ? effectiveRange.max
-        : lower + 1;
+        : currentDomain.max;
+    const lower = Number.isFinite(sourceMin) ? sourceMin : 0;
+    const upper = Number.isFinite(sourceMax) ? sourceMax : lower + 1;
     return normalizeRange([lower, upper]);
-  }, [effectiveRange.min, effectiveRange.max]);
-
-  const { inputValue: localRange, handleInputChange: handleRangeChange } = useDebouncedValue<
-    [number, number]
-  >({ onChange: setCustomRange, value: rangeValue }, { allowFalsyValue: true });
-
-  const liveRangeValue = useMemo<[number, number]>(() => normalizeRange(localRange), [localRange]);
-  const [lowestSeenNegativeValue, setLowestSeenNegativeValue] = useState<number | null>(() => {
-    const lowestValue = Math.min(
-      currentDomain.min,
-      dataBounds.min,
-      rangeValue[0],
-      liveRangeValue[0]
-    );
-    return lowestValue < 0 ? lowestValue : null;
-  });
-
-  useEffect(() => {
-    const lowestValue = Math.min(
-      currentDomain.min,
-      dataBounds.min,
-      rangeValue[0],
-      liveRangeValue[0],
-      fillStyle.valueRange?.min ?? Number.POSITIVE_INFINITY
-    );
-
-    if (lowestValue < 0) {
-      setLowestSeenNegativeValue((previousValue) =>
-        previousValue == null ? lowestValue : Math.min(previousValue, lowestValue)
-      );
-    }
-  }, [currentDomain.min, dataBounds.min, fillStyle.valueRange?.min, liveRangeValue, rangeValue]);
-
-  // Keep the slider anchored to human-friendly extremes. Positive-only ranges
-  // start at 0; once a negative value has appeared during the current edit
-  // session, keep a negative extreme available until the flyout closes.
-  const [sliderMin, sliderMax] = useMemo<[number, number]>(() => {
-    const upperBound = getNextNiceBound(
-      Math.max(dataBounds.max, currentDomain.max, rangeValue[1], liveRangeValue[1], 1)
-    );
-    const lowestNegativeCandidate = Math.min(
-      lowestSeenNegativeValue ?? Number.POSITIVE_INFINITY,
-      currentDomain.min,
-      dataBounds.min,
-      rangeValue[0],
-      liveRangeValue[0]
-    );
-
-    if (lowestNegativeCandidate < 0) {
-      return [-getNextNiceBound(Math.abs(lowestNegativeCandidate)), upperBound];
-    }
-
-    return [0, upperBound];
   }, [
     currentDomain.max,
     currentDomain.min,
-    dataBounds.max,
-    dataBounds.min,
-    liveRangeValue,
-    lowestSeenNegativeValue,
-    rangeValue,
+    effectiveRange.max,
+    effectiveRange.min,
+    effectiveRange.mode,
+  ]);
+  const rangeValueMin = rangeValue[0];
+  const rangeValueMax = rangeValue[1];
+
+  const datasetDecimalPlaces = useMemo(
+    () => Math.max(getDecimalPlaces(dataBounds.min), getDecimalPlaces(dataBounds.max)),
+    [dataBounds.max, dataBounds.min]
+  );
+  const basePrecisionUnit = useMemo(
+    () =>
+      getPrecisionUnit(
+        Math.max(
+          datasetDecimalPlaces,
+          getDecimalPlaces(rangeValueMin),
+          getDecimalPlaces(rangeValueMax)
+        )
+      ),
+    [datasetDecimalPlaces, rangeValueMax, rangeValueMin]
+  );
+  const [draftRange, setDraftRange] = useState<[number, number]>([rangeValueMin, rangeValueMax]);
+  const [focusedRangeInput, setFocusedRangeInput] = useState<0 | 1 | null>(null);
+  const [rangeInputValues, setRangeInputValues] = useState<[string, string]>(() => [
+    formatRangeInputValue(rangeValueMin),
+    formatRangeInputValue(rangeValueMax),
+  ]);
+  const rangeInputValuesRef = useRef(rangeInputValues);
+  const inputDecimalPlaces = useMemo(
+    () =>
+      Math.max(
+        datasetDecimalPlaces,
+        getDecimalPlacesFromInputText(rangeInputValues[0]),
+        getDecimalPlacesFromInputText(rangeInputValues[1])
+      ),
+    [datasetDecimalPlaces, rangeInputValues]
+  );
+  const inputPrecisionUnit = useMemo(
+    () => getPrecisionUnit(inputDecimalPlaces),
+    [inputDecimalPlaces]
+  );
+  const [sliderBounds, setSliderBounds] = useState<[number, number]>(() =>
+    getSliderBoundsForRange([rangeValueMin, rangeValueMax], basePrecisionUnit)
+  );
+  const wasCustomRange = useRef(isCustomRange);
+  const manualInputSyncTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const draftOwner = useRef<'external' | 'input' | 'slider'>('external');
+  const pendingCommittedRange = useRef<[number, number] | undefined>();
+  const sliderGestureActive = useRef(false);
+  const sliderGestureCleanup = useRef<(() => void) | undefined>();
+
+  const clearSliderGestureListeners = useCallback(() => {
+    sliderGestureCleanup.current?.();
+    sliderGestureCleanup.current = undefined;
+  }, []);
+
+  const finishSliderGesture = useCallback(() => {
+    sliderGestureActive.current = false;
+    clearSliderGestureListeners();
+
+    if (draftOwner.current === 'slider' && pendingCommittedRange.current == null) {
+      draftOwner.current = 'external';
+    }
+  }, [clearSliderGestureListeners]);
+
+  const beginSliderGesture = useCallback(() => {
+    if (sliderGestureActive.current || typeof window === 'undefined') {
+      return;
+    }
+
+    sliderGestureActive.current = true;
+
+    const handleGestureEnd = () => {
+      finishSliderGesture();
+    };
+
+    window.addEventListener('mouseup', handleGestureEnd);
+    window.addEventListener('touchend', handleGestureEnd);
+    window.addEventListener('touchcancel', handleGestureEnd);
+    window.addEventListener('pointerup', handleGestureEnd);
+    window.addEventListener('pointercancel', handleGestureEnd);
+
+    sliderGestureCleanup.current = () => {
+      window.removeEventListener('mouseup', handleGestureEnd);
+      window.removeEventListener('touchend', handleGestureEnd);
+      window.removeEventListener('touchcancel', handleGestureEnd);
+      window.removeEventListener('pointerup', handleGestureEnd);
+      window.removeEventListener('pointercancel', handleGestureEnd);
+    };
+  }, [finishSliderGesture]);
+
+  useEffect(() => {
+    return () => {
+      clearTimeoutRef(manualInputSyncTimeout);
+      clearSliderGestureListeners();
+    };
+  }, [clearSliderGestureListeners]);
+
+  useEffect(() => {
+    rangeInputValuesRef.current = rangeInputValues;
+  }, [rangeInputValues]);
+
+  useEffect(() => {
+    const enteringCustom = isCustomRange && !wasCustomRange.current;
+    wasCustomRange.current = isCustomRange;
+
+    if (!isCustomRange) {
+      return;
+    }
+
+    const nextRange: [number, number] = [rangeValueMin, rangeValueMax];
+    const pendingRange = pendingCommittedRange.current;
+    const pendingPropUpdate =
+      pendingRange != null && !areNumericRangesEqual(pendingRange, nextRange);
+
+    if (draftOwner.current === 'slider' && (sliderGestureActive.current || pendingPropUpdate)) {
+      return;
+    }
+
+    if (
+      draftOwner.current === 'input' &&
+      focusedRangeInput !== null &&
+      !areNumericRangesEqual(draftRange, nextRange)
+    ) {
+      return;
+    }
+
+    if (pendingRange && areNumericRangesEqual(pendingRange, nextRange)) {
+      pendingCommittedRange.current = undefined;
+      if (draftOwner.current === 'slider') {
+        draftOwner.current = 'external';
+      }
+    }
+
+    setDraftRange((currentRange) =>
+      areNumericRangesEqual(currentRange, nextRange) ? currentRange : nextRange
+    );
+    setSliderBounds((currentBounds) => {
+      if (!enteringCustom && isRangeWithinBounds(nextRange, currentBounds)) {
+        return currentBounds;
+      }
+
+      const nextBounds = enteringCustom
+        ? getSliderBoundsForRange(nextRange, basePrecisionUnit)
+        : mergeSliderBoundsWithRange(currentBounds, nextRange, basePrecisionUnit);
+      return areNumericRangesEqual(currentBounds, nextBounds) ? currentBounds : nextBounds;
+    });
+  }, [
+    basePrecisionUnit,
+    draftRange,
+    focusedRangeInput,
+    isCustomRange,
+    rangeValueMax,
+    rangeValueMin,
   ]);
 
-  // A step that evenly divides the slider range keeps EUI's step-grid validation
-  // satisfied for any clamped/snapped value, ticks, or level boundary.
-  const step = useMemo(() => getSafeStep(sliderMin, sliderMax), [sliderMin, sliderMax]);
+  useEffect(() => {
+    const normalizedDraftRange = normalizeRange(draftRange);
+    const nextInputValues: [string, string] = [
+      formatRangeInputValue(normalizedDraftRange[0]),
+      formatRangeInputValue(normalizedDraftRange[1]),
+    ];
 
-  // Snap the live selected range to the step grid and slider bounds so the
-  // dual range, its inputs, and its palette band all stay in sync while editing.
-  const safeRangeValue = useMemo<[number, number]>(
-    () =>
-      normalizeRange([
-        snapToStep(liveRangeValue[0], sliderMin, sliderMax, step),
-        snapToStep(liveRangeValue[1], sliderMin, sliderMax, step),
-      ]),
-    [liveRangeValue, sliderMin, sliderMax, step]
+    setRangeInputValues((currentValues) => {
+      const syncedValues: [string, string] = [
+        focusedRangeInput === 0 ? currentValues[0] : nextInputValues[0],
+        focusedRangeInput === 1 ? currentValues[1] : nextInputValues[1],
+      ];
+
+      return areRangeInputValuesEqual(currentValues, syncedValues) ? currentValues : syncedValues;
+    });
+  }, [draftRange, focusedRangeInput]);
+
+  const commitManualRangeToSlider = useCallback(
+    (
+      nextRange: [number, number],
+      nextPrecisionUnit: number,
+      options?: { allowPassiveShrink?: boolean }
+    ) => {
+      pendingCommittedRange.current = nextRange;
+      setDraftRange((currentRange) =>
+        areNumericRangesEqual(currentRange, nextRange) ? currentRange : nextRange
+      );
+      setSliderBounds((currentBounds) => {
+        let nextBounds = currentBounds;
+
+        if (options?.allowPassiveShrink) {
+          nextBounds = getPassivelyShrunkSliderBoundsForRange(
+            currentBounds,
+            nextRange,
+            nextPrecisionUnit
+          );
+        } else if (!isRangeWithinBounds(nextRange, currentBounds)) {
+          nextBounds = mergeSliderBoundsWithRange(currentBounds, nextRange, nextPrecisionUnit);
+        }
+
+        return areNumericRangesEqual(currentBounds, nextBounds) ? currentBounds : nextBounds;
+      });
+      setCustomRange(nextRange);
+    },
+    [setCustomRange]
   );
 
-  // Tint the dual-range track (rendered inside the popover) with the chosen
-  // palette / single color. Palette fills always spread across the selected
-  // lower/upper bounds; the outer slider extremes only widen how far the user
-  // can drag those bounds.
+  const syncManualRangeToSlider = useCallback(
+    (nextRange: [number, number], nextPrecisionUnit: number) => {
+      clearTimeoutRef(manualInputSyncTimeout);
+      manualInputSyncTimeout.current = setTimeout(() => {
+        manualInputSyncTimeout.current = undefined;
+        commitManualRangeToSlider(nextRange, nextPrecisionUnit);
+      }, MANUAL_INPUT_SYNC_DELAY_MS);
+    },
+    [commitManualRangeToSlider]
+  );
+
+  const handleRangeInputChange = useCallback(
+    (inputIndex: 0 | 1, nextValue: string) => {
+      draftOwner.current = 'input';
+      pendingCommittedRange.current = undefined;
+      finishSliderGesture();
+      setFocusedRangeInput(inputIndex);
+      const currentValues = rangeInputValuesRef.current;
+      const nextValues: [string, string] =
+        inputIndex === 0 ? [nextValue, currentValues[1]] : [currentValues[0], nextValue];
+      const nextParsedRange = getParsedRangeFromInputValues(nextValues);
+      const nextPrecisionUnit = getPrecisionUnit(
+        Math.max(
+          datasetDecimalPlaces,
+          getDecimalPlacesFromInputText(nextValues[0]),
+          getDecimalPlacesFromInputText(nextValues[1])
+        )
+      );
+
+      setRangeInputValues(nextValues);
+      rangeInputValuesRef.current = nextValues;
+
+      if (!nextParsedRange) {
+        clearTimeoutRef(manualInputSyncTimeout);
+        return;
+      }
+
+      if (nextParsedRange[0] > nextParsedRange[1]) {
+        clearTimeoutRef(manualInputSyncTimeout);
+        return;
+      }
+
+      syncManualRangeToSlider(nextParsedRange, nextPrecisionUnit);
+    },
+    [datasetDecimalPlaces, finishSliderGesture, syncManualRangeToSlider]
+  );
+
+  const handleRangeInputBlur = useCallback(() => {
+    const nextParsedRange = getParsedRangeFromInputValues(rangeInputValues);
+
+    if (!nextParsedRange) {
+      const nextValues: [string, string] = [
+        formatRangeInputValue(draftRange[0]),
+        formatRangeInputValue(draftRange[1]),
+      ];
+      draftOwner.current = 'external';
+      setFocusedRangeInput(null);
+      setRangeInputValues(nextValues);
+      rangeInputValuesRef.current = nextValues;
+      return;
+    }
+
+    const adjustedRange =
+      focusedRangeInput != null
+        ? getAdjustedRangeForInputChange(focusedRangeInput, rangeInputValues) ?? nextParsedRange
+        : nextParsedRange;
+    const nextPrecisionUnit = getPrecisionUnit(
+      Math.max(
+        datasetDecimalPlaces,
+        getDecimalPlacesFromInputText(rangeInputValues[0]),
+        getDecimalPlacesFromInputText(rangeInputValues[1])
+      )
+    );
+    const nextValues: [string, string] = [
+      formatRangeInputValue(adjustedRange[0]),
+      formatRangeInputValue(adjustedRange[1]),
+    ];
+
+    clearTimeoutRef(manualInputSyncTimeout);
+    commitManualRangeToSlider(adjustedRange, nextPrecisionUnit, { allowPassiveShrink: true });
+    draftOwner.current = 'external';
+    setFocusedRangeInput(null);
+    setRangeInputValues(nextValues);
+    rangeInputValuesRef.current = nextValues;
+  }, [
+    commitManualRangeToSlider,
+    datasetDecimalPlaces,
+    draftRange,
+    focusedRangeInput,
+    rangeInputValues,
+  ]);
+
+  const handleSliderChange = useCallback(
+    (value: [number, number]) => {
+      const nextRange = normalizeRange([Number(value[0]), Number(value[1])]);
+      clearTimeoutRef(manualInputSyncTimeout);
+      draftOwner.current = 'slider';
+      pendingCommittedRange.current = nextRange;
+      setFocusedRangeInput(null);
+      setDraftRange((currentRange) =>
+        areNumericRangesEqual(currentRange, nextRange) ? currentRange : nextRange
+      );
+      setCustomRange(nextRange);
+    },
+    [setCustomRange]
+  );
+
+  const normalizedDraftRange = useMemo<[number, number]>(
+    () => normalizeRange(draftRange),
+    [draftRange]
+  );
+  const [sliderBoundsMin, sliderBoundsMax] = sliderBounds;
+  const sliderRangeWidth = sliderBoundsMax - sliderBoundsMin;
+  const sliderValue = useMemo<[number, number]>(
+    () => [normalizedDraftRange[0] - sliderBoundsMin, normalizedDraftRange[1] - sliderBoundsMin],
+    [normalizedDraftRange, sliderBoundsMin]
+  );
+  const sliderStep = basePrecisionUnit;
+
+  // Feed the slider a zero-based local coordinate space instead of large
+  // absolute numbers so tiny ranges retain stable thumb movement.
   const levels = useMemo<EuiDualRangeProps['levels']>(() => {
-    const clamp = (value: number) => Math.min(Math.max(value, sliderMin), sliderMax);
+    const clampActualValue = (value: number) =>
+      Math.min(Math.max(value, sliderBoundsMin), sliderBoundsMax);
+    const toSliderOffset = (value: number) => value - sliderBoundsMin;
+    const paletteColors =
+      palette.params?.colors ?? palette.params?.stops?.map(({ color }) => color);
+    const paletteStops = palette.name === 'custom' ? palette.params?.stops : undefined;
     if (usesPalette) {
       const stops = getProgressBarPaletteStops(
         paletteService,
-        { min: safeRangeValue[0], max: safeRangeValue[1] },
+        { min: normalizedDraftRange[0], max: normalizedDraftRange[1] },
         palette,
-        undefined,
-        palette.params?.stops
+        paletteColors,
+        paletteStops
       );
 
       if (stops.length) {
         return stops
-          .map((stop, index) => ({
-            min: clamp(stop.stop),
-            max: clamp(stops[index + 1]?.stop ?? safeRangeValue[1]),
-            color: stop.color,
-          }))
+          .map((stop, index) => {
+            const nextStop = stops[index + 1]?.stop ?? normalizedDraftRange[1];
+
+            return {
+              min: toSliderOffset(clampActualValue(index === 0 ? sliderBoundsMin : stop.stop)),
+              max: toSliderOffset(
+                clampActualValue(index === stops.length - 1 ? sliderBoundsMax : nextStop)
+              ),
+              color: stop.color,
+            };
+          })
           .filter(({ min, max }) => min < max);
       }
     }
     return [
       {
-        min: clamp(safeRangeValue[0]),
-        max: clamp(safeRangeValue[1]),
+        min: toSliderOffset(clampActualValue(normalizedDraftRange[0])),
+        max: toSliderOffset(clampActualValue(normalizedDraftRange[1])),
         color: fillStyle.color ?? DEFAULT_PROGRESS_BAR_COLOR,
       },
     ];
-  }, [fillStyle.color, palette, paletteService, safeRangeValue, sliderMax, sliderMin, usesPalette]);
-
-  const formatUnit = useMemo(() => getFormatUnit(formatter), [formatter]);
-  const append = formatUnit ? { append: formatUnit } : {};
+  }, [
+    fillStyle.color,
+    normalizedDraftRange,
+    palette,
+    paletteService,
+    sliderBoundsMax,
+    sliderBoundsMin,
+    usesPalette,
+  ]);
 
   return (
     <>
@@ -494,7 +862,7 @@ export function ProgressBarControls({
           setPalette={(newPalette) => onUpdate({ palette: newPalette })}
           paletteService={paletteService}
           panelRef={panelRef}
-          dataBounds={dataBounds}
+          dataBounds={currentDomain}
         />
       )}
 
@@ -517,31 +885,66 @@ export function ProgressBarControls({
         // Reserve the label column so the range inputs line up under the
         // "Value range" control above instead of starting at the panel edge.
         <EuiFormRow display="columnCompressed" fullWidth hasEmptyLabelSpace>
-          <EuiDualRange
-            id={`${idPrefix}valueRangeSlider`}
-            min={sliderMin}
-            max={sliderMax}
-            step={step}
-            value={localRange}
-            onChange={(value) => {
-              const [next0, next1] = value;
-              const nextRange = normalizeRange([Number(next0), Number(next1)]);
-              if (nextRange[0] < 0) {
-                setLowestSeenNegativeValue((previousValue) =>
-                  previousValue == null ? nextRange[0] : Math.min(previousValue, nextRange[0])
-                );
-              }
-              handleRangeChange(nextRange);
-            }}
-            showInput="inputWithPopover"
-            showLabels
-            levels={levels}
-            fullWidth
-            compressed
-            aria-label={valueRangeLabel}
-            data-test-subj="lnsDatatable_progressBar_valueRangeSlider"
-            {...append}
-          />
+          <>
+            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+              <EuiFlexItem>
+                <EuiFieldNumber
+                  fullWidth
+                  compressed
+                  step={inputPrecisionUnit}
+                  value={rangeInputValues[0]}
+                  onFocus={() => setFocusedRangeInput(0)}
+                  onBlur={handleRangeInputBlur}
+                  onChange={(event) => handleRangeInputChange(0, event.target.value)}
+                  aria-label={minValueRangeLabel}
+                  data-test-subj="lnsDatatable_progressBar_valueRangeMin"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <span aria-hidden="true">&rarr;</span>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFieldNumber
+                  fullWidth
+                  compressed
+                  step={inputPrecisionUnit}
+                  value={rangeInputValues[1]}
+                  onFocus={() => setFocusedRangeInput(1)}
+                  onBlur={handleRangeInputBlur}
+                  onChange={(event) => handleRangeInputChange(1, event.target.value)}
+                  aria-label={maxValueRangeLabel}
+                  data-test-subj="lnsDatatable_progressBar_valueRangeMax"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <div
+              onMouseDownCapture={beginSliderGesture}
+              onTouchStartCapture={beginSliderGesture}
+              onPointerDownCapture={beginSliderGesture}
+            >
+              <EuiDualRange
+                id={`${idPrefix}valueRangeSlider`}
+                min={0}
+                max={sliderRangeWidth}
+                step={sliderStep}
+                value={sliderValue}
+                onChange={(value) =>
+                  handleSliderChange([
+                    sliderBoundsMin + Number(value[0]),
+                    sliderBoundsMin + Number(value[1]),
+                  ])
+                }
+                showInput={false}
+                // The numeric inputs above are the source of truth. Leaving
+                // the built-in labels on squeezes the track for long values.
+                levels={levels}
+                fullWidth
+                compressed
+                aria-label={valueRangeLabel}
+                data-test-subj="lnsDatatable_progressBar_valueRangeSlider"
+              />
+            </div>
+          </>
         </EuiFormRow>
       )}
     </>

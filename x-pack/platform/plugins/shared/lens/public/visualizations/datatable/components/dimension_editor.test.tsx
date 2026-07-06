@@ -530,7 +530,7 @@ describe('data table dimension editor', () => {
       });
     });
 
-    it('anchors a positive-only custom range slider at zero and a nice upper bound', () => {
+    it('does not clamp the custom range inputs to the slider bounds', () => {
       mockFirstColumn({ dataType: 'number' });
       frame.activeData!.first.rows = [{ foo: 70 }, { foo: 80 }, { foo: 90 }];
       state.columns[0].colorMode = 'progress';
@@ -541,8 +541,8 @@ describe('data table dimension editor', () => {
       renderTableDimensionEditor();
 
       const [minInput, maxInput] = screen.getAllByRole('spinbutton');
-      expect(Number(minInput.getAttribute('min'))).toBe(0);
-      expect(Number(maxInput.getAttribute('max'))).toBe(100);
+      expect(minInput.getAttribute('min')).toBeNull();
+      expect(maxInput.getAttribute('max')).toBeNull();
     });
 
     it('renders a finite custom range slider for a solid fill with open-ended palette bounds', () => {
@@ -568,7 +568,7 @@ describe('data table dimension editor', () => {
       });
     });
 
-    it('retains the last custom range when toggling Custom -> Auto (single fill)', async () => {
+    it('clears persisted custom bounds when toggling Custom -> Auto (single fill)', async () => {
       mockFirstColumn({ dataType: 'number' });
       state.columns[0].colorMode = 'progress';
       state.columns[0].fillStyle = {
@@ -581,14 +581,12 @@ describe('data table dimension editor', () => {
       await act(async () => screen.getByTestId('lnsDatatable_progressBar_valueRange_auto').click());
       await act(async () => jest.advanceTimersByTime(256));
 
-      // The committed bounds survive on `fillStyle.valueRange` (inert under Auto)
-      // so they can be restored on the next switch to Custom.
       expect(props.setState).toHaveBeenCalledWith(
         expect.objectContaining({
           columns: [
             expect.objectContaining({
               fillStyle: expect.objectContaining({
-                valueRange: { mode: 'auto', min: -5, max: 25 },
+                valueRange: { mode: 'auto' },
               }),
             }),
           ],
@@ -596,23 +594,22 @@ describe('data table dimension editor', () => {
       );
     });
 
-    it('restores the remembered custom bounds when switching Auto -> Custom (single fill)', async () => {
+    it('restores the last custom bounds only within the same flyout session', async () => {
       mockFirstColumn({ dataType: 'number' });
-      // Auto mode but with previously committed bounds remembered on valueRange.
       state.columns[0].colorMode = 'progress';
       state.columns[0].fillStyle = {
         fillMode: 'single',
-        valueRange: { mode: 'auto', min: -5, max: 25 },
+        valueRange: { mode: 'custom', min: -5, max: 25 },
       };
       renderTableDimensionEditor();
 
+      await act(async () => screen.getByTestId('lnsDatatable_progressBar_valueRange_auto').click());
+      await act(async () => jest.advanceTimersByTime(256));
       await act(async () =>
         screen.getByTestId('lnsDatatable_progressBar_valueRange_custom').click()
       );
       await act(async () => jest.advanceTimersByTime(256));
 
-      // The committed Custom range is seeded from the remembered bounds (-5, 25),
-      // not reset to the data bounds.
       expect(props.setState).toHaveBeenCalledWith(
         expect.objectContaining({
           columns: [
@@ -626,7 +623,7 @@ describe('data table dimension editor', () => {
       );
     });
 
-    it('seeds Auto -> Custom from the visible auto domain for positive-only data', async () => {
+    it('seeds Auto -> Custom from the loaded auto domain for positive-only data', async () => {
       mockFirstColumn({ dataType: 'number' });
       frame.activeData!.first.rows = [{ foo: 70 }, { foo: 80 }, { foo: 90 }];
       state.columns[0].colorMode = 'progress';
@@ -646,7 +643,7 @@ describe('data table dimension editor', () => {
           columns: [
             expect.objectContaining({
               fillStyle: expect.objectContaining({
-                valueRange: { mode: 'custom', min: 0, max: 90 },
+                valueRange: { mode: 'custom', min: 70, max: 90 },
               }),
             }),
           ],

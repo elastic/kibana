@@ -61,16 +61,15 @@ describe('datatable progress bar utils', () => {
         { fillStyle: single({ valueRange: { mode: 'auto' } }) },
         { min: 10, max: 90 }
       );
-      // Baseline 0 is kept inside the domain.
-      expect(domain).toEqual({ min: 0, max: 90 });
+      expect(domain).toEqual({ min: 10, max: 90 });
     });
 
-    it('keeps zero anchored for a negative-only auto range', () => {
+    it('uses the loaded data bounds for a negative-only auto range', () => {
       const domain = getProgressBarDomain(
         { fillStyle: single({ valueRange: { mode: 'auto' } }) },
         { min: -120, max: -10 }
       );
-      expect(domain).toEqual({ min: -120, max: 0 });
+      expect(domain).toEqual({ min: -120, max: -10 });
     });
 
     it('spans the full mixed-sign auto range', () => {
@@ -81,12 +80,12 @@ describe('datatable progress bar utils', () => {
       expect(domain).toEqual({ min: -50, max: 50 });
     });
 
-    it('honors a single-mode custom range, widening to include zero', () => {
+    it('honors a single-mode custom range as-is', () => {
       const domain = getProgressBarDomain(
         { fillStyle: single({ valueRange: { mode: 'custom', min: 20, max: 80 } }) },
         { min: 0, max: 100 }
       );
-      expect(domain).toEqual({ min: 0, max: 80 });
+      expect(domain).toEqual({ min: 20, max: 80 });
     });
 
     it('supports a custom range with a negative minimum (single mode)', () => {
@@ -121,8 +120,7 @@ describe('datatable progress bar utils', () => {
         { fillStyle: single({ valueRange: { mode: 'custom', min: NaN, max: 70 } }) },
         { min: 10, max: 50 }
       );
-      // NaN min is replaced by the data min (10), then widened to include 0.
-      expect(domain).toEqual({ min: 0, max: 70 });
+      expect(domain).toEqual({ min: 10, max: 70 });
     });
 
     it('normalizes an inverted custom range', () => {
@@ -130,7 +128,7 @@ describe('datatable progress bar utils', () => {
         { fillStyle: single({ valueRange: { mode: 'custom', min: 80, max: 20 } }) },
         { min: 0, max: 100 }
       );
-      expect(domain).toEqual({ min: 0, max: 80 });
+      expect(domain).toEqual({ min: 20, max: 80 });
     });
 
     it('ignores stale palette range for a single fill', () => {
@@ -142,7 +140,7 @@ describe('datatable progress bar utils', () => {
         { min: 10, max: 90 }
       );
       // Single mode must not read leftover palette bounds.
-      expect(domain).toEqual({ min: 0, max: 90 });
+      expect(domain).toEqual({ min: 10, max: 90 });
     });
 
     it('treats open-ended (±Infinity) palette continuities as the data bounds', () => {
@@ -165,8 +163,8 @@ describe('datatable progress bar utils', () => {
     it('uses data bounds for an explicit Auto palette fill, ignoring stale palette range', () => {
       // Switching Custom -> Auto keeps the last custom bounds on fillStyle (range
       // retention) and may leave stale rangeMin/rangeMax on the palette. An
-      // explicit Auto mode must win: the domain follows the data bounds (here a
-      // positive-only column spans [0, 108], not the stale [0, 200]).
+      // explicit Auto mode must win: the domain follows the loaded data bounds
+      // rather than the stale custom palette range.
       const domain = getProgressBarDomain(
         {
           fillStyle: { fillMode: 'gradient', valueRange: { mode: 'auto', min: 0, max: 200 } },
@@ -174,12 +172,10 @@ describe('datatable progress bar utils', () => {
         },
         { min: 19, max: 108 }
       );
-      expect(domain).toEqual({ min: 0, max: 108 });
+      expect(domain).toEqual({ min: 19, max: 108 });
     });
 
-    it('drops a positive-only palette fill back to [0, max] when switched to Auto', () => {
-      // Mixed-sign custom range, then Auto, on data that is positive-only: the
-      // baseline returns to the left edge (0) and the bar spans the data max.
+    it('drops a positive-only palette fill back to the loaded data bounds when switched to Auto', () => {
       const domain = getProgressBarDomain(
         {
           fillStyle: { fillMode: 'gradient', valueRange: { mode: 'auto', min: -24, max: 108 } },
@@ -187,7 +183,7 @@ describe('datatable progress bar utils', () => {
         },
         { min: 19, max: 108 }
       );
-      expect(domain).toEqual({ min: 0, max: 108 });
+      expect(domain).toEqual({ min: 19, max: 108 });
     });
 
     it('honors a palette range only when fillStyle has no explicit mode (legacy/API)', () => {
@@ -201,25 +197,26 @@ describe('datatable progress bar utils', () => {
         },
         { min: 19, max: 108 }
       );
-      expect(domain).toEqual({ min: 0, max: 250 });
+      expect(domain).toEqual({ min: 5, max: 250 });
     });
   });
 
   describe('getProgressBarPaletteStops', () => {
     const paletteService = chartPluginMock.createPaletteRegistry();
 
-    it('zips parallel colors/stops into domain-valued stops', () => {
+    it('converts explicit upper-bound stops into visible lower-bound segments', () => {
       expect(
         getProgressBarPaletteStops(
           paletteService,
           { min: 0, max: 100 },
-          undefined,
-          ['#aaa', '#bbb'],
-          [0, 50]
+          { type: 'palette', name: 'custom', params: { rangeType: 'number' } },
+          ['#aaa', '#bbb', '#ccc'],
+          [20, 50, 80]
         )
       ).toEqual([
         { color: '#aaa', stop: 0 },
-        { color: '#bbb', stop: 50 },
+        { color: '#bbb', stop: 20 },
+        { color: '#ccc', stop: 50 },
       ]);
     });
 
@@ -228,14 +225,43 @@ describe('datatable progress bar utils', () => {
         getProgressBarPaletteStops(
           paletteService,
           { min: 0, max: 100 },
-          undefined,
-          ['#aaa', '#bbb'],
-          [{ stop: 0 }, { stop: 50 }]
+          { type: 'palette', name: 'custom', params: { rangeType: 'number' } },
+          ['#aaa', '#bbb', '#ccc'],
+          [{ stop: 20 }, { stop: 50 }, { stop: 80 }]
         )
       ).toEqual([
         { color: '#aaa', stop: 0 },
-        { color: '#bbb', stop: 50 },
+        { color: '#bbb', stop: 20 },
+        { color: '#ccc', stop: 50 },
       ]);
+    });
+
+    it('maps percent stops across the active progress-bar domain', () => {
+      expect(
+        getProgressBarPaletteStops(
+          paletteService,
+          { min: 70, max: 90 },
+          { type: 'palette', name: 'custom', params: { rangeType: 'percent' } },
+          ['#aaa', '#bbb', '#ccc'],
+          [50, 90, 100]
+        )
+      ).toEqual([
+        { color: '#aaa', stop: 70 },
+        { color: '#bbb', stop: 80 },
+        { color: '#ccc', stop: 88 },
+      ]);
+    });
+
+    it('extends the last visible color when the whole range sits above the configured stops', () => {
+      expect(
+        getProgressBarPaletteStops(
+          paletteService,
+          { min: 100, max: 200 },
+          { type: 'palette', name: 'custom', params: { rangeType: 'number' } },
+          ['#aaa', '#bbb', '#ccc'],
+          [20, 50, 80]
+        )
+      ).toEqual([{ color: '#ccc', stop: 100 }]);
     });
 
     it('distributes serialized colors across the domain when stops are empty', () => {
@@ -323,6 +349,18 @@ describe('datatable progress bar utils', () => {
           { min: 0, max: 100 }
         )
       ).toEqual({ mode: 'custom', min: 1, max: 9 });
+    });
+
+    it('prefers fillStyle valueRange bounds over stale palette bounds for palette fills', () => {
+      expect(
+        getDecorationCustomRange(
+          {
+            fillStyle: { fillMode: 'solid', valueRange: { mode: 'custom', min: 10, max: 90 } },
+            palette: { params: { rangeMin: 1, rangeMax: 9 } },
+          },
+          { min: 0, max: 100 }
+        )
+      ).toEqual({ mode: 'custom', min: 10, max: 90 });
     });
 
     it('collapses open-ended (±Infinity) palette bounds to finite data bounds', () => {

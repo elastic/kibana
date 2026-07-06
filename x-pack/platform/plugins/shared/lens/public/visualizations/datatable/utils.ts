@@ -183,13 +183,9 @@ export function isPaletteFillMode(fillMode: CellDecorationFillMode): boolean {
 /**
  * Resolves the bar domain `[min, max]` for a decorated column.
  *
- * - `auto`: uses the loaded column data bounds (baseline stays at `0`).
- * - `custom`: uses the explicit bounds. For solid/gradient the custom bounds live
- *   on `palette.params.rangeMin`/`rangeMax`; for single they live on
- *   `fillStyle.valueRange`. Either store is honored here so callers don't branch.
- *
- * Returns bounds already widened to include the `0` baseline so signed columns keep
- * a stable zero anchor.
+ * - `auto`: uses the loaded column data bounds as-is.
+ * - `custom`: uses the explicit bounds. `fillStyle.valueRange` is the primary
+ *   source; legacy/API columns can still fall back to palette range bounds.
  */
 export interface DecorationColumnLike {
   fillStyle?: CellDecorationFillConfig;
@@ -244,10 +240,6 @@ export function getProgressBarDomain(
     [min, max] = [max, min];
   }
 
-  // Keep zero inside the domain so the baseline (0) stays a stable anchor.
-  min = Math.min(min, 0);
-  max = Math.max(max, 0);
-
   // Guard against a degenerate domain.
   if (min === max) {
     max = min + 1;
@@ -264,7 +256,8 @@ export function getProgressBarDomain(
  * only carries explicit numeric `stops` for the `custom` palette; predefined
  * (by-name) palettes serialize empty `stops`. So the resolution order is:
  *
- * 1. `colors` + matching `stops` → zip them directly (custom palette).
+ * 1. `colors` + matching `stops` → convert explicit stop bounds into visible
+ *    meter stop starts inside the active progress-bar domain.
  * 2. `colors` only → distribute those colors evenly across the data bounds, so
  *    the user's chosen palette is honored rather than discarded.
  * 3. named `palette` only → resolve that palette's colors from the service and
@@ -278,13 +271,14 @@ export function getProgressBarPaletteStops(
   colors?: string[],
   stops?: Array<number | Pick<ColorStop, 'stop'>>
 ): Array<{ color: string; stop: number }> {
-  if (colors?.length && stops?.length) {
-    return colors.reduce<Array<{ color: string; stop: number }>>((acc, color, index) => {
-      const rawStop = stops[index];
-      const stop = typeof rawStop === 'number' ? rawStop : rawStop?.stop;
-      if (stop != null) acc.push({ color, stop });
-      return acc;
-    }, []);
+  const explicitPaletteStops = resolveExplicitProgressBarPaletteStops(
+    dataBounds,
+    palette,
+    colors,
+    stops
+  );
+  if (explicitPaletteStops.length) {
+    return explicitPaletteStops;
   }
 
   // Predefined palettes serialize their resolved colors but omit numeric stops.
@@ -321,6 +315,82 @@ function distributeColorsAcrossDomain(
   const span = max - min;
   const step = span / colors.length;
   return colors.map((color, index) => ({ color, stop: min + step * index }));
+}
+
+function resolveExplicitProgressBarPaletteStops(
+  domain: DataBounds,
+  palette: PaletteOutput<CustomPaletteParams> | undefined,
+  colors: string[] | undefined,
+  stops: Array<number | Pick<ColorStop, 'stop'>> | undefined
+): Array<{ color: string; stop: number }> {
+  const explicitStops = toExplicitStopPairs(colors, stops);
+  if (!explicitStops.length) {
+    return [];
+  }
+
+  if (explicitStops.length === 1) {
+    return [{ color: explicitStops[0].color, stop: domain.min }];
+  }
+
+  const rangeType = palette?.params?.rangeType ?? 'percent';
+  const upperBounds = explicitStops
+    .map(({ color, stop }) => ({
+      color,
+      stop: toDomainStop(stop, domain, rangeType),
+    }))
+    .filter(({ stop }) => Number.isFinite(stop))
+    .sort((left, right) => left.stop - right.stop);
+
+  if (!upperBounds.length) {
+    return [];
+  }
+
+  const firstVisibleStopIndex = upperBounds.findIndex(({ stop }) => stop > domain.min);
+  const visibleColorIndex =
+    firstVisibleStopIndex === -1 ? upperBounds.length - 1 : firstVisibleStopIndex;
+  const visibleStops = [{ color: upperBounds[visibleColorIndex].color, stop: domain.min }];
+
+  for (let index = visibleColorIndex + 1; index < upperBounds.length; index++) {
+    const stop = upperBounds[index - 1].stop;
+    if (stop <= domain.min || stop >= domain.max) {
+      continue;
+    }
+    visibleStops.push({ color: upperBounds[index].color, stop });
+  }
+
+  return visibleStops;
+}
+
+function toExplicitStopPairs(
+  colors: string[] | undefined,
+  stops: Array<number | Pick<ColorStop, 'stop'>> | undefined
+): Array<{ color: string; stop: number }> {
+  return (stops ?? []).reduce<Array<{ color: string; stop: number }>>((acc, rawStop, index) => {
+    const stop = typeof rawStop === 'number' ? rawStop : rawStop?.stop;
+    const color =
+      colors?.[index] ??
+      (typeof rawStop === 'object' && rawStop != null && 'color' in rawStop
+        ? rawStop.color
+        : undefined);
+
+    if (color != null && stop != null) {
+      acc.push({ color, stop });
+    }
+
+    return acc;
+  }, []);
+}
+
+function toDomainStop(
+  stop: number,
+  { min, max }: DataBounds,
+  rangeType: CustomPaletteParams['rangeType']
+): number {
+  if (rangeType === 'number') {
+    return stop;
+  }
+
+  return min + ((max - min) * stop) / 100;
 }
 
 function resolveProgressBarPaletteColors(
@@ -378,10 +448,16 @@ export function getDecorationCustomRange(
 
   if (isPaletteFillMode(fillStyle.fillMode)) {
     const mode = fillStyle.valueRange?.mode ?? 'auto';
+    const hasExplicitValueRange =
+      Number.isFinite(fillStyle.valueRange?.min) || Number.isFinite(fillStyle.valueRange?.max);
     return {
       mode,
-      min: finiteOr(palette?.params?.rangeMin, dataBounds.min),
-      max: finiteOr(palette?.params?.rangeMax, dataBounds.max),
+      min: hasExplicitValueRange
+        ? finiteOr(fillStyle.valueRange?.min, dataBounds.min)
+        : finiteOr(palette?.params?.rangeMin, dataBounds.min),
+      max: hasExplicitValueRange
+        ? finiteOr(fillStyle.valueRange?.max, dataBounds.max)
+        : finiteOr(palette?.params?.rangeMax, dataBounds.max),
     };
   }
 
