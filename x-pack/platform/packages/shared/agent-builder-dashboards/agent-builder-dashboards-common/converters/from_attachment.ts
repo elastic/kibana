@@ -12,6 +12,8 @@ import type {
 } from '@kbn/dashboard-plugin/server';
 import { isLensAPIFormat, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import { buildVegaSavedVis, VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type {
   AttachmentPanel,
   DashboardSection as AgentDashboardSection,
@@ -22,9 +24,33 @@ import { EMPTY_DASHBOARD_STATE } from '../dashboard_state_helpers';
 
 /**
  * Converts an AttachmentPanel to a DashboardPanel.
- * For Lens panels with API format attributes, converts to internal format.
+ * - Lens panels with API-format attributes are converted to internal format.
+ * - `vega` panels (the future native API shape, `config.spec`) are expanded to a
+ *   by-value legacy-vis (`visualization`) embeddable for rendering. This is a
+ *   temporary bridge: once the native `vega` embeddable API ships, the panel can
+ *   be passed through unchanged and this branch removed.
  */
 const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): DashboardPanel => {
+  if (type === VEGA_VIS_TYPE) {
+    const { spec, title, description } = config as {
+      spec?: unknown;
+      title?: unknown;
+      description?: unknown;
+    };
+    return {
+      type: VISUALIZE_EMBEDDABLE_TYPE,
+      id,
+      grid,
+      config: {
+        savedVis: buildVegaSavedVis({
+          spec: typeof spec === 'string' ? spec : '',
+          title: typeof title === 'string' ? title : '',
+          description: typeof description === 'string' ? description : '',
+        }),
+      },
+    };
+  }
+
   let configObject = config;
   if (type === LENS_EMBEDDABLE_TYPE && isLensAPIFormat(config)) {
     const lensAttributes = new LensConfigBuilder().fromAPIFormat(config);

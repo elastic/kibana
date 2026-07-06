@@ -105,7 +105,7 @@ const detectionsBulkCreateRoute = createServerRoute({
   },
 });
 
-export const internalSigEventsDetectionsRoutes = {
+export const internalSignificantEventsDetectionsRoutes = {
   ...detectionsSearchRoute,
   ...detectionsHistoryRoute,
   ...detectionsBulkCreateRoute,
