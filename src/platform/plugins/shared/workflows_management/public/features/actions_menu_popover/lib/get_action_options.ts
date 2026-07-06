@@ -54,7 +54,7 @@ export function getActionOptions(
   };
 
   const kibanaEntityStoreGroup: ActionGroup = {
-    iconType: 'globe',
+    iconType: 'securityApp',
     id: 'kibana.entityStore',
     label: i18n.translate('workflows.actionsMenu.kibanaEntityStore', {
       defaultMessage: 'Entity Store',
