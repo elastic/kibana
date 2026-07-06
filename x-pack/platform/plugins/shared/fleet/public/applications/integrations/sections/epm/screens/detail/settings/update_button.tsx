@@ -278,7 +278,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
               'xpack.fleet.integrations.settings.errorUpdatingAgentlessPoliciesToast.message',
               {
                 defaultMessage:
-                  '{failedCount, plural, one {# agentless policy} other {# agentless policies}} could not be upgraded and need to be manually updated.',
+                  '{failedCount, plural, one {# agentless policy could not be upgraded and needs to be manually updated.} other {# agentless policies could not be upgraded and need to be manually updated.}}',
                 values: { failedCount: failed.length },
               }
             ),
