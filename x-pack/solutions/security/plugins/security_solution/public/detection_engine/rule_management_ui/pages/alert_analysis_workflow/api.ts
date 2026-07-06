@@ -13,8 +13,6 @@ import {
   ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
-  type AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody,
-  type AlertAnalysisWorkflowRuleAttachmentStatsRequestBody,
   type AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody,
   type AlertAnalysisWorkflowSettings,
   type RuleAttachmentPage,
@@ -113,12 +111,10 @@ export const fetchAlertAnalysisWorkflowRuleAttachmentStats = ({
   http: HttpStart;
   search: string;
 }): Promise<RuleAttachmentStats> => {
-  const body: AlertAnalysisWorkflowRuleAttachmentStatsRequestBody = { search };
-
   return http.fetch<RuleAttachmentStats>(ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE, {
-    method: 'POST',
+    method: 'GET',
     version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
-    body: JSON.stringify(body),
+    query: { search },
   });
 };
 
@@ -129,12 +125,10 @@ export const fetchAlertAnalysisWorkflowRuleAttachmentSelection = ({
   http: HttpStart;
   search: string;
 }): Promise<RuleAttachmentSelection> => {
-  const body: AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody = { search };
-
   return http.fetch<RuleAttachmentSelection>(ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE, {
-    method: 'POST',
+    method: 'GET',
     version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
-    body: JSON.stringify(body),
+    query: { search },
   });
 };
 

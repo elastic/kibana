@@ -57,19 +57,19 @@ export type AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.infer<
   typeof AlertAnalysisWorkflowRuleAttachmentListRequestQuery
 >;
 
-export const AlertAnalysisWorkflowRuleAttachmentStatsRequestBody = z.object({
+export const AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery = z.object({
   search: z.string().optional().default(''),
 });
 
-export type AlertAnalysisWorkflowRuleAttachmentStatsRequestBody = z.infer<
-  typeof AlertAnalysisWorkflowRuleAttachmentStatsRequestBody
+export type AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery = z.infer<
+  typeof AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery
 >;
 
-export const AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody =
-  AlertAnalysisWorkflowRuleAttachmentStatsRequestBody;
+export const AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery =
+  AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery;
 
-export type AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody = z.infer<
-  typeof AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody
+export type AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery = z.infer<
+  typeof AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery
 >;
 
 export const AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody = z

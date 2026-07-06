@@ -10,9 +10,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { focusManager } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
-import { RULES_FEATURE_ID } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { ALERT_ANALYSIS_WORKFLOW_API_VERSION, ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE } from './api';
 import { AlertAnalysisWorkflowPage } from '.';
 
@@ -24,6 +24,9 @@ jest.mock('../../../../common/containers/use_full_screen', () => ({
 }));
 
 jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../../common/components/user_privileges');
+
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 describe('AlertAnalysisWorkflowPage', () => {
   const coreStart = coreMock.createStart();
@@ -44,9 +47,12 @@ describe('AlertAnalysisWorkflowPage', () => {
       ...coreStart.application.capabilities,
       advancedSettings: { show: true, save: true },
       securitySolution: { show: true, crud: true },
-      [RULES_FEATURE_ID]: { read_rules: true, edit_rules: true },
       workflowsManagement: { updateWorkflow: true },
     };
+    // The page reads rules-edit via useUserPrivileges (not raw capabilities).
+    useUserPrivilegesMock.mockReturnValue({
+      rulesPrivileges: { rules: { read: true, edit: true } },
+    });
     coreStart.application.getUrlForApp.mockImplementation(
       (appId, options) => `/app/${appId}${options?.path ?? ''}`
     );
