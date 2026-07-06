@@ -15,17 +15,18 @@ import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
 import type { DashboardState } from '../types';
 import type { DashboardCreateResponseBody } from './types';
+import { getUseGASchemas } from '../get_use_ga_schemas';
 
 export async function create(
   requestCtx: RequestHandlerContext,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardState,
-  useGASchemas: boolean,
   serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false,
   id?: string
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
+  const useGASchemas = await getUseGASchemas(core);
   const { access_control: accessControl, ...restOfData } = createBody;
 
   const { attributes: soAttributes, references: soReferences } = transformDashboardIn(

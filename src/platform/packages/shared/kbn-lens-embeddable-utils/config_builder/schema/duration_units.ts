@@ -70,8 +70,8 @@ export const durationFormatSchema = schema.object(
 );
 
 /**
- * Legacy duration format schema accepting pre-GA free-form string values for `from` and `to`.
- * Used as a fallback when `asCode.useGASchemas` is disabled (default during Tech Preview).
+ * Legacy duration format schema accepting pre-GA free-form string values for `to` and `from`.
+ * Used as a fallback when `asCode.useGASchemas` is disabled.
  * @see AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG
  */
 export const legacyDurationFormatSchema = schema.object(
