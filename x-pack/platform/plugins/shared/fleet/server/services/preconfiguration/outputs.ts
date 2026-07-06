@@ -61,6 +61,7 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
             ca_sha256: config?.agents.elasticsearch.ca_sha256,
             ca_trusted_fingerprint: config?.agents.elasticsearch.ca_trusted_fingerprint,
             is_preconfigured: true,
+            allow_edit: ['hosts', 'ca_sha256', 'ca_trusted_fingerprint'],
           } as PreconfiguredOutput,
         ]
       : []),
