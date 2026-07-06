@@ -57,7 +57,7 @@ apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body.id).toBeDefined();
     expect(response.body.data.title).toBe(MINIMAL_LINKS_BODY.title);
     expect(response.body.data.links).toHaveLength(1);
-    expect(response.body.data.links[0].type).toBe('externalLink');
+    expect(response.body.data.links[0].type).toBe('external_link');
     expect(response.body.meta.created_at).toBeDefined();
     expect(response.body.meta.updated_at).toBeDefined();
   });
@@ -77,7 +77,7 @@ apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
 
     expect(response).toHaveStatusCode(201);
     expect(response.body.id).toBeDefined();
-    expect(response.body.data.links[0].type).toBe('dashboardLink');
+    expect(response.body.data.links[0].type).toBe('dashboard_link');
   });
 
   apiTest(
