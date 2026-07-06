@@ -274,6 +274,86 @@ describe('create', () => {
       )
     ).rejects.toThrow('id is not valid');
   });
+
+  it('should undefault an existing preconfigured default host when creating a new default via API', async () => {
+    const esClientMock = elasticsearchServiceMock.createInternalClient();
+    const soClientMock = getMockedSoClient();
+    const esoClientMock = getMockedEncryptedSoClient();
+
+    (isSecretStorageEnabled as jest.Mock).mockResolvedValue(false);
+
+    // getDefaultFleetServerHost() uses soClient.find — return a preconfigured default.
+    soClientMock.find.mockImplementation(async ({ type }: any) => {
+      if (type === FLEET_SERVER_HOST_SAVED_OBJECT_TYPE) {
+        return {
+          saved_objects: [
+            {
+              id: 'preconfigured-default',
+              attributes: {
+                name: 'Preconfigured Default',
+                host_urls: [],
+                is_default: true,
+                is_preconfigured: true,
+              },
+            },
+          ],
+        } as any;
+      }
+      return { saved_objects: [] } as any;
+    });
+
+    // First call: this.get('preconfigured-default') inside the internal update().
+    // Second call: post-create re-fetch of the newly created host.
+    esoClientMock.getDecryptedAsInternalUser
+      .mockResolvedValueOnce({
+        id: 'preconfigured-default',
+        type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: {
+          name: 'Preconfigured Default',
+          host_urls: [],
+          is_default: true,
+          is_preconfigured: true,
+          allow_edit: [],
+        },
+      } as any)
+      .mockResolvedValueOnce({
+        id: 'new-host',
+        type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: {
+          name: 'New Default',
+          host_urls: ['https://fleet.example.com:8220'],
+          is_default: true,
+          is_preconfigured: false,
+        },
+      } as any);
+
+    soClientMock.update.mockResolvedValue({ id: 'preconfigured-default', attributes: {} } as any);
+
+    // Creating a host via the API (fromPreconfiguration is undefined) must not be rejected
+    // by the preconfiguration guard when unsetting is_default on the preconfigured host.
+    await expect(
+      fleetServerHostService.create(
+        soClientMock,
+        esClientMock,
+        {
+          name: 'New Default',
+          host_urls: ['https://fleet.example.com:8220'],
+          is_default: true,
+          is_preconfigured: false,
+        },
+        { id: 'new-host' }
+      )
+    ).resolves.toBeDefined();
+
+    // The preconfigured host was undefaulted even though it was not edited from preconfiguration.
+    expect(soClientMock.update).toHaveBeenCalledWith(
+      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      'preconfigured-default',
+      expect.objectContaining({ is_default: false })
+    );
+  });
 });
 
 describe('delete fleetServerHost', () => {
