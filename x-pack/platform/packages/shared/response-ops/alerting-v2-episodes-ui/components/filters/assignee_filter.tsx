@@ -17,7 +17,7 @@ import { useCurrentUserProfile } from '../../hooks/use_current_user_profile';
 import { InlineFilterPopover } from './inline_filter_popover';
 import * as i18n from './translations';
 
-const MAX_VISIBLE_OPTIONS = 10;
+const MAX_VISIBLE_OPTIONS = 20;
 
 interface AlertEpisodesAssigneeFilterProps {
   selectedAssigneeUid?: string;

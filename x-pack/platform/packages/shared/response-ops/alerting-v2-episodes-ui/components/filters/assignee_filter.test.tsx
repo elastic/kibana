@@ -160,7 +160,7 @@ describe('AlertEpisodesAssigneeFilter', () => {
     await openPopover();
 
     const { options } = InlineFilterPopoverSpy.mock.calls[0][0];
-    expect(options).toHaveLength(10);
+    expect(options).toHaveLength(11);
   });
 
   it('calls onAssigneeChange with uid when a value is selected', async () => {
