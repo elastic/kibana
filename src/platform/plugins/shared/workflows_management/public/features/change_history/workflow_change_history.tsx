@@ -21,6 +21,7 @@ import {
   useWorkflowChangeHistoryRestoreEligibility,
 } from './use_workflow_change_history';
 import { renderWorkflowChangeHistoryBadge } from './workflow_change_history_badge';
+import { renderWorkflowChangeHistoryChangesSummary } from './workflow_change_history_changes_summary';
 import { renderWorkflowChangeHistoryPreview } from './workflow_change_history_preview';
 import {
   WORKFLOW_CHANGE_HISTORY_DATASET,
@@ -62,6 +63,7 @@ export const WorkflowChangeHistoryProvider = ({
       objectId={workflowId}
       adapter={adapter}
       renderPreview={renderWorkflowChangeHistoryPreview}
+      renderChangesSummary={renderWorkflowChangeHistoryChangesSummary}
       renderBadge={renderWorkflowChangeHistoryBadge}
       labels={{
         previewBackLabel: BACK_TO_WORKFLOW,

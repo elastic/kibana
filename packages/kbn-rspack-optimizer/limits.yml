@@ -4,6 +4,7 @@ pageLoadAssetSize:
   agentBuilder: 289
   agentBuilderDashboards: 3074
   agentBuilderPlatform: 4152
+  agentBuilderVisualizations: 2000
   agentBuilderWorkflows: 13383
   agentContextLayer: 324
   aiAssistantManagementSelection: 355
@@ -36,6 +37,7 @@ pageLoadAssetSize:
   dashboard: 452
   dashboardMarkdown: 4405
   data: 11799
+  dataFederation: 1150
   dataQuality: 5836
   datasetQuality: 41081
   dataUsage: 4123
