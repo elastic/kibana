@@ -13,6 +13,8 @@ jest.mock('@kbn/esql-utils', () => ({
   getESQLTimeFieldFromQuery: jest.fn(),
 }));
 
+import type { HttpStart } from '@kbn/core/public';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { getServices } from '../services';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
@@ -20,9 +22,9 @@ import { useEditFlyoutState } from './use_edit_flyout_state';
 
 const mockHttp = {
   get: jest.fn(),
-} as any;
+} as unknown as jest.Mocked<Pick<HttpStart, 'get'>> & HttpStart;
 
-const mockSearch = {} as any;
+const mockSearch = {} as unknown as ISearchGeneric;
 
 beforeEach(() => {
   jest.clearAllMocks();

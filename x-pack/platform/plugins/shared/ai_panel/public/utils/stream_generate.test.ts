@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HttpStart } from '@kbn/core/public';
 import { streamNdjson } from './stream_generate';
 
 function makeReader(chunks: string[]): ReadableStreamDefaultReader<Uint8Array> {
@@ -19,12 +20,12 @@ function makeReader(chunks: string[]): ReadableStreamDefaultReader<Uint8Array> {
   } as unknown as ReadableStreamDefaultReader<Uint8Array>;
 }
 
-function makeHttp(reader: ReadableStreamDefaultReader<Uint8Array>) {
+function makeHttp(reader: ReadableStreamDefaultReader<Uint8Array>): HttpStart {
   return {
     post: jest.fn().mockResolvedValue({
       response: { body: { getReader: () => reader } },
     }),
-  } as any;
+  } as unknown as HttpStart;
 }
 
 describe('streamNdjson', () => {
@@ -85,7 +86,7 @@ describe('streamNdjson', () => {
   it('throws when there is no response body', async () => {
     const http = {
       post: jest.fn().mockResolvedValue({ response: { body: null } }),
-    } as any;
+    } as unknown as HttpStart;
     await expect(
       streamNdjson(http, '/test', {}, jest.fn(), new AbortController().signal)
     ).rejects.toThrow('No response body');

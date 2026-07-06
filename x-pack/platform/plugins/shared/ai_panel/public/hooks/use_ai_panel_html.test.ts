@@ -17,14 +17,16 @@ jest.mock('../services');
 jest.mock('../utils/fetch_esql_data');
 jest.mock('../utils/stream_generate');
 
+import type { HttpStart } from '@kbn/core/public';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { getServices } from '../services';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { streamGenerate } from '../utils/stream_generate';
 import { useAiPanelHtml } from './use_ai_panel_html';
 import { TEMPLATE_SENTINEL } from '../utils/template_fill';
 
-const mockHttp = {} as any;
-const mockSearch = {} as any;
+const mockHttp = {} as unknown as HttpStart;
+const mockSearch = {} as unknown as ISearchGeneric;
 
 beforeEach(() => {
   jest.clearAllMocks();
