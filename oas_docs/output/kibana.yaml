@@ -34378,6 +34378,7 @@ paths:
                     properties:
                       actionIds:
                         items:
+                          maxLength: 36
                           type: string
                         maxItems: 10000
                         type: array
