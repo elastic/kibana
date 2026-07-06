@@ -34,7 +34,7 @@ const callbackRetryOptions = {
  * Delivers a success callback for a completed execution when a callback URL is configured.
  * No-op otherwise.
  */
-export const makeSuccessCallbackIfConfigured = async ({
+export const makeSuccessCallbackRequestIfConfigured = async ({
   executionId,
   events,
   callbackUrl,
@@ -61,7 +61,7 @@ export const makeSuccessCallbackIfConfigured = async ({
  * Delivers a failure callback for a failed or aborted execution when a callback URL is
  * configured. No-op otherwise.
  */
-export const makeFailureCallbackIfConfigured = async ({
+export const makeFailureCallbackRequestIfConfigured = async ({
   executionId,
   conversationId,
   error,

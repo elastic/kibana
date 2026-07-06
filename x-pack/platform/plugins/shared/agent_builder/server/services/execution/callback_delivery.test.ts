@@ -18,8 +18,8 @@ import type { ChatCallbackSuccessPayload } from '../../../common/http_api/chat_c
 import { buildChatResponseFromEvents } from './utils/chat_response';
 import {
   makeCallbackRequest,
-  makeFailureCallbackIfConfigured,
-  makeSuccessCallbackIfConfigured,
+  makeFailureCallbackRequestIfConfigured,
+  makeSuccessCallbackRequestIfConfigured,
 } from './callback_delivery';
 
 describe('makeCallbackRequest', () => {
@@ -122,7 +122,7 @@ describe('makeCallbackRequest', () => {
 
 const callbackUrl = 'https://relay.example.com/events?token=abc';
 
-describe('makeSuccessCallbackIfConfigured', () => {
+describe('makeSuccessCallbackRequestIfConfigured', () => {
   const events: ChatEvent[] = [
     {
       type: ChatEventType.conversationUpdated,
@@ -162,7 +162,7 @@ describe('makeSuccessCallbackIfConfigured', () => {
   it('does not deliver when no callback is configured', async () => {
     const fetchMock = jest.spyOn(global, 'fetch');
 
-    await makeSuccessCallbackIfConfigured({
+    await makeSuccessCallbackRequestIfConfigured({
       callbackUrl: undefined,
       executionId: 'execution-1',
       events,
@@ -174,7 +174,7 @@ describe('makeSuccessCallbackIfConfigured', () => {
   it('delivers the completed response payload when configured', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
 
-    await makeSuccessCallbackIfConfigured({
+    await makeSuccessCallbackRequestIfConfigured({
       callbackUrl,
       executionId: 'execution-1',
       events,
@@ -190,7 +190,7 @@ describe('makeSuccessCallbackIfConfigured', () => {
   });
 });
 
-describe('makeFailureCallbackIfConfigured', () => {
+describe('makeFailureCallbackRequestIfConfigured', () => {
   const error: SerializedExecutionError = {
     code: AgentBuilderErrorCode.internalError,
     message: 'boom',
@@ -203,7 +203,7 @@ describe('makeFailureCallbackIfConfigured', () => {
   it('does not deliver when no callback is configured', async () => {
     const fetchMock = jest.spyOn(global, 'fetch');
 
-    await makeFailureCallbackIfConfigured({
+    await makeFailureCallbackRequestIfConfigured({
       callbackUrl: undefined,
       executionId: 'execution-1',
       error,
@@ -216,7 +216,7 @@ describe('makeFailureCallbackIfConfigured', () => {
   it('includes conversation_id when provided', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
 
-    await makeFailureCallbackIfConfigured({
+    await makeFailureCallbackRequestIfConfigured({
       callbackUrl,
       executionId: 'execution-1',
       conversationId: 'conversation-1',
@@ -236,7 +236,7 @@ describe('makeFailureCallbackIfConfigured', () => {
   it('omits conversation_id when not provided', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
 
-    await makeFailureCallbackIfConfigured({
+    await makeFailureCallbackRequestIfConfigured({
       callbackUrl,
       executionId: 'execution-1',
       error,

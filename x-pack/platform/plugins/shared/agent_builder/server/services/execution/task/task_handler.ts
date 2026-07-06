@@ -8,7 +8,11 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
-import { ExecutionStatus, isRequestAbortedError } from '@kbn/agent-builder-common';
+import {
+  ExecutionStatus,
+  isRequestAbortedError,
+  type SerializedExecutionError,
+} from '@kbn/agent-builder-common';
 import { createAgentExecutionClient, type AgentExecutionClient } from '../persistence';
 import {
   handleAgentExecution,
@@ -18,8 +22,8 @@ import {
 } from '../execution_runner';
 import { AbortMonitor } from './abort_monitor';
 import {
-  makeSuccessCallbackIfConfigured,
-  makeFailureCallbackIfConfigured,
+  makeSuccessCallbackRequestIfConfigured,
+  makeFailureCallbackRequestIfConfigured,
 } from '../callback_delivery';
 
 export interface TaskHandlerDeps extends AgentExecutionDeps {
@@ -37,6 +41,13 @@ export interface TaskHandler {
 export const createTaskHandler = (deps: TaskHandlerDeps): TaskHandler => {
   return new TaskHandlerImpl(deps);
 };
+
+type ExecutionDocument = NonNullable<Awaited<ReturnType<AgentExecutionClient['get']>>>;
+
+interface FailureOutcome {
+  serializedError: SerializedExecutionError;
+  terminalStatus: ExecutionStatus.failed | ExecutionStatus.aborted;
+}
 
 class TaskHandlerImpl implements TaskHandler {
   private readonly deps: TaskHandlerDeps;
@@ -96,7 +107,7 @@ class TaskHandlerImpl implements TaskHandler {
       });
 
       // 6. Deliver success callback if configured
-      await makeSuccessCallbackIfConfigured({
+      await makeSuccessCallbackRequestIfConfigured({
         callbackUrl: execution.metadata?.callback_url,
         executionId,
         events,
@@ -111,6 +122,9 @@ class TaskHandlerImpl implements TaskHandler {
     }
   }
 
+  /**
+   * Finalizes an execution after the runner throws, including callback delivery and status persistence.
+   */
   private async handleExecutionFailure({
     executionId,
     execution,
@@ -118,7 +132,7 @@ class TaskHandlerImpl implements TaskHandler {
     error,
   }: {
     executionId: string;
-    execution: NonNullable<Awaited<ReturnType<AgentExecutionClient['get']>>>;
+    execution: ExecutionDocument;
     executionClient: AgentExecutionClient;
     error: unknown;
   }): Promise<void> {
@@ -126,36 +140,95 @@ class TaskHandlerImpl implements TaskHandler {
     this.logger.error(`Execution ${executionId} failed: ${message}`);
 
     try {
-      let serializedError = serializeExecutionError(error);
-      let terminalStatus = isRequestAbortedError(error)
-        ? ExecutionStatus.aborted
-        : ExecutionStatus.failed;
-      const conversationId =
-        execution.executionMode === 'conversation'
-          ? execution.agentParams.conversationId
-          : undefined;
-      try {
-        await makeFailureCallbackIfConfigured({
-          callbackUrl: execution.metadata?.callback_url,
-          executionId,
-          conversationId,
-          error: serializedError,
-          status: terminalStatus,
-        });
-      } catch (callbackError) {
-        serializedError = serializeExecutionError(callbackError);
-        terminalStatus = ExecutionStatus.failed;
-      }
-      if (terminalStatus === ExecutionStatus.aborted) {
-        await executionClient.updateStatus(executionId, ExecutionStatus.aborted);
-      } else {
-        await executionClient.updateStatus(executionId, ExecutionStatus.failed, serializedError);
-      }
+      const initialFailureOutcome = this.getFailureOutcome(error);
+      const finalFailureOutcome = await this.deliverFailureCallbackRequest({
+        executionId,
+        execution,
+        initialFailureOutcome,
+      });
+
+      await this.updateTerminalStatus({
+        executionId,
+        executionClient,
+        finalFailureOutcome,
+      });
     } catch (statusError) {
       this.logger.error(
         `Failed to update status for execution ${executionId}: ${statusError.message}`
       );
     }
+  }
+
+  /**
+   * Converts the thrown error into the terminal status and persisted error shape.
+   */
+  private getFailureOutcome(error: unknown): FailureOutcome {
+    return {
+      serializedError: serializeExecutionError(error),
+      terminalStatus: isRequestAbortedError(error)
+        ? ExecutionStatus.aborted
+        : ExecutionStatus.failed,
+    };
+  }
+
+  /**
+   * Sends the failure callback request, and treats callback delivery failures as execution failures.
+   */
+  private async deliverFailureCallbackRequest({
+    executionId,
+    execution,
+    initialFailureOutcome,
+  }: {
+    executionId: string;
+    execution: ExecutionDocument;
+    initialFailureOutcome: FailureOutcome;
+  }): Promise<FailureOutcome> {
+    try {
+      const conversationId =
+        execution.executionMode === 'conversation'
+          ? execution.agentParams.conversationId
+          : undefined;
+
+      await makeFailureCallbackRequestIfConfigured({
+        callbackUrl: execution.metadata?.callback_url,
+        executionId,
+        // Only conversation executions have a conversation id to report back.
+        conversationId,
+        error: initialFailureOutcome.serializedError,
+        status: initialFailureOutcome.terminalStatus,
+      });
+
+      return initialFailureOutcome;
+    } catch (callbackError) {
+      return {
+        serializedError: serializeExecutionError(callbackError),
+        terminalStatus: ExecutionStatus.failed,
+      };
+    }
+  }
+
+  /**
+   * Persists the terminal execution state, storing error details only for failed executions.
+   */
+  private async updateTerminalStatus({
+    executionId,
+    executionClient,
+    finalFailureOutcome,
+  }: {
+    executionId: string;
+    executionClient: AgentExecutionClient;
+    finalFailureOutcome: FailureOutcome;
+  }): Promise<void> {
+    if (finalFailureOutcome.terminalStatus === ExecutionStatus.aborted) {
+      await executionClient.updateStatus(executionId, ExecutionStatus.aborted);
+      return;
+    }
+
+    await executionClient.updateStatus(
+      executionId,
+      ExecutionStatus.failed,
+      finalFailureOutcome.serializedError
+    );
   }
 
   async cancel({ executionId }: { executionId: string }): Promise<void> {
