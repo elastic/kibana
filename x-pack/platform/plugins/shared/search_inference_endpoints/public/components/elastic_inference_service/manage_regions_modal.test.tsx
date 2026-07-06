@@ -16,6 +16,7 @@ import { useEisModels } from '../../hooks/use_eis_models';
 import * as eisUtils from '../../utils/eis_utils';
 
 jest.mock('../../hooks/use_region_policy');
+jest.mock('../../hooks/use_save_region_policy');
 jest.mock('../../hooks/use_eis_models');
 jest.mock('../../utils/eis_utils', () => ({
   ...jest.requireActual('../../utils/eis_utils'),
