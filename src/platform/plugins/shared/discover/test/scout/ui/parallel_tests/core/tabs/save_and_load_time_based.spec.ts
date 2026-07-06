@@ -16,8 +16,8 @@
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../fixtures/common';
-import { createDataViewFromSearchBar, waitForTabStateToPersist } from '../../fixtures/tabs/helpers';
+import { spaceTest, testData } from '../../../fixtures/common';
+import { createDataViewFromSearchBar, waitForTabStateToPersist } from '../../../fixtures/tabs/helpers';
 
 const AD_HOC_WITH_TIME_RANGE = 'log';
 const AD_HOC_WITHOUT_TIME_RANGE = 'logs';

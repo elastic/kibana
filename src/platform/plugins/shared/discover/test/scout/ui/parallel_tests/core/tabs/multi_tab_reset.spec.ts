@@ -13,12 +13,12 @@
 
 import type { ScoutTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../fixtures/common';
+import { spaceTest } from '../../../fixtures/common';
 import {
   createDataViewFromSearchBar,
   selectDataViewMode,
   waitForTabStateToPersist,
-} from '../../fixtures/tabs/helpers';
+} from '../../../fixtures/tabs/helpers';
 
 spaceTest.describe(
   'tabs - multi-tab Discover session reset behavior',

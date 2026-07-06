@@ -15,7 +15,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../fixtures/common';
+import { spaceTest } from '../../../fixtures/common';
 
 const LEGACY_SESSION_NAME = 'A Saved Search';
 const UPDATED_SESSION_NAME = 'Updated legacy session';

@@ -15,7 +15,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../fixtures/common';
+import { spaceTest } from '../../../fixtures/common';
 import {
   createDataViewFromSearchBar,
   changeVisShape,
@@ -23,13 +23,13 @@ import {
   addFieldColumn,
   getSelectedSidebarFields,
   waitForTabStateToPersist,
-} from '../../fixtures/tabs/helpers';
+} from '../../../fixtures/tabs/helpers';
 import {
   AD_HOC_TAB,
   ESQL_TAB,
   PERSISTED_TAB,
-} from '../../fixtures/tabs/discover_session_test_data';
-import { createMultiTabDiscoverSession } from '../../fixtures/tabs/discover_session_setup';
+} from '../../../fixtures/tabs/discover_session_test_data';
+import { createMultiTabDiscoverSession } from '../../../fixtures/tabs/discover_session_setup';
 
 const SAVED_SESSION_NAME = 'Saved multi-tab Discover session';
 const LOADED_SESSION_NAME = 'Loaded multi-tab Discover session';
