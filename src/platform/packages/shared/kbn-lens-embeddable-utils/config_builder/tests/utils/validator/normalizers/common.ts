@@ -604,15 +604,38 @@ export const getCommonNormalizer = <T extends LensAttributes>(
 });
 
 /**
+ * A named (non-`custom`) palette renders from `palette id + continuity + steps` alone. The stored
+ * stop positions, `colorStops`, and numeric bounds (`rangeMin`/`rangeMax`) are throwaway snapshots
+ * that the transform does not reproduce (it emits empty `stops` and lets the palette service
+ * resupply colors at render time). Drop those.
+ *
+ * `rangeType` is deliberately NOT dropped: it is deterministic per chart (`percent` everywhere
+ * except `legacy_metric` and single-value `metric`, which reconstruct as `number` via
+ * `useNumericRange`). Keeping it in the comparison enforces that each chart passes the correct
+ * `useNumericRange`; the `original` side defaults a missing `rangeType` to `'percent'` so legacy
+ * SOs that omit it still line up.
+ */
+function clearUnusedNamedPaletteParams(palette: PaletteOutput<CustomPaletteParams>) {
+  if (!palette.params) return;
+  delete palette.params.stops;
+  delete palette.params.colorStops;
+  delete palette.params.rangeMin;
+  delete palette.params.rangeMax;
+}
+
+/**
  * Normalized the palette params provided a string path to the palette(s) in the attributes
  *
  * This need to address:
- * - account for bad last color stop including shifting palettes :(
- * - defaulting missing rangeType
- * - defaulting missing continuity
+ * - named palettes: `palette id`, `continuity`, and `rangeType` are compared strictly (see
+ *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped.
+ * - custom palettes: account for the last color stop always becoming `rangeMax`, re-derive
+ *   `colorStops` from the normalized `stops`, and default the missing `rangeType`/`continuity`/bounds
+ *   the transform always derives.
  */
 export function getPaletteNormalizer<T extends LensAttributes>(
-  palettePath: string
+  palettePath: string,
+  isSingleValuePalette?: (attributes: T) => boolean
 ): NormalizerConfig<T> {
   return {
     original: (attributes: T) => {
@@ -621,62 +644,56 @@ export function getPaletteNormalizer<T extends LensAttributes>(
         palettePath
       ).filter(Boolean);
 
+      const useNumericRange =
+        typeof isSingleValuePalette === 'function' ? isSingleValuePalette(attributes) : false;
+
       palettes.forEach((palette) => {
-        const rangeMin = getRangeValue(palette.params?.rangeMin);
-        const rangeMax = getRangeValue(palette.params?.rangeMax);
+        if (!palette.params) return;
 
-        if (palette.params) {
-          // The SO→API transform always uses rangeMax as the last step's upper bound (lte),
-          // replacing the original stop value. The API→SO step then reconstructs the stop from lte,
-          // so the last stop always becomes rangeMax after the round-trip.
-          if (palette.params.stops) {
-            const isLegacy = palette.name !== 'custom';
-            const needsPaletteShift =
-              isLegacy &&
-              ((rangeMin !== null && rangeMin === palette.params.stops.at(0)?.stop) ||
-                (rangeMax !== null && rangeMax !== palette.params.stops.at(-1)?.stop));
-            const lastStop = palette.params.stops.at(-1);
-            if (lastStop && !needsPaletteShift) lastStop.stop = rangeMax as unknown as number; // can be null
-          }
+        const rangeMin = getRangeValue(palette.params.rangeMin);
+        const rangeMax = getRangeValue(palette.params.rangeMax);
 
-          if (!palette.params?.rangeType) {
-            palette.params.rangeType = 'percent';
-          }
-
-          if (!palette.params?.continuity) {
+        if (palette.name !== 'custom') {
+          // Continuity is the source of truth for a named palette and is preserved by the
+          // round-trip; default it (and the palette name) for legacy SOs that omit it.
+          if (!palette.params.continuity) {
             palette.params.continuity = getContinuity(rangeMin, rangeMax);
           }
-
-          if (palette.name !== 'custom') {
-            delete palette.params.colorStops;
-          }
-
-          // Legacy SOs may omit params.name, but the transform always sets it from the root name
           if (palette.params.name === undefined && palette.name) {
             palette.params.name = palette.name;
           }
-
-          // Legacy SOs may omit rangeMin/rangeMax, but the transform always derives them (can be null)
-          if (!('rangeMin' in palette.params)) {
-            palette.params.rangeMin = null as unknown as number;
-          }
-          if (!('rangeMax' in palette.params)) {
-            palette.params.rangeMax = null as unknown as number;
-          }
+          palette.params.rangeType = useNumericRange ? 'number' : 'percent';
+          clearUnusedNamedPaletteParams(palette);
+          return;
         }
-      });
 
-      return attributes;
-    },
-    transformed: (attributes: T) => {
-      const palettes = getValues<PaletteOutput<CustomPaletteParams>>(
-        attributes,
-        palettePath
-      ).filter(Boolean);
+        // The SO→API transform always uses rangeMax as the last step's upper bound (lte),
+        // replacing the original stop value. The API→SO step then reconstructs the stop from lte,
+        // so the last stop always becomes rangeMax after the round-trip.
+        if (palette.params.stops) {
+          const lastStop = palette.params.stops.at(-1);
+          if (lastStop) lastStop.stop = rangeMax as unknown as number; // can be null
+        }
 
-      palettes.forEach((palette) => {
-        if (palette.name !== 'custom') {
-          delete palette.params?.colorStops;
+        if (!palette.params.rangeType) {
+          palette.params.rangeType = 'percent';
+        }
+
+        if (!palette.params.continuity) {
+          palette.params.continuity = getContinuity(rangeMin, rangeMax);
+        }
+
+        // Legacy SOs may omit params.name, but the transform always sets it from the root name
+        if (palette.params.name === undefined && palette.name) {
+          palette.params.name = palette.name;
+        }
+
+        // Legacy SOs may omit rangeMin/rangeMax, but the transform always derives them (can be null)
+        if (!('rangeMin' in palette.params)) {
+          palette.params.rangeMin = null as unknown as number;
+        }
+        if (!('rangeMax' in palette.params)) {
+          palette.params.rangeMax = null as unknown as number;
         }
       });
 
