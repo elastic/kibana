@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/connector-specs'
   - '@kbn/workflows-extensions'
   - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/alerts-ui-shared'
 tags:
   - shared-browser
   - package

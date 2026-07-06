@@ -36,8 +36,8 @@ type LibraryTemplateDetailPageProps = RouteComponentProps<{ slug: string }>;
 /**
  * Workflow Template Library template detail page (`/app/workflows/library/:slug`).
  * Fills the available height like the workflow editor so the read-only preview
- * grows with the viewport. The route is only registered when the library is
- * enabled (see `routes.tsx`).
+ * grows with the viewport. The route is always registered (see `routes.tsx`);
+ * this page redirects to the workflows list when the library is disabled.
  */
 export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPageProps>(({ match }) => {
   const slug = match.params.slug;

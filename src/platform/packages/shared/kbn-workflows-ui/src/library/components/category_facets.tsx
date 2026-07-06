@@ -14,7 +14,10 @@ import type { Template } from '@kbn/workflows-library';
 import { humanizeCategoryId } from '../lib/humanize_category_id';
 
 export interface CategoryFacetsProps {
-  /** The full, unfiltered-by-category catalog — used to compute facet counts. */
+  /**
+   * The catalog scoped by every filter except category (search, solution) — used
+   * to compute facet counts so a category's own selection doesn't collapse its count.
+   */
   templates: Template[];
   selectedCategories: string[];
   onChange: (categories: string[]) => void;

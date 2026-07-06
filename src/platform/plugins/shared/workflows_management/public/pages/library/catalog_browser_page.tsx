@@ -30,7 +30,8 @@ const experimentalBadgeLabel = i18n.translate('workflowsManagement.libraryPage.e
  * Workflow Template Library catalog page (`/app/workflows/library`). The
  * browse UI itself lives in `@kbn/workflows-ui` (`<CatalogBrowser>`) so it can
  * be reused from other plugins later; this page only wires navigation. The
- * route is only registered when the library is enabled (see `routes.tsx`).
+ * route is always registered (see `routes.tsx`); this page redirects to the
+ * workflows list when the library is disabled.
  */
 export const LibraryCatalogBrowserPage = React.memo(() => {
   const { application } = useKibana().services;
