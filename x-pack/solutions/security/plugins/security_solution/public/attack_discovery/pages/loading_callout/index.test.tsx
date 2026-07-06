@@ -50,6 +50,13 @@ describe('LoadingCallout', () => {
     // Mock useKibana with featureFlags
     mockUseKibana.mockReturnValue({
       services: {
+        application: {
+          capabilities: {
+            workflowsManagement: {
+              readWorkflow: true,
+            },
+          },
+        },
         featureFlags: {
           getBooleanValue: jest.fn().mockResolvedValue(false),
         },
@@ -125,6 +132,13 @@ describe('LoadingCallout', () => {
   it('renders the Details button when workflowRunId and workflowId are provided and feature flag is enabled', async () => {
     mockUseKibana.mockReturnValue({
       services: {
+        application: {
+          capabilities: {
+            workflowsManagement: {
+              readWorkflow: true,
+            },
+          },
+        },
         featureFlags: {
           getBooleanValue: jest.fn().mockResolvedValue(true),
         },
@@ -184,6 +198,13 @@ describe('LoadingCallout', () => {
   it('opens the flyout when the Details button is clicked', async () => {
     mockUseKibana.mockReturnValue({
       services: {
+        application: {
+          capabilities: {
+            workflowsManagement: {
+              readWorkflow: true,
+            },
+          },
+        },
         featureFlags: {
           getBooleanValue: jest.fn().mockResolvedValue(true),
         },
@@ -251,6 +272,13 @@ describe('LoadingCallout', () => {
     it('does not render the Details button when hideActions is true even when feature flag is enabled', async () => {
       mockUseKibana.mockReturnValue({
         services: {
+          application: {
+            capabilities: {
+              workflowsManagement: {
+                readWorkflow: true,
+              },
+            },
+          },
           featureFlags: {
             getBooleanValue: jest.fn().mockResolvedValue(true),
           },
@@ -284,6 +312,13 @@ describe('LoadingCallout', () => {
     it('does not render the Details button when feature flag is disabled', async () => {
       mockUseKibana.mockReturnValue({
         services: {
+          application: {
+            capabilities: {
+              workflowsManagement: {
+                readWorkflow: true,
+              },
+            },
+          },
           featureFlags: {
             getBooleanValue: jest.fn().mockResolvedValue(false),
           },
@@ -307,6 +342,13 @@ describe('LoadingCallout', () => {
     it('does not allow navigating to the workflow execution details flyout when the feature flag is disabled', async () => {
       mockUseKibana.mockReturnValue({
         services: {
+          application: {
+            capabilities: {
+              workflowsManagement: {
+                readWorkflow: true,
+              },
+            },
+          },
           featureFlags: {
             getBooleanValue: jest.fn().mockResolvedValue(false),
           },
@@ -336,6 +378,13 @@ describe('LoadingCallout', () => {
     it('renders the Details button when feature flag is enabled and workflow IDs are present', async () => {
       mockUseKibana.mockReturnValue({
         services: {
+          application: {
+            capabilities: {
+              workflowsManagement: {
+                readWorkflow: true,
+              },
+            },
+          },
           featureFlags: {
             getBooleanValue: jest.fn().mockResolvedValue(true),
           },
@@ -358,6 +407,13 @@ describe('LoadingCallout', () => {
     it('does not render the Details button when feature flag is enabled but workflow IDs are missing', async () => {
       mockUseKibana.mockReturnValue({
         services: {
+          application: {
+            capabilities: {
+              workflowsManagement: {
+                readWorkflow: true,
+              },
+            },
+          },
           featureFlags: {
             getBooleanValue: jest.fn().mockResolvedValue(true),
           },
@@ -376,6 +432,37 @@ describe('LoadingCallout', () => {
         expect(detailsButton).not.toBeInTheDocument();
       });
     });
+
+    it('does not render the Details button when the workflows read privilege is missing', async () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              workflowsManagement: {
+                readWorkflow: false,
+              },
+            },
+          },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(true),
+          },
+          http: {},
+          telemetry: { reportEvent: jest.fn() },
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+
+      render(
+        <TestProviders>
+          <LoadingCallout {...defaultProps} workflowId="workflow-123" workflowRunId="run-456" />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(mockUseKibana().services.featureFlags.getBooleanValue).toHaveBeenCalled();
+      });
+
+      expect(screen.queryByTestId('detailsButton')).not.toBeInTheDocument();
+    });
   });
 
   describe('prop forwarding to WorkflowExecutionDetailsFlyout', () => {
@@ -390,6 +477,13 @@ describe('LoadingCallout', () => {
     const openFlyout = async () => {
       mockUseKibana.mockReturnValue({
         services: {
+          application: {
+            capabilities: {
+              workflowsManagement: {
+                readWorkflow: true,
+              },
+            },
+          },
           featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
           http: {},
           telemetry: { reportEvent: jest.fn() },

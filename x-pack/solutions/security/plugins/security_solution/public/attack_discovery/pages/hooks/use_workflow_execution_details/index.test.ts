@@ -437,6 +437,45 @@ describe('useWorkflowExecutionDetails', () => {
 
       expect(queryOptions?.refetchInterval).toBe(false);
     });
+
+    it('resumes polling when the execution key changes after polling was stopped', () => {
+      const mockError = {
+        body: { message: 'Test error' },
+      };
+
+      let onErrorCallback: ((error: unknown) => void) | undefined;
+      let queryOptions: { refetchInterval: number | boolean } | undefined;
+      mockUseQuery.mockImplementation((key, fn, options) => {
+        onErrorCallback = options.onError;
+        queryOptions = options;
+        return {
+          data: undefined,
+          error: undefined,
+          isLoading: false,
+        };
+      });
+
+      const { rerender } = renderHook(
+        ({ executionUuid }: { executionUuid: string }) =>
+          useWorkflowExecutionDetails({
+            executionUuid,
+            http: mockHttp,
+            workflowRunId: 'run-123',
+          }),
+        { initialProps: { executionUuid: 'execution-1' } }
+      );
+
+      act(() => {
+        onErrorCallback?.(mockError);
+      });
+      rerender({ executionUuid: 'execution-1' });
+
+      expect(queryOptions?.refetchInterval).toBe(false);
+
+      rerender({ executionUuid: 'execution-2' });
+
+      expect(queryOptions?.refetchInterval).toBe(1000);
+    });
   });
 
   describe('queryFn', () => {

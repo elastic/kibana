@@ -28,6 +28,7 @@ import type { SourceMetadata } from './workflow_execution_details_flyout/diagnos
 import * as i18n from './translations';
 import { getIsTerminalState } from './get_is_terminal_state';
 import { useDismissAttackDiscoveryGeneration } from '../use_dismiss_attack_discovery_generations';
+import { useHasWorkflowsPrivileges } from '../hooks/use_has_workflows_privileges';
 import { useKibana } from '../../../common/lib/kibana';
 import { AttackDiscoveryEventTypes } from '../../../common/lib/telemetry';
 
@@ -107,6 +108,8 @@ const LoadingCalloutComponent: React.FC<Props> = ({
   const { featureFlags, http, telemetry } = useKibana().services;
 
   const [isWorkflowsEnabled, setIsWorkflowsEnabled] = useState<boolean>(false);
+
+  const { hasWorkflowsRead } = useHasWorkflowsPrivileges();
 
   // Load feature flag value
   useEffect(() => {
@@ -249,8 +252,8 @@ const LoadingCalloutComponent: React.FC<Props> = ({
   }, []);
 
   const showDetailsButton = useMemo(
-    () => !hideActions && isWorkflowsEnabled && workflowId != null,
-    [hideActions, isWorkflowsEnabled, workflowId]
+    () => !hideActions && isWorkflowsEnabled && hasWorkflowsRead && workflowId != null,
+    [hasWorkflowsRead, hideActions, isWorkflowsEnabled, workflowId]
   );
 
   return (

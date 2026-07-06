@@ -129,7 +129,6 @@ const HistoryComponent: React.FC<Props> = ({
     isAssistantEnabled: assistantAvailability.isAssistantEnabled,
     page,
     perPage,
-    scheduled: false, // scheduled discoveries are only visible via the schedule's execution logs
     search: query?.trim(),
     shared,
     start: historyStart,
@@ -143,7 +142,6 @@ const HistoryComponent: React.FC<Props> = ({
   } = useGetAttackDiscoveryGenerations({
     http,
     isAssistantEnabled: assistantAvailability.isAssistantEnabled,
-    scheduled: false, // exclude scheduled discoveries; they are shown in schedule execution logs
     size: GET_ATTACK_DISCOVERY_GENERATIONS_SIZE,
   });
 

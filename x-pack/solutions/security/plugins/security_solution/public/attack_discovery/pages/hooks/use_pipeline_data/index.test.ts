@@ -245,6 +245,38 @@ describe('usePipelineData', () => {
     });
   });
 
+  describe('caching by workflowId', () => {
+    it('fetches again when workflowId changes for the same execution_id', async () => {
+      const secondResponse: PipelineDataResponse = {
+        ...mockPipelineDataResponse,
+        generation: {
+          ...mockPipelineDataResponse.generation!,
+          execution_uuid: 'other-workflow-exec-uuid',
+        },
+      };
+
+      (mockHttp.fetch as jest.Mock)
+        .mockResolvedValueOnce(mockPipelineDataResponse)
+        .mockResolvedValueOnce(secondResponse);
+
+      const { result, rerender } = renderHook(
+        (props: { workflowId: string }) =>
+          usePipelineData({ ...defaultProps, workflowId: props.workflowId }),
+        { wrapper, initialProps: { workflowId: 'workflow-456' } }
+      );
+
+      await waitFor(() => {
+        expect(result.current.data).toEqual(mockPipelineDataResponse);
+      });
+
+      rerender({ workflowId: 'workflow-789' });
+
+      await waitFor(() => {
+        expect(mockHttp.fetch).toHaveBeenCalledTimes(2);
+      });
+    });
+  });
+
   describe('refetch', () => {
     it('exposes a refetch function in the return value', async () => {
       (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockPipelineDataResponse);

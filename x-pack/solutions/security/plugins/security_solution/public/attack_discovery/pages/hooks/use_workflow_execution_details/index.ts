@@ -99,6 +99,15 @@ export const useWorkflowExecutionDetails = ({
     [workflowExecutionTargets]
   );
 
+  // Resume polling whenever the query key changes (e.g. the flyout switches to a
+  // different execution). Without this, `shouldPoll` stays `false` after a prior
+  // execution reached a terminal state or errored, so the newly-selected
+  // execution would never poll for real-time updates.
+  const pollResetKey = `${executionUuid ?? ''}|${workflowExecutionRunIds.join(',')}`;
+  useEffect(() => {
+    setShouldPoll(true);
+  }, [pollResetKey]);
+
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
     abortController.current = new AbortController();

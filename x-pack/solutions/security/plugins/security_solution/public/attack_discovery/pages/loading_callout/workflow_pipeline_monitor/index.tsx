@@ -48,6 +48,15 @@ import { PulsingTitle } from './pulsing_title';
 import { StepContent } from './step_content';
 import * as i18n from './translations';
 
+/**
+ * Intentional stub: the "Open in editor" affordance links out to the Workflows
+ * editor execution view. The link (`editorUrl`) is fully wired up, but the button
+ * is deliberately hidden until the Workflows editor experience is ready to be
+ * surfaced from Attack Discovery. This is kept (not deleted) so the wiring is
+ * preserved; flip to `true` to enable the affordance.
+ */
+const SHOW_OPEN_IN_EDITOR = false;
+
 interface WorkflowPipelineMonitorProps {
   onViewData?: (step: string, metadata?: WorkflowInspectMetadata) => void;
   pipelineData?: PipelineDataResponse;
@@ -486,7 +495,7 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
           steps={steps}
         />
       )}
-      {false && editorUrl && (
+      {SHOW_OPEN_IN_EDITOR && editorUrl && (
         <EuiButton
           data-test-subj="openInEditorButton"
           href={editorUrl ?? undefined}
