@@ -26201,7 +26201,7 @@ jsonc-parser@^3.0.0:
   resolved "https://registry.yarnpkg.com/jsonc-parser/-/jsonc-parser-3.2.0.tgz#31ff3f4c2b9793f89c67212627c51c6394f88e76"
   integrity sha512-gfFQZrcTc8CnKXp6Y4/CBT3fTc0OVuDofpre4aEeEpSBPV5X5v4+Vmx+8snU7RLPrNHPKSgLxGo9YuQzz20o+w==
 
-jsondiffpatch@^0.7.6:
+jsondiffpatch@0.7.6:
   version "0.7.6"
   resolved "https://registry.yarnpkg.com/jsondiffpatch/-/jsondiffpatch-0.7.6.tgz#5b71221911ef1bc2725a42da66a4aea83ec7220a"
   integrity sha512-zE9+AXFq+MkTolDor2Cw1nJzLC0aleqPkYf52Kb4Kn4mJcka/gFHpGI2JBVEJCfWOvBl0OoxZS+wuLdislQcqg==
@@ -28473,7 +28473,7 @@ mutation-observer@1.0.3:
   resolved "https://registry.yarnpkg.com/mutation-observer/-/mutation-observer-1.0.3.tgz#42e9222b101bca82e5ba9d5a7acf4a14c0f263d0"
   integrity sha512-M/O/4rF2h776hV7qGMZUH3utZLO/jK7p8rnNgGkjKUw8zCGjRQPxB8z6+5l8+VjRUQ3dNYu4vjqXYLr+U8ZVNA==
 
-mutative@^1.3.0:
+mutative@1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/mutative/-/mutative-1.3.0.tgz#9cb4f216813267487fadfae794881ed6ee69f444"
   integrity sha512-8MJj6URmOZAV70dpFe1YnSppRTKC4DsMkXQiBDFayLcDI4ljGokHxmpqaBQuDWa4iAxWaJJ1PS8vAmbntjjKmQ==
@@ -34904,7 +34904,7 @@ trace@3.2.0:
   dependencies:
     stack-chain "^2.0.0"
 
-travels@^1.3.1:
+travels@1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/travels/-/travels-1.3.1.tgz#b379278316ce2f0583c7ad30d421d334b10dfd85"
   integrity sha512-l71Cw0HqoCW9isx1a3pBya8h2jWu2DuzEb9za2xdt0wWAkxzepwj/WSwBrGYgwGJksMcU/V3JB0TY4FmZul9bg==

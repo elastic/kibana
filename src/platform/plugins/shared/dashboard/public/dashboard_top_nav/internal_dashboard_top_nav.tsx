@@ -393,22 +393,33 @@ export function InternalDashboardTopNav({
     };
   }, [badges]);
 
+  const [undoDisabled, setUndoDisabled] = useState<boolean>(false);
+  const [redoDisabled, setRedoDisabled] = useState<boolean>(false);
+  useEffect(() => {
+    dashboardInternalApi.disabledActions$.subscribe(({ undo, redo }) => {
+      setUndoDisabled(undo);
+      setRedoDisabled(redo);
+    });
+  }, [dashboardInternalApi.disabledActions$]);
+
   const historyConfig = useMemo(() => {
     return {
       undo: {
+        disabled: undoDisabled,
         onClick: () => {
           console.log('UNDO');
           dashboardInternalApi.undo();
         },
       },
       redo: {
+        disabled: redoDisabled,
         onClick: () => {
           console.log('REDO');
           dashboardInternalApi.redo();
         },
       },
     };
-  }, []);
+  }, [undoDisabled, redoDisabled, dashboardInternalApi]);
 
   useEffect(() => {
     return coreServices.chrome.setBreadcrumbsAppendExtension({

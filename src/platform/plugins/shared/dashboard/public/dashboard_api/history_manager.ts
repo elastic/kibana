@@ -28,18 +28,21 @@ export function initializeHistoryManager({
   cleanup: () => void;
 } {
   const dashboardState$ = new BehaviorSubject<DashboardState>(lastSavedState);
-
   const { api: historyApi, cleanup: cleanupHistoryTracking } = startTrackingHistory<DashboardState>(
     {
       state$: dashboardState$,
       maxSize: 10,
     }
   );
+
+  // when state changes, update full dashboard state so that we can store it in the history
+  const onAnyStateChangeSubscription = anyStateChange$.pipe(debounceTime(0)).subscribe(() => {
+    dashboardState$.next(getState());
+  });
+
+  // when the history's current state updates, respond by setting state on the Dashboard
   const historyStateSubscription = historyApi.currentState$.subscribe((newState) => {
     setState(newState);
-  });
-  const onAnyStateChangeSubscription = anyStateChange$.pipe(debounceTime(0)).subscribe(() => {
-    if (historyApi.isAtEnd()) dashboardState$.next(getState());
   });
 
   return {

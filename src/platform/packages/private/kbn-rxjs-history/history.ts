@@ -18,20 +18,22 @@ export function startTrackingHistory<T extends object = {}>({
   state$: BehaviorSubject<T>;
   maxSize: number;
 }) {
-  let pointer = 0;
   let history: jsondiffpatch.Delta[] = [];
+  const pointer$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   const currentState$: BehaviorSubject<T> = new BehaviorSubject<T>(state$.getValue());
-  const availableActions$: BehaviorSubject<{ undo: boolean; redo: boolean }> = new BehaviorSubject({
-    undo: false as boolean,
-    redo: false as boolean,
+  const disabledActions$: BehaviorSubject<{ undo: boolean; redo: boolean }> = new BehaviorSubject({
+    undo: true as boolean,
+    redo: true as boolean,
   });
 
   const stateSubscription = state$
     .pipe(distinctUntilChanged(deepEqual), pairwise())
     .subscribe(([previous, current]) => {
-      console.log('STATE CHANGED', { pointer, history });
-      if (pointer !== history.length) {
-        history = history.slice(0, pointer);
+      const pointer = pointer$.getValue();
+      console.log({ pointerBefore: pointer });
+      if (pointer > 0 && pointer < history.length) {
+        console.log('do not update state');
+        // history = history.slice(0, pointer);
         return;
       }
 
@@ -39,37 +41,56 @@ export function startTrackingHistory<T extends object = {}>({
       history.push(diff);
       if (history.length > maxSize) {
         history.shift(); // drop the bottom of the patch queue
-      } else {
-        pointer += 1;
+      } else if (history.length > 1) {
+        pointer$.next(Math.max(pointer + 1, history.length));
       }
+      // if (history.length > maxSize) {
+      //   history.shift(); // drop the bottom of the patch queue
+      // } else if (history.length > 1) {
+      //   pointer$.next(Math.max(pointer + 1, history.length));
+      // }
+      pointer$.next(history.length);
+
+      console.log('STATE CHANGED', { pointerAfter: pointer$.getValue(), history });
     });
+
+  const disabledActionsSubscription = pointer$.subscribe((pointer) => {
+    console.log('disabled actions subscription', pointer, history);
+    disabledActions$.next({
+      undo: pointer === 1,
+      redo: pointer === history.length,
+    });
+  });
 
   return {
     api: {
       currentState$,
-      availableActions$,
+      disabledActions$,
       undo: () => {
-        console.log('UNDO', { pointer, history });
-        if (pointer > 0) {
-          pointer -= 1;
-          const reversedPatch = jsondiffpatch.reverse(history[pointer]);
-          console.log({ currentState: state$.getValue(), reversedPatch });
+        const pointer = pointer$.getValue();
+        if (pointer > 1) {
+          const newPointer = pointer - 1;
+          const reversedPatch = jsondiffpatch.reverse(history[newPointer]);
           currentState$.next(jsondiffpatch.patch(state$.getValue(), reversedPatch) as T);
+          pointer$.next(newPointer);
+          console.log('UNDO - after', { pointer: pointer$.getValue() });
         }
-        console.log('AFTER UNDO', { pointer, history });
       },
       redo: () => {
+        const pointer = pointer$.getValue();
+        console.log('REDO', { pointer, history });
         if (pointer < history.length) {
-          pointer += 1;
-          const patch = history[pointer];
+          const newPointer = pointer;
+          const patch = history[newPointer];
           currentState$.next(jsondiffpatch.patch(state$.getValue(), patch) as T);
+          pointer$.next(newPointer + 1);
+          console.log('REDO - after', { pointer: pointer$.getValue() });
         }
-        console.log({ pointer, history });
       },
-      isAtEnd: () => pointer === history.length,
     },
     cleanup: () => {
       stateSubscription.unsubscribe();
+      disabledActionsSubscription.unsubscribe();
     },
   };
 }
