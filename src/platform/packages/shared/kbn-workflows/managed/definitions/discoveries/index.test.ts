@@ -10,12 +10,23 @@
 import { parse } from 'yaml';
 
 import {
+  ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW,
+  ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
+  ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW,
+  ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
+  ATTACK_DISCOVERY_GENERATION_WORKFLOW,
+  ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+  ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW,
+  ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
   ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW,
   ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
   ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW,
   ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
-} from './discoveries';
-import { getManagedWorkflowDefinition } from '..';
+  ATTACK_DISCOVERY_VALIDATE_WORKFLOW,
+  ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+} from '.';
+import { getManagedWorkflowDefinition, managedWorkflowDefinitions } from '../..';
+import type { ManagedWorkflowDefinition } from '../../types';
 
 interface ParsedStep {
   name: string;
@@ -299,8 +310,9 @@ describe('ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW', () => {
   });
 
   describe('inputs', () => {
-    it('exposes conversation_id and execution_uuid inputs', () => {
+    it('exposes connector_id, conversation_id, and execution_uuid inputs', () => {
       expect(Object.keys(parsedReport.inputs?.properties ?? {}).sort()).toEqual([
+        'connector_id',
         'conversation_id',
         'execution_uuid',
       ]);
@@ -312,6 +324,10 @@ describe('ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW', () => {
 
     it('continues the existing conversation via the conversation_id input', () => {
       expect(step.with?.conversation_id).toBe('${{ inputs.conversation_id }}');
+    });
+
+    it('routes model calls through the connector_id input (Constraint A)', () => {
+      expect(step['connector-id']).toBe('${{ inputs.connector_id }}');
     });
 
     it('does not create a new conversation', () => {
@@ -356,4 +372,85 @@ describe('ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW', () => {
       );
     });
   });
+});
+
+// The persist step (`security.attack-discovery.persistDiscoveries`) skips ad-hoc
+// index I/O when `source === 'scheduled'` so scheduled discoveries are written
+// only to the scheduled alerts index by the alerting-framework executor. That
+// skip relies on each validation workflow forwarding its `source` input into the
+// persist step. A workflow that omits it makes scheduled runs leak discoveries
+// into the ad-hoc index (where they wrongly appear on the main Attack Discovery
+// page), so lock the wiring in for every validation workflow that persists.
+describe('validation workflows forward source into the persist step', () => {
+  const getPersistStepSourceInput = (
+    definition: ManagedWorkflowDefinition & { yaml: string }
+  ): unknown => {
+    const parsedWorkflow = parse(definition.yaml) as ParsedWorkflow;
+    const persistStep = parsedWorkflow.steps?.find(
+      ({ type }) => type === 'security.attack-discovery.persistDiscoveries'
+    );
+    if (!persistStep) {
+      throw new Error(`Managed workflow '${definition.id}' has no persistDiscoveries step`);
+    }
+
+    return persistStep.with?.source;
+  };
+
+  it.each([
+    ['default validation', ATTACK_DISCOVERY_VALIDATE_WORKFLOW],
+    ['custom validation example', ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW],
+  ])('%s wires source into the persist step', (_label, definition) => {
+    expect(getPersistStepSourceInput(definition)).toBe('${{ inputs.source }}');
+  });
+});
+
+// Backs the claim in `definitions/index.ts` that adding the Attack Discovery
+// workflows to `managedWorkflowDefinitions` is feature-flag-off safe. Membership
+// in the registry only makes a definition *discoverable by id*; it never installs
+// or executes anything. Installation is a separate, explicit step performed by the
+// owner (discoveries) plugin in `start()`, which reads the
+// `securitySolution.attackDiscoveryWorkflowsEnabled` feature flag and skips
+// installation when it is off (that FF gating is covered by the discoveries
+// plugin's `plugin` tests; `install_static` covers the underlying enabled/disabled
+// install behavior). Here we lock in the platform-side half of the contract: the
+// entries are inert data.
+describe('FF-off safety: AD registry membership is discoverable-by-id and inert', () => {
+  const adWorkflows: Array<[string, ManagedWorkflowDefinition & { yaml: string }]> = [
+    [ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID, ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW],
+    [
+      ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
+      ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW,
+    ],
+    [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID, ATTACK_DISCOVERY_GENERATION_WORKFLOW],
+    [ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID, ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW],
+    [
+      ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
+      ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW,
+    ],
+    [ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID, ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW],
+    [ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID, ATTACK_DISCOVERY_VALIDATE_WORKFLOW],
+  ];
+
+  it.each(adWorkflows)(
+    '%s is a member of the managed registry, discoverable by id',
+    (id, workflow) => {
+      expect(managedWorkflowDefinitions).toContain(workflow);
+      expect(getManagedWorkflowDefinition(id)).toBe(workflow);
+    }
+  );
+
+  it.each(adWorkflows)(
+    '%s is declarative data only (no side-effect hooks that could run FF-off)',
+    (_id, workflow) => {
+      // The definition exposes a static `yaml` source and carries no
+      // function-valued properties, so importing it or including it in the
+      // registry cannot install or execute anything on its own.
+      expect(typeof workflow.yaml).toBe('string');
+
+      const functionValuedKeys = Object.keys(workflow).filter(
+        (key) => typeof (workflow as Record<string, unknown>)[key] === 'function'
+      );
+      expect(functionValuedKeys).toEqual([]);
+    }
+  );
 });

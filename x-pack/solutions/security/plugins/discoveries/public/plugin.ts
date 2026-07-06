@@ -23,6 +23,9 @@ import {
   runStepPublicDefinition,
 } from './step_types';
 
+const ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG =
+  'securitySolution.attackDiscoveryWorkflowsEnabled';
+
 export class DiscoveriesPublicPlugin
   implements
     Plugin<
@@ -35,14 +38,33 @@ export class DiscoveriesPublicPlugin
   constructor(_context: PluginInitializerContext) {}
 
   public setup(
-    _core: CoreSetup<DiscoveriesPublicPluginStartDeps, DiscoveriesPublicPluginStart>,
+    core: CoreSetup<DiscoveriesPublicPluginStartDeps, DiscoveriesPublicPluginStart>,
     plugins: DiscoveriesPublicPluginSetupDeps
   ): DiscoveriesPublicPluginSetup {
-    plugins.workflowsExtensions.registerStepDefinition(defaultAlertRetrievalStepPublicDefinition);
-    plugins.workflowsExtensions.registerStepDefinition(defaultValidationStepPublicDefinition);
-    plugins.workflowsExtensions.registerStepDefinition(generateStepPublicDefinition);
-    plugins.workflowsExtensions.registerStepDefinition(persistDiscoveriesStepPublicDefinition);
-    plugins.workflowsExtensions.registerStepDefinition(runStepPublicDefinition);
+    // Register each AD step as a feature-flag-gated loader. The Workflows step
+    // registry resolves the loader (after start, when the flag is readable);
+    // resolving `undefined` skips registration, so the AD step types do not
+    // appear in the Workflows UI catalog while the flag is OFF.
+    const gate =
+      <T>(definition: T) =>
+      async (): Promise<T | undefined> => {
+        const [coreStart] = await core.getStartServices();
+        const enabled = await coreStart.featureFlags.getBooleanValue(
+          ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG,
+          false
+        );
+        return enabled ? definition : undefined;
+      };
+
+    plugins.workflowsExtensions.registerStepDefinition(
+      gate(defaultAlertRetrievalStepPublicDefinition)
+    );
+    plugins.workflowsExtensions.registerStepDefinition(gate(defaultValidationStepPublicDefinition));
+    plugins.workflowsExtensions.registerStepDefinition(gate(generateStepPublicDefinition));
+    plugins.workflowsExtensions.registerStepDefinition(
+      gate(persistDiscoveriesStepPublicDefinition)
+    );
+    plugins.workflowsExtensions.registerStepDefinition(gate(runStepPublicDefinition));
 
     return {};
   }

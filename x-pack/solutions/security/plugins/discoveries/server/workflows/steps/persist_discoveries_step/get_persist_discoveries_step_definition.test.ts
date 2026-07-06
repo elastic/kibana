@@ -215,6 +215,7 @@ describe('getPersistDiscoveriesStepDefinition', () => {
       expect(mockValidateAttackDiscoveries).toHaveBeenCalledWith({
         adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
         authenticatedUser: mockAuthenticatedUser,
+        esClient: mockEsClient,
         logger: expect.objectContaining({
           debug: expect.any(Function),
           error: expect.any(Function),
@@ -375,32 +376,6 @@ describe('getPersistDiscoveriesStepDefinition', () => {
       const output = getOutputOrThrow(result);
 
       expect(output.discoveries_to_persist).toEqual([]);
-    });
-  });
-
-  describe('when authentication fails', () => {
-    beforeEach(() => {
-      mockAuthenticateAndGetSpace.mockResolvedValue({
-        authenticationInfo: {},
-        authenticatedUser: undefined,
-        esClient: mockEsClient,
-        spaceId: 'default',
-      } as unknown as Awaited<ReturnType<typeof authenticateAndGetSpace>>);
-    });
-
-    it('returns an error', async () => {
-      const stepDefinition = getPersistDiscoveriesStepDefinition({
-        adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
-        getStartServices: mockGetStartServices,
-        logger: mockLogger,
-      });
-
-      await stepDefinition.handler(mockContext as never);
-
-      expect(mockContext.logger.error).toHaveBeenCalledWith(
-        'Failed to persist discoveries',
-        expect.any(Error)
-      );
     });
   });
 

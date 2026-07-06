@@ -65,12 +65,7 @@ export const getDefaultAlertRetrievalStepDefinition = ({
         const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
         const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
-        const parsedApiConfig = apiConfig as {
-          action_type_id?: string;
-          connector_id: string;
-          model?: string;
-        };
-        const connectorId = parsedApiConfig.connector_id;
+        const connectorId = apiConfig.connector_id;
 
         // Track replacements locally
         let localReplacements: Replacements = { ...inputReplacements };

@@ -69,7 +69,15 @@ export interface WorkflowConfig {
   additional_context?: string;
   alert_retrieval_mode: AlertRetrievalMode;
   alert_retrieval_workflow_ids: string[];
+  // FF-off incremental slicing: these three composite-retrieval toggles are
+  // consumed by the schedule workflow_executor from PR2 onward, but the request
+  // fixtures/constructors that populate them are only completed in PR7. Keeping
+  // them optional through PR2–PR6 lets each of those PRs type-check in isolation;
+  // PR7 tightens them to required once every constructor supplies them.
+  alert_retrieval_workflows_enabled?: boolean;
+  default_retrieval_enabled?: boolean;
   esql_query?: string;
+  skill_enabled?: boolean;
   validation_workflow_id: string;
 }
 
@@ -127,6 +135,13 @@ export interface ExecuteGenerationWorkflowParams {
     logger: Logger;
     spaceId: string;
   }) => Promise<WorkflowIntegrityResult>;
+  /**
+   * Isomorphic sha256 hasher injected by the scheduled executor for FF-on
+   * scheduled cross-execution de-duplication. This package cannot import the
+   * Node.js `crypto` builtin, so the hasher is supplied by the plugin. Present
+   * only on the scheduled path; ad-hoc / interactive callers omit it.
+   */
+  computeSha256Hash?: (input: string) => string;
   end?: string;
   getInferredPrebuiltStepTypes?: (params: {
     defaultValidationWorkflowId: string;

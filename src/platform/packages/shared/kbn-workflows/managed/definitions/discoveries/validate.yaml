@@ -109,4 +109,5 @@ steps:
       enable_field_rendering: ${{ inputs.enable_field_rendering }}
       generation_uuid: ${{ inputs.generation_uuid }}
       replacements: ${{ inputs.replacements }}
+      source: ${{ inputs.source }}
       with_replacements: ${{ inputs.with_replacements }}

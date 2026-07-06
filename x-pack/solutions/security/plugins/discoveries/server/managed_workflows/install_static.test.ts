@@ -17,7 +17,7 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
-import { installStatic } from './install_static';
+import { AD_WORKFLOW_IDS, installStatic } from './install_static';
 
 const createMockLifecycleClient = () => ({
   execute: jest.fn().mockResolvedValue('mock-execution-id'),
@@ -32,7 +32,19 @@ const createMockWorkflowsExtensionsStart = (lifecycleClient = createMockLifecycl
   } as unknown as WorkflowsExtensionsServerPluginStart);
 
 describe('installStatic', () => {
-  describe('when enabled (FF on)', () => {
+  // Guards against reintroducing the legacy, non-prefixed workflow-id duplicates
+  // that previously lived in `@kbn/discoveries` and collided (same constant
+  // names, different values) with the canonical ids. `@kbn/workflows/managed` is
+  // now the single source of truth and every managed workflow id is `system-`
+  // prefixed, so if `AD_WORKFLOW_IDS` ever points at a non-prefixed alias again
+  // this fails loudly.
+  it('installs only canonical, system-prefixed workflow ids', () => {
+    AD_WORKFLOW_IDS.forEach((id) => {
+      expect(id.startsWith('system-')).toBe(true);
+    });
+  });
+
+  describe('when enabled', () => {
     it('initialises the managed workflows client with the discoveries plugin id exactly once', async () => {
       const lifecycleClient = createMockLifecycleClient();
       const workflowsExtensions = createMockWorkflowsExtensionsStart(lifecycleClient);
@@ -145,7 +157,7 @@ describe('installStatic', () => {
     });
   });
 
-  describe('when disabled (FF off)', () => {
+  describe('when disabled', () => {
     it('does not initialise the managed workflows client', async () => {
       const workflowsExtensions = createMockWorkflowsExtensionsStart();
 

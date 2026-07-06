@@ -25,7 +25,7 @@ However, workflow-based generation steps did not emit these events, meaning:
 
 ## Solution
 
-Implemented event logging in the `attack-discovery.generate` workflow step to emit the same event structure as the public API, and moved shared event logging utilities to `@kbn/discoveries` package to eliminate code duplication.
+Implemented event logging in the `@kbn/discoveries` orchestration helpers (invoked by `executeGenerationWorkflow` on the `_generate` route, the scheduled `workflowExecutor`, and the `security.attack-discovery.run` step) to emit the same event structure as the public API, and moved the shared event logging utilities into the `@kbn/discoveries` package to eliminate code duplication. The `security.attack-discovery.generate` step itself does not write these events — they are written by the orchestration layer that wraps the step.
 
 ## Architecture Changes
 
@@ -44,17 +44,19 @@ discoveries plugin
 
 ```
 @kbn/discoveries package
-└── Event logging utilities (shared)
-    ├── constants.ts
-    ├── get_duration_nanoseconds.ts
-    └── write_attack_discovery_event.ts
+├── impl/attack_discovery/persistence/event_logging/ (shared)
+│   ├── constants.ts               (ATTACK_DISCOVERY_EVENT_ACTIONS + action constants)
+│   ├── write_attack_discovery_event.ts
+│   └── index.ts
+└── impl/lib/persistence/
+    └── get_duration_nanoseconds.ts
 
 elastic_assistant plugin
 ├── Public API (uses shared utilities)
-└── Imports from @kbn/discoveries
+└── Re-export shims that forward to @kbn/discoveries
 
 discoveries plugin
-├── Workflow steps (uses shared utilities)
+├── Orchestration helpers (impl/attack_discovery/generation/**) write the events
 └── Imports from @kbn/discoveries
 ```
 
@@ -63,13 +65,12 @@ discoveries plugin
 ### Phase 1: Shared Utilities Migration
 
 **Files Created:**
-- `x-pack/solutions/security/packages/kbn-discoveries/src/persistence/event_logging/constants.ts`
-- `x-pack/solutions/security/packages/kbn-discoveries/src/persistence/event_logging/get_duration_nanoseconds.ts`
-- `x-pack/solutions/security/packages/kbn-discoveries/src/persistence/event_logging/write_attack_discovery_event.ts`
-- `x-pack/solutions/security/packages/kbn-discoveries/src/persistence/event_logging/get_duration_nanoseconds.test.ts`
-- `x-pack/solutions/security/packages/kbn-discoveries/src/persistence/event_logging/write_attack_discovery_event.test.ts`
-- `x-pack/solutions/security/packages/kbn-discoveries/src/persistence/event_logging/index.ts`
-- `x-pack/solutions/security/packages/kbn-discoveries/src/persistence/index.ts`
+- `x-pack/solutions/security/packages/kbn-discoveries/impl/attack_discovery/persistence/event_logging/constants.ts`
+- `x-pack/solutions/security/packages/kbn-discoveries/impl/attack_discovery/persistence/event_logging/write_attack_discovery_event.ts`
+- `x-pack/solutions/security/packages/kbn-discoveries/impl/attack_discovery/persistence/event_logging/write_attack_discovery_event.test.ts`
+- `x-pack/solutions/security/packages/kbn-discoveries/impl/attack_discovery/persistence/event_logging/index.ts`
+- `x-pack/solutions/security/packages/kbn-discoveries/impl/lib/persistence/get_duration_nanoseconds.ts`
+- `x-pack/solutions/security/packages/kbn-discoveries/impl/lib/persistence/get_duration_nanoseconds.test.ts`
 
 **Key Design Decision:**
 - Abstracted `AttackDiscoveryDataClient` dependency to `EventLogRefresher` interface to avoid circular dependencies
@@ -80,11 +81,10 @@ discoveries plugin
 **Files Modified:**
 - `x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/public/post/post_attack_discovery_generate.ts`
 - `x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/public/post/post_attack_discovery_generations_dismiss.ts`
-- `x-pack/solutions/security/plugins/elastic_assistant/common/constants.ts` (added deprecation comments)
 
-**Files Deleted:**
+**Files Retained as re-export shims** (they were **not** deleted — they now forward to `@kbn/discoveries` so existing importers keep working):
 - `x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/public/post/get_duration_nanoseconds/index.ts`
-- `x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/public/post/helpers/write_attack_discovery_event/index.ts`
+- `x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/public/post/helpers/write_attack_discovery_event/index.ts` (`export { writeAttackDiscoveryEvent } from '@kbn/discoveries';`)
 
 ### Phase 3: discoveries Event Logging
 
@@ -92,28 +92,27 @@ discoveries plugin
 - `x-pack/solutions/security/plugins/discoveries/kibana.jsonc` (added eventLog dependency)
 - `x-pack/solutions/security/plugins/discoveries/server/types.ts` (added EventLogServiceSetup)
 - `x-pack/solutions/security/plugins/discoveries/server/plugin.ts` (create eventLogger)
-- `x-pack/solutions/security/plugins/discoveries/server/workflows/register_workflow_steps.ts` (pass eventLogger)
-- `x-pack/solutions/security/plugins/discoveries/server/workflows/steps/generate_step.ts` (implement event logging)
+- `x-pack/solutions/security/plugins/discoveries/server/workflows/register_workflow_steps.ts` (pass `getEventLogger`/`getEventLogIndex` into the steps)
 
-**Event Logging Flow in generate_step.ts:**
+**Where the events are written:** the orchestration layer in `@kbn/discoveries` (`impl/attack_discovery/generation/**`), not the `generate` step. `executeGenerationWorkflow` and the workflow-invocation helpers (`write_generation_started_event/`, `write_alert_retrieval_started_event/`, `write_alert_retrieval_succeeded_event/`, `write_alert_retrieval_failed_event/`, `invoke_generation_workflow.ts`, `invoke_validation_workflow.ts`) call `writeAttackDiscoveryEvent`.
+
+**Event Logging Flow:**
 
 1. **At Start:**
-   - Get `executionUuid` from `context.contextManager.getContext().execution.id`
-   - Get authenticated user from security plugin
-   - Get spaceId from spaces plugin
-   - Get eventLogger and eventLogIndex
-   - Write `generation-started` event
+   - Use the `executionUuid` supplied by the orchestrator (the alerting framework's execution ID on the scheduled path, so events are queryable by the same ID as the rule execution log)
+   - Resolve the authenticated user and spaceId from the (space-scoped) request
+   - Write `generation-started` (and per-phase `*-started`) events
 
 2. **On Success:**
    - Calculate duration using `getDurationNanoseconds`
-   - Write `generation-succeeded` event with metrics:
+   - Write `generation-succeeded` (and per-phase `*-succeeded`) events with metrics:
      - `alertsContextCount`: Number of alerts sent to LLM
      - `newAlerts`: Number of discoveries generated
      - `duration`: Time taken in nanoseconds
 
 3. **On Failure:**
    - Calculate duration
-   - Write `generation-failed` event with:
+   - Write `generation-failed` (or the relevant per-phase `*-failed`) event with:
      - `reason`: Error message
      - `outcome`: 'failure'
 
@@ -125,7 +124,12 @@ Events follow the Elasticsearch event log schema:
 {
   '@timestamp': string,
   event: {
-    action: 'generation-started' | 'generation-succeeded' | 'generation-failed',
+    // The full set is in ATTACK_DISCOVERY_EVENT_ACTIONS (event_logging/constants.ts):
+    // generation-started | generation-succeeded | generation-failed |
+    // generation-canceled | generation-dismissed |
+    // alert-retrieval-started | alert-retrieval-succeeded | alert-retrieval-failed |
+    // generate-step-started | generate-step-succeeded | generate-step-failed
+    action: string,
     dataset: string,  // Connector ID
     duration?: number,  // Duration in nanoseconds
     end?: string,  // ISO timestamp
@@ -253,14 +257,13 @@ None. This is an additive change that doesn't affect existing functionality.
 
 ## Deprecations
 
-Added deprecation comments to event logging constants in `elastic_assistant/common/constants.ts` pointing to `@kbn/discoveries`. These can be removed in a future cleanup PR.
+The event-logging constants still live in `elastic_assistant/common/constants.ts` (no deprecation comments were added). The canonical action constants and `ATTACK_DISCOVERY_EVENT_ACTIONS` are also exported from `@kbn/discoveries` (`impl/attack_discovery/persistence/event_logging/constants.ts`); consolidating the two definitions is a future cleanup.
 
 ## Future Enhancements
 
-1. **Validation Events**: Consider adding separate event logging for the validation step
-2. **Additional Metrics**: Track more detailed LLM invocation metrics
-3. **Event Retention**: Configure event log retention policies
-4. **Alerting**: Set up alerts for failed generations
+1. **Additional Metrics**: Track more detailed LLM invocation metrics
+2. **Event Retention**: Configure event log retention policies
+3. **Alerting**: Set up alerts for failed generations
 
 ## References
 

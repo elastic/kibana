@@ -17,6 +17,13 @@ const TRIGGERED_BY = 'attack-discovery-skill-report';
  * Parameters for invoking the managed skill report workflow.
  */
 export interface InvokeSkillReportWorkflowParams {
+  /**
+   * GenAI connector id selected for this generation. Forwarded to the report
+   * `ai.agent` step (Constraint A) so the report is rendered by the model the
+   * user selected rather than the Agent Builder default. When empty, it is
+   * omitted so the step falls back to the Agent Builder default model.
+   */
+  connectorId: string;
   /** Persisted Agent Builder conversation id to resume (continue) with the report. */
   conversationId: string;
   /** The AD 2.0 generation `execution_uuid` whose discoveries should be rendered. */
@@ -41,6 +48,7 @@ export interface InvokeSkillReportWorkflowParams {
  * failure can never block or fail the AD 2.0 generation outcome.
  */
 export const invokeSkillReportWorkflow = async ({
+  connectorId,
   conversationId,
   executionUuid,
   logger,
@@ -70,7 +78,11 @@ export const invokeSkillReportWorkflow = async ({
     const workflowRunId = await workflowsManagementApi.scheduleWorkflow(
       workflowToRun,
       spaceId,
-      { conversation_id: conversationId, execution_uuid: executionUuid },
+      {
+        ...(connectorId ? { connector_id: connectorId } : {}),
+        conversation_id: conversationId,
+        execution_uuid: executionUuid,
+      },
       request,
       TRIGGERED_BY
     );

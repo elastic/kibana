@@ -20,11 +20,18 @@ jest.mock('./lib/schedules/workflow_executor', () => ({
   workflowExecutor: jest.fn().mockResolvedValue({ state: {} }),
 }));
 
+// Default the feature flag to ON so the scheduled factory proceeds; individual
+// tests override with `mockResolvedValueOnce(false)` to exercise the kill-switch.
+const mockIsWorkflowsEnabled = jest.fn().mockResolvedValue(true);
+jest.mock('@kbn/discoveries/impl/lib/helpers/is_workflows_enabled', () => ({
+  isWorkflowsEnabled: (...args: unknown[]) => mockIsWorkflowsEnabled(...args),
+}));
+
 jest.mock('./routes', () => ({
   registerRoutes: jest.fn(),
 }));
 
-jest.mock('./skills/register_skills', () => ({
+jest.mock('./agent_builder/skills/register_skills', () => ({
   registerSkills: jest.fn().mockResolvedValue(undefined),
 }));
 
@@ -43,6 +50,18 @@ jest.mock('./managed_workflows/install_static', () => ({
 
 const { workflowExecutor } = jest.requireMock('./lib/schedules/workflow_executor');
 const { installStatic } = jest.requireMock('./managed_workflows/install_static');
+const { registerSkills } = jest.requireMock('./agent_builder/skills/register_skills');
+
+/** Drains the microtask + macrotask queues so deferred `getStartServices().then()` work runs. */
+const flushPromises = async () => {
+  await new Promise((resolve) => setImmediate(resolve));
+  await new Promise((resolve) => setImmediate(resolve));
+};
+
+const createMockAgentBuilder = () => ({
+  attachments: { registerType: jest.fn() },
+  skills: { register: jest.fn().mockResolvedValue(undefined) },
+});
 
 const createMockRuleRegistry = () => ({
   ruleDataService: {
@@ -123,7 +142,7 @@ describe('DiscoveriesPlugin', () => {
         jest.clearAllMocks();
       });
 
-      it('registers discoveries as managed workflow owner exactly once when enabled (FF on)', () => {
+      it('registers discoveries as managed workflow owner exactly once when the plugin is enabled', () => {
         const mockWorkflowsExtensions = createMockWorkflowsExtensions();
         const context = coreMock.createPluginInitializerContext({ enabled: true });
         const plugin = new DiscoveriesPlugin(context);
@@ -142,7 +161,7 @@ describe('DiscoveriesPlugin', () => {
         );
       });
 
-      it('does not register managed workflow owner when disabled (FF off)', () => {
+      it('does not register managed workflow owner when the plugin is disabled', () => {
         const mockWorkflowsExtensions = createMockWorkflowsExtensions();
         const context = coreMock.createPluginInitializerContext({ enabled: false });
         const plugin = new DiscoveriesPlugin(context);
@@ -235,6 +254,37 @@ describe('DiscoveriesPlugin', () => {
         expect(result).toEqual({ state: {} });
       });
 
+      it('skips the scheduled execution as a no-op when the feature flag is OFF', async () => {
+        mockIsWorkflowsEnabled.mockResolvedValueOnce(false);
+
+        const mockElasticAssistant = createMockElasticAssistant();
+        const context = createPluginInitializerContext();
+        const plugin = new DiscoveriesPlugin(context);
+
+        const coreSetup = coreMock.createSetup();
+        const deps = createPluginSetupDeps({
+          elasticAssistant: mockElasticAssistant,
+        });
+
+        plugin.setup(coreSetup, deps);
+
+        const factory =
+          mockElasticAssistant.registerAttackDiscoveryWorkflowExecutor.mock.calls[0][0];
+
+        const mockOptions = {
+          executionId: 'exec-1',
+          params: { alertsIndexPattern: '.alerts-*', apiConfig: {} },
+          rule: { id: 'rule-1' },
+          services: { alertsClient: {} },
+          spaceId: 'default',
+        } as unknown as AttackDiscoveryExecutorOptions;
+
+        const result = await factory(mockOptions);
+
+        expect(result).toEqual({ state: {} });
+        expect(workflowExecutor).not.toHaveBeenCalled();
+      });
+
       it('creates a fake request with authorization extracted from the scoped cluster client transport', async () => {
         const mockElasticAssistant = createMockElasticAssistant();
         const context = createPluginInitializerContext();
@@ -275,6 +325,42 @@ describe('DiscoveriesPlugin', () => {
             authorization: 'ApiKey dGVzdC1lbmNvZGVk',
           })
         );
+      });
+
+      it('scopes the fake request to the rule space so authorization runs against the correct space', async () => {
+        const mockElasticAssistant = createMockElasticAssistant();
+        const context = createPluginInitializerContext();
+        const plugin = new DiscoveriesPlugin(context);
+
+        const coreSetup = coreMock.createSetup();
+        const deps = createPluginSetupDeps({
+          elasticAssistant: mockElasticAssistant,
+        });
+
+        plugin.setup(coreSetup, deps);
+
+        const factory =
+          mockElasticAssistant.registerAttackDiscoveryWorkflowExecutor.mock.calls[0][0];
+
+        const mockOptions = {
+          executionId: 'exec-1',
+          params: { alertsIndexPattern: '.alerts-*', apiConfig: {} },
+          rule: { id: 'rule-1' },
+          services: {
+            alertsClient: {},
+            scopedClusterClient: {
+              asCurrentUser: {
+                transport: { headers: { authorization: 'ApiKey dGVzdC1lbmNvZGVk' } },
+              },
+            },
+          },
+          spaceId: 'marketing',
+        } as unknown as AttackDiscoveryExecutorOptions;
+
+        await factory(mockOptions);
+
+        const passedRequest = workflowExecutor.mock.calls[0][0].deps.request;
+        expect(passedRequest.spaceId).toEqual('marketing');
       });
 
       it('falls back to empty headers when transport has no authorization header', async () => {
@@ -345,6 +431,50 @@ describe('DiscoveriesPlugin', () => {
         expect(firstRequest).not.toBe(secondRequest);
       });
     });
+
+    describe('agent builder registration', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('registers agent builder skills and the attachment type when the feature flag is ON', async () => {
+        const mockAgentBuilder = createMockAgentBuilder();
+        const context = createPluginInitializerContext();
+        const plugin = new DiscoveriesPlugin(context);
+
+        plugin.setup(
+          coreMock.createSetup(),
+          createPluginSetupDeps({
+            agentBuilder: mockAgentBuilder as unknown as DiscoveriesPluginSetupDeps['agentBuilder'],
+          })
+        );
+
+        await flushPromises();
+
+        expect(registerSkills).toHaveBeenCalledTimes(1);
+        expect(mockAgentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not register agent builder skills or the attachment type when the feature flag is OFF', async () => {
+        mockIsWorkflowsEnabled.mockResolvedValueOnce(false);
+
+        const mockAgentBuilder = createMockAgentBuilder();
+        const context = createPluginInitializerContext();
+        const plugin = new DiscoveriesPlugin(context);
+
+        plugin.setup(
+          coreMock.createSetup(),
+          createPluginSetupDeps({
+            agentBuilder: mockAgentBuilder as unknown as DiscoveriesPluginSetupDeps['agentBuilder'],
+          })
+        );
+
+        await flushPromises();
+
+        expect(registerSkills).not.toHaveBeenCalled();
+        expect(mockAgentBuilder.attachments.registerType).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('start', () => {
@@ -353,7 +483,7 @@ describe('DiscoveriesPlugin', () => {
         jest.clearAllMocks();
       });
 
-      it('calls installStatic with enabled=true and workflowsExtensions when FF is on', () => {
+      it('installs the managed workflows when the plugin is enabled and the feature flag is ON', async () => {
         const mockWorkflowsExtensionsStart = createMockWorkflowsExtensionsStart();
         const context = coreMock.createPluginInitializerContext({ enabled: true });
         const plugin = new DiscoveriesPlugin(context);
@@ -367,6 +497,8 @@ describe('DiscoveriesPlugin', () => {
           })
         );
 
+        await flushPromises();
+
         expect(installStatic).toHaveBeenCalledTimes(1);
         expect(installStatic).toHaveBeenCalledWith({
           enabled: true,
@@ -374,7 +506,28 @@ describe('DiscoveriesPlugin', () => {
         });
       });
 
-      it('calls installStatic with enabled=false when FF is off', () => {
+      it('does not install the managed workflows when the feature flag is OFF', async () => {
+        mockIsWorkflowsEnabled.mockResolvedValueOnce(false);
+
+        const mockWorkflowsExtensionsStart = createMockWorkflowsExtensionsStart();
+        const context = coreMock.createPluginInitializerContext({ enabled: true });
+        const plugin = new DiscoveriesPlugin(context);
+
+        plugin.setup(coreMock.createSetup(), createPluginSetupDeps());
+        plugin.start(
+          coreMock.createStart(),
+          createPluginStartDeps({
+            workflowsExtensions:
+              mockWorkflowsExtensionsStart as unknown as DiscoveriesPluginStartDeps['workflowsExtensions'],
+          })
+        );
+
+        await flushPromises();
+
+        expect(installStatic).not.toHaveBeenCalled();
+      });
+
+      it('does not install the managed workflows when the plugin is disabled', async () => {
         const mockWorkflowsExtensionsStart = createMockWorkflowsExtensionsStart();
         const context = coreMock.createPluginInitializerContext({ enabled: false });
         const plugin = new DiscoveriesPlugin(context);
@@ -388,11 +541,9 @@ describe('DiscoveriesPlugin', () => {
           })
         );
 
-        expect(installStatic).toHaveBeenCalledTimes(1);
-        expect(installStatic).toHaveBeenCalledWith({
-          enabled: false,
-          workflowsExtensions: mockWorkflowsExtensionsStart,
-        });
+        await flushPromises();
+
+        expect(installStatic).not.toHaveBeenCalled();
       });
     });
   });

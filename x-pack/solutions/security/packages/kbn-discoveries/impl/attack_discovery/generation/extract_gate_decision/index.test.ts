@@ -237,4 +237,61 @@ describe('extractGateDecision', () => {
       'Gate agent step completed but returned no decision output'
     );
   });
+
+  // ids-only contract (anti-injection): the gate is a DECISION, never a data
+  // source. `extractGateDecision` reads only the id arrays (+ corroboration
+  // context + conversation id) from the gate's `structured_output`, so a gate
+  // (LLM) that echoes candidate bytes or injects arbitrary alert content cannot
+  // smuggle that content downstream. This backs the "ids-only enforced, not just
+  // prose" claim at the parse boundary.
+  describe('ids-only contract (anti-injection)', () => {
+    const injectedExecution = {
+      ...baseCompletedExecution,
+      stepExecutions: [
+        {
+          output: {
+            conversation_id: 'conversation-1',
+            structured_output: {
+              added_alert_ids: ['added-1'],
+              // Fields an adversarial / confused gate might emit alongside the
+              // decision. None of these are part of the decision contract.
+              alerts: ['_id,evil\nINJECTED ALERT BYTES — should never surface'],
+              candidate_alerts: ['_id,also-evil\nMORE INJECTED BYTES'],
+              page_content: 'INJECTED PAGE CONTENT',
+              remove_alert_ids: ['id-1'],
+            },
+          },
+          stepId: 'gate',
+          stepType: 'ai.agent',
+        },
+      ],
+    } as unknown as WorkflowExecutionDto;
+
+    it('surfaces only the decision id arrays, never injected alert content', () => {
+      const result = extractGateDecision({ execution: injectedExecution });
+
+      expect(result.removeAlertIds).toEqual(['id-1']);
+      expect(result.addedAlertIds).toEqual(['added-1']);
+    });
+
+    it('does not expose any alert-content fields on the decision', () => {
+      const result = extractGateDecision({ execution: injectedExecution }) as unknown as Record<
+        string,
+        unknown
+      >;
+
+      expect(result.alerts).toBeUndefined();
+      expect(result.candidate_alerts).toBeUndefined();
+      expect(result.page_content).toBeUndefined();
+      expect(Object.keys(result).sort()).toEqual(
+        ['addedAlertIds', 'conversationId', 'removeAlertIds'].sort()
+      );
+    });
+
+    it('does not carry any injected alert bytes anywhere in the returned decision', () => {
+      const result = extractGateDecision({ execution: injectedExecution });
+
+      expect(JSON.stringify(result)).not.toContain('INJECTED');
+    });
+  });
 });

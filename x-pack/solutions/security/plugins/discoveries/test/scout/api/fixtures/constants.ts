@@ -30,6 +30,38 @@ export const SCHEDULE_ROUTES = {
 } as const;
 
 /**
+ * Internal ad-hoc generation route for AD 2.0.
+ *
+ * Requires workflows read + execute at the route-authz layer (least-privilege
+ * matrix, bead kibana-5wd6.1), so an under-privileged caller is rejected with a
+ * synchronous 403.
+ */
+export const GENERATE_ROUTE = 'internal/attack_discovery/_generate';
+
+/**
+ * Feature flag that gates the AD 2.0 internal API surface (`_generate`,
+ * schedules, execution monitoring). All internal routes fall through to a
+ * `404 Not Found` (via `assertWorkflowsEnabled`) when it is OFF, so the suite
+ * must enable it at runtime before exercising those routes.
+ */
+export const ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG =
+  'securitySolution.attackDiscoveryWorkflowsEnabled';
+
+/**
+ * Internal execution-monitoring routes for AD 2.0.
+ *
+ * These require attack discovery + alerts read + workflows READ (but NOT
+ * execute) at the route-authz layer, so a caller that can read workflows may
+ * monitor executions without being able to trigger them.
+ */
+export const MONITORING_ROUTES = {
+  EXECUTION_TRACKING: (executionId: string) =>
+    `internal/attack_discovery/executions/${executionId}/tracking`,
+  PIPELINE_DATA: (workflowId: string, executionId: string) =>
+    `internal/attack_discovery/workflow/${workflowId}/execution/${executionId}`,
+} as const;
+
+/**
  * Public attack discovery schedule API routes in elastic_assistant.
  * Used by isolation tests to verify tag-based separation.
  */

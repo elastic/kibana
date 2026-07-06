@@ -89,20 +89,13 @@ export const getPersistDiscoveriesStepDefinition = ({
         const { coreStart, pluginsStart } = await getStartServices();
         const request = context.contextManager.getFakeRequest();
 
-        const { authenticatedUser, spaceId } = await authenticateAndGetSpace({
+        const { authenticatedUser, esClient, spaceId } = await authenticateAndGetSpace({
           coreStart,
           pluginsStart,
           request,
         });
 
-        if (!authenticatedUser) {
-          throw new Error(
-            'Persist discoveries step failed to resolve authenticated user. Check service account or API key configuration for scheduled runs.'
-          );
-        }
-
-        const parsedApiConfig = apiConfig as { connector_id?: string } | undefined;
-        const connectorId = parsedApiConfig?.connector_id;
+        const connectorId = apiConfig.connector_id;
 
         if (!connectorId) {
           throw new Error('Missing connector_id in api_config');
@@ -128,6 +121,7 @@ export const getPersistDiscoveriesStepDefinition = ({
         const result = await validateAttackDiscoveries({
           adhocAttackDiscoveryDataClient,
           authenticatedUser,
+          esClient,
           logger: tracedLogger,
           spaceId,
           validateRequestBody: {

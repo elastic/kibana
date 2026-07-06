@@ -316,7 +316,10 @@ describe('getDefaultValidationStepDefinition', () => {
       await stepDefinition.handler(context);
 
       expect(filterHallucinatedAlerts).toHaveBeenCalledWith({
-        alertsIndexPattern: '.alerts-security.alerts-*',
+        // When no explicit pattern is supplied, validation falls back to the
+        // resolved space's index (`-default` here) rather than the cross-space
+        // `-*` wildcard, keeping reads inside the caller's space boundary.
+        alertsIndexPattern: '.alerts-security.alerts-default',
         attackDiscoveries: defaultInput.attack_discoveries,
         esClient: expect.anything(),
         logger: expect.objectContaining({

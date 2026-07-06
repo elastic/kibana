@@ -212,6 +212,54 @@ describe('getDefaultValidationStepDefinition', () => {
     });
   });
 
+  describe('space-bounded alerts index fallback', () => {
+    beforeEach(() => {
+      mockFilterAndValidateDiscoveries.mockResolvedValue({
+        filteredCount: 0,
+        shouldValidate: false,
+        validDiscoveries: [],
+      } as FilterResult<(typeof mockContext.input.attack_discoveries)[number]>);
+    });
+
+    it('falls back to the resolved space index when alerts_index_pattern is omitted', async () => {
+      mockAuthenticateAndGetSpace.mockResolvedValue({
+        authenticationInfo: {},
+        authenticatedUser: { profile_uid: 'profile-1', username: 'test-user' },
+        esClient: mockEsClient,
+        spaceId: 'marketing',
+      } as unknown as Awaited<ReturnType<typeof authenticateAndGetSpace>>);
+
+      const context = {
+        ...mockContext,
+        input: { ...mockContext.input, alerts_index_pattern: undefined },
+      };
+
+      const stepDefinition = getDefaultValidationStepDefinition({
+        getStartServices: mockGetStartServices,
+        logger: mockLogger,
+      });
+
+      await stepDefinition.handler(context as never);
+
+      expect(mockFilterAndValidateDiscoveries).toHaveBeenCalledWith(
+        expect.objectContaining({ alertsIndexPattern: '.alerts-security.alerts-marketing' })
+      );
+    });
+
+    it('uses the caller-supplied alerts_index_pattern when present', async () => {
+      const stepDefinition = getDefaultValidationStepDefinition({
+        getStartServices: mockGetStartServices,
+        logger: mockLogger,
+      });
+
+      await stepDefinition.handler(mockContext as never);
+
+      expect(mockFilterAndValidateDiscoveries).toHaveBeenCalledWith(
+        expect.objectContaining({ alertsIndexPattern: '.alerts-security.alerts-default' })
+      );
+    });
+  });
+
   describe('when some discoveries are filtered by hallucination detection', () => {
     beforeEach(() => {
       mockFilterAndValidateDiscoveries.mockResolvedValue({

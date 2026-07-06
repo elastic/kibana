@@ -33,6 +33,24 @@ const createStartDeps = ({
 
 describe('DiscoveriesPublicPlugin', () => {
   describe('setup', () => {
+    // Steps are registered as feature-flag-gated loaders. This runs setup with a
+    // controllable flag value and returns the registered loaders.
+    const setupWithFlag = (enabled: boolean) => {
+      const context = coreMock.createPluginInitializerContext();
+      const plugin = new DiscoveriesPublicPlugin(context);
+      const coreSetup = coreMock.createSetup();
+      const coreStart = coreMock.createStart();
+      (coreStart.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(enabled);
+      coreSetup.getStartServices = jest.fn().mockResolvedValue([coreStart, {}, {}]);
+      const setupDeps = createSetupDeps();
+
+      plugin.setup(coreSetup, setupDeps);
+
+      return (setupDeps.workflowsExtensions.registerStepDefinition as jest.Mock).mock.calls.map(
+        ([loader]) => loader as () => Promise<{ id: string } | undefined>
+      );
+    };
+
     it('registers step definitions with workflowsExtensions', () => {
       const context = coreMock.createPluginInitializerContext();
       const plugin = new DiscoveriesPublicPlugin(context);
@@ -42,6 +60,28 @@ describe('DiscoveriesPublicPlugin', () => {
       plugin.setup(coreSetup, setupDeps);
 
       expect(setupDeps.workflowsExtensions.registerStepDefinition).toHaveBeenCalled();
+    });
+
+    it('registers five step loaders (functions)', () => {
+      const loaders = setupWithFlag(true);
+
+      expect(loaders).toHaveLength(5);
+    });
+
+    it('resolves all loaders to definitions when the feature flag is on', async () => {
+      const loaders = setupWithFlag(true);
+
+      const definitions = await Promise.all(loaders.map((loader) => loader()));
+
+      expect(definitions.filter((definition) => definition != null)).toHaveLength(5);
+    });
+
+    it('resolves all loaders to undefined when the feature flag is off', async () => {
+      const loaders = setupWithFlag(false);
+
+      const definitions = await Promise.all(loaders.map((loader) => loader()));
+
+      expect(definitions.every((definition) => definition === undefined)).toBe(true);
     });
   });
 

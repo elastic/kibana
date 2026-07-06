@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout-security/api';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
+  enableWorkflowsFeatureFlag,
   getSimpleWorkflowSchedule,
   getWorkflowSchedulesApis,
 } from '../fixtures/helpers';
@@ -17,7 +18,9 @@ import {
 apiTest.describe('Workflow schedule API - create', { tag: SCHEDULE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth }) => {
+  apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
+    await enableWorkflowsFeatureFlag(apiServices);
+
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = { ...credentials.cookieHeader };
   });
@@ -112,7 +115,7 @@ apiTest.describe('Workflow schedule API - create', { tag: SCHEDULE_TAGS }, () =>
         },
         size: 50,
         workflow_config: {
-          alert_retrieval_mode: 'custom_only',
+          alert_retrieval_mode: 'custom_query',
           alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2'],
           validation_workflow_id: 'custom-validation',
         },

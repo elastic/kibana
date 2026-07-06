@@ -11,6 +11,7 @@ import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllPublicSchedules,
   deleteAllWorkflowSchedules,
+  enableWorkflowsFeatureFlag,
   getPublicSchedulesApis,
   getSimplePublicSchedule,
   getSimpleWorkflowSchedule,
@@ -20,7 +21,9 @@ import {
 apiTest.describe('Workflow schedule API - isolation', { tag: SCHEDULE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth }) => {
+  apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
+    await enableWorkflowsFeatureFlag(apiServices);
+
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = { ...credentials.cookieHeader };
   });
@@ -113,6 +116,49 @@ apiTest.describe('Workflow schedule API - isolation', { tag: SCHEDULE_TAGS }, ()
 
       const publicGet = await publicApis.getSchedule(publicId);
       expect(publicGet.statusCode).toBe(404);
+    }
+  );
+
+  apiTest(
+    'public API cannot get an internal (workflow) schedule by id (returns 404)',
+    async ({ apiClient }) => {
+      const publicApis = getPublicSchedulesApis(apiClient, defaultHeaders);
+      const internalApis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+
+      const internalCreate = await internalApis.createSchedule(
+        getSimpleWorkflowSchedule({ name: 'Internal schedule for public get' })
+      );
+      expect(internalCreate.statusCode).toBe(200);
+      const internalId = (internalCreate.body as Record<string, unknown>).id as string;
+
+      // The public (legacy) client excludes workflow-tagged schedules, so a
+      // by-ID read of an internal schedule must be indistinguishable from a
+      // missing one (404) — no cross-domain read.
+      const publicGet = await publicApis.getSchedule(internalId);
+      expect(publicGet.statusCode).toBe(404);
+    }
+  );
+
+  apiTest(
+    'public API cannot delete an internal (workflow) schedule by id (returns 404)',
+    async ({ apiClient }) => {
+      const publicApis = getPublicSchedulesApis(apiClient, defaultHeaders);
+      const internalApis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+
+      const internalCreate = await internalApis.createSchedule(
+        getSimpleWorkflowSchedule({ name: 'Internal schedule for public delete' })
+      );
+      expect(internalCreate.statusCode).toBe(200);
+      const internalId = (internalCreate.body as Record<string, unknown>).id as string;
+
+      // The public (legacy) client must not be able to delete a workflow schedule
+      // by ID; the guard rejects with 404 before any mutation.
+      const publicDelete = await publicApis.deleteSchedule(internalId);
+      expect(publicDelete.statusCode).toBe(404);
+
+      // The internal schedule must still exist (the public delete was a no-op).
+      const internalGet = await internalApis.getSchedule(internalId);
+      expect(internalGet.statusCode).toBe(200);
     }
   );
 

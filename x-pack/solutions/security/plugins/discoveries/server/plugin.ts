@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { IRuleDataClient, IndexOptions } from '@kbn/rule-registry-plugin/server';
@@ -34,12 +35,13 @@ import {
   ATTACK_DISCOVERY_STEP_FAILURE_EVENT,
 } from '@kbn/discoveries/impl/lib/telemetry/event_based_telemetry';
 import { reportMisconfiguration } from '@kbn/discoveries/impl/lib/telemetry/report_misconfiguration';
+import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 import { DEFAULT_CONNECTOR_TIMEOUT_MS } from '.';
 import { logStartupHealthCheck } from './lib/startup_health_check';
 import { workflowExecutor } from './lib/schedules/workflow_executor';
 import { registerRoutes } from './routes';
 import { createDiagnosticReportAttachmentType } from './agent_builder/attachments/diagnostic_report';
-import { registerSkills } from './skills/register_skills';
+import { registerSkills } from './agent_builder/skills/register_skills';
 import type {
   DiscoveriesPluginSetup,
   DiscoveriesPluginSetupDeps,
@@ -142,6 +144,11 @@ export class DiscoveriesPlugin
     core.analytics.registerEventType(ATTACK_DISCOVERY_SCHEDULE_ACTION_EVENT);
     core.analytics.registerEventType(ATTACK_DISCOVERY_STEP_FAILURE_EVENT);
 
+    // Register 'discoveries' as a managed-workflow owner. `registerManagedWorkflowOwner`
+    // is a setup-only platform contract and the feature flag is not readable during
+    // setup, so this is gated on plugin config only. Owning the namespace is inert on
+    // its own — it installs nothing. The actual managed-workflow installation is
+    // feature-flag-gated in `start()`.
     if (this.config.enabled) {
       registerOwner({ workflowsExtensions: plugins.workflowsExtensions });
     }
@@ -236,31 +243,54 @@ export class DiscoveriesPlugin
       });
     }
 
-    // Register agent builder attachment types and skills
+    // Register agent builder attachment types and skills — but only when the
+    // feature flag is ON, so nothing requiring agent-builder-team review is
+    // active while the flag is OFF. Registration is deferred through
+    // `getStartServices()` because the request-free feature flags reader
+    // (`coreStart.featureFlags`) is only available at start. Attachment types
+    // and skills are read lazily at request time, so registering here (rather
+    // than synchronously in setup) is safe. This mirrors the Streams plugin.
     if (plugins.agentBuilder) {
-      plugins.agentBuilder.attachments.registerType(createDiagnosticReportAttachmentType());
+      const agentBuilder = plugins.agentBuilder;
+      const logger = this.logger;
       const workflowsManagementApi = this.workflowsManagementApi;
-      registerSkills(plugins.agentBuilder, this.logger, {
-        getEventLogIndex,
-        runAttackDiscoveryToolDeps: {
-          analytics: core.analytics,
-          getEventLogIndex,
-          getEventLogger,
-          getStartServices,
-          logger: this.logger,
-          workflowsManagementApi,
-        },
-        workflowExecutionLookup:
-          workflowsManagementApi != null
-            ? {
-                getWorkflowExecution: (executionId, spaceId, options) =>
-                  workflowsManagementApi.getWorkflowExecution(executionId, spaceId, options),
-              }
-            : undefined,
-        workflowFetcher: workflowsManagementApi,
-      }).catch((error) => {
-        this.logger.error(`discoveries: Error registering skills: ${error}`);
-      });
+
+      void getStartServices()
+        .then(async ({ coreStart }) => {
+          if (!(await isWorkflowsEnabled(coreStart.featureFlags))) {
+            logger.debug(
+              () =>
+                'discoveries: Attack Discovery workflows disabled; skipping agent builder registration'
+            );
+            return;
+          }
+
+          agentBuilder.attachments.registerType(createDiagnosticReportAttachmentType());
+
+          await registerSkills(agentBuilder, logger, {
+            getEventLogIndex,
+            getStartServices,
+            runAttackDiscoveryToolDeps: {
+              analytics: core.analytics,
+              getEventLogIndex,
+              getEventLogger,
+              getStartServices,
+              logger,
+              workflowsManagementApi,
+            },
+            workflowExecutionLookup:
+              workflowsManagementApi != null
+                ? {
+                    getWorkflowExecution: (executionId, spaceId, options) =>
+                      workflowsManagementApi.getWorkflowExecution(executionId, spaceId, options),
+                  }
+                : undefined,
+            workflowFetcher: workflowsManagementApi,
+          });
+        })
+        .catch((error) => {
+          logger.error(`discoveries: Error registering skills: ${error}`);
+        });
     } else {
       this.logger.debug(
         'discoveries: agentBuilder plugin not available, skipping skill registration'
@@ -286,6 +316,19 @@ export class DiscoveriesPlugin
       const publicBaseUrl = core.http.basePath.publicBaseUrl;
 
       plugins.elasticAssistant.registerAttackDiscoveryWorkflowExecutor(async (options) => {
+        // Kill-switch: when the feature flag is OFF, skip the scheduled AD 2.0 run
+        // as a no-op so the rule stays healthy (no error, no LLM/alert work). Only
+        // schedules carrying a `workflowConfig` reach this factory, so the legacy
+        // (non-AD-2.0) scheduled path is unaffected.
+        const { coreStart } = await getStartServices();
+        if (!(await isWorkflowsEnabled(coreStart.featureFlags))) {
+          logger.debug(
+            () =>
+              `Attack Discovery workflows disabled; skipping scheduled execution ${options.executionId}`
+          );
+          return { state: {} };
+        }
+
         // The alerting framework authenticates via the rule's stored API key but
         // only exposes pre-scoped clients — NOT the authenticated KibanaRequest.
         // The workflow execution engine needs an authenticated KibanaRequest to
@@ -297,7 +340,16 @@ export class DiscoveriesPlugin
           scopedClusterClient: options.services.scopedClusterClient,
         });
 
-        const fakeRawRequest: FakeRawRequest = { headers: authHeaders, path: '/' };
+        // Scope the synthetic request to the rule's space (the alerting
+        // framework's authoritative `options.spaceId`). `CoreKibanaRequest`
+        // reads `FakeRawRequest.spaceId`, so the single `getSpaceId({ request })`
+        // path inside `executeGenerationWorkflow` resolves the correct space for
+        // the authorization guard, anonymization, integrity check, and event log.
+        const fakeRawRequest: FakeRawRequest = {
+          headers: authHeaders,
+          path: '/',
+          spaceId: asSpaceId(options.spaceId),
+        };
         const request = kibanaRequestFactory(fakeRawRequest);
 
         return workflowExecutor({
@@ -324,26 +376,41 @@ export class DiscoveriesPlugin
     return {};
   }
 
-  public start(_core: CoreStart, plugins: DiscoveriesPluginStartDeps): DiscoveriesPluginStart {
+  public start(core: CoreStart, plugins: DiscoveriesPluginStartDeps): DiscoveriesPluginStart {
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
 
-    installStatic({
-      enabled: this.config.enabled,
-      workflowsExtensions: plugins.workflowsExtensions,
-    })
-      .then(({ failedIds }) => {
-        logStartupHealthCheck({
-          expectedWorkflowIds: AD_WORKFLOW_IDS,
-          failedWorkflowIds: failedIds,
-          logger: this.logger,
-          workflowsManagementApiAvailable: this.workflowsManagementApi != null,
-        });
-      })
-      .catch((error) => {
-        this.logger.error(
-          `discoveries: Failed to install static managed workflows: ${error.message}`
+    // Install the Attack Discovery managed workflows into Elasticsearch only when
+    // the plugin is enabled AND the `attackDiscoveryWorkflowsEnabled` feature flag
+    // is ON. Owner registration happens in setup (a setup-only platform contract,
+    // where the feature flag is not readable), but installation is deferred to start
+    // where the request-free feature flags reader is available — mirroring the
+    // agent-builder skill registration above. With the flag off nothing is
+    // installed, so the managed workflows stay inert.
+    void (async () => {
+      if (!this.config.enabled || !(await isWorkflowsEnabled(core.featureFlags))) {
+        this.logger.debug(
+          () =>
+            'discoveries: Attack Discovery workflows disabled; skipping managed workflow installation'
         );
+        return;
+      }
+
+      const { failedIds } = await installStatic({
+        enabled: true,
+        workflowsExtensions: plugins.workflowsExtensions,
       });
+
+      logStartupHealthCheck({
+        expectedWorkflowIds: AD_WORKFLOW_IDS,
+        failedWorkflowIds: failedIds,
+        logger: this.logger,
+        workflowsManagementApiAvailable: this.workflowsManagementApi != null,
+      });
+    })().catch((error) => {
+      this.logger.error(
+        `discoveries: Failed to install static managed workflows: ${error.message}`
+      );
+    });
 
     return {};
   }

@@ -6,7 +6,41 @@
  */
 
 import type { KbnClient } from '@kbn/scout-security';
-import { COMMON_HEADERS, PUBLIC_SCHEDULE_ROUTES, SCHEDULE_ROUTES } from './constants';
+import {
+  ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG,
+  COMMON_HEADERS,
+  GENERATE_ROUTE,
+  MONITORING_ROUTES,
+  PUBLIC_SCHEDULE_ROUTES,
+  SCHEDULE_ROUTES,
+} from './constants';
+
+/**
+ * Minimal shape of the Scout `apiServices` fixture required to override runtime
+ * feature flags via the core `_settings` endpoint.
+ */
+export interface CoreApiSettingsFixture {
+  core: {
+    settings: (configOverrides: Record<string, unknown>) => Promise<void>;
+  };
+}
+
+/**
+ * Enables the AD 2.0 workflows feature flag at runtime so the internal API
+ * routes (`_generate`, schedules, monitoring) are reachable. Without this the
+ * routes fall through to `404 Not Found` via `assertWorkflowsEnabled`.
+ *
+ * Call this in `beforeAll` before exercising any internal route.
+ */
+export const enableWorkflowsFeatureFlag = async (
+  apiServices: CoreApiSettingsFixture
+): Promise<void> => {
+  await apiServices.core.settings({
+    'feature_flags.overrides': {
+      [ATTACK_DISCOVERY_WORKFLOWS_FEATURE_FLAG]: true,
+    },
+  });
+};
 
 /**
  * API client shape required by schedule test helpers.
@@ -88,6 +122,7 @@ export const getSimplePublicSchedule = (
     api_config: {
       actionTypeId: '.gen-ai',
       connectorId: 'test-connector-id',
+      name: 'Test connector',
     },
     size: 20,
   },
@@ -105,7 +140,7 @@ export const getWorkflowSchedulesApis = (
   apiClient: ScheduleApiClient,
   headers: Record<string, string>
 ) => {
-  const defaultHeaders = { ...headers, ...COMMON_HEADERS };
+  const defaultHeaders = { ...headers, ...COMMON_HEADERS, 'elastic-api-version': '1' };
 
   return {
     createSchedule: (body: Record<string, unknown>) =>
@@ -155,6 +190,67 @@ export const getWorkflowSchedulesApis = (
     updateSchedule: (id: string, body: Record<string, unknown>) =>
       apiClient.put(SCHEDULE_ROUTES.UPDATE(id), {
         body,
+        headers: defaultHeaders,
+        responseType: 'json',
+      }),
+  };
+};
+
+/**
+ * Returns a minimal valid ad-hoc generation body for the internal `_generate`
+ * route. Matches the PostGenerateRequestBody schema (required: alerts index
+ * pattern + api_config).
+ */
+export const getSimpleGenerateBody = (
+  overrides: Record<string, unknown> = {}
+): Record<string, unknown> => ({
+  alerts_index_pattern: '.alerts-security.alerts-default',
+  api_config: {
+    action_type_id: '.gen-ai',
+    connector_id: 'test-connector-id',
+  },
+  size: 20,
+  ...overrides,
+});
+
+/**
+ * Convenience wrapper around the internal ad-hoc generation route.
+ */
+export const getGenerateApi = (apiClient: ScheduleApiClient, headers: Record<string, string>) => {
+  const defaultHeaders = { ...headers, ...COMMON_HEADERS, 'elastic-api-version': '1' };
+
+  return {
+    generate: (body: Record<string, unknown>) =>
+      apiClient.post(GENERATE_ROUTE, {
+        body,
+        headers: defaultHeaders,
+        responseType: 'json',
+      }),
+  };
+};
+
+/**
+ * Convenience wrapper around the internal execution-monitoring routes.
+ *
+ * These routes require attack discovery + alerts read + workflows READ (not
+ * execute), so a workflows-read caller can monitor executions without being
+ * able to trigger them.
+ */
+export const getMonitoringApis = (
+  apiClient: ScheduleApiClient,
+  headers: Record<string, string>
+) => {
+  const defaultHeaders = { ...headers, ...COMMON_HEADERS, 'elastic-api-version': '1' };
+
+  return {
+    getExecutionTracking: (executionId: string) =>
+      apiClient.get(MONITORING_ROUTES.EXECUTION_TRACKING(executionId), {
+        headers: defaultHeaders,
+        responseType: 'json',
+      }),
+
+    getPipelineData: (workflowId: string, executionId: string) =>
+      apiClient.get(MONITORING_ROUTES.PIPELINE_DATA(workflowId, executionId), {
         headers: defaultHeaders,
         responseType: 'json',
       }),

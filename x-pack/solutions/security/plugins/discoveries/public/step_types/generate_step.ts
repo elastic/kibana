@@ -83,7 +83,7 @@ export const generateStepPublicDefinition: PublicStepDefinition = {
       `## Full pipeline example
 \`\`\`yaml
 - name: retrieve_alerts
-  type: attack-discovery.defaultAlertRetrieval
+  type: security.attack-discovery.defaultAlertRetrieval
   with:
     alerts_index_pattern: '.alerts-security.alerts-default'
     size: 100
@@ -100,7 +100,7 @@ export const generateStepPublicDefinition: PublicStepDefinition = {
     replacements: \${{ steps.retrieve_alerts.output.replacements }}
 
 - name: validate_discoveries
-  type: attack-discovery.defaultValidation
+  type: security.attack-discovery.defaultValidation
   with:
     attack_discoveries: \${{ steps.generate_discoveries.output.attack_discoveries }}
     anonymized_alerts: \${{ steps.retrieve_alerts.output.anonymized_alerts }}

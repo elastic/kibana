@@ -22,7 +22,7 @@ export const DefaultValidationStepTypeId = 'security.attack-discovery.defaultVal
  */
 export const DefaultValidationInputSchema = z.object({
   alerts_context_count: z.number().int().optional(),
-  alerts_index_pattern: z.string().optional().default('.alerts-security.alerts-*'),
+  alerts_index_pattern: z.string().optional(),
   anonymized_alerts: z.array(AnonymizedAlertSchema).optional(),
   api_config: ApiConfigSchema,
   attack_discoveries: z.array(AttackDiscoverySchema),

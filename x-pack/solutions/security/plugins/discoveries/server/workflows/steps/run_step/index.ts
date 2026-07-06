@@ -25,6 +25,7 @@ export const getRunStepDefinition = (_params: {
   }>;
   logger: Logger;
   workflowsManagementApi?: WorkflowsManagementApi;
-}): { id: string } & Record<string, unknown> => ({
+}): { handler: (context: never) => Promise<unknown>; id: string } & Record<string, unknown> => ({
+  handler: async () => undefined,
   id: 'security.attack-discovery.run',
 });

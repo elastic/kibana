@@ -8,6 +8,8 @@
 import { StepCategory } from '@kbn/workflows';
 import { generateStepPublicDefinition } from './generate_step';
 import { GenerateStepTypeId } from '../../common/step_types/generate_step';
+import { DefaultAlertRetrievalStepTypeId } from '../../common/step_types/default_alert_retrieval_step';
+import { DefaultValidationStepTypeId } from '../../common/step_types/default_validation_step';
 
 describe('generateStepPublicDefinition', () => {
   describe('id', () => {
@@ -129,5 +131,23 @@ describe('generateStepPublicDefinition', () => {
         expect(example).toContain('security.attack-discovery.generate');
       }
     );
+  });
+
+  describe('full pipeline example', () => {
+    const examples = generateStepPublicDefinition.documentation?.examples ?? [];
+    const fullPipelineExample =
+      examples.find((example) => example.includes('Full pipeline example')) ?? '';
+
+    it('is present', () => {
+      expect(fullPipelineExample).not.toBe('');
+    });
+
+    it('references the registered default alert retrieval step type id', () => {
+      expect(fullPipelineExample).toContain(`type: ${DefaultAlertRetrievalStepTypeId}`);
+    });
+
+    it('references the registered default validation step type id', () => {
+      expect(fullPipelineExample).toContain(`type: ${DefaultValidationStepTypeId}`);
+    });
   });
 });

@@ -17,6 +17,7 @@ describe('registerWorkflowSteps', () => {
     registerStepDefinition: mockRegisterStepDefinition,
   } as unknown as WorkflowsExtensionsServerPluginSetup;
   const mockAdhocAttackDiscoveryDataClient = {} as IRuleDataClient;
+  const mockGetBooleanValue = jest.fn();
   const mockGetStartServices = jest.fn();
   const mockGetEventLogger = jest.fn();
   const mockGetEventLogIndex = jest.fn().mockResolvedValue('.kibana-event-log-*');
@@ -29,48 +30,56 @@ describe('registerWorkflowSteps', () => {
     logger: mockLogger,
   } as const;
 
+  // Steps are registered as feature-flag-gated loaders. This resolves every
+  // captured loader and returns the ids of the definitions that were actually
+  // registered (loaders resolving to `undefined` are skipped).
+  const resolveRegisteredStepIds = async (): Promise<string[]> => {
+    const loaders = mockRegisterStepDefinition.mock.calls.map(
+      ([loader]) => loader as () => Promise<{ id: string } | undefined>
+    );
+    const definitions = await Promise.all(loaders.map((loader) => loader()));
+    return definitions
+      .filter((definition): definition is { id: string } => definition != null)
+      .map((definition) => definition.id);
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
     mockGetEventLogIndex.mockResolvedValue('.kibana-event-log-*');
+    mockGetBooleanValue.mockResolvedValue(true);
+    mockGetStartServices.mockResolvedValue({
+      coreStart: { featureFlags: { getBooleanValue: mockGetBooleanValue } },
+      pluginsStart: {},
+    });
   });
 
-  it('registers default alert retrieval step definition', () => {
+  it('registers default alert retrieval step definition when the feature flag is on', async () => {
     registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
 
-    expect(mockRegisterStepDefinition).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'security.attack-discovery.defaultAlertRetrieval',
-      })
+    expect(await resolveRegisteredStepIds()).toContain(
+      'security.attack-discovery.defaultAlertRetrieval'
     );
   });
 
-  it('registers default validation step definition', () => {
+  it('registers default validation step definition when the feature flag is on', async () => {
     registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
 
-    expect(mockRegisterStepDefinition).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'security.attack-discovery.defaultValidation',
-      })
+    expect(await resolveRegisteredStepIds()).toContain(
+      'security.attack-discovery.defaultValidation'
     );
   });
 
-  it('registers generate step definition', () => {
+  it('registers generate step definition when the feature flag is on', async () => {
     registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
 
-    expect(mockRegisterStepDefinition).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'security.attack-discovery.generate',
-      })
-    );
+    expect(await resolveRegisteredStepIds()).toContain('security.attack-discovery.generate');
   });
 
-  it('registers persist discoveries step definition', () => {
+  it('registers persist discoveries step definition when the feature flag is on', async () => {
     registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
 
-    expect(mockRegisterStepDefinition).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'security.attack-discovery.persistDiscoveries',
-      })
+    expect(await resolveRegisteredStepIds()).toContain(
+      'security.attack-discovery.persistDiscoveries'
     );
   });
 
@@ -78,6 +87,20 @@ describe('registerWorkflowSteps', () => {
     registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
 
     expect(mockRegisterStepDefinition).toHaveBeenCalledTimes(5);
+  });
+
+  it('registers loaders (functions), not definitions, with workflowsExtensions', () => {
+    registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
+
+    expect(mockRegisterStepDefinition).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  it('skips registration of every step when the feature flag is off', async () => {
+    mockGetBooleanValue.mockResolvedValue(false);
+
+    registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
+
+    expect(await resolveRegisteredStepIds()).toHaveLength(0);
   });
 
   it('returns StepRegistrationResult with all registeredSteps and no failedSteps when all succeed', () => {
@@ -164,39 +187,27 @@ describe('registerWorkflowSteps', () => {
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('failure'));
   });
 
-  it('passes connectorTimeout to generate step definition', () => {
+  it('passes connectorTimeout to generate step definition', async () => {
     const connectorTimeout = 120000;
 
     registerWorkflowSteps(mockWorkflowsExtensions, { ...defaultArgs, connectorTimeout });
 
-    expect(mockRegisterStepDefinition).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'security.attack-discovery.generate',
-      })
-    );
+    expect(await resolveRegisteredStepIds()).toContain('security.attack-discovery.generate');
   });
 
-  it('passes langSmithApiKey to generate step definition', () => {
+  it('passes langSmithApiKey to generate step definition', async () => {
     const langSmithApiKey = 'test-api-key';
 
     registerWorkflowSteps(mockWorkflowsExtensions, { ...defaultArgs, langSmithApiKey });
 
-    expect(mockRegisterStepDefinition).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'security.attack-discovery.generate',
-      })
-    );
+    expect(await resolveRegisteredStepIds()).toContain('security.attack-discovery.generate');
   });
 
-  it('passes langSmithProject to generate step definition', () => {
+  it('passes langSmithProject to generate step definition', async () => {
     const langSmithProject = 'test-project';
 
     registerWorkflowSteps(mockWorkflowsExtensions, { ...defaultArgs, langSmithProject });
 
-    expect(mockRegisterStepDefinition).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'security.attack-discovery.generate',
-      })
-    );
+    expect(await resolveRegisteredStepIds()).toContain('security.attack-discovery.generate');
   });
 });

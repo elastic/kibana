@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -19,31 +19,31 @@
     "@kbn/attack-discovery-schedules-common",
     "@kbn/config-schema",
     "@kbn/core",
-    "@kbn/core-elasticsearch-server",
     "@kbn/core-http-server",
     "@kbn/core-http-server-utils",
-    "@kbn/core-saved-objects-server",
     "@kbn/i18n",
-    "@kbn/kibana-react-plugin",
-    "@kbn/logging",
     "@kbn/management-settings-ids",
-    "@kbn/react-query",
     "@kbn/rule-registry-plugin",
-    "@kbn/security-ai-prompts",
     "@kbn/discoveries",
-    "@kbn/discoveries-schemas",
     "@kbn/security-plugin",
     "@kbn/scout-security",
-    "@kbn/security-solution-features",
     "@kbn/securitysolution-es-utils",
     "@kbn/securitysolution-utils",
     "@kbn/spaces-plugin",
     "@kbn/task-manager-plugin",
-    "@kbn/triggers-actions-ui-plugin",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
     "@kbn/workflows-management-plugin",
     "@kbn/workflows-yaml",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/logging-mocks",
+    "@kbn/event-log-plugin",
+    "@kbn/inference-common",
+    "@kbn/elastic-assistant-common",
+    "@kbn/actions-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/core-spaces-common",
+    "@kbn/inference-plugin",
+    "@kbn/utility-types"
   ]
 }

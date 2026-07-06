@@ -11,12 +11,14 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 import type { DiscoveriesPluginStartDeps } from '../types';
 import { getDefaultAlertRetrievalStepDefinition } from './steps/default_alert_retrieval_step';
 import { getDefaultValidationStepDefinition } from './steps/default_validation_step';
 import { getGenerateStepDefinition } from './steps/generate_step';
 import { getPersistDiscoveriesStepDefinition } from './steps/persist_discoveries_step';
 import { getRunStepDefinition } from './steps/run_step';
+import { withWorkflowsEnabledGuard } from './with_workflows_enabled_guard';
 
 export interface StepRegistrationResult {
   failedSteps: Array<{ error: string; id: string }>;
@@ -27,20 +29,44 @@ type StepRegistrationOutcome =
   | { error: string; id: string; success: false }
   | { id: string; success: true };
 
+type GetStartServices = () => Promise<{
+  coreStart: CoreStart;
+  pluginsStart: DiscoveriesPluginStartDeps;
+}>;
+
 const tryRegisterStep = ({
+  getStartServices,
   logger,
   stepDefinition,
   workflowsExtensions,
 }: {
+  getStartServices: GetStartServices;
   logger: Logger;
   stepDefinition: { id: string };
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }): StepRegistrationOutcome => {
   try {
+    // Register a flag-gated loader instead of the definition directly. The
+    // Workflows step registry resolves the loader after start (when the feature
+    // flag is readable); resolving `undefined` skips registration, so the step
+    // type is not registered at all while the flag is OFF. The `withWorkflowsEnabledGuard`
+    // wrapping on the definition is retained as the live toggle-off kill-switch.
+    const loader = async () => {
+      const { coreStart } = await getStartServices();
+
+      if (!(await isWorkflowsEnabled(coreStart.featureFlags))) {
+        logger.debug(
+          () =>
+            `Attack Discovery workflows disabled; skipping registration of step '${stepDefinition.id}'`
+        );
+        return undefined;
+      }
+
+      return stepDefinition;
+    };
+
     workflowsExtensions.registerStepDefinition(
-      stepDefinition as Parameters<
-        WorkflowsExtensionsServerPluginSetup['registerStepDefinition']
-      >[0]
+      loader as Parameters<WorkflowsExtensionsServerPluginSetup['registerStepDefinition']>[0]
     );
     return { id: stepDefinition.id, success: true };
   } catch (err) {
@@ -79,75 +105,95 @@ export const registerWorkflowSteps = (
     workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
   }
 ): StepRegistrationResult => {
-  const defaultAlertRetrievalStepDef = getDefaultAlertRetrievalStepDefinition({
-    getEventLogIndex,
-    getEventLogger,
-    getStartServices,
-    logger,
-  });
+  const defaultAlertRetrievalStepDef = withWorkflowsEnabledGuard(
+    getDefaultAlertRetrievalStepDefinition({
+      getEventLogIndex,
+      getEventLogger,
+      getStartServices,
+      logger,
+    }),
+    getStartServices
+  );
   logger.debug(
     () =>
       `Registering defaultAlertRetrievalStepDefinition with id: ${defaultAlertRetrievalStepDef.id}`
   );
   const defaultAlertRetrievalOutcome = tryRegisterStep({
+    getStartServices,
     logger,
     stepDefinition: defaultAlertRetrievalStepDef,
     workflowsExtensions,
   });
 
-  const defaultValidationStepDef = getDefaultValidationStepDefinition({
-    getStartServices,
-    logger,
-  });
+  const defaultValidationStepDef = withWorkflowsEnabledGuard(
+    getDefaultValidationStepDefinition({
+      getStartServices,
+      logger,
+    }),
+    getStartServices
+  );
   logger.debug(
     () => `Registering defaultValidationStepDefinition with id: ${defaultValidationStepDef.id}`
   );
   const defaultValidationOutcome = tryRegisterStep({
+    getStartServices,
     logger,
     stepDefinition: defaultValidationStepDef,
     workflowsExtensions,
   });
 
-  const persistDiscoveriesStepDef = getPersistDiscoveriesStepDefinition({
-    adhocAttackDiscoveryDataClient,
-    getStartServices,
-    logger,
-  });
+  const persistDiscoveriesStepDef = withWorkflowsEnabledGuard(
+    getPersistDiscoveriesStepDefinition({
+      adhocAttackDiscoveryDataClient,
+      getStartServices,
+      logger,
+    }),
+    getStartServices
+  );
   logger.debug(
     () => `Registering persistDiscoveriesStepDefinition with id: ${persistDiscoveriesStepDef.id}`
   );
   const persistDiscoveriesOutcome = tryRegisterStep({
+    getStartServices,
     logger,
     stepDefinition: persistDiscoveriesStepDef,
     workflowsExtensions,
   });
 
-  const generateStepDef = getGenerateStepDefinition({
-    connectorTimeout,
-    getEventLogIndex,
-    getEventLogger,
-    getStartServices,
-    langSmithApiKey,
-    langSmithProject,
-    logger,
-  });
+  const generateStepDef = withWorkflowsEnabledGuard(
+    getGenerateStepDefinition({
+      connectorTimeout,
+      getEventLogIndex,
+      getEventLogger,
+      getStartServices,
+      langSmithApiKey,
+      langSmithProject,
+      logger,
+    }),
+    getStartServices
+  );
   logger.debug(() => `Registering generateStepDefinition with id: ${generateStepDef.id}`);
   const generateOutcome = tryRegisterStep({
+    getStartServices,
     logger,
     stepDefinition: generateStepDef,
     workflowsExtensions,
   });
 
-  const runStepDef = getRunStepDefinition({
-    analytics,
-    getEventLogIndex,
-    getEventLogger,
-    getStartServices,
-    logger,
-    workflowsManagementApi,
-  });
+  const runStepDef = withWorkflowsEnabledGuard(
+    getRunStepDefinition({
+      analytics,
+      getEventLogIndex,
+      getEventLogger,
+      getStartServices,
+      logger,
+      workflowsManagementApi,
+    }),
+    getStartServices
+  );
   logger.debug(() => `Registering runStepDefinition with id: ${runStepDef.id}`);
   const runOutcome = tryRegisterStep({
+    getStartServices,
     logger,
     stepDefinition: runStepDef,
     workflowsExtensions,

@@ -69,19 +69,13 @@ export const getGenerateStepDefinition = ({
         const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
         const inferenceClient = pluginsStart.inference?.getClient({ request });
 
-        const parsedApiConfig = apiConfig as {
-          action_type_id?: string;
-          connector_id: string;
-          model?: string;
-        };
-
         // action_type_id arrives as '' from the UI for EIS connectors; asNonEmpty
         // converts it to undefined so resolveConnectorDetails performs a lookup
         // instead of short-circuiting with an empty value:
         const { actionTypeId: resolvedActionTypeId } = await resolveConnectorDetails({
           actionsClient,
-          actionTypeId: asNonEmpty(parsedApiConfig.action_type_id),
-          connectorId: parsedApiConfig.connector_id,
+          actionTypeId: asNonEmpty(apiConfig.action_type_id),
+          connectorId: apiConfig.connector_id,
           inference: pluginsStart.inference,
           logger,
           request,
@@ -89,8 +83,8 @@ export const getGenerateStepDefinition = ({
 
         const resolvedApiConfig = {
           action_type_id: resolvedActionTypeId,
-          connector_id: parsedApiConfig.connector_id,
-          ...(parsedApiConfig.model != null ? { model: parsedApiConfig.model } : {}),
+          connector_id: apiConfig.connector_id,
+          ...(apiConfig.model != null ? { model: apiConfig.model } : {}),
         };
 
         if (alerts.length === 0) {

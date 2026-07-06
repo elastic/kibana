@@ -14,11 +14,13 @@ import type {
   AttackDiscoveryScheduleContext,
 } from '@kbn/attack-discovery-schedules-common';
 import {
+  backfillAttackIdsBestEffort,
+  buildAlertIdToAttackIdsMap,
   generateAttackDiscoveryAlertHash,
+  normalizeAttackDiscovery,
   transformToBaseAlertDocument,
-  updateAlertsWithAttackIds,
 } from '@kbn/attack-discovery-schedules-common';
-import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { getAttackDiscoveryMarkdownFields } from '@kbn/elastic-assistant-common';
 import { ALERT_URL } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -46,29 +48,6 @@ const DEFAULT_INSIGHT_TYPE = 'attack_discovery';
 
 const computeSha256Hash = (input: string): string =>
   createHash('sha256').update(input).digest('hex');
-
-/**
- * Normalizes attack discovery objects that may arrive with snake_case keys
- * (from workflow execution output) to the camelCase format expected by
- * `generateAttackDiscoveryAlertHash`, `getAttackDiscoveryMarkdownFields`,
- * and `transformToBaseAlertDocument`.
- */
-const normalizeAttackDiscovery = (raw: unknown): AttackDiscovery => {
-  const d = raw as Record<string, unknown>;
-
-  return {
-    alertIds: (d.alertIds ?? d.alert_ids ?? []) as string[],
-    detailsMarkdown: (d.detailsMarkdown ?? d.details_markdown ?? '') as string,
-    entitySummaryMarkdown: (d.entitySummaryMarkdown ?? d.entity_summary_markdown) as
-      | string
-      | undefined,
-    id: d.id as string | undefined,
-    mitreAttackTactics: (d.mitreAttackTactics ?? d.mitre_attack_tactics) as string[] | undefined,
-    summaryMarkdown: (d.summaryMarkdown ?? d.summary_markdown ?? '') as string,
-    timestamp: (d.timestamp ?? '') as string,
-    title: (d.title ?? '') as string,
-  } as AttackDiscovery;
-};
 
 const getDefaultWorkflowConfig = (): WorkflowConfig => ({
   alert_retrieval_mode: 'custom_query',
@@ -192,6 +171,11 @@ export const workflowExecutor = async ({
             workflowsExtensions,
           });
       })(),
+      // Injected so the FF-on scheduled cross-execution de-duplication in the
+      // validation layer computes byte-identical alert hashes to this executor
+      // (the shared @kbn/discoveries package cannot import the Node.js `crypto`
+      // builtin).
+      computeSha256Hash,
       end,
       esClient: scopedClusterClient.asCurrentUser,
       executionUuid,
@@ -274,9 +258,7 @@ export const workflowExecutor = async ({
         withReplacements: false,
       };
 
-      const alertIdToAttackIds: Record<string, string[]> = {};
-
-      await Promise.all(
+      const attacks = await Promise.all(
         attackDiscoveries.map(async (attackDiscovery) => {
           const alertInstanceId = generateAttackDiscoveryAlertHash({
             attackDiscovery,
@@ -291,11 +273,6 @@ export const workflowExecutor = async ({
             actionGroup: 'default',
             id: alertInstanceId,
           });
-
-          for (const alertId of attackDiscovery.alertIds) {
-            alertIdToAttackIds[alertId] = alertIdToAttackIds[alertId] ?? [];
-            alertIdToAttackIds[alertId].push(alertDocId);
-          }
 
           const baseAlertDocument = transformToBaseAlertDocument({
             alertDocId,
@@ -331,6 +308,8 @@ export const workflowExecutor = async ({
             id: alertInstanceId,
             payload: baseAlertDocument,
           });
+
+          return { alertIds: attackDiscovery.alertIds, attackId: alertDocId };
         })
       );
 
@@ -338,9 +317,12 @@ export const workflowExecutor = async ({
 
       const esClient = scopedClusterClient.asCurrentUser;
 
-      await updateAlertsWithAttackIds({
-        alertIdToAttackIdsMap: alertIdToAttackIds,
+      // Best-effort: a back-fill failure must not fail an otherwise-successful
+      // scheduled generation (mirrors the ad-hoc path).
+      await backfillAttackIdsBestEffort({
+        alertIdToAttackIdsMap: buildAlertIdToAttackIdsMap({ attacks }),
         esClient,
+        logger: tracedLogger,
         spaceId,
       });
     }

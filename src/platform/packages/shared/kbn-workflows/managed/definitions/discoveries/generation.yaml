@@ -79,11 +79,12 @@ inputs:
       description: |
         Controls how the built-in default alert retrieval workflow operates.
         Values: 'custom_query' (DSL-based), 'esql' (ES|QL query), 'custom_only' (skip built-in retrieval),
-        'provided' (alerts supplied directly via the `alerts` input; retrieval is skipped).
+        'provided' (alerts supplied directly via the `alerts` input; retrieval is skipped),
+        'skill' (alerts retrieved by the attack-discovery-generator skill workflow).
         This field is read but not acted upon by this workflow.
         The _generate endpoint handles retrieval orchestration.
       type: string
-      enum: ['custom_only', 'custom_query', 'esql', 'provided']
+      enum: ['custom_only', 'custom_query', 'esql', 'provided', 'skill']
     esql_query:
       description: |
         ES|QL query for alert retrieval (required when alert_retrieval_mode is 'esql').

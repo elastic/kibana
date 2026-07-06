@@ -2,7 +2,7 @@
 
 This document is the contract reference for the five Attack Discovery workflow steps: schema source, anonymization-boundary flow, per-step justification (why a step instead of a REST endpoint), failure modes, and the checklist for adding a new step.
 
-For the system-level architecture (three execution paths, the orchestrator, security surfaces, etc.), see the canonical [discoveries plugin README](../../../README.md).
+For the system-level architecture (the four entry points, the orchestrator, security surfaces, etc.), see the canonical [discoveries plugin README](../../../README.md).
 
 ## Schema source: `@kbn/zod/v4` (NOT v3)
 
@@ -50,15 +50,15 @@ Attack Discovery registers **five** workflow step types. Each step is a server-s
 
 | Step Type ID | Category | Status |
 |---|---|---|
-| `attack-discovery.defaultAlertRetrieval` | Elasticsearch | Implemented |
-| `attack-discovery.generate` | AI | Implemented |
-| `attack-discovery.defaultValidation` | Kibana | Implemented |
-| `attack-discovery.persistDiscoveries` | Kibana | Implemented |
-| `attack-discovery.run` | AI | Implemented |
+| `security.attack-discovery.defaultAlertRetrieval` | Elasticsearch | Implemented |
+| `security.attack-discovery.generate` | AI | Implemented |
+| `security.attack-discovery.defaultValidation` | Kibana | Implemented |
+| `security.attack-discovery.persistDiscoveries` | Kibana | Implemented |
+| `security.attack-discovery.run` | AI | Implemented |
 
 ## Anonymization-boundary contract per step
 
-The anonymization boundary sits at `defaultAlertRetrieval`. Everything downstream operates on anonymized strings; the `replacements` map is the only bridge back to real values and is **excluded by the output schema** of `attack-discovery.run` so user-authored workflows cannot inadvertently log or forward the de-anonymization key.
+The anonymization boundary sits at `defaultAlertRetrieval`. Everything downstream operates on anonymized strings; the `replacements` map is the only bridge back to real values and is **excluded by the output schema** of `security.attack-discovery.run` so user-authored workflows cannot inadvertently log or forward the de-anonymization key.
 
 | Step | Input | Output | `replacements` flow |
 |---|---|---|---|
@@ -103,7 +103,7 @@ All five steps share the same fundamental justification for being workflow steps
 
 ---
 
-## Step 1: `attack-discovery.defaultAlertRetrieval`
+## Step 1: `security.attack-discovery.defaultAlertRetrieval`
 
 ### Purpose
 
@@ -111,7 +111,7 @@ Retrieves security alerts from Elasticsearch and anonymizes sensitive fields, pr
 
 ### Consumer
 
-- **Default pipeline**: The `_generate` endpoint's orchestrator invokes the `default-attack-discovery-alert-retrieval` workflow, which contains this step.
+- **Default pipeline**: The `_generate` endpoint's orchestrator invokes the `system-attack-discovery-alert-retrieval` workflow, which contains this step.
 - **Scheduled generation**: The `workflowExecutor` invokes the same pipeline for alerting-framework-based schedules.
 
 ### User Pattern
@@ -119,7 +119,7 @@ Retrieves security alerts from Elasticsearch and anonymizes sensitive fields, pr
 ```yaml
 steps:
   - name: retrieve_alerts
-    type: attack-discovery.defaultAlertRetrieval
+    type: security.attack-discovery.defaultAlertRetrieval
     timeout: '5m'
     with:
       alerts_index_pattern: .alerts-security.alerts-default
@@ -143,7 +143,7 @@ Additionally, the step supports two retrieval modes — DSL query and ES|QL quer
 
 ---
 
-## Step 2: `attack-discovery.generate`
+## Step 2: `security.attack-discovery.generate`
 
 ### Purpose
 
@@ -151,7 +151,7 @@ Invokes the LangGraph-based generation graph with pre-retrieved anonymized alert
 
 ### Consumer
 
-- **Default pipeline**: The `attack-discovery-generation` workflow contains this step, invoked by the orchestrator after alert retrieval.
+- **Default pipeline**: The `system-attack-discovery-generation` workflow contains this step, invoked by the orchestrator after alert retrieval.
 - **Custom workflows**: Advanced users can compose this step with custom retrieval logic.
 
 ### User Pattern
@@ -159,13 +159,12 @@ Invokes the LangGraph-based generation graph with pre-retrieved anonymized alert
 ```yaml
 steps:
   - name: generate
-    type: attack-discovery.generate
+    type: security.attack-discovery.generate
     timeout: '10m'
     with:
       alerts: ${{ steps.retrieve.output.alerts }}
       api_config: ${{ inputs.api_config }}
       replacements: ${{ steps.retrieve.output.replacements }}
-      type: attack_discovery
 ```
 
 ### Why Not a REST Endpoint
@@ -180,12 +179,12 @@ The `_generate/graph` endpoint (now removed) was the REST-endpoint equivalent of
 
 | Direction | Key Fields |
 |-----------|------------|
-| **Input** | `alerts` (string[], min 1), `api_config`, `replacements`, `size`, `type` |
+| **Input** | `alerts` (string[], min 1), `api_config`, `additional_context` (optional), `replacements` (optional), `size` (default 10) |
 | **Output** | `attack_discoveries` (AttackDiscovery[] or null), `execution_uuid`, `replacements` |
 
 ---
 
-## Step 3: `attack-discovery.defaultValidation`
+## Step 3: `security.attack-discovery.defaultValidation`
 
 ### Purpose
 
@@ -193,7 +192,7 @@ Performs hallucination detection (verifying that alert IDs referenced in discove
 
 ### Consumer
 
-- **Default pipeline**: The `attack-discovery-validate` workflow's first step.
+- **Default pipeline**: The `system-attack-discovery-validate` workflow's first step.
 - **Custom validation workflows**: Users can create workflows that add custom filtering logic before or after this step.
 
 ### User Pattern
@@ -201,7 +200,7 @@ Performs hallucination detection (verifying that alert IDs referenced in discove
 ```yaml
 steps:
   - name: validate
-    type: attack-discovery.defaultValidation
+    type: security.attack-discovery.defaultValidation
     with:
       attack_discoveries: ${{ steps.generate.output.attack_discoveries }}
       api_config: ${{ inputs.api_config }}
@@ -216,7 +215,7 @@ Validation requires an Elasticsearch query to check whether referenced alert IDs
 
 More importantly, validation is a **mid-pipeline operation** that feeds directly into persistence. The tight coupling between "validate → persist" is natural in a workflow (one step's output flows to the next) but awkward across REST calls (the caller must receive validated results, then POST them to a persist endpoint).
 
-The `_validate` REST endpoint exists for backward compatibility but is not used by the workflow pipeline. Workflows use this step directly.
+There is no `_validate` REST endpoint — validation runs only as this workflow step within the pipeline. (An earlier `_validate` route was removed; its request/response types remain generated in `@kbn/discoveries-schemas` but are not wired to any route.)
 
 ### Inputs/Outputs Summary
 
@@ -227,7 +226,7 @@ The `_validate` REST endpoint exists for backward compatibility but is not used 
 
 ---
 
-## Step 4: `attack-discovery.persistDiscoveries`
+## Step 4: `security.attack-discovery.persistDiscoveries`
 
 ### Purpose
 
@@ -235,7 +234,7 @@ Writes validated attack discoveries to the ad-hoc Attack Discovery data store as
 
 ### Consumer
 
-- **Default pipeline**: The `attack-discovery-validate` workflow's second step (after validation).
+- **Default pipeline**: The `system-attack-discovery-validate` workflow's second step (after validation).
 - **Scheduled generation**: The `workflowExecutor` persists via the alerting framework's `alertsClient` instead, but uses the same underlying `validateAttackDiscoveries` function for deduplication logic.
 
 ### User Pattern
@@ -243,7 +242,7 @@ Writes validated attack discoveries to the ad-hoc Attack Discovery data store as
 ```yaml
 steps:
   - name: persist
-    type: attack-discovery.persistDiscoveries
+    type: security.attack-discovery.persistDiscoveries
     with:
       attack_discoveries: ${{ steps.validate.output.validated_discoveries }}
       anonymized_alerts: ${{ inputs.anonymized_alerts }}
@@ -270,7 +269,7 @@ The step also handles deduplication by querying the existing index for matching 
 
 ---
 
-## Step 5: `attack-discovery.run`
+## Step 5: `security.attack-discovery.run`
 
 ### Purpose
 
@@ -287,7 +286,7 @@ Executes the full Attack Discovery pipeline (retrieval → generation → valida
 ```yaml
 steps:
   - name: discover
-    type: attack-discovery.run
+    type: security.attack-discovery.run
     with:
       connector_id: ${{ inputs.connector_id }}
 ```
@@ -297,7 +296,7 @@ Or with custom pre-retrieved alerts:
 ```yaml
 steps:
   - name: discover
-    type: attack-discovery.run
+    type: security.attack-discovery.run
     with:
       connector_id: ${{ inputs.connector_id }}
       alerts: ${{ steps.custom_retrieval.output.alerts }}
@@ -317,8 +316,8 @@ The `_generate` endpoint is the REST equivalent for async mode, and it remains a
 
 | Direction | Key Fields |
 |-----------|------------|
-| **Input** | `connector_id` (required), `alert_retrieval_mode` (enum: `custom_query`\|`disabled`\|`esql`\|`provided`, default `sync`), `mode` (enum: `async`\|`sync`, default `sync`), `alerts` (string[], optional pre-retrieved), `size`, `start`/`end`, `filter`, `esql_query`, `alert_retrieval_workflow_ids`, `validation_workflow_id`, `additional_context` |
-| **Output** | `attack_discoveries` (nullable array), `execution_uuid`, `alerts_context_count`, `discovery_count` |
+| **Input** | `connector_id` (optional), `alert_retrieval_mode` (enum: `custom_only`\|`custom_query`\|`esql`\|`provided`, default `custom_query`), `mode` (enum: `async`\|`sync`, default `sync`), `alerts` (string[], optional pre-retrieved), `size` (default 100), `start`/`end`, `filter`, `esql_query`, `alert_retrieval_workflow_ids`, `validation_workflow_id`, `additional_context` |
+| **Output** | `attack_discoveries` (nullable array), `execution_uuid`, `status` (enum: `pending`\|`completed`), `alerts_context_count`, `discovery_count` |
 
 ---
 
@@ -333,7 +332,7 @@ server/workflows/steps/<step_name>/     → getXxxStepDefinition() wrapping Comm
 
 The common definition is a `CommonStepDefinition<TInput, TOutput>` that includes:
 
-- `id`: Step type identifier (e.g., `attack-discovery.generate`)
+- `id`: Step type identifier (e.g., `security.attack-discovery.generate`)
 - `category`: `StepCategory.Elasticsearch | StepCategory.Ai | StepCategory.Kibana`
 - `label`: Human-readable name for the step catalog UI
 - `description`: One-sentence description
@@ -346,7 +345,7 @@ This separation ensures that schema changes are reflected in both the step catal
 
 | Symptom | Likely cause | Where to look |
 |---------|--------------|---------------|
-| Step missing from the Workflows step catalog | Plugin scaffold did not register it (or FF is OFF) | `plugin.setup()` step registration; verify `securitySolution.attackDiscoveryWorkflowsEnabled: true` |
+| Step missing from the Workflows step catalog | `registerWorkflowSteps` recorded a `failedSteps` entry for it, or the `attackDiscoveryWorkflowsEnabled` FF is OFF | `registerWorkflowSteps` outcome logs (each step is registered via a feature-flag-gated loader; when the FF is OFF the loader resolves `undefined`, so the step type is not registered at all and does not appear in the catalog) |
 | `TypeError: Cannot read properties of undefined (reading 'values')` in Workflows UI | v3-zod schema cast to v4 | Check the step's `common/step_types/` file imports `from '@kbn/zod/v4'` directly, not via a v3 cast |
 | Step times out | Step's `timeout` value (in YAML) too short relative to LLM/connector latency | Workflow YAML; LLM connector configuration; the layered timeout architecture in the canonical README |
 | Step cancellation does not stop in-flight LLM calls | Handler ignores the `AbortSignal` from the workflow context | `context.abortSignal` must be threaded into the `actionsClient`/`getFakeRequest()` call |
@@ -359,14 +358,14 @@ This separation ensures that schema changes are reflected in both the step catal
 1. **Create the common definition** in [`common/step_types/<step_name>.ts`](../../../common/step_types/):
    - `import { z } from '@kbn/zod/v4'` — never v3
    - Export `MyStepInputSchema`, `MyStepOutputSchema`, `MyStepCommonDefinition: CommonStepDefinition<...>`
-   - `id` follows the `attack-discovery.<verb>` convention
+   - `id` follows the `security.attack-discovery.<verb>` convention
 2. **Create the server handler** in [`server/workflows/steps/<step_name>/`](.):
    - `helpers/<helper_name>/index.ts` + `helpers/<helper_name>/index.test.ts` for any non-trivial helper (per `identity.md` layout rule)
    - Wrap with `createServerStepDefinition(MyStepCommonDefinition, handler)`
    - Use `context.contextManager.getFakeRequest()` to inherit the workflow execution's auth scope; never use `asInternalUser`
    - Thread `context.abortSignal` into any long-running call (LLM, connector, ES query)
-3. **Register the step** in [`plugin.setup()`](../../plugin.ts) via `tryRegisterStep` (which records `StepRegistrationResult` for the startup health check).
+3. **Register the step** in [`registerWorkflowSteps`](../register_workflow_steps.ts) (called from `plugin.setup()`): wrap the definition with `withWorkflowsEnabledGuard` so the handler throws `"Attack Discovery workflows are not enabled"` if the FF is toggled OFF at runtime, then register via `tryRegisterStep`. `tryRegisterStep` registers a feature-flag-gated loader so the step type is not registered at all while the FF is OFF at startup; it also records `StepRegistrationResult` for the startup health check.
 4. **Write Jest unit tests** alongside the handler. Run with `node scripts/jest --coverage <path-to-step>`.
-5. **If the step joins a default workflow YAML**, update the bundled YAML and the integrity manifest (PR 9 self-healing verifies the YAML byte-stably; whitespace-only diffs trigger drift detection).
+5. **If the step joins a managed workflow YAML**, update the platform-managed definition under `src/platform/packages/shared/kbn-workflows/managed/definitions/`. The plugin's diagnostic `checkManagedWorkflowIntegrity` compares the installed workflow against the managed definition and reports `intact` / `drifted` / `repair_failed` (diagnostic only — it does not self-heal).
 6. **Add a row to the canonical [discoveries plugin README](../../../README.md) Workflow Steps reference table.**
 7. **Update this README's anonymization-boundary table** if the step receives or produces `replacements`.

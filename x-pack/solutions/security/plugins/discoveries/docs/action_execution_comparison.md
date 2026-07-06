@@ -95,9 +95,10 @@ After the executor completes, the Alerting Framework's `ActionScheduler`:
 
 ### 3.2 Hybrid Path (FF ON)
 
-**File:** `x-pack/solutions/security/plugins/discoveries/server/lib/alert_executor/workflow_executor/index.ts`
+**Branch point (shared executor):** `x-pack/solutions/security/plugins/elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/executor.ts`
+**Registered workflow executor (discoveries):** `x-pack/solutions/security/plugins/discoveries/server/lib/schedules/workflow_executor/index.ts` (`workflowExecutor`)
 
-The alerting rule executor detects the `workflowConfig` field in rule params and delegates to `executeGenerationWorkflow()`:
+Both modes run through the **same** alerting rule executor (`attackDiscoveryScheduleExecutor` in `elastic_assistant`). That executor inspects `params.workflowConfig`: when it is present, it looks up the workflow executor factory the `discoveries` plugin registered during setup (`getWorkflowExecutorFactory()`) and delegates to it (throwing a user-facing `TaskRunError` if no factory is registered). The discoveries `workflowExecutor` then:
 
 1. Calls `executeGenerationWorkflow()` — invokes the three-phase workflows pipeline (alert retrieval → generation → validation)
 2. For each discovery returned by the pipeline, **reports an alert** to the framework:
@@ -109,7 +110,7 @@ The alerting rule executor detects the `workflowConfig` field in rule params and
 
 The Alerting Framework's `ActionScheduler` then handles action execution identically to the legacy path — with full frequency/throttling enforcement.
 
-**Key insight:** The executor's `workflowConfig` check is the only branch point. Actions are always handled by the framework regardless of which branch the executor takes.
+**Key insight:** The shared executor's `params.workflowConfig` check is the only branch point. Actions are always handled by the framework regardless of which branch the executor takes.
 
 ---
 
@@ -126,11 +127,18 @@ The `createScheduleDataClient()` factory always returns `AttackDiscoverySchedule
 All CRUD routes follow a simple pattern:
 
 ```typescript
+const disabledResponse = await assertWorkflowsEnabled({ context, response });
+if (disabledResponse) return disabledResponse; // 404 when the FF is OFF
+
 const dataClient = await createScheduleDataClient({ ... });
 await dataClient.someOperation({ id, ...params });
 ```
 
 No branching, no fallback, no dual-client try/catch.
+
+### 4.3 Route guards (internal API)
+
+Every internal schedule route is gated by `assertWorkflowsEnabled` — when `securitySolution.attackDiscoveryWorkflowsEnabled` is OFF the route returns **404 Not Found** (not 403). Additionally, the create and update routes call `assertAlertsIndexPatternInSpace` to reject a client-supplied `alerts_index_pattern` that targets another space or a cross-space wildcard (returning **400**), so a persisted schedule is space-correct at rest.
 
 ---
 
@@ -140,20 +148,20 @@ No branching, no fallback, no dual-client try/catch.
 
 **Behavior:** Works seamlessly.
 
-Schedules are alerting rules in both modes. The two APIs apply different tag strategies to maintain isolation:
+Schedules are alerting rules in both modes. The two APIs apply an **asymmetric** tag strategy:
 
-- **Public API:** no `applyTags` or `filterTags` — creates untagged schedules and reads all untagged alerting-backed schedules.
-- **Internal API:** `applyTags: ['attack-discovery-schedule']` on write + `filterTags: { includeTags: ['attack-discovery-schedule'] }` on read — creates and reads only internally-tagged schedules.
+- **Public API (legacy):** no `applyTags`; `filterTags: { excludeTags: ['attack-discovery-schedule'] }` on read — creates untagged schedules and hides workflow-tagged schedules from its `_find`/by-id results.
+- **Internal API:** `applyTags: ['attack-discovery-schedule']` on write and **no** `filterTags` on read — it is the **superset** view, surfacing both its own tagged rules and untagged legacy schedules.
 
-When FF is turned ON, previously untagged schedules remain visible and manageable via the public API. The UI automatically switches to the internal API for new schedules.
+When FF is turned ON, previously untagged schedules remain visible and manageable via **both** APIs (the internal API sees everything). The UI automatically switches to the internal API for new schedules.
 
-**Why isolation is maintained:** The public API's update path (`rulesClient.update()`) performs full parameter replacement. Its update transform omits `workflowConfig`, so updating an internally-created schedule via the public API would silently wipe ESQL queries and custom workflow IDs. Tag isolation prevents this data loss by ensuring each API only surfaces schedules it safely knows how to update.
+**Why the asymmetry:** the goal is **migration continuity**, not data-loss protection. The internal API deliberately surfaces legacy untagged schedules so they remain visible after the flag is turned on. The public API excludes workflow-tagged schedules so the legacy UI does not surface schedules whose workflow-only fields it cannot present. Cross-API update is safe: `rulesClient.update()` does a full params replacement, but the public update route now reads the existing schedule and re-attaches `workflowConfig` before calling `updateSchedule`, so editing a workflow schedule via the public API no longer silently wipes ES|QL queries or custom workflow IDs.
 
 ### 5.2 Schedule Created with FF ON, then FF Turned OFF
 
 **Behavior:** Works seamlessly for execution; internally-tagged schedules are not visible via the public API.
 
-Schedules created via the internal API are tagged with `attack-discovery-schedule`. When FF is OFF, the UI targets the public API. Because the internal API's `filterTags` restricts reads to the internal tag, and the public API has no `filterTags`, internally-tagged schedules do not appear in the public API's `_find` results.
+Schedules created via the internal API are tagged with `attack-discovery-schedule`. When FF is OFF, the UI targets the public API. Because the public API's `filterTags` **excludes** the workflow tag on read, internally-tagged schedules do not appear in the public API's `_find` results. (The internal API has no `filterTags`, so it would still show them — but the UI does not call it while the flag is off.)
 
 However, because all schedules are stored as alerting rules, they continue to execute normally. Re-enabling the flag restores full UI visibility via the internal API.
 
@@ -183,10 +191,10 @@ These settings are configured per-action on the alerting rule and **always enfor
 | File | Purpose |
 |---|---|
 | `x-pack/solutions/security/plugins/discoveries/server/lib/schedules/create_schedule_data_client/index.ts` | Data client factory — always returns alerting-backed client |
-| `x-pack/solutions/security/plugins/discoveries/server/lib/alert_executor/workflow_executor/index.ts` | Hybrid executor — delegates generation to workflows, reports via `alertsClient` |
-| `x-pack/solutions/security/plugins/elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/executor.ts` | Legacy executor — monolithic generation, reports via `alertsClient` |
+| `x-pack/solutions/security/plugins/discoveries/server/lib/schedules/workflow_executor/index.ts` | Registered workflow executor (`workflowExecutor`) — delegates generation to workflows, reports via `alertsClient` |
+| `x-pack/solutions/security/plugins/elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/executor.ts` | Shared rule executor + branch point — checks `params.workflowConfig`; runs monolithic legacy generation or delegates to the registered workflow executor |
 | `x-pack/solutions/security/plugins/discoveries/server/routes/post/schedules/create_schedule.ts` | Create route (internal API) |
-| `x-pack/solutions/security/plugins/discoveries/server/routes/get/schedules/find_schedules.ts` | Find route (internal API, tag-scoped) |
+| `x-pack/solutions/security/plugins/discoveries/server/routes/get/schedules/find_schedules.ts` | Find route (internal API — unfiltered superset, no `filterTags`) |
 | `x-pack/solutions/security/plugins/discoveries/server/routes/put/schedules/update_schedule.ts` | Update route (internal API) |
 | `x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/settings_flyout/schedule/logic/use_schedule_api.ts` | UI hook swapper based on FF |
 | `x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/use_attack_discovery/index.tsx` | Generation hook — FF branch for API selection |

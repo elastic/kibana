@@ -12,6 +12,7 @@ import type { CoreStart } from '@kbn/core/server';
 import { createTracedLogger } from '@kbn/discoveries/impl/lib/create_traced_logger';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { asNonEmpty } from '../../../lib/non_empty_string';
+import { getAlertsIndexForSpace } from '../../../lib/get_alerts_index_for_space';
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
 import { DefaultValidationStepCommonDefinition } from '../../../../common/step_types/default_validation_step';
 import { authenticateAndGetSpace } from './helpers/authenticate_and_get_space';
@@ -38,7 +39,7 @@ export const getDefaultValidationStepDefinition = ({
     handler: async (context) => {
       try {
         const {
-          alerts_index_pattern: alertsIndexPattern = '.alerts-security.alerts-*',
+          alerts_index_pattern: alertsIndexPattern,
           api_config: apiConfig,
           attack_discoveries: attackDiscoveries,
           connector_name: connectorName,
@@ -56,14 +57,18 @@ export const getDefaultValidationStepDefinition = ({
         const { coreStart, pluginsStart } = await getStartServices();
         const request = context.contextManager.getFakeRequest();
 
-        const { esClient } = await authenticateAndGetSpace({
+        const { esClient, spaceId } = await authenticateAndGetSpace({
           coreStart,
           pluginsStart,
           request,
         });
 
-        const parsedApiConfig = apiConfig as { connector_id?: string } | undefined;
-        const connectorId = parsedApiConfig?.connector_id;
+        // When the caller omits `alerts_index_pattern`, fall back to the
+        // caller's own space index instead of the cross-space `-*` wildcard, so
+        // validation never reads alerts beyond the resolved space boundary.
+        const effectiveAlertsIndexPattern = alertsIndexPattern ?? getAlertsIndexForSpace(spaceId);
+
+        const connectorId = apiConfig.connector_id;
 
         if (!connectorId) {
           throw new Error('Missing connector_id in api_config');
@@ -84,7 +89,7 @@ export const getDefaultValidationStepDefinition = ({
 
         const { filteredCount, filterReason, shouldValidate, validDiscoveries } =
           await filterAndValidateDiscoveries({
-            alertsIndexPattern,
+            alertsIndexPattern: effectiveAlertsIndexPattern,
             attackDiscoveries,
             contextLogger: context.logger,
             esClient,

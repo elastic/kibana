@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout-security/api';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
+  enableWorkflowsFeatureFlag,
   getSimpleWorkflowSchedule,
   getWorkflowSchedulesApis,
 } from '../fixtures/helpers';
@@ -17,7 +18,9 @@ import {
 apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth }) => {
+  apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
+    await enableWorkflowsFeatureFlag(apiServices);
+
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = { ...credentials.cookieHeader };
   });
@@ -101,6 +104,17 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     for (let i = 1; i <= 5; i++) {
       await apis.createSchedule(getSimpleWorkflowSchedule({ name: `Schedule ${i}` }));
     }
+
+    // Schedules are Alerting rules backed by saved objects, so a create is not
+    // guaranteed to be searchable immediately (index refresh lag). Wait until
+    // all five are actually retrievable (not just counted) before asserting
+    // pagination, so the test does not race the refresh.
+    await expect
+      .poll(async () => {
+        const { body } = await apis.findSchedules({ per_page: '100' });
+        return (body as { data: unknown[] }).data.length;
+      })
+      .toBe(5);
 
     const page1 = await apis.findSchedules({ page: '1', per_page: '2' });
     expect(page1.statusCode).toBe(200);
