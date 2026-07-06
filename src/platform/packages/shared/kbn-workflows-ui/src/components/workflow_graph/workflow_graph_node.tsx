@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButtonIcon,
-  EuiIcon,
-  EuiLoadingSpinner,
-  euiShadowXSmall,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButtonIcon, EuiIcon, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import React, { memo, useState } from 'react';
@@ -79,56 +71,53 @@ function getNodeIcon(stepType: string): string {
 // tinted with the trigger/step accent color.
 const LOGO_ICONS = new Set(['logoElasticsearch', 'logoKibana']);
 
-// Figma step/trigger state colors (light mode). Hardcoded to match Figma tokens
-// exactly; EUI does not expose equivalents for these specific tints.
-// Regular step — Static (node 11094:5696)
-const FIGMA_STEP_OUTER_BORDER = '#e3e8f2';
-const FIGMA_STEP_ICON_AREA_BG = '#f1f6ff';
-const FIGMA_STEP_INNER_BOX_BORDER = '#e4e7f1';
-const FIGMA_STEP_ICON_COLOR = '#61a2ff';
-const FIGMA_STEP_LABEL_COLOR = '#111c2c';
-// Regular step — Working (node 10791:5624)
-const FIGMA_RUNNING_BORDER = '#bfdbff';
-// Regular step — Executed (node 11094:5703)
-const FIGMA_SUCCESS_BG = '#d0f3f2';
-const FIGMA_SUCCESS_COLOR = '#16c5c0';
-// Trigger (node 11099:5798)
-const FIGMA_TRIGGER_ICON_AREA_BG = '#fff3f9';
-const FIGMA_TRIGGER_INNER_BOX_BORDER = '#ffc7db';
-const FIGMA_TRIGGER_ICON_COLOR = '#ee72a6';
-// Selected, unrun. Figma uses a saturated outer border but keeps the icon
-// area and inner box at their default colours — selection is signalled by
-// the border alone (nodes 11130:5814 "Selected" and trigger selected variant).
-// Toned down from Figma's `#61a2ff` so the selected border doesn't dominate
-// the rest of the row — still recognisably blue, just less aggressive.
-const FIGMA_STEP_SELECTED_BORDER = '#a3c4ff';
-const FIGMA_TRIGGER_SELECTED_BORDER = '#ffddea';
-
 function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const { stepType, label, isTrigger, stepExecution, preview, step } = node.data;
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
   const isTriggerNode = isTrigger || TRIGGER_STEP_TYPES.has(stepType);
 
+  // Node card colors, sourced from Borealis semantic tokens so they adapt to
+  // light/dark automatically. Each token is the closest match to the design;
+  // the trailing comment shows the light-mode hex each token resolves to (or
+  // approximates).
+  const { colors } = euiTheme;
+  // Card outer border + icon pane are tinted to the node's family:
+  // step = light blue, trigger = light pink.
+  const STEP_OUTER_BORDER = colors.backgroundLightPrimary; // #d8e6ff
+  const STEP_ICON_AREA_BG = colors.backgroundLightPrimary; // ~#e3edff
+  const STEP_INNER_BOX_BORDER = colors.borderBaseSubdued; // ~#e4e7f1
+  const STEP_ICON_COLOR = colors.primary; // ~#61a2ff (light primary #0b64dd)
+  const STEP_LABEL_COLOR = colors.textHeading; // #111c2c
+  const RUNNING_BORDER = colors.primary; // ~#bfdbff
+  const SUCCESS_BG = colors.backgroundBaseSuccess; // ~#d0f3f2
+  const SUCCESS_COLOR = colors.success; // ~#16c5c0
+  const TRIGGER_OUTER_BORDER = colors.backgroundLightAccent; // #ffdbe8
+  const TRIGGER_ICON_AREA_BG = colors.backgroundBaseAccent; // ~#fff3f9
+  const TRIGGER_INNER_BOX_BORDER = colors.borderBaseAccent; // #ffc7db
+  const TRIGGER_ICON_COLOR = colors.accent; // ~#ee72a6 (light accent #bc1e70)
+  const STEP_SELECTED_BORDER = colors.primary; // ~#a3c4ff
+  const TRIGGER_SELECTED_BORDER = colors.accent; // ~#ffddea
+
   // Theme-derived palettes — adapt to dark/light mode automatically.
   const palette = isTriggerNode
     ? {
-        outerBorder: FIGMA_STEP_OUTER_BORDER,
-        iconAreaBg: FIGMA_TRIGGER_ICON_AREA_BG,
-        innerBoxBorder: FIGMA_TRIGGER_INNER_BOX_BORDER,
-        iconColor: FIGMA_TRIGGER_ICON_COLOR,
-        selectedBorder: FIGMA_TRIGGER_SELECTED_BORDER,
+        outerBorder: TRIGGER_OUTER_BORDER,
+        iconAreaBg: TRIGGER_ICON_AREA_BG,
+        innerBoxBorder: TRIGGER_INNER_BOX_BORDER,
+        iconColor: TRIGGER_ICON_COLOR,
+        selectedBorder: TRIGGER_SELECTED_BORDER,
       }
     : {
-        outerBorder: FIGMA_STEP_OUTER_BORDER,
-        iconAreaBg: FIGMA_STEP_ICON_AREA_BG,
-        innerBoxBorder: FIGMA_STEP_INNER_BOX_BORDER,
-        iconColor: FIGMA_STEP_ICON_COLOR,
-        selectedBorder: FIGMA_STEP_SELECTED_BORDER,
+        outerBorder: STEP_OUTER_BORDER,
+        iconAreaBg: STEP_ICON_AREA_BG,
+        innerBoxBorder: STEP_INNER_BOX_BORDER,
+        iconColor: STEP_ICON_COLOR,
+        selectedBorder: STEP_SELECTED_BORDER,
       };
 
-  const statusSuccessColor = FIGMA_SUCCESS_COLOR;
-  const statusSuccessBg = FIGMA_SUCCESS_BG;
+  const statusSuccessColor = SUCCESS_COLOR;
+  const statusSuccessBg = SUCCESS_BG;
   const statusFailColor = euiTheme.colors.danger;
   const statusFailBg = euiTheme.colors.backgroundBaseDanger;
 
@@ -151,7 +140,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
     execStatus === ExecutionStatus.FAILED ||
     execStatus === ExecutionStatus.TIMED_OUT ||
     execStatus === ExecutionStatus.CANCELLED;
-  // Outer border (Figma 11142:2638): a successfully-run step keeps the
+  // Outer border: a successfully-run step keeps the
   // DEFAULT gray outer border — the status reads from the icon area /
   // inner box / icon. Only when the row is selected does the border take
   // on the status colour. Running is its own state and always shows the
@@ -163,25 +152,25 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
       : isSuccess
       ? statusSuccessColor
       : isRunning
-      ? FIGMA_RUNNING_BORDER
+      ? RUNNING_BORDER
       : palette.selectedBorder
     : isRunning
-    ? FIGMA_RUNNING_BORDER
+    ? RUNNING_BORDER
     : palette.outerBorder;
   const iconAreaBg = isSuccess ? statusSuccessBg : isFailed ? statusFailBg : palette.iconAreaBg;
   // Inner box border keeps its default neutral colour when only selection
-  // is active (Figma "Selected" leaves the inner box border at #e4e7f1);
+  // is active (the selected state leaves the inner box border at #e4e7f1);
   // run states still recolour it as before.
   const innerBoxBorder = isSuccess
     ? statusSuccessColor
     : isFailed
     ? statusFailColor
     : palette.innerBoxBorder;
-  // Retry badge — Warning variant (Figma 11107:6610)
-  const FIGMA_RETRY_BADGE_BG = '#fde9b5';
-  const FIGMA_RETRY_BADGE_COLOR = '#825803';
+  // Retry badge — Warning variant
+  const RETRY_BADGE_BG = colors.backgroundBaseWarning; // ~#fde9b5
+  const RETRY_BADGE_COLOR = colors.textWarning; // #825803
 
-  // Figma: 10px for static/executed, 8px for working/running
+  // 10px for static/executed, 8px for working/running
   const borderRadius = isRunning ? 8 : 10;
   const hasStatusIcon = isRunning || isSuccess || isFailed;
   // Hover actions hide when an execution-status icon is visible so they
@@ -213,11 +202,16 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
               css={[
                 { color: palette.iconColor, display: 'flex' },
                 isTriggerNode && {
-                  '& svg, & svg *': { fill: FIGMA_TRIGGER_ICON_COLOR },
+                  '& svg, & svg *': { fill: TRIGGER_ICON_COLOR },
                 },
               ]}
             >
-              {renderStepIcon({ stepType, isTrigger: isTrigger ?? false, size: 'm' })}
+              {renderStepIcon({
+                stepType,
+                isTrigger: isTrigger ?? false,
+                size: 'm',
+                color: palette.iconColor,
+              })}
             </div>
           ) : (
             <EuiIcon
@@ -225,7 +219,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
               size="m"
               color={
                 isTriggerNode
-                  ? FIGMA_TRIGGER_ICON_COLOR
+                  ? TRIGGER_ICON_COLOR
                   : LOGO_ICONS.has(iconType)
                   ? undefined
                   : palette.iconColor
@@ -262,8 +256,15 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             width: '100%',
             height: '100%',
             background: euiTheme.colors.backgroundBasePlain,
+            // Flat card: a 1px border tinted to the node's
+            // family (light blue for steps, light pink for triggers) via
+            // `palette.outerBorder`. Active/running/status states recolor it.
             border: `1px solid ${borderColor}`,
             borderRadius,
+            // Clip children to the card's rounded shape so the icon pane's
+            // corners stay concentric with the card border (otherwise the pane
+            // and card render two slightly different corner arcs).
+            overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
             gap: 16,
@@ -271,16 +272,13 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             // status icon, or hover action) so the retry badge sits at the
             // design's 16px inset from the step's right edge.
             paddingRight: 16,
-            transition: 'border-color 120ms ease, background 120ms ease, box-shadow 120ms ease',
+            transition: 'border-color 120ms ease, background 120ms ease',
           },
-          css`
-            &:hover {
-              ${euiShadowXSmall(euiThemeContext)}
-            }
-          `,
         ]}
       >
-        {/* Icon area — colored background pane */}
+        {/* Icon area — colored background pane. No own corner radius: the card's
+            `overflow: hidden` clips it to the rounded shape, so the pane fills
+            flush into the corner with no gap. */}
         <div
           css={{
             flex: '0 0 auto',
@@ -289,8 +287,6 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             display: 'flex',
             alignItems: 'center',
             padding: 12,
-            borderTopLeftRadius: borderRadius,
-            borderBottomLeftRadius: borderRadius,
             transition: 'background 120ms ease',
           }}
         >
@@ -318,7 +314,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
                 : isFailed
                 ? statusFailColor
                 : isTriggerNode
-                ? FIGMA_TRIGGER_ICON_COLOR
+                ? TRIGGER_ICON_COLOR
                 : palette.iconColor;
               // Triggers in their idle pink state need a hard `fill` override
               // because EuiIcon paints `fill` directly onto the SVG paths,
@@ -330,11 +326,16 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
                     css={[
                       { color: iconColor, display: 'flex' },
                       forceTriggerPinkFill && {
-                        '& svg, & svg *': { fill: FIGMA_TRIGGER_ICON_COLOR },
+                        '& svg, & svg *': { fill: TRIGGER_ICON_COLOR },
                       },
                     ]}
                   >
-                    {renderStepIcon({ stepType, isTrigger: isTrigger ?? false, size: 'm' })}
+                    {renderStepIcon({
+                      stepType,
+                      isTrigger: isTrigger ?? false,
+                      size: 'm',
+                      color: iconColor,
+                    })}
                   </div>
                 );
               }
@@ -358,7 +359,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             fontStyle: 'normal',
             fontWeight: 500,
             lineHeight: '24px',
-            color: FIGMA_STEP_LABEL_COLOR,
+            color: STEP_LABEL_COLOR,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -370,7 +371,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
         </span>
         {/* Retry-on-failure badge: the configured max-attempts taken from
             either `step.retry` or `step['on-failure'].retry`. Mirrors the
-            badge in the execution detail step list. See Figma 10735:23813. */}
+            badge in the execution detail step list. */}
         {maxAttempts != null && (
           <EuiToolTip
             content={i18n.translate('workflowsUi.graphNode.retryBadgeTooltip', {
@@ -396,8 +397,8 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
                 paddingTop: 4,
                 paddingBottom: 4,
                 borderRadius: 999,
-                background: FIGMA_RETRY_BADGE_BG,
-                color: FIGMA_RETRY_BADGE_COLOR,
+                background: RETRY_BADGE_BG,
+                color: RETRY_BADGE_COLOR,
                 fontFamily: euiTheme.font.family,
                 fontSize: 12,
                 fontWeight: 400,
@@ -405,7 +406,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
-              <EuiIcon type="refresh" size="s" color={FIGMA_RETRY_BADGE_COLOR} aria-hidden />
+              <EuiIcon type="refresh" size="s" color={RETRY_BADGE_COLOR} aria-hidden />
               <span>{maxAttempts}</span>
             </div>
           </EuiToolTip>
