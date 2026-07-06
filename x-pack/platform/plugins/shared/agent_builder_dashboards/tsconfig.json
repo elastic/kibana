@@ -9,6 +9,8 @@
     "@kbn/i18n",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
+    "@kbn/agent-builder-visualizations-server",
+    "@kbn/agent-builder-visualizations-common",
     "@kbn/agent-builder-server",
     "@kbn/controls-constants",
     "@kbn/dashboard-plugin",
@@ -30,7 +32,7 @@
     "@kbn/as-code-shared-transforms",
     "@kbn/data-views-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/esql-utils",
+    "@kbn/esql-utils"
   ],
   "exclude": ["target/**/*"]
 }

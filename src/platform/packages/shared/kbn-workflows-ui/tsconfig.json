@@ -7,6 +7,7 @@
   "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts", "index.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/dag-layout",
     "@kbn/react-query",
     "@kbn/kibana-react-plugin",
     "@kbn/workflows",
@@ -21,6 +22,6 @@
     "@kbn/data-views-plugin",
     "@kbn/monaco",
     "@kbn/code-editor",
-    "@kbn/use-observable",
+    "@kbn/use-observable"
   ]
 }
