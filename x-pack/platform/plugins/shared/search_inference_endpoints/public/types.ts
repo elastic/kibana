@@ -24,7 +24,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { EisModelStatus } from '../common/types';
+import type { EisModelStatus, CspRegion } from '../common/types';
 
 export * from '../common/types';
 
