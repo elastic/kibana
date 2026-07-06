@@ -1,4 +1,11 @@
-'use strict';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
 
 const fs = require('fs');
 const path = require('path');
@@ -77,7 +84,8 @@ const buildPrDiffFromFiles = (files) =>
     .join('\n')}\n`;
 
 const withoutPatch = (file) => {
-  const { patch, ...fileMetadata } = file;
+  const fileMetadata = { ...file };
+  delete fileMetadata.patch;
   return fileMetadata;
 };
 
@@ -253,11 +261,11 @@ const getPrMetadata = async ({ github, owner, repo, pullNumber }) => {
   return {
     author: author
       ? {
-        id: author.id,
-        is_bot: author.__typename === 'Bot',
-        login: author.login,
-        name: author.name ?? '',
-      }
+          id: author.id,
+          is_bot: author.__typename === 'Bot',
+          login: author.login,
+          name: author.name ?? '',
+        }
       : null,
     baseRefName: pullRequest.baseRefName,
     body: pullRequest.body,
@@ -272,6 +280,37 @@ const getPrMetadata = async ({ github, owner, repo, pullNumber }) => {
     url: pullRequest.url,
     crossReferencedPulls,
   };
+};
+
+const fetchReviewThreadComments = async ({ github, threadId }) => {
+  const comments = [];
+  let cursor = '';
+
+  try {
+    while (true) {
+      const result = await graphqlWithRetry({
+        github,
+        query: reviewThreadCommentsQuery,
+        variables: {
+          threadId,
+          cursor,
+        },
+      });
+      const page = result.node.comments;
+
+      comments.push(...page.nodes);
+
+      if (!page.pageInfo.hasNextPage) {
+        break;
+      }
+
+      cursor = page.pageInfo.endCursor ?? '';
+    }
+  } catch {
+    return [];
+  }
+
+  return comments;
 };
 
 const fetchReviewThreads = async ({ github, owner, repo, pullNumber }) => {
@@ -310,37 +349,6 @@ const fetchReviewThreads = async ({ github, owner, repo, pullNumber }) => {
   return reviewThreads;
 };
 
-const fetchReviewThreadComments = async ({ github, threadId }) => {
-  const comments = [];
-  let cursor = '';
-
-  try {
-    while (true) {
-      const result = await graphqlWithRetry({
-        github,
-        query: reviewThreadCommentsQuery,
-        variables: {
-          threadId,
-          cursor,
-        },
-      });
-      const page = result.node.comments;
-
-      comments.push(...page.nodes);
-
-      if (!page.pageInfo.hasNextPage) {
-        break;
-      }
-
-      cursor = page.pageInfo.endCursor ?? '';
-    }
-  } catch {
-    return [];
-  }
-
-  return comments;
-};
-
 const getNullableStartLine = ({ startLine, line }) => (startLine === line ? null : startLine);
 
 const reviewThreadToComments = ({ repoFullName, pullNumber, thread }) =>
@@ -351,8 +359,8 @@ const reviewThreadToComments = ({ repoFullName, pullNumber, thread }) =>
     node_id: comment.id,
     diff_hunk: comment.diffHunk,
     path: comment.path ?? thread.path,
-    commit_id: comment.commit.oid,
-    original_commit_id: comment.originalCommit.oid,
+    commit_id: comment.commit?.oid ?? null,
+    original_commit_id: comment.originalCommit?.oid ?? null,
     user: comment.author ? { login: getBotAwareLogin(comment.author) } : null,
     body: comment.body,
     created_at: comment.createdAt,
@@ -390,13 +398,7 @@ const reviewThreadToComments = ({ repoFullName, pullNumber, thread }) =>
     review_thread_start_diff_side: thread.startDiffSide,
   }));
 
-const getReviewComments = async ({
-  github,
-  owner,
-  repo,
-  repoFullName,
-  pullNumber,
-}) => {
+const getReviewComments = async ({ github, owner, repo, repoFullName, pullNumber }) => {
   try {
     const threads = await fetchReviewThreads({ github, owner, repo, pullNumber });
 
