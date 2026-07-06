@@ -54,7 +54,7 @@ export interface ResolveLocaleResult {
  *   1. User profile setting (when value is in `translationHashes`)
  *   2. KBN_LOCALE cookie (only when `allowLocaleCookie` is `true` and value is in `translationHashes`)
  *   3. Explicitly-configured `configLocale` (any `i18n.defaultLocale` other than the built-in `en`)
- *   4. Accept-Language header (exact match against `configuredLocales`, with region-less fallback)
+ *   4. Accept-Language header (exact match against `configuredLocales`, else language-level (region-optional) fallback)
  *   5. `configLocale` (the built-in `en` default)
  */
 export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
@@ -132,10 +132,9 @@ export const readCookie = (cookieHeader: string, name: string): string | undefin
 /**
  * Walks a weighted Accept-Language header and returns the configured locale for
  * the highest-weight entry, matched case-insensitively. Each entry is matched
- * exactly first; a *bare* (region-less) entry such as `fr` then falls back to
- * the first configured locale sharing its primary subtag (`fr` → `fr-FR`).
- * Region-qualified entries (`fr-CH`) are never loosened. Returns `undefined` if
- * no entry matches. Entries with `q=0` are ignored.
+ * exactly first, then falls back to the first configured locale sharing its
+ * primary subtag (`fr` or `fr-CH` → `fr-FR`). Returns `undefined` if no entry
+ * matches. Entries with `q=0` are ignored.
  */
 export const pickFromAcceptLanguage = (
   header: string,
@@ -145,7 +144,7 @@ export const pickFromAcceptLanguage = (
 
   const allowedByLowerCase = new Map<string, string>();
   // Primary subtag → first configured locale with that subtag (config order
-  // wins ties). Used only for bare-tag fallback.
+  // wins ties).
   const allowedByPrimarySubtag = new Map<string, string>();
   for (const id of allowed) {
     const lower = id.toLowerCase();
@@ -180,12 +179,11 @@ export const pickFromAcceptLanguage = (
   for (const { locale } of entries) {
     const exact = allowedByLowerCase.get(locale);
     if (exact) return exact;
-    // Bare (region-less) entry: fall back to a configured locale sharing the
-    // primary subtag. Region-qualified entries stay strict.
-    if (!locale.includes('-')) {
-      const fallback = allowedByPrimarySubtag.get(locale);
-      if (fallback) return fallback;
-    }
+    // No exact match: fall back to a configured locale sharing the primary
+    // subtag, regardless of region (`fr-CH` may resolve to `fr-FR`).
+    const primary = locale.split('-')[0];
+    const fallback = allowedByPrimarySubtag.get(primary);
+    if (fallback) return fallback;
   }
   return undefined;
 };
