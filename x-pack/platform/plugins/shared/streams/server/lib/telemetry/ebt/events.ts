@@ -19,6 +19,7 @@ import {
   STREAMS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
   STREAMS_CODE_ANALYSIS_GROUNDING_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
   STREAMS_ONBOARDING_SCHEDULED_EVENT_TYPE,
 } from './constants';
 import {
@@ -35,6 +36,7 @@ import {
   streamsAgentToolEventInvestigationAttachSchema,
   streamsCodeAnalysisGroundingSchema,
   streamsSignificantEventsDiscoveryTriggeredSchema,
+  streamsSignificantEventsDetectionScanSchema,
   streamsOnboardingScheduledSchema,
 } from './schemas';
 
@@ -101,6 +103,11 @@ const streamsSignificantEventsDiscoveryTriggeredEventType = {
   schema: streamsSignificantEventsDiscoveryTriggeredSchema,
 };
 
+const streamsSignificantEventsDetectionScanEventType = {
+  eventType: STREAMS_SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
+  schema: streamsSignificantEventsDetectionScanSchema,
+};
+
 const streamsOnboardingScheduledEventType = {
   eventType: STREAMS_ONBOARDING_SCHEDULED_EVENT_TYPE,
   schema: streamsOnboardingScheduledSchema,
@@ -120,5 +127,6 @@ export {
   streamsAgentToolEventInvestigationAttachEventType,
   streamsCodeAnalysisGroundingEventType,
   streamsSignificantEventsDiscoveryTriggeredEventType,
+  streamsSignificantEventsDetectionScanEventType,
   streamsOnboardingScheduledEventType,
 };
