@@ -516,6 +516,7 @@ export const PostBulkAgentUnenrollRequestSchema = {
         },
       })
     ),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -545,6 +546,7 @@ export const PostBulkRemoveCollectorsRequestSchema = {
         },
       })
     ),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -587,6 +589,7 @@ export const PostBulkAgentUpgradeRequestSchema = {
     ),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -623,6 +626,7 @@ export const PostBulkRequestDiagnosticsActionRequestSchema = {
         maxSize: 1,
       })
     ),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -678,6 +682,7 @@ export const PostBulkAgentReassignRequestSchema = {
     agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -721,6 +726,7 @@ export const BulkMigrateAgentsRequestSchema = {
     enrollment_token: schema.string(),
     settings: schema.maybe(schema.object(BulkMigrateOptionsSchema)),
     batchSize: schema.maybe(schema.number()),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -733,6 +739,7 @@ export const PostBulkUpdateAgentTagsRequestSchema = {
     tagsToRemove: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -991,6 +998,7 @@ export const BulkChangeAgentsPrivilegeLevelRequestSchema = {
         password: schema.maybe(schema.string()),
       })
     ),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -1011,6 +1019,7 @@ export const PostBulkAgentRollbackRequestSchema = {
     agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
+    dryRun: schema.maybe(schema.boolean()),
   }),
 };
 

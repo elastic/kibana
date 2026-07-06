@@ -126,8 +126,9 @@ export async function bulkMigrateAgents(
     enrollment_token: string;
     uri: string;
     settings?: Record<string, any>;
+    dryRun?: boolean;
   }
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   // Check the user has the correct license
   if (!licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION)) {
     throw new FleetUnauthorizedError(
@@ -151,6 +152,9 @@ export async function bulkMigrateAgents(
   };
 
   if ('agentIds' in options) {
+    if (options.dryRun) {
+      return { count: options.agentIds.length };
+    }
     const givenAgents = await getAgents(esClient, soClient, options);
     const response = await bulkMigrateAgentsBatch(esClient, soClient, givenAgents, {
       enrollment_token: options.enrollment_token,
@@ -172,6 +176,9 @@ export async function bulkMigrateAgents(
     page: 1,
     perPage: 0,
   });
+  if (options.dryRun) {
+    return { count: total };
+  }
   if (total <= batchSize) {
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery: options.kuery,

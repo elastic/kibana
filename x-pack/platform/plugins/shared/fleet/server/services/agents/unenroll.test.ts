@@ -248,7 +248,7 @@ describe('unenroll', () => {
         agentIds: idsToUnenroll,
         revoke: true,
       });
-      expect(unenrolledResponse.actionId).toBeDefined();
+      expect('actionId' in unenrolledResponse && unenrolledResponse.actionId).toBeDefined();
 
       // calls ES update with correct values
       const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
@@ -312,7 +312,7 @@ describe('unenroll', () => {
         force: true,
       });
 
-      expect(unenrolledResponse.actionId).toBeDefined();
+      expect('actionId' in unenrolledResponse && unenrolledResponse.actionId).toBeDefined();
 
       // calls ES update with correct values
       const calledWith = esClient.bulk.mock.calls[0][0];

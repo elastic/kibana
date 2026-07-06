@@ -74,16 +74,23 @@ export async function sendUpgradeAgentsActions(
     startTime?: string;
     batchSize?: number;
     isAutomatic?: boolean;
+    dryRun?: boolean;
   }
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   const currentSpaceId = getCurrentNamespace(soClient);
   // Full set of agents
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
 
   if ('agents' in options) {
+    if (options.dryRun) {
+      return { count: options.agents.length };
+    }
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
+    if (options.dryRun) {
+      return { count: options.agentIds.length };
+    }
     const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
     for (const maybeAgent of maybeAgents) {
       if ('notFound' in maybeAgent) {
@@ -105,6 +112,9 @@ export async function sendUpgradeAgentsActions(
       page: 1,
       perPage: 0,
     });
+    if (options.dryRun) {
+      return { count: total };
+    }
 
     if (total <= batchSize) {
       const res = await getAgentsByKuery(esClient, soClient, {

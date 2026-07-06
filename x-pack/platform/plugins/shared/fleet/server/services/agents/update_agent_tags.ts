@@ -17,22 +17,30 @@ import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
-import { getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
+import { closePointInTime, getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
 import type { GetAgentsOptions } from '.';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
 export async function updateAgentTags(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options: ({ agents: Agent[] } | GetAgentsOptions) & { batchSize?: number },
+  options: ({ agents: Agent[] } | GetAgentsOptions) & { batchSize?: number; dryRun?: boolean },
   tagsToAdd: string[],
   tagsToRemove: string[]
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   const currentSpaceId = getCurrentNamespace(soClient);
   const outgoingErrors: Record<Agent['id'], Error> = {};
   const givenAgents: Agent[] = [];
 
-  if ('agentIds' in options) {
+  if ('agents' in options) {
+    if (options.dryRun) {
+      return { count: options.agents.length };
+    }
+    givenAgents.push(...options.agents);
+  } else if ('agentIds' in options) {
+    if (options.dryRun) {
+      return { count: options.agentIds.length };
+    }
     const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
     for (const maybeAgent of maybeAgents) {
       if ('notFound' in maybeAgent) {
@@ -72,6 +80,11 @@ export async function updateAgentTags(
       perPage: 0,
       pitId,
     });
+
+    if (options.dryRun) {
+      await closePointInTime(esClient, pitId);
+      return { count: res.total };
+    }
 
     return await new UpdateAgentTagsActionRunner(
       esClient,
