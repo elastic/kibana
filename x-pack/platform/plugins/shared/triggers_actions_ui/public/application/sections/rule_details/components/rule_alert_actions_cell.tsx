@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiPopover, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useState, type ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
@@ -19,6 +13,7 @@ import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '@kbn/response-ops-alerts-table/constants';
 import { useViewInAppUrl } from '@kbn/response-ops-alerts-table/hooks/use_view_in_app_url';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
+import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
 
 const VIEW_DETAILS = i18n.translate(
   'xpack.triggersActionsUI.ruleDetails.alertsTable.viewDetailsLabel',
@@ -111,7 +106,7 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
 
       <EuiFlexItem>
         <EuiPopover
-          anchorPosition="downLeft"
+          anchorPosition="rightCenter"
           aria-label={MORE_ACTIONS}
           button={
             <EuiToolTip content={MORE_ACTIONS} disableScreenReaderOutput>
@@ -129,8 +124,9 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
           closePopover={closeActionsPopover}
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
+          panelStyle={{ maxHeight: '80vh', overflowY: 'auto' }}
         >
-          <EuiContextMenuPanel items={actionsMenuItems} data-test-subj="alertsTableActionsMenu" />
+          <ExpandableContextMenuPanel items={actionsMenuItems} />
         </EuiPopover>
       </EuiFlexItem>
     </>

@@ -121,20 +121,23 @@ interface ThroughputAggregations {
   };
 }
 
-const buildComponentQuery = (
+export const buildComponentQuery = (
   serviceInstanceId: string,
   componentId: string,
   componentType: OTelComponentType,
   now: number,
   timeRangeMs: number,
-  fixedInterval: string
+  fixedInterval: string,
+  enrolledAt?: string
 ) => {
   const config = COMPONENT_METRICS[componentType];
   if (!config) {
     return undefined;
   }
 
-  const gte = now - timeRangeMs;
+  const enrolledAtMs = enrolledAt ? Date.parse(enrolledAt) : NaN;
+  const timeRangeGte = now - timeRangeMs;
+  const gte = !isNaN(enrolledAtMs) && enrolledAtMs > timeRangeGte ? enrolledAtMs : timeRangeGte;
   const subAggs: Record<string, unknown> = {};
   for (const group of config.metricGroups) {
     for (const { field, aggType } of group.metrics) {
@@ -216,7 +219,7 @@ export const useComponentMetrics = ({
   fixedInterval: string;
 }): UseComponentMetricsResult => {
   const { data } = useStartServices();
-  const { serviceInstanceId } = useCollectorContext();
+  const { serviceInstanceId, enrolledAt } = useCollectorContext();
 
   const [groups, setGroups] = useState<MetricGroup[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -243,7 +246,8 @@ export const useComponentMetrics = ({
           componentType,
           now,
           timeRangeMs,
-          fixedInterval
+          fixedInterval,
+          enrolledAt
         );
 
         if (!searchRequest) {
@@ -284,7 +288,15 @@ export const useComponentMetrics = ({
     return () => {
       abortController.abort();
     };
-  }, [componentId, componentType, serviceInstanceId, data.search, timeRangeMs, fixedInterval]);
+  }, [
+    componentId,
+    componentType,
+    serviceInstanceId,
+    enrolledAt,
+    data.search,
+    timeRangeMs,
+    fixedInterval,
+  ]);
 
   return { groups, isLoading, error };
 };
