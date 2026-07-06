@@ -55,6 +55,10 @@ export const agentlessPolicyToTableItem = (
     packagePolicy = {
       ...agentlessPolicyToPackagePolicy(agentlessPolicy, packageInfo),
       ...identity,
+      // Keep each row's own package version: the mapper stamps `package` from the shared
+      // (installed/latest) `packageInfo`, which would misreport an older policy's version and
+      // hide its "upgrade available" indicator. The API returns the policy's real package.
+      package: agentlessPolicy.package,
     } as PackagePolicy;
   } catch {
     // Re-deriving a policy's inputs against the manifest can throw (e.g. the policy references a
