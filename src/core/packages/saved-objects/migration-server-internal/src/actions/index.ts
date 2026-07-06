@@ -75,6 +75,11 @@ export type { CreateIndexParams, ClusterShardLimitExceeded } from './create_inde
 
 export { createIndex } from './create_index';
 
+export {
+  ensureIndexShardCount,
+  type EnsureIndexShardCountParams,
+} from './ensure_index_shard_count';
+
 export { checkTargetTypesMappings } from './check_target_mappings';
 
 export const noop = async (): Promise<Either<never, 'noop'>> => right('noop' as const);

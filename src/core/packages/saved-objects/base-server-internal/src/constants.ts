@@ -10,6 +10,28 @@
 import type { IndexTypesMap } from './mappings';
 
 /**
+ * Desired number of primary shards for specific saved objects indices, keyed by
+ * the index's alias (e.g. `.kibana_task_manager`).
+ *
+ * By default every saved objects index is created with a single primary shard
+ * (see `INDEX_NUMBER_OF_SHARDS`). For write-heavy indices this concentrates all
+ * writes on a single primary/node, which caps write throughput regardless of
+ * cluster size and surfaces as `es_rejected_execution_exception` (429) on the
+ * Elasticsearch `write` thread pool. Indices listed here are:
+ *  - created with the specified number of primary shards on fresh deployments,
+ *  - split up to the specified number of primary shards on existing deployments
+ *    (see `ensureIndexShardCount`),
+ * so their write load is spread across nodes.
+ *
+ * NOTE: only powers of two are safe here. Existing indices were created with
+ * Elasticsearch's default (power-of-two) `number_of_routing_shards`, and
+ * `_split` targets must divide it evenly.
+ */
+export const INDEX_NUMBER_OF_SHARDS_OVERRIDES: Record<string, number> = {
+  '.kibana_task_manager': 4,
+};
+
+/**
  * This map holds the default breakdown of SO types per index (pre 8.8.0)
  */
 export const DEFAULT_INDEX_TYPES_MAP: IndexTypesMap = {

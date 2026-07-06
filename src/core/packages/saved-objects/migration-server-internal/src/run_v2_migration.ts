@@ -20,6 +20,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import {
   getVirtualVersionMap,
+  INDEX_NUMBER_OF_SHARDS_OVERRIDES,
   type IndexMappingMeta,
   type MigrationResult,
   type SavedObjectsMigrationConfigType,
@@ -29,6 +30,7 @@ import Semver, { SemVer } from 'semver';
 import { pick } from 'lodash';
 import type { Histogram } from '@opentelemetry/api';
 import type { DocumentMigrator } from './document_migrator';
+import { ensureIndexShardCount } from './actions';
 import { buildActiveMappings, createIndexMap } from './core';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
@@ -110,6 +112,26 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
     indexMap: options.mappingProperties,
     registry: options.typeRegistry,
   });
+
+  // Reconcile the primary shard count of write-heavy indices (e.g. the Task
+  // Manager index) before migrating. On existing deployments this splits the
+  // index up to the desired shard count so writes spread across nodes; on fresh
+  // deployments it is a no-op (the index is created with the desired shard count
+  // by the `createIndex` action). Skipped on serverless (shard settings are not
+  // supported) and for nodes that only wait for migrations to complete.
+  if (!options.waitForMigrationCompletion && !options.esCapabilities.serverless) {
+    for (const indexName of Object.keys(indexMap)) {
+      const numberOfShards = INDEX_NUMBER_OF_SHARDS_OVERRIDES[indexName];
+      if (numberOfShards) {
+        await ensureIndexShardCount({
+          client: options.elasticsearchClient,
+          logger: options.logger,
+          alias: indexName,
+          numberOfShards,
+        });
+      }
+    }
+  }
 
   options.logger.debug('Applying registered migrations for the following saved object types:');
   Object.entries(options.documentMigrator.getMigrationVersion())
