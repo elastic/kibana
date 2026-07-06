@@ -12,6 +12,7 @@ import { noop } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -232,124 +233,128 @@ export function HeaderActions({
             }
           >
             {showSnoozeForm ? (
-              <AlertSnoozePanelInline
-                onApply={handleSnoozeAlertApply}
-                onBack={() => setShowSnoozeForm(false)}
-              />
+              <EuiContextMenuPanel>
+                <AlertSnoozePanelInline
+                  onApply={handleSnoozeAlertApply}
+                  onBack={() => setShowSnoozeForm(false)}
+                />
+              </EuiContextMenuPanel>
             ) : (
-              <div style={{ width: '220px' }}>
-                <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
-                  <div />
+              <EuiContextMenuPanel>
+                <div style={{ width: '220px' }}>
+                  <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+                    <div />
 
-                  <EuiButtonEmpty
-                    size="s"
-                    color="text"
-                    iconType="bellSlash"
-                    onClick={handleOpenSnoozeModal}
-                    disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
-                    data-test-subj="snooze-rule-button"
-                  >
-                    <EuiText size="s">
-                      {i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
-                        defaultMessage: 'Snooze the rule',
-                      })}
-                    </EuiText>
-                  </EuiButtonEmpty>
+                    <EuiButtonEmpty
+                      size="s"
+                      color="text"
+                      iconType="bellSlash"
+                      onClick={handleOpenSnoozeModal}
+                      disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+                      data-test-subj="snooze-rule-button"
+                    >
+                      <EuiText size="s">
+                        {i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
+                          defaultMessage: 'Snooze the rule',
+                        })}
+                      </EuiText>
+                    </EuiButtonEmpty>
 
-                  {ruleId && instanceId ? (
-                    isMuted || isSnoozed ? (
-                      <EuiButtonEmpty
-                        size="s"
-                        color="text"
-                        iconType="bell"
-                        onClick={handleUnsnoozeAlert}
-                        data-test-subj="unsnooze-alert-button"
-                      >
-                        <EuiText size="s">
-                          {i18n.translate('xpack.observability.alertDetails.unsnoozeAlert', {
-                            defaultMessage: 'Unsnooze the alert',
-                          })}
-                        </EuiText>
-                      </EuiButtonEmpty>
-                    ) : (
-                      <EuiButtonEmpty
-                        size="s"
-                        color="text"
-                        iconType="bellSlash"
-                        onClick={() => setShowSnoozeForm(true)}
-                        data-test-subj="snooze-alert-button"
-                      >
-                        <EuiText size="s">
-                          {i18n.translate('xpack.observability.alertDetails.snoozeAlert', {
-                            defaultMessage: 'Snooze the alert',
-                          })}
-                        </EuiText>
-                      </EuiButtonEmpty>
-                    )
-                  ) : null}
+                    {ruleId && instanceId ? (
+                      isMuted || isSnoozed ? (
+                        <EuiButtonEmpty
+                          size="s"
+                          color="text"
+                          iconType="bell"
+                          onClick={handleUnsnoozeAlert}
+                          data-test-subj="unsnooze-alert-button"
+                        >
+                          <EuiText size="s">
+                            {i18n.translate('xpack.observability.alertDetails.unsnoozeAlert', {
+                              defaultMessage: 'Unsnooze the alert',
+                            })}
+                          </EuiText>
+                        </EuiButtonEmpty>
+                      ) : (
+                        <EuiButtonEmpty
+                          size="s"
+                          color="text"
+                          iconType="bellSlash"
+                          onClick={() => setShowSnoozeForm(true)}
+                          data-test-subj="snooze-alert-button"
+                        >
+                          <EuiText size="s">
+                            {i18n.translate('xpack.observability.alertDetails.snoozeAlert', {
+                              defaultMessage: 'Snooze the alert',
+                            })}
+                          </EuiText>
+                        </EuiButtonEmpty>
+                      )
+                    ) : null}
 
-                  <EuiButtonEmpty
-                    size="s"
-                    color="text"
-                    iconType="pencil"
-                    onClick={() => {
-                      setIsPopoverOpen(false);
-                      setAlertDetailsRuleFormFlyoutOpen(true);
-                    }}
-                    disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
-                    data-test-subj="edit-rule-button"
-                  >
-                    <EuiText size="s">
-                      {i18n.translate('xpack.observability.alertDetails.editRule', {
-                        defaultMessage: 'Edit rule',
-                      })}
-                    </EuiText>
-                  </EuiButtonEmpty>
+                    <EuiButtonEmpty
+                      size="s"
+                      color="text"
+                      iconType="pencil"
+                      onClick={() => {
+                        setIsPopoverOpen(false);
+                        setAlertDetailsRuleFormFlyoutOpen(true);
+                      }}
+                      disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+                      data-test-subj="edit-rule-button"
+                    >
+                      <EuiText size="s">
+                        {i18n.translate('xpack.observability.alertDetails.editRule', {
+                          defaultMessage: 'Edit rule',
+                        })}
+                      </EuiText>
+                    </EuiButtonEmpty>
 
-                  <EuiButtonEmpty
-                    size="s"
-                    color="text"
-                    iconType="eyeSlash"
-                    onClick={handleUntrackAlert}
-                    data-test-subj="untrack-alert-button"
-                    disabled={alertStatus !== ALERT_STATUS_ACTIVE}
-                  >
-                    <EuiText size="s">
-                      {i18n.translate('xpack.observability.alertDetails.untrackAlert', {
-                        defaultMessage: 'Mark as untracked',
-                      })}
-                    </EuiText>
-                  </EuiButtonEmpty>
+                    <EuiButtonEmpty
+                      size="s"
+                      color="text"
+                      iconType="eyeSlash"
+                      onClick={handleUntrackAlert}
+                      data-test-subj="untrack-alert-button"
+                      disabled={alertStatus !== ALERT_STATUS_ACTIVE}
+                    >
+                      <EuiText size="s">
+                        {i18n.translate('xpack.observability.alertDetails.untrackAlert', {
+                          defaultMessage: 'Mark as untracked',
+                        })}
+                      </EuiText>
+                    </EuiButtonEmpty>
 
-                  {canReadAlertRule && (
-                    <>
-                      <EuiHorizontalRule margin="none" />
+                    {canReadAlertRule && (
+                      <>
+                        <EuiHorizontalRule margin="none" />
 
-                      <EuiButtonEmpty
-                        size="s"
-                        color="text"
-                        iconType="link"
-                        disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
-                        data-test-subj="view-rule-details-button"
-                        href={
-                          rule
-                            ? http.basePath.prepend(paths.observability.ruleDetails(rule.id))
-                            : ''
-                        }
-                        target="_blank"
-                      >
-                        <EuiText size="s">
-                          {i18n.translate('xpack.observability.alertDetails.viewRuleDetails', {
-                            defaultMessage: 'Go to rule details',
-                          })}
-                        </EuiText>
-                      </EuiButtonEmpty>
-                    </>
-                  )}
+                        <EuiButtonEmpty
+                          size="s"
+                          color="text"
+                          iconType="link"
+                          disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+                          data-test-subj="view-rule-details-button"
+                          href={
+                            rule
+                              ? http.basePath.prepend(paths.observability.ruleDetails(rule.id))
+                              : ''
+                          }
+                          target="_blank"
+                        >
+                          <EuiText size="s">
+                            {i18n.translate('xpack.observability.alertDetails.viewRuleDetails', {
+                              defaultMessage: 'Go to rule details',
+                            })}
+                          </EuiText>
+                        </EuiButtonEmpty>
+                      </>
+                    )}
 
-                  <div />
-                </EuiFlexGroup>
-              </div>
+                    <div />
+                  </EuiFlexGroup>
+                </div>
+              </EuiContextMenuPanel>
             )}
           </EuiPopover>
         </EuiFlexItem>

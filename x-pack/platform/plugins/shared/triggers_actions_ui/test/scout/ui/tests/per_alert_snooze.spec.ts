@@ -53,9 +53,6 @@ const INDEX_THRESHOLD_RULE_TYPE_ID = '.index-threshold';
 const ALERT_INSTANCE_ID_VALUE = `snooze-test-instance-${TEST_RUN_ID}`;
 const ALERT_UUID = `per-alert-snooze-${TEST_RUN_ID}`;
 
-// How long to wait for async operations (API call + React re-render + query invalidation).
-const ASYNC_TIMEOUT = 10_000;
-
 test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful.classic }, () => {
   let ruleId: string;
 
@@ -166,9 +163,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
 
     // After the API call resolves and the table re-fetches snooze state, the
     // bell badge should be visible in the status cell of the row.
-    await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible({
-      timeout: ASYNC_TIMEOUT,
-    });
+    await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible();
   });
 
   test('snoozes an active alert with a condition-based snooze (any operator)', async ({
@@ -190,9 +185,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
     // Apply — conditionOperator defaults to 'any' with a single condition.
     await pageObjects.ruleDetailsPage.applySnooze();
 
-    await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible({
-      timeout: ASYNC_TIMEOUT,
-    });
+    await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible();
   });
 
   test('snoozes an active alert with two conditions using the all operator', async ({
@@ -218,9 +211,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
 
     await pageObjects.ruleDetailsPage.applySnooze();
 
-    await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible({
-      timeout: ASYNC_TIMEOUT,
-    });
+    await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible();
   });
 
   test('snoozes an active alert with a combined time and condition-based snooze', async ({
@@ -245,9 +236,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
 
     await pageObjects.ruleDetailsPage.applySnooze();
 
-    await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible({
-      timeout: ASYNC_TIMEOUT,
-    });
+    await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible();
   });
 
   test('unsnoozes an alert via the row action menu and the snooze badge disappears', async ({
@@ -270,17 +259,13 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
     await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
 
     // The badge should already be visible because the rule SO has a snoozed instance.
-    await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible({
-      timeout: ASYNC_TIMEOUT,
-    });
+    await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible();
 
     // Open the actions menu — the Unsnooze item appears for a snoozed alert.
     await pageObjects.ruleDetailsPage.unsnoozeAlert();
 
     // After the unsnooze API call resolves and the table re-fetches snooze state,
     // the badge should no longer be visible.
-    await expect(page.testSubj.locator('alertSnoozedBadge')).not.toBeVisible({
-      timeout: ASYNC_TIMEOUT,
-    });
+    await expect(page.testSubj.locator('alertSnoozedBadge')).not.toBeVisible();
   });
 });

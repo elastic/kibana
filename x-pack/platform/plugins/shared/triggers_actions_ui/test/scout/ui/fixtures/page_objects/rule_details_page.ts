@@ -73,14 +73,12 @@ export class RuleDetailsPage {
   }
 
   /**
-   * Opens the first alert row's actions menu, clicks Snooze, and waits for the
-   * inline snooze panel to be ready. Assertions stay in the spec.
+   * Opens the first alert row's actions menu and clicks Snooze. Callers assert the
+   * inline snooze panel visibility in the spec (Playwright clicks auto-wait).
    */
   async openAlertSnoozePanel() {
     await this.page.testSubj.click('alertsTableRowActionMore');
-    await this.page.testSubj.waitForSelector('alertsTableActionsMenu', { state: 'visible' });
     await this.page.testSubj.click('snooze-alert-action-snooze');
-    await this.page.testSubj.waitForSelector('alertSnoozePanel', { state: 'visible' });
   }
 
   /**
@@ -88,7 +86,6 @@ export class RuleDetailsPage {
    */
   async unsnoozeAlert() {
     await this.page.testSubj.click('alertsTableRowActionMore');
-    await this.page.testSubj.waitForSelector('alertsTableActionsMenu', { state: 'visible' });
     await this.page.testSubj.click('snooze-alert-action-unsnooze');
   }
 
