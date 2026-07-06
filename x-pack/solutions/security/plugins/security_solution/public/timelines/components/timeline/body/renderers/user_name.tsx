@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { lazy, Suspense, useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -22,10 +22,16 @@ import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_a
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana, useUiSetting } from '../../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { User } from '../../../../../flyout_v2/entity/user/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
+import { FlyoutLoading } from '../../../../../flyout_v2/shared/components/flyout_loading';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
+
+// Lazy-loaded to keep the heavy v2 entity flyout out of the timeline row renderer's static import
+// graph, which would otherwise create a require cycle back through the row renderers barrel.
+const User = lazy(() =>
+  import('../../../../../flyout_v2/entity/user/main').then((module) => ({ default: module.User }))
+);
 
 interface Props {
   contextId: string;
@@ -87,7 +93,11 @@ const UserNameComponent: React.FC<Props> = ({
             services,
             store,
             history,
-            children: <User userName={userName} entityId={resolvedEntityId} />,
+            children: (
+              <Suspense fallback={<FlyoutLoading />}>
+                <User userName={userName} entityId={resolvedEntityId} />
+              </Suspense>
+            ),
           }),
           { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' }
         );
