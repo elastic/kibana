@@ -92,22 +92,6 @@ export const registerUISettings = (
   });
 
   uiSettings.registerGlobal({
-    [WORKFLOWS_VERSIONING_SETTING_ID]: {
-      name: i18n.translate('workflowsManagement.uiSettings.changeHistory.name', {
-        defaultMessage: 'Workflow version history',
-      }),
-      description: i18n.translate('workflowsManagement.uiSettings.changeHistory.description', {
-        defaultMessage:
-          'Internal gate for workflow version history (change-history writes and read routes).',
-      }),
-      schema: schema.boolean(),
-      value: false,
-      readonly: true,
-      readonlyMode: 'ui',
-      requiresPageReload: true,
-      scope: 'global',
-    },
-
     [WORKFLOWS_LIBRARY_ENABLED_SETTING_ID]: {
       name: i18n.translate('workflowsManagement.uiSettings.libraryEnabled.name', {
         defaultMessage: 'Workflow Template Library',
