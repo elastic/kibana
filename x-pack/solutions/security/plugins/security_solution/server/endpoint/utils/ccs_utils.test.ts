@@ -6,9 +6,9 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { checkConnectedRemoteClusters, prefixIndexPatternsWithCcs } from './ccs_utils';
+import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from './ccs_utils';
 
-describe('checkConnectedRemoteClusters', () => {
+describe('hasConnectedRemoteClusters', () => {
   const mockEsClient = (remoteInfo: Record<string, { connected: boolean }>): ElasticsearchClient =>
     ({
       cluster: {
@@ -21,24 +21,24 @@ describe('checkConnectedRemoteClusters', () => {
       cluster_a: { connected: true },
       cluster_b: { connected: false },
     });
-    expect(await checkConnectedRemoteClusters(esClient)).toBe(true);
+    expect(await hasConnectedRemoteClusters(esClient)).toBe(true);
   });
 
   it('returns false when no remote clusters are connected', async () => {
     const esClient = mockEsClient({ cluster_a: { connected: false } });
-    expect(await checkConnectedRemoteClusters(esClient)).toBe(false);
+    expect(await hasConnectedRemoteClusters(esClient)).toBe(false);
   });
 
   it('returns false when there are no remote clusters', async () => {
     const esClient = mockEsClient({});
-    expect(await checkConnectedRemoteClusters(esClient)).toBe(false);
+    expect(await hasConnectedRemoteClusters(esClient)).toBe(false);
   });
 
   it('rejects when remoteInfo throws (caller decides how to handle the failure)', async () => {
     const esClient = {
       cluster: { remoteInfo: jest.fn().mockRejectedValue(new Error('permission denied')) },
     } as unknown as ElasticsearchClient;
-    await expect(checkConnectedRemoteClusters(esClient)).rejects.toThrow('permission denied');
+    await expect(hasConnectedRemoteClusters(esClient)).rejects.toThrow('permission denied');
   });
 });
 

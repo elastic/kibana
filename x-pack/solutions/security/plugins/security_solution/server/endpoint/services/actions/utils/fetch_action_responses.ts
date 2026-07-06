@@ -39,7 +39,6 @@ const buildSearchQuery = (
 
 interface FetchActionResponsesOptions {
   esClient: ElasticsearchClient;
-  /** Used to derive whether Cross-Cluster Search should be applied to the response index reads */
   endpointService: EndpointAppContextService;
   /** List of specific action ids to filter for */
   actionIds?: string[];

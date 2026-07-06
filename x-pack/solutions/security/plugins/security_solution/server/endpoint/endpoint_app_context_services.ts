@@ -82,7 +82,7 @@ import type { ProductFeaturesService } from '../lib/product_features_service/pro
 import type { ResponseActionAgentType } from '../../common/endpoint/service/response_actions/constants';
 import { ScopedEndpointArtifactListClient } from './services/scoped_endpoint_artifact_list_client';
 import { SimpleMemCache } from './lib/simple_mem_cache';
-import { checkConnectedRemoteClusters } from './utils/ccs_utils';
+import { hasConnectedRemoteClusters } from './utils/ccs_utils';
 
 /** Time-to-live (seconds) for the cached connected-remote-clusters check backing `isCcsEnabled` */
 const CCS_CACHE_TTL_SECONDS = 60;
@@ -296,7 +296,7 @@ export class EndpointAppContextService {
     }
 
     try {
-      const hasRemoteClusters = await checkConnectedRemoteClusters(this.getInternalEsClient());
+      const hasRemoteClusters = await hasConnectedRemoteClusters(this.getInternalEsClient());
       this.ccsCache.set(CCS_CACHE_KEY, hasRemoteClusters);
       return hasRemoteClusters;
     } catch (error) {

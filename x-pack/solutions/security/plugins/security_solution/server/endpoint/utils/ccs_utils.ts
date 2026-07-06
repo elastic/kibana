@@ -16,7 +16,7 @@ import { catchAndWrapError } from './wrap_errors';
  * which would hide remote endpoints. Prefer `EndpointAppContextService#isCcsEnabled`, which layers
  * the feature-flag gate and caching on top of this.
  */
-export const checkConnectedRemoteClusters = async (
+export const hasConnectedRemoteClusters = async (
   esClient: ElasticsearchClient
 ): Promise<boolean> => {
   const response = await esClient.cluster.remoteInfo().catch(catchAndWrapError);
