@@ -702,19 +702,10 @@ export class AgentBuilderApp {
       .waitFor({ state: 'visible' });
   }
 
-  async isMcpClientInList(clientId: string): Promise<boolean> {
-    const row = this.page.testSubj.locator(`agentBuilderMcpClientsListRow-${clientId}`);
-    return (await row.count()) > 0;
-  }
-
   async waitForMcpClientRow(clientId: string) {
     await this.page.testSubj
       .locator(`agentBuilderMcpClientsListRow-${clientId}`)
       .waitFor({ state: 'visible' });
-  }
-
-  async isMcpClientsEmptyStateVisible(): Promise<boolean> {
-    return this.page.testSubj.locator('mcpClientsEmptyStateAddButton').isVisible();
   }
 
   private mcpClientsSearchInput() {
@@ -744,13 +735,6 @@ export class AgentBuilderApp {
 
   async openMcpClientCreate() {
     await this.page.testSubj.click('mcpClientsAddButton');
-    await this.page.testSubj
-      .locator('agentBuilderMcpClientCreatePage')
-      .waitFor({ state: 'visible' });
-  }
-
-  async openMcpClientCreateFromEmptyState() {
-    await this.page.testSubj.click('mcpClientsEmptyStateAddButton');
     await this.page.testSubj
       .locator('agentBuilderMcpClientCreatePage')
       .waitFor({ state: 'visible' });
