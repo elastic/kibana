@@ -288,41 +288,49 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
         visShape: 'Area',
       };
 
-      let persistedUnsavedCount: number;
-      let adHocUnsavedCount: number;
-      let esqlUnsavedCount: number;
+      // Capture each tab's hit count while the unsaved changes are applied, so we
+      // can assert after reload that the restored state actually re-runs the search
+      // and yields the same results (not just that the input controls rehydrate).
+      const persistedUnsavedCount = await spaceTest.step(
+        'make unsaved changes to persisted tab',
+        async () => {
+          await datePicker.setAbsoluteRange(persistedUnsaved.time);
+          await queryBar.setQuery(persistedUnsaved.query);
+          await discover.submitQuery();
+          await discover.waitUntilTabIsLoaded();
+          await addFieldColumn(page, PERSISTED_TAB.column2);
+          return discover.getHitCountInt();
+        }
+      );
 
-      await spaceTest.step('make unsaved changes to persisted tab', async () => {
-        await datePicker.setAbsoluteRange(persistedUnsaved.time);
-        await queryBar.setQuery(persistedUnsaved.query);
-        await discover.submitQuery();
-        await discover.waitUntilTabIsLoaded();
-        await addFieldColumn(page, PERSISTED_TAB.column2);
-        persistedUnsavedCount = await discover.getHitCountInt();
-      });
+      const adHocUnsavedCount = await spaceTest.step(
+        'make unsaved changes to ad hoc tab',
+        async () => {
+          await unifiedTabs.selectTab(1);
+          await discover.waitUntilTabIsLoaded();
+          expect(await discover.getSelectedDataViewName()).toBe(AD_HOC_TAB.dataView);
+          await datePicker.setAbsoluteRange(adHocUnsaved.time);
+          await queryBar.setQuery(adHocUnsaved.query);
+          await discover.submitQuery();
+          await discover.waitUntilTabIsLoaded();
+          await addFieldColumn(page, AD_HOC_TAB.column2);
+          return discover.getHitCountInt();
+        }
+      );
 
-      await spaceTest.step('make unsaved changes to ad hoc tab', async () => {
-        await unifiedTabs.selectTab(1);
-        await discover.waitUntilTabIsLoaded();
-        expect(await discover.getSelectedDataViewName()).toBe(AD_HOC_TAB.dataView);
-        await datePicker.setAbsoluteRange(adHocUnsaved.time);
-        await queryBar.setQuery(adHocUnsaved.query);
-        await discover.submitQuery();
-        await discover.waitUntilTabIsLoaded();
-        await addFieldColumn(page, AD_HOC_TAB.column2);
-        adHocUnsavedCount = await discover.getHitCountInt();
-      });
-
-      await spaceTest.step('make unsaved changes to ES|QL tab', async () => {
-        await unifiedTabs.selectTab(2);
-        await discover.waitUntilTabIsLoaded();
-        await datePicker.setAbsoluteRange(esqlUnsaved.time);
-        await discover.codeEditor.setCodeEditorValue(esqlUnsaved.query);
-        await page.testSubj.click('querySubmitButton');
-        await discover.waitUntilTabIsLoaded();
-        await changeVisShape(page, esqlUnsaved.visShape);
-        esqlUnsavedCount = await discover.getHitCountInt();
-      });
+      const esqlUnsavedCount = await spaceTest.step(
+        'make unsaved changes to ES|QL tab',
+        async () => {
+          await unifiedTabs.selectTab(2);
+          await discover.waitUntilTabIsLoaded();
+          await datePicker.setAbsoluteRange(esqlUnsaved.time);
+          await discover.codeEditor.setCodeEditorValue(esqlUnsaved.query);
+          await page.testSubj.click('querySubmitButton');
+          await discover.waitUntilTabIsLoaded();
+          await changeVisShape(page, esqlUnsaved.visShape);
+          return discover.getHitCountInt();
+        }
+      );
 
       await expect(page.testSubj.locator('split-button-notification-indicator')).toBeVisible();
 
@@ -342,7 +350,7 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
         });
         expect(await getSelectedSidebarFields(page)).toStrictEqual(persistedUnsaved.columns);
         expect(await discover.getSelectedDataViewName()).toBe(PERSISTED_TAB.dataView);
-        expect(await discover.getHitCountInt()).toBe(persistedUnsavedCount!);
+        expect(await discover.getHitCountInt()).toBe(persistedUnsavedCount);
       });
 
       await spaceTest.step('validate ad hoc tab unsaved changes', async () => {
@@ -355,7 +363,7 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
         });
         expect(await getSelectedSidebarFields(page)).toStrictEqual(adHocUnsaved.columns);
         expect(await discover.getSelectedDataViewName()).toBe(AD_HOC_TAB.dataView);
-        expect(await discover.getHitCountInt()).toBe(adHocUnsavedCount!);
+        expect(await discover.getHitCountInt()).toBe(adHocUnsavedCount);
       });
 
       await spaceTest.step('validate ES|QL tab unsaved changes', async () => {
@@ -367,7 +375,7 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
           end: esqlUnsaved.timeISO.end,
         });
         expect(await getCurrentVisTitle(page)).toBe(esqlUnsaved.visShape);
-        expect(await discover.getHitCountInt()).toBe(esqlUnsavedCount!);
+        expect(await discover.getHitCountInt()).toBe(esqlUnsavedCount);
       });
 
       await expect(page.testSubj.locator('split-button-notification-indicator')).toBeVisible();
