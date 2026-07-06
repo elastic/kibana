@@ -20,6 +20,7 @@ import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection
 import { useScheduleRuleRun } from '../../../../rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../../common';
+import { ENABLE_RULE_CHANGES_HISTORY_SETTING } from '../../../../../../common/constants';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -30,7 +31,7 @@ import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import type { Rule } from '../../../../rule_management/logic';
 import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
@@ -105,7 +106,13 @@ const RuleActionsOverflowComponent = ({
     state: { doesBaseVersionExist },
   } = useRuleCustomizationsContext();
 
-  const isRuleChangesHistoryEnabled = useIsExperimentalFeatureEnabled('ruleChangesHistoryEnabled');
+  const ruleChangesHistoryFFEnabled = useIsExperimentalFeatureEnabled('ruleChangesHistoryEnabled');
+  const [ruleChangesHistoryAdvancedSetting] = useUiSetting$<boolean>(
+    ENABLE_RULE_CHANGES_HISTORY_SETTING,
+    false
+  );
+  const isRuleChangesHistoryEnabled =
+    ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
 
   const actions = useMemo(
     () => [

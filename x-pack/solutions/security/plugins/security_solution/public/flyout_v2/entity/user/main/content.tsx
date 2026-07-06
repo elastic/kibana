@@ -115,7 +115,7 @@ export const Content = ({
     <>
       {!skipRiskAndCriticality && (
         <EntityHighlightsAccordion
-          entityIdentifier={entityRecord ? entityRecord.entity.id : userName}
+          entityIdentifier={entityRecord?.entity?.id ?? userName}
           entityType={EntityType.user}
         />
       )}
@@ -131,7 +131,7 @@ export const Content = ({
               queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
-              entityId={entityRecord?.entity.id}
+              entityId={entityRecord?.entity?.id}
               prefetchedResolutionRisk={prefetchedResolutionRisk}
               hideHeaderIcon={hideHeaderIcons}
             />
