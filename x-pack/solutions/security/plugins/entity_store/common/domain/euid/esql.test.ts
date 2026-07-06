@@ -22,7 +22,9 @@ import type {
   FieldEvaluation,
   FieldEvaluationWhenClause,
 } from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinition } from '../definitions/registry';
+import { userEntityDefinition } from '../definitions/user';
 
 const normalize = (s: string) =>
   s
@@ -535,9 +537,13 @@ describe('buildDestinationFieldEsql', () => {
   });
 
   describe('field-mapping then', () => {
-    const cloudProviderClause = {
-      condition: { field: 'event.kind', includes: 'asset' } as const,
-      then: { field: 'cloud.provider', mapping: { aws: 'aws', gcp: 'gcp', azure: 'entra_id' } },
+    // Use the real user definition as source of truth so this block stays in sync
+    // with user.ts automatically — no duplicate manual copy to drift.
+    const { identityField } = userEntityDefinition;
+    if (isSingleFieldIdentity(identityField)) throw new Error('expected multi-field identity');
+    const cloudProviderClause = identityField.fieldEvaluations[0].whenClauses[1] as FieldEvaluationWhenClause & {
+      condition: object;
+      then: { field: string; mapping: Record<string, string> };
     };
 
     it('emits a precompute column for the condition and a nested CASE for the mapping', () => {
@@ -550,10 +556,14 @@ describe('buildDestinationFieldEsql', () => {
 
       expect(conditionPrecomputes).toHaveLength(1);
       expect(conditionPrecomputes[0].colName).toBe('_eval_dest_arm0');
+      // The precomputed condition covers both fields from the real user.ts compound condition.
+      expect(conditionPrecomputes[0].esql).toContain('event.kind');
+      expect(conditionPrecomputes[0].esql).toContain('asset_discovery');
 
       // Outer CASE guards on the condition column; inner CASE maps cloud.provider values.
       // When condition is true but cloud.provider is absent or not in the mapping,
       // the inner CASE returns NULL → COALESCE falls through to the next arm.
+      // The expression structure is stable regardless of the condition shape.
       expect(expression).toBe(
         'COALESCE(' +
           'CASE(COALESCE(_eval_dest_arm0, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == "aws", "aws", MV_FIRST(TO_STRING(cloud.provider)) == "gcp", "gcp", MV_FIRST(TO_STRING(cloud.provider)) == "azure", "entra_id")), ' +
@@ -578,34 +588,6 @@ describe('buildDestinationFieldEsql', () => {
       expect(expression).not.toContain('"ibm"');
     });
 
-    it('handles compound and-condition as the outer guard (real user.ts shape)', () => {
-      // user.ts now requires both event.kind=asset AND event.module=asset_discovery
-      // so that only the Cloud Asset Discovery integration triggers the cloud.provider mapping.
-      const realClause: FieldEvaluationWhenClause = {
-        condition: {
-          and: [
-            { field: 'event.kind', includes: 'asset' },
-            { field: 'event.module', includes: 'asset_discovery' },
-          ],
-        },
-        then: { field: 'cloud.provider', mapping: { aws: 'aws', gcp: 'gcp', azure: 'entra_id' } },
-      };
-
-      const { expression, conditionPrecomputes } = buildDestinationFieldEsql(
-        '_src',
-        '_eval_dest',
-        '"unknown"',
-        [realClause]
-      );
-
-      expect(conditionPrecomputes).toHaveLength(1);
-      // The precomputed boolean checks both event.kind and event.module.
-      expect(conditionPrecomputes[0].esql).toContain('event.kind');
-      expect(conditionPrecomputes[0].esql).toContain('asset_discovery');
-      // The outer CASE uses the precompute; the inner CASE maps cloud.provider.
-      expect(expression).toContain('CASE(COALESCE(_eval_dest_arm0, FALSE), CASE(');
-      expect(expression).toContain('"aws", "aws"');
-    });
   });
 });
 

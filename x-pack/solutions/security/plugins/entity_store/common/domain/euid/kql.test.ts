@@ -251,9 +251,10 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
       expect(awsFilter).toBeDefined();
       expect(gcpFilter).toBeDefined();
 
-      // Each filter must pin the specific provider so the two entities never cross-match.
-      expect(awsFilter).toContain('cloud.provider: "aws"');
-      expect(gcpFilter).toContain('cloud.provider: "gcp"');
+      // Full-string snapshots: verify the exact KQL shape including the compound condition
+      // (event.kind=asset AND event.module=asset_discovery AND cloud.provider==<value>).
+      expect(awsFilter).toMatchSnapshot('aws filter');
+      expect(gcpFilter).toMatchSnapshot('gcp filter');
 
       // No cross-contamination: the aws filter must not reference gcp and vice versa.
       expect(awsFilter).not.toContain('"gcp"');

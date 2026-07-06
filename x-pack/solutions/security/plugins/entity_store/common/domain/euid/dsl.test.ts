@@ -366,12 +366,13 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       expect(awsFilter).toBeDefined();
       expect(gcpFilter).toBeDefined();
 
+      // Full-object snapshots: verify the exact DSL shape including the compound condition
+      // (event.kind=asset AND event.module=asset_discovery AND cloud.provider==<value>).
+      expect(awsFilter).toMatchSnapshot('aws filter');
+      expect(gcpFilter).toMatchSnapshot('gcp filter');
+
       const awsJson = JSON.stringify(awsFilter);
       const gcpJson = JSON.stringify(gcpFilter);
-
-      // Each filter must pin the specific provider so the two entities never cross-match.
-      expect(awsJson).toContain('"aws"');
-      expect(gcpJson).toContain('"gcp"');
 
       // No cross-contamination: the aws filter must not reference gcp and vice versa.
       expect(awsJson).not.toContain('"gcp"');
