@@ -9,7 +9,7 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import type { RecursivePartial } from '@elastic/eui';
-import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -30,6 +30,8 @@ import { ApmDocumentType } from '../../../../../common/document_type';
 import { TransactionTypeSelect } from './transaction_type_select';
 import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
 import { RedMetricsChartActions } from './red_metrics_chart_actions';
+import { AnomalyChartPanel } from './anomaly_chart_panel';
+import { AnomalySeverityBadge, type AnomalyChartInfo } from './anomaly_severity_badge';
 
 type ErrorRate =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
@@ -63,6 +65,7 @@ export function FailedTransactionChart({
   filters,
   customAlertEvaluationThreshold,
   threshold,
+  anomaly,
   ruleTypeId,
   compact,
   showAlertAnnotations,
@@ -84,6 +87,7 @@ export function FailedTransactionChart({
   filters?: BoolQuery;
   customAlertEvaluationThreshold?: number;
   threshold?: ReactElement;
+  anomaly?: AnomalyChartInfo;
   ruleTypeId?: ApmRuleType;
   /** When true, hide the threshold side panel even if `threshold` is provided. */
   compact?: boolean;
@@ -174,7 +178,7 @@ export function FailedTransactionChart({
 
   return (
     <EuiFlexItem>
-      <EuiPanel hasBorder={true}>
+      <AnomalyChartPanel anomalyScore={anomaly?.score}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
@@ -185,6 +189,11 @@ export function FailedTransactionChart({
               </h2>
             </EuiTitle>
           </EuiFlexItem>
+          {anomaly && (
+            <EuiFlexItem grow={false}>
+              <AnomalySeverityBadge severity={anomaly.severity} score={anomaly.score} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiIconTip content={errorRateI18n} position="right" />
           </EuiFlexItem>
@@ -240,7 +249,7 @@ export function FailedTransactionChart({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </AnomalyChartPanel>
     </EuiFlexItem>
   );
 }
