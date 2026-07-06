@@ -117,7 +117,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           <>
             <EuiCallOut
               title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.title', {
-                defaultMessage: 'All models may not be available in all regions',
+                defaultMessage: 'Some models aren't available in every region.',
               })}
               color="primary"
               iconType="info"
