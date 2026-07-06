@@ -83,7 +83,9 @@ export type EisInferenceEndpoint = InferenceAPIConfigResponse & {
 };
 
 export type InferenceEndpointWithMetadata = EisInferenceEndpoint & {
-  metadata: EisInferenceEndpointMetadata;
+  metadata: EisInferenceEndpointMetadata & {
+    regions?: CspRegion[];
+  };
 };
 
 export type InferenceEndpointWithDisplayNameMetadata = InferenceEndpointWithMetadata & {

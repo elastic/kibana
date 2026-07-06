@@ -7,6 +7,7 @@
 
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import type {
+  CspRegion,
   EisInferenceEndpoint,
   InferenceEndpointWithMetadata,
   InferenceEndpointWithDisplayNameMetadata,
@@ -71,3 +72,13 @@ export function isInferenceEndpointWithDisplayCreatorMetadata(
     metadata.display.model_creator.length > 0
   );
 }
+
+/**
+ * Returns true when `value` is a valid {@link CspRegion} object (has both `csp` and `region` as
+ * non-empty strings). The optional `geo` field is not validated — its absence is allowed.
+ */
+export const isCspRegion = (value: unknown): value is CspRegion => {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.csp === 'string' && typeof v.region === 'string';
+};

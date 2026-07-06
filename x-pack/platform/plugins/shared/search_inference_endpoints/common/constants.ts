@@ -35,6 +35,21 @@ export const DYNAMIC_CONNECTORS_POLLING_START_DELAY = 5000; // 5 seconds
 
 export const NO_DEFAULT_MODEL = 'NO_DEFAULT_MODEL';
 
+/**
+ * Maps a `csp::region` key to a human-readable region name.
+ * Based on the EIS inference locations list provided by the EIS team.
+ * Falls back to the raw region code if not found.
+ */
+export const REGION_DISPLAY_NAMES: Record<string, string> = {
+  'aws::eu-central-1': 'EU Central (Frankfurt)',
+  'aws::eu-west-1': 'EU West (Ireland)',
+  'aws::us-east-1': 'US East (N. Virginia)',
+  'gcp::asia-southeast1': 'Asia Southeast (Singapore)',
+  'gcp::europe-west1': 'EU West (Belgium)',
+  'gcp::us-east4': 'US East (N. Virginia)',
+  'gcp::us-east5': 'US East (Columbus)',
+};
+
 export const INFERENCE_UI_CAPABILITIES = {
   show: 'show',
   manage: 'manage',

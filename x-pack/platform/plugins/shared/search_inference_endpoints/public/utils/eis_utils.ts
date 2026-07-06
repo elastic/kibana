@@ -17,6 +17,7 @@ import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
+  isCspRegion,
 } from '../../common/type_guards';
 import type { MultiSelectFilterOption } from '../components/filter/multi_select_filter';
 
@@ -308,20 +309,7 @@ export function getModelDeprecatedMessage(deprecatedFormattedDate: string | null
       );
 }
 
-/**
- * Maps a `csp::region` key to a human-readable region name.
- * Based on the EIS inference locations list provided by the EIS team.
- * Falls back to the raw region code if not found.
- */
-export const REGION_DISPLAY_NAMES: Record<string, string> = {
-  'aws::eu-central-1': 'EU Central (Frankfurt)',
-  'aws::eu-west-1': 'EU West (Ireland)',
-  'aws::us-east-1': 'US East (N. Virginia)',
-  'gcp::asia-southeast1': 'Asia Southeast (Singapore)',
-  'gcp::europe-west1': 'EU West (Belgium)',
-  'gcp::us-east4': 'US East (N. Virginia)',
-  'gcp::us-east5': 'US East (Columbus)',
-};
+export { REGION_DISPLAY_NAMES } from '../../common/constants';
 
 const GEO_DISPLAY_NAMES: Record<string, string> = {
   apac: i18n.translate('xpack.searchInferenceEndpoints.geo.asiaPacific', {
@@ -358,7 +346,8 @@ const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, Cs
   const byGeo = new Map<string, Map<string, CspRegion>>();
 
   for (const ep of endpoints) {
-    const regions = (ep.metadata as Record<string, unknown> | undefined)?.regions;
+    if (!isInferenceEndpointWithMetadata(ep)) continue;
+    const regions = ep.metadata.regions;
     if (!Array.isArray(regions)) continue;
 
     for (const region of regions) {
@@ -397,12 +386,6 @@ export const getRegionZoneCounts = (
   }).filter(({ modelCount }) => modelCount > 0);
 };
 
-const isCspRegion = (value: unknown): value is CspRegion => {
-  if (!value || typeof value !== 'object') return false;
-  const v = value as Record<string, unknown>;
-  return typeof v.csp === 'string' && typeof v.region === 'string';
-};
-
 /**
  * Aggregates all unique CSP regions from EIS endpoint `regions` metadata.
  * The returned list is deduplicated (by csp+region key) and sorted alphabetically.
@@ -411,7 +394,8 @@ export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegio
   const seen = new Map<string, CspRegion>();
 
   for (const ep of endpoints) {
-    const regions = (ep.metadata as Record<string, unknown> | undefined)?.regions;
+    if (!isInferenceEndpointWithMetadata(ep)) continue;
+    const regions = ep.metadata.regions;
     if (!Array.isArray(regions)) continue;
 
     for (const region of regions) {
