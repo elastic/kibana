@@ -22,7 +22,6 @@ export {
   BytesFormat,
   ColorFormat,
   DurationFormat,
-  convertDurationValue,
   GeoPointFormat,
   IpFormat,
   NumberFormat,
@@ -44,6 +43,7 @@ export {
   DEFAULT_DURATION_OUTPUT_FORMAT,
   DURATION_INPUT_FORMATS,
   DURATION_OUTPUT_FORMATS,
+  DURATION_RATIO_TO_SECONDS,
 } from './constants/duration_formats';
 export { FIELD_FORMAT_IDS } from './types';
 

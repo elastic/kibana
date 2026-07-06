@@ -19,60 +19,20 @@ import {
   DEFAULT_DURATION_OUTPUT_FORMAT,
   DURATION_INPUT_FORMATS,
   DURATION_OUTPUT_FORMATS,
+  DURATION_RATIO_TO_SECONDS,
 } from '../constants/duration_formats';
-
-const ratioToSeconds: Record<string, number> = {
-  picoseconds: 0.000000000001,
-  nanoseconds: 0.000000001,
-  microseconds: 0.000001,
-};
 
 const HUMAN_FRIENDLY = 'humanize';
 const HUMAN_FRIENDLY_PRECISE = 'humanizePrecise';
 const DEFAULT_OUTPUT_PRECISION = 2;
 
 function parseInputAsDuration(val: number, inputFormat: string, humanPrecise: boolean) {
-  const ratio = ratioToSeconds[inputFormat] || 1;
+  const ratio = DURATION_RATIO_TO_SECONDS[inputFormat] || 1;
   const kind = (
-    inputFormat in ratioToSeconds ? 'seconds' : inputFormat
+    inputFormat in DURATION_RATIO_TO_SECONDS ? 'seconds' : inputFormat
   ) as unitOfTime.DurationConstructor;
   const value = humanPrecise && val < 0 ? Math.abs(val * ratio) : val * ratio;
   return moment.duration(value, kind);
-}
-
-function durationInputToSeconds(val: number, inputFormat: string) {
-  const ratio = ratioToSeconds[inputFormat] ?? 1;
-  const kind = (
-    inputFormat in ratioToSeconds ? 'seconds' : inputFormat
-  ) as unitOfTime.DurationConstructor;
-  return moment.duration(val * ratio, kind).asSeconds();
-}
-
-/**
- * Converts a numeric duration value from one duration input unit to another, e.g. a value of
- * `1000` in `milliseconds` becomes `1` in `seconds`. Supports the sub-second units handled by
- * the duration format (picoseconds, nanoseconds, microseconds). Returns the value unchanged
- * when the units match or when the conversion cannot be computed safely (e.g. an unrecognized
- * input unit), so callers never end up with `NaN`/`Infinity`.
- */
-export function convertDurationValue(
-  value: number,
-  fromInputFormat: string,
-  toInputFormat: string
-): number {
-  if (fromInputFormat === toInputFormat) {
-    return value;
-  }
-  const fromSeconds = durationInputToSeconds(value, fromInputFormat);
-  const oneTargetUnitInSeconds = durationInputToSeconds(1, toInputFormat);
-  if (
-    !Number.isFinite(fromSeconds) ||
-    !Number.isFinite(oneTargetUnitInSeconds) ||
-    !oneTargetUnitInSeconds
-  ) {
-    return value;
-  }
-  return fromSeconds / oneTargetUnitInSeconds;
 }
 
 export class DurationFormat extends FieldFormat {

@@ -11,11 +11,38 @@ import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
-import { normalizeSharedDurationAxes } from './normalize_duration_axes';
+import { convertDurationValue, normalizeSharedDurationAxes } from './normalize_duration_axes';
 
 const durationFormat = (inputFormat: string): SerializedFieldFormat => ({
   id: 'duration',
   params: { inputFormat, outputFormat: 'humanize' },
+});
+
+describe('convertDurationValue', () => {
+  test('returns the value unchanged when units match', () => {
+    expect(convertDurationValue(1000, 'milliseconds', 'milliseconds')).toBe(1000);
+  });
+
+  test('converts milliseconds to seconds', () => {
+    expect(convertDurationValue(1000, 'milliseconds', 'seconds')).toBe(1);
+  });
+
+  test('converts seconds to milliseconds', () => {
+    expect(convertDurationValue(1, 'seconds', 'milliseconds')).toBe(1000);
+  });
+
+  test('converts minutes to seconds', () => {
+    expect(convertDurationValue(2, 'minutes', 'seconds')).toBe(120);
+  });
+
+  test('supports sub-second input units', () => {
+    expect(convertDurationValue(1, 'milliseconds', 'microseconds')).toBeCloseTo(1000);
+    expect(convertDurationValue(1_000_000, 'microseconds', 'seconds')).toBeCloseTo(1);
+  });
+
+  test('returns the original value when the conversion is not finite', () => {
+    expect(convertDurationValue(Infinity, 'seconds', 'milliseconds')).toBe(Infinity);
+  });
 });
 
 const buildLayer = (

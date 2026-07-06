@@ -170,3 +170,13 @@ export const DEFAULT_DURATION_INPUT_FORMAT = DEFAULT_INPUT_FORMAT;
 export const DEFAULT_DURATION_OUTPUT_FORMAT = DEFAULT_OUTPUT_FORMAT;
 export const DURATION_INPUT_FORMATS = inputFormats;
 export const DURATION_OUTPUT_FORMATS = outputFormats;
+
+/**
+ * Ratio, in seconds, of the sub-second duration input units that moment.js cannot represent
+ * directly. Used to scale a value into `seconds` before constructing a `moment.duration`.
+ */
+export const DURATION_RATIO_TO_SECONDS: Record<string, number> = {
+  picoseconds: 0.000000000001,
+  nanoseconds: 0.000000001,
+  microseconds: 0.000001,
+};
