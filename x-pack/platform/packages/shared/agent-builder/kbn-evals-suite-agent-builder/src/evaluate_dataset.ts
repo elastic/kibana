@@ -23,6 +23,7 @@ import {
   type GroundTruth,
   type ExperimentTask,
   type TaskOutput,
+  type CorrectnessAnalysis,
 } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -158,6 +159,113 @@ const createAgentBuilderTrajectoryEvaluator = (): Evaluator<DatasetExample, Task
       });
     },
   } as Evaluator<DatasetExample, TaskOutput>;
+};
+
+// Per-claim weights, mirroring the shared `CLAIM_FACTUAL_SCORE_MAP` in
+// @kbn/evals correctness/scoring.ts. Duplicated here so this fork is
+// self-contained and does not mutate the shared scorer's behaviour for the
+// other framework that consumes it.
+const CLAIM_FACTUAL_SCORE_MAP = {
+  FULLY_SUPPORTED: 1.0,
+  PARTIALLY_SUPPORTED: { central: 0.9, peripheral: 0.95 },
+  CONTRADICTED: { central: 0.0, peripheral: 0.1 },
+  NOT_IN_GROUND_TRUTH: { central: 0.1, peripheral: 0.5 },
+} as const;
+
+/**
+ * Agent-builder fork of the shared Factuality scorer.
+ *
+ * The shared `calculateFactualScore` (kbn-evals) computes a geometric mean over
+ * ALL claims, including `NOT_IN_GROUND_TRUTH` (statements the reference neither
+ * supports nor contradicts). Because the mean is a product, each such extra
+ * claim multiplicatively crushes the score: a fully accurate answer that is
+ * richer than a (often thin) reference lands at a uniform ~0.1–0.3,
+ * indistinguishable from a genuinely inaccurate one. This is worst where ground
+ * truth is sparsest (e.g. multi-turn), and is a scoring artifact, not a model
+ * gap (see elastic/security-team#18060).
+ *
+ * This fork scores factuality only over the claims that CAN be checked against
+ * the reference (FULLY_SUPPORTED / PARTIALLY_SUPPORTED / CONTRADICTED), so a
+ * grounded-but-richer answer is no longer penalized for its extra detail.
+ * Reference coverage is already measured separately by the Relevance score.
+ * The deliberate geometric-mean intent is preserved: a single contradicted
+ * central claim still tanks the score to 0. When every claim is unverifiable
+ * (no reference overlap at all) the original behaviour is retained so a fully
+ * off-reference answer is not rewarded with a perfect score.
+ *
+ * Scoped to the agent-builder/security suites — the shared scorer is untouched,
+ * so the context-engine framework's numbers do not diverge (per reviewer
+ * guidance on #276536).
+ */
+const calculateAgentBuilderFactualScore = (
+  correctnessEvaluation: CorrectnessAnalysis
+): number => {
+  const analysis = correctnessEvaluation?.analysis;
+  if (!analysis || !Array.isArray(analysis) || analysis.length === 0) {
+    return 0.0;
+  }
+
+  const verifiableClaims = analysis.filter(
+    (claim) => (claim.verdict || 'NOT_IN_GROUND_TRUTH') !== 'NOT_IN_GROUND_TRUTH'
+  );
+  const scoredClaims = verifiableClaims.length > 0 ? verifiableClaims : analysis;
+
+  let productOfScores = 1.0;
+  for (const claim of scoredClaims) {
+    const verdict = claim.verdict || 'NOT_IN_GROUND_TRUTH';
+    const centrality = claim.centrality || 'peripheral';
+    const scoreMapEntry = CLAIM_FACTUAL_SCORE_MAP[verdict as keyof typeof CLAIM_FACTUAL_SCORE_MAP];
+    let claimScore = 0.0;
+    if (typeof scoreMapEntry === 'object') {
+      claimScore = scoreMapEntry[centrality as keyof typeof scoreMapEntry] || 0.0;
+    } else if (typeof scoreMapEntry === 'number') {
+      claimScore = scoreMapEntry;
+    }
+    productOfScores *= claimScore;
+  }
+
+  const numClaims = scoredClaims.length;
+  return productOfScores > 0 ? Math.pow(productOfScores, 1 / numClaims) : 0.0;
+};
+export { calculateAgentBuilderFactualScore };
+
+/**
+ * Agent-builder correctness evaluators: wraps the shared
+ * `createQuantitativeCorrectnessEvaluators` and overrides ONLY the Factuality
+ * score with `calculateAgentBuilderFactualScore` (NOT_IN_GROUND_TRUTH-excluded
+ * geometric mean). Relevance and Sequence Accuracy are reused unchanged from
+ * the shared factory. Mirrors the existing `createAgentBuilderTrajectoryEvaluator`
+ * pattern of forking a shared kbn-evals primitive into the agent-builder scope.
+ */
+const createAgentBuilderCorrectnessEvaluators = (): Evaluator[] => {
+  const shared = createQuantitativeCorrectnessEvaluators();
+  return shared.map((evaluator) =>
+    evaluator.name === 'Factuality'
+      ? {
+          ...evaluator,
+          evaluate: async (args) => {
+            const correctnessAnalysis = ((args.output as any)?.correctnessAnalysis ??
+              null) as CorrectnessAnalysis | null;
+            if (!correctnessAnalysis) {
+              return {
+                score: null,
+                label: 'unavailable',
+                explanation: 'No correctness analysis available',
+                metadata: (args.metadata ?? undefined) as object | undefined,
+              };
+            }
+            const score = calculateAgentBuilderFactualScore(correctnessAnalysis);
+            const summaryText = correctnessAnalysis.summary.factual_accuracy_summary;
+            return {
+              score,
+              label: summaryText,
+              explanation: summaryText,
+              metadata: { ...((args.metadata as object) ?? {}), correctnessAnalysis },
+            };
+          },
+        }
+      : evaluator
+  );
 };
 
 /**
@@ -356,7 +464,7 @@ function configureExperiment({
     // Guards that literal terms (e.g. seeded risk scores) appear in the final response, catching
     // regressions where the tool silently reads 0 for fields like kibana.alert.risk_score.
     createRequiredTermsEvaluator({ name: 'RequiredTermsInResponse', metadataKey: 'requiredTerms' }),
-    ...createQuantitativeCorrectnessEvaluators(),
+    ...createAgentBuilderCorrectnessEvaluators(),
     createQuantitativeGroundednessEvaluator(),
     ...ragEvaluators,
     ...Object.values({
