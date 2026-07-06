@@ -55069,7 +55069,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the Entity Store log extraction configuration. This applies to all entity types. Cadence settings (`frequency`, `delay`, `lookbackPeriod`) can also be set individually per entity type via `PUT /api/security/entity_store/update/{entityType}`; a value set for a specific type takes precedence over this shared setting for that type only. Supplying a cadence field here is a request for the whole store: it applies the new value to every entity type, replacing any value that type had configured individually (including types with a different default cadence, such as Service/Generic).<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Update the Entity Store log extraction configuration. This applies to all entity types. Cadence settings (`frequency`, `delay`, `lookbackPeriod`) can also be set individually per entity type via `PUT /api/security/entity_store/{entityType}`; a value set for a specific type takes precedence over this shared setting for that type only. Supplying a cadence field here is a request for the whole store: it applies the new value to every entity type, replacing any value that type had configured individually (including types with a different default cadence, such as Service/Generic).<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: put-security-entity-store
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -55084,7 +55084,7 @@ paths:
           application/json:
             examples:
               appliesFrequencyToAllTypesExample:
-                description: "Setting frequency here is a request for the whole store: it applies to every entity type (including types with a different default cadence, such as Service/Generic's reduced cadence, and any value set individually via PUT /update/{entityType}) so all types run at 5 minutes."
+                description: "Setting frequency here is a request for the whole store: it applies to every entity type (including types with a different default cadence, such as Service/Generic's reduced cadence, and any value set individually via PUT /api/security/entity_store/{entityType}) so all types run at 5 minutes."
                 summary: Applies a frequency to every entity type
                 value:
                   logExtraction:
@@ -55203,6 +55203,136 @@ paths:
                 "fieldHistoryLength": 15
               }
             }
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/{entityType}:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/{entityType}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update the cadence settings (`frequency`, `delay`, `lookbackPeriod`) for a single entity type. Only the fields supplied are changed; there is no way to clear a field back to the shared global value — set it explicitly to the value you want, including the type's default if desired. All other log extraction settings (index patterns, volume limits, etc.) remain store-wide only and can be changed via `PUT /api/security/entity_store`.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: put-security-entity-store-entitytype
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The entity type to update.
+          in: path
+          name: entityType
+          required: true
+          schema:
+            enum:
+              - user
+              - host
+              - service
+              - generic
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateByTypeSetCadenceExample:
+                description: Set the Service engine's frequency to 15 minutes. Other entity types and all other log extraction settings are unaffected. There is no way to clear this back to the default — set it explicitly if you want the default value again.
+                summary: Set the cadence for a single entity type
+                value:
+                  logExtraction:
+                    frequency: 15m
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                logExtraction:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    delay:
+                      pattern: '[smdh]$'
+                      type: string
+                    frequency:
+                      pattern: '[smdh]$'
+                      type: string
+                    lookbackPeriod:
+                      pattern: '[smdh]$'
+                      type: string
+              required:
+                - logExtraction
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateByTypeSuccessExample:
+                  description: The entity type's cadence was updated. If frequency changed and the engine is running, its extraction task is rescheduled immediately.
+                  summary: Entity type cadence updated
+                  value:
+                    ok: true
+          description: Indicates a successful response.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidDurationByTypeExample:
+                  description: A cadence field has an invalid duration format.
+                  summary: Invalid duration parameter
+                  value:
+                    error: Bad Request
+                    message: '[request body]: logExtraction.frequency: must be a valid duration of at least 30 seconds (e.g. 1m, 30s)'
+                    statusCode: 400
+                notInstalledByTypeExample:
+                  description: No engine is installed for the requested entity type.
+                  summary: Entity type not installed
+                  value:
+                    error: Bad Request
+                    message: Entity Store engine for type "service" is not installed
+                    statusCode: 400
+                nullCadenceValueByTypeExample:
+                  description: Cadence fields cannot be cleared with null; set the desired duration (including the default, if that's what you want) explicitly.
+                  summary: Null is not a valid cadence value
+                  value:
+                    error: Bad Request
+                    message: '[request body]: logExtraction.frequency: Invalid input: expected string, received null'
+                    statusCode: 400
+          description: Bad request.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenByTypeExample:
+                  description: The user does not have the required Elasticsearch privileges.
+                  summary: Insufficient privileges
+                  value:
+                    error: Forbidden
+                    message: User 'analyst' has insufficient privileges
+                    statusCode: 403
+          description: Insufficient privileges.
+      summary: Update a single entity type
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"logExtraction":{"frequency":"15m"}}' \
+              "${KIBANA_URL}/api/security/entity_store/service"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store/service
+            {
+              "logExtraction": {
+                "frequency": "15m"
+              }
+            }
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -62681,7 +62811,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install the Entity Store and create engines for the specified entity types. A single `logExtraction` configuration is shared across all entity types. Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. To change settings after install, use the `PUT /api/security/entity_store/update` endpoint or the `PUT /api/security/entity_store/update/{entityType}` endpoint.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Install the Entity Store and create engines for the specified entity types. A single `logExtraction` configuration is shared across all entity types. Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. To change settings after install, use the `PUT /api/security/entity_store` endpoint or the `PUT /api/security/entity_store/{entityType}` endpoint.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: post-security-entity-store-install
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -63777,136 +63907,6 @@ paths:
         - lang: Console
           source: |
             DELETE kbn://api/security/entity_store/uninstall/service
-      x-state: Generally available; added in 9.5.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/security/entity_store/update/{entityType}:
-    put:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/update/{entityType}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Update the cadence settings (`frequency`, `delay`, `lookbackPeriod`) for a single entity type. Only the fields supplied are changed; there is no way to clear a field back to the shared global value — set it explicitly to the value you want, including the type's default if desired. All other log extraction settings (index patterns, volume limits, etc.) remain store-wide only and can be changed via `PUT /api/security/entity_store/update`.<br/><br/>[Required authorization] Route required privileges: securitySolution.
-      operationId: put-security-entity-store-update-entitytype
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: The entity type to update.
-          in: path
-          name: entityType
-          required: true
-          schema:
-            enum:
-              - user
-              - host
-              - service
-              - generic
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              updateByTypeSetCadenceExample:
-                description: Set the Service engine's frequency to 15 minutes. Other entity types and all other log extraction settings are unaffected. There is no way to clear this back to the default — set it explicitly if you want the default value again.
-                summary: Set the cadence for a single entity type
-                value:
-                  logExtraction:
-                    frequency: 15m
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                logExtraction:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    delay:
-                      pattern: '[smdh]$'
-                      type: string
-                    frequency:
-                      pattern: '[smdh]$'
-                      type: string
-                    lookbackPeriod:
-                      pattern: '[smdh]$'
-                      type: string
-              required:
-                - logExtraction
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                updateByTypeSuccessExample:
-                  description: The entity type's cadence was updated. If frequency changed and the engine is running, its extraction task is rescheduled immediately.
-                  summary: Entity type cadence updated
-                  value:
-                    ok: true
-          description: Indicates a successful response.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidDurationByTypeExample:
-                  description: A cadence field has an invalid duration format.
-                  summary: Invalid duration parameter
-                  value:
-                    error: Bad Request
-                    message: '[request body]: logExtraction.frequency: must be a valid duration of at least 30 seconds (e.g. 1m, 30s)'
-                    statusCode: 400
-                notInstalledByTypeExample:
-                  description: No engine is installed for the requested entity type.
-                  summary: Entity type not installed
-                  value:
-                    error: Bad Request
-                    message: Entity Store engine for type "service" is not installed
-                    statusCode: 400
-                nullCadenceValueByTypeExample:
-                  description: Cadence fields cannot be cleared with null; set the desired duration (including the default, if that's what you want) explicitly.
-                  summary: Null is not a valid cadence value
-                  value:
-                    error: Bad Request
-                    message: '[request body]: logExtraction.frequency: Invalid input: expected string, received null'
-                    statusCode: 400
-          description: Bad request.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbiddenByTypeExample:
-                  description: The user does not have the required Elasticsearch privileges.
-                  summary: Insufficient privileges
-                  value:
-                    error: Forbidden
-                    message: User 'analyst' has insufficient privileges
-                    statusCode: 403
-          description: Insufficient privileges.
-      summary: Update a single entity type
-      tags:
-        - Security entity store
-      x-codeSamples:
-        - lang: curl
-          source: |
-            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
-              -H "Content-Type: application/json" \
-              -d '{"logExtraction":{"frequency":"15m"}}' \
-              "${KIBANA_URL}/api/security/entity_store/update/service"
-        - lang: Console
-          source: |
-            PUT kbn://api/security/entity_store/update/service
-            {
-              "logExtraction": {
-                "frequency": "15m"
-              }
-            }
       x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
