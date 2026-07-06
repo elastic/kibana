@@ -8,7 +8,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { join } from 'path';
 
 // --- CODEOWNERS resolution ---
 // Simple prefix matching instead of `ignore` library to avoid OOM on large repos.
@@ -41,8 +41,7 @@ function createOwnerResolver(repoRoot) {
   const cache = new Map();
 
   return function getOwnerForFile(filePath) {
-    const dir = dirname(filePath);
-    if (cache.has(dir)) return cache.get(dir);
+    if (cache.has(filePath)) return cache.get(filePath);
 
     let owner = 'unknown';
     for (const e of entries) {
@@ -50,7 +49,7 @@ function createOwnerResolver(repoRoot) {
         owner = e.owner;
       }
     }
-    cache.set(dir, owner);
+    cache.set(filePath, owner);
     return owner;
   };
 }

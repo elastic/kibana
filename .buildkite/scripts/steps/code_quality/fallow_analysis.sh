@@ -37,7 +37,13 @@ set +e
   --quiet \
   $SAVE_SNAPSHOT_FLAG \
   > "$FALLOW_JSON"
+FALLOW_EXIT=$?
 set -e
+
+if [ "$FALLOW_EXIT" -ne 0 ]; then
+  echo "fallow health failed (exit $FALLOW_EXIT)" >&2
+  exit "$FALLOW_EXIT"
+fi
 
 echo "--- Process results"
 # shellcheck disable=SC2086
