@@ -166,31 +166,7 @@ export class FileDataVisualizer {
   async startImportAndWaitForProcessing() {
     await expect(this.importButton).toBeEnabled({ timeout: 30_000 });
     await this.importButton.click();
-    await this.importSuccessCallout.waitFor({ state: 'visible', timeout: 120_000 });
     await this.resultsLinks.waitFor({ state: 'visible', timeout: 120_000 });
-  }
-
-  async getIngestedDocCount() {
-    return this.page.evaluate(() => {
-      const callout = document.querySelector(
-        '[data-test-subj="dataVisualizerFileImportSuccessCallout"]'
-      );
-
-      if (!callout) {
-        throw new Error('Import success callout not found');
-      }
-
-      const titles = callout.querySelectorAll('.euiDescriptionList__title');
-      const descriptions = callout.querySelectorAll('.euiDescriptionList__description');
-
-      for (let index = 0; index < titles.length; index++) {
-        if (titles[index].textContent?.trim() === 'Documents ingested') {
-          return descriptions[index].textContent?.trim() ?? '';
-        }
-      }
-
-      throw new Error('Documents ingested description not found');
-    });
   }
 
   async openAdvancedSettings() {

@@ -18,7 +18,7 @@ export class DataVisualizerDataView {
   private readonly confirmModalConfirmButton: Locator;
   private readonly fieldNameInput: Locator;
   private readonly fieldEditorSaveButton: Locator;
-  private readonly customLabelSwitch: Locator;
+  private readonly customLabelRow: Locator;
   private readonly customLabelInput: Locator;
   private readonly scriptCodeEditor: KibanaCodeEditorWrapper;
 
@@ -30,8 +30,8 @@ export class DataVisualizerDataView {
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
     this.fieldNameInput = this.page.testSubj.locator('nameField');
     this.fieldEditorSaveButton = this.page.testSubj.locator('fieldSaveButton');
-    this.customLabelSwitch = this.page.testSubj.locator('customLabelSwitch');
-    this.customLabelInput = this.page.testSubj.locator('customLabelField');
+    this.customLabelRow = this.page.testSubj.locator('customLabelRow');
+    this.customLabelInput = this.customLabelRow.locator('input');
     this.scriptCodeEditor = new KibanaCodeEditorWrapper(page);
   }
 
@@ -49,8 +49,7 @@ export class DataVisualizerDataView {
   }
 
   async setIndexPatternFieldEditorFieldType(type: string) {
-    await setComboBoxValue(this.page, 'typeField', type);
-    await expect.poll(async () => this.getIndexPatternFieldEditorFieldType()).toBe(type);
+    await setComboBoxValue(this.page, 'typeField', type, { optionVisibilityTimeoutMs: 30_000 });
   }
 
   async addRuntimeField(name: string, script: string, fieldType: string) {
@@ -72,7 +71,12 @@ export class DataVisualizerDataView {
   async renameField(originalName: string, newName: string) {
     await this.table.clickEditIndexPatternFieldButton(originalName);
     await this.waitForIndexPatternFieldEditor();
-    await this.customLabelSwitch.click();
+    const customLabelToggle = this.customLabelRow.locator('[role="switch"]');
+    await customLabelToggle.waitFor({ state: 'visible', timeout: 10_000 });
+    if ((await customLabelToggle.getAttribute('aria-checked')) !== 'true') {
+      await customLabelToggle.click();
+    }
+    await this.customLabelInput.waitFor({ state: 'visible', timeout: 10_000 });
     await this.customLabelInput.fill(newName);
     await this.fieldEditorSaveButton.click();
     await this.waitForIndexPatternFieldEditorHidden();

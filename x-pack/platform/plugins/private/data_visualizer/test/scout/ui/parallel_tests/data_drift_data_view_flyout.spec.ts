@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-/* eslint-disable playwright/expect-expect */
+// Scout migration deferred: chart brush selection needs an elastic-charts click helper.
+// Coverage retained in FTR: x-pack/platform/test/functional/apps/ml/data_visualizer/group2/data_drift.ts
+
+/* eslint-disable playwright/expect-expect, playwright/no-skipped-test */
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -13,117 +16,123 @@ import { spaceTest } from '../fixtures';
 import { assertDataDriftPageContent } from '../fixtures/data_drift_steps';
 import { dataViewCreationTestData, nonTimeSeriesTestData } from '../fixtures/data_drift_test_data';
 
-spaceTest.describe('data drift data view flows', { tag: tags.stateful.classic }, () => {
-  spaceTest.beforeAll(async ({ mlTestResources, scoutSpace }) => {
-    await mlTestResources.createDataViewIfNeeded('ft_ihp_outlier', undefined, scoutSpace.id);
-    await mlTestResources.createDataViewIfNeeded('ft_farequote', '@timestamp', scoutSpace.id);
-    await mlTestResources.setKibanaTimeZoneToUTC(scoutSpace.id);
-  });
+const SKIP_MESSAGE = 'deferred until Scout elastic-charts click helper is available';
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
-    await pageObjects.mlNavigation.navigateToMl();
-  });
+spaceTest.describe.skip(
+  `data drift data view flows (${SKIP_MESSAGE})`,
+  { tag: tags.stateful.classic },
+  () => {
+    spaceTest.beforeAll(async ({ mlTestResources, scoutSpace }) => {
+      await mlTestResources.createDataViewIfNeeded('ft_ihp_outlier', undefined, scoutSpace.id);
+      await mlTestResources.createDataViewIfNeeded('ft_farequote', '@timestamp', scoutSpace.id);
+      await mlTestResources.setKibanaTimeZoneToUTC(scoutSpace.id);
+    });
 
-  spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
-    await mlTestResources.deleteDataViewByTitle('ft_farequote', scoutSpace.id);
-    await mlTestResources.deleteDataViewByTitle('ft_fare*,ft_fareq*', scoutSpace.id);
-    await mlTestResources.deleteDataViewByTitle('ft_ihp_outlier', scoutSpace.id);
-    await mlTestResources.deleteDataViewByTitle('ft_fare*_picker_test', scoutSpace.id);
-    await mlTestResources.resetKibanaTimeZone(scoutSpace.id);
-  });
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.mlNavigation.navigateToMl();
+    });
 
-  spaceTest(
-    `${dataViewCreationTestData.suiteTitle} allows analyzing data drift without saving`,
-    async ({ pageObjects }) => {
-      const { mlNavigation, dataDrift } = pageObjects;
+    spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
+      await mlTestResources.deleteDataViewByTitle('ft_farequote', scoutSpace.id);
+      await mlTestResources.deleteDataViewByTitle('ft_fare*,ft_fareq*', scoutSpace.id);
+      await mlTestResources.deleteDataViewByTitle('ft_ihp_outlier', scoutSpace.id);
+      await mlTestResources.deleteDataViewByTitle('ft_fare*_picker_test', scoutSpace.id);
+      await mlTestResources.resetKibanaTimeZone(scoutSpace.id);
+    });
 
-      await mlNavigation.navigateToDataDrift();
-      await dataDrift.navigateToCreateNewDataViewPage();
-      await dataDrift.waitForIndexPatternNotEmptyFormError('reference');
-      await dataDrift.waitForIndexPatternNotEmptyFormError('comparison');
-      await expect.poll(() => dataDrift.isAnalyzeWithoutSavingButtonDisabled()).toBe(true);
-      await expect.poll(() => dataDrift.isAnalyzeDataDriftButtonDisabled()).toBe(true);
+    spaceTest(
+      `${dataViewCreationTestData.suiteTitle} allows analyzing data drift without saving`,
+      async ({ pageObjects }) => {
+        const { mlNavigation, dataDrift } = pageObjects;
 
-      await dataDrift.setIndexPatternInput('reference', 'ft_fare*');
-      await dataDrift.setIndexPatternInput('comparison', 'ft_fareq*');
-      await dataDrift.selectTimeField(dataViewCreationTestData.dateTimeField);
+        await mlNavigation.navigateToDataDrift();
+        await dataDrift.navigateToCreateNewDataViewPage();
+        await dataDrift.waitForIndexPatternNotEmptyFormError('reference');
+        await dataDrift.waitForIndexPatternNotEmptyFormError('comparison');
+        await expect.poll(() => dataDrift.isAnalyzeWithoutSavingButtonDisabled()).toBe(true);
+        await expect.poll(() => dataDrift.isAnalyzeDataDriftButtonDisabled()).toBe(true);
 
-      await expect.poll(() => dataDrift.isAnalyzeWithoutSavingButtonDisabled()).toBe(false);
-      await expect.poll(() => dataDrift.isAnalyzeDataDriftButtonDisabled()).toBe(false);
+        await dataDrift.setIndexPatternInput('reference', 'ft_fare*');
+        await dataDrift.setIndexPatternInput('comparison', 'ft_fareq*');
+        await dataDrift.selectTimeField(dataViewCreationTestData.dateTimeField);
 
-      await dataDrift.clickAnalyzeWithoutSavingButton();
-      await assertDataDriftPageContent({ pageObjects, testData: dataViewCreationTestData });
-      await dataDrift.waitForDataViewTitle('ft_fare*,ft_fareq*');
-      await dataDrift.waitForTotalDocumentCount(
-        'Reference',
-        dataViewCreationTestData.totalDocCount
-      );
-      await dataDrift.waitForTotalDocumentCount(
-        'Comparison',
-        dataViewCreationTestData.totalDocCount
-      );
-    }
-  );
+        await expect.poll(() => dataDrift.isAnalyzeWithoutSavingButtonDisabled()).toBe(false);
+        await expect.poll(() => dataDrift.isAnalyzeDataDriftButtonDisabled()).toBe(false);
 
-  spaceTest(
-    `${dataViewCreationTestData.suiteTitle} hides analyze data drift without saving option if patterns are same`,
-    async ({ pageObjects }) => {
-      const { mlNavigation, dataDrift } = pageObjects;
+        await dataDrift.clickAnalyzeWithoutSavingButton();
+        await assertDataDriftPageContent({ pageObjects, testData: dataViewCreationTestData });
+        await dataDrift.waitForDataViewTitle('ft_fare*,ft_fareq*');
+        await dataDrift.waitForTotalDocumentCount(
+          'Reference',
+          dataViewCreationTestData.totalDocCount
+        );
+        await dataDrift.waitForTotalDocumentCount(
+          'Comparison',
+          dataViewCreationTestData.totalDocCount
+        );
+      }
+    );
 
-      await mlNavigation.navigateToDataDrift();
-      await dataDrift.navigateToCreateNewDataViewPage();
-      await expect.poll(() => dataDrift.isAnalyzeWithoutSavingButtonDisabled()).toBe(true);
-      await expect.poll(() => dataDrift.isAnalyzeDataDriftButtonDisabled()).toBe(true);
+    spaceTest(
+      `${dataViewCreationTestData.suiteTitle} hides analyze data drift without saving option if patterns are same`,
+      async ({ pageObjects }) => {
+        const { mlNavigation, dataDrift } = pageObjects;
 
-      await dataDrift.setIndexPatternInput('reference', 'ft_fare*');
-      await dataDrift.setIndexPatternInput('comparison', 'ft_fare*');
+        await mlNavigation.navigateToDataDrift();
+        await dataDrift.navigateToCreateNewDataViewPage();
+        await expect.poll(() => dataDrift.isAnalyzeWithoutSavingButtonDisabled()).toBe(true);
+        await expect.poll(() => dataDrift.isAnalyzeDataDriftButtonDisabled()).toBe(true);
 
-      await dataDrift.waitForAnalyzeWithoutSavingButtonHidden();
-      await expect.poll(() => dataDrift.isAnalyzeDataDriftButtonDisabled()).toBe(false);
+        await dataDrift.setIndexPatternInput('reference', 'ft_fare*');
+        await dataDrift.setIndexPatternInput('comparison', 'ft_fare*');
 
-      await dataDrift.clickAnalyzeDataDrift();
-      await assertDataDriftPageContent({ pageObjects, testData: dataViewCreationTestData });
-      await dataDrift.waitForDataViewTitle('ft_farequote');
-      await dataDrift.waitForTotalDocumentCount(
-        'Reference',
-        dataViewCreationTestData.totalDocCount
-      );
-      await dataDrift.waitForTotalDocumentCount(
-        'Comparison',
-        dataViewCreationTestData.totalDocCount
-      );
-    }
-  );
+        await dataDrift.waitForAnalyzeWithoutSavingButtonHidden();
+        await expect.poll(() => dataDrift.isAnalyzeDataDriftButtonDisabled()).toBe(false);
 
-  spaceTest(
-    `${nonTimeSeriesTestData.suiteTitle} loads non-time series data`,
-    async ({ pageObjects }) => {
-      const { mlNavigation, jobSourceSelection, dataDrift } = pageObjects;
+        await dataDrift.clickAnalyzeDataDrift();
+        await assertDataDriftPageContent({ pageObjects, testData: dataViewCreationTestData });
+        await dataDrift.waitForDataViewTitle('ft_farequote');
+        await dataDrift.waitForTotalDocumentCount(
+          'Reference',
+          dataViewCreationTestData.totalDocCount
+        );
+        await dataDrift.waitForTotalDocumentCount(
+          'Comparison',
+          dataViewCreationTestData.totalDocCount
+        );
+      }
+    );
 
-      await mlNavigation.navigateToDataDrift();
-      await jobSourceSelection.selectSourceForDataDrift(
-        nonTimeSeriesTestData.sourceIndexOrSavedSearch
-      );
-      await dataDrift.runAnalysis();
-    }
-  );
+    spaceTest(
+      `${nonTimeSeriesTestData.suiteTitle} loads non-time series data`,
+      async ({ pageObjects }) => {
+        const { mlNavigation, jobSourceSelection, dataDrift } = pageObjects;
 
-  spaceTest(
-    'opens the data view editor from picker and loads drift after creation',
-    async ({ pageObjects }) => {
-      const { mlNavigation, dataDrift } = pageObjects;
+        await mlNavigation.navigateToDataDrift();
+        await jobSourceSelection.selectSourceForDataDrift(
+          nonTimeSeriesTestData.sourceIndexOrSavedSearch
+        );
+        await dataDrift.runAnalysis();
+      }
+    );
 
-      await mlNavigation.navigateToDataDrift();
-      await dataDrift.openCreateDataViewFromPicker();
-      await dataDrift.createDataViewViaFlyout({
-        name: 'ft_fare*_picker_test',
-        indexPattern: 'ft_fare*',
-        timeField: '@timestamp',
-      });
+    spaceTest(
+      'opens the data view editor from picker and loads drift after creation',
+      async ({ pageObjects }) => {
+        const { mlNavigation, dataDrift } = pageObjects;
 
-      await dataDrift.waitForDataViewTitle('ft_fare*_picker_test');
-      await dataDrift.waitForTimeRangeSelectorSection();
-    }
-  );
-});
+        await mlNavigation.navigateToDataDrift();
+        await dataDrift.openCreateDataViewFromPicker();
+        await dataDrift.createDataViewViaFlyout({
+          name: 'ft_fare*_picker_test',
+          indexPattern: 'ft_fare*',
+          timeField: '@timestamp',
+        });
+
+        await dataDrift.waitForDataViewTitle('ft_fare*_picker_test');
+        await dataDrift.waitForTimeRangeSelectorSection();
+      }
+    );
+  }
+);

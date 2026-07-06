@@ -14,8 +14,8 @@
     },
     {
       "id": "60d8218dafa8e69-b0d8d76ebf5387c",
-      "title": "data drift data view flows from data view creation mode allows analyzing data drift without saving",
-      "expectedStatus": "passed",
+      "title": "data drift data view flows from data view creation mode allows analyzing data drift without saving (deferred until Scout elastic-charts click helper is available)",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -28,8 +28,8 @@
     },
     {
       "id": "60d8218dafa8e69-f2d55cce9d8b89e",
-      "title": "data drift data view flows from data view creation mode hides analyze data drift without saving option if patterns are same",
-      "expectedStatus": "passed",
+      "title": "data drift data view flows from data view creation mode hides analyze data drift without saving option if patterns are same (deferred until Scout elastic-charts click helper is available)",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -42,8 +42,8 @@
     },
     {
       "id": "60d8218dafa8e69-adfe07a24e56afd",
-      "title": "data drift data view flows from data view creation mode loads non-time series data",
-      "expectedStatus": "passed",
+      "title": "data drift data view flows from data view creation mode loads non-time series data (deferred until Scout elastic-charts click helper is available)",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -56,8 +56,8 @@
     },
     {
       "id": "60d8218dafa8e69-87479a94df5ecb6",
-      "title": "data drift data view flows opens the data view editor from picker and loads drift after creation",
-      "expectedStatus": "passed",
+      "title": "data drift data view flows opens the data view editor from picker and loads drift after creation (deferred until Scout elastic-charts click helper is available)",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -70,8 +70,8 @@
     },
     {
       "id": "c955b89422536e7-a476ca8e0991b30",
-      "title": "data drift with ft_farequote_filter_and_kuery saved search loads the source data in data drift",
-      "expectedStatus": "passed",
+      "title": "data drift with ft_farequote_filter_and_kuery saved search loads the source data in data drift (deferred until Scout elastic-charts click helper is available)",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"

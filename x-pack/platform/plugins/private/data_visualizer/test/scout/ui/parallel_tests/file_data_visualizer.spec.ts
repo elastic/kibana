@@ -7,7 +7,7 @@
 
 /* eslint-disable playwright/expect-expect */
 
-import { tags, test as scoutTest } from '@kbn/scout';
+import { tags, test as scoutTest, type EsClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   assertNonMetricFieldContents,
@@ -20,12 +20,24 @@ import {
 } from '../fixtures/file_data_visualizer_test_data';
 import { spaceTest } from '../fixtures';
 
-spaceTest.describe('file based data visualizer', { tag: tags.stateful.classic }, () => {
-  spaceTest.beforeAll(async ({ mlTestResources, scoutSpace }) => {
+const FILE_IMPORT_INDEX_NAMES = [
+  ...fileDataVisualizerPositiveTestData.map(({ indexName }) => indexName),
+];
+
+const deleteFileImportIndices = async (esClient: EsClient) => {
+  for (const indexName of FILE_IMPORT_INDEX_NAMES) {
+    await esClient.indices.delete({ index: indexName }, { ignore: [404] });
+  }
+};
+
+spaceTest.describe.serial('file based data visualizer', { tag: tags.stateful.classic }, () => {
+  spaceTest.beforeAll(async ({ mlTestResources, scoutSpace, esClient }) => {
     await mlTestResources.setKibanaTimeZoneToUTC(scoutSpace.id);
+    await deleteFileImportIndices(esClient);
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+  spaceTest.beforeEach(async ({ browserAuth, esClient, pageObjects }) => {
+    await deleteFileImportIndices(esClient);
     await browserAuth.loginAsAdmin();
     await pageObjects.mlNavigation.navigateToMl();
   });
@@ -121,8 +133,11 @@ spaceTest.describe('file based data visualizer', { tag: tags.stateful.classic },
           await fileDataVisualizer.startImportAndWaitForProcessing();
 
           await expect
-            .poll(() => fileDataVisualizer.getIngestedDocCount())
-            .toBe(`${testData.expected.ingestedDocCount}`);
+            .poll(async () => {
+              const { count } = await esClient.count({ index: testData.indexName });
+              return count;
+            })
+            .toBe(testData.expected.ingestedDocCount);
 
           await expect
             .poll(async () => {

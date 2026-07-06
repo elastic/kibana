@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-/* eslint-disable playwright/expect-expect */
+// Scout migration deferred: chart brush selection needs an elastic-charts click helper.
+// Coverage retained in FTR: x-pack/platform/test/functional/apps/ml/data_visualizer/group2/data_drift.ts
+
+/* eslint-disable playwright/expect-expect, playwright/no-skipped-test */
 
 import { tags, test as scoutTest } from '@kbn/scout';
 import { spaceTest } from '../fixtures';
 import { assertDataDriftPageContent } from '../fixtures/data_drift_steps';
 import { farequoteKQLFiltersDataDriftTestData } from '../fixtures/data_drift_test_data';
 
-spaceTest.describe(
-  'data drift with ft_farequote_filter_and_kuery saved search',
+const SKIP_MESSAGE = 'deferred until Scout elastic-charts click helper is available';
+
+spaceTest.describe.skip(
+  `data drift with ft_farequote_filter_and_kuery saved search (${SKIP_MESSAGE})`,
   { tag: tags.stateful.classic },
   () => {
     spaceTest.beforeAll(async ({ mlTestResources, scoutSpace }) => {

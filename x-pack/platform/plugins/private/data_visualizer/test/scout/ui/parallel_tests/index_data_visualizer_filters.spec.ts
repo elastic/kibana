@@ -16,7 +16,13 @@ import {
   farequoteKQLFiltersSearchTestData,
   farequoteLuceneFiltersSearchTestData,
 } from '../fixtures/expected_field_stats_random_sampler';
-import { hasFilterBadge, removeFirstPresentFilter } from '../fixtures/filter_bar_assertions';
+import {
+  addFilterAllowExistingBadges,
+  getFilterFieldKeyVariants,
+  hasFilterBadge,
+  removeFirstPresentFilter,
+  toggleFilterPinnedForField,
+} from '../fixtures/filter_bar_assertions';
 
 const PINNED_FILTER = {
   key: 'type',
@@ -24,6 +30,27 @@ const PINNED_FILTER = {
   enabled: true,
   pinned: true,
   negated: false,
+};
+
+const openMlDataVisualizerViaSidebar = async (
+  page: ExtParallelRunTestFixtures['page'],
+  pageObjects: ExtParallelRunTestFixtures['pageObjects']
+) => {
+  await pageObjects.collapsibleNav.clickItem('Machine Learning');
+  await page.testSubj.locator('mlApp').waitFor({ state: 'visible' });
+  await page.testSubj.click('~mlMainTab & ~dataVisualizer');
+  await page.testSubj
+    .locator('~mlMainTab & ~dataVisualizer & ~selected')
+    .waitFor({ state: 'visible' });
+  await page.testSubj.locator('mlPageDataVisualizerSelector').waitFor({ state: 'visible' });
+};
+
+const openDiscoverViaSidebar = async (
+  page: ExtParallelRunTestFixtures['page'],
+  pageObjects: ExtParallelRunTestFixtures['pageObjects']
+) => {
+  await pageObjects.collapsibleNav.clickItem('Discover');
+  await page.testSubj.locator('dscPage').waitFor({ state: 'visible' });
 };
 
 const assertFilterBarFilterContent = async (
@@ -38,28 +65,45 @@ const assertFilterBarFilterContent = async (
   }
 ) => {
   await expect
-    .poll(async () => {
-      if (
-        await hasFilterBadge(page, {
-          field: filter.key,
-          value: filter.value,
-          enabled: filter.enabled ?? true,
-          pinned: filter.pinned ?? false,
-          negated: filter.negated ?? false,
-        })
-      ) {
-        return true;
-      }
+    .poll(
+      async () => {
+        for (const field of getFilterFieldKeyVariants(filter.key)) {
+          if (
+            await pageObjects.filterBar.hasFilter({
+              field,
+              value: filter.value,
+              enabled: filter.enabled ?? true,
+              pinned: filter.pinned ?? false,
+              negated: filter.negated ?? false,
+            })
+          ) {
+            return true;
+          }
+        }
 
-      const labels = await pageObjects.filterBar.getFiltersLabel();
-      return labels.some(
-        (label) => label.includes(filter.value) && label.includes(filter.key.split('.')[0])
-      );
-    })
+        if (
+          await hasFilterBadge(page, {
+            field: filter.key,
+            value: filter.value,
+            enabled: filter.enabled ?? true,
+            pinned: filter.pinned ?? false,
+            negated: filter.negated ?? false,
+          })
+        ) {
+          return true;
+        }
+
+        const labels = await pageObjects.filterBar.getFiltersLabel();
+        return labels.some(
+          (label) => label.includes(filter.value) && label.includes(filter.key.split('.')[0])
+        );
+      },
+      { timeout: 30_000 }
+    )
     .toBe(true);
 };
 
-const runFilterTests = async ({
+const runFilterFromDiscoverTest = async ({
   page,
   pageObjects,
   data,
@@ -68,68 +112,84 @@ const runFilterTests = async ({
   pageObjects: ExtParallelRunTestFixtures['pageObjects'];
   data: TestData;
 }) => {
-  await scoutTest.step('retains pinned filters from other plugins', async () => {
-    await pageObjects.discover.goto({ queryMode: 'classic' });
-    await pageObjects.discover.selectDataView('ft_farequote');
-    await pageObjects.datePicker.setAbsoluteRange({
-      from: testData.DISCOVER_TIME_RANGE.start,
-      to: testData.DISCOVER_TIME_RANGE.end,
-    });
-
-    await pageObjects.filterBar.addFilter({
-      field: PINNED_FILTER.key,
-      operator: 'is',
-      value: PINNED_FILTER.value,
-    });
-    await pageObjects.filterBar.toggleFilterPinned(PINNED_FILTER.key);
-
-    await pageObjects.mlNavigation.navigateToDataVisualizer();
-    await pageObjects.dataVisualizerSelector.navigateToDataViewSelection();
-    await pageObjects.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
-      data.sourceIndexOrSavedSearch,
-      data.isSavedSearch
-    );
-
-    await pageObjects.indexDataVisualizer.clickUseFullDataButton(
-      data.expected.totalDocCountFormatted
-    );
-
-    for (const filter of data.expected.filters ?? []) {
-      await assertFilterBarFilterContent(page, pageObjects, {
-        key: filter.key,
-        value: filter.value,
-        enabled: true,
-        pinned: false,
-        negated: false,
-      });
-    }
-
-    await assertFilterBarFilterContent(page, pageObjects, PINNED_FILTER);
+  await pageObjects.discover.goto({ queryMode: 'classic' });
+  await pageObjects.discover.selectDataView('ft_farequote');
+  await pageObjects.datePicker.setAbsoluteRange({
+    from: testData.DISCOVER_TIME_RANGE.start,
+    to: testData.DISCOVER_TIME_RANGE.end,
   });
 
-  await scoutTest.step('retains pinned filters to other plugins', async () => {
-    await pageObjects.mlNavigation.navigateToMl();
-    await pageObjects.mlNavigation.navigateToDataVisualizer();
-    await pageObjects.dataVisualizerSelector.navigateToDataViewSelection();
-    await pageObjects.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
-      data.sourceIndexOrSavedSearch,
-      data.isSavedSearch
-    );
-
-    await pageObjects.indexDataVisualizer.clickUseFullDataButton(
-      data.expected.totalDocCountFormatted
-    );
-
-    await pageObjects.filterBar.addFilter({
-      field: PINNED_FILTER.key,
-      operator: 'is',
-      value: PINNED_FILTER.value,
-    });
-    await pageObjects.filterBar.toggleFilterPinned(PINNED_FILTER.key);
-
-    await pageObjects.discover.goto({ queryMode: 'classic' });
-    await assertFilterBarFilterContent(page, pageObjects, PINNED_FILTER);
+  await addFilterAllowExistingBadges(page, {
+    field: PINNED_FILTER.key,
+    operator: 'is',
+    value: PINNED_FILTER.value,
   });
+  await toggleFilterPinnedForField(
+    page,
+    (field) => pageObjects.filterBar.toggleFilterPinned(field),
+    PINNED_FILTER.key
+  );
+  await assertFilterBarFilterContent(page, pageObjects, PINNED_FILTER);
+
+  await openMlDataVisualizerViaSidebar(page, pageObjects);
+  await pageObjects.dataVisualizerSelector.navigateToDataViewSelection();
+  await pageObjects.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
+    data.sourceIndexOrSavedSearch,
+    data.isSavedSearch
+  );
+
+  await pageObjects.indexDataVisualizer.clickUseFullDataButton(
+    data.expected.totalDocCountFormatted
+  );
+
+  for (const filter of data.expected.filters ?? []) {
+    await assertFilterBarFilterContent(page, pageObjects, {
+      key: filter.key,
+      value: filter.value,
+      enabled: true,
+      pinned: false,
+      negated: false,
+    });
+  }
+
+  await assertFilterBarFilterContent(page, pageObjects, PINNED_FILTER);
+};
+
+const runFilterToDiscoverTest = async ({
+  page,
+  pageObjects,
+  data,
+}: {
+  page: ExtParallelRunTestFixtures['page'];
+  pageObjects: ExtParallelRunTestFixtures['pageObjects'];
+  data: TestData;
+}) => {
+  await pageObjects.mlNavigation.navigateToDataVisualizer();
+  await pageObjects.dataVisualizerSelector.navigateToDataViewSelection();
+  await pageObjects.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
+    data.sourceIndexOrSavedSearch,
+    data.isSavedSearch
+  );
+
+  await pageObjects.indexDataVisualizer.clickUseFullDataButton(
+    data.expected.totalDocCountFormatted
+  );
+
+  await addFilterAllowExistingBadges(page, {
+    field: PINNED_FILTER.key,
+    operator: 'is',
+    value: PINNED_FILTER.value,
+  });
+  await toggleFilterPinnedForField(
+    page,
+    (field) => pageObjects.filterBar.toggleFilterPinned(field),
+    PINNED_FILTER.key
+  );
+  await assertFilterBarFilterContent(page, pageObjects, PINNED_FILTER);
+
+  await openDiscoverViaSidebar(page, pageObjects);
+  await pageObjects.discover.selectDataView('ft_farequote');
+  await assertFilterBarFilterContent(page, pageObjects, PINNED_FILTER);
 };
 
 spaceTest.describe(
@@ -162,16 +222,54 @@ spaceTest.describe(
     });
 
     spaceTest(
-      `with ${farequoteLuceneFiltersSearchTestData.suiteTitle}`,
+      `retains pinned filters from discover with ${farequoteLuceneFiltersSearchTestData.suiteTitle}`,
       async ({ page, pageObjects }) => {
-        await runFilterTests({ page, pageObjects, data: farequoteLuceneFiltersSearchTestData });
+        await scoutTest.step('retains pinned filters from other plugins', async () => {
+          await runFilterFromDiscoverTest({
+            page,
+            pageObjects,
+            data: farequoteLuceneFiltersSearchTestData,
+          });
+        });
       }
     );
 
     spaceTest(
-      `with ${farequoteKQLFiltersSearchTestData.suiteTitle}`,
+      `retains pinned filters to discover with ${farequoteLuceneFiltersSearchTestData.suiteTitle}`,
       async ({ page, pageObjects }) => {
-        await runFilterTests({ page, pageObjects, data: farequoteKQLFiltersSearchTestData });
+        await scoutTest.step('retains pinned filters to other plugins', async () => {
+          await runFilterToDiscoverTest({
+            page,
+            pageObjects,
+            data: farequoteLuceneFiltersSearchTestData,
+          });
+        });
+      }
+    );
+
+    spaceTest(
+      `retains pinned filters from discover with ${farequoteKQLFiltersSearchTestData.suiteTitle}`,
+      async ({ page, pageObjects }) => {
+        await scoutTest.step('retains pinned filters from other plugins', async () => {
+          await runFilterFromDiscoverTest({
+            page,
+            pageObjects,
+            data: farequoteKQLFiltersSearchTestData,
+          });
+        });
+      }
+    );
+
+    spaceTest(
+      `retains pinned filters to discover with ${farequoteKQLFiltersSearchTestData.suiteTitle}`,
+      async ({ page, pageObjects }) => {
+        await scoutTest.step('retains pinned filters to other plugins', async () => {
+          await runFilterToDiscoverTest({
+            page,
+            pageObjects,
+            data: farequoteKQLFiltersSearchTestData,
+          });
+        });
       }
     );
   }

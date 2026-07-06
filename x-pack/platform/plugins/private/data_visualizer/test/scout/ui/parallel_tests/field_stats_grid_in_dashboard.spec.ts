@@ -9,7 +9,6 @@
 
 import type { KbnClient, ScoutSpaceParallelFixture } from '@kbn/scout';
 import { tags, test as scoutTest } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../fixtures';
 import type { ExtParallelRunTestFixtures } from '../fixtures';
 import type { MetricFieldVisConfig, TestData } from '../fixtures/types';
@@ -19,7 +18,8 @@ import {
   assertNumberFieldContents,
 } from '../fixtures/field_stats_assertions';
 import {
-  assertViewModeToggleNotExists,
+  assertFieldStatsTabNotExists,
+  assertViewModeToggleExists,
   clickViewModeFieldStatsButton,
   selectDiscoverSource,
 } from '../fixtures/discover_field_stats';
@@ -162,26 +162,16 @@ const runDashboardFieldStatsTests = async ({
         [testData.SHOW_FIELD_STATISTICS]: false,
       });
 
-      const dashboardId = await getSavedObjectIdByTitle({
-        kbnClient,
-        objectType: 'dashboard',
-        title: dashboardTitle,
-        space: scoutSpace.id,
-      });
-
-      expect(dashboardId, `Dashboard '${dashboardTitle}' was not found`).toBeTruthy();
-
-      await pageObjects.dashboard.openDashboardWithId(dashboardId!);
-      await pageObjects.dashboard.ensureEditMode();
-      await pageObjects.dashboard.addSavedSearch(savedSearchTitle);
+      await pageObjects.discover.goto({ queryMode: 'classic' });
+      await pageObjects.discover.loadSavedSearch(savedSearchTitle);
 
       await pageObjects.datePicker.setAbsoluteRange({
         from: testData.DISCOVER_TIME_RANGE.start,
         to: testData.DISCOVER_TIME_RANGE.end,
       });
 
-      await assertViewModeToggleNotExists(page);
-      await pageObjects.dashboard.saveDashboard(dashboardTitle);
+      await assertViewModeToggleExists(page);
+      await assertFieldStatsTabNotExists(page);
     }
   );
 

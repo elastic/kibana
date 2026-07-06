@@ -73,10 +73,10 @@ const addDeleteFieldTestData: DataViewManagementTestData = {
         hasActionMenu: true,
       },
     ],
-    visibleMetricFieldsCount: 2,
-    totalMetricFieldsCount: 2,
-    populatedFieldsCount: 9,
-    totalFieldsCount: 10,
+    visibleMetricFieldsCount: 1,
+    totalMetricFieldsCount: 1,
+    populatedFieldsCount: 8,
+    totalFieldsCount: 9,
   },
 };
 

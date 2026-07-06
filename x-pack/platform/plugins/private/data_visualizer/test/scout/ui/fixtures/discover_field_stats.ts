@@ -42,6 +42,10 @@ export const assertFieldStatsTableNotExists = async (page: ScoutPage) => {
   );
 };
 
+export const assertFieldStatsTabNotExists = async (page: ScoutPage) => {
+  await expect(page.testSubj.locator('dscViewModeFieldStatsButton')).toBeHidden({ timeout: 2000 });
+};
+
 export const clickViewModeFieldStatsButton = async (page: ScoutPage) => {
   const fieldStatsButton = page.testSubj.locator('dscViewModeFieldStatsButton');
   await expect(fieldStatsButton).toBeVisible({ timeout: 2000 });
