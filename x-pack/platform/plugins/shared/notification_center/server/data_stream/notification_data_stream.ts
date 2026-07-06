@@ -35,10 +35,6 @@ export const notificationDataStreamMappings = {
   },
 } satisfies MappingsDefinition;
 
-/**
- * Installs the notification data stream's index template at plugin setup. The
- * data stream itself is created lazily by ES on the first write.
- */
 export const registerNotificationDataStream = (dataStreams: DataStreamsSetup) => {
   return dataStreams.registerDataStream({
     name: NOTIFICATION_DATA_STREAM_NAME,
@@ -55,10 +51,6 @@ export const registerNotificationDataStream = (dataStreams: DataStreamsSetup) =>
   });
 };
 
-/**
- * Data stream client typed with the canonical {@link Notification}; binding the
- * schema type to the mappings enforces their field contract at compile time.
- */
 export type NotificationDataStreamClient = IDataStreamClient<
   typeof notificationDataStreamMappings,
   Notification
