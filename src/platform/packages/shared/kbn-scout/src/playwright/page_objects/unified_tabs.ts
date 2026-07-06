@@ -248,19 +248,11 @@ export class UnifiedTabs {
    */
   async getTabLabels(): Promise<string[]> {
     await this.getTabsBar().waitFor({ state: 'visible' });
-    const tabs = await this.getTabs().all();
-    const labels: string[] = [];
-    for (const tab of tabs) {
-      // The tab label is rendered by EuiTextTruncate which always includes
-      // a span[data-test-subj="fullText"] containing the complete label.
-      // Use evaluate to reliably read the text even when visually truncated.
-      const text = await tab.evaluate((el) => {
-        const fullTextEl = el.querySelector('[data-test-subj="fullText"]');
-        return fullTextEl?.textContent?.trim() ?? '';
-      });
-      labels.push(text);
-    }
-    return labels;
+    // The tab label is rendered by EuiTextTruncate, which keeps the complete
+    // label in a `span[data-test-subj="fullText"]` even when the visible text is
+    // truncated, so read that span across all tabs (DOM order = left to right).
+    const labels = await this.getTabs().locator('[data-test-subj="fullText"]').allTextContents();
+    return labels.map((label) => label.trim());
   }
 
   /**
@@ -289,16 +281,9 @@ export class UnifiedTabs {
     await labelInput.fill(newLabel);
     await this.page.keyboard.press('Enter');
 
-    // Wait for the label to update.
-    await this.page.waitForFunction(
-      ({ tabTestSubj, label }) => {
-        const tabButton = document.querySelector(`[data-test-subj="${tabTestSubj}"]`);
-        return (
-          tabButton?.querySelector('[data-test-subj="fullText"]')?.textContent?.trim() === label
-        );
-      },
-      { tabTestSubj: testSubj, label: newLabel },
-      { timeout: 10_000 }
-    );
+    // Web-first assertion retries until the tab's full label reflects the edit.
+    await expect(tab.locator('[data-test-subj="fullText"]')).toHaveText(newLabel, {
+      timeout: 10_000,
+    });
   }
 }
