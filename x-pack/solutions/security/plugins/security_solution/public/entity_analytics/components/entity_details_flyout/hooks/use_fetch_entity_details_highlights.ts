@@ -154,35 +154,37 @@ export const useFetchEntityDetailsHighlights = ({
     // Clear any previously shown error while a new generation attempt is in progress
     setError(null);
 
-    const toDate = Date.now();
-    const fromDate = toDate - ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
-    const { summary, replacements, prompt } = await fetchEntityDetailsHighlights({
-      entityType,
-      entityIdentifier,
-      anonymizationFields,
-      from: fromDate,
-      to: toDate,
-      connectorId,
-    }).catch((e: Error) => {
-      const caughtError = e instanceof Error ? e : new Error(String(e));
-      addError(caughtError, {
-        title: errorTitle,
-      });
-      setError(caughtError);
-      return { summary: null, replacements: null, prompt: null };
-    });
-
-    if (!summary || !replacements || !prompt) {
-      return;
-    }
-
-    const summaryFormatted = JSON.stringify(summary);
-
+    // Enter the loading state before the pre-inference fetch so the Generate button can't be
+    // re-clicked while entity data is gathered. The try/finally below always resets it.
     const controller = new AbortController();
     setAbortController(controller);
     setIsChatLoading(true);
 
     try {
+      const toDate = Date.now();
+      const fromDate = toDate - ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
+      const { summary, replacements, prompt } = await fetchEntityDetailsHighlights({
+        entityType,
+        entityIdentifier,
+        anonymizationFields,
+        from: fromDate,
+        to: toDate,
+        connectorId,
+      }).catch((e: Error) => {
+        const caughtError = e instanceof Error ? e : new Error(String(e));
+        addError(caughtError, {
+          title: errorTitle,
+        });
+        setError(caughtError);
+        return { summary: null, replacements: null, prompt: null };
+      });
+
+      if (!summary || !replacements || !prompt) {
+        return;
+      }
+
+      const summaryFormatted = JSON.stringify(summary);
+
       const outputResponse = await inference.output({
         id: 'entity-highlights',
         connectorId,

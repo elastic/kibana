@@ -345,7 +345,7 @@ export const EntityHighlightsAccordion: React.FC<{
           </EuiPanel>
         )}
 
-        {!assistantResult && !isLoading && !showErrorBanner && (
+        {!assistantResult && !storedSummary && !isLoading && !showErrorBanner && (
           <EuiPanel hasBorder={true}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={4}>

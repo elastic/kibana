@@ -226,15 +226,26 @@ describe('EntityMetadataClient', () => {
       expect(result).toBeNull();
     });
 
-    it('tolerates missing indices via allow_no_indices / ignore_unavailable', async () => {
+    it('omits allow_no_indices / ignore_unavailable so an authz denial is not swallowed as an empty 200', async () => {
       mockSearchHits([]);
       await client.getLatestByEntityId({
         entityId: 'user:alice@corp',
         eventAction: 'relationship_observed',
       });
       const [params] = esClient.search.mock.calls[0] as [Record<string, unknown>];
-      expect(params.allow_no_indices).toBe(true);
-      expect(params.ignore_unavailable).toBe(true);
+      expect(params.allow_no_indices).toBeUndefined();
+      expect(params.ignore_unavailable).toBeUndefined();
+    });
+
+    it('tolerates a missing datastream (404) by returning null', async () => {
+      esClient.search.mockRejectedValueOnce(
+        Object.assign(new Error('index_not_found_exception'), { statusCode: 404 })
+      );
+      const result = await client.getLatestByEntityId({
+        entityId: 'user:alice@corp',
+        eventAction: 'relationship_observed',
+      });
+      expect(result).toBeNull();
     });
 
     it('wraps the call in runWithSpan with the get_latest_by_entity_id name', async () => {

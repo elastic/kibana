@@ -39,7 +39,7 @@ const AI_SUMMARY_EVENT_ACTION = 'ai_summary_generated';
  */
 const toPersistedSummary = (doc: AiSummaryMetadataDoc): PersistedEntityAiSummary => ({
   highlights: doc['ai_summary.highlights'],
-  recommendedActions: doc['ai_summary.recommended_actions'] ?? null,
+  recommendedActions: doc['ai_summary.recommendedActions'] ?? null,
   generated_at: doc['ai_summary.generated_at'],
   generated_by: doc['ai_summary.generated_by'],
   staleness: {

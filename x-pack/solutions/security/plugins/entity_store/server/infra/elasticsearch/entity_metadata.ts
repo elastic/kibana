@@ -67,8 +67,15 @@ export const bulkCreateEntityMetadataDocs = async <TDoc extends object>(
  * generation). This returns the latest by `@timestamp` ("latest wins"),
  * which is what single-entity views (the flyout) need.
  *
- * The datastream may not exist yet (no docs written in this space), so the
- * search tolerates missing indices rather than throwing.
+ * Two failure modes are handled differently, on purpose:
+ *   - Missing datastream (nothing written in this space yet): tolerated, returns `null`.
+ *   - No read privilege: NOT tolerated, the error propagates so a gated caller
+ *     (reading as the current user) can tell "no access" apart from "no data".
+ *
+ * This is why we do NOT set `ignore_unavailable` / `allow_no_indices`. With those
+ * on, Elasticsearch treats an index the caller can't read as just "unavailable",
+ * skips it, and returns an empty 200 instead of a 403 — hiding the authorization
+ * failure and making it look identical to "no data".
  */
 export const getLatestEntityMetadataDoc = async <TDoc>(
   esClient: ElasticsearchClient,
@@ -78,21 +85,28 @@ export const getLatestEntityMetadataDoc = async <TDoc>(
     eventAction: string;
   }
 ): Promise<TDoc | null> => {
-  const response = await esClient.search<TDoc>({
-    index: params.index,
-    size: 1,
-    sort: [{ '@timestamp': { order: 'desc' } }],
-    query: {
-      bool: {
-        filter: [
-          { term: { 'event.action': params.eventAction } },
-          { term: { 'entity.id': params.entityId } },
-        ],
+  try {
+    const response = await esClient.search<TDoc>({
+      index: params.index,
+      size: 1,
+      sort: [{ '@timestamp': { order: 'desc' } }],
+      query: {
+        bool: {
+          filter: [
+            { term: { 'event.action': params.eventAction } },
+            { term: { 'entity.id': params.entityId } },
+          ],
+        },
       },
-    },
-    allow_no_indices: true,
-    ignore_unavailable: true,
-  });
+    });
 
-  return response.hits.hits[0]?._source ?? null;
+    return response.hits.hits[0]?._source ?? null;
+  } catch (error) {
+    // Datastream not created yet (no docs written in this space) → no summary.
+    // A 403 (no metadata read privilege) still propagates to the caller.
+    if (error?.meta?.statusCode === 404 || error?.statusCode === 404) {
+      return null;
+    }
+    throw error;
+  }
 };
