@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { Controller, useForm } from 'react-hook-form';
@@ -52,6 +52,18 @@ export const TagsField: React.FC<TagsFieldProps> = ({ isLoading, onSubmit, tags 
 
   const { data: tagOptions = [] } = useGetTags();
   const options = useMemo(() => tagOptions.map((label) => ({ label })), [tagOptions]);
+
+  // Read isDirty through a ref so this effect only reacts to the `tags` prop itself
+  // changing (e.g. an external update), and not to the dirty state flipping back to
+  // false as a side effect of the confirm/cancel handlers resetting the form.
+  const isDirtyRef = useRef(isDirty);
+  isDirtyRef.current = isDirty;
+
+  useEffect(() => {
+    if (!isDirtyRef.current) {
+      reset({ tags });
+    }
+  }, [tags, reset]);
 
   const onConfirm = handleSubmit(({ tags: submittedTags }) => {
     const trimmedTags = submittedTags.map((tag) => tag.trim());

@@ -200,7 +200,7 @@ const AssigneesFieldComponent: React.FC<AssigneesFieldProps> = ({
           ) : null}
           {isLoading && hasUsers ? (
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner data-test-subj="case-view-assignees-button-loading" />
+              <EuiLoadingSpinner data-test-subj={`${dataTestSubj}-updating`} />
             </EuiFlexItem>
           ) : null}
           {showEditControls ? (

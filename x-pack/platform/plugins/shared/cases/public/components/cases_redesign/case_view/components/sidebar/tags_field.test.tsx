@@ -135,4 +135,31 @@ describe('TagsField', () => {
 
     expect(await screen.findByTestId('comboBoxSearchInput')).toBeDisabled();
   });
+
+  it('reflects tags updated externally after mount when there is no pending edit', async () => {
+    const { rerender } = renderWithTestingProviders(<TagsField {...defaultProps} tags={['a']} />);
+
+    expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('a');
+
+    rerender(<TagsField {...defaultProps} tags={['a', 'b']} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('b');
+    });
+  });
+
+  it('does not clobber a pending edit when the tags prop changes externally', async () => {
+    const { rerender } = renderWithTestingProviders(<TagsField {...defaultProps} tags={['a']} />);
+
+    await user.click(await screen.findByRole('combobox'));
+    await user.paste('new');
+    await user.keyboard('{enter}');
+
+    expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('new');
+
+    rerender(<TagsField {...defaultProps} tags={['a', 'c']} />);
+
+    expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('new');
+    expect(screen.getByTestId('template-field-confirm-tags')).toBeInTheDocument();
+  });
 });

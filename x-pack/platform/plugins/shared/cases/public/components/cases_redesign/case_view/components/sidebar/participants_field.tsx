@@ -91,7 +91,7 @@ const ParticipantsFieldComponent: React.FC<ParticipantsFieldProps> = ({
           <UserAvatarList users={displayUsers} caseId={caseId} caseTitle={caseTitle} />
           {isLoading ? (
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner data-test-subj="case-view-assignees-button-loading" />
+              <EuiLoadingSpinner data-test-subj={`${dataTestSubj}-updating`} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>

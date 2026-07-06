@@ -71,6 +71,6 @@ describe('ParticipantsField', () => {
     );
 
     expect(screen.getByTestId('case-view-participants-field-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('case-view-assignees-button-loading')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-participants-field-panel-loading')).toBeInTheDocument();
   });
 });

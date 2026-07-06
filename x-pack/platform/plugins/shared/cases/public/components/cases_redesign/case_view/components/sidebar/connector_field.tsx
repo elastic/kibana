@@ -6,14 +6,10 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback } from 'react';
-import { EuiFlexItem, EuiText } from '@elastic/eui';
+import React from 'react';
 import type { CaseConnectors, CaseUI } from '../../../../../../common/ui/types';
 import type { ActionConnector, CaseConnector } from '../../../../../../common/types/domain';
-import { ConnectorsForm } from '../../../../edit_connector/connectors_form';
-import { useApplicationCapabilities } from '../../../../../common/lib/kibana';
-import { useCasesContext } from '../../../../cases_context/use_cases_context';
-import { READ_ACTIONS_PERMISSIONS_ERROR_MSG } from '../../../../../common/translations';
+import { EditConnector } from '../../../../edit_connector';
 
 export interface ConnectorFieldProps {
   caseData: CaseUI;
@@ -23,40 +19,25 @@ export interface ConnectorFieldProps {
   onSubmit: (connector: CaseConnector) => void;
 }
 
+// Delegates to EditConnector (with its own "Connectors" header suppressed, since the
+// accordion section already renders one) so the redesigned sidebar keeps the full
+// push-to-service experience: preview mode, edit toggle, push button, and callouts.
 export const ConnectorField: FC<ConnectorFieldProps> = ({
   caseData,
   caseConnectors,
   supportedActionConnectors,
   isLoading,
   onSubmit,
-}) => {
-  const { actions } = useApplicationCapabilities();
-  const { permissions } = useCasesContext();
-  const canUseConnectors = permissions.connectors && actions.read;
-
-  // the form resets its own values on cancel, nothing else to do here
-  const onCancel = useCallback(() => {}, []);
-
-  if (!canUseConnectors) {
-    return (
-      <EuiText data-test-subj="edit-connector-permissions-error-msg" size="s">
-        <span>{READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
-      </EuiText>
-    );
-  }
-
-  return (
-    <EuiFlexItem grow={false} data-test-subj="case-view-edit-connector">
-      <ConnectorsForm
-        caseData={caseData}
-        caseConnectors={caseConnectors}
-        supportedActionConnectors={supportedActionConnectors}
-        isLoading={isLoading}
-        onCancel={onCancel}
-        onSubmit={onSubmit}
-      />
-    </EuiFlexItem>
-  );
-};
+}) => (
+  <EditConnector
+    caseData={caseData}
+    caseConnectors={caseConnectors}
+    supportedActionConnectors={supportedActionConnectors}
+    isLoading={isLoading}
+    onSubmit={onSubmit}
+    showHeader={false}
+    actionsVariant="outlined"
+  />
+);
 
 ConnectorField.displayName = 'ConnectorField';

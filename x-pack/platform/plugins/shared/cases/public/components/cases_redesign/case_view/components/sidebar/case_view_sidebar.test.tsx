@@ -194,6 +194,30 @@ describe('CaseViewSidebar (redesign)', () => {
     expect(screen.getByTestId('template-field-confirm-severity')).toBeInTheDocument();
   });
 
+  it('does not render duplicate data-test-subj when assignees and participants are both loading', async () => {
+    useGetCaseUsersMock.mockReturnValue({
+      isLoading: true,
+      data: {
+        participants: [],
+        assignees: [],
+        unassignedUsers: [],
+        reporter: caseUsers.reporter,
+      },
+    });
+
+    renderWithTestingProviders(<CaseViewSidebar caseData={{ ...caseData, assignees: [] }} />, {
+      wrapperProps: { license: platinumLicense },
+    });
+
+    expect(
+      await screen.findByTestId('case-view-assignees-field-panel-loading')
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('case-view-participants-field-panel-loading')
+    ).toBeInTheDocument();
+    expect(screen.queryAllByTestId('case-view-assignees-button-loading')).toHaveLength(0);
+  });
+
   it('should not render the assignees on basic license', () => {
     useCasesFeaturesMock.mockReturnValue({
       ...useGetCasesFeaturesRes,

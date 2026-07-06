@@ -9,6 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,6 +39,12 @@ export interface EditConnectorProps {
   isLoading: boolean;
   onSubmit: (connector: CaseConnector) => void;
   showHeader?: boolean;
+  /**
+   * `icon` (default) matches the legacy pencil-icon-in-the-header look. `outlined`
+   * renders the edit action as a labelled, bordered button alongside the push
+   * button, matching the action buttons in the redesigned case header.
+   */
+  actionsVariant?: 'icon' | 'outlined';
 }
 
 export const EditConnector = React.memo(
@@ -48,6 +55,7 @@ export const EditConnector = React.memo(
     isLoading,
     onSubmit,
     showHeader = true,
+    actionsVariant = 'icon',
   }: EditConnectorProps) => {
     const caseConnectorFields = caseData.connector.fields;
     const caseActionConnector = getConnectorById(caseData.connector.id, supportedActionConnectors);
@@ -101,6 +109,15 @@ export const EditConnector = React.memo(
       !isValidConnector ||
       !needsToBePushed;
 
+    const isOutlined = actionsVariant === 'outlined';
+    const showEditAction = !isLoading && !isEdit && hasPushPermissions && canUseConnectors;
+    const showPushAction =
+      !hasErrorMessages && !isLoading && !isEdit && hasPushPermissions && canUseConnectors;
+    // Nothing renders in the header row when there's no header and the edit action has
+    // moved down next to the push button, so skip the divider below it too instead of
+    // showing a stray line with an empty row above it.
+    const showHeaderDivider = showHeader || (showEditAction && !isOutlined);
+
     return (
       <EuiFlexItem grow={false} data-test-subj="sidebar-connectors">
         <EuiFlexGroup
@@ -117,7 +134,7 @@ export const EditConnector = React.memo(
               </EuiTitle>
             </EuiFlexItem>
           ) : null}
-          {!isLoading && !isEdit && hasPushPermissions && canUseConnectors ? (
+          {showEditAction && !isOutlined ? (
             <EuiFlexItem data-test-subj="connector-edit" grow={false}>
               <EuiToolTip content={i18n.EDIT_CONNECTOR_ARIA} disableScreenReaderOutput>
                 <EuiButtonIcon
@@ -130,7 +147,7 @@ export const EditConnector = React.memo(
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-        <EuiHorizontalRule margin="xs" />
+        {showHeaderDivider ? <EuiHorizontalRule margin="xs" /> : null}
         <EuiFlexGroup data-test-subj="edit-connectors" direction="column" alignItems="stretch">
           {!isLoading && !isEdit && hasErrorMessages && canUseConnectors && (
             <EuiFlexItem data-test-subj="push-callouts">
@@ -163,21 +180,63 @@ export const EditConnector = React.memo(
               onSubmit={onSubmitConnector}
             />
           )}
-          {!hasErrorMessages && !isLoading && !isEdit && hasPushPermissions && canUseConnectors && (
-            <EuiFlexItem grow={false}>
-              <span>
-                <PushButton
-                  hasBeenPushed={hasBeenPushed}
-                  disabled={disablePushButton}
-                  isLoading={isLoadingPushToService}
-                  pushToService={handlePushToService}
-                  errorsMsg={errorsMsg}
-                  showTooltip={errorsMsg.length > 0 || !needsToBePushed || !hasPushPermissions}
-                  connectorName={connectorWithName.name}
-                />
-              </span>
-            </EuiFlexItem>
-          )}
+          {isOutlined
+            ? (showEditAction || showPushAction) && (
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    responsive={false}
+                    data-test-subj="connector-outlined-actions"
+                  >
+                    {showEditAction ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          data-test-subj="connector-edit-button"
+                          size="s"
+                          color="text"
+                          iconType="pencil"
+                          onClick={onEditClick}
+                        >
+                          {i18n.EDIT}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    ) : null}
+                    {showPushAction ? (
+                      <EuiFlexItem grow={false}>
+                        <span>
+                          <PushButton
+                            hasBeenPushed={hasBeenPushed}
+                            disabled={disablePushButton}
+                            isLoading={isLoadingPushToService}
+                            pushToService={handlePushToService}
+                            errorsMsg={errorsMsg}
+                            showTooltip={
+                              errorsMsg.length > 0 || !needsToBePushed || !hasPushPermissions
+                            }
+                            connectorName={connectorWithName.name}
+                            variant="outlined"
+                          />
+                        </span>
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )
+            : showPushAction && (
+                <EuiFlexItem grow={false}>
+                  <span>
+                    <PushButton
+                      hasBeenPushed={hasBeenPushed}
+                      disabled={disablePushButton}
+                      isLoading={isLoadingPushToService}
+                      pushToService={handlePushToService}
+                      errorsMsg={errorsMsg}
+                      showTooltip={errorsMsg.length > 0 || !needsToBePushed || !hasPushPermissions}
+                      connectorName={connectorWithName.name}
+                    />
+                  </span>
+                </EuiFlexItem>
+              )}
         </EuiFlexGroup>
       </EuiFlexItem>
     );

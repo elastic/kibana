@@ -85,7 +85,7 @@ describe('AssigneesField', () => {
   it('shows a loading spinner when loading and there are no assignees', () => {
     renderWithTestingProviders(<AssigneesField {...{ ...defaultProps, isLoading: true }} />);
 
-    expect(screen.getByTestId('case-view-assignees-button-loading')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-assignees-field-panel-loading')).toBeInTheDocument();
     expect(screen.queryByTestId('case-view-assignees-add-button')).not.toBeInTheDocument();
   });
 

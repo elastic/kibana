@@ -51,7 +51,7 @@ export const UserPickerFieldPanelLayout: React.FC<UserPickerFieldPanelLayoutProp
       </EuiText>
       <EuiSpacer size="m" />
       {isLoading && !hasUsers ? (
-        <EuiLoadingSpinner data-test-subj="case-view-assignees-button-loading" />
+        <EuiLoadingSpinner data-test-subj={`${dataTestSubj}-loading`} />
       ) : (
         children
       )}
