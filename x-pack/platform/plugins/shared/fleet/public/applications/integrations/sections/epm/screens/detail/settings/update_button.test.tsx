@@ -121,6 +121,60 @@ describe('UpdateButton agentless dry-run guard failures', () => {
     expect(toasts.addWarning).not.toHaveBeenCalled();
   });
 
+  it('reports which policies failed a partial bulk upgrade, with the error message', async () => {
+    mockSendBulkUpgradeAgentlessPolicies.mockResolvedValue([
+      { id: 'agentless-ok', name: 'ok-policy', success: true },
+      {
+        id: 'agentless-broken',
+        name: 'broken-policy',
+        success: false,
+        statusCode: 500,
+        body: { message: 'mapping failed' },
+      },
+    ]);
+
+    const { toasts } = await renderAndConfirmUpgrade({
+      agentlessPolicyIds: ['agentless-ok', 'agentless-broken'],
+      agentlessDryRunData: [
+        { id: 'agentless-ok', name: 'ok-policy', hasErrors: false },
+        { id: 'agentless-broken', name: 'broken-policy', hasErrors: false },
+      ],
+    });
+
+    // The toast must name the failed policy and carry the API's error message — a bare count
+    // leaves the operator unable to tell which policies to fix.
+    await waitFor(() =>
+      expect(toasts.addWarning).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: expect.stringContaining('Error upgrading agentless policies'),
+          text: expect.stringContaining('broken-policy'),
+        })
+      )
+    );
+    expect(toasts.addWarning).toHaveBeenCalledWith(
+      expect.objectContaining({ text: expect.stringContaining('mapping failed') })
+    );
+    const warningText = (toasts.addWarning as jest.Mock).mock.calls[0][0].text;
+    expect(warningText).not.toContain('ok-policy');
+  });
+
+  it('falls back to the policy id in the partial-failure toast when the result has no name', async () => {
+    mockSendBulkUpgradeAgentlessPolicies.mockResolvedValue([
+      { id: 'agentless-broken', success: false, statusCode: 500 },
+    ]);
+
+    const { toasts } = await renderAndConfirmUpgrade({
+      agentlessPolicyIds: ['agentless-broken'],
+      agentlessDryRunData: [{ id: 'agentless-broken', hasErrors: false }],
+    });
+
+    await waitFor(() => expect(toasts.addWarning).toHaveBeenCalled());
+    const warningText = (toasts.addWarning as jest.Mock).mock.calls[0][0].text;
+    expect(warningText).toContain('agentless-broken');
+    // No per-policy error message in the response — no dangling "Error:" suffix.
+    expect(warningText).not.toContain('Error:');
+  });
+
   it('does not warn about config-migration conflicts (announced in the modal instead)', async () => {
     const { toasts } = await renderAndConfirmUpgrade({
       agentlessPolicyIds: ['agentless-ok', 'agentless-conflict'],

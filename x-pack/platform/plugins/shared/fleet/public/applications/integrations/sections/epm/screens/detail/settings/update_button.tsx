@@ -297,19 +297,26 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
         const results = await sendBulkUpgradeAgentlessPolicies(agentlessIdsToUpgrade);
         const failed = results.filter((result) => !result.success);
         if (failed.length > 0) {
+          // The response carries per-policy failure details — surface them so the operator can
+          // tell which policies failed and why, not just how many.
+          const firstErrorMessage = failed.find((result) => result.body?.message)?.body?.message;
           notifications.toasts.addWarning({
             title: i18n.translate(
               'xpack.fleet.integrations.settings.errorUpdatingAgentlessPoliciesToast.title',
               {
-                defaultMessage: 'Error updating agentless policies',
+                defaultMessage: 'Error upgrading agentless policies',
               }
             ),
             text: i18n.translate(
               'xpack.fleet.integrations.settings.errorUpdatingAgentlessPoliciesToast.message',
               {
                 defaultMessage:
-                  '{failedCount, plural, one {# agentless policy could not be upgraded and needs to be manually updated.} other {# agentless policies could not be upgraded and need to be manually updated.}}',
-                values: { failedCount: failed.length },
+                  'Fleet could not upgrade {failedNames}. Upgrade {failedCount, plural, one {it} other {them}} manually.{errorMessage}',
+                values: {
+                  failedCount: failed.length,
+                  failedNames: failed.map((result) => result.name ?? result.id).join(', '),
+                  errorMessage: firstErrorMessage ? `\nError: ${firstErrorMessage}` : '',
+                },
               }
             ),
           });
@@ -339,7 +346,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           title: i18n.translate(
             'xpack.fleet.integrations.settings.errorUpdatingAgentlessPoliciesToast.title',
             {
-              defaultMessage: 'Error updating agentless policies',
+              defaultMessage: 'Error upgrading agentless policies',
             }
           ),
           toastMessage: i18n.translate(
