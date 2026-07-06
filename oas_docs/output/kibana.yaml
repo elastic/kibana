@@ -45429,10 +45429,10 @@ paths:
                   links:
                     - destination: dashboard-abc-123
                       label: Overview
-                      type: dashboardLink
+                      type: dashboard_link
                     - destination: https://www.elastic.co/docs
                       label: Elastic Documentation
-                      type: externalLink
+                      type: external_link
                   title: Important Resources
             schema:
               additionalProperties: false
@@ -45451,12 +45451,12 @@ paths:
                   items:
                     discriminator:
                       mapping:
-                        dashboardLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
-                        externalLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                        dashboard_link: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboard_link'
+                        external_link: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-external_link'
                       propertyName: type
                     oneOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboard_link'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-external_link'
                   maxItems: 100
                   type: array
                 tags:
@@ -45490,13 +45490,13 @@ paths:
                             open_in_new_tab: false
                             use_filters: true
                             use_time_range: true
-                          type: dashboardLink
+                          type: dashboard_link
                         - destination: https://www.elastic.co/docs
                           label: Elastic Documentation
                           options:
                             encode_url: true
                             open_in_new_tab: true
-                          type: externalLink
+                          type: external_link
                       title: Important Resources
                     id: 0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
                     meta:
@@ -45527,12 +45527,12 @@ paths:
                         items:
                           discriminator:
                             mapping:
-                              dashboardLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
-                              externalLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                              dashboard_link: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboard_link'
+                              external_link: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-external_link'
                             propertyName: type
                           oneOf:
-                            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
-                            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboard_link'
+                            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-external_link'
                         maxItems: 100
                         type: array
                       tags:
@@ -45579,12 +45579,12 @@ paths:
               "links": [
                 {
                   "label": "Overview",
-                  "type": "dashboardLink",
+                  "type": "dashboard_link",
                   "destination": "dashboard-abc-123"
                 },
                 {
                   "label": "Elastic Documentation",
-                  "type": "externalLink",
+                  "type": "external_link",
                   "destination": "https://www.elastic.co/docs"
                 }
               ],
@@ -45602,12 +45602,12 @@ paths:
                 "links": [
                   {
                     "label": "Overview",
-                    "type": "dashboardLink",
+                    "type": "dashboard_link",
                     "destination": "dashboard-abc-123"
                   },
                   {
                     "label": "Elastic Documentation",
-                    "type": "externalLink",
+                    "type": "external_link",
                     "destination": "https://www.elastic.co/docs"
                   }
                 ],
@@ -45708,13 +45708,13 @@ paths:
                             open_in_new_tab: false
                             use_filters: true
                             use_time_range: true
-                          type: dashboardLink
+                          type: dashboard_link
                         - destination: https://www.elastic.co/docs
                           label: Elastic Documentation
                           options:
                             encode_url: true
                             open_in_new_tab: true
-                          type: externalLink
+                          type: external_link
                       title: Important Resources
                     id: 0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
                     meta:
@@ -45743,12 +45743,12 @@ paths:
                         items:
                           discriminator:
                             mapping:
-                              dashboardLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
-                              externalLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                              dashboard_link: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboard_link'
+                              external_link: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-external_link'
                             propertyName: type
                           oneOf:
-                            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
-                            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboard_link'
+                            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-external_link'
                         maxItems: 100
                         type: array
                       tags:
@@ -45838,13 +45838,13 @@ paths:
                         open_in_new_tab: false
                         use_filters: true
                         use_time_range: true
-                      type: dashboardLink
+                      type: dashboard_link
                     - destination: https://www.elastic.co/docs
                       label: Elastic Documentation
                       options:
                         encode_url: true
                         open_in_new_tab: true
-                      type: externalLink
+                      type: external_link
                   title: Important Resources
             schema:
               additionalProperties: false
@@ -45863,12 +45863,12 @@ paths:
                   items:
                     discriminator:
                       mapping:
-                        dashboardLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
-                        externalLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                        dashboard_link: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboard_link'
+                        external_link: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-external_link'
                       propertyName: type
                     oneOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboard_link'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-external_link'
                   maxItems: 100
                   type: array
                 tags:
@@ -45902,13 +45902,13 @@ paths:
                             open_in_new_tab: false
                             use_filters: true
                             use_time_range: true
-                          type: dashboardLink
+                          type: dashboard_link
                         - destination: https://www.elastic.co/docs
                           label: Elastic Documentation
                           options:
                             encode_url: true
                             open_in_new_tab: true
-                          type: externalLink
+                          type: external_link
                       title: Important Resources
                     id: 0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
                     meta:
@@ -45937,13 +45937,13 @@ paths:
                             open_in_new_tab: false
                             use_filters: true
                             use_time_range: true
-                          type: dashboardLink
+                          type: dashboard_link
                         - destination: https://www.elastic.co/docs
                           label: Elastic Documentation
                           options:
                             encode_url: true
                             open_in_new_tab: true
-                          type: externalLink
+                          type: external_link
                       title: Important Resources
                     id: 0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
                     meta:
@@ -45978,7 +45978,7 @@ paths:
               "links": [
                 {
                   "label": "Overview",
-                  "type": "dashboardLink",
+                  "type": "dashboard_link",
                   "destination": "dashboard-abc-123",
                   "options": {
                     "open_in_new_tab": false,
@@ -45988,7 +45988,7 @@ paths:
                 },
                 {
                   "label": "Elastic Documentation",
-                  "type": "externalLink",
+                  "type": "external_link",
                   "destination": "https://www.elastic.co/docs",
                   "options": {
                     "encode_url": true,
@@ -46008,7 +46008,7 @@ paths:
               "links": [
                 {
                   "label": "Overview",
-                  "type": "dashboardLink",
+                  "type": "dashboard_link",
                   "destination": "dashboard-abc-123",
                   "options": {
                     "open_in_new_tab": false,
@@ -46018,7 +46018,7 @@ paths:
                 },
                 {
                   "label": "Elastic Documentation",
-                  "type": "externalLink",
+                  "type": "external_link",
                   "destination": "https://www.elastic.co/docs",
                   "options": {
                     "encode_url": true,
@@ -96406,12 +96406,12 @@ components:
                   items:
                     discriminator:
                       mapping:
-                        dashboardLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
-                        externalLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                        dashboard_link: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboard_link'
+                        external_link: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-external_link'
                       propertyName: type
                     oneOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboard_link'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-external_link'
                   maxItems: 100
                   type: array
                 title:
@@ -97417,7 +97417,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-field-setting'
       description: Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.
       title: Field settings or runtime field
-    Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink:
+    Kibana_HTTP_APIs_kbn-link-panel-type-dashboard_link:
       additionalProperties: false
       description: Link type. Set to dashboardLink for a link to another dashboard.
       properties:
@@ -97449,14 +97449,14 @@ components:
               type: boolean
         type:
           enum:
-            - dashboardLink
+            - dashboard_link
           type: string
       required:
         - type
         - destination
-      title: kbn-link-panel-type-dashboardLink
+      title: kbn-link-panel-type-dashboard_link
       type: object
-    Kibana_HTTP_APIs_kbn-link-type-externalLink:
+    Kibana_HTTP_APIs_kbn-link-type-external_link:
       additionalProperties: false
       description: Link type. Set to externalLink for a URL outside Kibana.
       properties:
@@ -97483,12 +97483,12 @@ components:
               type: boolean
         type:
           enum:
-            - externalLink
+            - external_link
           type: string
       required:
         - type
         - destination
-      title: kbn-link-type-externalLink
+      title: kbn-link-type-external_link
       type: object
     Kibana_HTTP_APIs_kbn-runtime-field-schema:
       additionalProperties: false
@@ -98644,12 +98644,12 @@ components:
               items:
                 discriminator:
                   mapping:
-                    dashboardLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
-                    externalLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                    dashboard_link: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboard_link'
+                    external_link: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-external_link'
                   propertyName: type
                 oneOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboard_link'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-external_link'
               maxItems: 100
               type: array
             tags:
