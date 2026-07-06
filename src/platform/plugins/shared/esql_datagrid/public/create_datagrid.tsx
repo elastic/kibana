@@ -33,6 +33,7 @@ interface ESQLDataGridProps {
   fullHeight?: boolean;
   initialRowHeight?: number;
   controlColumnIds?: string[]; // default: ['openDetails', 'select']
+  isApproximate?: boolean;
 }
 
 const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
