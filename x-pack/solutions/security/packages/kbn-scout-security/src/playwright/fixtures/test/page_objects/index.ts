@@ -21,6 +21,7 @@ import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
 import { GraphFlyoutPage } from './graph_flyout_page';
+import { EntityFlyoutAnomaliesPage } from './entity_flyout_anomalies_page';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 export { AddExceptionButtonType } from './add_exception_flyout';
@@ -42,6 +43,8 @@ export interface SecurityPageObjects extends PageObjects {
   serverlessProjectChromePage: ServerlessProjectChromePage;
   /** Graph Visualization tab inside the alert/event details left panel. */
   graphFlyoutPage: GraphFlyoutPage;
+  /** Entity flyout anomalies section and tab — requires entityAnalyticsAnomalyDetails feature flag. */
+  entityFlyoutAnomaliesPage: EntityFlyoutAnomaliesPage;
 }
 
 export function extendPageObjects(
@@ -69,5 +72,6 @@ export function extendPageObjects(
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
     serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),
     graphFlyoutPage: createLazyPageObject(GraphFlyoutPage, page),
+    entityFlyoutAnomaliesPage: createLazyPageObject(EntityFlyoutAnomaliesPage, page),
   };
 }

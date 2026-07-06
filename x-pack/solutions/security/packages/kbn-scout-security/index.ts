@@ -53,6 +53,8 @@ export type {
   ThreatMatchRuleCreatePage,
 } from './src/playwright';
 
+export * from './src/playwright/fixtures/test';
+
 // Re-exported Scout core types
 export type {
   ScoutPlaywrightOptions,
