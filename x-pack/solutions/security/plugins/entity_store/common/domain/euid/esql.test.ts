@@ -541,7 +541,8 @@ describe('buildDestinationFieldEsql', () => {
     // with user.ts automatically — no duplicate manual copy to drift.
     const { identityField } = userEntityDefinition;
     if (isSingleFieldIdentity(identityField)) throw new Error('expected multi-field identity');
-    const cloudProviderClause = identityField.fieldEvaluations[0].whenClauses[1] as FieldEvaluationWhenClause & {
+    const cloudProviderClause = identityField.fieldEvaluations[0]
+      .whenClauses[1] as FieldEvaluationWhenClause & {
       condition: object;
       then: { field: string; mapping: Record<string, string> };
     };
@@ -587,7 +588,6 @@ describe('buildDestinationFieldEsql', () => {
       // No trailing catch-all default inside the inner CASE.
       expect(expression).not.toContain('"ibm"');
     });
-
   });
 });
 
