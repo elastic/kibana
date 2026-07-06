@@ -26,7 +26,10 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  evaluation: { query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' } },
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  },
   state_transition: null,
   enabled: true,
   createdBy: 'elastic',
@@ -183,12 +186,12 @@ describe('createRuleSmlType', () => {
               'CPU breach detection',
               'alert',
               'ops, cpu',
-              baseRuleAttrs.evaluation!.query!.base,
+              (baseRuleAttrs.query as { breach: { query: string } }).breach.query,
             ].join('\n'),
-            permissions: [`api:${ALERTING_V2_API_PRIVILEGES.rules.read}`],
           },
         ],
       });
+      expect(result?.chunks[0]).not.toHaveProperty('permissions');
     });
 
     it('falls back to originId for title when metadata.name is missing', async () => {
@@ -218,6 +221,16 @@ describe('createRuleSmlType', () => {
     });
   });
 
+  describe('getPermissions', () => {
+    it('returns the rules-read API privilege', () => {
+      const permissions = buildDefinition().getPermissions!('rule-1', buildSmlContext());
+      expect(permissions).toEqual({
+        kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
+        elasticsearch: { indices: [] },
+      });
+    });
+  });
+
   describe('toAttachment', () => {
     const buildSmlDocument = (overrides: Partial<{ origin_id: string }> = {}) => {
       const originId = overrides.origin_id ?? 'rule-1';
@@ -231,7 +244,7 @@ describe('createRuleSmlType', () => {
         created_at: '2026-04-10T00:00:00.000Z',
         updated_at: '2026-04-10T00:00:00.000Z',
         spaces: ['default'],
-        permissions: [],
+        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
         ingestion_method: 'crawled' as const,
       };
     };

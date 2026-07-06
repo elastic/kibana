@@ -153,6 +153,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - server/**/*.json
     - test/scout_agent_builder/**/*
     - test/scout_agent_builder_smoke/**/*
     - test/scout_agent_builder_shared/**/*

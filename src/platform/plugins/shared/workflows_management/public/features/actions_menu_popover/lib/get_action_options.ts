@@ -14,6 +14,7 @@ import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
 import { triggerSchemas } from '../../../trigger_schemas';
+import { getExtensionStability } from '../../../widgets/workflow_yaml_editor/lib/get_stability_note';
 import type { ActionConnectorGroup, ActionGroup, ActionOptionData } from '../types';
 import { isActionGroup } from '../types';
 
@@ -65,7 +66,7 @@ export function getActionOptions(
       description: t.description ?? t.id,
       iconType: (t.icon != null ? t.icon : 'bolt') as IconType,
       iconColor: euiTheme.colors.vis.euiColorVis6,
-      stability: 'tech_preview',
+      stability: getExtensionStability(t),
     }));
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
@@ -92,6 +93,18 @@ export function getActionOptions(
     options: [],
   };
 
+  const kibanaSecurityGroup: ActionGroup = {
+    iconType: 'securityApp',
+    id: 'kibana.security',
+    label: i18n.translate('workflows.actionsMenu.kibanaSecurity', {
+      defaultMessage: 'Security',
+    }),
+    description: i18n.translate('workflows.actionsMenu.kibanaSecurityDescription', {
+      defaultMessage: 'Work with Security data and features directly from your workflow',
+    }),
+    options: [],
+  };
+
   const kibanaGroup: ActionGroup = {
     iconType: 'logoKibana',
     id: 'kibana',
@@ -102,7 +115,7 @@ export function getActionOptions(
       defaultMessage: 'Work with Kibana data and features directly from your workflow',
     }),
     options: [],
-    nestedGroups: [kibanaCasesGroup],
+    nestedGroups: [kibanaCasesGroup, kibanaSecurityGroup],
   };
   const externalGroup: ActionOptionData = {
     iconType: 'plugs',
@@ -258,6 +271,7 @@ export function getActionOptions(
     [StepCategory.Ai]: aiGroup,
     [StepCategory.Kibana]: kibanaGroup,
     [StepCategory.KibanaCases]: kibanaCasesGroup,
+    [StepCategory.KibanaSecurity]: kibanaSecurityGroup,
     [StepCategory.Data]: dataTransformationGroup,
     [StepCategory.FlowControl]: flowControlGroup,
   };

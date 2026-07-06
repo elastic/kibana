@@ -21,9 +21,7 @@ PUT my-vectors
   "mappings": {
     "properties": {
       "vector": {
-        "type": "dense_vector",
-        "dims": 384,
-        "similarity": "cosine"
+        "type": "dense_vector"
       },
       "text": { "type": "text" }
     }
@@ -42,9 +40,7 @@ POST my-vectors/_search
 {
   "knn": {
     "field": "vector",
-    "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60],
-    "k": 10,
-    "num_candidates": 100
+    "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
   }
 }`;
 

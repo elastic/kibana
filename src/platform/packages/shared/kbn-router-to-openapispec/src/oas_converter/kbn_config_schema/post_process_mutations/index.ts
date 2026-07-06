@@ -10,7 +10,7 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import * as mutations from './mutations';
 import type { IContext } from './context';
-import { isAnyType } from './mutations/utils';
+import { ensureNullableEnumIncludesNull, isAnyType } from './mutations/utils';
 import { isReferenceObject } from '../../common';
 
 type Schema = OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
@@ -70,6 +70,8 @@ const walkSchema = (ctx: IContext, schema: Schema): void => {
       }
     }
   }
+
+  ensureNullableEnumIncludesNull(schema);
 };
 
 export { createCtx } from './context';

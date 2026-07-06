@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldValue, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -16,25 +16,30 @@ import type {
   SmlSearchResult,
   SmlAutocompleteResult,
   SmlDocument,
-  SmlDocumentInput,
   SmlTypeDefinition,
-  SmlUpsertResult,
   SmlSearchFilters,
   SmlSearchConstraints,
   MatchedDiscoveryLabel,
+  SmlPermissions,
 } from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
 import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
 import { SmlCrawlerImpl } from './sml_crawler';
 import type { SmlCrawler } from './types';
-import { smlIndexName, createSmlStorage } from './sml_storage';
-import { SmlResultWindowExceededError } from './sml_errors';
+import { smlIndexName } from './sml_storage';
+import {
+  SmlResultWindowExceededError,
+  SmlAuthzEnumerationIncompleteError,
+  SmlCorpusTooLargeError,
+} from './sml_errors';
+import { MAX_CHUNKS_PER_ORIGIN } from '../../../common/constants';
 
 // ES client usage pattern in this module:
 // - Read operations (search, get, list, checkAccess) use `esClient.asInternalUser` directly with
 //   `allow_no_indices: true` / `ignore_unavailable: true` so they silently handle a missing index.
-// - Write operations (upsert, delete) use `createSmlStorage` / `smlClient` so that
-//   StorageIndexAdapter auto-creates the index on first write.
+// - Every write path (origin-mode crawler, content-mode workflow step, HTTP PUT/DELETE) goes
+//   through `SmlIndexer` so type-registration enforcement, permission derivation, and storage
+//   shape stay consistent. There are no document-write paths in this file.
 
 export interface SmlServiceSetup {
   /**
@@ -161,7 +166,7 @@ class SmlServiceImpl implements SmlServiceInstance {
       getDocuments: async ({ ids, spaceId, esClient }) => {
         return getDocumentsByIds({ ids, spaceId, esClient, logger });
       },
-      listDocuments: async ({ spaceId, esClient, page, perPage, type, originUri }) => {
+      listDocuments: async ({ spaceId, esClient, page, perPage, type, originUri, tags }) => {
         return listDocuments({
           spaceId,
           esClient,
@@ -170,13 +175,14 @@ class SmlServiceImpl implements SmlServiceInstance {
           perPage,
           type,
           originId: originUri,
+          tags,
         });
       },
-      upsertDocument: async ({ id, spaceId, document, esClient }) => {
-        return upsertDocument({ id, spaceId, document, esClient, logger });
+      findByOrigin: async ({ type, originId, spaceId, esClient }) => {
+        return findByOrigin({ type, originId, spaceId, esClient, logger });
       },
-      deleteDocument: async ({ id, spaceId, esClient }) => {
-        return deleteDocument({ id, spaceId, esClient, logger });
+      findByOriginAcrossSpaces: async ({ type, originId, esClient }) => {
+        return findByOriginAcrossSpaces({ type, originId, esClient, logger });
       },
       getTypeDefinition: (typeId: string) => {
         return this.registry.get(typeId);
@@ -198,6 +204,15 @@ class SmlServiceImpl implements SmlServiceInstance {
 export const isNotFoundError = (error: unknown): boolean => {
   return error instanceof errors.ResponseError && error.statusCode === 404;
 };
+
+/**
+ * Empty-but-fully-shaped permissions object. Used as a fallback when
+ * `_source.permissions` is somehow missing (legacy / test docs).
+ */
+const emptyPermissions = (): SmlDocument['permissions'] => ({
+  kibana: { privileges: [] },
+  elasticsearch: { indices: [] },
+});
 
 const isResultWindowExceededError = (error: unknown): boolean => {
   if (!(error instanceof errors.ResponseError) || error.statusCode !== 400) return false;
@@ -221,40 +236,250 @@ const isResultWindowExceededError = (error: unknown): boolean => {
 };
 
 /**
- * Batch-check which of the given Kibana privilege strings the current user holds.
- * Returns the set of authorized privilege strings.
+ * Combined privilege check for SML chunks. In a single ES `_has_privileges`
+ * call (via Kibana's `checkPrivileges` wrapper), batch-checks:
+ *
+ *   - Which of the given Kibana action strings are authorized for the user
+ *     in the current space.
+ *   - Which of the given concrete Elasticsearch index / alias / data stream
+ *     names the user has `read` on.
+ *
+ * Kibana's `checkPrivilegesDynamicallyWithRequest` packs both the
+ * `application:` (Kibana feature privs) and `index:` (raw ES grants)
+ * sections into the same `_has_privileges` POST, so this is one HTTP
+ * round-trip — not two.
+ *
+ * Per `IndicesPermission.checkResourcePrivileges`, ES evaluates each
+ * requested index name against the user's role grants by automaton
+ * subset check, so callers must pass **concrete names only** — not
+ * patterns. SML chunks store concrete names by construction.
+ *
+ * Fails closed (empty Sets) on error to avoid over-disclosure — a
+ * transient ES error must not silently bypass either check.
  */
-const getAuthorizedPermissions = async ({
+const getAuthorizedPrivileges = async ({
   permissions,
+  indices,
   request,
   securityAuthz,
   logger,
 }: {
   permissions: string[];
+  indices: string[];
   request: KibanaRequest;
   securityAuthz: AuthorizationServiceSetup;
   logger: Logger;
-}): Promise<Set<string>> => {
-  if (permissions.length === 0) {
-    return new Set();
+}): Promise<{ authorizedPerms: Set<string>; authorizedIndices: Set<string> }> => {
+  if (permissions.length === 0 && indices.length === 0) {
+    return { authorizedPerms: new Set(), authorizedIndices: new Set() };
   }
 
   try {
     const checkPrivileges = securityAuthz.checkPrivilegesDynamicallyWithRequest(request);
-    const response = await checkPrivileges({ kibana: permissions });
+    const response = await checkPrivileges({
+      ...(permissions.length > 0 ? { kibana: permissions } : {}),
+      ...(indices.length > 0
+        ? {
+            elasticsearch: {
+              cluster: [],
+              index: Object.fromEntries(indices.map((i) => [i, ['read']])),
+            },
+          }
+        : {}),
+    });
 
-    return new Set(response.privileges.kibana.filter((p) => p.authorized).map((p) => p.privilege));
+    const authorizedPerms = new Set(
+      response.privileges.kibana.filter((p) => p.authorized).map((p) => p.privilege)
+    );
+    const authorizedIndices = new Set<string>();
+    for (const [name, privs] of Object.entries(response.privileges.elasticsearch.index ?? {})) {
+      if (privs.some((p) => p.privilege === 'read' && p.authorized)) {
+        authorizedIndices.add(name);
+      }
+    }
+    return { authorizedPerms, authorizedIndices };
   } catch (error) {
-    logger.warn(`SML permission check failed: ${(error as Error).message}`);
-    return new Set();
+    logger.warn(`SML privilege check failed; failing closed: ${(error as Error).message}`);
+    return { authorizedPerms: new Set(), authorizedIndices: new Set() };
   }
 };
 
 /**
- * Filter a single page of results by the current user's Kibana RBAC permissions.
- * Used by the search loop (per page) and directly by autocomplete (single pass).
+ * Keyword leaf fields enumerated by the pre-aggregation pass. These are the
+ * concrete `_terms_enum`-addressable leaves of the nested `permissions` object
+ * (see sml_storage.ts) — the same paths the ES|QL authz filter references.
  */
-const filterPageByPermissions = async <T extends { permissions: string[] }>(
+const PERM_KIBANA_FIELD = 'permissions.kibana.privileges.name' as const;
+const PERM_ES_INDICES_FIELD = 'permissions.elasticsearch.indices.name' as const;
+
+type EnumerableAuthzField = typeof PERM_KIBANA_FIELD | typeof PERM_ES_INDICES_FIELD;
+
+/**
+ * Enumerate every distinct value of a keyword permission field across the SML
+ * corpus via `_terms_enum`, paginated by `search_after`.
+ *
+ * Pre-aggregation needs the full universe of permission values present in the
+ * corpus so it can resolve, up front, exactly which the caller is authorized
+ * for. `_terms_enum` reads the inverted index directly (no doc scan), which is
+ * far cheaper than aggregating, and is unaffected by Document Level Security on
+ * the SML system index (we always read as the internal user).
+ *
+ * Fail-closed contract: a `complete: false` response (node error / timeout)
+ * means the returned terms are a *subset* of the true universe. Authorizing
+ * against a truncated universe would silently grant access to values we never
+ * checked, so we throw rather than undercount. Likewise, exceeding the page
+ * ceiling throws instead of proceeding with a partial set.
+ *
+ * A missing index returns `[]` (empty corpus), mirroring the empty-results
+ * behavior of the search/autocomplete paths.
+ *
+ * `index_filter` is intentionally omitted: segment-level pruning is a no-op on
+ * our single-primary-shard system index.
+ */
+const enumerateDistinctValues = async ({
+  field,
+  esClient,
+  logger,
+  pageSize = 1000,
+  maxPages = 100,
+}: {
+  field: EnumerableAuthzField;
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  pageSize?: number;
+  maxPages?: number;
+}): Promise<string[]> => {
+  const values: string[] = [];
+  let searchAfter: string | undefined;
+
+  try {
+    for (let page = 0; page < maxPages; page++) {
+      const response = await esClient.asInternalUser.termsEnum({
+        index: smlIndexName,
+        field,
+        size: pageSize,
+        ...(searchAfter !== undefined ? { search_after: searchAfter } : {}),
+      });
+
+      if (!response.complete) {
+        logger.warn(`_terms_enum on '${field}' returned complete=false; failing closed`);
+        throw new SmlAuthzEnumerationIncompleteError(
+          `Could not complete permission authorization for this search; please retry.`
+        );
+      }
+
+      values.push(...response.terms);
+
+      if (response.terms.length < pageSize) {
+        return values;
+      }
+      searchAfter = response.terms[response.terms.length - 1];
+    }
+  } catch (error) {
+    if (error instanceof SmlAuthzEnumerationIncompleteError) {
+      throw error;
+    }
+    if (isNotFoundError(error)) {
+      logger.debug(`SML index does not exist yet — '${field}' universe is empty`);
+      return [];
+    }
+    throw error;
+  }
+
+  throw new SmlCorpusTooLargeError(
+    `Too many distinct permission values to authorize this search; the limit is ${
+      maxPages * pageSize
+    }.`
+  );
+};
+
+/**
+ * Result of the request-scoped pre-aggregation pass.
+ *
+ * `authorizedActions` / `authorizedIndices` are the values the caller is
+ * authorized for, intersected against what the corpus actually uses. The
+ * `*UniverseNonEmpty` flags distinguish "the corpus uses this dimension but the
+ * caller holds nothing" (→ restrict to public KIs) from "the corpus does not
+ * use this dimension at all" (→ no filter needed).
+ */
+interface AuthorizedUniverse {
+  authorizedActions: string[];
+  authorizedIndices: string[];
+  kibanaUniverseNonEmpty: boolean;
+  indexUniverseNonEmpty: boolean;
+}
+
+/**
+ * Pre-aggregation pass: discover the corpus's permission universe and resolve,
+ * in a single `_has_privileges` call, which values the caller is authorized
+ * for. The resulting sets are pushed into the ES|QL search as an in-query
+ * authorization filter, replacing the old overfetch + JS post-filter.
+ *
+ * Both field enumerations run concurrently. If neither dimension is used by the
+ * corpus, the privilege check is skipped entirely.
+ */
+const resolveAuthorizedUniverse = async ({
+  esClient,
+  request,
+  securityAuthz,
+  logger,
+}: {
+  esClient: IScopedClusterClient;
+  request: KibanaRequest;
+  securityAuthz: AuthorizationServiceSetup;
+  logger: Logger;
+}): Promise<AuthorizedUniverse> => {
+  const [kibanaUniverse, indexUniverse] = await Promise.all([
+    enumerateDistinctValues({ field: PERM_KIBANA_FIELD, esClient, logger }),
+    enumerateDistinctValues({ field: PERM_ES_INDICES_FIELD, esClient, logger }),
+  ]);
+
+  const kibanaUniverseNonEmpty = kibanaUniverse.length > 0;
+  const indexUniverseNonEmpty = indexUniverse.length > 0;
+
+  if (!kibanaUniverseNonEmpty && !indexUniverseNonEmpty) {
+    return {
+      authorizedActions: [],
+      authorizedIndices: [],
+      kibanaUniverseNonEmpty,
+      indexUniverseNonEmpty,
+    };
+  }
+
+  const { authorizedPerms, authorizedIndices } = await getAuthorizedPrivileges({
+    permissions: kibanaUniverse,
+    indices: indexUniverse,
+    request,
+    securityAuthz,
+    logger,
+  });
+
+  return {
+    authorizedActions: [...authorizedPerms],
+    authorizedIndices: [...authorizedIndices],
+    kibanaUniverseNonEmpty,
+    indexUniverseNonEmpty,
+  };
+};
+
+/**
+ * Filter a single page of results by the current user's privileges. Applies
+ * two stacked all-of checks per chunk in a single `_has_privileges` call:
+ *
+ *   1. Kibana `permissions.kibana.privileges[].name` — every action
+ *      string a chunk lists must be authorized for the user.
+ *   2. ES `permissions.elasticsearch.indices[].name` — every concrete
+ *      index / alias / data stream a chunk depends on must be `read`-
+ *      authorized.
+ *
+ * Chunks with no `kibana.privileges` pass check 1 trivially; chunks with
+ * no `elasticsearch.indices` pass check 2 trivially.
+ *
+ * Used by the search loop (per page) and directly by autocomplete (single
+ * pass). When the security plugin is absent (dev / test), the function is
+ * a no-op — both checks are skipped — to preserve open-access semantics.
+ */
+const filterPageByPermissions = async <T extends { permissions: SmlPermissions }>(
   items: T[],
   {
     request,
@@ -268,26 +493,42 @@ const filterPageByPermissions = async <T extends { permissions: string[] }>(
 ): Promise<T[]> => {
   if (!securityAuthz || items.length === 0) return items;
 
-  const allPermissions = [...new Set(items.flatMap((hit) => hit.permissions))];
-  if (allPermissions.length === 0) return items;
+  const allPermissions = [
+    ...new Set(items.flatMap((hit) => hit.permissions.kibana.privileges.map((p) => p.name))),
+  ];
+  const allTargetIndices = [
+    ...new Set(items.flatMap((hit) => hit.permissions.elasticsearch.indices.map((i) => i.name))),
+  ];
 
-  const authorizedPerms = await getAuthorizedPermissions({
+  if (allPermissions.length === 0 && allTargetIndices.length === 0) {
+    return items;
+  }
+
+  const { authorizedPerms, authorizedIndices } = await getAuthorizedPrivileges({
     permissions: allPermissions,
+    indices: allTargetIndices,
     request,
     securityAuthz,
     logger,
   });
 
-  return items.filter(
-    (hit) => hit.permissions.length === 0 || hit.permissions.every((p) => authorizedPerms.has(p))
-  );
+  return items.filter((hit) => {
+    const kbnPrivs = hit.permissions.kibana.privileges.map((p) => p.name);
+    const esIdx = hit.permissions.elasticsearch.indices.map((i) => i.name);
+
+    const permsOk = kbnPrivs.length === 0 || kbnPrivs.every((p) => authorizedPerms.has(p));
+    if (!permsOk) return false;
+
+    const indicesOk = esIdx.length === 0 || esIdx.every((idx) => authorizedIndices.has(idx));
+    return indicesOk;
+  });
 };
 
 /**
  * Wrap filterPageByPermissions for callers that hold a `{ results }` object.
  * Used by the autocomplete path.
  */
-const filterResultsByPermissions = async <T extends { permissions: string[] }>({
+const filterResultsByPermissions = async <T extends { permissions: SmlPermissions }>({
   searchResult,
   request,
   securityAuthz,
@@ -308,7 +549,17 @@ const filterResultsByPermissions = async <T extends { permissions: string[] }>({
 
 /**
  * Check whether the current user has access to specific SML items.
- * Looks up each item's permissions from the index and batch-checks them.
+ * For each id, the access verdict is the AND of:
+ *
+ *   - Kibana `permissions.kibana.privileges[].name` — all listed action
+ *     strings are authorized.
+ *   - ES `permissions.elasticsearch.indices[].name` — all listed
+ *     concrete index/alias/data stream names are `read`-authorized via
+ *     `_has_privileges`.
+ *
+ * Chunks without any kibana privileges and without any elasticsearch
+ * indices are visible to anyone in the space. When the security plugin
+ * is absent, all ids resolve to `true` (open access).
  */
 const checkItemsAccess = async ({
   ids,
@@ -335,7 +586,12 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  let docPermissions: Map<string, string[]>;
+  interface DocAuthz {
+    kbnPrivs: string[];
+    esIdx: string[];
+  }
+
+  let docAuthz: Map<string, DocAuthz>;
   try {
     const response = await esClient.asInternalUser.search<Pick<SmlDocument, 'id' | 'permissions'>>({
       index: smlIndexName,
@@ -358,12 +614,18 @@ const checkItemsAccess = async ({
       _source: ['id', 'permissions'],
     });
 
-    docPermissions = new Map(
+    docAuthz = new Map(
       response.hits.hits
         .filter((hit) => hit._source != null)
         .map((hit) => {
           const source = hit._source!;
-          return [source.id ?? '', source.permissions ?? []] as [string, string[]];
+          return [
+            source.id ?? '',
+            {
+              kbnPrivs: source.permissions?.kibana?.privileges?.map((p) => p.name) ?? [],
+              esIdx: source.permissions?.elasticsearch?.indices?.map((i) => i.name) ?? [],
+            },
+          ] as [string, DocAuthz];
         })
     );
   } catch (error) {
@@ -380,39 +642,39 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  const allPermissions = [...new Set([...docPermissions.values()].flat())];
+  const allPermissions = [...new Set([...docAuthz.values()].flatMap((doc) => doc.kbnPrivs))];
+  const allTargetIndices = [...new Set([...docAuthz.values()].flatMap((doc) => doc.esIdx))];
 
-  const authorizedPerms = await getAuthorizedPermissions({
+  const { authorizedPerms, authorizedIndices } = await getAuthorizedPrivileges({
     permissions: allPermissions,
+    indices: allTargetIndices,
     request,
     securityAuthz,
     logger,
   });
 
   for (const id of ids) {
-    const perms = docPermissions.get(id);
-    if (!perms) {
+    const doc = docAuthz.get(id);
+    if (!doc) {
       accessMap.set(id, false);
       continue;
     }
-    if (perms.length === 0) {
-      accessMap.set(id, true);
-      continue;
-    }
-    accessMap.set(
-      id,
-      perms.every((p) => authorizedPerms.has(p))
-    );
+    const permsOk = doc.kbnPrivs.length === 0 || doc.kbnPrivs.every((p) => authorizedPerms.has(p));
+    const indicesOk =
+      doc.esIdx.length === 0 || doc.esIdx.every((idx) => authorizedIndices.has(idx));
+    accessMap.set(id, permsOk && indicesOk);
   }
 
   return accessMap;
 };
 
 /**
- * Maximum docs scanned per search request — a cap on the total overfetch used
- * to absorb permission filtering. If size × MAX_SCAN_MULTIPLIER docs are
- * scanned without filling the page the caller's permissions are too restrictive
- * to reliably fill it — return what we have.
+ * Per-FORK-branch candidate depth multiplier. Each retrieval leg (BM25 +
+ * semantic) collects size × MAX_SCAN_MULTIPLIER candidates before FUSE computes
+ * RRF scores, so a relevant doc ranked outside the top `size` on one leg can
+ * still surface after fusion. Authorization is now enforced in-query (a
+ * pre-FORK WHERE), so this no longer absorbs a post-filter — the outer LIMIT
+ * bounds the final set to `size`.
  */
 const MAX_SCAN_MULTIPLIER = 10;
 
@@ -434,14 +696,17 @@ const SML_SEMANTIC_FIELDS = ['title.semantic', 'description.semantic', 'content.
  *
  * Empty string or `*`: plain sorted scan — no FORK/FUSE, no relevance signal.
  *
- * Spaces filter uses MV_CONTAINS rather than `==` because `==` returns null
- * (not false) when the field has multiple values — a known ES|QL multi-value
- * semantic that would silently drop multi-space documents.
+ * Spaces and tag filters use MV_CONTAINS rather than `==` because `==` returns
+ * null (not false) on multi-value fields — an ES|QL semantic that would
+ * silently drop multi-space / multi-tag documents.
  *
- * Tag filter similarly uses MV_CONTAINS for the same reason.
- *
- * The LIMIT is size × MAX_SCAN_MULTIPLIER to leave room for permission
- * post-filtering; the caller slices the authorized results to `size`.
+ * Authorization is enforced in-query via the `authz` param (pre-aggregation):
+ * a doc is authorized iff its required permissions are a subset of what the
+ * caller holds. `MV_CONTAINS(?authorized, permissions...name)` expresses
+ * exactly that (the authorized set is bound as a single multivalue param) —
+ * and because a null/empty permission field is treated as the empty set,
+ * public KIs (no required perms) pass automatically. This replaces the former
+ * overfetch + JS post-filter, so the outer LIMIT is just `size`.
  *
  * `references.uri` is extracted via EVAL before KEEP so the result column is
  * a flat keyword array that can be reconstructed into Array<{uri}> client-side.
@@ -453,6 +718,7 @@ const buildSmlEsqlQuery = ({
   spaceId,
   constraints,
   filters,
+  authz,
 }: {
   query: string;
   size: number;
@@ -460,14 +726,34 @@ const buildSmlEsqlQuery = ({
   spaceId: string;
   constraints?: SmlSearchConstraints;
   filters?: SmlSearchFilters;
+  authz?: AuthorizedUniverse;
 }): { esql: string; params: unknown[] } => {
   const params: unknown[] = [];
   // METADATA is required for FUSE (which needs _id, _index, _score to compute RRF).
   const lines: string[] = [`FROM ${smlIndexName} METADATA _id, _index, _score`];
 
-  // spaces filter — MV_CONTAINS handles multi-value docs (== returns null for them)
+  // spaces filter (see docblock for the MV_CONTAINS rationale)
   params.push(spaceId);
   lines.push('| WHERE MV_CONTAINS(spaces, ?)');
+
+  // Authorization pre-filter. The authorized set is bound as a single
+  // multivalue param (ES|QL rejects an inline `[?, ?]` list), and a clause is
+  // emitted only for dimensions the corpus actually uses. See docblock for the
+  // subset semantics.
+  if (authz) {
+    const pushAuthzClause = (
+      authorized: string[],
+      universeNonEmpty: boolean,
+      field: EnumerableAuthzField
+    ) => {
+      if (!universeNonEmpty) return;
+      params.push(authorized);
+      lines.push(`| WHERE MV_CONTAINS(?, ${field})`);
+    };
+
+    pushAuthzClause(authz.authorizedActions, authz.kibanaUniverseNonEmpty, PERM_KIBANA_FIELD);
+    pushAuthzClause(authz.authorizedIndices, authz.indexUniverseNonEmpty, PERM_ES_INDICES_FIELD);
+  }
 
   // runtime-imposed per-type id-allowlist constraints
   if (constraints) {
@@ -506,25 +792,30 @@ const buildSmlEsqlQuery = ({
   if (trimmed === '' || trimmed === '*') {
     lines.push('| SORT id ASC');
   } else {
-    // LIMIT inside each FORK branch caps the per-leg candidate set before FUSE
-    // computes RRF scores; without it FUSE would merge all matches. The outer
-    // LIMIT after FUSE+SORT bounds the final set for RBAC post-filtering.
+    // SORT _score DESC inside each branch is required so LIMIT selects the
+    // top-scoring candidates before FUSE computes RRF ranks. Without it,
+    // LIMIT takes the first N docs in scan order and FUSE assigns arbitrary
+    // ranks, producing wrong results regardless of relevance scores.
     lines.push('| FORK');
     const bm25Conditions = SML_BM25_FIELDS.map((field) => {
       params.push(trimmed);
       return `MATCH(${field}, ?)`;
     }).join(' OR ');
-    lines.push(`  (WHERE ${bm25Conditions} | LIMIT ${size * MAX_SCAN_MULTIPLIER})`);
+    lines.push(
+      `  (WHERE ${bm25Conditions} | SORT _score DESC | LIMIT ${size * MAX_SCAN_MULTIPLIER})`
+    );
     const semanticConditions = SML_SEMANTIC_FIELDS.map((field) => {
       params.push(trimmed);
       return `MATCH(${field}, ?)`;
     }).join(' OR ');
-    lines.push(`  (WHERE ${semanticConditions} | LIMIT ${size * MAX_SCAN_MULTIPLIER})`);
+    lines.push(
+      `  (WHERE ${semanticConditions} | SORT _score DESC | LIMIT ${size * MAX_SCAN_MULTIPLIER})`
+    );
     lines.push('| FUSE');
     lines.push('| SORT _score DESC, id ASC');
   }
 
-  lines.push(`| LIMIT ${size * MAX_SCAN_MULTIPLIER}`);
+  lines.push(`| LIMIT ${size}`);
 
   // description is included in the baseline (short summary, useful for triage).
   // content, tags, references, spaces, permissions are opt-in via the fields param.
@@ -538,8 +829,14 @@ const buildSmlEsqlQuery = ({
     lines.push('| EVAL ref_uris = references.uri');
   }
 
-  // permissions is always fetched for server-side RBAC filtering; included in
-  // the result only when explicitly requested. spaces is purely opt-in.
+  // permissions is a nested object; its leaf name fields are materialized into
+  // flat keyword columns (mirroring origin_uri / ref_uris) so they can be
+  // reconstructed into the nested shape client-side. Always fetched for
+  // server-side RBAC filtering; only surfaced in the result when requested.
+  lines.push('| EVAL perm_kibana = permissions.kibana.privileges.name');
+  lines.push('| EVAL perm_es_indices = permissions.elasticsearch.indices.name');
+
+  // spaces is purely opt-in.
   const keepCols = [
     'id',
     'type',
@@ -549,7 +846,8 @@ const buildSmlEsqlQuery = ({
     ...(shouldKeep('tags') ? ['tags'] : []),
     ...(shouldKeep('references') ? ['ref_uris'] : []),
     ...(shouldKeep('spaces') ? ['spaces'] : []),
-    'permissions',
+    'perm_kibana',
+    'perm_es_indices',
     ...(shouldKeep('content') ? ['content'] : []),
   ];
   lines.push(`| KEEP ${keepCols.join(', ')}`);
@@ -662,20 +960,29 @@ const isEsqlIndexMissingError = (error: unknown): boolean => {
 };
 
 /**
- * Search the SML index using ES|QL FORK + FUSE hybrid retrieval.
+ * Search the SML index using ES|QL FORK + FUSE hybrid retrieval, with
+ * authorization enforced in-query via pre-aggregation.
  *
- * A single ES|QL query fetches size × MAX_SCAN_MULTIPLIER docs (to absorb
- * permission post-filtering). Docs are filtered by Kibana RBAC and the first
- * `size` authorized results are returned.
+ * Before the search, `resolveAuthorizedUniverse` enumerates the corpus's
+ * permission universe (`_terms_enum`) and resolves, in a single
+ * `_has_privileges` call, which Kibana actions and ES indices the caller is
+ * authorized for. Those sets are pushed into the ES|QL query as MV_CONTAINS
+ * subset filters, so the index returns only authorized docs — no overfetch, no
+ * JS post-filter. The outer LIMIT is exactly `size`.
+ *
+ * When the security plugin is absent (dev / test), enumeration is skipped and
+ * all docs in the space are returned (open-access parity with the prior
+ * behavior).
  *
  * Non-empty queries: two FORK branches (BM25 over all text fields + semantic
  * over all semantic multi-fields), merged by FUSE with RRF — mirrors the old
  * `retriever.rrf fields` two-retriever structure. Empty string or `*`: plain
  * sorted scan, no relevance signal.
  *
- * Filter composition: spaces (MV_CONTAINS) + constraints (runtime-imposed per-type
- * id-allowlist) + agent filters — each component is a separate WHERE clause (ANDed
- * across dimensions); within types and tags, matching is OR (any listed value matches).
+ * Filter composition: spaces (MV_CONTAINS) + authz (MV_CONTAINS) + constraints
+ * (runtime-imposed per-type id-allowlist) + agent filters — each component is a
+ * separate WHERE clause (ANDed across dimensions); within types and tags,
+ * matching is OR (any listed value matches).
  */
 const searchSml = async ({
   query,
@@ -702,6 +1009,17 @@ const searchSml = async ({
 }): Promise<{ results: SmlSearchResult[] }> => {
   logger.debug(`SML search: query=${JSON.stringify(query)}, size=${size}, spaceId='${spaceId}'`);
 
+  // Pre-aggregation: resolve the caller's authorized permission universe so the
+  // ES|QL query can filter to authorized docs in-query. Skipped when the
+  // security plugin is absent (dev / test) — open-access parity.
+  let authz: AuthorizedUniverse | undefined;
+  if (securityAuthz) {
+    authz = await resolveAuthorizedUniverse({ esClient, request, securityAuthz, logger });
+    logger.debug(
+      `SML search authz: actions=${authz.authorizedActions.length}, indices=${authz.authorizedIndices.length}`
+    );
+  }
+
   const { esql, params } = buildSmlEsqlQuery({
     query,
     size,
@@ -709,6 +1027,7 @@ const searchSml = async ({
     spaceId,
     constraints,
     filters,
+    authz,
   });
 
   let response: { columns: Array<{ name: string; type: string }>; values: unknown[][] };
@@ -733,8 +1052,10 @@ const searchSml = async ({
     return Array.isArray(v) ? (v as unknown[]).filter((s) => s != null).map(String) : [String(v)];
   };
 
-  // permissions is always in the columns for RBAC filtering; spaces only when requested.
-  type SmlSearchResultInternal = SmlSearchResult & { permissions: string[] };
+  // permissions columns are kept for optional surfacing (fields includes
+  // 'permissions'); authorization itself is enforced in-query. spaces is
+  // surfaced only when requested.
+  type SmlSearchResultInternal = SmlSearchResult & { permissions: SmlPermissions };
 
   const allResults: SmlSearchResultInternal[] = response.values.map((row) => {
     const result: SmlSearchResultInternal = {
@@ -742,7 +1063,14 @@ const searchSml = async ({
       type: String(row[colIndex.get('type')!] ?? ''),
       title: String(row[colIndex.get('title')!] ?? ''),
       origin: { uri: String(row[colIndex.get('origin_uri')!] ?? '') },
-      permissions: toStringArray(row[colIndex.get('permissions')!]),
+      permissions: {
+        kibana: {
+          privileges: toStringArray(row[colIndex.get('perm_kibana')!]).map((name) => ({ name })),
+        },
+        elasticsearch: {
+          indices: toStringArray(row[colIndex.get('perm_es_indices')!]).map((name) => ({ name })),
+        },
+      },
     };
     const spacesIdx = colIndex.get('spaces');
     if (spacesIdx !== undefined) result.spaces = toStringArray(row[spacesIdx]);
@@ -774,15 +1102,14 @@ const searchSml = async ({
     return result;
   });
 
-  const authorized = await filterPageByPermissions(allResults, { request, securityAuthz, logger });
-  logger.debug(
-    `SML search: scanned=${response.values.length}, authorized=${authorized.length}, size=${size}`
-  );
+  // Authorization is already enforced in-query (MV_CONTAINS subset filters), so
+  // every returned row is authorized and the ES|QL LIMIT bounds it to `size`.
+  logger.debug(`SML search: returned=${response.values.length}, size=${size}`);
   const includePermissions = fields !== undefined && fields.includes('permissions');
   return {
-    results: authorized
-      .slice(0, size)
-      .map(({ permissions, ...rest }) => (includePermissions ? { ...rest, permissions } : rest)),
+    results: allResults.map(({ permissions, ...rest }) =>
+      includePermissions ? { ...rest, permissions } : rest
+    ),
   };
 };
 
@@ -936,7 +1263,7 @@ const autocompleteSml = async ({
           title: source.title ?? '',
           origin: { uri: source.origin?.uri ?? '' },
           spaces: source.spaces ?? [],
-          permissions: source.permissions ?? [],
+          permissions: source.permissions ?? emptyPermissions(),
         };
         // Inner hits from the nested discovery_labels query: the specific entries
         // that matched, with their ES-generated highlight snippet wrapping the
@@ -1031,39 +1358,7 @@ const getDocumentsByIds = async ({
 
     for (const hit of response.hits.hits) {
       if (!hit._source) continue;
-      const source = hit._source;
-      const originUri = source.origin?.uri ?? '';
-      const doc: SmlDocument = {
-        id: source.id ?? '',
-        type: source.type ?? '',
-        title: source.title ?? '',
-        origin_id: originUri.split('://')[1] ?? '',
-        origin: { uri: originUri },
-        content: source.content ?? '',
-        created_at: source.created_at ?? '',
-        updated_at: source.updated_at ?? '',
-        spaces: source.spaces ?? [],
-        permissions: source.permissions ?? [],
-        ingestion_method: source.ingestion_method ?? 'crawled',
-      };
-      if (source.description !== undefined) {
-        doc.description = source.description;
-      }
-      if (source.tags !== undefined) {
-        doc.tags = source.tags;
-      }
-      if (source.discovery_labels !== undefined) {
-        doc.discovery_labels = source.discovery_labels;
-      }
-      if (source.extended_attrs !== undefined) {
-        doc.extended_attrs = source.extended_attrs;
-      }
-      if (source.user_id !== undefined) {
-        doc.user_id = source.user_id;
-      }
-      if (source.references !== undefined) {
-        doc.references = source.references;
-      }
+      const doc = hydrateDocument(hit._source);
       docMap.set(doc.id, doc);
     }
   } catch (error) {
@@ -1076,30 +1371,70 @@ const getDocumentsByIds = async ({
 };
 
 /**
- * Fetch a single SML document by id, scoped to a space.
- * Returns `undefined` when the document does not exist or is not in the space.
+ * Extract the total-hit count from an ES search response in a way that
+ * tolerates both the legacy numeric shape (older clients) and the
+ * `{ value, relation }` object shape returned when `track_total_hits`
+ * is set. Falls back to `0` when the field is absent.
  */
-const getDocumentById = async ({
-  id,
+const extractTotalHits = (total: SearchTotalHits | number | undefined): number => {
+  if (total === undefined) return 0;
+  if (typeof total === 'number') return total;
+  return total.value;
+};
+
+/**
+ * Compose the canonical `origin.uri` from the SML `type` and bare
+ * `originId`. Single source of truth for the URI scheme.
+ *
+ * Exported for the HTTP routes; the indexer derives it internally.
+ */
+export const buildOriginUri = (type: string, originId: string): string => `${type}://${originId}`;
+
+/**
+ * Fetch every chunk written under `(type, originId)` that is visible
+ * in `spaceId`.
+ *
+ * Multiple chunks per origin are expected: the workflow step's
+ * content mode and `getSmlData` in origin mode can both produce >1
+ * chunk per origin. Ordering is unspecified.
+ *
+ * Lookups happen via the `origin.uri` keyword field — the only mapped
+ * origin identifier. The compound URI is the only safe addressable key
+ * because bare `originId` is not unique across SML types (a lens id and
+ * a dashboard id can legitimately collide). The HTTP routes carry both
+ * pieces in the URL (`/sml/{type}/{originId}`) for the same reason.
+ *
+ * Results are bounded by {@link MAX_CHUNKS_PER_ORIGIN}. Overflow is
+ * logged with `track_total_hits` so operators can spot a producer
+ * that has gone off the rails. The first `MAX_CHUNKS_PER_ORIGIN`
+ * chunks are still returned — the per-space response is a degraded
+ * view rather than an error.
+ */
+const findByOrigin = async ({
+  type,
+  originId,
   spaceId,
   esClient,
   logger,
 }: {
-  id: string;
+  type: string;
+  originId: string;
   spaceId: string;
   esClient: IScopedClusterClient;
   logger: Logger;
-}): Promise<SmlDocument | undefined> => {
+}): Promise<SmlDocument[]> => {
+  const originUri = buildOriginUri(type, originId);
   try {
     const response = await esClient.asInternalUser.search<SmlDocument>({
       index: smlIndexName,
-      size: 1,
+      size: MAX_CHUNKS_PER_ORIGIN,
+      track_total_hits: true,
       allow_no_indices: true,
       ignore_unavailable: true,
       query: {
         bool: {
           filter: [
-            { term: { id } },
+            { term: { 'origin.uri': originUri } },
             {
               bool: {
                 should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
@@ -1111,30 +1446,169 @@ const getDocumentById = async ({
       },
     });
 
-    const hit = response.hits.hits[0];
-    if (!hit?._source) return undefined;
+    const total = extractTotalHits(response.hits.total);
+    if (total > MAX_CHUNKS_PER_ORIGIN) {
+      logger.warn(
+        `SML findByOrigin: origin '${originUri}' has ${total} chunks in space '${spaceId}' but only the first ${MAX_CHUNKS_PER_ORIGIN} are returned. Producer is likely misbehaving — investigate before the cross-space guard becomes unreliable.`
+      );
+    }
 
-    const source = hit._source;
-    return {
-      id: source.id ?? '',
-      type: source.type ?? '',
-      title: source.title ?? '',
-      origin_id: (source.origin?.uri ?? '').split('://')[1] ?? '',
-      origin: { uri: source.origin?.uri ?? '' },
-      content: source.content ?? '',
-      created_at: source.created_at ?? '',
-      updated_at: source.updated_at ?? '',
-      spaces: source.spaces ?? [],
-      permissions: source.permissions ?? [],
-      ingestion_method: source.ingestion_method ?? 'crawled',
-    };
+    return response.hits.hits
+      .filter((hit) => hit._source != null)
+      .map((hit) => hydrateDocument(hit._source!));
   } catch (error) {
     if (isNotFoundError(error)) {
-      return undefined;
+      return [];
     }
-    logger.warn(`SML getDocument failed: ${(error as Error).message}`);
+    logger.warn(`SML findByOrigin failed: ${(error as Error).message}`);
     throw error;
   }
+};
+
+/**
+ * `_source` fields fetched by `findByOriginAcrossSpaces`.
+ *
+ * The cross-space guard only reads `id`, `type`, `spaces` (and uses
+ * `origin.uri` indirectly via `hydrateDocument`'s `origin_id`
+ * derivation — `origin_id` is not stored, it's parsed from the URI at
+ * read time). Everything else — `content`, `title`, `description`,
+ * `tags`, `permissions`, … — is pulled back on the per-space path
+ * (`findByOrigin`) which is the one that surfaces to users. The
+ * guard runs on every PUT and DELETE, so trimming the payload here
+ * matters: with `size: 1000` and a 50 KB `content` field per chunk,
+ * the un-filtered version could pull up to 50 MB per guard call and
+ * immediately discard 99% of it.
+ *
+ * Listed as a typed constant rather than inline so a future field
+ * addition has a single place to consider whether the guard needs to
+ * see it.
+ */
+const FIND_ACROSS_SPACES_SOURCE_FIELDS: ReadonlyArray<keyof SmlDocument> = [
+  'id',
+  'type',
+  'spaces',
+  'origin',
+  'created_at',
+];
+
+/**
+ * Fetch every chunk written under `(type, originId)` regardless of
+ * space.
+ *
+ * Used by the HTTP routes' cross-space-overwrite guard and the
+ * `checkItemsAccess` privilege gate — never for read paths that
+ * surface data to users. The route compares the result against the
+ * caller's space to decide between proceeding, 404, and (later) 409
+ * semantics.
+ *
+ * Returns an empty array on `index_not_found` rather than throwing —
+ * "no SML index yet" is a normal first-write state.
+ *
+ * Results are bounded by {@link MAX_CHUNKS_PER_ORIGIN}. If more than
+ * the limit exists, chunks in another space might fall outside the
+ * returned window — the cross-space guard would then act on an
+ * incomplete view and could silently authorise a write that crosses
+ * a space boundary. To prevent that, overflow throws
+ * {@link SmlCorpusTooLargeError} (fail-closed). The limit is generous
+ * enough that legitimate producers should never hit it (the workflow
+ * step caps batches at 100, and the crawler's built-in types produce
+ * 1 chunk per origin).
+ *
+ * Returned `SmlDocument`s carry only the fields in
+ * {@link FIND_ACROSS_SPACES_SOURCE_FIELDS}; everything else is
+ * defaulted to empty by `hydrateDocument`. Callers must treat the
+ * result as guard-only and not surface it to users.
+ */
+const findByOriginAcrossSpaces = async ({
+  type,
+  originId,
+  esClient,
+  logger,
+}: {
+  type: string;
+  originId: string;
+  esClient: IScopedClusterClient;
+  logger: Logger;
+}): Promise<SmlDocument[]> => {
+  const originUri = buildOriginUri(type, originId);
+  try {
+    const response = await esClient.asInternalUser.search<SmlDocument>({
+      index: smlIndexName,
+      size: MAX_CHUNKS_PER_ORIGIN,
+      track_total_hits: true,
+      _source: FIND_ACROSS_SPACES_SOURCE_FIELDS as unknown as string[],
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [{ term: { 'origin.uri': originUri } }],
+        },
+      },
+    });
+
+    const total = extractTotalHits(response.hits.total);
+    if (total > MAX_CHUNKS_PER_ORIGIN) {
+      throw new SmlCorpusTooLargeError(
+        `SML origin '${originUri}' has ${total} chunks, which exceeds the ${MAX_CHUNKS_PER_ORIGIN}-chunk cross-space guard limit. The write is rejected to avoid acting on a partial cross-space view. Reduce the chunk count for this origin before retrying.`
+      );
+    }
+
+    return response.hits.hits
+      .filter((hit) => hit._source != null)
+      .map((hit) => hydrateDocument(hit._source!));
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      return [];
+    }
+    // SmlCorpusTooLargeError is an intentional fail-closed signal — let it
+    // propagate without the generic "failed" warn, which would be redundant.
+    if (!(error instanceof SmlCorpusTooLargeError)) {
+      logger.warn(`SML findByOriginAcrossSpaces failed: ${(error as Error).message}`);
+    }
+    throw error;
+  }
+};
+
+/**
+ * Project an ES `_source` payload into the canonical `SmlDocument`
+ * shape used everywhere downstream. Centralised because three readers
+ * (getDocumentsByIds, findByOrigin, findByOriginAcrossSpaces) apply
+ * the same mapping — keeping them in sync by-hand is a footgun.
+ */
+const hydrateDocument = (source: SmlDocument): SmlDocument => {
+  const originUri = source.origin?.uri ?? '';
+  const doc: SmlDocument = {
+    id: source.id ?? '',
+    type: source.type ?? '',
+    title: source.title ?? '',
+    origin_id: source.origin_id ?? originUri.split('://')[1] ?? '',
+    origin: { uri: originUri },
+    content: source.content ?? '',
+    created_at: source.created_at ?? '',
+    updated_at: source.updated_at ?? '',
+    spaces: source.spaces ?? [],
+    permissions: source.permissions ?? emptyPermissions(),
+    ingestion_method: source.ingestion_method ?? 'crawled',
+  };
+  if (source.description !== undefined) doc.description = source.description;
+  if (source.tags !== undefined) doc.tags = source.tags;
+  if (source.discovery_labels !== undefined) doc.discovery_labels = source.discovery_labels;
+  if (source.extended_attrs !== undefined) doc.extended_attrs = source.extended_attrs;
+  if (source.user_id !== undefined) doc.user_id = source.user_id;
+  if (source.references !== undefined) doc.references = source.references;
+  return doc;
+};
+
+/**
+ * True when a document with the given `spaces` field is visible from
+ * `spaceId`. Wildcard (`'*'`) entries are treated as global.
+ *
+ * Exported so route helpers (HTTP upsert/delete cross-space guard) can
+ * apply the same predicate used internally by `findByOrigin`.
+ */
+export const isVisibleInSpace = (spaces: string[] | undefined, spaceId: string): boolean => {
+  if (!spaces || spaces.length === 0) return false;
+  return spaces.includes(spaceId) || spaces.includes('*');
 };
 
 /**
@@ -1151,6 +1625,7 @@ const listDocuments = async ({
   perPage = 20,
   type,
   originId,
+  tags,
 }: {
   spaceId: string;
   esClient: IScopedClusterClient;
@@ -1159,6 +1634,7 @@ const listDocuments = async ({
   perPage?: number;
   type?: string;
   originId?: string;
+  tags?: string[];
 }): Promise<{ total: number; results: SmlDocument[] }> => {
   const filters: Array<Record<string, unknown>> = [
     {
@@ -1173,6 +1649,9 @@ const listDocuments = async ({
   }
   if (originId) {
     filters.push({ term: { 'origin.uri': originId } });
+  }
+  if (tags && tags.length > 0) {
+    filters.push({ terms: { tags } });
   }
 
   try {
@@ -1198,23 +1677,7 @@ const listDocuments = async ({
 
     const results: SmlDocument[] = response.hits.hits
       .filter((hit) => hit._source != null)
-      .map((hit) => {
-        const source = hit._source!;
-        const uri = source.origin?.uri ?? '';
-        return {
-          id: source.id ?? '',
-          type: source.type ?? '',
-          title: source.title ?? '',
-          origin_id: uri.split('://')[1] ?? '',
-          origin: { uri },
-          content: source.content ?? '',
-          created_at: source.created_at ?? '',
-          updated_at: source.updated_at ?? '',
-          spaces: source.spaces ?? [],
-          permissions: source.permissions ?? [],
-          ingestion_method: source.ingestion_method ?? 'crawled',
-        };
-      });
+      .map((hit) => hydrateDocument(hit._source!));
 
     return { total, results };
   } catch (error) {
@@ -1231,124 +1694,6 @@ const listDocuments = async ({
       throw new SmlResultWindowExceededError(reason);
     }
     logger.warn(`SML listDocuments failed: ${(error as Error).message}`);
-    throw error;
-  }
-};
-
-/**
- * Upsert an SML document by id, scoped to a space.
- *
- * On create, `spaces` is set to `[spaceId]`. On update, `created_at` and the
- * existing `spaces` are preserved (callers cannot widen or narrow space
- * membership through this endpoint), and `updated_at` is refreshed.
- *
- * Returns `null` when a document with this id exists but is not visible from
- * `spaceId` — callers cannot clobber documents in other spaces.
- */
-const upsertDocument = async ({
-  id,
-  spaceId,
-  document,
-  esClient,
-  logger,
-}: {
-  id: string;
-  spaceId: string;
-  document: SmlDocumentInput;
-  esClient: IScopedClusterClient;
-  logger: Logger;
-}): Promise<SmlUpsertResult | null> => {
-  // TODO: Implement optimistic concurrency using _seq_no/_primary_term to prevent lost-update
-  // races. The current get-then-index pattern allows two concurrent upserts to silently overwrite
-  // each other. A fix should use esClient.asInternalUser.get() (which reliably returns
-  // _seq_no/_primary_term) and pass if_seq_no/if_primary_term to the index call.
-  // Note: StorageIndexAdapter.get() uses search internally and does not request
-  // seq_no_primary_term, so _seq_no is unreliable via that path.
-
-  // We use smlClient.get() rather than the space-aware getDocumentById() here intentionally:
-  // we need to detect documents that exist in another space (to block cross-space overwrites).
-  // getDocumentById() would return undefined for those, causing us to silently overwrite them.
-  const internalEsClient = esClient.asInternalUser;
-  const storage = createSmlStorage({ logger, esClient: internalEsClient });
-  const smlClient = storage.getClient();
-
-  let existing: SmlDocument | undefined;
-  try {
-    const existingResponse = await smlClient.get({ id });
-    if (existingResponse?.found && existingResponse._source) {
-      existing = existingResponse._source;
-    }
-  } catch (error) {
-    if (!isNotFoundError(error)) {
-      logger.warn(`SML upsertDocument lookup failed: ${(error as Error).message}`);
-      throw error;
-    }
-  }
-
-  if (existing && !isVisibleInSpace(existing.spaces, spaceId)) {
-    return null;
-  }
-
-  const now = new Date().toISOString();
-  const created = !existing;
-  const fullDocument: SmlDocument = {
-    id,
-    type: document.type,
-    title: document.title,
-    origin: { uri: `${document.type}://${document.origin_id}` },
-    content: document.content,
-    created_at: existing?.created_at ?? now,
-    updated_at: now,
-    spaces: existing?.spaces ?? [spaceId],
-    permissions: document.permissions ?? [],
-    ingestion_method: 'manual',
-  };
-
-  await smlClient.index({ id, document: fullDocument });
-
-  return { document: fullDocument, created };
-};
-
-const isVisibleInSpace = (spaces: string[] | undefined, spaceId: string): boolean => {
-  if (!spaces || spaces.length === 0) return false;
-  return spaces.includes(spaceId) || spaces.includes('*');
-};
-
-/**
- * Delete an SML document by id, scoped to a space.
- *
- * The space scope is enforced via a lookup before the delete: documents
- * that exist but are not visible in `spaceId` are reported as not found.
- * Returns `true` when a document was deleted, `false` otherwise.
- */
-const deleteDocument = async ({
-  id,
-  spaceId,
-  esClient,
-  logger,
-}: {
-  id: string;
-  spaceId: string;
-  esClient: IScopedClusterClient;
-  logger: Logger;
-}): Promise<boolean> => {
-  const existing = await getDocumentById({ id, spaceId, esClient, logger });
-  if (!existing) {
-    return false;
-  }
-
-  const internalEsClient = esClient.asInternalUser;
-  const storage = createSmlStorage({ logger, esClient: internalEsClient });
-  const smlClient = storage.getClient();
-
-  try {
-    const response = await smlClient.delete({ id });
-    return response.result === 'deleted';
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      return false;
-    }
-    logger.warn(`SML deleteDocument failed: ${(error as Error).message}`);
     throw error;
   }
 };

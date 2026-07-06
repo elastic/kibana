@@ -12,6 +12,7 @@ import { useAttackTitles } from './use_attack_titles';
 import { useAlertsAggregation } from '../common/use_alerts_aggregation';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
 import { getAttacksListAggregations } from './aggregations';
+import { buildAttacksOnlyFilter } from '../../table/filtering_configs';
 
 jest.mock('./use_attack_titles');
 jest.mock('../common/use_alerts_aggregation');
@@ -59,9 +60,9 @@ describe('useAttacksListData', () => {
       refetch: jest.fn(),
     });
     (useAttackTitles as jest.Mock).mockReturnValue({
-      attackTitles: {
-        'attack-1': 'Title attack-1',
-        'attack-2': 'Title attack-2',
+      attackDetails: {
+        'attack-1': { title: 'Title attack-1', count: 10 },
+        'attack-2': { title: 'Title attack-2', count: 8 },
       },
       isLoading: false,
     });
@@ -72,7 +73,7 @@ describe('useAttacksListData', () => {
 
     expect(getAttacksListAggregations).toHaveBeenCalledWith(0, 10);
     expect(useAlertsAggregation).toHaveBeenCalledWith({
-      filters: mockFilters,
+      filters: [...mockFilters, ...buildAttacksOnlyFilter()],
       query: mockQuery,
       aggs: { some: 'agg' },
       queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
@@ -88,13 +89,13 @@ describe('useAttacksListData', () => {
     expect(result.current.items[0]).toEqual({
       id: 'attack-1',
       name: 'Title attack-1',
-      alertsCount: 5,
+      alertsCount: 10,
       severityCount: { Critical: 2, High: 3 },
     });
     expect(result.current.items[1]).toEqual({
       id: 'attack-2',
       name: 'Title attack-2',
-      alertsCount: 3,
+      alertsCount: 8,
       severityCount: { Low: 3 },
     });
     expect(result.current.total).toBe(20);
@@ -129,7 +130,7 @@ describe('useAttacksListData', () => {
 
   it('handles attack loading state', () => {
     (useAttackTitles as jest.Mock).mockReturnValue({
-      attackTitles: {
+      attackDetails: {
         'attack-1': 'Title attack-1',
       },
       isLoading: true,

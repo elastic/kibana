@@ -26,6 +26,7 @@ import { TrialUsageBadge, CloudLinks } from '@kbn/shared-components';
 import { ConnectToProject, useOnboardingCredentials } from '@kbn/vectordb-onboarding';
 import { i18n } from '@kbn/i18n';
 import { formatBytes, formatNumber, useDeploymentStats } from '../hooks/use_deployment_stats';
+import { useAgentsCount } from '../hooks/use_agents_count';
 import { HomePageBanner } from './home_page_banner';
 import { DocumentationQuickLinks } from './documentation_quick_links';
 import { useKibana } from '../hooks/use_kibana';
@@ -65,6 +66,7 @@ export const HomePage = () => {
     services: { cloud },
   } = useKibana();
   const { stats, isLoading } = useDeploymentStats();
+  const { agentsCount, isLoading: isAgentsCountLoading } = useAgentsCount();
   const { elasticsearchUrl, apiKey, isLoading: isCredentialsLoading } = useOnboardingCredentials();
   const hasData = (stats.vectorDocsCount ?? 0) > 0 || (stats.indicesCount ?? 0) > 0;
 
@@ -73,31 +75,37 @@ export const HomePage = () => {
       key: 'indices',
       label: STAT_TILE_LABELS.indices,
       value: formatNumber(stats.indicesCount),
+      isLoading,
     },
     {
       key: 'vectors',
       label: STAT_TILE_LABELS.vectors,
       value: formatNumber(stats.vectorDocsCount),
+      isLoading,
     },
     {
       key: 'storage',
       label: STAT_TILE_LABELS.storage,
       value: formatBytes(stats.storeSizeBytes),
+      isLoading,
     },
     {
       key: 'dashboards',
       label: STAT_TILE_LABELS.dashboards,
       value: formatNumber(stats.dashboardsCount),
+      isLoading,
     },
     {
       key: 'agents',
       label: STAT_TILE_LABELS.agents,
-      value: formatNumber(stats.agentsCount),
+      value: formatNumber(agentsCount),
+      isLoading: isAgentsCountLoading,
     },
     {
       key: 'workflows',
       label: STAT_TILE_LABELS.workflows,
       value: formatNumber(stats.workflowsCount),
+      isLoading,
     },
   ];
 
@@ -153,8 +161,8 @@ export const HomePage = () => {
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiFlexGrid columns={3} gutterSize="m">
-              {statTiles.map(({ key, label, value }) => (
-                <StatTile key={key} label={label} value={value} isLoading={isLoading} />
+              {statTiles.map(({ key, label, value, isLoading: tileIsLoading }) => (
+                <StatTile key={key} label={label} value={value} isLoading={tileIsLoading} />
               ))}
             </EuiFlexGrid>
           </EuiFlexItem>

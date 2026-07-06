@@ -95,7 +95,11 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
     await page.gotoApp('rules');
     await expect(page.testSubj.locator('rulesList')).toBeVisible();
     await page.testSubj.locator('ruleSearchField').fill(ruleName);
-    await expect(page.testSubj.locator('rulesList').locator(`[title="${ruleName}"]`)).toBeVisible();
+    await expect(
+      page.testSubj
+        .locator('rulesList')
+        .locator(`[data-test-subj="rulesListTableRowName-${ruleName}"]`)
+    ).toBeVisible();
   });
 
   test('redirects to the rule details page after saving a new rule', async ({

@@ -8,8 +8,10 @@
  */
 
 import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
+import type { IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { GlobalHeaderAiButton } from './ai_button';
 import type { GlobalSearchConfig } from './global_search';
 
 /** @public */
@@ -54,14 +56,68 @@ export interface AppHeaderBadgeItem {
 }
 
 /** @public */
+export interface AppHeaderTabIconBadge {
+  /** EUI icon type rendered in the tab badge. */
+  iconType: string;
+  /** Optional tooltip shown when hovering the badge icon. */
+  tooltip?: string;
+}
+
+/**
+ * Tab badge: either a numeric count (rendered as a notification badge) or an icon
+ * with an optional tooltip.
+ *
+ * @public
+ */
+export type AppHeaderTabBadge = number | AppHeaderTabIconBadge;
+
+/** @public */
+export interface AppHeaderTabAction {
+  id: string;
+  label: string;
+  /** EUI icon type rendered next to the action label. */
+  iconType?: IconType;
+  /** Disables the action if `true` or if the function returns `true`. */
+  disabled?: boolean | (() => boolean);
+  onClick: () => void;
+  'data-test-subj'?: string;
+}
+
+/**
+ * Optional overflow actions for a tab, rendered as an ellipsis popover appended to the tab.
+ *
+ * @remarks
+ * Actions are intentionally flat (a single level of items). Nested submenus, modals/flyouts and
+ * focus return are not supported yet; when a use case arises, mirror the AppMenu approach
+ * (`AppMenuRunActionParams` in `@kbn/core-chrome-app-menu-components`) by adding a nested `items`
+ * prop and passing an anchor/`returnFocus` handler down to `onClick`.
+ *
+ * @public
+ */
+export interface AppHeaderTabActions {
+  /** Accessible label and tooltip for the ellipsis trigger. */
+  ariaLabel: string;
+  items: AppHeaderTabAction[];
+  /** `data-test-subj` for the ellipsis trigger button. */
+  'data-test-subj'?: string;
+}
+
+/** @public */
 export interface AppHeaderTab {
   id: string;
   label: string;
   isSelected?: boolean;
   onClick?: () => void;
   href?: string;
-  badge?: number;
+  badge?: AppHeaderTabBadge;
   'data-test-subj'?: string;
+  disabled?: boolean;
+  toolTipContent?: string;
+  /**
+   * Optional overflow actions rendered as an ellipsis popover appended to the tab. Only surfaced
+   * for the selected tab (`isSelected`); may be provided unconditionally.
+   */
+  actions?: AppHeaderTabActions;
 }
 
 /** @public */
@@ -80,7 +136,10 @@ export type AppHeaderMetadataItems = readonly [
 /** @public */
 export interface AppHeaderMetadataTextItem {
   type: 'text';
+  /** When `value` is set, this acts as the bold key (e.g. "Created by"). */
   label: string;
+  /** Optional value rendered next to `label` in a subdued color. */
+  value?: string;
   'data-test-subj'?: string;
 }
 
@@ -93,7 +152,6 @@ export type AppHeaderMetadataButtonItem =
 export interface AppHeaderMetadataButtonBase {
   type: 'button';
   label: string;
-  iconType?: string;
   'data-test-subj'?: string;
 }
 
@@ -169,6 +227,25 @@ export interface AppHeaderConfig {
 export interface ChromeNext {
   /** Whether the Chrome Next feature flag is enabled. */
   readonly isEnabled: boolean;
+  aiButton: {
+    /**
+     * Register an AI button rendered in a fixed slot in the Chrome-Next global header.
+     * Returns an unregister callback. Global — persists across app changes.
+     *
+     * @remarks
+     * Stop-gap for the Chrome-Next transition. The end goal is a single, chrome-owned
+     * AI button with one registration point. We are not there yet: the legacy header
+     * lets every solution register its own button and self-manage visibility, so apps
+     * can have more than one in flight at a time. To migrate those apps without
+     * regressing behavior, `register` mirrors that model — it accepts multiple
+     * registrations and renders each registered button as-is (each owner remains
+     * responsible for its own visibility). Once the single-button model lands, this
+     * should collapse to one registration and the multi-button handling can be removed.
+     *
+     * Tech debt: https://github.com/elastic/kibana/issues/272279
+     */
+    register(button: GlobalHeaderAiButton): () => void;
+  };
   /** Global search configuration. */
   globalSearch: {
     /**
@@ -195,6 +272,13 @@ export interface ChromeNext {
      * Per-app, cleared on app change.
      */
     set(config: AppHeaderConfig): () => void;
+  };
+  userMenu: {
+    /**
+     * Set the user menu content for the Chrome-Next global header.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
   };
   /**
    * Register a handler that opens the feedback UI in the Chrome Next help menu.

@@ -68,7 +68,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
         created_at: now,
         updated_at: now,
         spaces: ['default'],
-        permissions: [],
+        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
         ingestion_method: 'crawled',
       },
     });
@@ -174,7 +174,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
           created_at: now,
           updated_at: now,
           spaces: ['default'],
-          permissions: [],
+          permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
           ingestion_method: 'crawled',
         },
       });

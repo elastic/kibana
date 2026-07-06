@@ -39,6 +39,9 @@ describe('buildEpisodesBaseQuery', () => {
     expect(queryString).toContain(
       'episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}"'
     );
+    expect(queryString).toContain(
+      'severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL'
+    );
     expect(queryString).toContain('BY episode.id');
     expect(queryString).toContain('EVAL duration = DATE_DIFF');
     expect(queryString).toContain('"ms"');
@@ -115,6 +118,20 @@ describe('buildEpisodesQuery', () => {
     });
   });
 
+  it('should sort by severity using numeric severity order', () => {
+    const query = buildEpisodesQuery(SPACE_ID, {
+      sortField: 'severity',
+      sortDirection: 'desc',
+    });
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('EVAL _severity_sort = CASE(');
+    expect(queryString).toContain('severity == "critical", 4');
+    expect(queryString).toContain('severity == "info", 0');
+    expect(queryString).toContain(', -1)');
+    expect(queryString).toContain('SORT _severity_sort DESC');
+  });
+
   it('should filter on effective_status when status filter is set', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
@@ -146,6 +163,45 @@ describe('buildEpisodesQuery', () => {
     const queryString = query.print('basic');
 
     expect(queryString).toContain('WHERE rule.id == "rule-123"');
+  });
+
+  it('should apply groupHash filter', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { groupHash: 'abc123' }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE group_hash == "abc123"');
+  });
+
+  it('should not apply groupHash filter when null', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { groupHash: null }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).not.toContain('WHERE group_hash ==');
+  });
+
+  it('should treat groupingValues as display-only and not add a clause', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      {
+        groupHash: 'abc123',
+        groupingValues: { 'host.name': 'web-01', 'service.name': 'checkout' },
+      }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE group_hash == "abc123"');
+    expect(queryString).not.toContain('groupingValues');
+    expect(queryString).not.toContain('host.name');
+    expect(queryString).not.toContain('web-01');
   });
 
   it('should apply queryString filter with QSTR', () => {
@@ -211,6 +267,50 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).not.toContain('MV_CONTAINS(last_tags');
   });
 
+  it('should apply single severity filter', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severity: ['high'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE severity IN ("high")');
+  });
+
+  it('should apply multiple severities with IN', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severity: ['high', 'critical'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE severity IN ("high", "critical")');
+  });
+
+  it('should apply no-severity filter with severity IS NULL', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severity: ['__no_severity__'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE severity IS NULL');
+  });
+
+  it('should apply mixed severity and no-severity filters as OR', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severity: ['high', '__no_severity__'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE (severity IN ("high")) OR severity IS NULL');
+  });
+
   it('should trim queryString before applying', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
@@ -226,13 +326,21 @@ describe('buildEpisodesQuery', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { queryString: null, status: null, ruleId: undefined, tags: null }
+      {
+        queryString: null,
+        status: null,
+        ruleId: undefined,
+        groupHash: null,
+        tags: null,
+        severity: null,
+      }
     );
     const queryString = query.print('basic');
 
     expect(queryString).not.toContain('QSTR');
     expect(queryString).not.toContain('WHERE effective_status ==');
     expect(queryString).not.toContain('WHERE rule.id ==');
+    expect(queryString).not.toContain('WHERE group_hash ==');
     expect(queryString).not.toContain('MV_CONTAINS(last_tags');
   });
 
