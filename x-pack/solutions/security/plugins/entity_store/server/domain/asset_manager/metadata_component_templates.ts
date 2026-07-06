@@ -18,7 +18,7 @@ import {
 export const getMetadataComponentTemplateName = (namespace: string) =>
   `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V2}-security_${ENTITY_METADATA}_${namespace}@platform`;
 
-const getMetadataIndexMappings = (): MappingTypeMapping => ({
+export const getMetadataIndexMappings = (): MappingTypeMapping => ({
   dynamic_templates: [
     {
       relationship_target_keyword: {

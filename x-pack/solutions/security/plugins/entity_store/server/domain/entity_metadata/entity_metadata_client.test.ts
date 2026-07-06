@@ -10,6 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { RelationshipMetadataDoc } from '../../../common/domain/entity_metadata/relationship_metadata';
 import { EntityMetadataClient } from './entity_metadata_client';
 import { runWithSpan } from '../../telemetry/traces';
+import { ensureMetadataDataStreamMappingsOnce } from '../asset_manager/ensure_metadata_mappings';
 
 jest.mock('../../telemetry/traces', () => {
   const actual = jest.requireActual('../../telemetry/traces');
@@ -18,6 +19,10 @@ jest.mock('../../telemetry/traces', () => {
     runWithSpan: jest.fn(actual.runWithSpan),
   };
 });
+
+jest.mock('../asset_manager/ensure_metadata_mappings', () => ({
+  ensureMetadataDataStreamMappingsOnce: jest.fn().mockResolvedValue(undefined),
+}));
 
 const makeDoc = (overrides: Partial<RelationshipMetadataDoc> = {}): RelationshipMetadataDoc =>
   ({
@@ -47,6 +52,7 @@ describe('EntityMetadataClient', () => {
     logger = loggerMock.create();
     client = new EntityMetadataClient({ esClient, logger, namespace: 'default' });
     (runWithSpan as jest.Mock).mockClear();
+    (ensureMetadataDataStreamMappingsOnce as jest.Mock).mockClear();
   });
 
   // Drains the helper `datasource` (so the mock counts docs) and invokes
@@ -72,6 +78,27 @@ describe('EntityMetadataClient', () => {
       const result = await client.bulkAppendMetadata([]);
       expect(result).toEqual({ successful: 0, failed: 0, dropsByType: [] });
       expect(esClient.helpers.bulk).not.toHaveBeenCalled();
+    });
+
+    it('skips the mapping sync when no docs are passed', async () => {
+      await client.bulkAppendMetadata([]);
+      expect(ensureMetadataDataStreamMappingsOnce).not.toHaveBeenCalled();
+    });
+
+    it('syncs the metadata data stream mappings before writing', async () => {
+      const bulk = mockHelpersBulk();
+      await client.bulkAppendMetadata([makeDoc()]);
+
+      expect(ensureMetadataDataStreamMappingsOnce).toHaveBeenCalledWith(
+        esClient,
+        'default',
+        logger
+      );
+
+      const ensureOrder = (ensureMetadataDataStreamMappingsOnce as jest.Mock).mock
+        .invocationCallOrder[0];
+      const bulkOrder = bulk.mock.invocationCallOrder[0];
+      expect(ensureOrder).toBeLessThan(bulkOrder);
     });
 
     it('calls helpers.bulk with the namespace-scoped metadata datastream name', async () => {

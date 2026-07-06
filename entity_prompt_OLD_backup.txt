@@ -1,0 +1,14 @@
+Generate structured information for entity so a Security analyst can act. Your response should take all the important elements of the entity into consideration.
+
+Generate a list of highlight items, each with a title and text. Only include highlights for which information is available in the context.
+  - Risk score: Summarize the entity's risk score and the main factors contributing to it. Don't mention any risk contribution scores.
+  - Criticality: Note the entity's criticality level and its impact on the risk score. Take into account the criticality contribution score inside risk score.
+  - Anomalies: Summarize unusual activities or anomalies detected for the entity and briefly explain why it is significant.
+  - Vulnerabilities: Summarize any significant Vulnerability and briefly explain why it is significant.
+
+Additionally, provide a list of actionable recommendations for the security analyst if available.
+
+**Guidelines**:
+  - Only include highlight items for which information is available in the context.
+  - Use must use inline code (backticks) for technical values like file paths, process names, arguments, scores, package versions, etc.
+  - **Do not** include any extra explanation, reasoning or text.

@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getMetadataEntitiesDataStreamName } from '../asset_manager/metadata_data_stream';
+import { ensureMetadataDataStreamMappingsOnce } from '../asset_manager/ensure_metadata_mappings';
 import { runWithSpan } from '../../telemetry/traces';
 import type { BulkCreateEntityMetadataDocsResult } from '../../infra/elasticsearch/entity_metadata';
 import {
@@ -82,6 +83,12 @@ export class EntityMetadataClient {
     docs: TDoc[]
   ): Promise<BulkCreateEntityMetadataDocsResult> {
     if (docs.length === 0) return { successful: 0, failed: 0, dropsByType: [] };
+
+    // On upgrade of an existing deployment the shared-asset install does not
+    // re-run, so newly added component-template fields would never reach the
+    // existing write index. Sync them in place before the first write in this
+    // namespace. Best-effort and cached — never blocks the write.
+    await ensureMetadataDataStreamMappingsOnce(this.esClient, this.namespace, this.logger);
 
     const { successful, failed, dropsByType } = await bulkCreateEntityMetadataDocs(this.esClient, {
       index: getMetadataEntitiesDataStreamName(this.namespace),
