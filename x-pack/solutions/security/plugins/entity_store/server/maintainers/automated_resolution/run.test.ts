@@ -8,7 +8,8 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ResolutionClient } from '../../domain/resolution';
-import { runEmailRuleResolution, selectTarget } from './run';
+import { selectTarget } from '../../domain/resolution';
+import { runEmailRuleResolution } from './run';
 import type { EntityHit, PerRuleState } from './types';
 import type { RunDeps } from './run';
 

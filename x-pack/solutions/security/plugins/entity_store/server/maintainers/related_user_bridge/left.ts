@@ -6,8 +6,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getEuidFromObject } from '../../../common/domain/euid';
-import type { RelatedUserBundle, SeedEntity } from './types';
+import {
+  SEED_IDENTITY_PREFILTER_FIELDS,
+  type RelatedUserBundle,
+  type SeedEntity,
+} from './types';
 
 const SOURCE_INDEX_BY_NAMESPACE: Record<string, string> = {
   active_directory: 'logs-entityanalytics_ad.entity-*',
@@ -50,11 +55,11 @@ export const getFieldStringValues = (doc: Record<string, unknown>, field: string
   return toStringValues(current);
 };
 
-const buildIdentityPrefilter = (seed: SeedEntity): object[] => {
+const buildIdentityPrefilter = (seed: SeedEntity): QueryDslQueryContainer[] => {
   const source = seed.source;
-  const should: object[] = [];
+  const should: QueryDslQueryContainer[] = [];
 
-  for (const field of ['user.id', 'user.email', 'user.name']) {
+  for (const field of SEED_IDENTITY_PREFILTER_FIELDS) {
     const values = getFieldStringValues(source, field);
     if (values.length > 0) {
       should.push({ terms: { [field]: values } });

@@ -16,7 +16,12 @@ import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_field
 import type { MaintainerTelemetryClient } from '../../tasks/entity_maintainers/maintainer_telemetry_client';
 import type { PerRuleState } from '../automated_resolution/types';
 import { getFieldStringValues, readRelatedUserBundleForSeed } from './left';
-import type { CandidateEntity, RelatedUserBridgeLastRun, SeedEntity } from './types';
+import {
+  SEED_IDENTITY_PREFILTER_FIELDS,
+  type CandidateEntity,
+  type RelatedUserBridgeLastRun,
+  type SeedEntity,
+} from './types';
 
 const ENTITY_TYPE = 'user';
 const PAGE_SIZE = 10_000;
@@ -51,6 +56,7 @@ const isWellKnownOrSharedValue = (value: string): boolean => {
   const normalized = normalize(value);
   return (
     GENERIC_SERVICE_ACCOUNTS.has(normalized) ||
+    // Windows well-known SIDs: LocalSystem/LocalService/NetworkService and built-in groups.
     /^s-1-5-(18|19|20)$/i.test(value) ||
     /^s-1-5-32-/i.test(value)
   );
@@ -108,14 +114,7 @@ export const collectSeeds = async ({
         },
         sort: [{ [FIRST_SEEN_FIELD]: { order: 'asc' } }, { [ENTITY_ID_FIELD]: { order: 'asc' } }],
         ...(searchAfter ? { search_after: searchAfter } : {}),
-        _source: [
-          ENTITY_ID_FIELD,
-          ENTITY_NAMESPACE_FIELD,
-          'user.id',
-          'user.email',
-          'user.name',
-          'user.domain',
-        ],
+        _source: [ENTITY_ID_FIELD, ENTITY_NAMESPACE_FIELD, ...SEED_IDENTITY_PREFILTER_FIELDS],
       },
       { signal: abortSignal }
     );

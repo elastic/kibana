@@ -347,5 +347,3 @@ async function resolveMatchBuckets(
 
   return { resolutionsCreated, appliedBuckets, skippedAmbiguousBuckets, failedBuckets };
 }
-
-export { selectTarget };

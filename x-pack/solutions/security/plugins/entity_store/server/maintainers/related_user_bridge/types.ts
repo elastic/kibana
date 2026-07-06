@@ -7,6 +7,8 @@
 
 import type { TargetSelectionEntity } from '../../domain/resolution';
 
+export const SEED_IDENTITY_PREFILTER_FIELDS = ['user.id', 'user.email', 'user.name'] as const;
+
 export interface RelatedUserBridgeLastRun {
   /**
    * v1 intentionally re-scans all unresolved IDP seeds each enabled cycle. These
