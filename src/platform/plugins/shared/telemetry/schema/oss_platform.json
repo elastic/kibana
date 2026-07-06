@@ -12083,6 +12083,12 @@
             "description": "Enable Significant events discovery in Streams."
           }
         },
+        "observability:streamsEnableSignificantEventsAlertingV2": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Back Streams Significant events queries with Alerting v2 (kind: signal) instead of the streams.rules.esql rule type."
+          }
+        },
         "observability:streamsEnableContentPacks": {
           "type": "boolean",
           "_meta": {

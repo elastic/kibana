@@ -91,54 +91,77 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('closeDetailsButton');
     });
 
-    describe('data retention modal', function () {
+    const openLifecycleFlyout = async (dataStreamName: string) => {
+      await pageObjects.indexManagement.clickDataStreamNameLink(dataStreamName);
+      await testSubjects.click('manageDataStreamButton');
+      await testSubjects.click('editDataLifecycleButton');
+      await testSubjects.existOrFail('editDataLifecycleFlyoutApplyButton');
+    };
+
+    const INHERIT_CHECKBOX = 'dataLifecycleInheritCheckbox';
+    const DELETE_PHASE_CARD = 'dlmPhasesSelectorDeletePhaseCard';
+    const FAILURE_STORE_CHECKBOX = 'editFailedDataLifecycle-enableFailureStoreCheckbox';
+
+    const applyLifecycleChange = async () => {
+      await testSubjects.click('editDataLifecycleFlyoutApplyButton');
+      await testSubjects.missingOrFail('editDataLifecycleFlyoutApplyButton', { timeout: 30000 });
+    };
+
+    const stopInheritingLifecycle = async () => {
+      if (
+        (await testSubjects.exists(INHERIT_CHECKBOX, { allowHidden: true })) &&
+        (await testSubjects.isChecked(INHERIT_CHECKBOX))
+      ) {
+        await testSubjects.click(INHERIT_CHECKBOX);
+      }
+    };
+
+    describe('data lifecycle flyout', function () {
       describe('from details panel', function () {
         it('allows to update data retention', async () => {
-          // Open details flyout
+          await openLifecycleFlyout(TEST_DS_NAME_1);
+          await testSubjects.click('flyoutTab-successful_data');
+          await stopInheritingLifecycle();
+
+          // Ensure the delete phase is enabled so a retention period can be set (an inherited
+          // infinite lifecycle leaves the delete phase turned off).
+          if (!(await testSubjects.exists('deleteDurationValue'))) {
+            await testSubjects.click(DELETE_PHASE_CARD);
+          }
+          // Set the retention to 7 days.
+          await testSubjects.setValue('deleteDurationValue', '7');
+
+          await applyLifecycleChange();
+
+          // Applying closes the details panel and reloads the list; reopen to verify the summary.
           await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_1);
-          // Open the edit retention dialog
-          await testSubjects.click('manageDataStreamButton');
-          await testSubjects.click('editDataRetentionButton');
-
-          // Disable infinite retention
-          await testSubjects.click('infiniteRetentionPeriod > input');
-          // Set the retention to 7 hours
-          await testSubjects.setValue('dataRetentionValue', '7');
-          await testSubjects.click('show-filters-button');
-          await testSubjects.click('filter-option-h');
-
-          // Submit the form
-          await testSubjects.click('saveButton');
-
-          // Expect to see a success toast
           await retry.try(async () => {
-            const successToast = await toasts.getElementByIndex(1);
-            expect(await successToast.getVisibleText()).to.contain('Data retention updated');
+            const detail = await testSubjects.getVisibleText('successfulIngestLifecycleDetail');
+            expect(detail).to.contain('7 days');
           });
-          // Clear up toasts for next test
-          await toasts.dismissAll();
+          await testSubjects.click('closeDetailsButton');
         });
 
-        it('allows to disable data retention', async () => {
-          // Open details flyout
+        it('allows to keep data indefinitely', async () => {
+          await openLifecycleFlyout(TEST_DS_NAME_1);
+          await testSubjects.click('flyoutTab-successful_data');
+          await stopInheritingLifecycle();
+
+          // Turning off the delete phase keeps data indefinitely (infinite retention). The previous
+          // test left an explicit 7 day retention, so the delete phase is currently enabled.
+          if (await testSubjects.exists('deleteDurationValue')) {
+            await testSubjects.click(DELETE_PHASE_CARD);
+          }
+
+          await applyLifecycleChange();
+
           await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_1);
-          // Open the edit retention dialog
-          await testSubjects.click('manageDataStreamButton');
-          await testSubjects.click('editDataRetentionButton');
-
-          // Disable infinite retention
-          await testSubjects.click('dataRetentionEnabledField > input');
-
-          // Submit the form
-          await testSubjects.click('saveButton');
-
-          // Expect to see a success toast
           await retry.try(async () => {
-            const successToast = await toasts.getElementByIndex(1);
-            expect(await successToast.getVisibleText()).to.contain('Data retention disabled');
+            const detail = await testSubjects.getVisibleText('successfulIngestLifecycleDetail');
+            // Infinite retention is rendered as the infinity symbol.
+            expect(detail).to.contain('∞');
           });
-          // Clear up toasts for next test
-          await toasts.dismissAll();
+          await testSubjects.click('closeDetailsButton');
         });
       });
 
@@ -197,55 +220,47 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('configure failure store modal', function () {
-      it('allows to configure failure store from details panel', async () => {
-        // Open details flyout
+    describe('failure store (failed data lifecycle)', function () {
+      it('allows to enable failure store from the details panel', async () => {
+        await openLifecycleFlyout(TEST_DS_NAME_1);
+        await testSubjects.click('flyoutTab-failed_data');
+        await stopInheritingLifecycle();
+
+        // Enable the failure store if it is not already enabled.
+        if (!(await testSubjects.isChecked(FAILURE_STORE_CHECKBOX))) {
+          await testSubjects.click(FAILURE_STORE_CHECKBOX);
+        }
+
+        await applyLifecycleChange();
+
+        // Applying closes the details panel and reloads the list; reopen to verify the summary.
         await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_1);
-        // Open the configure failure store dialog
-        await testSubjects.click('manageDataStreamButton');
-        await testSubjects.click('configureFailureStoreButton');
-
-        // Verify modal is open
-        expect(await testSubjects.exists('editFailureStoreModal')).to.be(true);
-
-        // Enable failure store
-        await testSubjects.click('enableFailureStoreToggle');
-
-        // Submit the form
-        await testSubjects.click('failureStoreModalSaveButton');
-
-        // Expect to see a success toast
         await retry.try(async () => {
-          const successToast = await toasts.getElementByIndex(1);
-          expect(await successToast.getVisibleText()).to.contain('Failure store enabled');
+          const detail = await testSubjects.getVisibleText('failedIngestLifecycleDetail');
+          // An enabled failure store is managed by the data stream lifecycle (not "Disabled").
+          expect(detail).to.contain('Data stream lifecycle');
         });
-        // Clear up toasts for next test
-        await toasts.dismissAll();
+        await testSubjects.click('closeDetailsButton');
       });
 
-      it('allows to disable failure store from details panel', async () => {
-        // Open details flyout
+      it('allows to disable failure store from the details panel', async () => {
+        await openLifecycleFlyout(TEST_DS_NAME_1);
+        await testSubjects.click('flyoutTab-failed_data');
+        await stopInheritingLifecycle();
+
+        // Disable the failure store if it is currently enabled.
+        if (await testSubjects.isChecked(FAILURE_STORE_CHECKBOX)) {
+          await testSubjects.click(FAILURE_STORE_CHECKBOX);
+        }
+
+        await applyLifecycleChange();
+
         await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_1);
-        // Open the configure failure store dialog
-        await testSubjects.click('manageDataStreamButton');
-        await testSubjects.click('configureFailureStoreButton');
-
-        // Verify modal is open
-        expect(await testSubjects.exists('editFailureStoreModal')).to.be(true);
-
-        // Disable failure store (toggle off if it's on)
-        await testSubjects.click('enableFailureStoreToggle');
-
-        // Submit the form
-        await testSubjects.click('failureStoreModalSaveButton');
-
-        // Expect to see a success toast
         await retry.try(async () => {
-          const successToast = await toasts.getElementByIndex(1);
-          expect(await successToast.getVisibleText()).to.contain('Failure store disabled');
+          const detail = await testSubjects.getVisibleText('failedIngestLifecycleDetail');
+          expect(detail).to.contain('Disabled');
         });
-        // Clear up toasts for next test
-        await toasts.dismissAll();
+        await testSubjects.click('closeDetailsButton');
       });
     });
   });
