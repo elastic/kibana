@@ -43,7 +43,7 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     userMessages?: EmbeddableComponentProps['userMessages'];
     profileId: string;
     id: string;
-    isSelected?: boolean;
+    isSelected: boolean;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -72,7 +72,7 @@ export const Chart = ({
   userMessages,
   profileId,
   id,
-  isSelected = false,
+  isSelected,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
