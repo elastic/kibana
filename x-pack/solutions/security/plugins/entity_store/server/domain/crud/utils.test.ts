@@ -351,25 +351,6 @@ describe('crud_client utils', () => {
       ).not.toThrow();
     });
 
-    it('omits @timestamp on update when preserveTimestamp is true', () => {
-      mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
-
-      const doc: Entity = {
-        entity: {
-          id: 'entity-preserve-timestamp-update',
-          attributes: {
-            managed: true,
-          },
-        },
-      };
-
-      const result = validateAndTransformDoc('update', 'generic', 'default', doc, undefined, true, {
-        preserveTimestamp: true,
-      });
-
-      expect(result.doc['@timestamp']).toBeUndefined();
-    });
-
     describe('generic vs typed entity transform', () => {
       it('keeps entity at root level for generic type', () => {
         mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));

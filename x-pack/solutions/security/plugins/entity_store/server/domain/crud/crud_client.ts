@@ -61,10 +61,6 @@ export interface ListEntitiesParams {
   sortOrder?: SortOrder;
 }
 
-export interface UpdateEntityOptions {
-  preserveTimestamp?: boolean;
-}
-
 export interface ListEntitiesResult {
   entities: Entity[];
   fields?: Array<SearchHit['fields']>; // Only present if `fields` was specified in ListEntitiesParams
@@ -140,8 +136,7 @@ export class CRUDClient {
     const tracedUpdateEntity = (
       entityType: EntityType,
       doc: Entity,
-      force: boolean,
-      options?: UpdateEntityOptions
+      force: boolean
     ): Promise<void> =>
       runWithSpan({
         name: 'entityStore.crud.update_entity',
@@ -151,7 +146,7 @@ export class CRUDClient {
           'entity_store.entity.type': entityType,
           'entity_store.force': force,
         },
-        cb: () => baseUpdateEntity(entityType, doc, force, options),
+        cb: () => baseUpdateEntity(entityType, doc, force),
       });
 
     Object.defineProperty(this, 'updateEntity', {
@@ -287,12 +282,7 @@ export class CRUDClient {
   // 2. ID and Identity - a valid ID and matching identifying data - provided
   // ID will be validated and used if correct
   // 3. Identity only - no ID and identifying data - ID will be generated
-  public async updateEntity(
-    entityType: EntityType,
-    doc: Entity,
-    force: boolean,
-    options?: UpdateEntityOptions
-  ): Promise<void> {
+  public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     await this.assertInstalled();
     const generatedId = getEuidFromObject(entityType, doc);
     const valid = validateAndTransformDoc(
@@ -301,8 +291,7 @@ export class CRUDClient {
       this.namespace,
       doc,
       generatedId,
-      force,
-      options
+      force
     );
 
     const previousDocs = await this.eventPublisher.maybeGetExistingDocs([valid.doc]);

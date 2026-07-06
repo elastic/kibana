@@ -108,7 +108,11 @@ export const EntityHighlightsAccordion: React.FC<{
   // Read the persisted summary from the metadata datastream (may be null if never
   // generated, or if the user lacks metadata read access — see `canRead`). This
   // loads on flyout open and does not regenerate on close / click-away.
-  const { summary: storedSummary, refetch: refetchPersistedSummary } = useFetchPersistedAiSummary({
+  const {
+    summary: storedSummary,
+    refetch: refetchPersistedSummary,
+    isLoading: isPersistedSummaryLoading,
+  } = useFetchPersistedAiSummary({
     entityType,
     entityIdentifier,
   });
@@ -219,8 +223,12 @@ export const EntityHighlightsAccordion: React.FC<{
   ]);
 
   const isLoading = useMemo(
-    () => isChatLoading || isAnonymizationFieldsLoading || isLoadingConnectors,
-    [isAnonymizationFieldsLoading, isChatLoading, isLoadingConnectors]
+    () =>
+      isChatLoading ||
+      isAnonymizationFieldsLoading ||
+      isLoadingConnectors ||
+      isPersistedSummaryLoading,
+    [isAnonymizationFieldsLoading, isChatLoading, isLoadingConnectors, isPersistedSummaryLoading]
   );
 
   const [dismissedError, setDismissedError] = useState<Error | null>(null);
