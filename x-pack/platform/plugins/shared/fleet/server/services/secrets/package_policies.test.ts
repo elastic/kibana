@@ -6,10 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { fromKueryExpression } from '@kbn/es-query';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
+import { packagePolicyService } from '../package_policy';
 import type {
   NewPackagePolicy,
   PackageInfo,
@@ -22,7 +24,12 @@ import {
   diffSecretPaths,
   extractAndWriteSecrets,
   extractAndUpdateSecrets,
+  findPackagePoliciesUsingSecrets,
 } from './package_policies';
+
+jest.mock('../package_policy');
+
+const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 
 describe('Package policy secrets', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
@@ -1974,6 +1981,41 @@ describe('Package policy secrets', () => {
 
         expect(result.secretsToDelete).toHaveLength(0);
       });
+    });
+  });
+
+  describe('findPackagePoliciesUsingSecrets', () => {
+    const soClient = savedObjectsClientMock.create();
+
+    beforeEach(() => {
+      mockedPackagePolicyService.list.mockReset();
+      mockedPackagePolicyService.list.mockResolvedValue({ total: 0, items: [] } as any);
+    });
+
+    it('quotes each id so the generated kuery is valid even when an id contains a KQL keyword', async () => {
+      // Real-world ids from https://github.com/elastic/kibana/issues/273040 that end in "Not",
+      // which an unquoted kuery would parse as the NOT operator.
+      const ids = ['_3bpqZ4BbB0ae8-cYNot', '_nbpqZ4BbB0ae8-cYNot'];
+
+      await findPackagePoliciesUsingSecrets({ soClient, ids });
+
+      const { kuery } = mockedPackagePolicyService.list.mock.calls[0][1];
+
+      expect(kuery).toBe(
+        'ingest-package-policies.secret_references.id: ("_3bpqZ4BbB0ae8-cYNot" or "_nbpqZ4BbB0ae8-cYNot")'
+      );
+      // This is the actual bug: before quoting, this expression throws KQLSyntaxError.
+      expect(() => fromKueryExpression(kuery as string)).not.toThrow();
+    });
+
+    it('produces a parseable kuery for ids containing other KQL keywords and quote characters', async () => {
+      const ids = ['idAndSuffix', 'idOrSuffix', 'id"with"quotes'];
+
+      await findPackagePoliciesUsingSecrets({ soClient, ids });
+
+      const { kuery } = mockedPackagePolicyService.list.mock.calls[0][1];
+
+      expect(() => fromKueryExpression(kuery as string)).not.toThrow();
     });
   });
 });

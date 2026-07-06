@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 import { keyBy } from 'lodash';
 
 import { packageHasNoPolicyTemplates } from '../../../common/services/policy_template';
@@ -234,7 +235,9 @@ export async function findPackagePoliciesUsingSecrets(opts: {
 }): Promise<Array<{ id: string; policyIds: string[] }>> {
   const { soClient, ids } = opts;
   const packagePolicies = await packagePolicyService.list(soClient, {
-    kuery: `ingest-package-policies.secret_references.id: (${ids.join(' or ')})`,
+    kuery: `ingest-package-policies.secret_references.id: (${ids
+      .map((id) => `"${escapeQuotes(id)}"`)
+      .join(' or ')})`,
     perPage: SO_SEARCH_LIMIT,
     page: 1,
   });
