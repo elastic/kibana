@@ -353,7 +353,10 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
            *    for GRAPH_FADE_DURATION_MS + 40ms after switching back to YAML so the cross-fade plays out.
            * The bottom bar floats (position:absolute) and overlays both layers.
            */}
-          <div css={[styles.editorLayer, showGraph ? styles.layerHidden : styles.layerVisible]}>
+          <div
+            css={[styles.editorLayer, showGraph ? styles.layerHidden : styles.layerVisible]}
+            inert={showGraph ? '' : undefined}
+          >
             <React.Suspense fallback={<EuiLoadingSpinner />}>
               <WorkflowYAMLEditor
                 highlightDiff={highlightDiff}
