@@ -156,7 +156,7 @@ describe('metric suggestions', () => {
               layerId: 'first',
               layerType: LayerTypes.DATA,
               metricAccessor: metricColumn.columnId,
-              spacing: 'large',
+              density: 'default',
               // should ignore bucketed column for initial drag
             },
             title: 'Metric',
@@ -188,7 +188,7 @@ describe('metric suggestions', () => {
               layerId: 'first',
               layerType: LayerTypes.DATA,
               breakdownByAccessor: bucketColumn.columnId,
-              spacing: 'large',
+              density: 'default',
             },
             title: 'Metric',
             hide: true,
@@ -221,7 +221,7 @@ describe('metric suggestions', () => {
               layerType: LayerTypes.DATA,
               metricAccessor: undefined,
               breakdownByAccessor: bucketColumn.columnId,
-              spacing: 'large',
+              density: 'default',
             },
             title: 'Metric',
             hide: true,
@@ -295,7 +295,7 @@ describe('metric suggestions', () => {
               layerType: LayerTypes.DATA,
               metricAccessor: metricColumn.columnId,
               breakdownByAccessor: bucketColumn.columnId,
-              spacing: 'large',
+              density: 'default',
             },
             title: 'Metric',
             hide: true,
@@ -328,7 +328,7 @@ describe('metric suggestions', () => {
               layerType: LayerTypes.DATA,
               metricAccessor: metricColumn.columnId,
               breakdownByAccessor: bucketColumn.columnId,
-              spacing: 'large',
+              density: 'default',
             },
             title: 'Metric',
             hide: true,
@@ -360,7 +360,7 @@ describe('metric suggestions', () => {
             layerType: LayerTypes.DATA,
             metricAccessor: metricColumn.columnId,
             breakdownByAccessor: bucketColumn.columnId,
-            spacing: 'large',
+            density: 'default',
           },
           title: 'Metric',
           hide: true,
@@ -371,8 +371,8 @@ describe('metric suggestions', () => {
     });
   });
 
-  describe('spacing default', () => {
-    test('applies the default `large` spacing when switching from another vis type (no incoming state)', () => {
+  describe('density default', () => {
+    test('applies the default density when switching from another vis type (no incoming state)', () => {
       const [suggestion] = getSuggestions({
         table: {
           layerId: 'first',
@@ -384,10 +384,10 @@ describe('metric suggestions', () => {
         keptLayerIds: ['first'],
       });
 
-      expect(suggestion.state.spacing).toBe('large');
+      expect(suggestion.state.density).toBe('default');
     });
 
-    test('applies the default `large` spacing when active state has no spacing yet', () => {
+    test('applies the default density when active state has no density yet', () => {
       const [suggestion] = getSuggestions({
         table: {
           layerId: 'first',
@@ -402,10 +402,10 @@ describe('metric suggestions', () => {
         keptLayerIds: ['first'],
       });
 
-      expect(suggestion.state.spacing).toBe('large');
+      expect(suggestion.state.density).toBe('default');
     });
 
-    test('preserves explicit `small` spacing on the incoming state (legacy chart being edited)', () => {
+    test('preserves explicit compact density on the incoming state (legacy chart being edited)', () => {
       const [suggestion] = getSuggestions({
         table: {
           layerId: 'first',
@@ -416,12 +416,12 @@ describe('metric suggestions', () => {
         state: {
           layerId: 'first',
           layerType: LayerTypes.DATA,
-          spacing: 'small',
+          density: 'compact',
         } as MetricVisualizationState,
         keptLayerIds: ['first'],
       });
 
-      expect(suggestion.state.spacing).toBe('small');
+      expect(suggestion.state.density).toBe('compact');
     });
   });
 });

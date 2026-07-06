@@ -51,7 +51,7 @@ const fullState: Required<
   primaryPosition: 'bottom',
   iconAlign: 'right',
   valueFontMode: 'default',
-  spacing: 'large',
+  density: 'default',
   secondaryTrend: { type: 'none' },
   secondaryLabelPosition: 'before',
   applyColorTo: 'background',
@@ -218,17 +218,17 @@ describe('appearance settings', () => {
     expect(mockSetState.mock.calls.map(([s]) => s.valueFontMode)).toEqual(['default']);
   });
 
-  it('should set spacing to Large', async () => {
-    renderComponent({ spacing: 'small' });
+  it('should set density to Default', async () => {
+    renderComponent({ density: 'compact' });
 
-    const btnGroup = new EuiButtonGroupTestHarness('lens-metric-appearance-other-spacing-btn');
+    const btnGroup = new EuiButtonGroupTestHarness('lens-metric-appearance-other-density-btn');
 
-    expect(btnGroup.getSelected()?.textContent).toBe('Small');
+    expect(btnGroup.getSelected()?.textContent).toBe('Compact');
 
-    btnGroup.select('Large');
-    btnGroup.select('Small');
+    btnGroup.select('Default');
+    btnGroup.select('Compact');
 
-    expect(mockSetState.mock.calls.map(([s]) => s.spacing)).toEqual(['large']);
+    expect(mockSetState.mock.calls.map(([s]) => s.density)).toEqual(['default']);
   });
 
   it('should set iconAlign when Left position option is selected', async () => {

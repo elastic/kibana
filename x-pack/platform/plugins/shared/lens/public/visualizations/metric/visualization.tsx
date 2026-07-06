@@ -465,7 +465,7 @@ export const getMetricVisualization = ({
       layerId: addNewLayer(),
       layerType: layerTypes.DATA,
       ...LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
-      spacing: LENS_METRIC_STATE_DEFAULTS.spacing,
+      density: LENS_METRIC_STATE_DEFAULTS.density,
       palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
     };
   },

@@ -103,15 +103,15 @@ describe('metric visualization', () => {
     primaryPosition: 'bottom',
     iconAlign: 'right',
     valueFontMode: 'default',
-    spacing: 'small',
+    density: 'compact',
     secondaryTrend: { type: 'none' },
     secondaryLabelPosition: 'before',
     applyColorTo: 'background',
   };
 
-  const getLegacyStateWithoutSpacing = (): MetricVisualizationState => {
+  const getLegacyStateWithoutDensity = (): MetricVisualizationState => {
     const legacyState: MetricVisualizationState = { ...fullState };
-    delete legacyState.spacing;
+    delete legacyState.density;
     return legacyState;
   };
 
@@ -136,7 +136,7 @@ describe('metric visualization', () => {
         primaryPosition: 'bottom',
         primaryAlign: 'right',
         secondaryAlign: 'right',
-        spacing: 'large',
+        density: 'default',
       });
     });
 
@@ -144,19 +144,19 @@ describe('metric visualization', () => {
       expect(visualization.initialize(() => fullState.layerId, fullState)).toEqual(fullState);
     });
 
-    test('sets small spacing for persisted state without spacing', () => {
+    test('sets compact density for persisted state without density', () => {
       expect(
-        visualization.initialize(() => fullState.layerId, getLegacyStateWithoutSpacing())
+        visualization.initialize(() => fullState.layerId, getLegacyStateWithoutDensity())
       ).toEqual(fullState);
     });
 
-    test('preserves explicit persisted spacing', () => {
-      const stateWithLargeSpacing: MetricVisualizationState = {
+    test('preserves explicit persisted density', () => {
+      const stateWithDefaultDensity: MetricVisualizationState = {
         ...fullState,
-        spacing: 'large',
+        density: 'default',
       };
-      expect(visualization.initialize(() => fullState.layerId, stateWithLargeSpacing)).toEqual(
-        stateWithLargeSpacing
+      expect(visualization.initialize(() => fullState.layerId, stateWithDefaultDensity)).toEqual(
+        stateWithDefaultDensity
       );
     });
 
@@ -611,8 +611,8 @@ describe('metric visualization', () => {
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
                 ],
-                "spacing": Array [
-                  "small",
+                "density": Array [
+                  "compact",
                 ],
                 "subtitle": Array [
                   "subtitle",
@@ -634,9 +634,9 @@ describe('metric visualization', () => {
       `);
     });
 
-    it('keeps legacy persisted metrics on small spacing when building an expression', () => {
+    it('keeps legacy persisted metrics on compact density when building an expression', () => {
       const initializedState = visualization.initialize(() => fullState.layerId, {
-        ...getLegacyStateWithoutSpacing(),
+        ...getLegacyStateWithoutDensity(),
         breakdownByAccessor: undefined,
         collapseFn: undefined,
       });
@@ -646,7 +646,7 @@ describe('metric visualization', () => {
         datasourceLayers
       ) as ExpressionAstExpression;
 
-      expect(expression.chain[0].arguments.spacing).toEqual(['small']);
+      expect(expression.chain[0].arguments.density).toEqual(['compact']);
     });
 
     it('builds breakdown by metric', () => {
@@ -717,8 +717,8 @@ describe('metric visualization', () => {
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
                 ],
-                "spacing": Array [
-                  "small",
+                "density": Array [
+                  "compact",
                 ],
                 "subtitle": Array [
                   "subtitle",
@@ -1038,8 +1038,8 @@ describe('metric visualization', () => {
               "secondaryLabelPosition": Array [
                 "before",
               ],
-              "spacing": Array [
-                "small",
+              "density": Array [
+                "compact",
               ],
               "subtitle": Array [
                 "subtitle",
@@ -1287,7 +1287,7 @@ describe('metric visualization', () => {
         "primaryAlign": "right",
         "primaryPosition": "bottom",
         "secondaryAlign": "right",
-        "spacing": "small",
+        "density": "compact",
         "titlesTextAlign": "left",
         "valueFontMode": "default",
       }

@@ -66,7 +66,7 @@ describe('getTransformOut', () => {
     expect(result.data_source).toEqual(expect.objectContaining({ ref_id: remappedDataViewId }));
   });
 
-  it('keeps legacy metric panels without spacing on small spacing in apiFormat', () => {
+  it('keeps legacy metric panels without density on compact density in apiFormat', () => {
     const builder = new LensConfigBuilder(undefined, true);
     const transformOut = getTransformOut(builder, transformDrilldownsOut, true);
 
@@ -78,10 +78,10 @@ describe('getTransformOut', () => {
       references: [],
     };
 
-    const result = transformOut(storedState, []) as { styling?: { spacing?: string } };
+    const result = transformOut(storedState, []) as { styling?: { density?: string } };
 
-    expect(simpleMetricAttributes.state.visualization).not.toHaveProperty('spacing');
-    expect(result.styling?.spacing).toEqual('small');
+    expect(simpleMetricAttributes.state.visualization).not.toHaveProperty('density');
+    expect(result.styling?.density).toEqual('compact');
   });
 
   // When the panel has no title (key absent or `undefined`), fall back to the attributes

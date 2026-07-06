@@ -133,14 +133,14 @@ describe('Metric', () => {
       expect(apiOutput.metrics[1].color).toEqual(NO_COLOR);
     });
 
-    it('should emit large spacing when no spacing is specified', () => {
+    it('should emit default density when no density is specified', () => {
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(baseMetric);
       const apiOutput = builder.toAPIFormat(lensState) as MetricConfig;
       const visualization = lensState.state.visualization as MetricVisualizationState;
 
-      expect(visualization.spacing).toBe('large');
-      expect(apiOutput.styling?.spacing).toBe('large');
+      expect(visualization.density).toBe('default');
+      expect(apiOutput.styling?.density).toBe('default');
     });
   });
 });

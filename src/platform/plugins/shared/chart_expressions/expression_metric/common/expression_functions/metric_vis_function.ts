@@ -107,10 +107,10 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The value font size.',
       }),
     },
-    spacing: {
+    density: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.spacing.help', {
-        defaultMessage: 'The metric spacing size.',
+      help: i18n.translate('expressionMetricVis.function.density.help', {
+        defaultMessage: 'The metric density.',
       }),
     },
     primaryPosition: {
@@ -288,7 +288,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             secondaryAlign: args.secondaryAlign,
             iconAlign: args.iconAlign,
             valueFontSize: args.valueFontSize,
-            spacing: args.spacing,
+            density: args.density,
             primaryPosition: args.primaryPosition,
             maxCols: args.maxCols,
             minTiles: args.minTiles,

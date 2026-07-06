@@ -11,7 +11,7 @@ import type {
   IconPosition,
   Alignment,
   PrimaryMetricPosition,
-  MetricSpacing,
+  MetricDensity,
 } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 
@@ -57,17 +57,17 @@ export const fontSizeOptions: Array<EuiButtonGroupOptionProps & { id: PrimaryMet
   },
 ];
 
-export const spacingOptions: Array<EuiButtonGroupOptionProps & { id: MetricSpacing }> = [
+export const densityOptions: Array<EuiButtonGroupOptionProps & { id: MetricDensity }> = [
   {
-    id: 'small',
-    label: i18n.translate('xpack.lens.metric.appearancePopover.spacing.small', {
-      defaultMessage: 'Small',
+    id: 'compact',
+    label: i18n.translate('xpack.lens.metric.appearancePopover.density.compact', {
+      defaultMessage: 'Compact',
     }),
   },
   {
-    id: 'large',
-    label: i18n.translate('xpack.lens.metric.appearancePopover.spacing.large', {
-      defaultMessage: 'Large',
+    id: 'default',
+    label: i18n.translate('xpack.lens.metric.appearancePopover.density.default', {
+      defaultMessage: 'Default',
     }),
   },
 ];

@@ -31,7 +31,7 @@ describe('interpreter/functions#metricVis', () => {
     secondaryAlign: 'right',
     iconAlign: 'left',
     valueFontSize: 'default',
-    spacing: 'small',
+    density: 'compact',
     primaryPosition: 'bottom',
     secondaryLabelPosition: 'before',
     applyColorTo: 'background',

@@ -58,7 +58,7 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
       ...state,
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
-      spacing: state?.spacing ?? LENS_METRIC_STATE_DEFAULTS.spacing,
+      density: state?.density ?? LENS_METRIC_STATE_DEFAULTS.density,
     },
     title: metricColumns[0]?.operation.label || metricLabel,
     previewIcon: IconChartMetric,

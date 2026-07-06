@@ -27,10 +27,10 @@ import { metricIconsSet } from '../../../shared_components/icon_set';
 import { AppearanceOption, AppearanceOptionGroup, SubtitleOption } from './appearance_option';
 import {
   alignmentOptions,
+  densityOptions,
   fontSizeOptions,
   iconPositionOptions,
   primaryMetricPositionOptions,
-  spacingOptions,
 } from './option_configs';
 import { StyleTemplateSelector } from './style_template_selector';
 
@@ -43,12 +43,12 @@ const getTemplateAppearanceDefaults = (
   | 'primaryAlign'
   | 'secondaryAlign'
   | 'valueFontMode'
-  | 'spacing'
+  | 'density'
   | 'iconAlign'
 > => ({
   ...LENS_METRIC_STYLE_TEMPLATE[primaryMetricPosition],
   valueFontMode: LENS_METRIC_STATE_DEFAULTS.valueFontMode,
-  spacing: LENS_METRIC_STATE_DEFAULTS.spacing,
+  density: LENS_METRIC_STATE_DEFAULTS.density,
   iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
 });
 
@@ -270,16 +270,16 @@ export function MetricAppearanceSettings({
               dataTestSubj="lens-metric-appearance-other-icon-position-btn"
             />
             <AppearanceOption
-              label={i18n.translate('xpack.lens.metric.appearancePopover.spacing', {
-                defaultMessage: 'Spacing and size',
+              label={i18n.translate('xpack.lens.metric.appearancePopover.density', {
+                defaultMessage: 'Density',
               })}
-              value={state.spacing ?? LENS_METRIC_STATE_DEFAULTS.spacing}
-              options={spacingOptions}
+              value={state.density ?? LENS_METRIC_STATE_DEFAULTS.density}
+              options={densityOptions}
               onChange={(id) => {
                 setIsCustomStyle(false);
-                setState({ ...state, spacing: id });
+                setState({ ...state, density: id });
               }}
-              dataTestSubj="lens-metric-appearance-other-spacing-btn"
+              dataTestSubj="lens-metric-appearance-other-density-btn"
             />
           </AppearanceOptionGroup>
           <EuiSpacer size="s" />

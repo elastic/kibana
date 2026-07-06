@@ -88275,11 +88275,11 @@ components:
                     - center
                     - right
                   type: string
-        spacing:
-          description: Spacing preset for metric chart layout
+        density:
+          description: Density preset for the metric chart layout. Use `compact` for a compact layout, or `default` for increased padding, element spacing, and font size.
           enum:
-            - small
-            - large
+            - compact
+            - default
           type: string
       title: metricStyling
       type: object

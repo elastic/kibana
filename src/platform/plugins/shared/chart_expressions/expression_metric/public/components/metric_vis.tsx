@@ -71,6 +71,9 @@ export interface MetricVisComponentProps {
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
 
+const getMetricSpacing = (density: MetricVisComponentProps['config']['metric']['density']) =>
+  density === 'compact' ? 'small' : 'large';
+
 function buildTrendConfig(
   { palette, textPalette, visuals, baseline }: MetricVisParam['secondaryTrend'],
   value: number | string
@@ -376,7 +379,7 @@ export const MetricVis = ({
                   extraTextAlign: config.metric.secondaryAlign,
                   iconAlign: config.metric.iconAlign,
                   valueFontSize: config.metric.valueFontSize,
-                  spacing: config.metric.spacing,
+                  spacing: getMetricSpacing(config.metric.density),
                   valuePosition: config.metric.primaryPosition,
                 },
               },

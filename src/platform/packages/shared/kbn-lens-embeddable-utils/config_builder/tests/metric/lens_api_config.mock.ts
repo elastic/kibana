@@ -104,7 +104,7 @@ export const simpleMetricAPIAttributes = {
     },
   ],
   styling: {
-    spacing: 'large',
+    density: 'default',
   },
 } as MetricConfig;
 
