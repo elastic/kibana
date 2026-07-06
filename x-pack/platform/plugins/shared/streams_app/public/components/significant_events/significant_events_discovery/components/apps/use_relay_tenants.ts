@@ -42,5 +42,5 @@ export const useRelayTenants = () => {
       }),
   });
 
-  return { tenants: data?.tenants ?? [], isLoading, error };
+  return { tenants: data?.items ?? [], isLoading, error };
 };

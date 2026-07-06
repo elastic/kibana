@@ -58,7 +58,7 @@ export const AppsPanel = () => {
   const handleConnectSlack = useCallback(async () => {
     setConnectingId('slack');
     try {
-      const { authorizeUrl } = await streamsRepositoryClient.fetch(
+      const { authorize_url: authorizeUrl } = await streamsRepositoryClient.fetch(
         'POST /internal/streams/relay/slack/connect',
         { signal }
       );
