@@ -31,6 +31,10 @@ import {
 } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import {
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  type SignificantEventsTuningConfig,
+} from '@kbn/significant-events-schema';
+import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
@@ -40,8 +44,6 @@ import {
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
-  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
-  type SignificantEventsTuningConfig,
 } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';

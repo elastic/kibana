@@ -85,7 +85,7 @@ export const useScheduledDiscoverySettings = ({
   }, [saved]);
 
   const save = useCallback(async () => {
-    await http.put('/internal/streams/_significant_events/settings', {
+    await http.put('/internal/streams/_significant_events/scheduled_discovery/settings', {
       body: JSON.stringify({ scheduledDiscovery: draft }),
     });
 

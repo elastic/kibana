@@ -500,6 +500,16 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmTraceLogsDefaultColumns': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Field names configured as default columns for the Logs tab in APM trace samples.',
+      },
+    },
+  },
   'observability:apmAWSLambdaPriceFactor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
@@ -830,6 +840,45 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: {
       description:
         'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Non-default value of whether scheduled Significant Events discovery is enabled.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events detection interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events review interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events discovery batch size.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events triage batch size.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events maximum review passes.',
     },
   },
   'observability:enableDiagnosticMode': {

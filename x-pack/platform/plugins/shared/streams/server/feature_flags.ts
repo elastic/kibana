@@ -30,6 +30,11 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
+import {
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
+  validateSignificantEventsTuningConfig,
+} from '@kbn/significant-events-schema';
 import type { StreamsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 import {
@@ -45,29 +50,18 @@ import {
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
 } from '../common/constants';
-import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '../common/significant_events_tuning_config';
 
 const sigEventsTuningConfigSchema = schema.object(
-  {
-    sample_size: schema.number({ min: 1, max: 100 }),
-    max_iterations: schema.number({ min: 1, max: 20 }),
-    feature_ttl_days: schema.number({ min: 1 }),
-    entity_filtered_ratio: schema.number({ min: 0, max: 1 }),
-    diverse_ratio: schema.number({ min: 0, max: 1 }),
-    max_excluded_features_in_prompt: schema.number({ min: 0, max: 50 }),
-    max_entity_filters: schema.number({ min: 1, max: 50 }),
-    semantic_min_score: schema.number({ min: 0, max: 1 }),
-    rrf_rank_constant: schema.number({ min: 1, max: 100 }),
-  },
+  Object.fromEntries(
+    Object.entries(SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS).map(([key, { min, max }]) => [
+      key,
+      schema.number({ min, max }),
+    ])
+  ) as Record<string, ReturnType<typeof schema.number>>,
   {
     validate: (value) => {
-      if (value.entity_filtered_ratio + value.diverse_ratio > 1.0) {
-        return (
-          `entity_filtered_ratio (${value.entity_filtered_ratio}) + ` +
-          `diverse_ratio (${value.diverse_ratio}) must not exceed 1.0 ` +
-          `(remainder is used for random sampling)`
-        );
-      }
+      const errors = validateSignificantEventsTuningConfig(value as Record<string, unknown>);
+      return errors.length ? errors.join('; ') : undefined;
     },
   }
 );
@@ -184,6 +178,7 @@ export function registerFeatureFlags(
               type: 'number',
               schema: schema.number({ min: MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES }),
               solutionViews: ['classic', 'oblt'],
+              technicalPreview: true,
               readonly: true,
               readonlyMode: 'ui',
             },
@@ -206,6 +201,7 @@ export function registerFeatureFlags(
             type: 'number',
             schema: schema.number({ min: MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES }),
             solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
             readonly: true,
             readonlyMode: 'ui',
           },
@@ -231,6 +227,7 @@ export function registerFeatureFlags(
               max: MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
             }),
             solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
             readonly: true,
             readonlyMode: 'ui',
           },
@@ -253,6 +250,7 @@ export function registerFeatureFlags(
               max: MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
             }),
             solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
             readonly: true,
             readonlyMode: 'ui',
           },
@@ -275,6 +273,7 @@ export function registerFeatureFlags(
               max: MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
             }),
             solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
             readonly: true,
             readonlyMode: 'ui',
           },

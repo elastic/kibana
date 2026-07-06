@@ -11,6 +11,8 @@ import { API_VERSIONS } from '../../../common';
 
 import { agentlessPolicyRouteService } from '../../../common/services';
 import type {
+  AgentlessPolicyUpgradeDryRunResponse,
+  BulkUpgradeAgentlessPoliciesResponse,
   CreateAgentlessPolicyRequest,
   CreateAgentlessPolicyResponse,
   DeleteAgentlessPolicyRequest,
@@ -19,6 +21,8 @@ import type {
   GetAgentlessPolicyResponse,
   ListAgentlessPoliciesRequest,
   ListAgentlessPoliciesResponse,
+  UpdateAgentlessPolicyRequest,
+  UpdateAgentlessPolicyResponse,
 } from '../../../common/types/rest_spec/agentless_policy';
 
 import { sendRequestForRq } from './use_request';
@@ -33,6 +37,18 @@ export const sendCreateAgentlessPolicy = (body: CreateAgentlessPolicyRequest['bo
   });
 };
 
+export const sendUpdateAgentlessPolicy = (
+  policyId: string,
+  body: UpdateAgentlessPolicyRequest['body']
+) => {
+  return sendRequestForRq<UpdateAgentlessPolicyResponse>({
+    path: agentlessPolicyRouteService.getUpdatePath(policyId),
+    method: 'put',
+    version: API_VERSIONS.public.v1,
+    body: JSON.stringify(body),
+  });
+};
+
 export const sendDeleteAgentlessPolicy = (
   policyId: string,
   query?: DeleteAgentlessPolicyRequest['query']
@@ -42,6 +58,24 @@ export const sendDeleteAgentlessPolicy = (
     method: 'delete',
     version: API_VERSIONS.public.v1,
     query,
+  });
+};
+
+export const sendBulkUpgradeAgentlessPolicies = (policyIds: string[]) => {
+  return sendRequestForRq<BulkUpgradeAgentlessPoliciesResponse>({
+    path: agentlessPolicyRouteService.getUpgradePath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: JSON.stringify({ policyIds }),
+  });
+};
+
+export const sendUpgradeAgentlessPoliciesDryRun = (policyIds: string[]) => {
+  return sendRequestForRq<AgentlessPolicyUpgradeDryRunResponse>({
+    path: agentlessPolicyRouteService.getUpgradeDryRunPath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: JSON.stringify({ policyIds }),
   });
 };
 

@@ -6,17 +6,15 @@
  */
 
 import type { ComposerSortShorthand } from '@elastic/esql';
-import type {
-  Feature,
-  KnowledgeIndicator,
-  QueryLink,
-  StreamQuery,
+import {
+  type Feature,
+  type KnowledgeIndicator,
+  type QueryLink,
+  type SignificantEventsTuningConfig,
+  type StreamQuery,
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
 } from '@kbn/significant-events-schema';
 import type { Streams } from '@kbn/streams-schema';
-import {
-  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
-  type SignificantEventsTuningConfig,
-} from '../../../../../common/significant_events_tuning_config';
 import type { SearchMode } from '../../../../../common/queries';
 import type { KnowledgeIndicatorType } from '../fields';
 import {
@@ -81,6 +79,13 @@ export class KnowledgeIndicatorClient {
 
   getDefaultExpiresAt(): string {
     return computeExpiresAt(new Date().toISOString(), this.ttlDays);
+  }
+
+  keepAlivePersistentIndicators(
+    stream: string,
+    options: { lastRefreshedBefore: string }
+  ): Promise<{ refreshed: number }> {
+    return this.writer.keepAlivePersistent(stream, options);
   }
 
   deleteIndicators(stream: string) {

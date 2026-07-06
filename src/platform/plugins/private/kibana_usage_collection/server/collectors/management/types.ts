@@ -47,6 +47,7 @@ export interface UsageStats {
   'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
+  'observability:apmTraceLogsDefaultColumns': string[];
   'observability:logSources': string[];
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
@@ -206,6 +207,12 @@ export interface UsageStats {
   'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsEnableCanvas': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
+  'observability:streamsSigEventsScheduledDiscoveryEnabled': boolean;
+  'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': number;
+  'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': number;
+  'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': number;
   'securitySolution:entityStoreEnableV2': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
