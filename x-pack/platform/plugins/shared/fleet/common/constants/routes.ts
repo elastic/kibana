@@ -219,7 +219,10 @@ export const AGENTLESS_POLICIES_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agentless_policies`,
   LIST_PATTERN: `${API_ROOT}/agentless_policies`,
   GET_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
+  UPDATE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
   DELETE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
+  UPGRADE_PATTERN: `${API_ROOT}/agentless_policies/_upgrade`,
+  UPGRADE_DRYRUN_PATTERN: `${API_ROOT}/agentless_policies/_upgrade/dryrun`,
   SYNC_PATTERN: `${INTERNAL_ROOT}/agentless_policies/_sync`,
   BULK_THROUGHPUT_PATTERN: `${INTERNAL_ROOT}/agentless_policies/bulk_throughput`,
 };

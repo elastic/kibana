@@ -36,6 +36,6 @@ const significantEventsAvailabilityRoute = createServerRoute({
   },
 });
 
-export const internalSigEventsAvailabilityRoutes = {
+export const internalSignificantEventsAvailabilityRoutes = {
   ...significantEventsAvailabilityRoute,
 };

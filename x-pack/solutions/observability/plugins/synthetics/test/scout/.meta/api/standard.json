@@ -1,5 +1,5 @@
 {
-  "sha1": "2639e0a6bee3a529e8b28de7dfd4d5d05f81c093",
+  "sha1": "98e16b395787d925f5a92972f5edf6f8bd2af0b8",
   "tests": [
     {
       "id": "0e89de24e8ff3a8-faf07b914e53ca6",
@@ -4119,6 +4119,188 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/test_now_monitor.spec.ts",
         "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-9c91ca8685a7c4d",
+      "title": "UpdateMonitorBulkAPI partially patches a single monitor with a public location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 110,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-9ef299ac98f7736",
+      "title": "UpdateMonitorBulkAPI partially patches a monitor with a private location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 130,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-edb9e2140ad4608",
+      "title": "UpdateMonitorBulkAPI patches multiple monitors in one request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 150,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-9ce215233ce8242",
+      "title": "UpdateMonitorBulkAPI applies a different patch to each id in one request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 171,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-1f629bd44bb0e4b",
+      "title": "UpdateMonitorBulkAPI keeps the monitor decryptable after a partial patch on an AAD field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 199,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-932249d28094a08",
+      "title": "UpdateMonitorBulkAPI rejects project-origin monitors with an origin error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 242,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-17387cda604e40e",
+      "title": "UpdateMonitorBulkAPI rejects schedules outside the allowed set with a validation error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 276,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-cb7bba4c4c5581f",
+      "title": "UpdateMonitorBulkAPI rejects a patch with an unknown field and leaves the monitor unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 300,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-1b1e84d58a8ba20",
+      "title": "UpdateMonitorBulkAPI rejects a name patch that collides with another existing monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 322,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-241e4ab4611b503",
+      "title": "UpdateMonitorBulkAPI renames a monitor to a brand-new unique name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 345,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-c0d77663955abdd",
+      "title": "UpdateMonitorBulkAPI allows a patch that keeps the monitor its own current name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 361,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-79997ce1e1d1b02",
+      "title": "UpdateMonitorBulkAPI rejects every entry when two updates set the same name in one batch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 379,
+        "column": 12
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-075d5d6e34e078b",
+      "title": "UpdateMonitorBulkAPI isolates a name conflict to the offending id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 407,
         "column": 12
       }
     }

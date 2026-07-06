@@ -66,14 +66,32 @@ All commands support --help for usage information.
 
 ### exec_tool
 
-Use exec_tool to invoke another tool from the shell:
+Use exec_tool to invoke another tool from the shell. Pass parameters either as a
+single JSON object via --args, or as individual flags, or both:
   exec_tool <tool_id> --args='{...}'
-  exec_tool platform_core_generate_esql --args='{"query":"..."}' | jq
+  exec_tool <tool_id> --param value --other=value
+  exec_tool platform_core_generate_esql --query="FROM logs | LIMIT 10" | jq
+  exec_tool platform_core_generate_esql --args='{"query":"..."}' --index=logs-*
+
+Individual --param flags accept both "--param value" and "--param=value" forms and are coerced to the parameter's declared type (numbers, booleans, and JSON arrays/objects).
+A bare boolean flag (e.g. --verbose) is treated as true. When both are given, individual --param flags override matching keys in --args.
 
 Both sanitized tool names (as listed in your tools) and underscore-namespaced internal IDs are accepted.
 
-Output is JSON-serialized to stdout on success; the command exit code is returned.
-Stdout and stderr are truncated past a token safeguard for the model — the truncated flag will be set in the result.
+On success the tool result content is JSON-serialized to stdout. A single result prints its data object; multiple results
+print an array of data objects. If the tool reports an error, its message goes to stderr and the command
+exits non-zero. Stdout and stderr are truncated past a token safeguard for the model — the truncated flag will be set in the result.
+
+## Limitations of the bash environment
+
+### jq
+
+Not native JQ, only a subset of standard jq is supported.
+
+Most notable limitations:
+- No arg injection: --arg/--argjson aren't supported. Embed the value in the filter (jq ".x==\\"$VAL\\"") or \`export X=val\` and read \`$ENV.X\`.
+- No -R/--raw-input: use awk/sed/grep for non-JSON text.
+- If a flag or function errors as unsupported, adapt — don't retry it.
 
 ## Guidelines
 
