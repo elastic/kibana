@@ -332,9 +332,6 @@ const GEO_DISPLAY_NAMES: Record<string, string> = {
  */
 export const getGeoDisplayName = (geo: string): string => GEO_DISPLAY_NAMES[geo] ?? geo;
 
-export { GEO_ORDER } from '../types';
-export type { RegionZoneCount } from '../types';
-
 const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, CspRegion[]> => {
   const byGeo = new Map<string, Map<string, CspRegion>>();
 
@@ -378,9 +375,6 @@ const collectGeoOnlyZones = (endpoints: EisInferenceEndpoint[]): Set<string> => 
  * Computes per-zone region availability counts for a specific model relative to
  * all EIS models, for use in the model detail flyout region badges.
  *
- * Returns entries for zones where:
- * - The model has at least one region with full csp+region data (geoOnly: false), OR
- * - The model only has geo-level availability with no csp+region data (geoOnly: true)
  */
 export const getRegionZoneCounts = (
   modelEndpoints: EisInferenceEndpoint[],

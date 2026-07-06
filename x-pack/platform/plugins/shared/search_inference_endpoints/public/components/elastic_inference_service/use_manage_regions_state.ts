@@ -9,12 +9,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRegionPolicy } from '../../hooks/use_region_policy';
 import { useSaveRegionPolicy } from '../../hooks/use_save_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
-import {
-  getAvailableRegions,
-  getGeoDisplayName,
-  GEO_ORDER,
-  regionKey,
-} from '../../utils/eis_utils';
+import { getAvailableRegions, getGeoDisplayName, regionKey } from '../../utils/eis_utils';
+import { GEO_ORDER } from '../../types';
 import type { CspRegion } from '../../../common/types';
 import type { ZoneGroup } from './region_zone_list';
 
