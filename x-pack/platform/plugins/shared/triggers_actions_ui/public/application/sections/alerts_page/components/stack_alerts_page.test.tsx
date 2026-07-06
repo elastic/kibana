@@ -8,7 +8,10 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { STACK_ALERTS_ONLY_FEATURE_ID, OBSERVABILITY_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import {
+  STACK_ALERTS_ONLY_FEATURE_ID,
+  OBSERVABILITY_ALERTS_FEATURE_ID,
+} from '@kbn/rule-data-utils';
 import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
 import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
 import { StackAlertsPage } from './stack_alerts_page';
