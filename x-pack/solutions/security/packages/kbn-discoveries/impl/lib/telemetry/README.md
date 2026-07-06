@@ -2,7 +2,7 @@
 
 Event-Based Telemetry (EBT) events emitted by the `discoveries` plugin for the Attack Discovery 2.0 Workflows feature.
 
-For system context (three execution paths, security surfaces, where these events are emitted from), see the canonical [discoveries plugin README](../../../../../plugins/discoveries/README.md).
+For system context (the four entry points, security surfaces, where these events are emitted from), see the canonical [discoveries plugin README](../../../../../plugins/discoveries/README.md).
 
 ## Privacy contract
 
@@ -213,6 +213,8 @@ Emitted when an individual pipeline step fails during generation. Provides per-s
 | --- | --- | --- |
 | Manual (UI button or API call) | `manual` | `post_generate.ts` route handler |
 | Scheduled execution | `schedule` | `workflow_executor/index.ts` |
+| Agent Builder run tool | `agent_builder` | `agent_builder/skills/tools/run_attack_discovery_tool/index.ts` |
+| `security.attack-discovery.run` workflow step | `workflow` | `workflows/steps/run_step/get_run_step_definition.ts` |
 
 ## Product Questions Answered
 
