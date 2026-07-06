@@ -69,16 +69,6 @@ export const makeCallbackRequestIfConfigured = async ({
     return;
   }
 
-  await makeCallbackRequest({ url: callbackUrl, payload });
-};
-
-export const makeCallbackRequest = async ({
-  url,
-  payload,
-}: {
-  url: string;
-  payload: CallbackPayload;
-}): Promise<void> => {
   const body = JSON.stringify(payload);
   const headers = {
     'Content-Type': 'application/json',
@@ -87,7 +77,7 @@ export const makeCallbackRequest = async ({
   await pRetry(async () => {
     let response: Response;
     try {
-      response = await fetch(url, {
+      response = await fetch(callbackUrl, {
         method: 'POST',
         headers,
         body,

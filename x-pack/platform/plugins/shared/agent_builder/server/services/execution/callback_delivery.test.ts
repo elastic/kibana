@@ -14,34 +14,23 @@ import {
   type ChatEvent,
   type SerializedExecutionError,
 } from '@kbn/agent-builder-common';
-import type { ChatCallbackSuccessPayload } from '../../../common/http_api/chat_callback';
+import type { ChatCallbackFailurePayload } from '../../../common/http_api/chat_callback';
 import { buildChatResponseFromEvents } from './utils/chat_response';
 import {
-  makeCallbackRequest,
   makeFailureCallbackRequestIfConfigured,
   makeSuccessCallbackRequestIfConfigured,
 } from './callback_delivery';
 
-describe('makeCallbackRequest', () => {
-  const payload: ChatCallbackSuccessPayload = {
+const callbackUrl = 'https://relay.example.com/events?token=abc';
+
+describe('callback request delivery', () => {
+  const payload: ChatCallbackFailurePayload = {
     execution_id: 'execution-1',
-    status: ExecutionStatus.completed,
-    response: {
-      conversation_id: 'conversation-1',
-      access_control: { access_mode: ConversationAccessControlMode.Public },
-      round_id: 'round-1',
-      status: ConversationRoundStatus.completed,
-      steps: [],
-      started_at: '2026-01-01T00:00:00.000Z',
-      time_to_first_token: 1,
-      time_to_last_token: 2,
-      model_usage: {
-        connector_id: 'connector-1',
-        llm_calls: 1,
-        input_tokens: 1,
-        output_tokens: 1,
-      },
-      response: { message: 'hello' },
+    conversation_id: 'conversation-1',
+    status: ExecutionStatus.failed,
+    error: {
+      code: AgentBuilderErrorCode.internalError,
+      message: 'boom',
     },
   };
 
@@ -53,13 +42,13 @@ describe('makeCallbackRequest', () => {
   it('posts the exact serialized JSON body without a signature', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
 
-    await makeCallbackRequest({
-      url: 'https://relay.example.com/events?token=abc',
+    await makeFailureCallbackRequestIfConfigured({
+      callbackUrl,
       payload,
     });
 
     const body = JSON.stringify(payload);
-    expect(fetchMock).toHaveBeenCalledWith('https://relay.example.com/events?token=abc', {
+    expect(fetchMock).toHaveBeenCalledWith(callbackUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -76,8 +65,8 @@ describe('makeCallbackRequest', () => {
       .mockResolvedValueOnce({ status: 503 } as Response)
       .mockResolvedValueOnce({ status: 204 } as Response);
 
-    const delivery = makeCallbackRequest({
-      url: 'https://relay.example.com/events?token=abc',
+    const delivery = makeFailureCallbackRequestIfConfigured({
+      callbackUrl,
       payload,
     });
     const deliveryExpectation = expect(delivery).resolves.toBeUndefined();
@@ -92,8 +81,8 @@ describe('makeCallbackRequest', () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 400 } as Response);
 
     await expect(
-      makeCallbackRequest({
-        url: 'https://relay.example.com/events?token=abc',
+      makeFailureCallbackRequestIfConfigured({
+        callbackUrl,
         payload,
       })
     ).rejects.toThrow('Callback delivery failed with status 400');
@@ -105,8 +94,8 @@ describe('makeCallbackRequest', () => {
     jest.useFakeTimers();
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 503 } as Response);
 
-    const delivery = makeCallbackRequest({
-      url: 'https://relay.example.com/events?token=abc',
+    const delivery = makeFailureCallbackRequestIfConfigured({
+      callbackUrl,
       payload,
     });
     const deliveryExpectation = expect(delivery).rejects.toThrow(
@@ -119,8 +108,6 @@ describe('makeCallbackRequest', () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 });
-
-const callbackUrl = 'https://relay.example.com/events?token=abc';
 
 describe('makeSuccessCallbackRequestIfConfigured', () => {
   const events: ChatEvent[] = [
