@@ -56,6 +56,8 @@ export interface CspClientPluginStart {
     Header: React.FC<FindingsMisconfigurationFlyoutHeaderProps>;
     Body: React.FC<FindingsMisconfigurationFlyoutContentProps>;
     Footer: React.FC<FindingMisconfigurationFlyoutFooterProps>;
+    /** The "take action" control (create detection rule) without any flyout footer chrome. */
+    TakeAction: React.FC<FindingMisconfigurationFlyoutFooterProps>;
   };
   getCloudSecurityPostureVulnerabilityFlyout: () => {
     Component: React.FC<
@@ -66,6 +68,8 @@ export interface CspClientPluginStart {
     Header: React.FC<FindingsVulnerabilityFlyoutHeaderProps>;
     Body: React.FC<FindingsVulnerabilityFlyoutContentProps>;
     Footer: React.FC<FindingsVulnerabilityFlyoutFooterProps>;
+    /** The "take action" control (create detection rule) without any flyout footer chrome. */
+    TakeAction: React.FC<FindingsVulnerabilityFlyoutFooterProps>;
   };
 }
 
@@ -92,6 +96,27 @@ export interface CspSecuritySolutionContext {
   }>;
   useExpandableFlyoutApi?: () => ExpandableFlyoutApi;
   useOnExpandableFlyoutClose?: ({ callback }: UseOnCloseParams) => void;
+  /**
+   * Returns openers that render a finding as a primary "system flyout" (the security solution's
+   * v2 flyout), or `undefined` when the new flyout system is disabled. When available, the
+   * findings pages open these instead of the legacy expandable-flyout panels.
+   */
+  useOpenFindingInSystemFlyout?: () => OpenFindingInSystemFlyout | undefined;
+}
+
+/**
+ * Openers that render a CSP finding as a primary security solution system flyout.
+ * Params mirror the query inputs accepted by the misconfiguration / vulnerability findings queries.
+ */
+export interface OpenFindingInSystemFlyout {
+  openMisconfigurationFinding: (params: { resourceId: string; ruleId: string }) => void;
+  openVulnerabilityFinding: (params: {
+    vulnerabilityId?: string | string[];
+    resourceId?: string;
+    packageName?: string | string[];
+    packageVersion?: string | string[];
+    eventId?: string;
+  }) => void;
 }
 
 export type CloudSecurityPostureStartServices = Pick<

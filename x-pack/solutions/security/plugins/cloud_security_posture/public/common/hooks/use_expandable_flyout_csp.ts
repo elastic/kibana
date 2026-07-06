@@ -33,42 +33,47 @@ export const useExpandableFlyoutCsp = (
 
   const { openFlyout, closeFlyout } = securitySolutionContext.useExpandableFlyoutApi();
 
+  // When the new flyout system is enabled, the security solution injects openers that render the
+  // finding as a primary "system flyout". Otherwise this is `undefined` and we fall back to the
+  // legacy expandable-flyout panels.
+  const openInSystemFlyout = securitySolutionContext.useOpenFindingInSystemFlyout?.();
+
   setFlyoutCloseCallback(setExpandedDoc);
 
   const onExpandDocClick = (record?: DataTableRecord | undefined) => {
-    let finding;
-    if (record) {
-      if (flyoutType === 'vulnerability') {
-        finding = record?.raw?._source as unknown as CspVulnerabilityFinding;
-        setExpandedDoc(record);
-        openFlyout({
-          right: {
-            id: 'findings-vulnerability-panel',
-            params: {
-              vulnerabilityId: finding?.vulnerability?.id,
-              resourceId: finding?.resource?.id,
-              packageName: finding?.package?.name,
-              packageVersion: finding?.package?.version,
-              eventId: finding?.event?.id,
-            },
-          },
-        });
-      } else {
-        finding = record?.raw?._source as unknown as CspFinding;
-        setExpandedDoc(record);
-        openFlyout({
-          right: {
-            id: 'findings-misconfiguration-panel',
-            params: {
-              resourceId: finding.resource.id,
-              ruleId: finding.rule.id,
-            },
-          },
-        });
-      }
-    } else {
+    if (!record) {
       closeFlyout();
       setExpandedDoc(undefined);
+      return;
+    }
+
+    if (flyoutType === 'vulnerability') {
+      const finding = record?.raw?._source as unknown as CspVulnerabilityFinding;
+      setExpandedDoc(record);
+      const params = {
+        vulnerabilityId: finding?.vulnerability?.id,
+        resourceId: finding?.resource?.id,
+        packageName: finding?.package?.name,
+        packageVersion: finding?.package?.version,
+        eventId: finding?.event?.id,
+      };
+      if (openInSystemFlyout) {
+        openInSystemFlyout.openVulnerabilityFinding(params);
+      } else {
+        openFlyout({ right: { id: 'findings-vulnerability-panel', params } });
+      }
+    } else {
+      const finding = record?.raw?._source as unknown as CspFinding;
+      setExpandedDoc(record);
+      const params = {
+        resourceId: finding.resource.id,
+        ruleId: finding.rule.id,
+      };
+      if (openInSystemFlyout) {
+        openInSystemFlyout.openMisconfigurationFinding(params);
+      } else {
+        openFlyout({ right: { id: 'findings-misconfiguration-panel', params } });
+      }
     }
   };
 

@@ -67,7 +67,7 @@ jest.mock(
   })
 );
 
-jest.mock('../../../../csp/misconfiguration', () => ({
+jest.mock('../../../../csp/misconfiguration/main', () => ({
   Misconfiguration: () => <div data-test-subj="mockMisconfigurationPanel" />,
 }));
 

@@ -8,52 +8,32 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useMisconfigurationFinding } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding';
-import { Misconfiguration } from './misconfiguration';
+import { Misconfiguration } from '.';
 
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding', () => ({
   useMisconfigurationFinding: jest.fn(),
 }));
 
-jest.mock('../shared/components/flyout_error', () => ({
+jest.mock('../../../shared/components/flyout_error', () => ({
   FlyoutError: () => <div data-test-subj="mockFlyoutError" />,
 }));
 
-jest.mock('../shared/components/flyout_loading', () => ({
+jest.mock('../../../shared/components/flyout_loading', () => ({
   FlyoutLoading: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
     <div data-test-subj={dataTestSubj ?? 'mockFlyoutLoading'} />
   ),
 }));
 
-jest.mock('@kbn/cloud-security-posture', () => ({
-  CspEvaluationBadge: ({ type }: { type?: string }) => (
-    <div data-test-subj="mockCspEvaluationBadge" data-type={type} />
-  ),
+jest.mock('./header', () => ({
+  Header: () => <div data-test-subj="mockMisconfigurationHeader" />,
 }));
 
-jest.mock('../shared/components/flyout_title', () => ({
-  FlyoutTitle: ({ title }: { title: string }) => (
-    <div data-test-subj="mockFlyoutTitle">{title}</div>
-  ),
+jest.mock('./content', () => ({
+  Content: () => <div data-test-subj="mockMisconfigurationContent" />,
 }));
 
-jest.mock('../../common/components/formatted_date', () => ({
-  PreferenceFormattedDate: () => <span data-test-subj="mockFormattedDate" />,
-}));
-
-const mockCspHeader = jest.fn(() => <div data-test-subj="mockCspFlyoutHeader" />);
-const mockCspBody = jest.fn(() => <div data-test-subj="mockCspFlyoutBody" />);
-
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      cloudSecurityPosture: {
-        getCloudSecurityPostureMisconfigurationFlyout: () => ({
-          Header: mockCspHeader,
-          Body: mockCspBody,
-        }),
-      },
-    },
-  }),
+jest.mock('./footer', () => ({
+  Footer: () => <div data-test-subj="mockMisconfigurationFooter" />,
 }));
 
 const useMisconfigurationFindingMock = useMisconfigurationFinding as jest.Mock;
@@ -83,7 +63,7 @@ describe('<Misconfiguration />', () => {
     expect(getByTestId('mockFlyoutError')).toBeInTheDocument();
   });
 
-  it('renders header and body when a finding is available', () => {
+  it('renders header and content when a finding is available', () => {
     useMisconfigurationFindingMock.mockReturnValue({
       data: {
         result: {
@@ -100,9 +80,8 @@ describe('<Misconfiguration />', () => {
       },
     });
     const { getByTestId } = renderPanel();
-    expect(getByTestId('mockCspEvaluationBadge')).toHaveAttribute('data-type', 'failed');
-    expect(getByTestId('mockFlyoutTitle')).toHaveTextContent('My Rule');
-    expect(getByTestId('mockCspFlyoutHeader')).toBeInTheDocument();
-    expect(getByTestId('mockCspFlyoutBody')).toBeInTheDocument();
+    expect(getByTestId('mockMisconfigurationHeader')).toBeInTheDocument();
+    expect(getByTestId('mockMisconfigurationContent')).toBeInTheDocument();
+    expect(getByTestId('mockMisconfigurationFooter')).toBeInTheDocument();
   });
 });

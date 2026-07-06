@@ -20,7 +20,7 @@ import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_a
 import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
-import { Misconfiguration } from '../../../../csp/misconfiguration';
+import { Misconfiguration } from '../../../../csp/misconfiguration/main';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table';
 import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
