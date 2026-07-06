@@ -90,10 +90,21 @@ describe('WaitForInputStepImpl', () => {
       });
     });
 
-    it('should render message with the workflow context and persist schema verbatim', async () => {
+    it('should render the message and the template syntax in schema property default values', async () => {
       const schema = {
         type: 'object',
-        properties: { approved: { type: 'boolean', title: '{{ do not touch }}' } },
+        properties: {
+          approved: { type: 'boolean', title: 'Approve isolation?', default: '{{inputs.approved}}' },
+        },
+        required: ['approved'],
+      };
+      const renderedSchema = {
+        type: 'object',
+        properties: {
+          approved: { type: 'boolean', title: 'Approve isolation?', default: true },
+          reason: { type: 'string' },
+        },
+        required: ['approved'],
       };
       node.configuration.with = {
         message: '{{inputs.message}}',
@@ -101,7 +112,11 @@ describe('WaitForInputStepImpl', () => {
       } as WaitForInputStep['with'];
       (
         mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
-      ).mockImplementation((v: unknown) => (v === '{{inputs.message}}' ? 'hello world' : v));
+      ).mockImplementation((v: unknown) => {
+        if (v === '{{inputs.message}}') return 'hello world';
+        if (v === schema) return renderedSchema;
+        return v;
+      });
 
       underTest = new WaitForInputStepImpl(
         node,
@@ -111,10 +126,15 @@ describe('WaitForInputStepImpl', () => {
       );
       await underTest.run();
 
+      expect(
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext
+      ).toHaveBeenCalledWith(schema);
       expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
         message: 'hello world',
-        schema,
+        schema: renderedSchema,
       });
+      const persisted = (mockStepExecutionRuntime.setInput as jest.Mock).mock.calls[0][0];
+      expect(persisted.schema.properties.approved.default).toBe(true);
     });
 
     it('should not call setInput when the with block is absent', async () => {
