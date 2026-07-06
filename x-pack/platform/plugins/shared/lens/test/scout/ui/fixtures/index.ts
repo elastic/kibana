@@ -8,3 +8,4 @@
 export * as testData from './constants';
 export * from './dashboard_api';
 export * from './helpers';
+export * from './open_in_lens_helpers';

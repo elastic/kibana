@@ -96,7 +96,8 @@ export const getGridAttrs = async (
   http: CoreStart['http'],
   uiSettings: IUiSettingsClient,
   abortController?: AbortController,
-  esqlVariables: ESQLControlVariable[] = []
+  esqlVariables: ESQLControlVariable[] = [],
+  approximation?: boolean
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
@@ -126,6 +127,7 @@ export const getGridAttrs = async (
     timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
     variables: esqlVariables,
     timezone,
+    ...(approximation !== undefined ? { approximation } : {}),
   });
 
   const { all_columns: allColumns = [], columns: valueColumns = [], values } = results.response;
@@ -156,7 +158,8 @@ export const getSuggestions = async (
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void,
   esqlVariables: ESQLControlVariable[] = [],
   shouldUpdateAttrs = true,
-  preferredVisAttributes?: TypedLensSerializedState['attributes']
+  preferredVisAttributes?: TypedLensSerializedState['attributes'],
+  approximation?: boolean
 ) => {
   try {
     const { dataView, columns, rows } = await getGridAttrs(
@@ -166,7 +169,8 @@ export const getSuggestions = async (
       http,
       uiSettings,
       abortController,
-      esqlVariables
+      esqlVariables,
+      approximation
     );
     const updatedWithVariablesColumns = esqlVariables.length
       ? mapVariableToColumn(query.esql, esqlVariables, columns)
