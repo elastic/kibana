@@ -119,7 +119,9 @@ safe-outputs:
           required: true
           type: boolean
       env:
+        # The URL of the fix PR that safe_outputs just created (the link to add).
         GH_AW_PR_URL: ${{ needs.safe_outputs.outputs.created_pr_url }}
+        # The id of the outcome comment safe_outputs just posted (which comment to edit).
         GH_AW_COMMENT_ID: ${{ needs.safe_outputs.outputs.comment_id }}
       steps:
         - name: Append PR link to outcome comment
@@ -217,7 +219,8 @@ Follow this format:
 
   <one very concise sentence on what the PR changes>. cc @<github-handle-here>
   ```
-  Don't write the PR URL yourself; `link_fix_pr` (step 7) adds it.
+  Don't write the PR URL or number yourself.
+  
 - **Existing PR already covers it**:
   ```markdown
   ### 🔁 A fix is already in flight
