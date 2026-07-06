@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { debugTelemetryRoute } from './debug_telemetry';
 
-export const debugTelemetryRouteDefinitions = {
-  debugTelemetry: debugTelemetryRoute,
-};
+import type { RouteDependencies } from '../../../types';
+import { registerGetRoute } from './register_get_route';
 
-export type { DebugTelemetryResponse } from './debug_telemetry';
+export function registerSyntheticSourceRoutes(dependencies: RouteDependencies) {
+  registerGetRoute(dependencies);
+}
