@@ -63115,9 +63115,7 @@ paths:
           name: id
           required: true
           schema:
-            enum:
-              - email_exact_match
-              - related_user_alias_resolution
+            maxLength: 100
             type: string
       responses:
         '200':
@@ -63125,7 +63123,7 @@ paths:
             application/json:
               examples:
                 ruleDisabledExample:
-                  description: The related user bridge rule was disabled in the current space.
+                  description: The related user alias resolution rule was disabled in the current space.
                   summary: Rule disabled
                   value:
                     enabled: false
@@ -63175,9 +63173,7 @@ paths:
           name: id
           required: true
           schema:
-            enum:
-              - email_exact_match
-              - related_user_alias_resolution
+            maxLength: 100
             type: string
       responses:
         '200':
@@ -63185,7 +63181,7 @@ paths:
             application/json:
               examples:
                 ruleEnabledExample:
-                  description: The related user bridge rule was enabled in the current space.
+                  description: The related user alias resolution rule was enabled in the current space.
                   summary: Rule enabled
                   value:
                     enabled: true
