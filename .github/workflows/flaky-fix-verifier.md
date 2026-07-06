@@ -262,10 +262,10 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
    - Then a **separate** comment whose body is exactly the trigger command on its own (it must start with `/flaky ` so the trigger workflow picks it up):
 
      ```
-     /flaky <type>:<path>:50 [<type>:<path>:50 ...]
+     /flaky <type>:<path>:10 [<type>:<path>:10 ...]
      ```
 
-     Use `:50` per config. `<type>` is `ftrConfig` or `scoutConfig`. Keep all configs on the single `/flaky` line.
+     Use `:10` per config. `<type>` is `ftrConfig` or `scoutConfig`. Keep all configs on the single `/flaky` line.
 
 5. **Mark state.** Add the `flaky-fix-check:started` label (if it doesn't already exist). Do not wait for results. Stop here.
 
