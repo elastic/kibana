@@ -10,7 +10,10 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import { handleRouteError } from './route_error_handlers';
-import { WorkflowChangeHistoryDisabledError } from '../../../lib/workflow_change_history_disabled_error';
+import {
+  WORKFLOW_CHANGE_HISTORY_UNAVAILABLE_MESSAGE,
+  WorkflowChangeHistoryDisabledError,
+} from '../../../lib/workflow_change_history_disabled_error';
 import { ManagedWorkflowDeleteForbiddenError } from '../../managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from '../../managed_workflow_errors';
 
@@ -39,14 +42,14 @@ describe('handleRouteError', () => {
     });
   });
 
-  it('returns bad request with HISTORY_DISABLED code when change history is disabled', () => {
+  it('returns bad request with HISTORY_DISABLED code when change history is not initialized', () => {
     const response = httpServerMock.createResponseFactory();
 
     handleRouteError(response, new WorkflowChangeHistoryDisabledError());
 
     expect(response.badRequest).toHaveBeenCalledWith({
       body: {
-        message: 'Workflow version history is disabled.',
+        message: WORKFLOW_CHANGE_HISTORY_UNAVAILABLE_MESSAGE,
         attributes: {
           code: 'HISTORY_DISABLED',
         },

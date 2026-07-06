@@ -18,6 +18,7 @@ jest.mock('../../../../hooks/use_fetcher', () => ({
     FAILURE: 'failure',
     NOT_INITIATED: 'not_initiated',
   },
+  isPending: (status: string) => status === 'loading' || status === 'not_initiated',
   useFetcher: (...args: unknown[]) => mockUseFetcher(...args),
 }));
 
@@ -40,12 +41,20 @@ describe('useServiceHasSystemMetrics', () => {
     mockUseFetcher.mockClear();
   });
 
-  it('returns undefined while the fetch is loading', () => {
+  it('returns isLoading true and hasSystemMetrics undefined while the fetch is loading', () => {
     mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.LOADING });
 
     const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
 
-    expect(result.current).toBeUndefined();
+    expect(result.current).toEqual({ hasSystemMetrics: undefined, isLoading: true });
+  });
+
+  it('returns isLoading true when the fetch has not yet been initiated', () => {
+    mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.NOT_INITIATED });
+
+    const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
+
+    expect(result.current).toEqual({ hasSystemMetrics: undefined, isLoading: true });
   });
 
   it('returns true when the service has system metrics', () => {
@@ -56,7 +65,7 @@ describe('useServiceHasSystemMetrics', () => {
 
     const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
 
-    expect(result.current).toBe(true);
+    expect(result.current).toEqual({ hasSystemMetrics: true, isLoading: false });
   });
 
   it('returns false when the service has no system metrics', () => {
@@ -67,7 +76,15 @@ describe('useServiceHasSystemMetrics', () => {
 
     const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
 
-    expect(result.current).toBe(false);
+    expect(result.current).toEqual({ hasSystemMetrics: false, isLoading: false });
+  });
+
+  it('returns isLoading false when the fetch fails, so the skeleton does not get stuck', () => {
+    mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.FAILURE });
+
+    const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
+
+    expect(result.current).toEqual({ hasSystemMetrics: undefined, isLoading: false });
   });
 
   it('calls the correct endpoint with the right params', () => {
