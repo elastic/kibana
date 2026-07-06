@@ -394,6 +394,62 @@ describe('data table progress bar regressions', () => {
     );
   });
 
+  it('seeds Custom from a flat positive Auto domain by anchoring back to zero', async () => {
+    setFooRows([{ foo: 85 }, { foo: 85 }, { foo: 85 }]);
+    state.columns[0] = {
+      columnId: 'foo',
+      colorMode: 'progress',
+      fillStyle: { fillMode: 'gradient', valueRange: { mode: 'auto' } },
+      palette: { type: 'palette', name: 'status' },
+    };
+
+    renderEditor();
+
+    await user.click(screen.getByTestId('lnsDatatable_progressBar_valueRange_custom'));
+    await act(async () => jest.advanceTimersByTime(256));
+
+    expect(setState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        columns: expect.arrayContaining([
+          expect.objectContaining({
+            columnId: 'foo',
+            fillStyle: expect.objectContaining({
+              valueRange: { mode: 'custom', min: 0, max: 85 },
+            }),
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('seeds Custom from a flat negative Auto domain by anchoring back to zero', async () => {
+    setFooRows([{ foo: -0.2 }, { foo: -0.2 }, { foo: -0.2 }]);
+    state.columns[0] = {
+      columnId: 'foo',
+      colorMode: 'progress',
+      fillStyle: { fillMode: 'gradient', valueRange: { mode: 'auto' } },
+      palette: { type: 'palette', name: 'status' },
+    };
+
+    renderEditor();
+
+    await user.click(screen.getByTestId('lnsDatatable_progressBar_valueRange_custom'));
+    await act(async () => jest.advanceTimersByTime(256));
+
+    expect(setState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        columns: expect.arrayContaining([
+          expect.objectContaining({
+            columnId: 'foo',
+            fillStyle: expect.objectContaining({
+              valueRange: { mode: 'custom', min: -0.2, max: 0 },
+            }),
+          }),
+        ]),
+      })
+    );
+  });
+
   it('preserves local progress-bar palette changes when hide column is toggled', async () => {
     state.columns = [
       {

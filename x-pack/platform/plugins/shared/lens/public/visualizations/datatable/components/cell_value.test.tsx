@@ -789,6 +789,64 @@ describe('datatable cell renderer', () => {
       expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '123');
     });
 
+    it('anchors a flat positive auto range to zero in the rendered Meter domain', () => {
+      const CellRenderer = makeCellRenderer({
+        columnConfig: progressColumnConfig({ fillMode: 'single', valueRange: { mode: 'auto' } }),
+      });
+      render(
+        <EuiThemeProvider>
+          <CellRenderer
+            rowIndex={0}
+            colIndex={0}
+            columnId="a"
+            setCellProps={setCellProps}
+            isExpandable={false}
+            isDetails={false}
+            isExpanded={false}
+          />
+        </EuiThemeProvider>,
+        {
+          wrapper: DataContextProviderWrapper({
+            table: makeTable([{ a: 85 }]),
+            minMaxByColumnId: new Map([['a', { min: 85, max: 85 }]]),
+          }),
+        }
+      );
+
+      expect(screen.getByRole('meter')).toHaveAttribute('aria-valuemin', '0');
+      expect(screen.getByRole('meter')).toHaveAttribute('aria-valuemax', '85');
+      expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '85');
+    });
+
+    it('anchors a flat negative auto range to zero in the rendered Meter domain', () => {
+      const CellRenderer = makeCellRenderer({
+        columnConfig: progressColumnConfig({ fillMode: 'single', valueRange: { mode: 'auto' } }),
+      });
+      render(
+        <EuiThemeProvider>
+          <CellRenderer
+            rowIndex={0}
+            colIndex={0}
+            columnId="a"
+            setCellProps={setCellProps}
+            isExpandable={false}
+            isDetails={false}
+            isExpanded={false}
+          />
+        </EuiThemeProvider>,
+        {
+          wrapper: DataContextProviderWrapper({
+            table: makeTable([{ a: -0.2 }]),
+            minMaxByColumnId: new Map([['a', { min: -0.2, max: -0.2 }]]),
+          }),
+        }
+      );
+
+      expect(screen.getByRole('meter')).toHaveAttribute('aria-valuemin', '-0.2');
+      expect(screen.getByRole('meter')).toHaveAttribute('aria-valuemax', '0');
+      expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '-0.2');
+    });
+
     it('falls back to a formatted cell for empty/non-numeric values', () => {
       const CellRenderer = makeCellRenderer({
         columnConfig: progressColumnConfig({ fillMode: 'single', valueRange: { mode: 'auto' } }),

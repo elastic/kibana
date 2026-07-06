@@ -71,6 +71,22 @@ describe('datatable progress bar utils', () => {
       expect(domain).toEqual({ min: -120, max: -10 });
     });
 
+    it('anchors a flat positive auto range back to zero', () => {
+      const domain = getProgressBarDomain(
+        { fillStyle: single({ valueRange: { mode: 'auto' } }) },
+        { min: 85, max: 85 }
+      );
+      expect(domain).toEqual({ min: 0, max: 85 });
+    });
+
+    it('anchors a flat negative auto range back to zero', () => {
+      const domain = getProgressBarDomain(
+        { fillStyle: single({ valueRange: { mode: 'auto' } }) },
+        { min: -0.2, max: -0.2 }
+      );
+      expect(domain).toEqual({ min: -0.2, max: 0 });
+    });
+
     it('spans the full mixed-sign auto range', () => {
       const domain = getProgressBarDomain(
         { fillStyle: single({ valueRange: { mode: 'auto' } }) },
@@ -106,7 +122,7 @@ describe('datatable progress bar utils', () => {
       expect(domain).toEqual({ min: -40, max: 60 });
     });
 
-    it('guards against a degenerate (zero-width) domain', () => {
+    it('guards against an all-zero auto domain', () => {
       const domain = getProgressBarDomain(
         { fillStyle: single({ valueRange: { mode: 'auto' } }) },
         { min: 0, max: 0 }

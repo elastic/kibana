@@ -194,7 +194,9 @@ export function isPaletteFillMode(fillMode: CellDecorationFillMode): boolean {
 /**
  * Resolves the bar domain `[min, max]` for a decorated column.
  *
- * - `auto`: uses the loaded column data bounds as-is.
+ * - `auto`: uses the loaded column data bounds as-is, except a flat all-positive
+ *   or all-negative series anchors back to zero so a constant non-zero value does
+ *   not render as an empty bar.
  * - `custom`: uses the explicit bounds. `fillStyle.valueRange` is the primary
  *   source; legacy/API columns can still fall back to palette range bounds.
  */
@@ -251,9 +253,20 @@ export function getProgressBarDomain(
     [min, max] = [max, min];
   }
 
-  // Guard against a degenerate domain.
+  // Auto ranges anchor a flat positive/negative series back to zero so a
+  // constant non-zero value still renders with visible fill.
   if (min === max) {
-    max = min + 1;
+    if (!isCustom) {
+      if (min > 0) {
+        min = 0;
+      } else if (max < 0) {
+        max = 0;
+      } else {
+        max = min + 1;
+      }
+    } else {
+      max = min + 1;
+    }
   }
 
   return { min, max };
