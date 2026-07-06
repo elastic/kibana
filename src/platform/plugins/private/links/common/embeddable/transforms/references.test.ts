@@ -41,17 +41,17 @@ describe('extractReferences', () => {
     expect(transformLinksIn(links)).toEqual({
       links: [
         {
-          type: 'dashboardLink',
+          type: 'dashboard_link',
           destinationRefName: 'link_fb1b3fc7-6e12-4542-bcf5-c61ad77241c5_dashboard',
           options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
         },
         {
-          type: 'externalLink',
+          type: 'external_link',
           destination: 'https://example.com',
           options: DEFAULT_EXTERNAL_LINK_OPTIONS,
         },
         {
-          type: 'dashboardLink',
+          type: 'dashboard_link',
           destinationRefName: 'link_1409fabb-1d2b-49c2-a2dc-705bd8fabd0c_dashboard',
           options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
         },
@@ -105,17 +105,17 @@ describe('injectReferences', () => {
     ];
     expect(transformLinksOut(links, references)).toEqual([
       {
-        type: 'dashboardLink',
+        type: 'dashboard_link',
         destination: '19e149f0-e95e-404b-b6f8-fc751317c6be',
         options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
       {
-        type: 'externalLink',
+        type: 'external_link',
         destination: 'https://example.com',
         options: DEFAULT_EXTERNAL_LINK_OPTIONS,
       },
       {
-        type: 'dashboardLink',
+        type: 'dashboard_link',
         destination: '39555f99-a3b8-4210-b1ef-fa0fa86fa3da',
         options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
