@@ -7,7 +7,8 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { useManageRegionsState } from './use_manage_regions_state';
-import { useRegionPolicy, useSaveRegionPolicy } from '../../hooks/use_region_policy';
+import { useRegionPolicy } from '../../hooks/use_region_policy';
+import { useSaveRegionPolicy } from '../../hooks/use_save_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
 import * as eisUtils from '../../utils/eis_utils';
 

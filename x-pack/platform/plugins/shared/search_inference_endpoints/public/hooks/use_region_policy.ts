@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
-import { i18n } from '@kbn/i18n';
-import type { RegionPolicyBody, RegionPolicyResponse } from '../../common/types';
+import { useQuery } from '@kbn/react-query';
+import type { RegionPolicyResponse } from '../../common/types';
 import { APIRoutes } from '../../common/types';
 import { REGION_POLICY_QUERY_KEY, ROUTE_VERSIONS } from '../../common/constants';
 import { useKibana } from './use_kibana';
@@ -29,37 +28,6 @@ export const useRegionPolicy = () => {
         }
         throw err;
       }
-    },
-  });
-};
-
-export const useSaveRegionPolicy = () => {
-  const { services } = useKibana();
-  const queryClient = useQueryClient();
-
-  return useMutation<RegionPolicyResponse, Error, RegionPolicyBody>({
-    mutationFn: async (body: RegionPolicyBody) => {
-      return services.http.put<RegionPolicyResponse>(APIRoutes.REGION_POLICY, {
-        body: JSON.stringify(body),
-        version: ROUTE_VERSIONS.v1,
-      });
-    },
-    onSuccess: () => {
-      services.notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.searchInferenceEndpoints.regionPolicy.saveSuccess', {
-          defaultMessage: 'Region preferences saved',
-        }),
-      });
-    },
-    onError: (err) => {
-      services.notifications.toasts.addError(err, {
-        title: i18n.translate('xpack.searchInferenceEndpoints.regionPolicy.saveError', {
-          defaultMessage: 'Failed to save region preferences',
-        }),
-      });
-    },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: [REGION_POLICY_QUERY_KEY] });
     },
   });
 };
