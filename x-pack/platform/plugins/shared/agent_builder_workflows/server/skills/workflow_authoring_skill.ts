@@ -129,19 +129,17 @@ Every step (regardless of type) supports these properties. They are NOT repeated
 - **console**: Log messages to execution output
 - **elasticsearch.search**: Query Elasticsearch indices
 - **elasticsearch.bulk**: Bulk index documents
-- **ai.prompt**: One-shot LLM call (prompt in, structured output out)
-- **ai.summarize**: Purpose-built summarization step (text in, summary out)
-- **ai.classify**: Purpose-built classification step (text + labels in, label out)
+- **ai.prompt**: One-shot LLM call
+- **ai.summarize**: Summarize text
+- **ai.classify**: Classify text into one of a set of labels
 - **ai.agent**: Invoke an AI agent (multi-turn, tool-using)
 
 **AI steps: ONLY use the \`ai.*\` step family.** Discovery may also surface
 direct model-connector step types (\`inference.*\`, \`bedrock.*\`, \`gen-ai.*\`,
 \`gemini.*\`); these are deprecated and must NOT be used for new steps. Pick the
-narrowest \`ai.*\` step that fits the use case:
-- summarization → \`ai.summarize\`
-- classification / routing / labeling → \`ai.classify\`
-- multi-turn or tool-using flows → \`ai.agent\`
-- everything else (generic one-shot inference / analysis / extraction) → \`ai.prompt\`
+narrowest \`ai.*\` step for the task: \`ai.summarize\` for summarization,
+\`ai.classify\` for classification/routing, \`ai.agent\` for tool-using flows,
+\`ai.prompt\` for everything else.
 
 **AI step example (PREFERRED):**
 \`\`\`yaml
