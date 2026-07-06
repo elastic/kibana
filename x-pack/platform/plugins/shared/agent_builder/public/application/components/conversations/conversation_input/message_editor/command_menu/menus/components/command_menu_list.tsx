@@ -84,7 +84,10 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const optionKeysSignature = JSON.stringify(options.map((option) => option.key));
+    const optionKeysSignature = useMemo(
+      () => options.map((option) => option.key).join('|'),
+      [options]
+    );
     useEffect(() => {
       setActiveIndex(0);
     }, [optionKeysSignature]);
