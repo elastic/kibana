@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import type { Feature } from '../feature';
-import type { SignificantEventsResponse } from '../api/significant_events';
+import type { QueryWithOccurrences } from '../api/significant_events';
 
 export interface EsqlQuery {
   query: string;
@@ -99,7 +99,7 @@ export const bulkStreamQueryInputSchema = upsertStreamQueryRequestSchema.extend(
 });
 
 export interface QueriesGetResponse {
-  queries: SignificantEventsResponse[];
+  queries: QueryWithOccurrences[];
   page: number;
   perPage: number;
   total: number;
