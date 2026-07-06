@@ -300,8 +300,8 @@ describe('useServiceFlyoutTransactions', () => {
     await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
 
     // maxCountExceeded must stay true (sticky) so serverSearchQuery remains 'checkout'
-    // and no third fetch is triggered
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    // and no third fetch is triggered. waitFor() uses act() internally, so all React
+    // state from the 2nd response (including setMaxCountExceeded) is flushed above.
     expect(http.get).toHaveBeenCalledTimes(2);
   });
 
