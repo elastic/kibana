@@ -30,7 +30,7 @@ const POPOVER_WIDTH = 320;
 
 const getLabels = (
   disabled: boolean | undefined,
-  isApproximate: boolean,
+  esqlApproximation: boolean,
   additionalText?: string
 ) => {
   if (disabled) {
@@ -57,7 +57,7 @@ const getLabels = (
     };
   }
 
-  if (isApproximate) {
+  if (esqlApproximation) {
     return {
       tooltipContent: i18n.translate('unifiedSearch.esqlApproximationToggle.button.tooltip.on', {
         defaultMessage: 'Fast mode: ON',
@@ -85,14 +85,14 @@ const getLabels = (
 };
 
 interface EsqlApproximationToggleProps {
-  isApproximate: boolean;
-  onChange: (isApproximate: boolean) => void;
+  esqlApproximation: boolean;
+  onChange: (esqlApproximation: boolean) => void;
   additionalText?: string;
   disabled?: boolean;
 }
 
 export const EsqlApproximationToggle = ({
-  isApproximate,
+  esqlApproximation,
   onChange,
   additionalText,
   disabled,
@@ -104,7 +104,7 @@ export const EsqlApproximationToggle = ({
 
   const { tooltipContent, ariaLabel, switchLabel } = getLabels(
     disabled,
-    isApproximate,
+    esqlApproximation,
     additionalText
   );
 
@@ -117,7 +117,7 @@ export const EsqlApproximationToggle = ({
               iconType="bolt"
               aria-label={ariaLabel}
               size="s"
-              color={isApproximate ? 'success' : 'text'}
+              color={esqlApproximation ? 'success' : 'text'}
               display="base"
               disabled={disabled}
               data-test-subj="esqlApproximationToggleButton"
@@ -154,7 +154,7 @@ export const EsqlApproximationToggle = ({
               <EuiFlexItem grow={false}>
                 <EuiSwitch
                   label={switchLabel}
-                  checked={isApproximate}
+                  checked={esqlApproximation}
                   onChange={(e) => onChange(e.target.checked)}
                   data-test-subj="esqlApproximationToggleSwitch"
                 />

@@ -385,7 +385,7 @@ describe('Data Loader', () => {
     );
   });
 
-  it('should propagate isApproximate from parent API to search context', async () => {
+  it('should propagate esqlApproximation from parent API to search context', async () => {
     await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
@@ -396,7 +396,7 @@ describe('Data Loader', () => {
         const params = internalApi.expressionParams$.getValue()!;
         expect(params.searchContext).toEqual(
           expect.objectContaining({
-            isApproximate: true,
+            esqlApproximation: true,
           })
         );
 
@@ -409,7 +409,7 @@ describe('Data Loader', () => {
     );
   });
 
-  it('should handle undefined isApproximate from parent API', async () => {
+  it('should handle undefined esqlApproximation from parent API', async () => {
     await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
@@ -420,7 +420,7 @@ describe('Data Loader', () => {
         const params = internalApi.expressionParams$.getValue()!;
         expect(params.searchContext).toEqual(
           expect.objectContaining({
-            isApproximate: undefined,
+            esqlApproximation: undefined,
           })
         );
 

@@ -360,7 +360,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             sessionId: getSearchSessionId(),
             executionContext: getExecutionContext(),
             projectRouting: input?.projectRouting,
-            approximation: input?.isApproximate,
+            approximation: input?.esqlApproximation,
             dropNullColumns: true,
             includeExecutionMetadata: true,
           }
@@ -412,7 +412,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           })
           .json({
             ...params,
-            ...(input?.isApproximate !== undefined && { approximation: input.isApproximate }),
+            ...(input?.esqlApproximation !== undefined && {
+              approximation: input.esqlApproximation,
+            }),
           })
           .ok({ json: { rawResponse }, requestParams });
 
@@ -423,7 +425,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         logInspectorRequest()
           .json({
             ...params,
-            ...(input?.isApproximate !== undefined && { approximation: input.isApproximate }),
+            ...(input?.esqlApproximation !== undefined && {
+              approximation: input.esqlApproximation,
+            }),
           })
           .error({
             json: 'attributes' in error ? error.attributes : { message: error.message },

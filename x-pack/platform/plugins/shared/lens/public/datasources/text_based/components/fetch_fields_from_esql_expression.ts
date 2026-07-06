@@ -27,7 +27,7 @@ export function fetchFieldsFromESQLExpression(
   abortController?: AbortController,
   timeFieldName?: string,
   esqlVariables?: ESQLControlVariable[],
-  isApproximate?: boolean
+  esqlApproximation?: boolean
 ) {
   return textBasedQueryStateToAstWithValidation({
     query,
@@ -40,7 +40,7 @@ export function fetchFieldsFromESQLExpression(
           searchContext: {
             timeRange: time,
             esqlVariables,
-            isApproximate,
+            esqlApproximation,
           },
         });
 

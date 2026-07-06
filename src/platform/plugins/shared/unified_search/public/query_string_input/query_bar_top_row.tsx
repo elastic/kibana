@@ -263,8 +263,8 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * When provided, renders the ES|QL approximate execution toggle (bolt icon) before the date picker.
    */
   esqlApproximation?: {
-    isApproximate: boolean;
-    onChange: (isApproximate: boolean) => void;
+    esqlApproximation: boolean;
+    onChange: (esqlApproximation: boolean) => void;
     additionalText?: string;
     disabled?: boolean;
   };
@@ -1067,7 +1067,7 @@ export const QueryBarTopRow = React.memo(
                   {shouldRenderUpdateButton() ? button : null}
                   {props.esqlApproximation && (
                     <EsqlApproximationToggle
-                      isApproximate={props.esqlApproximation.isApproximate}
+                      esqlApproximation={props.esqlApproximation.esqlApproximation}
                       onChange={props.esqlApproximation.onChange}
                       additionalText={props.esqlApproximation.additionalText}
                       disabled={props.esqlApproximation.disabled}
@@ -1334,7 +1334,7 @@ export const QueryBarTopRow = React.memo(
                 {shouldShowDatePickerAsBadge() && props.filterBar}
                 {props.esqlApproximation && (
                   <EsqlApproximationToggle
-                    isApproximate={props.esqlApproximation.isApproximate}
+                    esqlApproximation={props.esqlApproximation.esqlApproximation}
                     onChange={props.esqlApproximation.onChange}
                     additionalText={props.esqlApproximation.additionalText}
                     disabled={props.esqlApproximation.disabled}

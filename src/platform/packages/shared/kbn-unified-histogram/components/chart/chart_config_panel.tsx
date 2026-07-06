@@ -37,7 +37,7 @@ export function ChartConfigPanel({
   isPlainRecord,
   query,
   onSuggestionContextEdit,
-  isApproximate,
+  esqlApproximation,
 }: {
   services: UnifiedHistogramServices;
   visContext: UnifiedHistogramVisContext;
@@ -49,7 +49,7 @@ export function ChartConfigPanel({
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
   onSuggestionContextEdit: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
-  isApproximate?: boolean;
+  esqlApproximation?: boolean;
 }) {
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
@@ -57,8 +57,8 @@ export function ChartConfigPanel({
 
   const esqlApproximation$ = useRef(new BehaviorSubject<boolean | undefined>(undefined));
   useEffect(() => {
-    esqlApproximation$.current.next(isApproximate);
-  }, [isApproximate]);
+    esqlApproximation$.current.next(esqlApproximation);
+  }, [esqlApproximation]);
   const editorParentApi = useRef({ esqlApproximation$: esqlApproximation$.current });
 
   const updatePanelState = useCallback<

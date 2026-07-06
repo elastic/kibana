@@ -1004,7 +1004,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   >;
   dateRange: DateRange;
   esqlVariables?: ESQLControlVariable[] | undefined;
-  isApproximate?: boolean | undefined;
+  esqlApproximation?: boolean | undefined;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;

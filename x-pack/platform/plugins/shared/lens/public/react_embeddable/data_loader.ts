@@ -101,7 +101,7 @@ function getSearchContext(parentApi: unknown) {
       ? parentApi.esqlVariables$.getValue()
       : undefined,
     projectRouting: projectRouting$?.getValue(),
-    isApproximate: esqlApproximation$?.getValue(),
+    esqlApproximation: esqlApproximation$?.getValue(),
   };
 }
 

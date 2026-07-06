@@ -216,7 +216,7 @@ export interface UnifiedHistogramFetchParamsExternal {
   /**
    * When true, ES|QL queries use approximate execution for faster, estimated results
    */
-  isApproximate?: boolean;
+  esqlApproximation?: boolean;
   /**
    * The controls state to use for the chart
    */

@@ -378,8 +378,8 @@ describe('onFetchContextChanged', () => {
     });
   });
 
-  describe('isApproximate', () => {
-    test('propagates isApproximate from parent API', async () => {
+  describe('esqlApproximation', () => {
+    test('propagates esqlApproximation from parent API', async () => {
       const api = {
         parentApi: {
           ...parentApi,
@@ -391,28 +391,28 @@ describe('onFetchContextChanged', () => {
         expect(onFetchMock).toHaveBeenCalledTimes(1);
       });
       const fetchContext = onFetchMock.mock.calls[0][0];
-      expect(fetchContext.isApproximate).toBe(true);
+      expect(fetchContext.esqlApproximation).toBe(true);
       subscription.unsubscribe();
     });
 
-    test('isApproximate is undefined when parent API does not publish it', async () => {
+    test('esqlApproximation is undefined when parent API does not publish it', async () => {
       const subscription = fetch$({ parentApi }).subscribe(onFetchMock);
       await waitFor(() => {
         expect(onFetchMock).toHaveBeenCalledTimes(1);
       });
       const fetchContext = onFetchMock.mock.calls[0][0];
-      expect(fetchContext.isApproximate).toBeUndefined();
+      expect(fetchContext.esqlApproximation).toBeUndefined();
       subscription.unsubscribe();
     });
 
-    test('emits a new fetch context when isApproximate toggles', async () => {
+    test('emits a new fetch context when esqlApproximation toggles', async () => {
       const esqlApproximation$ = new BehaviorSubject<boolean | undefined>(false);
       const api = { parentApi: { ...parentApi, esqlApproximation$ } };
       const subscription = fetch$(api).subscribe(onFetchMock);
       await waitFor(() => expect(onFetchMock).toHaveBeenCalledTimes(1));
       esqlApproximation$.next(true);
       await waitFor(() => expect(onFetchMock).toHaveBeenCalledTimes(2));
-      expect(onFetchMock.mock.calls[1][0].isApproximate).toBe(true);
+      expect(onFetchMock.mock.calls[1][0].esqlApproximation).toBe(true);
       subscription.unsubscribe();
     });
   });

@@ -88,7 +88,7 @@ export function LensRenderer({
   const searchSessionId$ = useObservableVariable(searchSessionId);
   const hideTitle$ = useObservableVariable(hidePanelTitles);
   const esqlVariables$ = useObservableVariable(props.esqlVariables);
-  const esqlApproximation$ = useObservableVariable(props.isApproximate);
+  const esqlApproximation$ = useObservableVariable(props.esqlApproximation);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);

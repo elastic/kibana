@@ -127,12 +127,12 @@ Object {
     "version": 2,
     "visualizationType": "lnsXY",
   },
+  "esqlApproximation": undefined,
   "esqlVariables": Array [],
   "executionContext": Object {
     "description": "fetch chart data and total hits",
   },
   "id": "unifiedHistogramLensComponent",
-  "isApproximate": undefined,
   "lastReloadRequestTime": 1759320000000,
   "noPadding": true,
   "onLoad": [MockFunction],
@@ -285,6 +285,7 @@ Object {
     "version": 2,
     "visualizationType": "lnsHeatmap",
   },
+  "esqlApproximation": undefined,
   "esqlVariables": Array [
     Object {
       "key": "field",
@@ -301,7 +302,6 @@ Object {
     "description": "fetch chart data and total hits",
   },
   "id": "unifiedHistogramLensComponent",
-  "isApproximate": undefined,
   "lastReloadRequestTime": 1759320000000,
   "noPadding": true,
   "onLoad": [MockFunction],

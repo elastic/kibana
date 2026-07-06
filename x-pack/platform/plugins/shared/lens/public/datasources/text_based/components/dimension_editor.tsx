@@ -43,7 +43,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     dateRange,
     expressions,
     esqlVariables,
-    isApproximate,
+    esqlApproximation,
     enableFormatSelector,
   } = props;
 
@@ -60,7 +60,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
             ? Object.values(indexPatterns)[0].timeFieldName
             : undefined,
           esqlVariables,
-          isApproximate
+          esqlApproximation
         );
 
         if (table) {
@@ -90,7 +90,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     dateRange.fromDate,
     dateRange.toDate,
     esqlVariables,
-    isApproximate,
+    esqlApproximation,
     expressions,
     indexPatterns,
     props,
