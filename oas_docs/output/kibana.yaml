@@ -125166,6 +125166,7 @@ components:
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
+        - endpoint_custom_yara_signatures
       type: string
     Security_Detections_API_ExternalRuleCustomizedFields:
       description: An array of customized field names — that is, fields that the user has modified from their base value. Defaults to an empty array.
