@@ -36,6 +36,7 @@ import {
   useGetPackageInfoByKeyQuery,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
+import { isAgentlessPoliciesUIEnabled } from '../../../../../services';
 import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
@@ -80,6 +81,9 @@ export const PackagePoliciesPage = ({
     () => getAgentlessStatusForPackage(packageInfo).isAgentless,
     [getAgentlessStatusForPackage, packageInfo]
   );
+  // Kill switch: when off, the agentless deployments table is sourced from the legacy
+  // package-policy LIST + bulk agent-policy reads instead of the agentless policies API.
+  const agentlessUIEnabled = isAgentlessPoliciesUIEnabled();
 
   // The agentless deployments table re-derives each policy's inputs from the package manifest
   // (agentless policies come from the LIST API with simplified object inputs). That requires the
@@ -91,7 +95,9 @@ export const PackagePoliciesPage = ({
       name,
       version,
       { full: true, prerelease: true },
-      { enabled: canHaveAgentlessPolicies }
+      // Only the agentless-API adapter path needs the full manifest; the legacy source
+      // returns full package policies that need no re-expansion.
+      { enabled: canHaveAgentlessPolicies && agentlessUIEnabled }
     );
   const agentlessFullPackageInfo = agentlessFullPackageInfoData?.item;
 
@@ -188,12 +194,37 @@ export const PackagePoliciesPage = ({
     isLoading: agentlessIsLoading,
     error: agentlessError,
     resendRequest: refreshAgentlessPolicies,
-  } = useAgentlessPolicies({
-    page: agentlessPagination.currentPage,
-    perPage: agentlessPagination.pageSize,
-    kuery: `package.name: "${name}"`,
-  });
+  } = useAgentlessPolicies(
+    {
+      page: agentlessPagination.currentPage,
+      perPage: agentlessPagination.pageSize,
+      kuery: `package.name: "${name}"`,
+    },
+    { enabled: canHaveAgentlessPolicies && agentlessUIEnabled }
+  );
+  // Legacy source for the agentless table, active only when the agentless policies UI kill
+  // switch is off: the pre-migration package-policy LIST (scoped to `supports_agentless`) plus
+  // the bulk agent-policy enrichment.
+  const {
+    data: legacyAgentlessData,
+    isLoading: legacyAgentlessIsLoading,
+    error: legacyAgentlessError,
+    resendRequest: refreshLegacyAgentlessPolicies,
+  } = usePackagePoliciesWithAgentPolicy(
+    {
+      page: agentlessPagination.currentPage,
+      perPage: agentlessPagination.pageSize,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${name}" AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.supports_agentless: true`,
+    },
+    { enabled: canHaveAgentlessPolicies && !agentlessUIEnabled }
+  );
   useEffect(() => {
+    if (!agentlessUIEnabled) {
+      setAgentlessPackageAndAgentPolicies(
+        !legacyAgentlessData?.items ? [] : legacyAgentlessData.items.map(mapPoliciesData)
+      );
+      return;
+    }
     // Expansion needs the full manifest (see `agentlessFullPackageInfo` above); wait for it so we
     // don't hydrate against the input-less detail-page `packageInfo`.
     if (!agentlessData?.items || !agentlessFullPackageInfo) {
@@ -208,7 +239,29 @@ export const PackagePoliciesPage = ({
         )
       )
     );
-  }, [agentlessData, mapPoliciesData, agentlessFullPackageInfo]);
+  }, [
+    agentlessUIEnabled,
+    agentlessData,
+    legacyAgentlessData,
+    mapPoliciesData,
+    agentlessFullPackageInfo,
+  ]);
+
+  // Per-flag view of the active agentless source. Never read loading state from the inactive
+  // source: a disabled react-query query reports `isLoading: true` forever.
+  const agentlessTableSource = agentlessUIEnabled
+    ? {
+        total: agentlessData?.total ?? 0,
+        isLoading: agentlessIsLoading || isAgentlessFullPackageInfoLoading,
+        error: agentlessError as Error | null,
+        refresh: refreshAgentlessPolicies,
+      }
+    : {
+        total: legacyAgentlessData?.total ?? 0,
+        isLoading: legacyAgentlessIsLoading,
+        error: legacyAgentlessError,
+        refresh: refreshLegacyAgentlessPolicies,
+      };
 
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
@@ -228,7 +281,7 @@ export const PackagePoliciesPage = ({
       value={{
         refresh: () => {
           refreshAgentBasedPolicies();
-          refreshAgentlessPolicies();
+          agentlessTableSource.refresh();
         },
       }}
     >
@@ -274,7 +327,7 @@ export const PackagePoliciesPage = ({
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiNotificationBadge color="subdued" size="m">
-                        <h4>{agentlessData?.total ?? 0}</h4>
+                        <h4>{agentlessTableSource.total}</h4>
                       </EuiNotificationBadge>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -283,11 +336,11 @@ export const PackagePoliciesPage = ({
                 <EuiSpacer size="m" />
                 <EuiPanel hasBorder={true} hasShadow={false}>
                   <AgentlessPackagePoliciesTable
-                    isLoading={agentlessIsLoading || isAgentlessFullPackageInfoLoading}
-                    error={agentlessError}
+                    isLoading={agentlessTableSource.isLoading}
+                    error={agentlessTableSource.error}
                     packagePolicies={agentlessPackageAndAgentPolicies}
-                    packagePoliciesTotal={agentlessData?.total ?? 0}
-                    refreshPackagePolicies={refreshAgentlessPolicies}
+                    packagePoliciesTotal={agentlessTableSource.total}
+                    refreshPackagePolicies={agentlessTableSource.refresh}
                     pagination={{
                       pagination: agentlessPagination,
                       pageSizeOptions: agentlessPageSizeOptions,
