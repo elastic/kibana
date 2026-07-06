@@ -18,22 +18,6 @@
 import type { QueryOccurrencesResponse, StreamQuery } from '@kbn/significant-events-schema';
 
 // ---------------------------------------------------------------------------
-// PUT /api/streams/{name}/_query  –  query stream upsert
-// ---------------------------------------------------------------------------
-
-export interface QueryStreamUpsertRequestBody {
-  query: {
-    esql: string;
-  };
-}
-
-export const upsertQueryStreamRequest: QueryStreamUpsertRequestBody = {
-  query: {
-    esql: 'FROM logs* | WHERE log.level == "error" | KEEP @timestamp, message, host.name, log.level',
-  },
-};
-
-// ---------------------------------------------------------------------------
 // PUT /api/streams/{name}/queries/{queryId}
 // ---------------------------------------------------------------------------
 

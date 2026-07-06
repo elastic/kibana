@@ -11,18 +11,15 @@ import type { BaseFeature } from '@kbn/significant-events-schema';
 import { emptyAssets } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
+import { upsertFeature, listFeatures, bulkFeatures, deleteFeature } from './helpers/requests';
 import {
   deleteStream,
   disableStreams,
   enableStreams,
-  upsertFeature,
-  listFeatures,
-  bulkFeatures,
-  deleteFeature,
   putStream,
-} from './helpers/requests';
+} from '../streams/helpers/requests';
 
 const STREAM_NAME = 'logs.otel';
 const SECOND_STREAM_NAME = 'logs.otel.features-cross-stream-test';
@@ -58,7 +55,7 @@ const testFeature: BaseFeature = {
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const kibanaServer = getService('kibanaServer');
-  let apiClient: StreamsSupertestRepositoryClient;
+  let apiClient: SignificantEventsSupertestRepositoryClient;
 
   describe('Features', function () {
     before(async () => {

@@ -10,16 +10,15 @@ import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
 import { isDslLifecycle, isIlmLifecycle, emptyAssets } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
+import { bulkQueries, getQueries } from './helpers/requests';
 import {
-  bulkQueries,
   deleteStream,
   disableStreams,
   enableStreams,
-  getQueries,
   putStream,
-} from './helpers/requests';
+} from '../streams/helpers/requests';
 import type { RoleCredentials } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -29,7 +28,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const alertingApi = getService('alertingApiCommon');
   const samlAuth = getService('samlAuth');
   let roleAuthc: RoleCredentials;
-  let apiClient: StreamsSupertestRepositoryClient;
+  let apiClient: SignificantEventsSupertestRepositoryClient;
 
   describe('Significant Events', function () {
     before(async () => {

@@ -13,16 +13,15 @@ import { v4 } from 'uuid';
 import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
+import { bulkQueries, getQueries } from './helpers/requests';
 import {
-  bulkQueries,
   deleteStream,
   disableStreams,
   enableStreams,
-  getQueries,
   putStream,
-} from './helpers/requests';
+} from '../streams/helpers/requests';
 import type { RoleCredentials } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -32,7 +31,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   let roleAuthc: RoleCredentials;
 
-  let apiClient: StreamsSupertestRepositoryClient;
+  let apiClient: SignificantEventsSupertestRepositoryClient;
 
   const STREAM_NAME = 'logs.otel.queries-test';
   const stream: Streams.WiredStream.UpsertRequest['stream'] = {
