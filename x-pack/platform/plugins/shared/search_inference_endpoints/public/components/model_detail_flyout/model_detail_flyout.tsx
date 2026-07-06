@@ -26,7 +26,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import { docLinks } from '../../../common/doc_links';
@@ -58,7 +57,7 @@ export interface ModelDetailFlyoutProps {
   allEndpoints: EisInferenceEndpoint[];
   onClose: () => void;
   onSaveEndpoint: () => void;
-  onDeleteEndpoint?: (endpoint: InferenceAPIConfigResponse) => void;
+  onDeleteEndpoint?: (endpoint: EisInferenceEndpoint) => void;
   onCopyEndpointId: (id: string) => void;
   canManage?: boolean;
 }
@@ -74,7 +73,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
 }) => {
   const flyoutTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingEndpoint, setEditingEndpoint] = useState<InferenceAPIConfigResponse | undefined>();
+  const [editingEndpoint, setEditingEndpoint] = useState<EisInferenceEndpoint | undefined>();
   const usageTracker = useUsageTracker();
   const {
     services: { uiSettings },
@@ -136,7 +135,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   }, [usageTracker]);
 
   const handleOpenEditModal = useCallback(
-    (endpoint: InferenceAPIConfigResponse) => {
+    (endpoint: EisInferenceEndpoint) => {
       usageTracker.count([EventType.MODAL_OPENED, `${EventType.MODAL_OPENED}_edit_endpoint`]);
       setEditingEndpoint(endpoint);
       setIsModalOpen(true);

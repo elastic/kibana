@@ -61,7 +61,7 @@ export const useManageRegionsState = (onClose: () => void) => {
 
   const totalSelected = checkedKeys.size;
   const totalRegions = availableRegions.length;
-  const allSelected = totalSelected === totalRegions;
+  const allSelected = totalRegions > 0 && totalSelected === totalRegions;
   const isAllExpanded = zoneGroups.length > 0 && expandedZones.size === zoneGroups.length;
   const isLoading = isPolicyLoading || isEndpointsLoading;
   const isError = isPolicyError || isEndpointsError;
@@ -116,6 +116,7 @@ export const useManageRegionsState = (onClose: () => void) => {
   }, []);
 
   const handleExpandAll = useCallback(() => {
+    if (zoneGroups.length === 0) return;
     if (expandedZones.size === zoneGroups.length) {
       setExpandedZones(new Set());
     } else {

@@ -67,7 +67,7 @@ export const RegionZoneList: React.FC<RegionZoneListProps> = ({
             paddingSize="s"
             data-test-subj={`manageRegionsZone-${zone.geo}`}
           >
-            <EuiFlexGroup alignItems="baseline" responsive={false} gutterSize="s">
+            <EuiFlexGroup alignItems="flexStart" responsive={false} gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiCheckbox
                   id={`zone-checkbox-${zone.geo}`}
