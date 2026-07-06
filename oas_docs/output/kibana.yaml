@@ -80753,7 +80753,7 @@ components:
       additionalProperties: false
       properties:
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -80780,7 +80780,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -81614,7 +81613,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -81667,7 +81666,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -87554,7 +87552,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color scale configuration for the heatmap cells.
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -87581,7 +87579,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -88884,6 +88881,8 @@ components:
           type: array
         name:
           type: string
+        rolledBack:
+          type: boolean
         status:
           type: string
         title:
@@ -93982,7 +93981,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration for the primary metric value or background.
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -94016,7 +94015,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
         - type
         - background_chart
@@ -95411,7 +95409,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricCompareToPrimary'
           description: Compare the secondary metric to a baseline value or to the primary metric.
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -95442,7 +95440,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
         - type
       title: Cumulative Sum Operation
@@ -100453,7 +100450,7 @@ components:
       additionalProperties: false
       properties:
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -100480,7 +100477,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -105034,7 +105030,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -105061,7 +105057,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -108929,7 +108924,7 @@ components:
       additionalProperties: false
       properties:
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -108956,7 +108951,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -110846,7 +110840,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -110873,7 +110867,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -113413,7 +113406,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -113440,7 +113433,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
@@ -118898,7 +118890,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
         field:
-          description: Field to be used for the metric
+          description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -118925,7 +118917,6 @@ components:
         - format
         - filter
         - time_scale
-        - field
         - operation
       title: Cumulative Sum Operation
       type: object
