@@ -16,6 +16,12 @@ import { SPNEGO_TOKEN } from './constants';
 export const test = baseTest.extend({
   page: async ({ page }, use) => {
     await page.route('**/*', async (route) => {
+      const request = route.request();
+      if (request.resourceType() !== 'document') {
+        await route.continue();
+        return;
+      }
+
       const response = await route.fetch({ maxRedirects: 0 });
       if (
         response.status() === 401 &&
@@ -25,7 +31,7 @@ export const test = baseTest.extend({
           response: await route.fetch({
             maxRedirects: 0,
             headers: {
-              ...route.request().headers(),
+              ...request.headers(),
               authorization: `Negotiate ${SPNEGO_TOKEN}`,
             },
           }),
