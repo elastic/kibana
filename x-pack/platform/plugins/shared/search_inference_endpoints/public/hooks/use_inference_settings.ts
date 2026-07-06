@@ -29,29 +29,27 @@ export const useSaveInferenceSettings = () => {
   const { services } = useKibana();
   const queryClient = useQueryClient();
 
-  return useMutation<InferenceSettingsResponse, Error, InferenceSettingsAttributes>({
+  return useMutation({
     mutationFn: async (body: InferenceSettingsAttributes) => {
       return services.http.put<InferenceSettingsResponse>(APIRoutes.PUT_INFERENCE_SETTINGS, {
         body: JSON.stringify(body),
         version: ROUTE_VERSIONS.v1,
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      queryClient.setQueryData([INFERENCE_SETTINGS_QUERY_KEY], data);
       services.notifications.toasts.addSuccess({
         title: i18n.translate('xpack.searchInferenceEndpoints.settings.saveSuccess', {
           defaultMessage: 'Changes saved',
         }),
       });
     },
-    onError: (err) => {
-      services.notifications.toasts.addError(err, {
+    onError: () => {
+      services.notifications.toasts.addDanger({
         title: i18n.translate('xpack.searchInferenceEndpoints.settings.saveError', {
           defaultMessage: 'Failed to save settings',
         }),
       });
-    },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: [INFERENCE_SETTINGS_QUERY_KEY] });
     },
   });
 };
