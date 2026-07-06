@@ -9,6 +9,8 @@ import { useCallback, useEffect, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { omit, pick } from 'lodash';
 
+import { i18n } from '@kbn/i18n';
+
 import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
 import type {
@@ -146,6 +148,20 @@ export function usePackagePolicyWithRelatedData(
       // Agentless policies are updated through the agentless API (full-replace PUT), never the
       // package-policy API.
       if (isAgentlessPolicy) {
+        // The agentless API has no agent-policy reassignment: `toNewAgentlessPolicy` drops
+        // `policy_ids`, so honoring a changed override would report success while saving
+        // nothing (e.g. the manage-agent-policies modal). Fail loudly instead. The edit page
+        // echoes the unchanged ids on every save, which stays allowed.
+        if (
+          packagePolicyOverride?.policy_ids &&
+          !deepEqual(packagePolicyOverride.policy_ids, packagePolicy.policy_ids)
+        ) {
+          throw new Error(
+            i18n.translate('xpack.fleet.editPackagePolicy.agentlessPolicyReassignmentError', {
+              defaultMessage: 'Agentless integrations do not support agent policy reassignment.',
+            })
+          );
+        }
         const { enableVarGroups } = ExperimentalFeaturesService.get();
         const varGroups =
           enableVarGroups && packageInfo?.var_groups ? packageInfo.var_groups : undefined;

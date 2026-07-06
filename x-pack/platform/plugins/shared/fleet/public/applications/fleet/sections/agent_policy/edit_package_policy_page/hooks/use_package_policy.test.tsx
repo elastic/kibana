@@ -767,6 +767,56 @@ describe('usePackagePolicy - agentless', () => {
     expect(sendUpdateAgentlessPolicy).not.toHaveBeenCalled();
   });
 
+  it('rejects an agent-policy reassignment of an agentless policy instead of silently dropping it', async () => {
+    // `toNewAgentlessPolicy` drops `policy_ids`, so a save that intends to change them (the
+    // manage-agent-policies modal) must fail loudly rather than report a success that saved
+    // nothing.
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('agentless-detect', {})
+    );
+    await waitFor(() =>
+      expect(result.current.packagePolicy?.policy_ids).toEqual(['agentless-agent-policy-1'])
+    );
+
+    let saveResult: any;
+    await act(async () => {
+      saveResult = await result.current.savePackagePolicy({ policy_ids: ['some-other-policy'] });
+    });
+
+    expect(saveResult.data).toBeUndefined();
+    expect(saveResult.error).toBeInstanceOf(Error);
+    expect(saveResult.error.message).toContain('agent policy reassignment');
+    expect(sendUpdateAgentlessPolicy).not.toHaveBeenCalled();
+    expect(sendUpdatePackagePolicy).not.toHaveBeenCalled();
+  });
+
+  it('allows an agentless save that echoes the unchanged policy_ids', async () => {
+    // The edit page always submits `{ policy_ids: packagePolicy.policy_ids }` — an unchanged
+    // echo must not trip the reassignment guard.
+    jest
+      .mocked(sendUpdateAgentlessPolicy)
+      .mockResolvedValue({ item: { id: 'agentless-detect' } } as any);
+
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('agentless-detect', {})
+    );
+    await waitFor(() =>
+      expect(result.current.packagePolicy?.policy_ids).toEqual(['agentless-agent-policy-1'])
+    );
+
+    let saveResult: any;
+    await act(async () => {
+      saveResult = await result.current.savePackagePolicy({
+        policy_ids: ['agentless-agent-policy-1'],
+      });
+    });
+
+    expect(sendUpdateAgentlessPolicy).toHaveBeenCalled();
+    expect(saveResult).toEqual({ data: { item: { id: 'agentless-detect' } }, error: null });
+  });
+
   it('normalizes agentless save failures into the { data, error } shape', async () => {
     const requestError = Object.assign(new Error('conflict'), { statusCode: 409 });
     jest.mocked(sendUpdateAgentlessPolicy).mockRejectedValue(requestError);
