@@ -32,6 +32,13 @@ jest.mock('@kbn/workflows-ui', () => {
     ...actual,
     useWorkflowsApi: jest.fn(() => mockWorkflowApi),
     useWorkflowsCapabilities: jest.fn(() => mockAllWorkflowCapabilitiesTrue),
+    WorkflowGraphPreview: (props: { width?: number | string; height?: number }) => (
+      <div
+        data-test-subj="workflowGraphPreview"
+        data-width={props.width ?? ''}
+        data-height={props.height ?? ''}
+      />
+    ),
   };
 });
 
@@ -85,6 +92,51 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
     expect(definition.getIcon).toBeDefined();
     expect(definition.getActionButtons).toBeDefined();
     expect(definition.renderCanvasContent).toBeDefined();
+    expect(definition.renderInlineContent).toBeDefined();
+  });
+
+  describe('renderInlineContent', () => {
+    it('renders a taller graph preview in the main chat (not sidebar)', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = createAttachment();
+
+      const { getByTestId } = render(
+        <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
+      );
+
+      const preview = getByTestId('workflowGraphPreview');
+      expect(preview.getAttribute('data-height')).toBe('220');
+    });
+
+    it('renders a shorter graph preview in the sidebar', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = createAttachment();
+
+      const { getByTestId } = render(
+        <>{definition.renderInlineContent!({ attachment, isSidebar: true })}</>
+      );
+
+      const preview = getByTestId('workflowGraphPreview');
+      expect(preview.getAttribute('data-height')).toBe('180');
+    });
+
+    it('renders an invalid-yaml callout when the yaml cannot be parsed', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = {
+        ...createAttachment(),
+        data: { yaml: 'not: valid: yaml: [{' },
+      };
+
+      const { queryByTestId } = render(
+        <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
+      );
+
+      expect(queryByTestId('workflowYamlInlinePreviewInvalid')).not.toBeNull();
+      expect(queryByTestId('workflowGraphPreview')).toBeNull();
+    });
   });
 
   describe('getLabel', () => {
