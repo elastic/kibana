@@ -39,6 +39,16 @@ export interface DataLifecycleSummaryCapabilities {
   canManageLifecycle: boolean;
 }
 
+export interface FrozenPhaseCallouts {
+  showEnterpriseCallout?: boolean;
+  onUpgradeEnterprise?: () => void;
+  showDefaultRepositoryCallout?: boolean;
+  /** Navigate directly to the create-repository page instead of opening a modal. */
+  createDefaultRepositoryHref?: string;
+  onRefreshDefaultRepository?: () => void;
+  isRefreshingDefaultRepository?: boolean;
+}
+
 export interface DataLifecycleSummaryPhaseActions {
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
   onRemovePhase?: (phaseName: string) => void;
@@ -71,6 +81,7 @@ interface DataLifecycleSummaryProps {
   phaseActions?: DataLifecycleSummaryPhaseActions;
   downsamplingActions?: DataLifecycleSummaryDownsamplingActions;
   uiState?: DataLifecycleSummaryUiState;
+  frozenPhaseCallouts?: FrozenPhaseCallouts;
 }
 
 export const DataLifecycleSummary = ({
@@ -83,6 +94,7 @@ export const DataLifecycleSummary = ({
   phaseActions,
   downsamplingActions,
   uiState,
+  frozenPhaseCallouts,
 }: DataLifecycleSummaryProps) => {
   const { phases, downsampleSteps, loading = false, testSubjPrefix } = model;
   const { canManageLifecycle } = capabilities;
@@ -167,6 +179,7 @@ export const DataLifecycleSummary = ({
                   testSubjPrefix={testSubjPrefix}
                   canManageLifecycle={canManageLifecycle}
                   isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                  frozenPhaseCallouts={frozenPhaseCallouts}
                 />
                 {showDownsampling && downsamplingSegments && (
                   <DownsamplingBar

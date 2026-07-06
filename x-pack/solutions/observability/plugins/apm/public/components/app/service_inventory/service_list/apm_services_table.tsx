@@ -124,12 +124,11 @@ export function getServiceColumns({
               return (
                 <EuiToolTip
                   position="bottom"
-                  content={i18n.translate(
-                    'xpack.apm.home.servicesTable.tooltip.activeAlertsExplanation',
-                    {
-                      defaultMessage: 'Active alerts',
-                    }
-                  )}
+                  content={i18n.translate('xpack.apm.serviceHeader.alertsBadge.countLabel', {
+                    defaultMessage:
+                      '{count, plural, one {# active alert} other {# active alerts}}. Click to view more.',
+                    values: { count: alertsCount },
+                  })}
                 >
                   <EuiBadge
                     data-test-subj="serviceInventoryAlertsBadgeLink"
@@ -204,8 +203,33 @@ export function getServiceColumns({
             width: '6.5em',
             minWidth: '6.5em',
             sortable: true,
-            render: (_, { anomalyScore }) => {
-              return <AnomaliesBadge score={anomalyScore} />;
+            render: (
+              _,
+              {
+                serviceName,
+                transactionType,
+                anomalyScore,
+                detectorType,
+                agentName,
+                anomalyEnvironment,
+              }
+            ) => {
+              return (
+                <AnomaliesBadge
+                  score={anomalyScore}
+                  detectorType={detectorType}
+                  navigationProps={
+                    agentName && anomalyEnvironment
+                      ? {
+                          serviceName,
+                          agentName,
+                          anomalyEnvironment,
+                          query: { ...query, transactionType },
+                        }
+                      : undefined
+                  }
+                />
+              );
             },
           } as ITableColumn<ServiceListItem>,
         ]

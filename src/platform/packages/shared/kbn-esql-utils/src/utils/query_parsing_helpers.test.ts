@@ -263,6 +263,12 @@ describe('esql query helpers', () => {
       }
     });
 
+    it('should preserve final own-line comments', function () {
+      expect(prettifyQuery('FROM logs* | WHERE KQL("term")\n// KEEP meow')).toEqual(
+        'FROM logs*\n  | WHERE KQL("term")\n  // KEEP meow'
+      );
+    });
+
     it('should respect custom lineWidth when provided', function () {
       const query =
         'FROM kibana_sample_data_logs | STATS count = COUNT(*), avg = AVG(bytes), p95 = PERCENTILE(bytes, 95), ext = VALUES(tags.keyword) BY ip | EVAL newField = CASE(count < 100, "groupA", count > 100 AND count < 500, "groupB", "Other") | KEEP newField';
