@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiPopover, EuiToolTip } from '@elastic/eui';
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -25,6 +19,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
+import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
 import { useKibana } from '../../utils/kibana_react';
 import { useCanModifyAlerts } from '../../hooks/use_can_modify_alerts';
 import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
@@ -211,7 +206,8 @@ export function AlertActions(
         grow={parentAlert ? false : undefined}
       >
         <EuiPopover
-          anchorPosition="downLeft"
+          aria-label={actionsToolTip}
+          anchorPosition="rightCenter"
           button={
             <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
               <EuiButtonIcon
@@ -228,8 +224,9 @@ export function AlertActions(
           closePopover={closeActionsPopover}
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
+          panelStyle={{ maxHeight: '80vh', overflowY: 'auto' }}
         >
-          <EuiContextMenuPanel items={actionsMenuItems} data-test-subj="alertsTableActionsMenu" />
+          <ExpandableContextMenuPanel items={actionsMenuItems} />
         </EuiPopover>
       </EuiFlexItem>
     </>
