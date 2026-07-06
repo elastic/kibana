@@ -114,11 +114,10 @@ export const RetentionSelector = ({
     flyoutScrollContainerRef ?? NO_FLYOUT_SCROLL_CONTAINER_REF,
     listScrollRef
   );
-  const useNestedFlyoutScroll = height === 'full' && flyoutScrollContainerRef !== undefined;
   const styles = getRetentionSelectorStyles({
     euiTheme,
     height,
-    nestedScrollHeight: useNestedFlyoutScroll ? nestedScrollHeight : undefined,
+    nestedScrollHeight: height === 'full' ? nestedScrollHeight : undefined,
   });
 
   const defaultGetMethodForOption = useCallback(
