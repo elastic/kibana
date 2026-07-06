@@ -108,7 +108,7 @@ safe-outputs:
       description: 'Append the newly-opened fix PR''s URL to the outcome comment on the issue. Call this exactly once, and only after you have opened a draft PR.'
       runs-on: ubuntu-latest
       needs: safe_outputs
-      if: ${{ needs.safe_outputs.outputs.created_pr_url != '' && needs.safe_outputs.outputs.comment_id != '' }}
+      if: needs.safe_outputs.outputs.created_pr_url != '' && needs.safe_outputs.outputs.comment_id != ''
       permissions:
         issues: write
       inputs:
