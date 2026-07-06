@@ -141,9 +141,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -271,9 +268,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -421,9 +415,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: false,
@@ -546,9 +537,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -673,9 +661,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -844,7 +829,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: { update_by_query: 1000 },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -949,7 +933,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: { update_by_query: 1000 },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -1048,7 +1031,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: { update_by_query: 1000 },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -1165,9 +1147,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -1294,9 +1273,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -1525,9 +1501,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: mockSavedObjectsService as unknown as SavedObjectsServiceStart,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -2356,9 +2329,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: {
           getScopedClient: mockGetScopedClient,
         } as unknown as SavedObjectsServiceStart,
@@ -2433,9 +2403,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3042,9 +3009,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -3171,9 +3135,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -3261,9 +3222,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -3345,9 +3303,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3413,9 +3368,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3516,9 +3468,6 @@ describe('TaskStore', () => {
             savedObjectsRepository: savedObjectsClient,
             adHocTaskCounter,
             allowReadingInvalidState: false,
-            requestTimeouts: {
-              update_by_query: 1000,
-            },
             savedObjectsService: coreStart.savedObjects,
             security: coreStart.security,
             getIsSecurityEnabled: () => true,
@@ -3546,9 +3495,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3574,9 +3520,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3603,9 +3546,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -3876,9 +3816,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: false,
@@ -3912,9 +3849,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -4172,9 +4106,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -4225,9 +4156,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: true,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -4274,9 +4202,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -4392,9 +4317,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,

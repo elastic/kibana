@@ -43,7 +43,6 @@ import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-bas
 import { nodeBuilder } from '@kbn/es-query';
 import type { ExecutionContextStart } from '@kbn/core/server';
 
-import type { RequestTimeoutsConfig } from './config';
 import type { Result } from './lib/result_type';
 import { asOk, asErr, unwrap } from './lib/result_type';
 import type { ExecutionContextRunner } from './lib/execution_context';
@@ -84,7 +83,6 @@ export interface StoreOpts {
   adHocTaskCounter: AdHocTaskCounter;
   allowReadingInvalidState: boolean;
   logger: Logger;
-  requestTimeouts: RequestTimeoutsConfig;
   security: SecurityServiceStart;
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
@@ -159,8 +157,6 @@ export class TaskStore {
   private _invalidationSoClient?: SavedObjectsClientContract;
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
-  // @ts-expect-error requestTimeouts is no longer used since removing update_by_query strategy
-  private requestTimeouts: RequestTimeoutsConfig;
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
   private getIsSecurityEnabled: () => boolean;
@@ -201,7 +197,6 @@ export class TaskStore {
       definitions: opts.definitions,
       allowReadingInvalidState: opts.allowReadingInvalidState,
     });
-    this.requestTimeouts = opts.requestTimeouts;
     this.security = opts.security;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
     this.getIsSecurityEnabled = opts.getIsSecurityEnabled;

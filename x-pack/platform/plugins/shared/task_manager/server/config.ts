@@ -232,4 +232,3 @@ export const configSchema = schema.object(
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;
-export type RequestTimeoutsConfig = TypeOf<typeof requestTimeoutsConfig>;
