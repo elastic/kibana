@@ -62,6 +62,18 @@ export const TemplateCard = React.memo<TemplateCardProps>(({ template, onSelect 
       layout="vertical"
       textAlign="left"
       paddingSize="l"
+      hasBorder
+      hasShadow={false}
+      css={css({
+        background: euiTheme.colors.emptyShade,
+        borderColor: euiTheme.colors.lightShade,
+        borderRadius: euiTheme.border.radius.medium,
+        boxShadow: 'none',
+        gap: euiTheme.size.l,
+        minHeight: 204,
+        padding: euiTheme.size.l,
+        width: '100%',
+      })}
       onClick={handleClick}
       title={title}
       description={template.description}
