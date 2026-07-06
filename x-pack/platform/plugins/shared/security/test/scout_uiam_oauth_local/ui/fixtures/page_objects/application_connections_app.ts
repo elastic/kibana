@@ -12,7 +12,11 @@ export class ApplicationConnectionsApp {
 
   async navigate() {
     await this.page.gotoApp('management/security/application_connections');
-    await this.page.testSubj.locator('applicationConnectionsTable').waitFor({ state: 'visible' });
+    // Initial app load can exceed the default 10s action timeout on
+    // cold serverless CI, so this first render gets a longer timeout.
+    await this.page.testSubj
+      .locator('applicationConnectionsTable')
+      .waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async switchToGroupedView() {
