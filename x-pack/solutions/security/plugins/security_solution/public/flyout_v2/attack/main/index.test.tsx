@@ -9,9 +9,13 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
-import { AttackFlyout } from '.';
+import { AttackFlyout, JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID } from '.';
 import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+
+jest.mock('../../shared/components/json_tab', () => ({
+  JsonTab: () => <div data-test-subj="mock-json-tab" />,
+}));
 
 jest.mock('./footer', () => ({
   Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
@@ -82,6 +86,26 @@ describe('<AttackFlyout />', () => {
     expect(getByTestId('mock-header')).toBeInTheDocument();
     expect(getByTestId('attack-flyout-body')).toBeInTheDocument();
     expect(getByTestId('attack-flyout-footer')).toBeInTheDocument();
+  });
+
+  it('renders Overview and JSON tabs and switches between them', () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
+      </TestProviders>
+    );
+
+    // both tab buttons are present
+    expect(getByTestId(OVERVIEW_TAB_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(JSON_TAB_TEST_ID)).toBeInTheDocument();
+
+    // overview is selected by default
+    expect(getByTestId('mock-overview-tab')).toBeInTheDocument();
+
+    // switching to the JSON tab renders the json content
+    fireEvent.click(getByTestId(JSON_TAB_TEST_ID));
+    expect(getByTestId('mock-json-tab')).toBeInTheDocument();
+    expect(queryByTestId('mock-overview-tab')).not.toBeInTheDocument();
   });
 
   it('renders without errors given a minimal DataTableRecord hit', () => {

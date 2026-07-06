@@ -7,11 +7,11 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { StreamsServer } from '../../../types';
-import { createSigEventsInvestigatorAgent } from './investigator';
-import { createSigEventsJudgeAgent } from './judge';
+import { createSignificantEventsInvestigatorAgent } from './investigator';
+import { createSignificantEventsJudgeAgent } from './judge';
 
-export { SIGEVENTS_INVESTIGATOR_AGENT_ID } from './investigator';
-export { SIGEVENTS_JUDGE_AGENT_ID } from './judge';
+export { SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID } from './investigator';
+export { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from './judge';
 
 export const registerSignificantEventsDiscoveryAgents = ({
   agentBuilder,
@@ -20,6 +20,6 @@ export const registerSignificantEventsDiscoveryAgents = ({
   agentBuilder: AgentBuilderPluginSetup;
   server: StreamsServer;
 }): void => {
-  agentBuilder.agents.register(createSigEventsInvestigatorAgent({ server }));
-  agentBuilder.agents.register(createSigEventsJudgeAgent({ server }));
+  agentBuilder.agents.register(createSignificantEventsInvestigatorAgent({ server }));
+  agentBuilder.agents.register(createSignificantEventsJudgeAgent({ server }));
 };
