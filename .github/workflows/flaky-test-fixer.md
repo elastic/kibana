@@ -100,9 +100,9 @@ safe-outputs:
     # transport makes the shallow safe_outputs checkout run `git fetch --unshallow`,
     # which on a repo Kibana's size cannot finish within the 15m job timeout.
     patch-format: am
-  # The agent can't know the PR number while it runs (safe_outputs creates the PR
-  # afterwards), so this job runs after safe_outputs and edits the just-posted
-  # comment to add the real PR URL.
+  # Adds the fix PR's URL to the outcome comment. The agent can't do this itself:
+  # it doesn't know the PR number while it runs (safe_outputs creates the PR
+  # afterwards), so this job runs after safe_outputs and edits the just-posted comment.
   jobs:
     link-fix-pr:
       description: 'Append the newly-opened fix PR''s URL to the outcome comment on the issue. Call this exactly once, and only after you have opened a draft PR.'
