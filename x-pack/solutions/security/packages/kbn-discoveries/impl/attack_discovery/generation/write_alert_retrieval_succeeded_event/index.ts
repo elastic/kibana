@@ -20,6 +20,7 @@ export const writeAlertRetrievalSucceededEvent = async ({
   alertsContextCount,
   authenticatedUser,
   connectorId,
+  conversationId,
   endTime,
   eventLogger,
   eventLogIndex,
@@ -35,6 +36,11 @@ export const writeAlertRetrievalSucceededEvent = async ({
   alertsContextCount: number;
   authenticatedUser: AuthenticatedUser;
   connectorId: string;
+  /**
+   * Identifier of the persisted Agent Builder conversation, present only for the
+   * `skill` retrieval mode. Persisted into event.reference for resumable reporting.
+   */
+  conversationId?: string;
   endTime: Date;
   eventLogger: IEventLogger;
   eventLogIndex: string;
@@ -53,6 +59,7 @@ export const writeAlertRetrievalSucceededEvent = async ({
       alertsContextCount,
       authenticatedUser,
       connectorId,
+      ...(conversationId != null ? { conversationId } : {}),
       dataClient: null,
       duration: getDurationNanoseconds({ end: endTime, start: startTime }),
       end: endTime,

@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 
-import { createLegacyRetrievalPromise } from '.';
+import { createDefaultRetrievalPromise } from '.';
 
 const mockInvokeAlertRetrievalWorkflow = jest.fn();
 
@@ -31,7 +31,8 @@ const baseParams = {
     model: 'gpt-4',
   },
   authenticatedUser: {} as never,
-  defaultAlertRetrievalWorkflowId: 'legacy',
+  defaultAlertRetrievalWorkflowId: 'default',
+  defaultRetrievalEnabled: true,
   eventLogger: {} as never,
   eventLogIndex: '.kibana-event-log-test',
   executionUuid: 'test-execution-uuid',
@@ -41,7 +42,7 @@ const baseParams = {
   workflowsManagementApi: {} as never,
 };
 
-describe('createLegacyRetrievalPromise', () => {
+describe('createDefaultRetrievalPromise', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -52,13 +53,13 @@ describe('createLegacyRetrievalPromise', () => {
       apiConfig: baseParams.apiConfig,
       connectorName: 'Test Connector',
       replacements: {},
-      workflowId: 'legacy',
-      workflowRunId: 'legacy-run',
+      workflowId: 'default',
+      workflowRunId: 'default-run',
     });
   });
 
-  it('invokes alert retrieval when mode is custom_query', async () => {
-    const result = await createLegacyRetrievalPromise({
+  it('invokes the default alert retrieval workflow when default_retrieval_enabled is true (custom_query)', async () => {
+    const result = await createDefaultRetrievalPromise({
       ...baseParams,
       alertRetrievalMode: 'custom_query' as const,
     });
@@ -72,36 +73,41 @@ describe('createLegacyRetrievalPromise', () => {
     );
   });
 
-  it('resolves to null when mode is custom_only', async () => {
-    const result = await createLegacyRetrievalPromise({
-      ...baseParams,
-      alertRetrievalMode: 'custom_only' as const,
-    });
-
-    expect(mockInvokeAlertRetrievalWorkflow).not.toHaveBeenCalled();
-    expect(result).toBeNull();
-  });
-
-  it('resolves to null when mode is provided', async () => {
-    const result = await createLegacyRetrievalPromise({
-      ...baseParams,
-      alertRetrievalMode: 'provided' as const,
-    });
-
-    expect(mockInvokeAlertRetrievalWorkflow).not.toHaveBeenCalled();
-    expect(result).toBeNull();
-  });
-
-  it('passes the correct workflowId to invokeAlertRetrievalWorkflow', async () => {
-    await createLegacyRetrievalPromise({
+  it('resolves to null and does not invoke retrieval when default_retrieval_enabled is false', async () => {
+    const result = await createDefaultRetrievalPromise({
       ...baseParams,
       alertRetrievalMode: 'custom_query' as const,
-      defaultAlertRetrievalWorkflowId: 'custom-legacy-id',
+      defaultRetrievalEnabled: false,
+    });
+
+    expect(mockInvokeAlertRetrievalWorkflow).not.toHaveBeenCalled();
+    expect(result).toBeNull();
+  });
+
+  it('passes maxWaitMs to invokeAlertRetrievalWorkflow', async () => {
+    await createDefaultRetrievalPromise({
+      ...baseParams,
+      alertRetrievalMode: 'custom_query' as const,
+      maxWaitMs: 15 * 60 * 1000,
     });
 
     expect(mockInvokeAlertRetrievalWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({
-        workflowId: 'custom-legacy-id',
+        maxWaitMs: 15 * 60 * 1000,
+      })
+    );
+  });
+
+  it('passes the default workflow id to invokeAlertRetrievalWorkflow', async () => {
+    await createDefaultRetrievalPromise({
+      ...baseParams,
+      alertRetrievalMode: 'custom_query' as const,
+      defaultAlertRetrievalWorkflowId: 'custom-default-id',
+    });
+
+    expect(mockInvokeAlertRetrievalWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: 'custom-default-id',
       })
     );
   });
@@ -109,7 +115,7 @@ describe('createLegacyRetrievalPromise', () => {
   it('passes anonymizationFields to invokeAlertRetrievalWorkflow', async () => {
     const anonymizationFields = [{ allowed: true, anonymized: false, field: 'host.name', id: '1' }];
 
-    await createLegacyRetrievalPromise({
+    await createDefaultRetrievalPromise({
       ...baseParams,
       alertRetrievalMode: 'custom_query' as const,
       anonymizationFields,
@@ -123,7 +129,7 @@ describe('createLegacyRetrievalPromise', () => {
   });
 
   it('passes esqlQuery when mode is esql', async () => {
-    await createLegacyRetrievalPromise({
+    await createDefaultRetrievalPromise({
       ...baseParams,
       alertRetrievalMode: 'esql' as const,
       esqlQuery: 'FROM .alerts | LIMIT 10',
@@ -137,7 +143,7 @@ describe('createLegacyRetrievalPromise', () => {
   });
 
   it('does NOT pass esqlQuery when mode is custom_query', async () => {
-    await createLegacyRetrievalPromise({
+    await createDefaultRetrievalPromise({
       ...baseParams,
       alertRetrievalMode: 'custom_query' as const,
       esqlQuery: 'FROM .alerts | LIMIT 10',

@@ -18,7 +18,7 @@ import type {
 import { invokeCustomAlertRetrievalWorkflows } from '../../../invoke_custom_alert_retrieval_workflows';
 import type { AttackDiscoverySource } from '../../../../persistence/event_logging';
 import type { ParsedApiConfig, WorkflowConfig } from '../../../types';
-import { createLegacyRetrievalPromise } from './helpers/create_default_retrieval_promise';
+import { createDefaultRetrievalPromise } from './helpers/create_default_retrieval_promise';
 import { resolveCustomSettledResults } from './helpers/resolve_custom_settled_results';
 import { resolveLegacySettledResult } from './helpers/resolve_default_settled_result';
 import { validateRetrievalResults } from './helpers/validate_retrieval_results';
@@ -35,6 +35,13 @@ export interface RetrievalStepParams {
   executionUuid: string;
   filter?: Record<string, unknown>;
   logger: Logger;
+  /**
+   * Maximum time to wait for the retrieval workflow to complete, in
+   * milliseconds. Threaded from the orchestration's remaining pipeline budget
+   * so the consumer-side poll never gives up before the workflow's own step
+   * timeout (notably the skill `ai.agent` step's 10m timeout).
+   */
+  maxWaitMs?: number;
   request: KibanaRequest;
   size?: number;
   source?: AttackDiscoverySource;
@@ -56,6 +63,7 @@ export const runRetrievalStep = async ({
   executionUuid,
   filter,
   logger,
+  maxWaitMs,
   request,
   size,
   source,
@@ -73,13 +81,14 @@ export const runRetrievalStep = async ({
     retrievalMode: workflowConfig.alert_retrieval_mode,
   });
 
-  const legacyPromise = createLegacyRetrievalPromise({
+  const defaultRetrievalPromise = createDefaultRetrievalPromise({
     alertsIndexPattern,
     anonymizationFields,
     apiConfig,
     authenticatedUser,
     alertRetrievalMode: workflowConfig.alert_retrieval_mode,
     defaultAlertRetrievalWorkflowId,
+    defaultRetrievalEnabled: workflowConfig.default_retrieval_enabled,
     end,
     esqlQuery: workflowConfig.esql_query,
     eventLogger,
@@ -87,6 +96,7 @@ export const runRetrievalStep = async ({
     executionUuid,
     filter,
     logger,
+    ...(maxWaitMs != null ? { maxWaitMs } : {}),
     request,
     size,
     source,
@@ -94,6 +104,11 @@ export const runRetrievalStep = async ({
     start,
     workflowsManagementApi,
   });
+
+  // Toggle 3: only run the user-created alert retrieval workflows when enabled.
+  const customWorkflowIds = workflowConfig.alert_retrieval_workflows_enabled
+    ? workflowConfig.alert_retrieval_workflow_ids
+    : [];
 
   const customPromise = invokeCustomAlertRetrievalWorkflows({
     alertsIndexPattern,
@@ -109,15 +124,18 @@ export const runRetrievalStep = async ({
     size,
     source,
     spaceId,
-    workflowIds: workflowConfig.alert_retrieval_workflow_ids,
+    workflowIds: customWorkflowIds,
     workflowsManagementApi,
   });
 
-  if (workflowConfig.alert_retrieval_mode === 'custom_only') {
+  if (!workflowConfig.default_retrieval_enabled) {
     logger.info('Default alert retrieval disabled; skipping');
   }
 
-  const [legacySettled, customSettled] = await Promise.allSettled([legacyPromise, customPromise]);
+  const [legacySettled, customSettled] = await Promise.allSettled([
+    defaultRetrievalPromise,
+    customPromise,
+  ]);
 
   const legacyResult = resolveLegacySettledResult({
     legacySettled,
@@ -129,7 +147,11 @@ export const runRetrievalStep = async ({
     logger,
   });
 
-  validateRetrievalResults({ customResults, legacyResult });
+  validateRetrievalResults({
+    customResults,
+    legacyResult,
+    skillEnabled: workflowConfig.skill_enabled,
+  });
 
   const alertRetrievalResult = combineAlertRetrievalResults({
     apiConfig,

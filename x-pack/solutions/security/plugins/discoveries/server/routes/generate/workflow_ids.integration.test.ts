@@ -38,6 +38,7 @@ describe('Generate API Workflow IDs Integration Tests', () => {
     email: 'test@example.com',
     enabled: true,
     full_name: 'Test User',
+    http_authentication_scheme: null,
     lookup_realm: { name: 'native', type: 'native' },
     metadata: {
       _reserved: false,

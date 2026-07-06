@@ -79,26 +79,36 @@ const getWorkflowsDescription = (workflowCount: number): string =>
 export const getWorkflowLoadingMessage = ({
   alertsCount,
   end,
+  providedAlertsCount,
   start,
   workflowConfig,
 }: {
   alertsCount: number;
   end?: string;
+  /** Count of pre-provided alerts (the `agent_builder` / run-step provided path). */
+  providedAlertsCount?: number;
   start?: string;
   workflowConfig: WorkflowConfig;
 }): string => {
-  const { alert_retrieval_mode: mode, alert_retrieval_workflow_ids: alertRetrievalWorkflowIds } =
-    workflowConfig;
+  const {
+    alert_retrieval_mode: mode,
+    alert_retrieval_workflow_ids: alertRetrievalWorkflowIds,
+    alert_retrieval_workflows_enabled: alertRetrievalWorkflowsEnabled,
+    default_retrieval_enabled: defaultRetrievalEnabled,
+  } = workflowConfig;
   const workflowCount = alertRetrievalWorkflowIds.length;
-  const hasCustomWorkflows = workflowCount > 0;
+  const hasCustomWorkflows = alertRetrievalWorkflowsEnabled && workflowCount > 0;
 
   const parts: string[] = [
-    ...(mode === 'custom_query'
-      ? [getCustomQueryDescription({ alertsCount, end, start })]
-      : mode === 'esql'
-      ? [getEsqlDescription()]
-      : mode === 'provided'
-      ? [getProvidedDescription(alertsCount)]
+    ...(providedAlertsCount != null && providedAlertsCount > 0
+      ? [getProvidedDescription(providedAlertsCount)]
+      : []),
+    ...(defaultRetrievalEnabled
+      ? [
+          mode === 'esql'
+            ? getEsqlDescription()
+            : getCustomQueryDescription({ alertsCount, end, start }),
+        ]
       : []),
     ...(hasCustomWorkflows ? [getWorkflowsDescription(workflowCount)] : []),
   ];

@@ -438,20 +438,21 @@ const extractValidationResult = ({
   const filterReason = extractFilterReason({ execution });
   const hallucinationsFilteredCount = extractHallucinationsFilteredCount({ execution });
   const persistedDiscoveries = extractPersistedDiscoveries({ execution });
-  // persistedCount prefers the ad-hoc persistence result: when persisted_discoveries is
-  // non-empty it contains ALL discoveries in the index (existing + newly created), so we
-  // subtract the pre-existing duplicates to get the actual new count. When ad-hoc persistence
-  // wrote nothing (scheduled), we report the handover (discoveries_to_persist) length. When
-  // there is no persist output at all but the persist step ran, we fall back to generatedCount
-  // minus both counters. When the persist step never ran (R1 noop) and there is no evidence of
-  // persistence, persistedCount is 0 — reporting generatedCount would be misleading.
+  // persistedCount prefers the ad-hoc persistence result: persisted_discoveries
+  // already contains ONLY the net-new discoveries created this run (duplicates are
+  // dropped on write), so its length is the new count directly. When ad-hoc
+  // persistence wrote nothing (scheduled), we report the handover
+  // (discoveries_to_persist) length. When there is no persist output at all but the
+  // persist step ran, we fall back to generatedCount minus both counters. When the
+  // persist step never ran (R1 noop) and there is no evidence of persistence,
+  // persistedCount is 0 — reporting generatedCount would be misleading.
   const persistedCount =
     persistedDiscoveries != null && persistedDiscoveries.length > 0
-      ? Math.max(0, persistedDiscoveries.length - (duplicatesDroppedCount ?? 0))
+      ? persistedDiscoveries.length
       : discoveriesToPersist.length > 0
       ? discoveriesToPersist.length
       : persistedDiscoveries != null
-      ? Math.max(0, persistedDiscoveries.length - (duplicatesDroppedCount ?? 0))
+      ? persistedDiscoveries.length
       : !persistStepInvoked
       ? 0
       : Math.max(

@@ -13,6 +13,9 @@ export type { WorkflowConfiguration } from './types';
 const DEFAULT_WORKFLOW_CONFIGURATION: WorkflowConfiguration = {
   alertRetrievalMode: 'custom_query',
   alertRetrievalWorkflowIds: [],
+  alertRetrievalWorkflowsEnabled: false,
+  defaultRetrievalEnabled: false,
+  skillEnabled: true,
   validationWorkflowId: 'default',
 };
 

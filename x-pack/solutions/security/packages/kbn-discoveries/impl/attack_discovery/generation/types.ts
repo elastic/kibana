@@ -83,19 +83,14 @@ export interface WorkflowConfig {
   alert_retrieval_mode: AlertRetrievalQueryMode;
   /** Toggle 3 sub-field: user-created alert retrieval workflow IDs to execute. */
   alert_retrieval_workflow_ids: string[];
-  // FF-off incremental slicing: these three composite-retrieval toggles are
-  // consumed by the schedule workflow_executor from PR2 onward, but the request
-  // fixtures/constructors that populate them are only completed in PR7. Keeping
-  // them optional through PR2–PR6 lets each of those PRs type-check in isolation;
-  // PR7 tightens them to required once every constructor supplies them.
   /** Toggle 3: whether the user-created alert retrieval workflows run. */
-  alert_retrieval_workflows_enabled?: boolean;
+  alert_retrieval_workflows_enabled: boolean;
   /** Toggle 2: whether the built-in default alert retrieval workflow runs. */
-  default_retrieval_enabled?: boolean;
+  default_retrieval_enabled: boolean;
   /** Toggle 2 sub-field: ES|QL query (required when `alert_retrieval_mode` is `'esql'`). */
   esql_query?: string;
   /** Toggle 1: whether the attack discovery skill performs its own additional alert retrieval. */
-  skill_enabled?: boolean;
+  skill_enabled: boolean;
   /** ID of the validation workflow to use (or `'default'` for built-in). */
   validation_workflow_id: string;
 }

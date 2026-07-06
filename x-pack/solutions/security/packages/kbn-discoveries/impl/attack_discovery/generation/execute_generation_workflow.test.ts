@@ -9,6 +9,7 @@ import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 
 import { executeGenerationWorkflow } from './execute_generation_workflow';
+import { WorkflowExecutionAuthorizationError } from './assert_authorized_to_execute_workflows';
 import type { GetStartServices } from './types';
 
 const mockWriteAttackDiscoveryEvent = jest.fn();
@@ -32,6 +33,11 @@ jest.mock('../../lib/persistence', () => ({
 
 jest.mock('../../lib/helpers/get_space_id', () => ({
   getSpaceId: () => 'default',
+}));
+
+const mockIsWorkflowsEnabled = jest.fn();
+jest.mock('../../lib/helpers/is_workflows_enabled', () => ({
+  isWorkflowsEnabled: (...args: unknown[]) => mockIsWorkflowsEnabled(...args),
 }));
 
 jest.mock('./fetch_anonymization_fields', () => ({
@@ -69,12 +75,39 @@ const mockAnonymizationFields = [
   },
 ];
 
+/**
+ * Authorized-by-default authz mock: `hasAllRequested` is true so the guard at
+ * the top of `executeGenerationWorkflow` resolves. (Unauthorized-path
+ * enforcement assertions are added in a later bead.)
+ */
+const createAuthorizedAuthzMock = () =>
+  ({
+    actions: { api: { get: (privilege: string) => `api:${privilege}` } },
+    checkPrivilegesWithRequest: () => ({
+      atSpace: async () => ({ hasAllRequested: true, privileges: { kibana: [] } }),
+    }),
+  } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['authz']);
+
+/**
+ * Unauthorized authz mock: `hasAllRequested` is false so the guard at the top of
+ * `executeGenerationWorkflow` throws `WorkflowExecutionAuthorizationError` before
+ * any workflow can run.
+ */
+const createUnauthorizedAuthzMock = () =>
+  ({
+    actions: { api: { get: (privilege: string) => `api:${privilege}` } },
+    checkPrivilegesWithRequest: () => ({
+      atSpace: async () => ({ hasAllRequested: false, privileges: { kibana: [] } }),
+    }),
+  } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['authz']);
+
 describe('executeGenerationWorkflow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     mockFetchAnonymizationFields.mockResolvedValue(mockAnonymizationFields);
     mockRunManualOrchestration.mockResolvedValue({ outcome: 'validation_succeeded' });
+    mockIsWorkflowsEnabled.mockResolvedValue(true);
   });
 
   it('writes generation-started event without stub workflowRunId', async () => {
@@ -114,6 +147,7 @@ describe('executeGenerationWorkflow', () => {
         connector_id: 'test-connector-id',
         model: 'gpt-4',
       },
+      authz: createAuthorizedAuthzMock(),
       executionUuid: 'test-execution-uuid',
       getEventLogIndex: async () => '.kibana-event-log-test',
       getEventLogger: async () => mockEventLogger,
@@ -129,6 +163,9 @@ describe('executeGenerationWorkflow', () => {
       workflowConfig: {
         alert_retrieval_workflow_ids: ['default-attack-discovery-alert-retrieval'],
         alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: true,
+        skill_enabled: true,
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
@@ -188,6 +225,7 @@ describe('executeGenerationWorkflow', () => {
         connector_id: 'test-connector-id',
         model: 'gpt-4',
       },
+      authz: createAuthorizedAuthzMock(),
       executionUuid: 'test-execution-uuid',
       getEventLogIndex: async () => '.kibana-event-log-test',
       getEventLogger: async () => mockEventLogger,
@@ -203,6 +241,9 @@ describe('executeGenerationWorkflow', () => {
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
         alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: true,
+        skill_enabled: true,
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
@@ -281,6 +322,7 @@ describe('executeGenerationWorkflow', () => {
         connector_id: 'test-connector-id',
         model: 'gpt-4',
       },
+      authz: createAuthorizedAuthzMock(),
       executionUuid: 'test-execution-uuid',
       getEventLogIndex: async () => '.kibana-event-log-test',
       getEventLogger: async () => mockEventLogger,
@@ -296,6 +338,9 @@ describe('executeGenerationWorkflow', () => {
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
         alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: true,
+        skill_enabled: true,
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
@@ -367,6 +412,7 @@ describe('executeGenerationWorkflow', () => {
         connector_id: 'test-connector-id',
         model: 'gpt-4',
       },
+      authz: createAuthorizedAuthzMock(),
       executionUuid: 'test-execution-uuid',
       getEventLogIndex: async () => '.kibana-event-log-test',
       getEventLogger: async () => mockEventLogger,
@@ -382,6 +428,9 @@ describe('executeGenerationWorkflow', () => {
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
         alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: true,
+        skill_enabled: true,
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
@@ -453,6 +502,7 @@ describe('executeGenerationWorkflow', () => {
         connector_id: 'test-connector-id',
         model: 'gpt-4',
       },
+      authz: createAuthorizedAuthzMock(),
       executionUuid: 'test-execution-uuid',
       getEventLogIndex: async () => '.kibana-event-log-test',
       getEventLogger: async () => mockEventLogger,
@@ -468,6 +518,9 @@ describe('executeGenerationWorkflow', () => {
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
         alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: true,
+        skill_enabled: true,
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
@@ -539,6 +592,7 @@ describe('executeGenerationWorkflow', () => {
         connector_id: 'test-connector-id',
         model: 'gpt-4',
       },
+      authz: createAuthorizedAuthzMock(),
       executionUuid: 'test-execution-uuid',
       getEventLogIndex: async () => '.kibana-event-log-test',
       getEventLogger: async () => mockEventLogger,
@@ -554,6 +608,9 @@ describe('executeGenerationWorkflow', () => {
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
         alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: true,
+        skill_enabled: true,
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
@@ -624,6 +681,7 @@ describe('executeGenerationWorkflow', () => {
         connector_id: 'test-connector-id',
         model: 'gpt-4',
       },
+      authz: createAuthorizedAuthzMock(),
       executionUuid: 'test-execution-uuid',
       getEventLogIndex: async () => '.kibana-event-log-test',
       getEventLogger: async () => mockEventLogger,
@@ -639,6 +697,9 @@ describe('executeGenerationWorkflow', () => {
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
         alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: true,
+        skill_enabled: true,
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
@@ -682,6 +743,7 @@ describe('executeGenerationWorkflow', () => {
         connector_id: 'test-connector-id',
         model: 'gpt-4',
       },
+      authz: createAuthorizedAuthzMock(),
       checkIntegrity: async () => ({
         optionalRepaired: [],
         optionalWarnings: [],
@@ -704,6 +766,9 @@ describe('executeGenerationWorkflow', () => {
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
         alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: true,
+        skill_enabled: true,
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
@@ -766,6 +831,7 @@ describe('executeGenerationWorkflow', () => {
           connector_id: 'test-connector-id',
           model: 'gpt-4',
         },
+        authz: createAuthorizedAuthzMock(),
         executionUuid: 'test-execution-uuid',
         getEventLogIndex: async () => '.kibana-event-log-test',
         getEventLogger: async () => mockEventLogger,
@@ -781,6 +847,9 @@ describe('executeGenerationWorkflow', () => {
         workflowConfig: {
           alert_retrieval_workflow_ids: [],
           alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: true,
+          skill_enabled: true,
           validation_workflow_id: 'default',
         },
         workflowsManagementApi: {
@@ -801,6 +870,92 @@ describe('executeGenerationWorkflow', () => {
         action: 'generation-failed',
       })
     );
+  });
+
+  describe('when shouldStopExecution() reports the rule was cancelled (timed out)', () => {
+    const buildCancelledRunArgs = () => {
+      const mockEventLogger: jest.Mocked<IEventLogger> = {
+        logEvent: jest.fn(),
+      } as unknown as jest.Mocked<IEventLogger>;
+
+      const coreStartMock: CoreStart = {
+        elasticsearch: {
+          client: {
+            asScoped: () => ({
+              asCurrentUser: {
+                indices: {
+                  refresh: jest.fn().mockResolvedValue(undefined),
+                },
+                security: {
+                  authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }),
+                },
+              },
+            }),
+          },
+        },
+        http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      } as unknown as CoreStart;
+
+      const mockGetStartServices: GetStartServices = async () => ({
+        coreStart: coreStartMock,
+        pluginsStart: {},
+      });
+
+      return {
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        apiConfig: {
+          action_type_id: '.gen-ai',
+          connector_id: 'test-connector-id',
+          model: 'gpt-4',
+        },
+        authz: createAuthorizedAuthzMock(),
+        executionUuid: 'test-execution-uuid',
+        getEventLogIndex: async () => '.kibana-event-log-test',
+        getEventLogger: async () => mockEventLogger,
+        getStartServices: mockGetStartServices,
+        logger: {
+          debug: jest.fn(),
+          error: jest.fn(),
+          info: jest.fn(),
+          warn: jest.fn(),
+        } as unknown as Logger,
+        request: {} as unknown as KibanaRequest,
+        shouldStopExecution: () => true,
+        source: 'scheduled' as const,
+        type: 'attack_discovery',
+        workflowConfig: {
+          alert_retrieval_workflow_ids: [],
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: true,
+          skill_enabled: true,
+          validation_workflow_id: 'default',
+        },
+        workflowsManagementApi: {
+          createWorkflow: jest.fn(),
+          getWorkflow: jest.fn(),
+          getWorkflowExecution: jest.fn(),
+          getWorkflows: jest.fn(),
+          runWorkflow: jest.fn(),
+        } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
+      };
+    };
+
+    it('rejects with a timeout error after the orchestration completes', async () => {
+      await expect(executeGenerationWorkflow(buildCancelledRunArgs())).rejects.toThrow(
+        'Rule execution cancelled due to timeout'
+      );
+    });
+
+    it('writes a generation-failed event so the UI reflects the real outcome', async () => {
+      await expect(executeGenerationWorkflow(buildCancelledRunArgs())).rejects.toThrow();
+
+      expect(mockWriteAttackDiscoveryEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'generation-failed',
+        })
+      );
+    });
   });
 
   it('passes scheduleInfo to reportWorkflowSuccess when provided', async () => {
@@ -850,6 +1005,7 @@ describe('executeGenerationWorkflow', () => {
         connector_id: 'test-connector-id',
         model: 'gpt-4',
       },
+      authz: createAuthorizedAuthzMock(),
       executionUuid: 'test-execution-uuid',
       getEventLogIndex: async () => '.kibana-event-log-test',
       getEventLogger: async () => mockEventLogger,
@@ -866,6 +1022,9 @@ describe('executeGenerationWorkflow', () => {
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
         alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: true,
+        skill_enabled: true,
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
@@ -920,6 +1079,7 @@ describe('executeGenerationWorkflow', () => {
           connector_id: 'test-connector-id',
           model: 'gpt-4',
         },
+        authz: createAuthorizedAuthzMock(),
         executionUuid: 'test-execution-uuid',
         getEventLogIndex: async () => '.kibana-event-log-test',
         getEventLogger: async () => mockEventLogger,
@@ -936,6 +1096,9 @@ describe('executeGenerationWorkflow', () => {
         workflowConfig: {
           alert_retrieval_workflow_ids: [],
           alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: true,
+          skill_enabled: true,
           validation_workflow_id: 'default',
         },
         workflowsManagementApi: {
@@ -1002,6 +1165,7 @@ describe('executeGenerationWorkflow', () => {
         connector_id: 'test-connector-id',
         model: 'gpt-4',
       },
+      authz: createAuthorizedAuthzMock(),
       executionUuid: 'test-execution-uuid',
       getEventLogIndex: async () => '.kibana-event-log-test',
       getEventLogger: async () => mockEventLogger,
@@ -1017,6 +1181,9 @@ describe('executeGenerationWorkflow', () => {
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
         alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: true,
+        skill_enabled: true,
         validation_workflow_id: 'default',
       },
       workflowsManagementApi: {
@@ -1074,6 +1241,7 @@ describe('executeGenerationWorkflow', () => {
           connector_id: 'test-connector-id',
           model: 'gpt-4',
         },
+        authz: createAuthorizedAuthzMock(),
         executionUuid: 'test-execution-uuid',
         getEventLogIndex: async () => '.kibana-event-log-test',
         getEventLogger: async () => mockEventLogger,
@@ -1089,6 +1257,9 @@ describe('executeGenerationWorkflow', () => {
         workflowConfig: {
           alert_retrieval_workflow_ids: [],
           alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: true,
+          skill_enabled: true,
           validation_workflow_id: 'default',
         },
         workflowsManagementApi: {
@@ -1122,5 +1293,92 @@ describe('executeGenerationWorkflow', () => {
       (order) => order > failedWriteCallOrder
     );
     expect(hasRefreshAfterFailedWrite).toBe(true);
+  });
+
+  describe('workflow-execution authorization guard', () => {
+    const buildRunArgs = (authz: Parameters<typeof executeGenerationWorkflow>[0]['authz']) => {
+      const mockEventLogger: jest.Mocked<IEventLogger> = {
+        logEvent: jest.fn(),
+      } as unknown as jest.Mocked<IEventLogger>;
+
+      const coreStartMock: CoreStart = {
+        elasticsearch: {
+          client: {
+            asScoped: () => ({
+              asCurrentUser: {
+                indices: { refresh: jest.fn().mockResolvedValue(undefined) },
+                security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+              },
+            }),
+          },
+        },
+        http: { basePath: { get: jest.fn().mockReturnValue('') } },
+      } as unknown as CoreStart;
+
+      return {
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        apiConfig: {
+          action_type_id: '.gen-ai',
+          connector_id: 'test-connector-id',
+          model: 'gpt-4',
+        },
+        authz,
+        executionUuid: 'test-execution-uuid',
+        getEventLogIndex: async () => '.kibana-event-log-test',
+        getEventLogger: async () => mockEventLogger,
+        getStartServices: async () => ({ coreStart: coreStartMock, pluginsStart: {} }),
+        logger: {
+          debug: jest.fn(),
+          error: jest.fn(),
+          info: jest.fn(),
+          warn: jest.fn(),
+        } as unknown as Logger,
+        request: {} as unknown as KibanaRequest,
+        type: 'attack_discovery',
+        workflowConfig: {
+          alert_retrieval_workflow_ids: [],
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: true,
+          skill_enabled: true,
+          validation_workflow_id: 'default',
+        },
+        workflowsManagementApi: {
+          createWorkflow: jest.fn(),
+          getWorkflow: jest.fn(),
+          getWorkflowExecution: jest.fn(),
+          getWorkflows: jest.fn(),
+          runWorkflow: jest.fn(),
+        } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
+      };
+    };
+
+    it('never runs a workflow (does not reach runManualOrchestration) when unauthorized', async () => {
+      await executeGenerationWorkflow(buildRunArgs(createUnauthorizedAuthzMock())).catch(() => {});
+
+      expect(mockRunManualOrchestration).not.toHaveBeenCalled();
+    });
+
+    it('throws WorkflowExecutionAuthorizationError when unauthorized', async () => {
+      await expect(
+        executeGenerationWorkflow(buildRunArgs(createUnauthorizedAuthzMock()))
+      ).rejects.toBeInstanceOf(WorkflowExecutionAuthorizationError);
+    });
+
+    it('proceeds to runManualOrchestration when authorized', async () => {
+      await executeGenerationWorkflow(buildRunArgs(createAuthorizedAuthzMock()));
+
+      expect(mockRunManualOrchestration).toHaveBeenCalled();
+    });
+
+    it('throws and never runs a workflow when the feature flag is OFF', async () => {
+      mockIsWorkflowsEnabled.mockResolvedValue(false);
+
+      await expect(
+        executeGenerationWorkflow(buildRunArgs(createAuthorizedAuthzMock()))
+      ).rejects.toThrow('Attack Discovery workflows are not enabled');
+
+      expect(mockRunManualOrchestration).not.toHaveBeenCalled();
+    });
   });
 });
