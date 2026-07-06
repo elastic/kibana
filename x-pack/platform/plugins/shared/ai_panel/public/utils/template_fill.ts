@@ -72,8 +72,10 @@ export function sanitizeTemplate(raw: string): string {
   return s;
 }
 
+const HTML_TAG_PATTERN = /<[a-zA-Z]/;
+
 export function isValidTemplate(template: string): boolean {
-  return /<[a-zA-Z]/.test(template);
+  return HTML_TAG_PATTERN.test(template);
 }
 
 export interface TemplateColumn {
@@ -120,13 +122,7 @@ export function fillTemplate(
     return obj;
   });
 
-  let rendered: string;
-  try {
-    rendered = liquid.parseAndRenderSync(tpl, { rows: rowObjects, max: maxValues });
-  } catch {
-    rendered =
-      '<p style="color:#d36086;padding:16px">Template error — please edit the prompt to regenerate.</p>';
-  }
+  const rendered = liquid.parseAndRenderSync(tpl, { rows: rowObjects, max: maxValues });
 
   return prepareHtml(rendered);
 }

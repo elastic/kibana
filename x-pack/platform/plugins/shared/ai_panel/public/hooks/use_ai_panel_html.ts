@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
@@ -99,7 +100,15 @@ export function useAiPanelHtml({
       fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal)
         .then(({ columns, values }) => {
           if (controller.signal.aborted) return;
-          setHtml(fillTemplate(template, columns, values ?? []));
+          try {
+            setHtml(fillTemplate(template, columns, values ?? []));
+          } catch {
+            setError(
+              i18n.translate('xpack.aiPanel.error.templateRender', {
+                defaultMessage: 'Template error — please edit the prompt to regenerate.',
+              })
+            );
+          }
           setIsLoading(false);
         })
         .catch((err: Error) => {
@@ -145,7 +154,17 @@ export function useAiPanelHtml({
           setIsLoading(false);
           return;
         }
-        rendered = fillTemplate(cleaned, esqlData.columns, esqlData.values ?? []);
+        try {
+          rendered = fillTemplate(cleaned, esqlData.columns, esqlData.values ?? []);
+        } catch {
+          setError(
+            i18n.translate('xpack.aiPanel.error.templateRender', {
+              defaultMessage: 'Template error — please edit the prompt to regenerate.',
+            })
+          );
+          setIsLoading(false);
+          return;
+        }
         selfWriteCountRef.current++;
         onTemplateChangeRef.current(cleaned);
       } else if (!esqlQuery) {
