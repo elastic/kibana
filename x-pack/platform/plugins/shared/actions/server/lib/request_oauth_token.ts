@@ -72,7 +72,7 @@ export async function requestOAuthToken<T>(
     validateStatus: () => true,
   });
 
-  if (res.status === 200) {
+  if (res.status >= 200 && res.status < 300) {
     return {
       tokenType: res.data.token_type,
       accessToken: res.data.access_token,
