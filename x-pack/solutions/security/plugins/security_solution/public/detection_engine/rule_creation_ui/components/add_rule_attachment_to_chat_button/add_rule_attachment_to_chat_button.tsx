@@ -25,6 +25,7 @@ import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/
 import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { formatRule } from '../../pages/rule_creation/helpers';
+import { stripServerFields } from '../../../common/ai_rule_creation_handler';
 import { useKibana } from '../../../../common/lib/kibana';
 
 interface AddRuleAttachmentFromFormProps {
@@ -80,18 +81,17 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
     actionTypeRegistry != null;
 
   const ruleAttachment = useMemo(() => {
-    let formattedRule: RuleCreateProps | RuleResponse | null | undefined;
+    let formattedRule: RuleCreateProps | Partial<RuleResponse> | null | undefined;
     if (isFormBased) {
-      const fromForm = formatRule<RuleCreateProps>(
+      formattedRule = formatRule<RuleCreateProps>(
         defineStepData,
         aboutStepData,
         scheduleStepData,
         actionsStepData,
         actionTypeRegistry
       );
-      formattedRule = existingRuleId ? { ...fromForm, id: existingRuleId } : fromForm;
     } else {
-      formattedRule = rule;
+      formattedRule = rule ? stripServerFields(rule) : rule;
     }
     const attachmentLabel =
       formattedRule?.name ||

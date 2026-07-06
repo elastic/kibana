@@ -40,7 +40,16 @@ const getCapturedAttachment = (): UseAgentBuilderAttachmentParams => {
   return attachment;
 };
 
-const ruleResponseMock = { id: 'rule-123', name: 'My Rule' } as RuleResponse;
+const ruleResponseMock = {
+  id: 'rule-123',
+  rule_id: 'rule-id-123',
+  revision: 2,
+  created_at: '2020-01-01T00:00:00.000Z',
+  created_by: 'elastic',
+  updated_at: '2020-01-02T00:00:00.000Z',
+  updated_by: 'elastic',
+  name: 'My Rule',
+} as RuleResponse;
 const defineStepDataMock = {} as DefineStepRule;
 const aboutStepDataMock = {} as AboutStepRule;
 const scheduleStepDataMock = {} as ScheduleStepRule;
@@ -94,8 +103,14 @@ describe('AddRuleAttachmentToChatButton', () => {
     expect(attachment.attachmentType).toBe(SecurityAgentBuilderAttachments.rule);
     // origin set → card shows "Update Rule"
     expect(attachment.origin).toBe(ruleResponseMock.id);
-    // data included → card renders immediately without waiting for server resolve
-    expect(attachment.attachmentData?.text).toBe(JSON.stringify(ruleResponseMock));
+    // data included → card renders immediately without waiting for server resolve, but
+    // server-assigned fields are stripped so identity flows only via `origin`
+    expect(attachment.attachmentData?.text).toBe(JSON.stringify({ name: 'My Rule' }));
+    const serializedText = attachment.attachmentData?.text ?? '';
+    expect(serializedText).not.toContain('rule-123');
+    expect(serializedText).not.toContain('rule_id');
+    expect(serializedText).not.toContain('revision');
+    expect(serializedText).not.toContain('created_at');
     expect(attachment.attachmentData?.attachmentLabel).toBe('My Rule');
     expect(attachment.attachmentDescription).toBe('My Rule');
     const newAttachmentProps = mockNewAgentBuilderAttachment.mock.calls[0][0];
@@ -133,5 +148,27 @@ describe('AddRuleAttachmentToChatButton', () => {
 
     await user.click(screen.getByTestId('newAgentBuilderAttachmentMock'));
     expect(mockOpenAgentBuilderFlyout).toHaveBeenCalledTimes(1);
+  });
+
+  it('sets origin from existingRuleId without embedding id in the serialized text', () => {
+    mockFormatRule.mockReturnValue({ name: 'Formatted Rule' });
+
+    render(
+      <AddRuleAttachmentToChatButton
+        defineStepData={defineStepDataMock}
+        aboutStepData={aboutStepDataMock}
+        scheduleStepData={scheduleStepDataMock}
+        actionsStepData={actionsStepDataMock}
+        actionTypeRegistry={actionTypeRegistryMock}
+        existingRuleId="rule-123"
+        pathway="rule_editing"
+      />
+    );
+
+    const attachment = getCapturedAttachment();
+    // identity flows via origin, never through the embedded text
+    expect(attachment.origin).toBe('rule-123');
+    expect(attachment.attachmentData?.text).toBe(JSON.stringify({ name: 'Formatted Rule' }));
+    expect(attachment.attachmentData?.text).not.toContain('rule-123');
   });
 });

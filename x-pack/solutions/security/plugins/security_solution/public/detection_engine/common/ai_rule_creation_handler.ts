@@ -26,7 +26,7 @@ import type { AiRuleCreationService } from './ai_rule_creation_store';
 
 // Strip server-assigned fields from attachment text — `id`/`rule_id` in the text causes the
 // agent to skip `attachment_id` and mint a new card instead of updating the existing one.
-const stripServerFields = (rule: RuleResponse): Partial<RuleResponse> => {
+export const stripServerFields = (rule: RuleResponse): Partial<RuleResponse> => {
   const {
     id: _id,
     rule_id: _ruleId,
