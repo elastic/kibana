@@ -27,8 +27,11 @@ export const DISPLAY_NAME = i18n.translate('links.displayName', {
 /**
  * Link types
  */
-export const DASHBOARD_LINK_TYPE = 'dashboardLink';
-export const EXTERNAL_LINK_TYPE = 'externalLink';
+export const DASHBOARD_LINK_TYPE = 'dashboard_link';
+export const EXTERNAL_LINK_TYPE = 'external_link';
+// legacy constants from before we settled on snake case for the API
+export const LEGACY_DASHBOARD_LINK_TYPE = 'dashboardLink';
+export const LEGACY_EXTERNAL_LINK_TYPE = 'externalLink';
 
 /**
  * Layout options
