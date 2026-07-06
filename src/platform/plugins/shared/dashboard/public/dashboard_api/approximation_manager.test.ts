@@ -20,24 +20,24 @@ describe('approximationManager', () => {
 
   test('initializes with false when esql_approximation is not set', () => {
     const manager = initializeApproximationManager(getSampleDashboardState());
-    expect(manager.api.esqlApproximation$.value).toBe(false);
+    expect(manager.api.isApproximate$.value).toBe(false);
   });
 
   test('initializes with the value from initial state', () => {
     const manager = initializeApproximationManager(
       getSampleDashboardState({ esql_approximation: true })
     );
-    expect(manager.api.esqlApproximation$.value).toBe(true);
+    expect(manager.api.isApproximate$.value).toBe(true);
   });
 
   test('setEsqlApproximation updates the subject', () => {
     const manager = initializeApproximationManager(getSampleDashboardState());
 
     manager.api.setEsqlApproximation(true);
-    expect(manager.api.esqlApproximation$.value).toBe(true);
+    expect(manager.api.isApproximate$.value).toBe(true);
 
     manager.api.setEsqlApproximation(false);
-    expect(manager.api.esqlApproximation$.value).toBe(false);
+    expect(manager.api.isApproximate$.value).toBe(false);
   });
 
   test('setEsqlApproximation does not emit when value is unchanged', () => {
@@ -45,7 +45,7 @@ describe('approximationManager', () => {
       getSampleDashboardState({ esql_approximation: true })
     );
     const emissions: boolean[] = [];
-    manager.api.esqlApproximation$.subscribe((v) => emissions.push(v));
+    manager.api.isApproximate$.subscribe((v) => emissions.push(v));
 
     manager.api.setEsqlApproximation(true);
     expect(emissions).toHaveLength(1); // only the initial emission
@@ -64,10 +64,10 @@ describe('approximationManager', () => {
     );
 
     manager.api.setEsqlApproximation(false);
-    expect(manager.api.esqlApproximation$.value).toBe(false);
+    expect(manager.api.isApproximate$.value).toBe(false);
 
     manager.internalApi.reset(getSampleDashboardState({ esql_approximation: true }));
-    expect(manager.api.esqlApproximation$.value).toBe(true);
+    expect(manager.api.isApproximate$.value).toBe(true);
   });
 
   test('startComparing detects change from false to true', (done) => {

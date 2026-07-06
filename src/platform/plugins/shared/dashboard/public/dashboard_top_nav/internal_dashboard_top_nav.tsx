@@ -117,7 +117,7 @@ export function InternalDashboardTopNav({
     dashboardApi.dataViews$,
     dashboardApi.fullScreenMode$,
     dashboardApi.hasUnsavedChanges$,
-    dashboardApi.esqlApproximation$,
+    dashboardApi.isApproximate$,
     dashboardApi.savedObjectId$,
     dashboardApi.query$,
     dashboardApi.title$,

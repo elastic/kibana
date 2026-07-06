@@ -124,7 +124,7 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
   }
 
   if (apiHasParentApi(api) && apiPublishesApproximation(api.parentApi)) {
-    observables.isApproximate = api.parentApi.esqlApproximation$;
+    observables.isApproximate = api.parentApi.isApproximate$;
   }
 
   return combineLatest(observables);

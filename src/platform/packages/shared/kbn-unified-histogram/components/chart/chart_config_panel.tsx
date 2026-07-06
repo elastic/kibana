@@ -55,11 +55,11 @@ export function ChartConfigPanel({
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
 
-  const esqlApproximation$ = useRef(new BehaviorSubject<boolean | undefined>(undefined));
+  const isApproximate$ = useRef(new BehaviorSubject<boolean | undefined>(undefined));
   useEffect(() => {
-    esqlApproximation$.current.next(isApproximate);
+    isApproximate$.current.next(isApproximate);
   }, [isApproximate]);
-  const editorParentApi = useRef({ esqlApproximation$: esqlApproximation$.current });
+  const editorParentApi = useRef({ isApproximate$: isApproximate$.current });
 
   const updatePanelState = useCallback<
     ComponentProps<EditLensConfigPanelComponent>['updatePanelState']
