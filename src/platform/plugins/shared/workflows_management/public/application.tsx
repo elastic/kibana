@@ -13,6 +13,7 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { QueryClientProvider } from '@kbn/react-query';
+import { WorkflowsUiServicesProvider } from '@kbn/workflows-ui';
 import { WorkflowsContextProvider } from './common/context';
 import { WorkflowsRoutes } from './routes';
 import { queryClient } from './shared/lib/query_client';
@@ -29,7 +30,9 @@ export const renderApp = (
       <KibanaContextProvider services={services}>
         <QueryClientProvider client={queryClient}>
           <WorkflowsContextProvider>
-            <WorkflowsRoutes history={history} />
+            <WorkflowsUiServicesProvider services={services}>
+              <WorkflowsRoutes history={history} />
+            </WorkflowsUiServicesProvider>
           </WorkflowsContextProvider>
         </QueryClientProvider>
       </KibanaContextProvider>

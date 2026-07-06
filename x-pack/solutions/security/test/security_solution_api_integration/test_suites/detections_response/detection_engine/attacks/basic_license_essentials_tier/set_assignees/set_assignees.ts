@@ -46,11 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
         .post(DETECTION_ENGINE_ATTACKS_SEARCH_URL)
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
-        .send(
-          ids === undefined
-            ? getSimpleAttackAlertsQuery()
-            : { query: { bool: { filter: { terms: { _id: ids } } } } }
-        )
+        .send(ids === undefined ? getSimpleAttackAlertsQuery() : { ids })
         .expect(200);
       return body.hits.hits as Array<{ _id: string; _source: Record<string, unknown> }>;
     };
