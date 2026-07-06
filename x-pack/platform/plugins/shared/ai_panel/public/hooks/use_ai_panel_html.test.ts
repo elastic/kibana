@@ -23,7 +23,6 @@ import { getServices } from '../services';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { streamGenerate } from '../utils/stream_generate';
 import { useAiPanelHtml } from './use_ai_panel_html';
-import { TEMPLATE_SENTINEL } from '../utils/template_fill';
 
 const mockHttp = {} as unknown as HttpStart;
 const mockSearch = {} as unknown as ISearchGeneric;
@@ -46,7 +45,7 @@ const baseParams = {
   onTemplateChange: jest.fn(),
 };
 
-const VALID_TEMPLATE = `${TEMPLATE_SENTINEL}\n<html><body><p>hello</p></body></html>`;
+const VALID_TEMPLATE = `<html><body><p>hello</p></body></html>`;
 
 describe('useAiPanelHtml', () => {
   describe('empty prompt', () => {
@@ -76,7 +75,7 @@ describe('useAiPanelHtml', () => {
         columns: [{ name: 'count', type: 'long' }],
         values: [[42]],
       });
-      const template = `${TEMPLATE_SENTINEL}\n<html><body>{{ rows[0].count }}</body></html>`;
+      const template = `<html><body>{{ rows[0].count }}</body></html>`;
 
       const { result } = renderHook(() =>
         useAiPanelHtml({
@@ -111,7 +110,7 @@ describe('useAiPanelHtml', () => {
   describe('slow path — no stored template', () => {
     it('calls both fetchEsqlData and streamGenerate in parallel for esqlQuery panels', async () => {
       const onTemplateChange = jest.fn();
-      const template = `${TEMPLATE_SENTINEL}\n<html><body>{{ rows[0].total }}</body></html>`;
+      const template = `<html><body>{{ rows[0].total }}</body></html>`;
 
       (streamGenerate as jest.Mock).mockImplementation(
         (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
@@ -135,7 +134,7 @@ describe('useAiPanelHtml', () => {
       await waitFor(() => expect(result.current.isLoading).toBe(false));
       expect(fetchEsqlData).toHaveBeenCalledTimes(1);
       expect(streamGenerate).toHaveBeenCalledTimes(1);
-      expect(onTemplateChange).toHaveBeenCalledWith(template);
+      expect(onTemplateChange).toHaveBeenCalledWith(expect.stringContaining('rows[0].total'));
       expect(result.current.html).toContain('99');
     });
 
@@ -153,8 +152,7 @@ describe('useAiPanelHtml', () => {
     it('shows invalid-template error when LLM returns non-HTML', async () => {
       (streamGenerate as jest.Mock).mockImplementation(
         (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
-          // Only emits the sentinel — no actual HTML elements
-          onToken(TEMPLATE_SENTINEL);
+          onToken('just plain text, no html elements');
           return Promise.resolve();
         }
       );

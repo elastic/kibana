@@ -13,7 +13,7 @@ import { fetchEsqlData } from '../utils/fetch_esql_data';
 import type { EsqlDataResult } from '../utils/fetch_esql_data';
 import {
   fillTemplate,
-  sanitizeTemplate,
+  stripMarkdownFences,
   isValidTemplate,
   prepareHtml,
 } from '../utils/template_fill';
@@ -148,7 +148,7 @@ export function useAiPanelHtml({
       let rendered: string;
 
       if (esqlQuery && esqlData) {
-        const cleaned = sanitizeTemplate(accRef.current);
+        const cleaned = stripMarkdownFences(accRef.current);
         if (!isValidTemplate(cleaned)) {
           setError('Failed to generate panel: LLM returned invalid template');
           setIsLoading(false);

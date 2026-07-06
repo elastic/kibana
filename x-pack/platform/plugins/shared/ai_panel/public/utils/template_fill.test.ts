@@ -11,12 +11,7 @@ jest.mock('dompurify', () => ({
   default: { sanitize: (html: string) => html },
 }));
 
-import {
-  fillTemplate,
-  sanitizeTemplate,
-  isValidTemplate,
-  TEMPLATE_SENTINEL,
-} from './template_fill';
+import { fillTemplate, stripMarkdownFences, isValidTemplate } from './template_fill';
 
 const cols = [
   { name: 'category.keyword', type: 'keyword' },
@@ -28,55 +23,65 @@ const rows = [
   ['Accessories', 1000],
 ];
 
-const wrap = (body: string) => `${TEMPLATE_SENTINEL}\n<html><body>${body}</body></html>`;
+const wrap = (body: string) => `<html><body>${body}</body></html>`;
 
 describe('fillTemplate', () => {
   describe('column name normalization', () => {
     it('maps dot-notation column names to underscored placeholders', () => {
-      const tpl = wrap('{{ rows[0].category_keyword }}');
-      expect(fillTemplate(tpl, cols, rows)).toContain('Clothing');
+      expect(fillTemplate(wrap('{{ rows[0].category_keyword }}'), cols, rows)).toContain(
+        'Clothing'
+      );
     });
 
     it('converts @-prefixed column names to at_ so they remain distinct', () => {
-      // "@ts" → "at_ts", naturally distinct from a column named "ts"
-      const tpl = wrap('{{ rows[0].at_ts }}');
-      const result = fillTemplate(tpl, [{ name: '@ts', type: 'date' }], [['2024-01-01']]);
+      const result = fillTemplate(
+        wrap('{{ rows[0].at_ts }}'),
+        [{ name: '@ts', type: 'date' }],
+        [['2024-01-01']]
+      );
       expect(result).toContain('2024-01-01');
     });
   });
 
   describe('Liquid loops', () => {
     it('renders one element per row inside {% for %}', () => {
-      const tpl = wrap('{% for row in rows %}<span>{{ row.category_keyword }}</span>{% endfor %}');
-      const result = fillTemplate(tpl, cols, rows);
+      const result = fillTemplate(
+        wrap('{% for row in rows %}<span>{{ row.category_keyword }}</span>{% endfor %}'),
+        cols,
+        rows
+      );
       expect(result).toContain('Clothing');
       expect(result).toContain('Shoes');
       expect(result).toContain('Accessories');
     });
 
     it('renders nothing for the loop when rows is empty', () => {
-      const tpl = wrap('{% for row in rows %}<span>{{ row.category_keyword }}</span>{% endfor %}');
-      const result = fillTemplate(tpl, cols, []);
+      const result = fillTemplate(
+        wrap('{% for row in rows %}<span>{{ row.category_keyword }}</span>{% endfor %}'),
+        cols,
+        []
+      );
       expect(result).not.toContain('<span>');
     });
   });
 
   describe('empty state', () => {
     it('renders {% if rows.size == 0 %} block when there are no rows', () => {
-      const tpl = wrap('{% if rows.size == 0 %}<p>No data</p>{% endif %}');
-      expect(fillTemplate(tpl, cols, [])).toContain('No data');
+      expect(fillTemplate(wrap('{% if rows.size == 0 %}<p>No data</p>{% endif %}'), cols, [])).toContain('No data');
     });
 
     it('does not render the empty block when rows are present', () => {
-      const tpl = wrap('{% if rows.size == 0 %}<p>No data</p>{% endif %}');
-      expect(fillTemplate(tpl, cols, rows)).not.toContain('No data');
+      expect(fillTemplate(wrap('{% if rows.size == 0 %}<p>No data</p>{% endif %}'), cols, rows)).not.toContain('No data');
     });
   });
 
   describe('_pct variants', () => {
     it('computes _pct as percentage of max value', () => {
-      const tpl = wrap('{% for row in rows %}{{ row.total_revenue_pct }}{% endfor %}');
-      const result = fillTemplate(tpl, cols, rows);
+      const result = fillTemplate(
+        wrap('{% for row in rows %}{{ row.total_revenue_pct }}{% endfor %}'),
+        cols,
+        rows
+      );
       // max is 8000 → 8000/8000=100, 3000/8000=38, 1000/8000=13
       expect(result).toContain('100');
       expect(result).toContain('38');
@@ -84,8 +89,7 @@ describe('fillTemplate', () => {
     });
 
     it('clamps _pct to 100 maximum', () => {
-      const tpl = wrap('{{ rows[0].val_pct }}');
-      const result = fillTemplate(tpl, [{ name: 'val', type: 'double' }], [[999999]]);
+      const result = fillTemplate(wrap('{{ rows[0].val_pct }}'), [{ name: 'val', type: 'double' }], [[999999]]);
       expect(result).toContain('100');
     });
   });
@@ -106,9 +110,8 @@ describe('fillTemplate', () => {
 
   describe('HTML escaping', () => {
     it('escapes < and > in column values', () => {
-      const tpl = wrap('{% for row in rows %}{{ row.label }}{% endfor %}');
       const result = fillTemplate(
-        tpl,
+        wrap('{% for row in rows %}{{ row.label }}{% endfor %}'),
         [{ name: 'label', type: 'keyword' }],
         [['<script>alert(1)</script>']]
       );
@@ -117,48 +120,36 @@ describe('fillTemplate', () => {
     });
   });
 
-  describe('sentinel stripping', () => {
-    it('strips the sentinel before rendering', () => {
-      const tpl = `${TEMPLATE_SENTINEL}\n<p>hello</p>`;
-      expect(fillTemplate(tpl, [], [])).not.toContain(TEMPLATE_SENTINEL);
-    });
-  });
-
   describe('error recovery', () => {
-    it('returns an error message for invalid Liquid syntax', () => {
-      const tpl = wrap('{% invalid_tag %}');
-      const result = fillTemplate(tpl, cols, rows);
-      expect(result).toContain('Template error');
+    it('throws on invalid Liquid syntax', () => {
+      expect(() => fillTemplate(wrap('{% invalid_tag %}'), cols, rows)).toThrow();
     });
   });
 });
 
-describe('sanitizeTemplate', () => {
-  it('strips markdown code fences', () => {
-    const raw = '```html\n' + TEMPLATE_SENTINEL + '\n<p>hi</p>\n```';
-    expect(sanitizeTemplate(raw)).toContain(TEMPLATE_SENTINEL);
-    expect(sanitizeTemplate(raw)).not.toContain('```');
+describe('stripMarkdownFences', () => {
+  it('strips leading ```html and trailing ```', () => {
+    expect(stripMarkdownFences('```html\n<p>hi</p>\n```')).toBe('<p>hi</p>');
   });
 
-  it('discards LLM preamble before the sentinel', () => {
-    const raw = 'Here is the template:\n' + TEMPLATE_SENTINEL + '\n<p>hi</p>';
-    expect(sanitizeTemplate(raw).startsWith(TEMPLATE_SENTINEL)).toBe(true);
+  it('strips fences embedded inside an HTML shell', () => {
+    const raw = '<html><body>```html\n<p>hi</p>\n```</body></html>';
+    expect(stripMarkdownFences(raw)).not.toContain('```');
   });
 
-  it('adds the sentinel if missing', () => {
-    const raw = '<p>no sentinel here</p>';
-    expect(sanitizeTemplate(raw)).toContain(TEMPLATE_SENTINEL);
+  it('leaves plain HTML unchanged', () => {
+    expect(stripMarkdownFences('<p>hello</p>')).toBe('<p>hello</p>');
   });
 });
 
 describe('isValidTemplate', () => {
   it('returns true when the template contains an HTML element', () => {
-    expect(isValidTemplate(TEMPLATE_SENTINEL + '\n<div>hi</div>')).toBe(true);
-    expect(isValidTemplate(TEMPLATE_SENTINEL + '\n<p>hi</p>')).toBe(true);
+    expect(isValidTemplate('<div>hi</div>')).toBe(true);
+    expect(isValidTemplate('<p>hi</p>')).toBe(true);
   });
 
-  it('returns false for empty or sentinel-only content', () => {
-    expect(isValidTemplate(TEMPLATE_SENTINEL)).toBe(false);
+  it('returns false for empty or non-HTML content', () => {
     expect(isValidTemplate('')).toBe(false);
+    expect(isValidTemplate('just some text')).toBe(false);
   });
 });
