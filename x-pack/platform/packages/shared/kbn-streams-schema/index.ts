@@ -6,6 +6,13 @@
  */
 
 export { Streams, streamDefinitionSchema } from './src/models/streams';
+export {
+  streamsGraphConfigurationSchema,
+  streamsGraphResponseSchema,
+  streamsGraphUiMetadataSchema,
+  streamsGraphUpsertRequestSchema,
+} from './src/models/graph';
+export type { StreamsGraph } from './src/models/graph';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
 export {

@@ -18,7 +18,10 @@ import {
 
 import type { StreamsPluginStartDependencies } from './types';
 
-export function registerFeatureFlags(core: CoreSetup<StreamsPluginStartDependencies>) {
+export function registerFeatureFlags(
+  core: CoreSetup<StreamsPluginStartDependencies>,
+  { isStreamsCanvasEnabled }: { isStreamsCanvasEnabled: boolean }
+) {
   core.uiSettings.register({
     [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: {
       category: ['observability'],
@@ -92,7 +95,7 @@ export function registerFeatureFlags(core: CoreSetup<StreamsPluginStartDependenc
       name: i18n.translate('xpack.streams.canvasSettingsName', {
         defaultMessage: 'Streams Canvas',
       }),
-      value: false,
+      value: isStreamsCanvasEnabled,
       description: i18n.translate('xpack.streams.canvasSettingsDescription', {
         defaultMessage: 'Enable the Streams Canvas experience.',
       }),

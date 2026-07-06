@@ -15,6 +15,11 @@ export const STREAMS_FEATURE_ID = 'streams';
 export const STREAMS_CONSUMER = 'streams';
 export const STREAMS_PRODUCER = 'streams';
 
+export const STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE = 'streams-configuration';
+export const STREAMS_CONFIGURATION_SAVED_OBJECT_ID = STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE;
+export const STREAMS_UI_METADATA_SAVED_OBJECT_TYPE = 'streams-ui-metadata';
+export const STREAMS_UI_METADATA_SAVED_OBJECT_ID = STREAMS_UI_METADATA_SAVED_OBJECT_TYPE;
+
 export const STREAMS_RULE_REGISTRATION_CONTEXT = 'streams';
 
 export const STREAMS_API_PRIVILEGES = {
