@@ -44,12 +44,6 @@ export type CommandExecutionResultProps = PropsWithChildren<{
    */
   showAs?: 'success' | 'failure' | 'pending';
 
-  /**
-   * Applies only when `showAs` is `pending`.
-   * If true (default), a hint will be shown to indicate that the command seems to be taking a long time to complete.
-   */
-  showLongRunningCommandHint?: boolean;
-
   /** Default title message are provided depending based on the value for `showAs` */
   title?: ReactNode;
 
@@ -73,7 +67,6 @@ export const CommandExecutionResult = memo<CommandExecutionResultProps>(
     showAs = 'success',
     title,
     showTitle = true,
-    showLongRunningCommandHint = true,
     'data-test-subj': dataTestSubj,
     className,
     children,
