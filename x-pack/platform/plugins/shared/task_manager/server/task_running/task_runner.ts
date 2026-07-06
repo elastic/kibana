@@ -123,7 +123,7 @@ type Opts = {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
-} & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
+} & Pick<Middleware, 'beforeRun'>;
 
 export enum TaskRunResult {
   // Task completed successfully
@@ -166,8 +166,6 @@ export class TaskManagerRunner implements TaskRunner {
   private logger: Logger;
   private bufferedTaskStore: Updatable;
   private beforeRun: Middleware['beforeRun'];
-  // @ts-expect-error
-  private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
@@ -200,7 +198,6 @@ export class TaskManagerRunner implements TaskRunner {
     logger,
     store,
     beforeRun,
-    beforeMarkRunning,
     defaultMaxAttempts,
     onTaskEvent = identity,
     executionContext,
@@ -218,7 +215,6 @@ export class TaskManagerRunner implements TaskRunner {
     this.logger = logger;
     this.bufferedTaskStore = store;
     this.beforeRun = beforeRun;
-    this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;

@@ -3358,7 +3358,6 @@ describe('TaskManagerRunner', () => {
     const runner = new TaskManagerRunner({
       defaultMaxAttempts: 5,
       beforeRun: (context) => Promise.resolve(context),
-      beforeMarkRunning: (context) => Promise.resolve(context),
       logger,
       store,
       instance,
