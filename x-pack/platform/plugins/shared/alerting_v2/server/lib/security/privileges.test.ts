@@ -71,13 +71,21 @@ describe('registerFeaturePrivileges', () => {
       const registered = getRegisteredFeature(featureId);
       const expectedManagement = { [ALERTING_V2_SECTION_ID]: [expectedApp] };
 
-      expect(registered.app).toContain(expectedApp);
       expect(registered.management).toEqual(expectedManagement);
-      expect(registered.privileges?.all.app).toContain(expectedApp);
       expect(registered.privileges?.all.management).toEqual(expectedManagement);
-      expect(registered.privileges?.read.app).toContain(expectedApp);
       expect(registered.privileges?.read.management).toEqual(expectedManagement);
     });
+
+    it.each(Object.values(ALERTING_V2_FEATURES).map((f) => [f.id, f.managementApp]))(
+      'does not add the "%s" feature\'s management app "%s" to the standalone `app` array',
+      (featureId, managementApp) => {
+        const registered = getRegisteredFeature(featureId);
+
+        expect(registered.app).not.toContain(managementApp);
+        expect(registered.privileges?.all.app).not.toContain(managementApp);
+        expect(registered.privileges?.read.app).not.toContain(managementApp);
+      }
+    );
 
     it('assigns a unique management app id to each feature (clean split)', () => {
       const managementApps = Object.values(ALERTING_V2_FEATURES).map((f) => f.managementApp);

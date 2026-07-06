@@ -27,7 +27,7 @@ const category: AppCategory = {
 
 const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeatureConfig => {
   const managementApps = [feature.managementApp];
-  const app = [APP_ID, feature.managementApp];
+  const app = [APP_ID];
 
   return {
     id: feature.id,
