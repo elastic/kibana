@@ -81,9 +81,6 @@ export function jobAuditMessagesProvider(
       end?: string;
     }
   ) {
-    // check that the job exists and the user has permission to access it
-    await mlClient.getJobs({ job_id: jobId });
-
     let gte = null;
     if (jobId !== undefined && from === undefined) {
       const jobs = await mlClient.getJobs({ job_id: jobId });
