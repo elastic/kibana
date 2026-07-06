@@ -91,7 +91,7 @@ describe('createSecurityDocumentProfileProviders', () => {
       expect(result.renderFooter).not.toBe(prevRenderFooter);
     });
 
-    it('does not override renderHeader for attack discovery alerts', () => {
+    it('overrides renderHeader for attack discovery alerts', () => {
       const { result, prevRenderHeader } = getDocViewerResult(
         createRecord({
           'event.kind': 'signal',
@@ -99,10 +99,11 @@ describe('createSecurityDocumentProfileProviders', () => {
         })
       );
 
-      expect(result.renderHeader).toBe(prevRenderHeader);
+      expect(result.renderHeader).toBeDefined();
+      expect(result.renderHeader).not.toBe(prevRenderHeader);
     });
 
-    it('does not override renderFooter for attack discovery alerts', () => {
+    it('overrides renderFooter for attack discovery alerts', () => {
       const { result, prevRenderFooter } = getDocViewerResult(
         createRecord({
           'event.kind': 'signal',
@@ -110,7 +111,8 @@ describe('createSecurityDocumentProfileProviders', () => {
         })
       );
 
-      expect(result.renderFooter).toBe(prevRenderFooter);
+      expect(result.renderFooter).toBeDefined();
+      expect(result.renderFooter).not.toBe(prevRenderFooter);
     });
 
     it('adds the overview tab to the registry for alert documents', () => {
@@ -133,7 +135,7 @@ describe('createSecurityDocumentProfileProviders', () => {
       );
     });
 
-    it('does not add the overview tab to the registry for attack discovery alerts', () => {
+    it('adds the overview tab to the registry for attack discovery alerts', () => {
       const { result } = getDocViewerResult(
         createRecord({
           'event.kind': 'signal',
@@ -143,7 +145,9 @@ describe('createSecurityDocumentProfileProviders', () => {
       const registry = { add: jest.fn() };
       result.docViewsRegistry(registry as never);
 
-      expect(registry.add).not.toHaveBeenCalled();
+      expect(registry.add).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'doc_view_attack_overview' })
+      );
     });
 
     it('does not override renderHeader when event.kind is absent', () => {
