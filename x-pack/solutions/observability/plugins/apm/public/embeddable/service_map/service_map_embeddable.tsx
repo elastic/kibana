@@ -86,6 +86,8 @@ export interface ServiceMapEmbeddableProps {
   contextualMapExpandedNodeIds?: ReadonlySet<string>;
   onContextualMapExpand?: (nodeId: string) => void;
   onContextualMapCollapse?: (nodeId: string) => void;
+  /** Override default min-height (400px) for compact inline embeds. */
+  embeddableMinHeight?: number;
 }
 
 function LoadingSpinner() {
@@ -131,6 +133,7 @@ export function ServiceMapEmbeddable({
   contextualMapExpandedNodeIds: contextualMapExpandedNodeIdsProp,
   onContextualMapExpand,
   onContextualMapCollapse,
+  embeddableMinHeight = EMBEDDABLE_MIN_HEIGHT,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -377,7 +380,7 @@ export function ServiceMapEmbeddable({
           width: '100%',
           height: '100%',
           minWidth: EMBEDDABLE_MIN_WIDTH,
-          minHeight: EMBEDDABLE_MIN_HEIGHT,
+          minHeight: embeddableMinHeight,
           position: 'relative' as const,
           boxSizing: 'border-box',
         }}

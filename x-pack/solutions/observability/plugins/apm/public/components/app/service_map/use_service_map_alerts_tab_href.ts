@@ -11,8 +11,8 @@
  * The module exposes three related hooks that all resolve the
  * service-scoped alerts-tab destination from the current map route
  * (`/service-map`, `/services/{serviceName}/service-map`,
- * `/mobile-services/{serviceName}/service-map`, or
- * `/services/{serviceName}/overview`) while preserving the
+ * `/mobile-services/{serviceName}/service-map`, `/services/{serviceName}/overview`,
+ * or `/services/{serviceName}/transactions/view`) while preserving the
  * shared time range / environment params and **stripping `kuery`** (alerts
  * aggregate across all visible services, so a node-scoped click would
  * otherwise carry the map's service-name filter into a destination where
@@ -54,7 +54,9 @@ function useAlertsTabHrefBuilder(): (serviceName: string) => string {
     '/service-map',
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map',
-    '/services/{serviceName}/overview'
+    '/services/{serviceName}/overview',
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
   );
 
   return useCallback(

@@ -47,7 +47,9 @@ export function ServiceContents({
     '/service-map',
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map',
-    '/services/{serviceName}/overview'
+    '/services/{serviceName}/overview',
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
   );
 
   if (!('rangeFrom' in query && 'rangeTo' in query) || !query.rangeFrom || !query.rangeTo) {

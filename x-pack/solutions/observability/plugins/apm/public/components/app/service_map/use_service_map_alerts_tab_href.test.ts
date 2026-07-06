@@ -147,6 +147,21 @@ describe('useServiceMapAlertsTabHref', () => {
     });
   });
 
+  describe('from transaction details (/services/{serviceName}/transactions/view)', () => {
+    it('links to /services/{serviceName}/alerts and resets kuery', () => {
+      mockedUseApmRoutePath.mockReturnValue(
+        '/services/{serviceName}/transactions/view' as unknown as ReturnType<typeof useApmRoutePath>
+      );
+
+      const { result } = renderHook(() => useServiceMapAlertsTabHref('opbeans-java'));
+
+      expect(result.current).toContain('/app/apm/services/opbeans-java/alerts');
+      const search = new URL(`http://x${result.current}`).searchParams;
+      expect(search.get('kuery')).toBe('');
+      expect(search.get('environment')).toBe('production');
+    });
+  });
+
   describe('from the mobile service map (/mobile-services/{serviceName}/service-map)', () => {
     it('links to /mobile-services/{serviceName}/alerts and resets kuery', () => {
       mockedUseApmRoutePath.mockReturnValue(
