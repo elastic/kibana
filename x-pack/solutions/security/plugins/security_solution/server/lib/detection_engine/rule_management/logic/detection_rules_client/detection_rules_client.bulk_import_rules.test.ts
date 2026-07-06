@@ -213,7 +213,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
     expect(errors[0].error.message).toBe('boom');
   });
 
-  it('forwards ruleImport action and rules.length as bulkCount to rulesClient.bulkCreateRules', async () => {
+  it('forwards caller changeTracking to rulesClient.bulkCreateRules and forces ruleImport action', async () => {
     const rules = [
       { ...getImportRulesSchemaMock(), rule_id: 'rule-1' },
       { ...getImportRulesSchemaMock(), rule_id: 'rule-2' },
@@ -225,18 +225,21 @@ describe('detectionRulesClient.bulkImportRules', () => {
       total: 0,
     });
 
+    // Caller supplies the pre-batching NDJSON count as bulkCount.
+    const originalBulkCount = 4200;
     await subject.bulkImportRules({
       allowMissingConnectorSecrets: false,
       overwriteRules: false,
       ruleSourceImporter: mockRuleSourceImporter,
       rules,
+      changeTracking: { metadata: { bulkCount: originalBulkCount } },
     });
 
     expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
       expect.objectContaining({
         changeTracking: {
           action: SecurityRuleChangeTrackingAction.ruleImport,
-          metadata: { bulkCount: rules.length },
+          metadata: { bulkCount: originalBulkCount },
         },
       })
     );
