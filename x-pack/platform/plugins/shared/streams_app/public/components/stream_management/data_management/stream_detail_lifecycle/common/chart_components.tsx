@@ -227,10 +227,14 @@ function ChartBarPhasesSeriesBase({
     }, {} as IlmPolicyPhases);
   }, [ingestionRate]);
 
-  const maxY = Math.max(
-    0,
-    ...Object.values(ingestionRate?.buckets ?? {}).flatMap((buckets) => buckets.map((b) => b.value))
-  );
+  const totalsByKey = new Map<number, number>();
+  for (const buckets of Object.values(ingestionRate?.buckets ?? {})) {
+    for (const { key, value } of buckets) {
+      totalsByKey.set(key, (totalsByKey.get(key) ?? 0) + value);
+    }
+  }
+  const maxY = Math.max(0, ...totalsByKey.values());
+
   const hasData = maxY > 0;
   const yDomain = { min: 0, max: hasData ? maxY : 1 };
 
