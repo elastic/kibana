@@ -18,13 +18,12 @@ import {
   seedFeatures,
   seedLogs,
   seedQueries,
-  seedTasks,
   cleanSeedData,
 } from './seed_sigevents_env/steps';
 import type { SeedContext } from './seed_sigevents_env/types';
 import { getSynthtraceDefaultStream } from './seed_sigevents_env/types';
 
-/** Fixed RNG seed — changing this invalidates all deterministic IDs (alerts, tasks, features) across re-runs. */
+/** Fixed RNG seed — changing this invalidates all deterministic IDs (alerts, features) across re-runs. */
 const FIXED_SEED = 42;
 
 export async function ensureStreamsEnabled(
@@ -100,8 +99,7 @@ run(
 
     // Step ordering matters — dependencies:
     //   logs       → must exist before alerts (ESQL runs against seeded logs)
-    //   queries    → must be promoted before rule_ids can be read (needed by alerts + tasks)
-    //   features + queries → all consumed by tasks (task payload embeds both)
+    //   queries    → must be promoted before rule_ids can be read (needed by alerts)
 
     log.info('Seeding logs…');
     const { failureStartMs, failureEndMs, manifest } = await seedLogs(ctx, esClient, log);
@@ -116,9 +114,6 @@ run(
     log.info('Seeding alerts…');
     await seedAlerts(ctx, seededQueries, failureStartMs, failureEndMs, esClient, log);
 
-    log.info('Seeding tasks…');
-    await seedTasks(ctx, manifest, seededQueries, esClient, log);
-
     log.info('Done.');
   },
   {
@@ -131,7 +126,7 @@ run(
                                  Available: fraud_check_redis_herring, healthy_baseline
         --space <name>           Kibana space for seeded assets (default: default)
         --clean                  Delete all previously seeded data (features, alerts, queries,
-                                 tasks, and the data stream) before re-seeding
+                                 and the data stream) before re-seeding
         --es-url <url>           Elasticsearch URL (default: from kibana.dev.yml)
         --es-username <user>     ES username (default: elastic)
         --es-password <pass>     ES password (default: changeme)
@@ -139,8 +134,6 @@ run(
 
         Notes:
           The target stream is auto-enabled (POST /api/streams/_enable) if not yet active.
-          If the seeder crashes before completing, a temporary ES user may be left behind.
-          Clean it up with: curl -u elastic:changeme -X DELETE http://localhost:9200/_security/user/seed_sigevents_tasks_tmp
       `,
     },
   }

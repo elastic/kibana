@@ -67,7 +67,7 @@ export interface ISignificantEventsAlertsReader {
     esClient: ElasticsearchClient,
     params: ChangePointScanParams,
     queryLinks: QueryLink[]
-  ): Promise<{ by_rule: { buckets: ChangePointRuleBucket[] } }>;
+  ): Promise<{ took?: number; by_rule: { buckets: ChangePointRuleBucket[] } }>;
 
   runRuleChangePoint(
     esClient: ElasticsearchClient,
