@@ -209,6 +209,11 @@ export class SignificantEventsPlugin
       };
     };
 
+    streamsSetup.registerKnowledgeIndicatorClientProvider(async (request) => {
+      const { getKnowledgeIndicatorClient } = await this.getScopedClients!({ request });
+      return getKnowledgeIndicatorClient();
+    });
+
     const telemetryClient = this.ebtTelemetryService.getClient();
 
     const workflowClients = createWorkflowClients(
