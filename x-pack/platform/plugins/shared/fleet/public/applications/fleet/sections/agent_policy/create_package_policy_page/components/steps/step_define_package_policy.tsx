@@ -233,7 +233,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       isPrefixAllowed: isNamespacePrefixAllowed,
       isToggleDisabled: isNamespaceCustomizationInputDisabled,
       namespaceCustomizationEnabled,
-      isOptedIn,
       showOptInImpactWarning,
       showOptOutImpactWarning,
       otherPoliciesCount,
@@ -695,7 +694,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                             id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLabel"
                             defaultMessage="Data retention settings"
                           />
-                          {showIlmPicker && !isOptedIn && (
+                          {showIlmPicker && !namespaceCustomizationEnabled && (
                             <>
                               {' '}
                               <EuiIconTip
@@ -711,7 +710,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                             </>
                           )}
                           {showIlmPicker &&
-                            isOptedIn &&
+                            namespaceCustomizationEnabled &&
                             ilmPoliciesData?.has_manage_ilm === false && (
                               <>
                                 {' '}
@@ -768,7 +767,9 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           data-test-subj="packagePolicyIlmPolicySelect"
                           isLoading={isIlmPoliciesLoading}
                           disabled={
-                            !isOptedIn || !ilmPoliciesData?.has_manage_ilm || isManaged === true
+                            !namespaceCustomizationEnabled ||
+                            !ilmPoliciesData?.has_manage_ilm ||
+                            isManaged === true
                           }
                           options={[
                             {

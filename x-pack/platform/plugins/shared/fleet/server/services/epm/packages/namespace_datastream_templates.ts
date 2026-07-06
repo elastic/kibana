@@ -20,10 +20,7 @@ import {
 } from '../elasticsearch/template/template';
 import { isUserSettingsTemplate } from '../elasticsearch/template/utils';
 import { deleteComponentTemplates } from '../elasticsearch/template/remove';
-import {
-  getRegistryDataStreamAssetBaseName,
-  dataStreamUsesOtelInput,
-} from '../../../../common/services';
+import { getRegistryDataStreamAssetBaseName } from '../../../../common/services';
 import { MAX_CONCURRENT_COMPONENT_TEMPLATES } from '../../../constants';
 import { throwIfAborted } from '../../../tasks/utils';
 import type { PackageInfo } from '../../../../common/types';
@@ -31,23 +28,7 @@ import type { PackageInfo } from '../../../../common/types';
 import { updateEsAssetReferences } from './es_assets_reference';
 import { getInstalledPackageWithAssets, getInstallation } from './get';
 import { handleIlmSettingsRestoreAfterPackageInstall } from './namespace_ilm_settings';
-
-/**
- * Returns true if any of the data stream's streams effectively use the OTel collector input
- * type AND OTel integrations are enabled. Resolves named inputs so that a stream referencing
- * an input by name (e.g. `otel_logs`) is correctly identified as OTel when its backing input
- * has `type: otelcol`.
- */
-function isOtelDataStream(
-  dataStream: RegistryDataStream,
-  packageInfo: Pick<PackageInfo, 'policy_templates'>
-): boolean {
-  const experimentalFeature = appContextService.getExperimentalFeatures();
-  return (
-    !!experimentalFeature?.enableOtelIntegrations &&
-    dataStreamUsesOtelInput(packageInfo, dataStream)
-  );
-}
+import { isOtelDataStream, fetchIndexTemplate } from './namespace_template_utils';
 
 /**
  * Returns true if namespace-level customization is opted in for `namespace` on
@@ -116,48 +97,6 @@ export function insertNamespaceCustomTemplate(
   const result = [...composedOf];
   result.splice(insertAt, 0, namespaceEntry);
   return result;
-}
-
-/**
- * Fetches a base index template from ES and strips read-only date properties.
- * Returns the cleaned template or undefined if not found.
- */
-async function fetchBaseTemplate(
-  esClient: ElasticsearchClient,
-  templateName: string,
-  logContext: string,
-  abortController?: AbortController
-): Promise<IndexTemplate | undefined> {
-  const logger = appContextService.getLogger();
-  let rawTemplate;
-  try {
-    const res = await esClient.indices.getIndexTemplate(
-      { name: templateName },
-      { signal: abortController?.signal }
-    );
-    rawTemplate = res.index_templates[0]?.index_template;
-  } catch (err: unknown) {
-    if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {
-      throw err;
-    }
-    logger.debug(`[${logContext}] index template ${templateName} not found, skipping`);
-    return undefined;
-  }
-
-  if (!rawTemplate) {
-    return undefined;
-  }
-
-  // Strip system-managed date properties that cannot be set on PUT
-  const {
-    created_date: _cd,
-    created_date_millis: _cdm,
-    modified_date: _md,
-    modified_date_millis: _mdm,
-    ...indexTemplate
-  } = rawTemplate as IndexTemplate;
-
-  return indexTemplate;
 }
 
 /**
@@ -240,7 +179,7 @@ async function createNamespaceTemplatesForPackage({
       if (abortController) throwIfAborted(abortController);
       const isOtelInputType = isOtelDataStream(dataStream, packageInfo);
       const templateName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
-      const baseTemplate = await fetchBaseTemplate(
+      const baseTemplate = await fetchIndexTemplate(
         esClient,
         templateName,
         logContext,

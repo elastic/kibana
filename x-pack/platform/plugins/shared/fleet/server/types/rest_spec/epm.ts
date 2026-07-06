@@ -763,61 +763,48 @@ export const GetBulkAssetsRequestSchema = {
   ),
 };
 
+const namespaceNameValidator = (v: string) => {
+  if (!v.length) {
+    return 'Must not be empty';
+  }
+  if (!/^[a-z0-9_]+$/.test(v)) {
+    return 'Must only contain lowercase letters, numbers, and underscores';
+  }
+};
+
+const NamespaceCustomizationSettingsSchema = schema.recordOf(
+  schema.string({ maxLength: 100, validate: namespaceNameValidator }),
+  // `unknowns: 'allow'` keeps this forward-compatible: future namespace-scoped settings
+  // can be accepted without breaking older clients/nodes.
+  schema.object(
+    {
+      ilm_policy: schema.maybe(schema.string({ maxLength: 1024 })),
+    },
+    { unknowns: 'allow' }
+  ),
+  {
+    meta: {
+      description:
+        'Per-namespace managed settings (for example, ILM policy) for this package. Keyed by namespace name.',
+    },
+  }
+);
+
 export const UpdatePackageRequestSchema = {
   params: PackageVersionRequestParamsSchema,
   body: schema.object(
     {
       keepPoliciesUpToDate: schema.maybe(schema.boolean()),
       namespace_customization_enabled_for: schema.maybe(
-        schema.arrayOf(
-          schema.string({
-            validate: (v) => {
-              if (!v.length) {
-                return 'Must not be empty';
-              }
-              if (!/^[a-z0-9_]+$/.test(v)) {
-                return 'Must only contain lowercase letters, numbers, and underscores';
-              }
-            },
-          }),
-          {
-            maxSize: 100,
-            meta: {
-              description:
-                'Namespaces for which namespace-level customization is enabled on this package.',
-            },
-          }
-        )
+        schema.arrayOf(schema.string({ validate: namespaceNameValidator }), {
+          maxSize: 100,
+          meta: {
+            description:
+              'Namespaces for which namespace-level customization is enabled on this package.',
+          },
+        })
       ),
-      namespace_customization_settings: schema.maybe(
-        schema.recordOf(
-          schema.string({
-            maxLength: 100,
-            validate: (v) => {
-              if (!v.length) {
-                return 'Must not be empty';
-              }
-              if (!/^[a-z0-9_]+$/.test(v)) {
-                return 'Must only contain lowercase letters, numbers, and underscores';
-              }
-            },
-          }),
-          // `unknowns: 'allow'` keeps this forward-compatible: future namespace-scoped settings
-          // can be accepted without breaking older clients/nodes.
-          schema.object(
-            {
-              ilm_policy: schema.maybe(schema.string({ maxLength: 1024 })),
-            },
-            { unknowns: 'allow' }
-          ),
-          {
-            meta: {
-              description:
-                'Per-namespace managed settings (for example, ILM policy) for this package. Keyed by namespace name.',
-            },
-          }
-        )
-      ),
+      namespace_customization_settings: schema.maybe(NamespaceCustomizationSettingsSchema),
     },
     { meta: { id: 'update_package_request' } }
   ),
