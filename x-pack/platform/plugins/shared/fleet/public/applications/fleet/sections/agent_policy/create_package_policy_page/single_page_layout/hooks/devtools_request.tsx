@@ -21,7 +21,7 @@ import {
   HIDDEN_API_REFERENCE_PACKAGES,
 } from '../../../../../../../../common/constants';
 import type { PackageInfo, NewAgentPolicy, NewPackagePolicy } from '../../../../../types';
-import { ExperimentalFeaturesService } from '../../../../../services';
+import { ExperimentalFeaturesService, isAgentlessPoliciesUIEnabled } from '../../../../../services';
 import { SelectedPolicyTab } from '../../components';
 import {
   generateCreateAgentlessPolicyDevToolsRequest,
@@ -50,6 +50,7 @@ export function useDevToolsRequest({
   const { enableVarGroups } = ExperimentalFeaturesService.get();
   const varGroups =
     enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const agentlessUIEnabled = isAgentlessPoliciesUIEnabled();
 
   const [devtoolRequest, devtoolRequestDescription] = useMemo(() => {
     if (selectedPolicyTab === SelectedPolicyTab.NEW) {
@@ -112,8 +113,10 @@ export function useDevToolsRequest({
     }
 
     // Editing an existing agentless policy: preview the agentless full-replace PUT rather than the
-    // package-policy update, matching the actual request the edit form now issues.
-    if (packagePolicyId && packagePolicy.supports_agentless) {
+    // package-policy update, matching the actual request the edit form now issues. When the
+    // agentless policies UI kill switch is off, edits go through the legacy package-policy PUT,
+    // so preview that instead (fall-through below).
+    if (packagePolicyId && packagePolicy.supports_agentless && agentlessUIEnabled) {
       return [
         generateUpdateAgentlessPolicyDevToolsRequest(
           packagePolicyId,
@@ -157,6 +160,7 @@ export function useDevToolsRequest({
     createDatasetTemplates,
     varGroups,
     packageInfo,
+    agentlessUIEnabled,
   ]);
 
   return { showDevtoolsRequest, devtoolRequest, devtoolRequestDescription };
