@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
+import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import {
   ExecutionStatus,
   isRequestAbortedError,
@@ -41,8 +42,6 @@ export interface TaskHandler {
 export const createTaskHandler = (deps: TaskHandlerDeps): TaskHandler => {
   return new TaskHandlerImpl(deps);
 };
-
-type ExecutionDocument = NonNullable<Awaited<ReturnType<AgentExecutionClient['get']>>>;
 
 interface FailureOutcome {
   serializedError: SerializedExecutionError;
@@ -132,7 +131,7 @@ class TaskHandlerImpl implements TaskHandler {
     error,
   }: {
     executionId: string;
-    execution: ExecutionDocument;
+    execution: AgentExecution;
     executionClient: AgentExecutionClient;
     error: unknown;
   }): Promise<void> {
@@ -140,7 +139,14 @@ class TaskHandlerImpl implements TaskHandler {
     this.logger.error(`Execution ${executionId} failed: ${message}`);
 
     try {
-      const initialFailureOutcome = this.getFailureOutcome(error);
+      // Converts the thrown error into the terminal status and persisted error shape.
+      const initialFailureOutcome: FailureOutcome = {
+        serializedError: serializeExecutionError(error),
+        terminalStatus: isRequestAbortedError(error)
+          ? ExecutionStatus.aborted
+          : ExecutionStatus.failed,
+      };
+
       const finalFailureOutcome = await this.deliverFailureCallbackRequest({
         executionId,
         execution,
@@ -160,18 +166,6 @@ class TaskHandlerImpl implements TaskHandler {
   }
 
   /**
-   * Converts the thrown error into the terminal status and persisted error shape.
-   */
-  private getFailureOutcome(error: unknown): FailureOutcome {
-    return {
-      serializedError: serializeExecutionError(error),
-      terminalStatus: isRequestAbortedError(error)
-        ? ExecutionStatus.aborted
-        : ExecutionStatus.failed,
-    };
-  }
-
-  /**
    * Sends the failure callback request, and treats callback delivery failures as execution failures.
    */
   private async deliverFailureCallbackRequest({
@@ -180,7 +174,7 @@ class TaskHandlerImpl implements TaskHandler {
     initialFailureOutcome,
   }: {
     executionId: string;
-    execution: ExecutionDocument;
+    execution: AgentExecution;
     initialFailureOutcome: FailureOutcome;
   }): Promise<FailureOutcome> {
     try {
