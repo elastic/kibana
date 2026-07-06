@@ -55069,7 +55069,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the Entity Store log extraction configuration. This applies to all entity types. Cadence settings (`frequency`, `delay`, `lookbackPeriod`) can also be set individually per entity type via `PUT /update/{entityType}`; a value set for a specific type takes precedence over this shared setting for that type only. Supplying a cadence field here is a request for the whole store: it applies the new value to every entity type, replacing any value that type had configured individually (including types with a different default cadence, such as Service/Generic).<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Update the Entity Store log extraction configuration. This applies to all entity types. Cadence settings (`frequency`, `delay`, `lookbackPeriod`) can also be set individually per entity type via `PUT /api/security/entity_store/update/{entityType}`; a value set for a specific type takes precedence over this shared setting for that type only. Supplying a cadence field here is a request for the whole store: it applies the new value to every entity type, replacing any value that type had configured individually (including types with a different default cadence, such as Service/Generic).<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: put-security-entity-store
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62681,7 +62681,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install the Entity Store and create engines for the specified entity types. A single `logExtraction` configuration is shared across all entity types. Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. To change settings after install, use the update endpoint or update by type endpoint.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Install the Entity Store and create engines for the specified entity types. A single `logExtraction` configuration is shared across all entity types. Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. To change settings after install, use the `PUT /api/security/entity_store/update` endpoint or the `PUT /api/security/entity_store/update/{entityType}` endpoint.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: post-security-entity-store-install
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62736,7 +62736,7 @@ paths:
                     - service
                     - generic
                   deprecated: true
-                  description: Deprecated in 9.6.0. Use `POST /install/{entityType}` to install a single entity type. Retained for backward compatibility; installs all listed types uniformly.
+                  description: Deprecated in 9.6.0. Use `POST /api/security/entity_store/install/{entityType}` to install a single entity type. Retained for backward compatibility; installs all listed types uniformly.
                   items:
                     enum:
                       - user
@@ -62871,7 +62871,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install the Entity Store for a single entity type. Accepts the same `logExtraction` shape as `POST /install`, scoped to just this type: if the Entity Store is not installed yet, this bootstraps it (shared indices/templates, global configuration, entity maintainers) for this one type; if the store is already installed by other types, only this type is added. A no-op if this type is already installed. Cadence fields (`frequency`, `delay`, `lookbackPeriod`) become this type's own cadence, distinct from the shared value; fields left unset use the type's default cadence (e.g. Service/Generic install at a reduced cadence). Every other field (index patterns, volume limits, etc.) is applied to the shared configuration, the same as `POST /install`.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Install the Entity Store for a single entity type. Accepts the same `logExtraction` shape as `POST /api/security/entity_store/install`, scoped to just this type: if the Entity Store is not installed yet, this bootstraps it (shared indices/templates, global configuration, entity maintainers) for this one type; if the store is already installed for other types, only this type is added. If this type is already installed, the request succeeds without making changes. Cadence fields (`frequency`, `delay`, `lookbackPeriod`) become this type's own cadence, distinct from the shared value; fields left unset use the type's default cadence (e.g. Service/Generic install at a reduced cadence). Every other field (index patterns, volume limits, etc.) is applied to the shared configuration, the same as `POST /api/security/entity_store/install`.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: post-security-entity-store-install-entitytype
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -63037,6 +63037,7 @@ paths:
                 "frequency": "5m"
               }
             }
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63640,7 +63641,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Uninstall the Entity Store, removing engines and associated resources for the specified entity types. To remove a single entity type, use `DELETE /uninstall/{entityType}` instead. Uninstalling the last remaining entity type (via either endpoint) removes the shared Entity Store resources as well (global configuration, status/history tasks, entity maintainers).<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Uninstall the Entity Store, removing engines and associated resources for the specified entity types. To remove a single entity type, use `DELETE /api/security/entity_store/uninstall/{entityType}` instead. Uninstalling the last remaining entity type (via either endpoint) removes the shared Entity Store resources as well (global configuration, status/history tasks, entity maintainers).<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: post-security-entity-store-uninstall
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -63680,7 +63681,7 @@ paths:
                     - service
                     - generic
                   deprecated: true
-                  description: Deprecated in 9.6.0. Use `DELETE /uninstall/{entityType}` to uninstall a single entity type. Retained for backward compatibility. Entity types to uninstall; defaults to all installed types.
+                  description: Deprecated in 9.6.0. Use `DELETE /api/security/entity_store/uninstall/{entityType}` to uninstall a single entity type. Retained for backward compatibility. Entity types to uninstall; defaults to all installed types.
                   items:
                     enum:
                       - user
@@ -63728,7 +63729,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Uninstall a single entity type, removing its engine and associated resources. Uninstalling the last remaining entity type also removes the shared Entity Store resources (global configuration, status/history tasks, entity maintainers) — the same as calling `POST /uninstall` for all types.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Uninstall a single entity type, removing its engine and associated resources. Uninstalling the last remaining entity type also removes the shared Entity Store resources (global configuration, status/history tasks, entity maintainers) — the same as calling `POST /api/security/entity_store/uninstall` for all types.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: delete-security-entity-store-uninstall-entitytype
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -63776,6 +63777,7 @@ paths:
         - lang: Console
           source: |
             DELETE kbn://api/security/entity_store/uninstall/service
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63788,7 +63790,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the cadence settings (`frequency`, `delay`, `lookbackPeriod`) for a single entity type. Only the fields supplied are changed; there is no way to clear a field back to the shared global value — set it explicitly to the value you want, including the type's default if desired. All other log extraction settings (index patterns, volume limits, etc.) remain store-wide only and can be changed via `PUT /update`.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Update the cadence settings (`frequency`, `delay`, `lookbackPeriod`) for a single entity type. Only the fields supplied are changed; there is no way to clear a field back to the shared global value — set it explicitly to the value you want, including the type's default if desired. All other log extraction settings (index patterns, volume limits, etc.) remain store-wide only and can be changed via `PUT /api/security/entity_store/update`.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: put-security-entity-store-update-entitytype
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -63905,6 +63907,7 @@ paths:
                 "frequency": "15m"
               }
             }
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
