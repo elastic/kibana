@@ -10,6 +10,7 @@ import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, useEuiTheme } f
 import { i18n } from '@kbn/i18n';
 import type { LifecyclePhase } from './lifecycle_types';
 import { LifecyclePhase as LifecyclePhaseComponent } from './lifecycle_phase';
+import type { FrozenPhaseCallouts } from './data_lifecycle_summary';
 
 export interface LifecycleBarProps {
   phases: LifecyclePhase[];
@@ -25,6 +26,7 @@ export interface LifecycleBarProps {
   editedPhaseName?: string;
   canManageLifecycle: boolean;
   isEditLifecycleFlyoutOpen?: boolean;
+  frozenPhaseCallouts?: FrozenPhaseCallouts;
 }
 
 const renderLifecyclePhase = (
@@ -39,17 +41,21 @@ const renderLifecyclePhase = (
   editedPhaseName?: string,
   canManageLifecycle?: boolean,
   isEditLifecycleFlyoutOpen?: boolean,
-  testSubjPrefix?: string
+  testSubjPrefix?: string,
+  frozenPhaseCallouts?: FrozenPhaseCallouts
 ) => {
-  const shouldShowEdit = shouldShowEditPhaseAction ? shouldShowEditPhaseAction(phase.label) : true;
+  // Use the stable schema name (not the localized label) for identity: frozen's label is translated
+  // but its name is always 'frozen'.
+  const shouldShowEdit = shouldShowEditPhaseAction ? shouldShowEditPhaseAction(phase.name) : true;
   const shouldShowRemove = shouldShowRemovePhaseAction
-    ? shouldShowRemovePhaseAction(phase.label)
+    ? shouldShowRemovePhaseAction(phase.name)
     : true;
   const commonProps = {
     description: phase.description,
     isReadOnly: phase.isReadOnly,
     isRemoveDisabled: phase.isRemoveDisabled,
     removeDisabledReason: phase.removeDisabledReason,
+    name: phase.name,
     label: phase.label,
     onClick: () => {
       onPhaseClick?.(phase, index);
@@ -64,6 +70,8 @@ const renderLifecyclePhase = (
     isEditLifecycleFlyoutOpen,
   };
 
+  const isFrozenPhase = phase.name === 'frozen';
+
   return phase.isDelete ? (
     <LifecyclePhaseComponent isDelete {...commonProps} />
   ) : (
@@ -74,6 +82,7 @@ const renderLifecyclePhase = (
       size={phase.size}
       sizeInBytes={phase.sizeInBytes}
       searchableSnapshot={phase.searchableSnapshot}
+      {...(isFrozenPhase && frozenPhaseCallouts ? frozenPhaseCallouts : {})}
     />
   );
 };
@@ -92,6 +101,7 @@ export const LifecycleBar: React.FC<LifecycleBarProps> = ({
   editedPhaseName,
   canManageLifecycle,
   isEditLifecycleFlyoutOpen,
+  frozenPhaseCallouts,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -107,6 +117,7 @@ export const LifecycleBar: React.FC<LifecycleBarProps> = ({
         hasShadow={false}
         hasBorder={false}
         css={{
+          height: '56px',
           backgroundColor: euiTheme.colors.backgroundBaseSubdued,
           borderRadius: '8px',
           padding: '4px 2px',
@@ -120,6 +131,7 @@ export const LifecycleBar: React.FC<LifecycleBarProps> = ({
             gridTemplateColumns,
             paddingInline: euiTheme.size.xxs,
             boxSizing: 'border-box',
+            height: '100%',
           }}
         >
           {phases.map((phase, index) => (
@@ -131,10 +143,10 @@ export const LifecycleBar: React.FC<LifecycleBarProps> = ({
                 flexBasis: 0,
                 minWidth: 0,
                 gridColumn: `span ${phaseColumnSpans[index]}`,
-                paddingBlock: euiTheme.size.xxs,
                 paddingInline: euiTheme.size.xxs,
                 boxSizing: 'border-box',
                 justifyContent: 'center',
+                height: '100%',
               }}
             >
               {renderLifecyclePhase(
@@ -149,7 +161,8 @@ export const LifecycleBar: React.FC<LifecycleBarProps> = ({
                 editedPhaseName,
                 canManageLifecycle,
                 isEditLifecycleFlyoutOpen,
-                testSubjPrefix
+                testSubjPrefix,
+                frozenPhaseCallouts
               )}
             </EuiFlexItem>
           ))}
