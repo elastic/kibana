@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import path from 'path';
-import yaml from 'js-yaml';
+import yaml from 'yaml';
 
 export interface ConnectionConfig {
   esUrl: string;
@@ -30,7 +30,7 @@ function readKibanaConfig(log: ToolingLog): KibanaConfig {
   let serverValues: Record<string, unknown> = {};
 
   if (fs.existsSync(configPath)) {
-    const loaded = (yaml.load(fs.readFileSync(configPath, 'utf8')) || {}) as Record<
+    const loaded = (yaml.parse(fs.readFileSync(configPath, 'utf8')) || {}) as Record<
       string,
       unknown
     >;
