@@ -44,6 +44,8 @@ import type {
   ReadRiskEngineSettingsResponse,
   RiskEngineScheduleNowResponse,
   RiskEngineStatusResponse,
+  RiskScoreHistoryEntry,
+  RiskScoreHistoryResponse,
   RiskScoresEntityCalculationRequest,
   RiskScoresEntityCalculationResponse,
   RiskScoresPreviewRequest,
@@ -97,6 +99,7 @@ import {
   RISK_SCORE_ENTITY_CALCULATION_V2_URL,
   RISK_SCORE_PREVIEW_URL,
   ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL,
+  ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL,
   ENTITY_ANOMALY_SUMMARY_INTERNAL_URL,
 } from '../../../common/constants';
 import {
@@ -105,6 +108,8 @@ import {
   WATCHLISTS_CSV_UPLOAD_URL,
   WATCHLISTS_PRIVILEGES_URL,
 } from '../../../common/entity_analytics/watchlists/constants';
+import { RISK_SCORE_HISTORY_URL } from '../../../common/entity_analytics/risk_score/constants';
+import type { EntityType } from '../../../common/entity_analytics/types';
 import type { UploadWatchlistCsvResponse } from '../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import {
   GENERATE_LEADS_URL,
@@ -185,6 +190,31 @@ export const useEntityAnalyticsRoutes = () => {
         version: '1',
         method: 'POST',
         body: JSON.stringify(params),
+        signal,
+      });
+
+    /**
+     * Fetches historical risk score entries for an entity
+     */
+    const fetchRiskScoreHistory = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params: FetchRiskScoreHistoryParams;
+    }) =>
+      http.fetch<RiskScoreHistoryResponse>(RISK_SCORE_HISTORY_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          entity_type: params.entityType,
+          entity_id: params.entityId,
+          from: params.from,
+          to: params.to,
+          score_type: params.scoreType,
+          page_size: params.pageSize,
+          include_contributions: params.includeContributions,
+        },
         signal,
       });
 
@@ -930,6 +960,12 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
+    const fetchAnomalyPrivileges = () =>
+      http.fetch<EntityAnalyticsPrivileges>(ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+      });
+
     const fetchAnomalySummary = ({
       entityType,
       entityId,
@@ -980,6 +1016,7 @@ export const useEntityAnalyticsRoutes = () => {
 
     return {
       fetchRiskScorePreview,
+      fetchRiskScoreHistory,
       fetchRiskEngineStatus,
       initRiskEngine,
       enableRiskEngine,
@@ -1031,6 +1068,7 @@ export const useEntityAnalyticsRoutes = () => {
       enableLeadGeneration,
       disableLeadGeneration,
       fetchLeadGenerationPrivileges,
+      fetchAnomalyPrivileges,
       fetchAnomalyOverview,
       fetchAnomalySummary,
     };
@@ -1045,3 +1083,13 @@ export const useEntityAnalyticsRoutes = () => {
 export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;
 
 export type FetchEntitiesListParams = SnakeToCamelCase<ListEntitiesRequestQuery>;
+
+export interface FetchRiskScoreHistoryParams {
+  entityType: EntityType;
+  entityId: string;
+  from?: string;
+  to?: string;
+  scoreType?: RiskScoreHistoryEntry['score_type'];
+  pageSize?: number;
+  includeContributions?: boolean;
+}
