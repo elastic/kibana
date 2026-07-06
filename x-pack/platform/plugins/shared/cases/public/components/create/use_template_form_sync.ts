@@ -33,6 +33,18 @@ const NONE_CONNECTOR_ID = 'none';
 const DEFAULT_SYNC_ALERTS = true;
 const DEFAULT_EXTRACT_OBSERVABLES = true;
 
+type SetFieldValue = (path: string, value: unknown) => void;
+
+const revertSettingsToDefault = (setFieldValue: SetFieldValue): void => {
+  setFieldValue('syncAlerts', DEFAULT_SYNC_ALERTS);
+  setFieldValue('extractObservables', DEFAULT_EXTRACT_OBSERVABLES);
+};
+
+const revertConnectorToDefault = (setFieldValue: SetFieldValue): void => {
+  setFieldValue('connectorId', NONE_CONNECTOR_ID);
+  setFieldValue('fields', null);
+};
+
 /**
  * Writes a template's default connector into the create-case form (`connectorId` + per-type
  * `fields`). Resolves the connector `id` against the supported connectors and, when it cannot be
@@ -133,13 +145,11 @@ export const useTemplateFormSync = (
       // configuration's default connector when no connector-bearing template was ever applied.
       if (didApplyConnectorRef.current) {
         didApplyConnectorRef.current = false;
-        setFieldValue('connectorId', NONE_CONNECTOR_ID);
-        setFieldValue('fields', null);
+        revertConnectorToDefault(setFieldValue);
       }
       if (didApplySettingsRef.current) {
         didApplySettingsRef.current = false;
-        setFieldValue('syncAlerts', DEFAULT_SYNC_ALERTS);
-        setFieldValue('extractObservables', DEFAULT_EXTRACT_OBSERVABLES);
+        revertSettingsToDefault(setFieldValue);
       }
       return;
     }
@@ -169,7 +179,9 @@ export const useTemplateFormSync = (
     }
 
     // Apply the template's default case settings. Each setting is independent — only the ones the
-    // template declares are applied; the rest keep the form's current value.
+    // template declares are applied; the rest keep the form's current value. When switching to a
+    // template that declares no settings, revert to defaults so a previous template's settings
+    // don't outlive it (the `!templateId` clear branch above only handles clearing the selection).
     if (definition.settings) {
       if (definition.settings.syncAlerts !== undefined) {
         setFieldValue('syncAlerts', definition.settings.syncAlerts);
@@ -178,6 +190,9 @@ export const useTemplateFormSync = (
         setFieldValue('extractObservables', definition.settings.extractObservables);
       }
       didApplySettingsRef.current = true;
+    } else if (didApplySettingsRef.current) {
+      revertSettingsToDefault(setFieldValue);
+      didApplySettingsRef.current = false;
     }
 
     // Wait for field definitions AND supported connectors to load before finishing. Connectors are
@@ -187,10 +202,15 @@ export const useTemplateFormSync = (
 
     // Apply the template's default connector. If the connector id no longer resolves to a supported
     // connector of the same type, fall back to the `.none` connector (no error) — mirroring the
-    // form serializer's fallback and the legacy template system's resilience.
+    // form serializer's fallback and the legacy template system's resilience. When switching to a
+    // template that declares no connector, revert to `.none` so a previous template's connector
+    // doesn't outlive it.
     if (definition.connector) {
       applyTemplateConnector(definition.connector, connectors, setFieldValue, updateFieldValues);
       didApplyConnectorRef.current = true;
+    } else if (didApplyConnectorRef.current) {
+      revertConnectorToDefault(setFieldValue);
+      didApplyConnectorRef.current = false;
     }
 
     // Resolve all fields — inline fields pass through, ref fields are looked up in the library

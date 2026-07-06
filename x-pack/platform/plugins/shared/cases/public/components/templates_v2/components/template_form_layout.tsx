@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { isEqual } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { UseFormReturn } from 'react-hook-form';
@@ -13,6 +14,7 @@ import { FormProvider } from 'react-hook-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import type { YamlEditorFormValues } from './template_form';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
 import { useDebouncedYamlEdit } from '../hooks/use_debounced_yaml_edit';
@@ -37,6 +39,12 @@ import { normalizeYamlString } from '../utils/normalize_yaml_string';
 import { splitTemplateDefinition, mergeTemplateDefinition } from '../utils/template_settings_yaml';
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
+
+interface SettingsConnectorDraft {
+  templateId?: string;
+  settings?: TemplateSettings;
+  connector?: CaseConnectorWithoutName;
+}
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
@@ -85,9 +93,36 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     settings: initialSettings,
   } = useMemo(() => splitTemplateDefinition(initialValue), [initialValue]);
 
-  const [settings, setSettings] = useState<TemplateSettings | undefined>(initialSettings);
-  const [connector, setConnector] = useState<CaseConnectorWithoutName | undefined>(
-    initialConnector
+  // The Settings tab (connector + case settings) is form state, not part of the YAML buffer. Persist
+  // it alongside the YAML draft — keyed to the template — so edits there survive a reload and count
+  // as unsaved changes, mirroring how the YAML buffer is persisted.
+  const initialFormState = useMemo<SettingsConnectorDraft>(
+    () => ({ templateId, settings: initialSettings, connector: initialConnector }),
+    [templateId, initialSettings, initialConnector]
+  );
+  const [storedFormState, setStoredFormState] = useCasesLocalStorage<SettingsConnectorDraft>(
+    `${storageKey}.settingsConnector`,
+    initialFormState
+  );
+  // Only reuse a persisted draft that belongs to the current template (mirrors the YAML draft).
+  const useStoredFormState = storedFormState != null && storedFormState.templateId === templateId;
+  const settings = useStoredFormState ? storedFormState.settings : initialSettings;
+  const connector = useStoredFormState ? storedFormState.connector : initialConnector;
+
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+  const connectorRef = useRef(connector);
+  connectorRef.current = connector;
+
+  const handleSettingsChange = useCallback(
+    (next: TemplateSettings) =>
+      setStoredFormState({ templateId, settings: next, connector: connectorRef.current }),
+    [setStoredFormState, templateId]
+  );
+  const handleConnectorChange = useCallback(
+    (next: CaseConnectorWithoutName) =>
+      setStoredFormState({ templateId, settings: settingsRef.current, connector: next }),
+    [setStoredFormState, templateId]
   );
 
   const {
@@ -103,12 +138,16 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     (newValue) => form.setValue('definition', newValue),
     templateId
   );
-  const hasChanges = useMemo(
-    () =>
+  const hasChanges = useMemo(() => {
+    const yamlChanged =
       computeChangedLines(normalizeYamlString(initialFieldsYaml), normalizeYamlString(yamlValue))
-        .length > 0,
-    [initialFieldsYaml, yamlValue]
-  );
+        .length > 0;
+    // Settings-tab edits (connector + case settings) count as unsaved changes too, so the reset
+    // button and "unsaved changes" badge show up when only that tab is edited.
+    const settingsChanged = !isEqual(settings, initialSettings);
+    const connectorChanged = !isEqual(connector, initialConnector);
+    return yamlChanged || settingsChanged || connectorChanged;
+  }, [initialFieldsYaml, yamlValue, settings, initialSettings, connector, initialConnector]);
 
   const hasValidationErrors = useMemo(
     () => !validateTemplateDefinitionYaml(yamlValue ?? '').success,
@@ -165,8 +204,9 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const handleResetConfirm = useCallback(() => {
     handleReset();
+    setStoredFormState(initialFormState);
     setIsResetModalVisible(false);
-  }, [handleReset]);
+  }, [handleReset, setStoredFormState, initialFormState]);
 
   const handleResetCancel = useCallback(() => {
     setIsResetModalVisible(false);
@@ -190,6 +230,9 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         try {
           await onCreate({ ...data, definition: mergedDefinition }, isEnabled);
           clearDraft(isEdit ? data.definition : undefined);
+          // Reset the persisted Settings-tab draft: keep the saved values when editing, revert to
+          // the template's defaults when creating (mirrors clearDraft's create/edit behavior).
+          setStoredFormState(isEdit ? { templateId, settings, connector } : initialFormState);
         } catch (e) {
           setSubmitError(e?.message ?? i18n.FAILED_TO_SAVE_TEMPLATE);
         }
@@ -198,7 +241,19 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         setSubmitError(i18n.FIX_VALIDATION_ERRORS);
       }
     )();
-  }, [form, onCreate, isEnabled, isEdit, clearDraft, yamlValue, connector, settings]);
+  }, [
+    form,
+    onCreate,
+    isEnabled,
+    isEdit,
+    clearDraft,
+    yamlValue,
+    connector,
+    settings,
+    setStoredFormState,
+    templateId,
+    initialFormState,
+  ]);
 
   const handleIsEnabledChange = useCallback((enabled: boolean) => {
     setIsEnabled(enabled);
@@ -241,8 +296,8 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             savedValue={isEdit ? initialFieldsYaml : undefined}
             settings={settings}
             connector={connector}
-            onSettingsChange={setSettings}
-            onConnectorChange={setConnector}
+            onSettingsChange={handleSettingsChange}
+            onConnectorChange={handleConnectorChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

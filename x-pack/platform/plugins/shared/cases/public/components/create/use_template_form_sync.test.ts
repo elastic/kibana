@@ -729,6 +729,34 @@ describe('useTemplateFormSync', () => {
       expect(mockSetFieldValue).toHaveBeenCalledWith('fields', null);
     });
 
+    it('reverts the connector to .none when switching to a template that declares no connector', () => {
+      // Direct A -> B switch: templateId goes straight from A's id to B's id (never through '').
+      mockUseFormData.mockReturnValue([{ templateId: 'template-connector' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithJiraConnector, isLoading: false });
+      mockUseGetSupportedActionConnectors.mockReturnValue({
+        data: [jiraConnector],
+        isLoading: false,
+      });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      mockSetFieldValue.mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: 'template-plain' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-plain',
+          templateVersion: 1,
+          definition: { name: 'B', fields: [] },
+        },
+        isLoading: false,
+      });
+
+      rerender();
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('connectorId', 'none');
+      expect(mockSetFieldValue).toHaveBeenCalledWith('fields', null);
+    });
+
     it('does not touch the connector when a cleared template never set one', () => {
       // mockTemplate has no connector block.
       mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
@@ -794,6 +822,30 @@ describe('useTemplateFormSync', () => {
       mockSetFieldValue.mockClear();
       mockUseFormData.mockReturnValue([{ templateId: '' }]);
       mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+
+      rerender();
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', true);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
+    });
+
+    it('reverts settings to defaults when switching to a template that declares no settings', () => {
+      // Direct A -> B switch: templateId goes straight from A's id to B's id (never through '').
+      mockUseFormData.mockReturnValue([{ templateId: 'template-settings' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithSettings, isLoading: false });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      mockSetFieldValue.mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: 'template-plain' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-plain',
+          templateVersion: 1,
+          definition: { name: 'B', fields: [] },
+        },
+        isLoading: false,
+      });
 
       rerender();
 
