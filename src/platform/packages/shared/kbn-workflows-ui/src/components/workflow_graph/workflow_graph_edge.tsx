@@ -35,13 +35,6 @@ interface WorkflowEdgeData extends Record<string, unknown> {
 
 const LABEL_TRUNCATE = 24;
 
-/** Default (non-traversed) edge stroke color for light mode. Figma (node
- *  10808:19179) uses the neutral `borderBasePlain` tone `#cad3e2` for connector
- *  lines, not a saturated blue. Prefer the `borderBasePlain` euiTheme token at
- *  call sites so the color adapts to dark mode; this constant is the fallback
- *  used where a theme isn't handy. */
-export const EDGE_STROKE_DEFAULT = '#cad3e2';
-
 function WorkflowGraphEdgeInner(props: EdgeProps) {
   const {
     id,
@@ -122,8 +115,6 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
               fontSize: 11,
               fontWeight: 400,
               lineHeight: '20px',
-              // Figma light: bg #f6f9fc, border #bfdbff, text #1d2a3e. Tokens
-              // keep those values in light and adapt on the dark canvas.
               background: euiTheme.colors.backgroundBaseSubdued,
               border: `1px solid ${euiTheme.colors.borderBasePrimary}`,
               color: euiTheme.colors.textParagraph,
