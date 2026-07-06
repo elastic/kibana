@@ -817,6 +817,23 @@ describe('usePackagePolicy - agentless', () => {
     expect(saveResult).toEqual({ data: { item: { id: 'agentless-detect' } }, error: null });
   });
 
+  it('surfaces a package info load failure through loadingError instead of swallowing it', async () => {
+    // `sendGetPackageInfoByKey` resolves to a `{ data, error }` envelope; the agentless loader
+    // must not drop the error, or the page shows only its generic loading-error copy.
+    const pkgError = Object.assign(new Error('registry unavailable'), { statusCode: 502 });
+    jest
+      .mocked(sendGetPackageInfoByKey)
+      .mockResolvedValueOnce({ data: undefined, error: pkgError } as any);
+
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('agentless-1', { isAgentless: true })
+    );
+
+    await waitFor(() => expect(result.current.loadingError).toBe(pkgError));
+    expect(result.current.isLoadingData).toBe(false);
+  });
+
   it('normalizes agentless save failures into the { data, error } shape', async () => {
     const requestError = Object.assign(new Error('conflict'), { statusCode: 409 });
     jest.mocked(sendUpdateAgentlessPolicy).mockRejectedValue(requestError);

@@ -483,11 +483,18 @@ export function usePackagePolicyWithRelatedData(
 
         const { item: agentlessPolicy } = await sendGetAgentlessPolicy(packagePolicyId);
 
-        const { data: packageData } = await sendGetPackageInfoByKey(
+        // `sendGetPackageInfoByKey` resolves to a `{ data, error }` envelope instead of throwing.
+        // Ignoring `error` would leave `loadingError` unset and hide the real failure (status
+        // code, message) behind the page's generic loading-error copy.
+        const { data: packageData, error: packageInfoError } = await sendGetPackageInfoByKey(
           agentlessPolicy.package.name,
           agentlessPolicy.package.version,
           { prerelease, full: true }
         );
+
+        if (packageInfoError) {
+          throw packageInfoError;
+        }
 
         if (ignore) {
           return;
