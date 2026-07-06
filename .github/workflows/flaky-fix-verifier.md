@@ -203,7 +203,7 @@ Only fetch data live when it is not in these files. In particular, the linked `f
 
 You run in one of two modes, selected from the triggering event:
 
-- `kickoff`: the trigger is `pull_request_target` (a `flaky-test-fixer` PR was opened or labeled), or a manual `workflow_dispatch` on a PR that does **not** yet have both the `flaky-fix-check:started` label and flaky test runner result comments. Resolve configs and trigger the first flaky test runner run.
+- `kickoff`: the trigger is `pull_request_target` (a `flaky-test-fixer` PR was opened or labeled), or a manual `workflow_dispatch` on a PR that does **not** yet have both the `flaky-fix-check:started` label and flaky test runner result comments. Decide whether the fix needs a run (see below); if so, resolve configs and trigger the first flaky test runner run.
 - `process_results`: the trigger is an `issue_comment` whose body contains `## Flaky Test Runner Stats`, or a manual `workflow_dispatch` on a PR that **already** has the `flaky-fix-check:started` label and flaky test runner result comments. Read the results, attribute them, and decide whether to finish or iterate.
 
 ## Number of runs
@@ -226,7 +226,7 @@ Use the PR itself as the state store — there is no separate state file or hidd
 | `flaky-fix-check:passed`       | The targeted test held across the run(s); the fix is confirmed.                                                      |
 | `flaky-fix-check:failed`       | The targeted test still failed after the run budget — the fix did not hold.                                          |
 | `flaky-fix-check:inconclusive` | The run budget was exhausted without a clear verdict (e.g. only unrelated failures, or the failure couldn't be attributed). |
-| `flaky-fix-check:skipped`      | The flaky test runner can't verify this fix (e.g. it doesn't support Jest tests, or there is no FTR/Scout config).   |
+| `flaky-fix-check:skipped`      | The flaky test runner isn't used — either it can't verify this fix (Jest-only change, or no FTR/Scout config) or the fix is deterministic, so the required CI pass is sufficient signal. |
 
 Exactly one of these should apply at a time. When you reach a terminal verdict (`passed`, `failed`, `inconclusive`, or `skipped`), **remove `flaky-fix-check:started`** and add the terminal label, so the PR's current state is unambiguous and the workflow stops re-processing result comments.
 
@@ -261,10 +261,12 @@ The **only** exception is the `/flaky` trigger comment: it must contain nothing 
    - the **touched test file(s)** (the files the fix changes), and
    - the **originally-flaky test title(s)** the fix is meant to stabilize. Record these as `targetedTests`.
 
-2. **Decide whether the runner applies.** The `/flaky` runner only accepts **FTR** and **Scout** configs. Jest is not supported by the runner.
+2. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, post a skipped comment (see [Comment format](#comment-format)) explaining which gate the fix missed, and stop.
 
-   - If the fix only touches a **Jest** unit/integration test (`*.test.ts(x)` not under a `test/scout*/` or FTR `test/` config), the runner cannot help. Add the `flaky-fix-check:skipped` label, post a skipped comment (see [Comment format](#comment-format)) noting the fixer already verifies Jest fixes by local repetition, and stop.
-   - Otherwise resolve the config(s) (next step).
+   - **Runner-supported test.** The `/flaky` runner accepts only **FTR** and **Scout** configs. If the fix touches only a **Jest** test (`*.test.ts(x)` not under a `test/scout*/` or FTR `test/` config), it can't help — the fixer already verifies Jest fixes by local repetition.
+   - **A fix repeated runs can actually validate.** The required CI already catches deterministic failures; extra runs add signal only when one pass isn't a reliable verdict — i.e. the test keeps a timing/ordering/concurrency element after the fix. If the fix makes the test **deterministic** (e.g. it excludes a volatile field from an assertion, pins a clock or seed, or removes the racy dependency outright), a single CI pass is sufficient signal and a run reveals nothing more — note that normal CI validates this deterministic fix. Trigger a run only when the fix *mitigates* a non-deterministic cause (a race, a wait/timeout, ordering, shared-state timing) whose stability is confirmed by holding across many runs.
+
+   When both gates hold, resolve the config(s) (next step).
 
 3. **Resolve config paths**:
 
