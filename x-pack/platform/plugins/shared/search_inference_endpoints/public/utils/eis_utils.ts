@@ -354,27 +354,23 @@ export interface RegionZoneCount {
   modelRegions: CspRegion[];
 }
 
-const collectRegionsPerGeo = (
-  endpoints: EisInferenceEndpoint[]
-): Map<string, { regions: CspRegion[]; keys: Set<string> }> => {
-  const byGeo = new Map<string, { regions: CspRegion[]; keys: Set<string> }>();
+const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, CspRegion[]> => {
+  const byGeo = new Map<string, Map<string, CspRegion>>();
+
   for (const ep of endpoints) {
-    if (!ep.metadata) continue;
-    const regions = (ep.metadata as Record<string, unknown>).regions;
+    const regions = (ep.metadata as Record<string, unknown> | undefined)?.regions;
     if (!Array.isArray(regions)) continue;
+
     for (const region of regions) {
       if (!isCspRegion(region)) continue;
       const geo = region.geo ?? 'other';
-      const entry = byGeo.get(geo) ?? { regions: [], keys: new Set<string>() };
-      const key = `${region.csp}::${region.region}`;
-      if (!entry.keys.has(key)) {
-        entry.keys.add(key);
-        entry.regions.push(region);
-      }
-      byGeo.set(geo, entry);
+      const geoMap = byGeo.get(geo) ?? new Map<string, CspRegion>();
+      geoMap.set(regionKey(region), region);
+      byGeo.set(geo, geoMap);
     }
   }
-  return byGeo;
+
+  return new Map([...byGeo.entries()].map(([geo, geoMap]) => [geo, [...geoMap.values()]]));
 };
 
 /**
@@ -390,12 +386,15 @@ export const getRegionZoneCounts = (
   const modelByGeo = collectRegionsPerGeo(modelEndpoints);
   const allByGeo = collectRegionsPerGeo(allEisEndpoints);
 
-  return GEO_ORDER.map((geo) => ({
-    geo,
-    modelRegions: modelByGeo.get(geo)?.regions ?? [],
-    modelCount: modelByGeo.get(geo)?.keys.size ?? 0,
-    totalCount: allByGeo.get(geo)?.keys.size ?? 0,
-  })).filter(({ modelCount }) => modelCount > 0);
+  return GEO_ORDER.map((geo) => {
+    const modelRegions = modelByGeo.get(geo) ?? [];
+    return {
+      geo,
+      modelRegions,
+      modelCount: modelRegions.length,
+      totalCount: allByGeo.get(geo)?.length ?? 0,
+    };
+  }).filter(({ modelCount }) => modelCount > 0);
 };
 
 const isCspRegion = (value: unknown): value is CspRegion => {
@@ -409,25 +408,20 @@ const isCspRegion = (value: unknown): value is CspRegion => {
  * The returned list is deduplicated (by csp+region key) and sorted alphabetically.
  */
 export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegion[] => {
-  const seen = new Set<string>();
-  const result: CspRegion[] = [];
+  const seen = new Map<string, CspRegion>();
 
   for (const ep of endpoints) {
-    if (!ep.metadata) continue;
-    const regions = (ep.metadata as Record<string, unknown>).regions;
+    const regions = (ep.metadata as Record<string, unknown> | undefined)?.regions;
     if (!Array.isArray(regions)) continue;
 
     for (const region of regions) {
       if (!isCspRegion(region)) continue;
-      const key = `${region.csp}::${region.region}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        result.push(region);
-      }
+      const key = regionKey(region);
+      if (!seen.has(key)) seen.set(key, region);
     }
   }
 
-  return result.sort((a, b) => {
+  return [...seen.values()].sort((a, b) => {
     const cspCmp = a.csp.localeCompare(b.csp);
     return cspCmp !== 0 ? cspCmp : a.region.localeCompare(b.region);
   });
