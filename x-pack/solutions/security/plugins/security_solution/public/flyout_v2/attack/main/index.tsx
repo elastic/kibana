@@ -22,20 +22,26 @@ import { useHistory } from 'react-router-dom';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
+import { cellActionRenderer } from '../../shared/components/cell_actions';
 import { NotesDetails } from '../../shared/tools/notes';
 import { useKibana } from '../../../common/lib/kibana';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
+import { TableTab } from './tabs/table_tab';
 import { Footer } from './footer';
 
-type AttackFlyoutTabId = 'overview' | 'json';
+type AttackFlyoutTabId = 'overview' | 'table' | 'json';
 
 export const OVERVIEW_TAB_TEST_ID = 'attack-flyout-overview-tab-button';
+export const TABLE_TAB_TEST_ID = 'attack-flyout-table-tab-button';
 export const JSON_TAB_TEST_ID = 'attack-flyout-json-tab-button';
 export const JSON_TAB_CONTENT_TEST_ID = 'attack-flyout-json-tab';
 
 const OVERVIEW_TAB_LABEL = i18n.translate('xpack.securitySolution.flyout.attack.overviewTabLabel', {
   defaultMessage: 'Overview',
+});
+const TABLE_TAB_LABEL = i18n.translate('xpack.securitySolution.flyout.attack.tableTabLabel', {
+  defaultMessage: 'Table',
 });
 const JSON_TAB_LABEL = i18n.translate('xpack.securitySolution.flyout.attack.jsonTabLabel', {
   defaultMessage: 'JSON',
@@ -100,6 +106,13 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
             {OVERVIEW_TAB_LABEL}
           </EuiTab>
           <EuiTab
+            isSelected={selectedTabId === 'table'}
+            onClick={() => setSelectedTabId('table')}
+            data-test-subj={TABLE_TAB_TEST_ID}
+          >
+            {TABLE_TAB_LABEL}
+          </EuiTab>
+          <EuiTab
             isSelected={selectedTabId === 'json'}
             onClick={() => setSelectedTabId('json')}
             data-test-subj={JSON_TAB_TEST_ID}
@@ -108,7 +121,9 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
           </EuiTab>
         </EuiTabs>
         <EuiSpacer size="m" />
-        {selectedTabId === 'json' ? (
+        {selectedTabId === 'table' ? (
+          <TableTab hit={hit} renderCellActions={cellActionRenderer} />
+        ) : selectedTabId === 'json' ? (
           <SharedJsonTab
             value={hit.raw as unknown as Record<string, unknown>}
             showFooterOffset={false}
