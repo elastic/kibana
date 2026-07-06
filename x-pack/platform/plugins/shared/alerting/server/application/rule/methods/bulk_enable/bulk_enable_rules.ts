@@ -350,7 +350,6 @@ const bulkEnableRulesWithOCC = async (
     );
   }
 
-  const bulkEnableTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -377,7 +376,6 @@ const bulkEnableRulesWithOCC = async (
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleEnable,
-      timestamp: bulkEnableTimestamp,
       metadata: { bulkCount: totalNumOfRules },
     },
   });

@@ -49,8 +49,9 @@ export const useCasesConfig = () => {
       // https://github.com/elastic/security-team/issues/15066
       attachmentsEnabled: config?.attachments?.enabled ?? false,
       templatesEnabled: config?.templates?.enabled ?? false,
+      detailsRedesignEnabled: config?.casesRedesign?.details ?? false,
     }),
-    [config?.attachments?.enabled, config?.templates?.enabled]
+    [config?.attachments?.enabled, config?.templates?.enabled, config?.casesRedesign?.details]
   );
 };
 
