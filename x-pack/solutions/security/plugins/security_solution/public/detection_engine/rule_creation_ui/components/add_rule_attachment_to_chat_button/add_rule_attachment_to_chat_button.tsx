@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
@@ -25,6 +24,7 @@ import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/
 import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { formatRule } from '../../pages/rule_creation/helpers';
+import { NEW_RULE_ATTACHMENT_LABEL } from '../../pages/rule_creation/translations';
 import { stripServerFields } from '../../../common/ai_rule_creation_handler';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -95,12 +95,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
     }
     const attachmentLabel =
       formattedRule?.name ||
-      (isFormBased && !existingRuleId
-        ? i18n.translate(
-            'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabel',
-            { defaultMessage: 'New Rule' }
-          )
-        : undefined);
+      (isFormBased && !existingRuleId ? NEW_RULE_ATTACHMENT_LABEL : undefined);
     const linkedRuleId = rule?.id ?? existingRuleId;
 
     return {

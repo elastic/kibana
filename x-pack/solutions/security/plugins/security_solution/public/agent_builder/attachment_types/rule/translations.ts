@@ -17,60 +17,19 @@ export const RULE_TYPE_FIELD_LABEL = i18n.translate(
   { defaultMessage: 'Rule type' }
 );
 
-export const QUERY_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.queryLabel',
-  { defaultMessage: 'Custom query' }
-);
-
-export const EQL_QUERY_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.eqlQueryLabel',
-  { defaultMessage: 'EQL query' }
-);
-
-export const ESQL_QUERY_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.esqlQueryLabel',
-  { defaultMessage: 'ES|QL query' }
-);
-
-export const SAVED_QUERY_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.savedQueryLabel',
-  { defaultMessage: 'Saved query' }
-);
-
-export const ML_TYPE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.mlRuleTypeDescription',
-  { defaultMessage: 'Machine Learning' }
-);
-
-export const EQL_TYPE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.eqlRuleTypeDescription',
-  { defaultMessage: 'Event Correlation' }
-);
-
-export const QUERY_TYPE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.queryRuleTypeDescription',
-  { defaultMessage: 'Query' }
-);
-
-export const THRESHOLD_TYPE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.thresholdRuleTypeDescription',
-  { defaultMessage: 'Threshold' }
-);
-
-export const THREAT_MATCH_TYPE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.threatMatchRuleTypeDescription',
-  { defaultMessage: 'Indicator Match' }
-);
-
-export const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.newTermsRuleTypeDescription',
-  { defaultMessage: 'New Terms' }
-);
-
-export const ESQL_TYPE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.esqlRuleTypeDescription',
-  { defaultMessage: 'ES|QL' }
-);
+export {
+  QUERY_LABEL,
+  EQL_QUERY_LABEL,
+  ESQL_QUERY_LABEL,
+  SAVED_QUERY_LABEL,
+  ML_TYPE_DESCRIPTION,
+  EQL_TYPE_DESCRIPTION,
+  QUERY_TYPE_DESCRIPTION,
+  THRESHOLD_TYPE_DESCRIPTION,
+  THREAT_MATCH_TYPE_DESCRIPTION,
+  NEW_TERMS_TYPE_DESCRIPTION,
+  ESQL_TYPE_DESCRIPTION,
+} from '../../../detection_engine/rule_creation_ui/components/description_step/translations';
 
 export const APPLY_TO_FORM = i18n.translate(
   'xpack.securitySolution.agentBuilder.ruleAttachment.applyToForm',

@@ -32,6 +32,7 @@ import {
   SECURITY_RULE_ATTACHMENT_ID,
 } from '../../../../../../common/constants';
 import { formatRule } from '../helpers';
+import { NEW_RULE_ATTACHMENT_LABEL, EXISTING_RULE_ATTACHMENT_LABEL } from '../translations';
 import { getRuleIdFromAttachment } from '../../../../../agent_builder/attachment_types/rule/helpers';
 
 const ruleDefaultMetadataFields = {
@@ -301,15 +302,7 @@ export const useAgentBuilderRuleCreation = ({
         addRuleAttachment(
           formattedRule,
           formattedRule.name ||
-            (ruleIdForSync
-              ? i18n.translate(
-                  'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabelExisting',
-                  { defaultMessage: 'Rule' }
-                )
-              : i18n.translate(
-                  'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabel',
-                  { defaultMessage: 'New Rule' }
-                )),
+            (ruleIdForSync ? EXISTING_RULE_ATTACHMENT_LABEL : NEW_RULE_ATTACHMENT_LABEL),
           ruleIdForSync
         );
         hasWarnedSyncFailureRef.current = false;
