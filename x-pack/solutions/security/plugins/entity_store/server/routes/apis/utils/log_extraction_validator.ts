@@ -113,7 +113,7 @@ export const LogExtractionUpdadeSchema = LogExtractionUpdateParams.superRefine(
 
 // Per-entity-type log extraction overrides (see #269261): only frequency/delay/lookbackPeriod
 // are configurable per type today. All other logExtraction settings remain store-wide only.
-// Shared by both `install/{entityType}` and `update/{entityType}` — a caller can set a value
+// Shared by both `install/{entityType}` and `PUT /{entityType}` — a caller can set a value
 // equal to a type's default explicitly, but there is no way to "clear" an override back to the
 // default (no `null`); only real duration values are accepted. Extending which fields are
 // overridable per type only requires updating this `.pick()`.

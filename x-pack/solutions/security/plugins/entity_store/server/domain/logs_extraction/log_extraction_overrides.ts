@@ -13,7 +13,7 @@ export type OverridableLogExtractionField = (typeof OVERRIDABLE_LOG_EXTRACTION_F
 
 /**
  * A caller-supplied per-type log extraction override, as accepted by the public API
- * (`install/{entityType}` / `update/{entityType}`). Only real values are accepted —
+ * (`install/{entityType}` / `PUT /{entityType}`). Only real values are accepted —
  * there is no `null` to clear a field back to the shared default; callers that want
  * the default must set it explicitly.
  */

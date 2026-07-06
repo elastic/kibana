@@ -65,7 +65,7 @@ describe('LogExtractionInstallParams additionalIndexPatterns', () => {
 });
 
 describe('LogExtractionOverrideSchema', () => {
-  // Shared by install/{entityType} and update/{entityType}: only real duration values
+  // Shared by install/{entityType} and PUT /{entityType}: only real duration values
   // are accepted. There is no `null` to clear a field back to the default — callers who
   // want the default must set it explicitly.
 

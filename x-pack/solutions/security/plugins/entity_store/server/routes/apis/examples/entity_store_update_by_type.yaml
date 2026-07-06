@@ -63,10 +63,10 @@ x-codeSamples:
       curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
         -H "Content-Type: application/json" \
         -d '{"logExtraction":{"frequency":"15m"}}' \
-        "${KIBANA_URL}/api/security/entity_store/update/service"
+        "${KIBANA_URL}/api/security/entity_store/service"
   - lang: Console
     source: |
-      PUT kbn://api/security/entity_store/update/service
+      PUT kbn://api/security/entity_store/service
       {
         "logExtraction": {
           "frequency": "15m"

@@ -43,7 +43,7 @@ export const ENTITY_STORE_ROUTES = {
     INSTALL: `${PUBLIC_BASE}/install`,
     INSTALL_BY_TYPE: (entityType: string) => `${PUBLIC_BASE}/install/${entityType}`,
     UPDATE: PUBLIC_BASE,
-    UPDATE_BY_TYPE: (entityType: string) => `${PUBLIC_BASE}/update/${entityType}`,
+    UPDATE_BY_TYPE: (entityType: string) => `${PUBLIC_BASE}/${entityType}`,
     STATUS: `${PUBLIC_BASE}/status`,
     START: `${PUBLIC_BASE}/start`,
     STOP: `${PUBLIC_BASE}/stop`,

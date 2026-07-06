@@ -507,7 +507,7 @@ export class AssetManagerClient {
   /**
    * Updates the shared, store-wide log extraction config. Any overridable field explicitly
    * supplied here (see `OVERRIDABLE_LOG_EXTRACTION_FIELDS`) is a deliberate request for
-   * the whole store and resets that field's per-type override — via `update/{entityType}`
+   * the whole store and resets that field's per-type override — via `PUT /{entityType}`
    * or a built-in default (e.g. Service/Generic) — for every entity type, so the newly
    * set global value applies uniformly.
    */

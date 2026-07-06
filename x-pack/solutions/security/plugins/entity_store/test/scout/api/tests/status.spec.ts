@@ -71,7 +71,7 @@ apiTest.describe('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, ()
   );
 
   apiTest(
-    'Should reflect a per-type cadence override set via update/{entityType}',
+    'Should reflect a per-type cadence override set via PUT /{entityType}',
     async ({ apiClient }) => {
       await installAllEntityTypes(apiClient, defaultHeaders);
 

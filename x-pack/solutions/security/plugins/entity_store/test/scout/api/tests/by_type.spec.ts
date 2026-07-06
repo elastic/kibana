@@ -224,24 +224,21 @@ apiTest.describe('Entity Store per-entity-type API tests', { tag: ENTITY_STORE_T
     expect(service?.frequency).toBe(effectiveFrequency('service'));
   });
 
-  apiTest(
-    'update/{entityType} returns 400 when the type is not installed',
-    async ({ apiClient }) => {
-      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: { entityTypes: ['host'] },
-      });
+  apiTest('PUT /{entityType} returns 400 when the type is not installed', async ({ apiClient }) => {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { entityTypes: ['host'] },
+    });
 
-      const update = await updateEntityType(apiClient, defaultHeaders, 'service', {
-        logExtraction: { frequency: '5m' },
-      });
-      expect(update.statusCode).toBe(400);
-    }
-  );
+    const update = await updateEntityType(apiClient, defaultHeaders, 'service', {
+      logExtraction: { frequency: '5m' },
+    });
+    expect(update.statusCode).toBe(400);
+  });
 
   apiTest(
-    'update/{entityType} sets a per-type override without affecting other types',
+    'PUT /{entityType} sets a per-type override without affecting other types',
     async ({ apiClient }) => {
       await installAllEntityTypes(apiClient, defaultHeaders);
 
@@ -264,7 +261,7 @@ apiTest.describe('Entity Store per-entity-type API tests', { tag: ENTITY_STORE_T
     }
   );
 
-  apiTest('update/{entityType} rejects an explicit null value', async ({ apiClient }) => {
+  apiTest('PUT /{entityType} rejects an explicit null value', async ({ apiClient }) => {
     await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
@@ -284,7 +281,7 @@ apiTest.describe('Entity Store per-entity-type API tests', { tag: ENTITY_STORE_T
   });
 
   apiTest(
-    'update/{entityType} allows setting a value equal to the default explicitly',
+    'PUT /{entityType} allows setting a value equal to the default explicitly',
     async ({ apiClient }) => {
       await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
@@ -303,7 +300,7 @@ apiTest.describe('Entity Store per-entity-type API tests', { tag: ENTITY_STORE_T
     }
   );
 
-  apiTest('update/{entityType} rejects an invalid duration', async ({ apiClient }) => {
+  apiTest('PUT /{entityType} rejects an invalid duration', async ({ apiClient }) => {
     await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
@@ -317,7 +314,7 @@ apiTest.describe('Entity Store per-entity-type API tests', { tag: ENTITY_STORE_T
   });
 
   apiTest(
-    'update/{entityType} rejects logExtraction fields that are not per-type cadence values',
+    'PUT /{entityType} rejects logExtraction fields that are not per-type cadence values',
     async ({ apiClient }) => {
       await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
@@ -335,7 +332,7 @@ apiTest.describe('Entity Store per-entity-type API tests', { tag: ENTITY_STORE_T
   );
 
   apiTest(
-    'update/{entityType} override is cleared when a later store-wide update explicitly sets the same field',
+    'PUT /{entityType} override is cleared when a later store-wide update explicitly sets the same field',
     async ({ apiClient }) => {
       await installAllEntityTypes(apiClient, defaultHeaders);
 
@@ -366,7 +363,7 @@ apiTest.describe('Entity Store per-entity-type API tests', { tag: ENTITY_STORE_T
   );
 
   apiTest(
-    'update/{entityType} override wins over an earlier store-wide update to the same field',
+    'PUT /{entityType} override wins over an earlier store-wide update to the same field',
     async ({ apiClient }) => {
       await installAllEntityTypes(apiClient, defaultHeaders);
 

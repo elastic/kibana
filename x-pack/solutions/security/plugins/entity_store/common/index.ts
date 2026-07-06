@@ -50,7 +50,7 @@ export const ENTITY_STORE_ROUTES = {
     INSTALL: `${PUBLIC_BASE_ROUTE}/install`,
     INSTALL_BY_TYPE: `${PUBLIC_BASE_ROUTE}/install/{entityType}`,
     UPDATE: PUBLIC_BASE_ROUTE,
-    UPDATE_BY_TYPE: `${PUBLIC_BASE_ROUTE}/update/{entityType}`,
+    UPDATE_BY_TYPE: `${PUBLIC_BASE_ROUTE}/{entityType}`,
     UNINSTALL: `${PUBLIC_BASE_ROUTE}/uninstall`,
     UNINSTALL_BY_TYPE: `${PUBLIC_BASE_ROUTE}/uninstall/{entityType}`,
     STATUS: `${PUBLIC_BASE_ROUTE}/status`,
