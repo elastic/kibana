@@ -12,7 +12,7 @@ import { SuggestionsDropdown } from '../shared/suggestions/suggestions_dropdown'
 import { useSuggestionsInput } from '../shared/suggestions/use_suggestions_input';
 import type { EvaluationDefinition, StatDefinition } from './form_types';
 import { createMetricSuggestionsProvider } from './suggestions_provider';
-import { EXPRESSION_UNKNOWN_REFERENCE_WARNING } from './translations';
+import { EXPRESSION_UNKNOWN_REFERENCE_ERROR } from './translations';
 
 export interface EvaluationExpressionFieldProps {
   readonly index: number;
@@ -48,9 +48,10 @@ export const EvaluationExpressionField: React.FC<EvaluationExpressionFieldProps>
         defaultMessage: 'Expression',
       })}
       fullWidth
-      helpText={
+      isInvalid={evaluationInvalidRefs.has(ev.id)}
+      error={
         evaluationInvalidRefs.has(ev.id)
-          ? EXPRESSION_UNKNOWN_REFERENCE_WARNING(evaluationInvalidRefs.get(ev.id)!)
+          ? EXPRESSION_UNKNOWN_REFERENCE_ERROR(evaluationInvalidRefs.get(ev.id)!)
           : undefined
       }
     >

@@ -63,4 +63,19 @@ describe('EvaluationExpressionField', () => {
 
     expect(input.value).toBe('count');
   });
+
+  it('marks the field invalid and shows the error text when it has an unknown reference', () => {
+    render(
+      <EvaluationExpressionField
+        index={0}
+        currentEvaluation={evaluations[0]}
+        onChange={jest.fn()}
+        stats={stats}
+        evaluations={evaluations}
+        evaluationInvalidRefs={new Map([['e1', ['unknown_total']]])}
+      />
+    );
+
+    expect(screen.getByText('References unknown label: unknown_total')).toBeInTheDocument();
+  });
 });
