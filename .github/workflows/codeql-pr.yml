@@ -27,7 +27,7 @@ jobs:
       id: check
       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ github.token }}
         script: |
           const allowed = ['admin', 'maintain', 'write'];
           const username = context.payload.pull_request.user.login;
@@ -41,8 +41,12 @@ jobs:
             core.info(`Author '${username}' permission='${data.permission}' role_name='${data.role_name}' authorized=${authorized}`);
             core.setOutput('is_authorized', String(authorized));
           } catch (error) {
-            core.warning(`Unable to resolve permission for '${username}': ${error.message}`);
-            core.setOutput('is_authorized', 'false');
+            if (error.status === 404) {
+              core.info(`Author '${username}' is not a collaborator; treating as unauthorized.`);
+              core.setOutput('is_authorized', 'false');
+              return;
+            }
+            core.setFailed(`Unable to resolve permission for '${username}': ${error.message}`);
           }
 
   test:
