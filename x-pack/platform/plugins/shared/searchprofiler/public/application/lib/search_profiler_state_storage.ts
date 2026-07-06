@@ -5,11 +5,25 @@
  * 2.0.
  */
 
+import { checkForParseErrors } from './check_for_json_errors';
+
 export const SEARCH_PROFILER_STATE_STORAGE_KEY = 'xpack.searchProfiler.state';
 
 export interface SearchProfilerStoredState {
   index?: string;
   query?: string;
+}
+
+export interface InitialSearchProfilerQueryParams {
+  defaultQuery: string;
+  queryFromUrl: string | null;
+  storedQuery?: string;
+}
+
+export interface InitialSearchProfilerIndexParams {
+  defaultIndex: string;
+  indexFromUrl: string | null;
+  storedIndex?: string;
 }
 
 const isSearchProfilerStoredState = (value: unknown): value is SearchProfilerStoredState => {
@@ -59,3 +73,42 @@ export const updateSearchProfilerState = (state: SearchProfilerStoredState): voi
     ...state,
   });
 };
+
+export const isSearchProfilerQueryPersistable = (query: string): boolean => {
+  return query === '' || checkForParseErrors(query).error === null;
+};
+
+export const updateSearchProfilerQueryState = (query: string): void => {
+  if (!isSearchProfilerQueryPersistable(query)) {
+    return;
+  }
+
+  updateSearchProfilerState({ query });
+};
+
+const getValidQuery = (query?: string | null): string | undefined => {
+  if (!query || !isSearchProfilerQueryPersistable(query)) {
+    return undefined;
+  }
+
+  return query;
+};
+
+export const getInitialSearchProfilerQuery = ({
+  defaultQuery,
+  queryFromUrl,
+  storedQuery,
+}: InitialSearchProfilerQueryParams): string => {
+  return (
+    getValidQuery(queryFromUrl) ??
+    (queryFromUrl === null ? getValidQuery(storedQuery) : undefined) ??
+    defaultQuery
+  );
+};
+
+export const getInitialSearchProfilerIndex = ({
+  defaultIndex,
+  indexFromUrl,
+  storedIndex,
+}: InitialSearchProfilerIndexParams): string =>
+  indexFromUrl || (indexFromUrl === null ? storedIndex : undefined) || defaultIndex;

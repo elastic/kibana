@@ -29,13 +29,16 @@ export class SearchProfilerPage {
     this.consolePanel = this.page.testSubj.locator('consolePanel');
   }
 
-  async goto(options: { index?: string; loadFrom?: string } = {}) {
+  async goto(options: { index?: string; loadFrom?: string; rawLoadFrom?: string } = {}) {
     const query = new URLSearchParams();
-    if (options.index) {
+    if (options.index !== undefined) {
       query.set('index', options.index);
     }
-    if (options.loadFrom) {
+    if (options.loadFrom !== undefined) {
       query.set('load_from', compressToEncodedURIComponent(options.loadFrom));
+    }
+    if (options.rawLoadFrom !== undefined) {
+      query.set('load_from', options.rawLoadFrom);
     }
 
     const hash = query.size > 0 ? `searchprofiler?${query.toString()}` : 'searchprofiler';

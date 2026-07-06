@@ -25,7 +25,13 @@ import { useHasIndices, useRequestProfile } from '../../hooks';
 import { useAppContext } from '../../contexts/app_context';
 import { useProfilerActionContext } from '../../contexts/profiler_context';
 import { Editor, type EditorProps } from './editor';
-import { readSearchProfilerState, updateSearchProfilerState } from '../../lib';
+import {
+  getInitialSearchProfilerIndex,
+  getInitialSearchProfilerQuery,
+  readSearchProfilerState,
+  updateSearchProfilerQueryState,
+  updateSearchProfilerState,
+} from '../../lib';
 
 const DEFAULT_INDEX_VALUE = '_all';
 const UPDATE_LOCAL_STORAGE_DEBOUNCE_DELAY = 500;
@@ -35,6 +41,29 @@ const INITIAL_EDITOR_VALUE = `{
     "match_all" : {}
   }
 }`;
+
+const SEARCH_PROFILER_HASH_PATH = '#/searchprofiler';
+
+const getSearchProfilerQuery = (searchProfilerQueryURI: string | null): string | null => {
+  if (searchProfilerQueryURI === null) {
+    return null;
+  }
+
+  return (
+    decompressFromEncodedURIComponent(searchProfilerQueryURI.replace(/^data:text\/plain,/, '')) ??
+    ''
+  );
+};
+
+const getSearchParamsFromHash = () => {
+  const [hashPath, hashSearch = ''] = window.location.hash.split('?');
+
+  if (hashPath !== SEARCH_PROFILER_HASH_PATH) {
+    return null;
+  }
+
+  return new URLSearchParams(hashSearch);
+};
 
 const styles = {
   container: css`
@@ -65,34 +94,76 @@ export const ProfileQueryEditor = memo(() => {
   const searchProfilerQueryURI = queryParams.get('load_from');
   const storedState = useMemo(() => readSearchProfilerState(), []);
 
-  const searchProfilerQuery =
-    searchProfilerQueryURI &&
-    decompressFromEncodedURIComponent(searchProfilerQueryURI.replace(/^data:text\/plain,/, ''));
+  const searchProfilerQuery = getSearchProfilerQuery(searchProfilerQueryURI);
 
-  const initialIndexValue = indexName ?? storedState.index ?? DEFAULT_INDEX_VALUE;
-  const initialEditorValue =
-    searchProfilerQuery ??
-    (searchProfilerQueryURI ? undefined : storedState.query) ??
-    INITIAL_EDITOR_VALUE;
+  const initialIndexValue = getInitialSearchProfilerIndex({
+    defaultIndex: DEFAULT_INDEX_VALUE,
+    indexFromUrl: indexName,
+    storedIndex: storedState.index,
+  });
+  const initialEditorValue = getInitialSearchProfilerQuery({
+    defaultQuery: INITIAL_EDITOR_VALUE,
+    queryFromUrl: searchProfilerQuery,
+    storedQuery: storedState.query,
+  });
   const editorValue = useRef(initialEditorValue);
 
   const requestProfile = useRequestProfile();
   const debouncedUpdateQueryStorage = useMemo(
     () =>
       debounce((query: string) => {
-        updateSearchProfilerState({ query });
+        updateSearchProfilerQueryState(query);
       }, UPDATE_LOCAL_STORAGE_DEBOUNCE_DELAY),
     []
   );
 
   useEffect(() => {
-    updateSearchProfilerState({ index: initialIndexValue, query: editorValue.current });
+    updateSearchProfilerState({ index: initialIndexValue });
+    updateSearchProfilerQueryState(editorValue.current);
 
     return () => {
       debouncedUpdateQueryStorage.flush();
       debouncedUpdateQueryStorage.cancel();
     };
   }, [debouncedUpdateQueryStorage, initialIndexValue]);
+
+  const applyUrlParams = useCallback((params: URLSearchParams) => {
+    const nextStoredState = readSearchProfilerState();
+    const nextIndexValue = getInitialSearchProfilerIndex({
+      defaultIndex: DEFAULT_INDEX_VALUE,
+      indexFromUrl: params.get('index'),
+      storedIndex: nextStoredState.index,
+    });
+    const nextEditorValue = getInitialSearchProfilerQuery({
+      defaultQuery: INITIAL_EDITOR_VALUE,
+      queryFromUrl: getSearchProfilerQuery(params.get('load_from')),
+      storedQuery: nextStoredState.query,
+    });
+
+    editorValue.current = nextEditorValue;
+    if (indexInputRef.current) {
+      indexInputRef.current.value = nextIndexValue;
+    }
+    editorPropsRef.current?.setValue(nextEditorValue);
+    updateSearchProfilerState({ index: nextIndexValue });
+    updateSearchProfilerQueryState(nextEditorValue);
+  }, []);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const params = getSearchParamsFromHash();
+
+      if (params) {
+        applyUrlParams(params);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, [applyUrlParams]);
 
   const handleProfileClick = async () => {
     dispatch({ type: 'setProfiling', value: true });

@@ -6,11 +6,20 @@
  */
 
 import {
+  getInitialSearchProfilerIndex,
+  getInitialSearchProfilerQuery,
+  isSearchProfilerQueryPersistable,
   readSearchProfilerState,
   SEARCH_PROFILER_STATE_STORAGE_KEY,
+  updateSearchProfilerQueryState,
   updateSearchProfilerState,
   writeSearchProfilerState,
 } from './search_profiler_state_storage';
+
+const DEFAULT_INDEX = '_all';
+const DEFAULT_QUERY = '{ "query": { "match_all": {} } }';
+const STORED_QUERY = '{ "query": { "term": { "message": "stored" } } }';
+const URL_QUERY = '{ "query": { "term": { "message": "url" } } }';
 
 describe('search profiler state storage', () => {
   beforeEach(() => {
@@ -62,5 +71,104 @@ describe('search profiler state storage', () => {
     );
 
     expect(readSearchProfilerState()).toEqual({});
+  });
+
+  it('falls back to the default index when URL or stored index values are empty', () => {
+    expect(
+      getInitialSearchProfilerIndex({
+        defaultIndex: DEFAULT_INDEX,
+        indexFromUrl: '',
+        storedIndex: 'logs-*',
+      })
+    ).toBe(DEFAULT_INDEX);
+
+    expect(
+      getInitialSearchProfilerIndex({
+        defaultIndex: DEFAULT_INDEX,
+        indexFromUrl: null,
+        storedIndex: '',
+      })
+    ).toBe(DEFAULT_INDEX);
+  });
+
+  it('uses stored index content only when no URL index parameter is present', () => {
+    expect(
+      getInitialSearchProfilerIndex({
+        defaultIndex: DEFAULT_INDEX,
+        indexFromUrl: null,
+        storedIndex: 'logs-*',
+      })
+    ).toBe('logs-*');
+  });
+
+  it('uses valid URL query content before stored query content', () => {
+    expect(
+      getInitialSearchProfilerQuery({
+        defaultQuery: DEFAULT_QUERY,
+        queryFromUrl: URL_QUERY,
+        storedQuery: STORED_QUERY,
+      })
+    ).toBe(URL_QUERY);
+  });
+
+  it('falls back to the default query when URL query content is empty or invalid', () => {
+    expect(
+      getInitialSearchProfilerQuery({
+        defaultQuery: DEFAULT_QUERY,
+        queryFromUrl: '',
+        storedQuery: STORED_QUERY,
+      })
+    ).toBe(DEFAULT_QUERY);
+
+    expect(
+      getInitialSearchProfilerQuery({
+        defaultQuery: DEFAULT_QUERY,
+        queryFromUrl: '!!!invalid',
+        storedQuery: STORED_QUERY,
+      })
+    ).toBe(DEFAULT_QUERY);
+  });
+
+  it('uses stored query content only when no URL query parameter is present', () => {
+    expect(
+      getInitialSearchProfilerQuery({
+        defaultQuery: DEFAULT_QUERY,
+        queryFromUrl: null,
+        storedQuery: STORED_QUERY,
+      })
+    ).toBe(STORED_QUERY);
+
+    expect(
+      getInitialSearchProfilerQuery({
+        defaultQuery: DEFAULT_QUERY,
+        queryFromUrl: null,
+        storedQuery: '',
+      })
+    ).toBe(DEFAULT_QUERY);
+  });
+
+  it('only persists empty or valid JSON query content', () => {
+    expect(isSearchProfilerQueryPersistable('')).toBe(true);
+    expect(isSearchProfilerQueryPersistable(STORED_QUERY)).toBe(true);
+    expect(isSearchProfilerQueryPersistable('!!!invalid')).toBe(false);
+
+    writeSearchProfilerState({
+      index: 'logs-*',
+      query: STORED_QUERY,
+    });
+
+    updateSearchProfilerQueryState('!!!invalid');
+
+    expect(readSearchProfilerState()).toEqual({
+      index: 'logs-*',
+      query: STORED_QUERY,
+    });
+
+    updateSearchProfilerQueryState('');
+
+    expect(readSearchProfilerState()).toEqual({
+      index: 'logs-*',
+      query: '',
+    });
   });
 });
