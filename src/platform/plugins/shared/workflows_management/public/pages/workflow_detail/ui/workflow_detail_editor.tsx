@@ -370,7 +370,10 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
             </React.Suspense>
           </div>
           {isVisualEditorEnabled && renderGraph && (
-            <div css={[styles.editorLayer, showGraph ? styles.layerVisible : styles.layerHidden]}>
+            <div
+              css={[styles.editorLayer, showGraph ? styles.layerVisible : styles.layerHidden]}
+              inert={showGraph ? undefined : ''}
+            >
               <React.Suspense fallback={<EuiLoadingSpinner />}>
                 <WorkflowVisualEditor
                   onStepRun={handleStepRun}
