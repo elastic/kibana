@@ -258,7 +258,7 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
 
 4. **Trigger the run.** Confirm you have not already triggered 3 runs (count prior `/flaky ` comments). Then post **two** comments:
 
-   - First, a **rationale** comment that is a single short sentence: name the config(s) you're running and the targeted test they cover. No file-walk reasoning, no junit/reportName details, no restating the fix.
+   - First, a short **rationale** comment (1–3 sentences): which config(s) you are running and why (which targeted test(s) they exercise).
    - Then a **separate** comment whose body is exactly the trigger command on its own (it must start with `/flaky ` so the trigger workflow picks it up):
 
      ```
