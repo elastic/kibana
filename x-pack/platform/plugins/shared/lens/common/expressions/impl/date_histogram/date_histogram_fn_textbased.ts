@@ -29,13 +29,14 @@ const getDomainBounds = (
   anchor: number,
   step: number,
   unit: Unit,
+  timeZone: string,
   dropPartials: boolean
 ): { min: number; max: number } | undefined => {
   if (!step || step <= 0) {
     return undefined;
   }
 
-  const anchorTime = moment.utc(anchor);
+  const anchorTime = moment.tz(anchor, timeZone);
 
   const stepsBefore = Math.ceil(anchorTime.diff(from, unit, true) / step);
   const start = anchorTime.clone().subtract(stepsBefore * step, unit);
@@ -69,14 +70,16 @@ export const dateHistogramTextBasedFn =
   (
     getDatatableUtilities: (
       context: ExecutionContext
-    ) => DatatableUtilitiesService | Promise<DatatableUtilitiesService>
+    ) => DatatableUtilitiesService | Promise<DatatableUtilitiesService>,
+    getTimezone: (context: ExecutionContext) => string | Promise<string>
   ): DateHistogramTextBasedExpressionFunction['fn'] =>
   async (input, _args, context) => {
+    const contextTimeZone = await getTimezone(context);
     const datatableUtilities = await getDatatableUtilities(context);
 
     const bucketColumn = (() => {
       for (const column of input.columns) {
-        const meta = datatableUtilities.getDateHistogramMeta(column);
+        const meta = datatableUtilities.getDateHistogramMeta(column, { timeZone: contextTimeZone });
         if (meta?.timeRange && meta.interval) {
           return { column, meta };
         }
@@ -95,6 +98,7 @@ export const dateHistogramTextBasedFn =
       return input;
     }
 
+    const timeZone = meta.timeZone || contextTimeZone;
     const parsedInterval = splitStringInterval(intervalString);
     const interval = parseInterval(intervalString);
 
@@ -102,8 +106,8 @@ export const dateHistogramTextBasedFn =
       return input;
     }
 
-    const from = moment.utc(timeRange.from);
-    const to = moment.utc(timeRange.to);
+    const from = moment.tz(timeRange.from, timeZone);
+    const to = moment.tz(timeRange.to, timeZone);
 
     const computedDomain = getDomainBounds(
       from,
@@ -111,6 +115,7 @@ export const dateHistogramTextBasedFn =
       input.rows[0]?.[column.id] ?? from.valueOf(),
       parsedInterval.value,
       parsedInterval.unit,
+      timeZone,
       Boolean(meta.dropPartials)
     );
 
@@ -128,7 +133,7 @@ export const dateHistogramTextBasedFn =
         )
       : input.columns;
 
-    if (!meta.dropPartials || input.rows.length <= 1) {
+    if (!meta.dropPartials || input.rows.length === 1) {
       return { ...input, columns };
     }
 
@@ -140,7 +145,7 @@ export const dateHistogramTextBasedFn =
         return (
           (typeof bucketStart !== 'string' && typeof bucketStart !== 'number') ||
           isFullyContained(
-            moment.utc(bucketStart),
+            moment.tz(bucketStart, timeZone),
             from,
             to,
             parsedInterval.value,

@@ -148,7 +148,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
       : selectedField?.meta?.type === 'number';
 
   const isDateHistogramColumn =
-    activeColumnMeta?.esType === 'date' && activeColumnMeta?.esMeta?.bucket !== null;
+    activeColumnMeta?.esType === 'date' && activeColumnMeta?.esMeta?.bucket !== undefined;
 
   return (
     <>
