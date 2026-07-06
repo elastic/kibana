@@ -384,6 +384,39 @@ describe('config validation', () => {
   });
 
   describe('connector validation', () => {
+    test('returns error when OAuth2 password grant credentials are missing', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'https://token.example.com',
+      };
+
+      expect(() => {
+        validateConnector(connectorType, { config, secrets: emptySecrets });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled"`
+      );
+    });
+
+    test('succeeds when OAuth2 password grant credentials are provided', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'https://token.example.com',
+      };
+      const secrets: ConnectorTypeSecretsType = {
+        ...emptySecrets,
+        user: 'bob',
+        password: 'supersecret',
+      };
+
+      expect(() => {
+        validateConnector(connectorType, { config, secrets });
+      }).not.toThrow();
+    });
+
     test('returns error when hasProxyAuth is true but proxyUrl is missing', () => {
       const config: ConnectorTypeConfigType = {
         ...emptyConfig,
