@@ -45,6 +45,20 @@ export interface CreateAndEnrollEndpointHostResponse {
 /**
  * Creates a new virtual machine (host) and enrolls that with Fleet
  */
+/**
+ * Temporary pin for the Elastic Agent version used by real-endpoint tests (Cypress + CLI runner).
+ *
+ * The stack (`9.5.0-SNAPSHOT`) Elastic Defend build fails to load the Linux `production-ransomware-v1`
+ * global artifact shipped in the current daily manifest (`ransom-protect` v0.0.3), and treats that
+ * single bad artifact as fatal to the entire global manifest — leaving the endpoint with no
+ * protections configured and the agent permanently `DEGRADED`, so policy status never reaches
+ * "Success". `9.4.3` tolerates the same bad artifact (applies the rest), so it enrolls healthy.
+ *
+ * Remove this pin (let the version fall back to the stack version) once the upstream ransomware
+ * artifact is fixed/rolled back. See https://github.com/elastic/kibana/issues/218441
+ */
+export const PINNED_AGENT_VERSION = '9.4.3';
+
 export const createAndEnrollEndpointHost = async ({
   kbnClient,
   log: _log,
@@ -65,6 +79,10 @@ export const createAndEnrollEndpointHost = async ({
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
     if (isServerless) {
       agentVersion = await fetchFleetLatestAvailableAgentVersion(kbnClient);
+    } else {
+      // Temporary: pin the stateful/ESS agent to a version unaffected by the broken Linux
+      // ransomware global artifact (see PINNED_AGENT_VERSION). Remove once fixed upstream.
+      agentVersion = PINNED_AGENT_VERSION;
     }
   }
   const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;

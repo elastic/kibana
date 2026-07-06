@@ -5,28 +5,15 @@
  * 2.0.
  */
 
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useCalculateEntityRiskScore } from './use_calculate_entity_risk_score';
-import { waitFor, renderHook, act } from '@testing-library/react';
-import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 
-const enabledRiskEngineStatus = {
-  risk_engine_status: RiskEngineStatusEnum.ENABLED,
-};
-const disabledRiskEngineStatus = {
-  risk_engine_status: RiskEngineStatusEnum.DISABLED,
-};
-
-const mockUseRiskEngineStatus = jest.fn();
-jest.mock('./use_risk_engine_status', () => ({
-  useRiskEngineStatus: () => mockUseRiskEngineStatus(),
-}));
-
-const mockCalculateEntityRiskScore = jest.fn();
+const mockCalculateEntityRiskScoreV2 = jest.fn();
 jest.mock('../api', () => ({
   useEntityAnalyticsRoutes: () => ({
-    calculateEntityRiskScore: mockCalculateEntityRiskScore,
+    calculateEntityRiskScoreV2: mockCalculateEntityRiskScoreV2,
   }),
 }));
 
@@ -39,28 +26,28 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
 
 const identifierType = EntityType.user;
 const identifier = 'test-user';
-const options = {
+const params = {
+  identifierType,
+  identifier,
   onSuccess: jest.fn(),
 };
 
-describe('useRiskScoreData', () => {
+describe('useCalculateEntityRiskScore', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseRiskEngineStatus.mockReturnValue({ data: enabledRiskEngineStatus });
-    mockCalculateEntityRiskScore.mockResolvedValue({});
+    mockCalculateEntityRiskScoreV2.mockResolvedValue({});
   });
 
-  it('should call calculateEntityRiskScore API when the callback function is called', async () => {
-    const { result } = renderHook(
-      () => useCalculateEntityRiskScore(identifierType, identifier, options),
-      { wrapper: TestProviders }
-    );
+  it('calls calculateEntityRiskScoreV2 when the callback is invoked', async () => {
+    const { result } = renderHook(() => useCalculateEntityRiskScore(params), {
+      wrapper: TestProviders,
+    });
 
     await act(async () => {
       result.current.calculateEntityRiskScore();
 
       await waitFor(() =>
-        expect(mockCalculateEntityRiskScore).toHaveBeenCalledWith(
+        expect(mockCalculateEntityRiskScoreV2).toHaveBeenCalledWith(
           expect.objectContaining({
             identifier_type: identifierType,
             identifier,
@@ -70,33 +57,37 @@ describe('useRiskScoreData', () => {
     });
   });
 
-  it('should NOT call calculateEntityRiskScore API when risk engine is disabled', async () => {
-    mockUseRiskEngineStatus.mockReturnValue({
-      data: disabledRiskEngineStatus,
+  it('displays a toast error when the API returns an error', async () => {
+    mockCalculateEntityRiskScoreV2.mockRejectedValue({});
+    const { result } = renderHook(() => useCalculateEntityRiskScore(params), {
+      wrapper: TestProviders,
     });
-    const { result } = renderHook(
-      () => useCalculateEntityRiskScore(identifierType, identifier, options),
-      { wrapper: TestProviders }
-    );
-
-    await act(async () => {
-      result.current.calculateEntityRiskScore();
-
-      await waitFor(() => expect(mockCalculateEntityRiskScore).not.toHaveBeenCalled());
-    });
-  });
-
-  it('should display a toast error when the API returns an error', async () => {
-    mockCalculateEntityRiskScore.mockRejectedValue({});
-    const { result } = renderHook(
-      () => useCalculateEntityRiskScore(identifierType, identifier, options),
-      { wrapper: TestProviders }
-    );
 
     await act(async () => {
       result.current.calculateEntityRiskScore();
 
       await waitFor(() => expect(mockAddError).toHaveBeenCalled());
+    });
+  });
+
+  it('forwards entityId to the V2 API call', async () => {
+    const entityId = 'test-euid';
+    const { result } = renderHook(() => useCalculateEntityRiskScore({ ...params, entityId }), {
+      wrapper: TestProviders,
+    });
+
+    await act(async () => {
+      result.current.calculateEntityRiskScore();
+
+      await waitFor(() =>
+        expect(mockCalculateEntityRiskScoreV2).toHaveBeenCalledWith(
+          expect.objectContaining({
+            identifier_type: identifierType,
+            identifier,
+            entity_id: entityId,
+          })
+        )
+      );
     });
   });
 });
