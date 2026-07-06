@@ -22,8 +22,12 @@ if (
 }
 
 const readNumber = (filePath) => {
-  const value = Number(readFileSync(filePath, 'utf8').trim());
-  return Number.isFinite(value) ? value : null;
+  try {
+    const value = Number(readFileSync(filePath, 'utf8').trim());
+    return Number.isFinite(value) ? value : null;
+  } catch {
+    return null;
+  }
 };
 
 const startedAtMs = readNumber(START_FILE);
