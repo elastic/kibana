@@ -241,12 +241,8 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
    * Ships dark by default; enable in kibana.dev.yml for local eval iteration.
-   *
-   * DEMO BRANCH ONLY: temporarily defaulted to `true` so the PR cloud deployment
-   * registers the skill for manual testing. Revert to `false` before this (or any
-   * derived) PR is marked ready-for-review — the skill must ship dark on serverless.
    */
-  endpointForensicAnalysisSkill: true,
+  endpointForensicAnalysisSkill: false,
 
   /**
    * Enables the find-security-rules Agent Builder skill.
