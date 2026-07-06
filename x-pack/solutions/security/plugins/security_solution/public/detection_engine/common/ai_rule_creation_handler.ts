@@ -82,15 +82,14 @@ export const createAiRuleCreationHandler = ({
           // Captured before the await: closing chat mid-save nulls activeConversationId.
           const convId = activeConversationId;
           const ruleProps = parseResult.data;
+          const isUpdate = Boolean(rule.id);
           let saved: RuleResponse;
-          const savedRuleId = rule.id;
-          const isUpdate = !!savedRuleId;
-          if (savedRuleId) {
+          if (rule.id) {
             // The server rejects PUT requests carrying both `id` and `rule_id`, so drop
             // `rule_id` and address the rule by `id` instead.
             const { rule_id: _ruleId, ...updateProps } = ruleProps;
             saved = await updateRule({
-              rule: transformOutput({ ...updateProps, id: savedRuleId }),
+              rule: transformOutput({ ...updateProps, id: rule.id }),
             });
           } else {
             saved = await createRule({
