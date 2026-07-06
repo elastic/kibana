@@ -68,6 +68,11 @@ export const transformControlPanelsIn = (
     return undefined;
   }
 
+  const panelIds = controlPanels.map((panel) => panel.id);
+  if (new Set(panelIds).size !== panelIds.length) {
+    throw new Error('control_panels must have unique ids');
+  }
+
   const panels = Object.fromEntries(
     controlPanels.map((panel, order) => {
       const { id, type, width, grow, config } = panel;

@@ -279,6 +279,21 @@ describe('discover session API transforms', () => {
         id: 'logs-data-view',
       });
     });
+
+    it('throws when tabs contain duplicate ids', () => {
+      expect(() =>
+        transformDiscoverSessionIn({
+          ...apiData,
+          tabs: [
+            apiData.tabs[0],
+            {
+              ...apiData.tabs[1],
+              id: apiData.tabs[0].id,
+            },
+          ],
+        })
+      ).toThrow('tabs must have unique ids');
+    });
   });
 
   describe('round-trip', () => {

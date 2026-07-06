@@ -36,6 +36,11 @@ const getVisContextRequestData = (tab: DiscoverSessionApiTab) => {
 export const transformDiscoverSessionIn = (
   data: DiscoverSessionApiData
 ): { attributes: DiscoverSessionAttributes; references: SavedObjectReference[] } => {
+  const tabIds = data.tabs.map((tab) => tab.id);
+  if (new Set(tabIds).size !== tabIds.length) {
+    throw new Error('tabs must have unique ids');
+  }
+
   const references: SavedObjectReference[] = [];
 
   const tabs: DiscoverSessionAttributes['tabs'] = data.tabs.map((tab) => {
