@@ -76,14 +76,17 @@ export function registerFeatureFlags(
         core.uiSettings.register({
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS]: {
             category: ['observability'],
-            name: i18n.translate('xpack.streams.sigEventsIndexPatternsSettingsName', {
+            name: i18n.translate('xpack.significantEvents.sigEventsIndexPatternsSettingsName', {
               defaultMessage: 'Significant Events index patterns',
             }) as string,
             value: DEFAULT_INDEX_PATTERNS,
-            description: i18n.translate('xpack.streams.sigEventsIndexPatternsSettingsDescription', {
-              defaultMessage:
-                'Comma-separated list of index patterns used for Significant Events stream filtering and analysis.',
-            }),
+            description: i18n.translate(
+              'xpack.significantEvents.sigEventsIndexPatternsSettingsDescription',
+              {
+                defaultMessage:
+                  'Comma-separated list of index patterns used for Significant Events stream filtering and analysis.',
+              }
+            ),
             type: 'string',
             schema: schema.string(),
             requiresPageReload: false,
@@ -97,12 +100,12 @@ export function registerFeatureFlags(
         core.uiSettings.register({
           [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY]: {
             category: ['observability'],
-            name: i18n.translate('xpack.streams.significantEventsDiscoverySettingsName', {
+            name: i18n.translate('xpack.significantEvents.significantEventsDiscoverySettingsName', {
               defaultMessage: 'Streams significant events discovery',
             }) as string,
             value: false,
             description: i18n.translate(
-              'xpack.streams.significantEventsDiscoverySettingsDescription',
+              'xpack.significantEvents.significantEventsDiscoverySettingsDescription',
               {
                 defaultMessage: 'Enable streams significant events discovery.',
               }
@@ -121,12 +124,15 @@ export function registerFeatureFlags(
           core.uiSettings.register({
             [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2]: {
               category: ['observability'],
-              name: i18n.translate('xpack.streams.significantEventsAlertingV2SettingsName', {
-                defaultMessage: 'Streams significant events — Alerting v2',
-              }) as string,
+              name: i18n.translate(
+                'xpack.significantEvents.significantEventsAlertingV2SettingsName',
+                {
+                  defaultMessage: 'Streams significant events — Alerting v2',
+                }
+              ) as string,
               value: false,
               description: i18n.translate(
-                'xpack.streams.significantEventsAlertingV2SettingsDescription',
+                'xpack.significantEvents.significantEventsAlertingV2SettingsDescription',
                 {
                   defaultMessage:
                     'Back significant event queries with Alerting v2 (kind: signal) instead of the custom streams.rules.esql rule type. ' +
@@ -155,14 +161,17 @@ export function registerFeatureFlags(
         core.uiSettings.registerGlobal({
           [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED]: {
             category: ['observability'],
-            name: i18n.translate('xpack.streams.continuousKiExtractionEnabledName', {
+            name: i18n.translate('xpack.significantEvents.continuousKiExtractionEnabledName', {
               defaultMessage: 'Continuous KI extraction enabled',
             }),
             value: false,
-            description: i18n.translate('xpack.streams.continuousKiExtractionEnabledDescription', {
-              defaultMessage:
-                'When enabled, knowledge indicator extraction runs automatically on managed streams.',
-            }),
+            description: i18n.translate(
+              'xpack.significantEvents.continuousKiExtractionEnabledDescription',
+              {
+                defaultMessage:
+                  'When enabled, knowledge indicator extraction runs automatically on managed streams.',
+              }
+            ),
             type: 'boolean',
             schema: schema.boolean(),
             scope: 'global',
@@ -172,12 +181,15 @@ export function registerFeatureFlags(
           },
           [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS]: {
             category: ['observability'],
-            name: i18n.translate('xpack.streams.continuousKiExtractionIntervalHoursName', {
-              defaultMessage: 'Continuous KI extraction interval (hours)',
-            }),
+            name: i18n.translate(
+              'xpack.significantEvents.continuousKiExtractionIntervalHoursName',
+              {
+                defaultMessage: 'Continuous KI extraction interval (hours)',
+              }
+            ),
             value: DEFAULT_EXTRACTION_INTERVAL_HOURS,
             description: i18n.translate(
-              'xpack.streams.continuousKiExtractionIntervalHoursDescription',
+              'xpack.significantEvents.continuousKiExtractionIntervalHoursDescription',
               {
                 defaultMessage:
                   'How often to run knowledge indicator extraction per stream, in hours.',
@@ -192,12 +204,15 @@ export function registerFeatureFlags(
           },
           [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS]: {
             category: ['observability'],
-            name: i18n.translate('xpack.streams.continuousKiExtractionExcludedStreamPatternsName', {
-              defaultMessage: 'Continuous KI extraction excluded streams',
-            }),
+            name: i18n.translate(
+              'xpack.significantEvents.continuousKiExtractionExcludedStreamPatternsName',
+              {
+                defaultMessage: 'Continuous KI extraction excluded streams',
+              }
+            ),
             value: '',
             description: i18n.translate(
-              'xpack.streams.continuousKiExtractionExcludedStreamPatternsDescription',
+              'xpack.significantEvents.continuousKiExtractionExcludedStreamPatternsDescription',
               {
                 defaultMessage:
                   'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to exclude from automatic knowledge indicator extraction.',
@@ -212,14 +227,17 @@ export function registerFeatureFlags(
           },
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG]: {
             category: ['observability'],
-            name: i18n.translate('xpack.streams.sigEventsTuningConfigName', {
+            name: i18n.translate('xpack.significantEvents.sigEventsTuningConfigName', {
               defaultMessage: 'Significant Events tuning',
             }),
             value: JSON.stringify(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG),
-            description: i18n.translate('xpack.streams.sigEventsTuningConfigDescription', {
-              defaultMessage:
-                'JSON configuration for Significant Events tuning parameters including sample sizes, ratios, TTLs, and search thresholds.',
-            }),
+            description: i18n.translate(
+              'xpack.significantEvents.sigEventsTuningConfigDescription',
+              {
+                defaultMessage:
+                  'JSON configuration for Significant Events tuning parameters including sample sizes, ratios, TTLs, and search thresholds.',
+              }
+            ),
             type: 'json',
             schema: sigEventsTuningConfigSchema,
             scope: 'global',
