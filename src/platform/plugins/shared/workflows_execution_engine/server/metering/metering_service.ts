@@ -50,17 +50,42 @@ export class WorkflowsMeteringService {
     const instanceGroupId = projectId || deploymentId;
     const instanceGroupType = projectId ? 'serverless_project' : 'stateful_deployment';
 
+    this.logger.debug(() => {
+      return `[reportWorkflowExecution] Preparing workflow metering report: ${JSON.stringify({
+        executionId: execution.id,
+        workflowId: execution.workflowId,
+        status: execution.status,
+        projectId,
+        deploymentId,
+        instanceGroupId,
+        instanceGroupType,
+        cloudIdPresent: Boolean(cloudSetup?.cloudId),
+        csp: cloudSetup?.csp,
+        region: cloudSetup?.region,
+        elasticsearchClusterId: cloudSetup?.elasticsearchClusterId,
+      })}`;
+    });
+
     // Self-managed: no metering (no projectId or deploymentId available)
     if (!instanceGroupId) {
+      this.logger.debug(
+        `[reportWorkflowExecution] Skipping workflow metering report for execution ${execution.id}: missing projectId/deploymentId`
+      );
       return;
     }
 
     // Only report for terminal states; skip SKIPPED executions since they
     // were dropped by concurrency limits and never actually ran.
     if (!isTerminalStatus(execution.status as ExecutionStatus)) {
+      this.logger.debug(
+        `[reportWorkflowExecution] Skipping workflow metering report for execution ${execution.id}: non-terminal status ${execution.status}`
+      );
       return;
     }
     if (execution.status === ExecutionStatus.SKIPPED) {
+      this.logger.debug(
+        `[reportWorkflowExecution] Skipping workflow metering report for execution ${execution.id}: skipped execution`
+      );
       return;
     }
 
@@ -72,14 +97,34 @@ export class WorkflowsMeteringService {
     );
 
     try {
+      this.logger.debug(() => {
+        return `[reportWorkflowExecution] Sending workflow metering record: ${JSON.stringify(
+          usageRecord,
+          undefined,
+          2
+        )}`;
+      });
       await this.usageReportingService.reportUsage([usageRecord]);
+      this.logger.debug(() => {
+        return `[reportWorkflowExecution] Successfully sent workflow metering record: ${JSON.stringify(
+          {
+            executionId: execution.id,
+            recordId: usageRecord.id,
+            source: usageRecord.source,
+          },
+          undefined,
+          2
+        )}`;
+      });
     } catch (err) {
       // Log with billing-relevant details per monitoring requirements:
       // project ID, type, and count for impact assessment
       const errorMessage = err instanceof Error ? err.message : String(err);
       this.logger.error(
         `Failed to report workflow metering for execution ${execution.id} ` +
-          `(instanceGroupId=${instanceGroupId}, type=${WORKFLOWS_USAGE_TYPE}, quantity=1): ${errorMessage}`
+          `(instanceGroupId=${instanceGroupId}, type=${WORKFLOWS_USAGE_TYPE}, quantity=1, source=${JSON.stringify(
+            usageRecord.source
+          )}): ${errorMessage}`
       );
     }
   }
@@ -140,6 +185,15 @@ export class WorkflowsMeteringService {
       source.region = cloudSetup?.region;
 
       const clusterId = cloudSetup?.elasticsearchClusterId;
+      this.logger.debug(() => {
+        return `[buildUsageRecord] Workflow stateful source enrichment: ${JSON.stringify({
+          instanceGroupId,
+          provider: source.provider,
+          region: source.region,
+          elasticsearchClusterId: clusterId,
+          hasClusterMetadata: Boolean(clusterId),
+        })}`;
+      });
       if (clusterId) {
         source.metadata = { cluster_id: clusterId };
       }

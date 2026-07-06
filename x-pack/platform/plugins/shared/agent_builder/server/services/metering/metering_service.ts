@@ -49,9 +49,17 @@ class MeteringServiceImpl implements MeteringService {
 
   public async reportExecution(execution: AgentExecutionUsage) {
     if (!this.cloud || !this.usageApi?.usageReporting) {
-      this.logger.debug(
-        `[reportExecution] Skipping reporting due to missing cloud or usage reporting dependencies.`
-      );
+      this.logger.debug(() => {
+        return `[reportExecution] Skipping agent builder metering report due to missing dependencies: ${JSON.stringify(
+          {
+            hasCloud: Boolean(this.cloud),
+            hasUsageApi: Boolean(this.usageApi),
+            hasUsageReporting: Boolean(this.usageApi?.usageReporting),
+            executionId: execution.executionId,
+            agentId: execution.agentId,
+          }
+        )}`;
+      });
       return;
     }
 
@@ -59,8 +67,25 @@ class MeteringServiceImpl implements MeteringService {
     const projectOrDeploymentId = projectId ?? this.cloud.deploymentId;
     const instanceGroupType = projectId ? 'serverless_project' : 'stateful_deployment';
 
+    this.logger.debug(() => {
+      return `[reportExecution] Preparing agent builder metering report: ${JSON.stringify({
+        executionId: execution.executionId,
+        agentId: execution.agentId,
+        projectId,
+        deploymentId: this.cloud?.deploymentId,
+        instanceGroupId: projectOrDeploymentId,
+        instanceGroupType,
+        cloudIdPresent: Boolean(this.cloud?.cloudId),
+        csp: this.cloud?.csp,
+        region: this.cloud?.region,
+        elasticsearchClusterId: this.cloud?.elasticsearchClusterId,
+      })}`;
+    });
+
     if (!projectOrDeploymentId) {
-      this.logger.debug(`[reportExecution] Skipping reporting due to project or deployment ID.`);
+      this.logger.debug(
+        `[reportExecution] Skipping agent builder metering report for execution ${execution.executionId}: missing projectId/deploymentId`
+      );
       return;
     }
 
@@ -107,6 +132,16 @@ class MeteringServiceImpl implements MeteringService {
       source.region = this.cloud.region;
 
       const clusterId = this.cloud.elasticsearchClusterId;
+      this.logger.debug(() => {
+        return `[reportExecution] Agent builder stateful source enrichment: ${JSON.stringify({
+          executionId,
+          instanceGroupId: projectOrDeploymentId,
+          provider: source.provider,
+          region: source.region,
+          elasticsearchClusterId: clusterId,
+          hasClusterMetadata: Boolean(clusterId),
+        })}`;
+      });
       if (clusterId) {
         source.metadata = { cluster_id: clusterId };
       }
@@ -126,9 +161,24 @@ class MeteringServiceImpl implements MeteringService {
     };
 
     this.logger.debug(() => {
-      return `[reportExecution] Reporting usage: ${JSON.stringify(record, undefined, 2)}`;
+      return `[reportExecution] Sending agent builder metering record: ${JSON.stringify(
+        record,
+        undefined,
+        2
+      )}`;
     });
 
     await this.usageApi.usageReporting.reportUsage([record]);
+    this.logger.debug(() => {
+      return `[reportExecution] Successfully sent agent builder metering record: ${JSON.stringify(
+        {
+          executionId,
+          recordId: record.id,
+          source: record.source,
+        },
+        undefined,
+        2
+      )}`;
+    });
   }
 }
