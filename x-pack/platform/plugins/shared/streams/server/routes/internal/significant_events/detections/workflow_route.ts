@@ -219,7 +219,7 @@ const ruleAlertWindowsRoute = createServerRoute({
   },
 });
 
-export const internalSigEventsDetectionsWorkflowRoutes = {
+export const internalSignificantEventsDetectionsWorkflowRoutes = {
   ...countAlertsRoute,
   ...changePointScanRoute,
   ...ruleChangePointRoute,
