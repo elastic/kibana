@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { map, type Observable } from 'rxjs';
+import { EMPTY, type Observable, of, switchMap } from 'rxjs';
 import type { IBasePath } from '@kbn/core/public';
 import type { NavExtensionEntry } from '@kbn/core-chrome-browser';
 import type { DashboardNavExtension } from '../types';
@@ -37,13 +37,19 @@ export const createRecentItemsData$ = (
   return getDashboardRecentlyAccessedService()
     .get$()
     .pipe(
-      map((items) =>
-        items.slice(0, max).map((item) => ({
-          id: `recent-${item.id}`,
-          label: item.label,
-          href: basePath.prepend(item.link),
-        }))
-      )
+      switchMap((items) => {
+        if (!items.length) {
+          return EMPTY;
+        }
+
+        return of(
+          items.slice(0, max).map((item) => ({
+            id: `recent-${item.id}`,
+            label: item.label,
+            href: basePath.prepend(item.link),
+          }))
+        );
+      })
     );
 };
 
