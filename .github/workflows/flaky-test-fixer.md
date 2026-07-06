@@ -100,6 +100,49 @@ safe-outputs:
     # transport makes the shallow safe_outputs checkout run `git fetch --unshallow`,
     # which on a repo Kibana's size cannot finish within the 15m job timeout.
     patch-format: am
+  # Custom safe-job that runs AFTER the consolidated `safe_outputs` job, so the PR
+  # and the outcome comment already exist. The agent can't know the PR number while
+  # it runs (the PR is created later, in safe_outputs), so instead of asking readers
+  # to hunt the issue timeline we edit the just-posted comment to inject the real PR
+  # URL, read from the safe_outputs job outputs.
+  jobs:
+    link-fix-pr:
+      description: 'Append the newly-opened fix PR''s URL to the outcome comment on the issue. Call this exactly once, and only after you have opened a draft PR.'
+      runs-on: ubuntu-latest
+      needs: safe_outputs
+      if: ${{ needs.safe_outputs.outputs.created_pr_url != '' && needs.safe_outputs.outputs.comment_id != '' }}
+      permissions:
+        issues: write
+      inputs:
+        confirm:
+          description: 'Set to true to append the opened fix PR link to the outcome comment. Only call this after a PR has been opened.'
+          required: true
+          type: boolean
+      env:
+        GH_AW_PR_URL: ${{ needs.safe_outputs.outputs.created_pr_url }}
+        GH_AW_COMMENT_ID: ${{ needs.safe_outputs.outputs.comment_id }}
+      steps:
+        - name: Append PR link to outcome comment
+          uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+          with:
+            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+            script: |
+              const prUrl = process.env.GH_AW_PR_URL;
+              const commentId = Number(process.env.GH_AW_COMMENT_ID);
+              if (!prUrl || !Number.isInteger(commentId)) {
+                core.info('Missing PR URL or comment id; nothing to do.');
+                return;
+              }
+              const { owner, repo } = context.repo;
+              const { data: comment } = await github.rest.issues.getComment({ owner, repo, comment_id: commentId });
+              const body = comment.body || '';
+              if (body.includes(prUrl)) {
+                core.info('Comment already references the PR URL; nothing to do.');
+                return;
+              }
+              const updated = `${body.trimEnd()}\n\n**Fix PR:** ${prUrl}`;
+              await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
+              core.info(`Appended ${prUrl} to comment ${commentId}.`);
 
 strict: false
 timeout-minutes: 90
@@ -125,6 +168,7 @@ Kibana is already bootstrapped for you.
 4. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 5. Open the PR (see "PR format" below).
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
+7. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and appends the new PR's URL to your outcome comment. You cannot know the PR number while running (the PR is created afterwards), so never write the URL into the comment yourself — this tool is how the link gets there.
 
 ## PR format
 
@@ -166,6 +210,6 @@ Add the following at the very end of the PR description (and outside of the deta
 
 In **every** run, finish by posting exactly one concise comment (1–2 sentences, no preamble, no sign-off) on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output. Lead with `@${{ env.REQUESTED_BY }}` (see "Requester mention"), then the outcome. Match the case:
 
-- **PR opened**: `Opened a draft fix PR (linked to this issue) that <one clause on the change>.` The PR carries `Fixes #${{ env.ISSUE_NUMBER }}`, so don't include a URL.
+- **PR opened**: `Opened a draft fix PR that <one clause on the change>.` Don't write the PR URL yourself — the `link_fix_pr` tool (step 7) appends a `**Fix PR:** <url>` line to this comment once the PR exists.
 - **Existing PR already covers it**: `A fix is already in progress in #<number>, so I didn't open a duplicate.`
 - **No PR opened**: `No fix PR: <one-sentence reason>.` — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified from the available evidence.
