@@ -33,13 +33,13 @@ const linksCreateBody: LinksCreateRequestBody = {
   links: [
     {
       label: 'Overview',
-      type: 'dashboardLink',
+      type: 'dashboard_link',
       destination: 'dashboard-abc-123',
       options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     },
     {
       label: 'Elastic Documentation',
-      type: 'externalLink',
+      type: 'external_link',
       destination: 'https://www.elastic.co/docs',
       options: DEFAULT_EXTERNAL_LINK_OPTIONS,
     },

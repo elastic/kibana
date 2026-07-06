@@ -46,7 +46,7 @@ function createMockLinksParent({
 describe('Dashboard link component', () => {
   const resolvedLink: ResolvedLink = {
     id: 'foo',
-    type: 'dashboardLink',
+    type: 'dashboard_link',
     label: '',
     destination: '456',
     title: 'Dashboard 1',

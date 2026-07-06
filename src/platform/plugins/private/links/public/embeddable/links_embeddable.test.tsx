@@ -20,25 +20,25 @@ import { getMockLinksParentApi } from '../mocks';
 
 const getLinks = (): Link[] => [
   {
-    type: 'dashboardLink',
+    type: 'dashboard_link',
     label: '',
     destination: '999',
     options: { open_in_new_tab: false, use_time_range: false, use_filters: false },
   },
   {
-    type: 'dashboardLink',
+    type: 'dashboard_link',
     label: 'Dashboard 2',
     destination: '888',
     options: { open_in_new_tab: false, use_time_range: false, use_filters: false },
   },
   {
-    type: 'externalLink',
+    type: 'external_link',
     label: 'Example homepage',
     destination: 'https://example.com',
     options: { open_in_new_tab: false, encode_url: true },
   },
   {
-    type: 'externalLink',
+    type: 'external_link',
     destination: 'https://elastic.co',
     options: { open_in_new_tab: true, encode_url: false },
   },
@@ -47,7 +47,7 @@ const getLinks = (): Link[] => [
 const getResolvedLinks: () => ResolvedLink[] = () => [
   {
     id: '001',
-    type: 'dashboardLink',
+    type: 'dashboard_link',
     label: '',
     destination: '999',
     title: 'Dashboard 1',
@@ -56,7 +56,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
   },
   {
     id: '002',
-    type: 'dashboardLink',
+    type: 'dashboard_link',
     label: 'Dashboard 2',
     destination: '888',
     title: 'Dashboard 2',
@@ -65,7 +65,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
   },
   {
     id: '003',
-    type: 'externalLink',
+    type: 'external_link',
     label: 'Example homepage',
     destination: 'https://example.com',
     title: 'Example homepage',
@@ -73,7 +73,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
   },
   {
     id: '004',
-    type: 'externalLink',
+    type: 'external_link',
     destination: 'https://elastic.co',
     title: 'https://elastic.co',
     options: { open_in_new_tab: true, encode_url: false },
