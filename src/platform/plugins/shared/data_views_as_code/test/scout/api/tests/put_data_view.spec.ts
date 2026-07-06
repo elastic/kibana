@@ -16,19 +16,29 @@ apiTest.describe('PUT /api/data_views/{id} - as code', { tag: tags.deploymentAgn
   let viewerApiCredentials: RoleApiCredentials;
 
   const createdIds: string[] = [];
+  const createdAliasIds: string[] = [];
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     adminApiCredentials = await requestAuth.getApiKeyForAdmin();
     viewerApiCredentials = await requestAuth.getApiKeyForViewer();
   });
 
-  apiTest.afterAll(async ({ apiServices }) => {
+  apiTest.afterAll(async ({ apiServices, kbnClient }) => {
     for (const id of createdIds) {
       try {
         await apiServices.dataViews.delete(id);
       } catch {
         // ignore cleanup errors
       }
+    }
+
+    if (createdAliasIds.length > 0) {
+      await kbnClient.savedObjects.bulkDelete({
+        objects: createdAliasIds.map((id) => ({
+          type: 'legacy-url-alias',
+          id,
+        })),
+      });
     }
   });
 
@@ -169,6 +179,58 @@ apiTest.describe('PUT /api/data_views/{id} - as code', { tag: tags.deploymentAgn
       expect(response.body.data.index_pattern).toBe(nextPattern);
       expect(response.body.data.time_field).toBeUndefined();
       expect(response.body.data.field_filters).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'updates using the resolved id when the request id is a legacy alias',
+    async ({ apiClient, apiServices, kbnClient }) => {
+      const resolvedId = `dv-put-alias-resolved-${Date.now()}-${Math.random()}`;
+      const aliasSourceId = `dv-put-alias-source-${Date.now()}-${Math.random()}`;
+      const aliasSavedObjectId = `default:index-pattern:${aliasSourceId}`;
+      const updatedPattern = `put-alias-updated-${Date.now()}-*`;
+      const updatedName = `Updated via alias ${Date.now()}-${Math.random()}`;
+
+      await apiServices.dataViews.create({
+        id: resolvedId,
+        title: `put-alias-initial-${Date.now()}-*`,
+      });
+      createdIds.push(resolvedId);
+
+      await kbnClient.savedObjects.create({
+        type: 'legacy-url-alias',
+        id: aliasSavedObjectId,
+        overwrite: true,
+        attributes: {
+          targetType: 'index-pattern',
+          targetId: resolvedId,
+          targetNamespace: 'default',
+          sourceId: aliasSourceId,
+          purpose: 'savedObjectConversion',
+        },
+        references: [],
+        migrationVersion: { 'legacy-url-alias': '8.2.0' },
+      });
+      createdAliasIds.push(aliasSavedObjectId);
+
+      const response = await apiClient.put(`${BASE_PATH}/${aliasSourceId}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        body: {
+          index_pattern: updatedPattern,
+          name: updatedName,
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.id).toBe(resolvedId);
+      expect(response.body.data).toMatchObject({
+        index_pattern: updatedPattern,
+        name: updatedName,
+      });
     }
   );
 

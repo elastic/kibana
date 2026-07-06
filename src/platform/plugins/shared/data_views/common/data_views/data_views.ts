@@ -1186,7 +1186,7 @@ export class DataViewsService {
   }
 
   /**
-   * Create a new data view instance.
+   * Always create a new `DataViewLazy` from spec.
    * @param spec data view spec
    * @returns DataViewLazy
    */
@@ -1217,7 +1217,7 @@ export class DataViewsService {
   }
 
   /**
-   * Create data view lazy instance.
+   * Create or reuse cached `DataViewLazy` by id.
    * @param spec data view spec
    * @returns DataViewLazy
    */

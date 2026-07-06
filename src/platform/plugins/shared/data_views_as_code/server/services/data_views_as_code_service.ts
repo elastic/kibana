@@ -59,42 +59,48 @@ export class DataViewsAsCodeService {
   }
 
   public async upsert(id: string, spec: Omit<AsCodeSavedDataView, 'id'>) {
-    const dataViewSpec = toStoredDataView({ id, ...spec });
+    const existingDataView = await this.getDataViewLazy(id);
 
-    if (await this.exists(id)) {
+    if (!!existingDataView) {
+      // The id can be a legacy alias, for that we use the resolved id.
+      const resolvedId = existingDataView.id!;
+
       // 1. Create a new data view instance from the spec and update it.
-      const dataViewInstance = await this.dataViewsService.createFromSpecLazy(dataViewSpec);
+      const dataViewInstance = await this.dataViewsService.createFromSpecLazy(
+        toStoredDataView({ id: resolvedId, ...spec })
+      );
 
       // 2. Update the saved object with the new data view instance.
       await this.savedObjectsClient.update(
         DATA_VIEW_SAVED_OBJECT_TYPE,
-        id,
+        resolvedId,
         dataViewInstance.getAsSavedObjectBody(),
         { mergeAttributes: false, refresh: true }
       );
 
       // 3 . Clear the data view service cache
-      this.dataViewsService.clearInstanceCache(id);
+      this.dataViewsService.clearInstanceCache(resolvedId);
 
       // 4. Return the updated data view.
       return {
         action: 'updated',
         // After that, it needs to be refetched, otherwise it won't get the meta fields correctly.
-        body: await this.mapDataView(await this.dataViewsService.getDataViewLazy(id)),
+        body: await this.mapDataView(await this.dataViewsService.getDataViewLazy(resolvedId)),
       };
     }
 
-    const createdDataView = await this.dataViewsService.createAndSaveDataViewLazy(dataViewSpec);
+    const createdDataView = await this.dataViewsService.createAndSaveDataViewLazy(
+      toStoredDataView({ id, ...spec })
+    );
     return { action: 'created', body: await this.mapDataView(createdDataView) };
   }
 
-  private async exists(id: string) {
+  private async getDataViewLazy(id: string) {
     try {
-      await this.dataViewsService.getDataViewLazy(id);
-      return true;
+      return await this.dataViewsService.getDataViewLazy(id);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        return false;
+        return null;
       }
       throw e;
     }
