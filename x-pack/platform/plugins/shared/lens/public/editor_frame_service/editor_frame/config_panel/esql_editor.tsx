@@ -239,7 +239,8 @@ export function ESQLEditor({
       setDataGridAttrs,
       esqlVariables,
       false,
-      currentAttributesRef.current
+      currentAttributesRef.current,
+      isApproximate ?? undefined
     ).catch(() => {
       // The chart itself will surface query errors via its own error handling path
     });
@@ -250,6 +251,7 @@ export function ESQLEditor({
   }, [
     searchSessionId,
     esqlVariables,
+    isApproximate,
     data,
     http,
     uiSettings,
