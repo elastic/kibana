@@ -177,7 +177,7 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode 
       })
       .catch(() => {
         if (isSubscribed) {
-          setSyntheticSourceFallbackToStoredSource(false);
+          setSyntheticSourceFallbackToStoredSource(true);
         }
       });
 

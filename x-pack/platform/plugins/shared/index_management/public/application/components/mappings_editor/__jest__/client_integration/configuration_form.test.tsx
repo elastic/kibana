@@ -122,5 +122,17 @@ describe('Mappings editor: configuration form', () => {
       await screen.findByTestId('storedSourceFieldOption');
       expect(screen.queryByTestId('syntheticSourceFieldOption')).not.toBeInTheDocument();
     });
+
+    it("doesn't have synthetic option if fallback status fails to load", async () => {
+      loadSyntheticSourceStatusMock.mockRejectedValue(new Error('Unable to load fallback status'));
+
+      setup({ esNodesPlugins: [] }, getContext(true, true));
+
+      const sourceValueField = screen.getByTestId('sourceValueField');
+      fireEvent.click(sourceValueField);
+
+      await screen.findByTestId('storedSourceFieldOption');
+      expect(screen.queryByTestId('syntheticSourceFieldOption')).not.toBeInTheDocument();
+    });
   });
 });

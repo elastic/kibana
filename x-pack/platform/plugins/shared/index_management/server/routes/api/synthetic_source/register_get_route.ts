@@ -55,7 +55,7 @@ export function registerGetRoute({ router, lib: { handleEsError } }: RouteDepend
       security: {
         authz: {
           enabled: false,
-          reason: 'Relies on es client for authorization',
+          reason: 'Uses internal es client to read cluster-level UI state',
         },
       },
       validate: {},
