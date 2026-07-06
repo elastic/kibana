@@ -184,7 +184,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                     title={i18n.translate(
                       'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.title',
                       {
-                        defaultMessage: '{count} of {total} available regions',
+                        defaultMessage: 'Available in {count} of {total} regions',
                         values: { count: modelCount, total: totalCount },
                       }
                     )}
