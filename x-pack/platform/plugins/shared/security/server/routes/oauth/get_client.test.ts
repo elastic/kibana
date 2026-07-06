@@ -79,11 +79,7 @@ describe('Get OAuth Client route', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(mockClient);
-    expect(oauthMock.listClients).toHaveBeenCalledWith(
-      expect.anything(),
-      'client-1',
-      PROJECT_ID
-    );
+    expect(oauthMock.listClients).toHaveBeenCalledWith(expect.anything(), 'client-1', PROJECT_ID);
   });
 
   it('returns 404 when client is not found', async () => {
