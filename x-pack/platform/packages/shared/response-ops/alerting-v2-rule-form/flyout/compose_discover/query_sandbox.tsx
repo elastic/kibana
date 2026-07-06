@@ -179,6 +179,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     timeField,
     timeRange,
     data: services.data,
+    tab: tabProps?.activeTab,
   });
 
   const hasAutoRunRef = useRef(false);
