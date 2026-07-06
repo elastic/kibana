@@ -23,6 +23,7 @@ import {
   EuiToolTip,
   useEuiTheme,
   transparentize,
+  copyToClipboard,
 } from '@elastic/eui';
 import type { monaco } from '@kbn/monaco';
 import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID } from '@kbn/monaco';
@@ -104,6 +105,23 @@ const useStatusCodeClassNames = (): StatusCodeClassNames => {
       euiTheme.colors.danger,
     ]
   );
+};
+
+const copyTextToClipboard = async (text: string): Promise<boolean> => {
+  if (copyToClipboard(text)) {
+    return true;
+  }
+
+  try {
+    if (window.navigator?.clipboard) {
+      await window.navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    return false;
+  }
+
+  return false;
 };
 
 export const MonacoEditorOutput: FunctionComponent = () => {
@@ -207,14 +225,12 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   }, [value, data, filterState]);
 
   const copyOutputCallback = useCallback(async () => {
-    const selectedText = (await actionsProvider.current?.getParsedOutput()) as string;
-
     try {
-      if (!window.navigator?.clipboard) {
+      const selectedText = await actionsProvider.current?.getParsedOutput();
+
+      if (selectedText === undefined || !(await copyTextToClipboard(selectedText))) {
         throw new Error('Could not copy to clipboard!');
       }
-
-      await window.navigator.clipboard.writeText(selectedText);
 
       notifications.toasts.addSuccess({
         title: i18n.translate('console.outputPanel.copyOutputToast', {
