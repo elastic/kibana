@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { merge } from 'lodash';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+import type { ApmEvent } from '@kbn/apm-types';
 import {
   PROCESSOR_EVENT,
   METRICSET_NAME,
@@ -19,15 +20,6 @@ import {
 import { getApmIndexPatterns } from './get_indices';
 import type { TypedSearch } from '../../../utils/create_typed_es_client';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
-
-export interface ApmEvent {
-  legacy?: boolean;
-  name: string;
-  kuery: string;
-  index: string[];
-  docCount: number;
-  intervals?: Record<string, { metricDocCount: number; eventDocCount: number }>;
-}
 
 export async function getApmEvents({
   esClient,
