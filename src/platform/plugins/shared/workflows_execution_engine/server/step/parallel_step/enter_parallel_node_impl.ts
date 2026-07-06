@@ -330,6 +330,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     // does not apply to them).
     if (branchTimeoutMs !== undefined) {
       const checkNow = Date.now();
+      const timedOutBranches: ParallelBranchState[] = [];
       for (const branch of state.branches) {
         const stillRunning = branch.status === 'running';
         const exceeded =
@@ -338,12 +339,13 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
           branch.status = 'timed_out';
           branch.timedOut = true;
           branch.finishedAt = checkNow;
-          // The branch parked in a durable wait/poll and never reached a
-          // terminal status; mark its current step execution TIMED_OUT so the
-          // per-branch step record does not leak in WAITING/RUNNING.
-          this.markBranchNodeTimedOut(branch);
+          timedOutBranches.push(branch);
         }
       }
+      // The branches parked in a durable wait/poll and never reached a terminal
+      // status; mark each one's current step execution TIMED_OUT (and cancel its
+      // node) so the per-branch step record does not leak in WAITING/RUNNING.
+      await Promise.all(timedOutBranches.map((branch) => this.markBranchNodeTimedOut(branch)));
     }
 
     // In fail-fast mode, once a failure exists and all in-flight branches have
@@ -422,7 +424,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       // (the `runBranchNode` deadline path below marks its own record, but this
       // early return never enters `runBranchNode`).
       if (deadline !== undefined && Date.now() >= deadline) {
-        this.markBranchNodeTimedOutAt(index, branchStackFrames, currentNodeId);
+        await this.markBranchNodeTimedOutAt(index, branchStackFrames, currentNodeId);
         return { status: 'timed_out', currentNodeId };
       }
 
