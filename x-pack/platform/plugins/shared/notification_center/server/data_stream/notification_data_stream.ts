@@ -24,9 +24,9 @@ export const notificationDataStreamMappings = {
   // keep the stream forward-compatible with fields added by newer nodes
   dynamic: false,
   properties: {
-    /** Ingest time, stamped on write by NC — never producer-supplied. */
+    /** Ingest time, generated during write by NC plugin only */
     '@timestamp': mappings.date(),
-    /** Idempotency key; the collapse field at query time. */
+    /** Idempotency key */
     notification_id: mappings.keyword(),
     event_timestamp: mappings.date(),
     type: mappings.keyword(),
@@ -56,7 +56,7 @@ export type NotificationDataStreamClient = IDataStreamClient<
   Notification
 >;
 
-/** Resolves the core-cached client. Call at the ES-operation site, not once up front. */
+/** Returns a cached data stream client */
 export const getNotificationDataStreamClient = (
   dataStreams: DataStreamsStart
 ): Promise<NotificationDataStreamClient> =>
