@@ -36,16 +36,10 @@ export class PromptsConfigService {
     this.logger = logger;
   }
 
-  /**
-   * Upsert a new prompt saved object.
-   * attributes is a plain object (e.g. { name, systemPromptTemplate, userPromptTemplate, inputExample })
-   * Note: no forced singleton id/overwrite — allow multiple prompt objects (user-created).
-   */
   async upsertPrompt(attributes: PromptsConfigAttributes, options?: SavedObjectsCreateOptions) {
-    // fetch existing and merge it in to avoid overwriting other fields
     const existing = await this.getPrompt();
 
-    this.logger.debug('Creating significant events prompt');
+    this.logger.debug('Streams: Creating prompt');
     const data = await this.soClient.create(
       streamsPromptsSOType,
       {
@@ -68,7 +62,7 @@ export class PromptsConfigService {
         streamsPromptsSOType,
         SINGLETON_PROMPTS_ID
       );
-      this.logger.debug(`Retrieved significant events prompt ${SINGLETON_PROMPTS_ID}`);
+      this.logger.debug(`Streams: Retrieved prompt ${SINGLETON_PROMPTS_ID}`);
       return {
         featurePromptOverride:
           data.attributes.featurePromptOverride || defaultsPrompts.featurePromptOverride,
@@ -84,16 +78,12 @@ export class PromptsConfigService {
         (err as { output?: { statusCode?: number } })?.output?.statusCode === 404 ||
         (err as { statusCode?: number })?.statusCode === 404
       ) {
-        // return the packaged default prompt on 404 as well
         return defaultsPrompts;
       }
       throw err;
     }
   }
 
-  /**
-   * Delete the prompts saved object (reset to defaults).
-   */
   async resetPrompts(): Promise<void> {
     this.logger.debug(`Deleting significant events prompt ${SINGLETON_PROMPTS_ID}`);
     await this.soClient.delete(streamsPromptsSOType, SINGLETON_PROMPTS_ID);
