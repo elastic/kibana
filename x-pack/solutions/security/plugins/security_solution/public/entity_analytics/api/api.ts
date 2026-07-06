@@ -11,7 +11,6 @@ import {
   API_VERSIONS as ENTITY_STORE_API_VERSIONS,
   type EntityMaintainerResponseItem,
   ENTITY_STORE_ROUTES,
-  FF_ENABLE_ENTITY_STORE_V2,
   type GetEntityMaintainersResponse,
 } from '@kbn/entity-store/common';
 import { compact } from 'lodash';
@@ -35,7 +34,7 @@ import type {
   InitMonitoringEngineResponse,
   InitRiskEngineResponse,
   InternalUploadAssetCriticalityV2CsvResponse,
-  ListEntitiesRequestQuery,
+  EntityType,
   ListEntitiesResponse,
   ListEntitySourcesResponse,
   PrivMonHealthResponse,
@@ -44,6 +43,8 @@ import type {
   ReadRiskEngineSettingsResponse,
   RiskEngineScheduleNowResponse,
   RiskEngineStatusResponse,
+  RiskScoreHistoryEntry,
+  RiskScoreHistoryResponse,
   RiskScoresEntityCalculationRequest,
   RiskScoresEntityCalculationResponse,
   RiskScoresPreviewRequest,
@@ -106,6 +107,7 @@ import {
   WATCHLISTS_CSV_UPLOAD_URL,
   WATCHLISTS_PRIVILEGES_URL,
 } from '../../../common/entity_analytics/watchlists/constants';
+import { RISK_SCORE_HISTORY_URL } from '../../../common/entity_analytics/risk_score/constants';
 import type { UploadWatchlistCsvResponse } from '../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import {
   GENERATE_LEADS_URL,
@@ -143,14 +145,11 @@ const getMaintainerRouteWithId = (route: string, id: string): string =>
   route.replace('{id}', encodeURIComponent(id));
 
 export const useEntityAnalyticsRoutes = () => {
-  const { http, uiSettings } = useKibana().services;
-  const isEntityStoreV2UiSettingEnabled =
-    uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2) ?? false;
+  const { http } = useKibana().services;
   const isEntityAnalyticsEntityStoreV2Enabled = useIsExperimentalFeatureEnabled(
     'entityAnalyticsEntityStoreV2'
   );
-  const isMaintainerRiskScoreV2Enabled =
-    isEntityStoreV2UiSettingEnabled && isEntityAnalyticsEntityStoreV2Enabled;
+  const isMaintainerRiskScoreV2Enabled = isEntityAnalyticsEntityStoreV2Enabled;
 
   return useMemo(() => {
     const fetchEntityMaintainers = (ids?: string[]) =>
@@ -186,6 +185,31 @@ export const useEntityAnalyticsRoutes = () => {
         version: '1',
         method: 'POST',
         body: JSON.stringify(params),
+        signal,
+      });
+
+    /**
+     * Fetches historical risk score entries for an entity
+     */
+    const fetchRiskScoreHistory = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params: FetchRiskScoreHistoryParams;
+    }) =>
+      http.fetch<RiskScoreHistoryResponse>(RISK_SCORE_HISTORY_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          entity_type: params.entityType,
+          entity_id: params.entityId,
+          from: params.from,
+          to: params.to,
+          score_type: params.scoreType,
+          page_size: params.pageSize,
+          include_contributions: params.includeContributions,
+        },
         signal,
       });
 
@@ -581,7 +605,7 @@ export const useEntityAnalyticsRoutes = () => {
       const body = new FormData();
       body.append('file', file);
 
-      if (isEntityAnalyticsEntityStoreV2Enabled && isEntityStoreV2UiSettingEnabled) {
+      if (isEntityAnalyticsEntityStoreV2Enabled) {
         const response = await http.fetch<InternalUploadAssetCriticalityV2CsvResponse>(
           ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
           {
@@ -987,6 +1011,7 @@ export const useEntityAnalyticsRoutes = () => {
 
     return {
       fetchRiskScorePreview,
+      fetchRiskScoreHistory,
       fetchRiskEngineStatus,
       initRiskEngine,
       enableRiskEngine,
@@ -1042,14 +1067,29 @@ export const useEntityAnalyticsRoutes = () => {
       fetchAnomalyOverview,
       fetchAnomalySummary,
     };
-  }, [
-    http,
-    isEntityStoreV2UiSettingEnabled,
-    isEntityAnalyticsEntityStoreV2Enabled,
-    isMaintainerRiskScoreV2Enabled,
-  ]);
+  }, [http, isEntityAnalyticsEntityStoreV2Enabled, isMaintainerRiskScoreV2Enabled]);
 };
 
 export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;
 
-export type FetchEntitiesListParams = SnakeToCamelCase<ListEntitiesRequestQuery>;
+// CamelCased mirror of `ListEntitiesRequestQuery` for ergonomic UI usage.
+// Hand-written instead of derived via `SnakeToCamelCase` because that utility
+// requires a type literal, while lint requires the source to be an interface.
+export interface FetchEntitiesListParams {
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  perPage?: number;
+  filterQuery?: string;
+  entityTypes: EntityType[];
+}
+
+export interface FetchRiskScoreHistoryParams {
+  entityType: EntityType;
+  entityId: string;
+  from?: string;
+  to?: string;
+  scoreType?: RiskScoreHistoryEntry['score_type'];
+  pageSize?: number;
+  includeContributions?: boolean;
+}

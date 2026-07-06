@@ -8,8 +8,8 @@
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type {
-  SignificantEventsGetResponse,
-  SignificantEventsResponse,
+  QueryWithOccurrences,
+  QueryOccurrencesResponse,
 } from '@kbn/significant-events-schema';
 import { MS_PER_UNIT } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
@@ -288,14 +288,14 @@ export function buildQueryOccurrences({
   return sparse ? fillTimeline({ timeline: queryOccurrences.timeline, sparse }) : EMPTY_OCCURRENCES;
 }
 
-/** Builds a full significant-events response row (query fields + occurrences). */
-export function toSignificantEventResponse({
+/** Builds a full query occurrence series row (query fields + occurrences). */
+export function toQueryWithOccurrences({
   queryLink,
   queryOccurrences,
 }: {
   queryLink: QueryLink;
   queryOccurrences: QueryOccurrences;
-}): SignificantEventsResponse {
+}): QueryWithOccurrences {
   return {
     ...queryLink.query,
     stream_name: queryLink.stream_name,
@@ -308,11 +308,11 @@ export function toSignificantEventResponse({
 export async function fetchQueryOccurrencesFromAlerts(
   params: SignificantEventsParams,
   dependencies: SignificantEventsDependencies
-): Promise<SignificantEventsGetResponse> {
+): Promise<QueryOccurrencesResponse> {
   const queryOccurrences = await getQueryOccurrences(params, dependencies);
   return {
-    significant_events: queryOccurrences.queryLinks.map((queryLink) =>
-      toSignificantEventResponse({ queryLink, queryOccurrences })
+    queries: queryOccurrences.queryLinks.map((queryLink) =>
+      toQueryWithOccurrences({ queryLink, queryOccurrences })
     ),
     aggregated_occurrences: queryOccurrences.aggregatedOccurrences,
   };
