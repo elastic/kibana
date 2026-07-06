@@ -22,6 +22,10 @@ import type {
  * On create/update the legacy side's rule is deleted (best-effort). On bulk delete both
  * sides are targeted. Errors from the legacy adapter are logged and swallowed so a
  * missing legacy rule never blocks the primary operation.
+ *
+ * `findOwnedRuleIds` unions both sides: a flag flip doesn't migrate existing rules, so a
+ * rule-backed query's rule may legitimately live on the legacy engine. Reporting only the
+ * primary engine's rules would make legacy-owned rules look orphaned/stale to callers.
  */
 export class DualCleanupRulesAdapter implements IRulesManagementClient {
   constructor(
@@ -64,7 +68,28 @@ export class DualCleanupRulesAdapter implements IRulesManagementClient {
   }
 
   async findOwnedRuleIds(streamName: string): Promise<string[]> {
-    return this.primary.findOwnedRuleIds(streamName);
+    const [primaryResult, legacyResult] = await Promise.allSettled([
+      this.primary.findOwnedRuleIds(streamName),
+      this.legacy.findOwnedRuleIds(streamName),
+    ]);
+
+    if (legacyResult.status === 'rejected') {
+      this.logger.warn(
+        `Legacy findOwnedRuleIds failed for stream "${streamName}" — rules on the legacy ` +
+          `engine may be misreported as orphaned or stale: ${
+            legacyResult.reason instanceof Error
+              ? legacyResult.reason.message
+              : String(legacyResult.reason)
+          }`
+      );
+    }
+
+    if (primaryResult.status === 'rejected') {
+      throw primaryResult.reason;
+    }
+
+    const legacyIds = legacyResult.status === 'fulfilled' ? legacyResult.value : [];
+    return [...new Set([...primaryResult.value, ...legacyIds])];
   }
 
   private async cleanupLegacyRule(id: string): Promise<void> {

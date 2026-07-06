@@ -158,17 +158,54 @@ describe('DualCleanupRulesAdapter', () => {
   });
 
   describe('findOwnedRuleIds', () => {
-    it('delegates to the primary client', async () => {
+    it('unions ids from primary and legacy', async () => {
       const primary = makeMockClient();
       const legacy = makeMockClient();
       primary.findOwnedRuleIds.mockResolvedValueOnce(['r-1', 'r-2']);
+      legacy.findOwnedRuleIds.mockResolvedValueOnce(['r-3']);
       const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
 
       const ids = await adapter.findOwnedRuleIds('my-stream');
 
-      expect(ids).toEqual(['r-1', 'r-2']);
+      expect(ids.sort()).toEqual(['r-1', 'r-2', 'r-3']);
       expect(primary.findOwnedRuleIds).toHaveBeenCalledWith('my-stream');
-      expect(legacy.findOwnedRuleIds).not.toHaveBeenCalled();
+      expect(legacy.findOwnedRuleIds).toHaveBeenCalledWith('my-stream');
+    });
+
+    it('dedupes ids that appear on both sides', async () => {
+      const primary = makeMockClient();
+      const legacy = makeMockClient();
+      primary.findOwnedRuleIds.mockResolvedValueOnce(['r-1']);
+      legacy.findOwnedRuleIds.mockResolvedValueOnce(['r-1']);
+      const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
+
+      const ids = await adapter.findOwnedRuleIds('my-stream');
+
+      expect(ids).toEqual(['r-1']);
+    });
+
+    it('swallows errors from the legacy client and logs a warning', async () => {
+      const primary = makeMockClient();
+      const legacy = makeMockClient();
+      primary.findOwnedRuleIds.mockResolvedValueOnce(['r-1']);
+      legacy.findOwnedRuleIds.mockRejectedValueOnce(new Error('legacy gone'));
+      const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
+
+      const ids = await adapter.findOwnedRuleIds('my-stream');
+
+      expect(ids).toEqual(['r-1']);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Legacy findOwnedRuleIds failed')
+      );
+    });
+
+    it('propagates errors from the primary client', async () => {
+      const primary = makeMockClient();
+      const legacy = makeMockClient();
+      primary.findOwnedRuleIds.mockRejectedValueOnce(new Error('primary failed'));
+      const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
+
+      await expect(adapter.findOwnedRuleIds('my-stream')).rejects.toThrow('primary failed');
     });
   });
 });

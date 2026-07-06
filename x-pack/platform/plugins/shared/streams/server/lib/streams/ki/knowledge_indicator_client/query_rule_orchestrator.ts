@@ -433,6 +433,8 @@ export class QueryRuleOrchestrator {
       // manually, via the alerting UI) is invisible to the orphan-rule sweep
       // above — it doesn't appear in `ownedRuleIds`. Tombstone the query so the
       // KI data stream doesn't keep advertising a rule that no longer exists.
+      // `ownedRuleIds` unions both alerting engines (see DualCleanupRulesAdapter),
+      // so this only fires when the rule is confirmed absent from both.
       const staleQueryIds = backedLinks
         .filter((link) => !ownedRuleIdSet.has(link.rule_id))
         .map((link) => link.query.id);
