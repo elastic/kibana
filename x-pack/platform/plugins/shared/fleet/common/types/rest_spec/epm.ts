@@ -107,11 +107,17 @@ export interface UpdatePackageRequest {
   body: {
     keepPoliciesUpToDate?: boolean;
     namespace_customization_enabled_for?: string[];
+    namespace_customization_settings?: { [namespace: string]: { ilm_policy?: string } };
   };
 }
 
 export interface UpdatePackageResponse {
   item: PackageInfo;
+}
+
+export interface GetIlmPoliciesResponse {
+  has_manage_ilm: boolean;
+  items: string[];
 }
 
 export interface ReviewUpgradeResponse {
