@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 // Route-reachability cases for the custom route wrappers. Strings that reach a
 // request-validation position are flagged ($ Alert); response schemas and
 // non-route schemas are not.
@@ -36,7 +45,10 @@ class MyRoute {
 
 // versioned router + buildRouteValidationWithZod wrapper (cross-file zod schema).
 router.versioned.post({ path: '/api/reach/wrap' }).addVersion(
-  { version: '1', validate: { request: { body: buildRouteValidationWithZod(CrossFileZodBody) } } },
+  {
+    version: '1',
+    validate: { request: { body: buildRouteValidationWithZod(CrossFileZodBody) } },
+  },
   handler
 );
 
@@ -46,7 +58,10 @@ router.post({ path: '/api/reach/spread', validate: { ...rt } }, handler);
 
 // `.extends` composition: base receiver + extension fields.
 router.post(
-  { path: '/api/reach/extends', validate: { body: BaseReq.extends({ extField: schema.string() }) } }, // $ Alert
+  {
+    path: '/api/reach/extends',
+    validate: { body: BaseReq.extends({ extField: schema.string() }) },
+  }, // $ Alert
   handler
 );
 
@@ -55,7 +70,10 @@ router.post({ path: '/api/reach/crossfile', validate: { request: CrossFileReques
 
 // RESPONSE schema -> must NOT be flagged.
 router.post(
-  { path: '/api/reach/response', validate: { response: { 200: { body: schema.object({ respOnly: schema.string() }) } } } },
+  {
+    path: '/api/reach/response',
+    validate: { response: { 200: { body: schema.object({ respOnly: schema.string() }) } } },
+  },
   handler
 );
 

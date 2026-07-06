@@ -903,7 +903,10 @@ class SchemaBuilder {
   }
 }
 router.post(
-  { path: '/api/edge/factory-method', validate: { body: z.object({ id: new SchemaBuilder().buildString() }) } },
+  {
+    path: '/api/edge/factory-method',
+    validate: { body: z.object({ id: new SchemaBuilder().buildString() }) },
+  },
   handler
 );
 
@@ -1152,26 +1155,30 @@ router.post(
 // =============================================================================
 
 // Same versioned route: the request body is flagged, the response body is NOT.
-router.versioned.post({
-  path: '/api/edge/request-and-response',
-  access: 'internal',
-}).addVersion({
-  version: '1',
-  validate: {
-    request: {
-      body: schema.object({
-        query: schema.string(),  // $ Alert
-      }),
-    },
-    response: {
-      200: {
-        body: () => schema.object({
-          result: schema.string(),  // response schema -> NOT flagged
+router.versioned
+  .post({
+    path: '/api/edge/request-and-response',
+    access: 'internal',
+  })
+  .addVersion({
+    version: '1',
+    validate: {
+      request: {
+        body: schema.object({
+          query: schema.string(), // $ Alert
         }),
       },
+      response: {
+        200: {
+          body: () =>
+            schema.object({
+              result: schema.string(), // response schema -> NOT flagged
+            }),
+        },
+      },
+      handler,
     },
-    handler
-  );
+  });
 
 // Shared schema consumed by a route -> flagged via the route usage.
 const sharedCommonSchema = schema.object({
@@ -1196,6 +1203,6 @@ router.post({ path: '/api/edge/helper', validate: { body: buildRouteSchema() } }
 
 // Schema defined but never reached by a route -> NOT flagged.
 const neverUsedSchema = schema.object({
-  unused: schema.string(),  // not reached by a route -> NOT flagged
+  unused: schema.string(), // not reached by a route -> NOT flagged
 });
 void neverUsedSchema;
