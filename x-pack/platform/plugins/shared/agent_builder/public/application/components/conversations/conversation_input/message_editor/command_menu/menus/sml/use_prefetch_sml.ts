@@ -8,32 +8,32 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import type { CeSearchFilters, CeSearchConstraints } from '@kbn/context-engine-plugin/public';
-import { CE_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/ce/constants';
+import { SML_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/sml/constants';
 import { queryKeys } from '../../../../../../../query_keys';
 import { useAgentBuilderServices } from '../../../../../../../hooks/use_agent_builder_service';
 import { useContextEngineEnabled } from '../../../../../../../hooks/use_context_engine_enabled';
 import { useExperimentalFeatures } from '../../../../../../../hooks/use_experimental_features';
 
-export const usePrefetchCe = (constraints?: CeSearchConstraints, filters?: CeSearchFilters) => {
+export const usePrefetchSml = (constraints?: CeSearchConstraints, filters?: CeSearchFilters) => {
   const queryClient = useQueryClient();
-  const { ceService } = useAgentBuilderServices();
+  const { smlService } = useAgentBuilderServices();
   const contextEngineEnabled = useContextEngineEnabled();
   const experimentalEnabled = useExperimentalFeatures();
-  const ceEnabled = contextEngineEnabled && experimentalEnabled;
+  const smlEnabled = contextEngineEnabled && experimentalEnabled;
 
   return useCallback(() => {
-    if (!ceEnabled) {
+    if (!smlEnabled) {
       return;
     }
     queryClient.prefetchQuery({
-      queryKey: queryKeys.ce.autocomplete('*', constraints, filters),
+      queryKey: queryKeys.sml.autocomplete('*', constraints, filters),
       queryFn: () =>
-        ceService.autocomplete({
+        smlService.autocomplete({
           query: '*',
-          size: CE_SEARCH_DEFAULT_SIZE,
+          size: SML_SEARCH_DEFAULT_SIZE,
           constraints,
           filters,
         }),
     });
-  }, [ceEnabled, queryClient, ceService, constraints, filters]);
+  }, [smlEnabled, queryClient, smlService, constraints, filters]);
 };

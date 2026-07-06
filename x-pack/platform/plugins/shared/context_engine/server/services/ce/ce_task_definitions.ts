@@ -30,7 +30,7 @@ import type { CeService } from './types';
  *  1. `searchCe` filters results to the requesting user's current space.
  *  2. `filterResultsByPermissions` batch-checks the user's Kibana privileges
  *     against each result's `permissions` array.
- *  3. `checkItemsAccess` (used by `ce_attach`) performs the same privilege
+ *  3. `checkItemsAccess` (used by `sml_attach`) performs the same privilege
  *     check before allowing attachment resolution.
  *
  * When the security plugin is absent (development/testing), all results are

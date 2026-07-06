@@ -12,7 +12,7 @@ import { registerInternalSkillsRoutes } from './internal/skills';
 import { registerInternalConversationRoutes } from './internal/conversations';
 import { registerConsumptionRoutes } from './consumption';
 import { registerInternalUserPromptsRoutes } from './internal/user_prompts';
-import { registerInternalCeRoutes } from './internal/ce';
+import { registerInternalSmlRoutes } from './internal/sml';
 import { registerInternalInferenceEndpointsRoute } from './internal/inference_endpoints';
 import { registerAgentRoutes } from './agents';
 import { registerChatRoutes } from './chat';
@@ -32,7 +32,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerInternalConversationRoutes(dependencies);
   registerConsumptionRoutes(dependencies);
   registerInternalUserPromptsRoutes(dependencies);
-  registerInternalCeRoutes(dependencies);
+  registerInternalSmlRoutes(dependencies);
   registerInternalInferenceEndpointsRoute(dependencies);
   registerAgentRoutes(dependencies);
   registerChatRoutes(dependencies);

@@ -11,48 +11,48 @@ import { useQuery } from '@kbn/react-query';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { i18n } from '@kbn/i18n';
 import type { CeSearchFilters, CeSearchConstraints } from '@kbn/context-engine-plugin/public';
-import { CE_SEARCH_DEFAULT_SIZE } from '../../../services/ce/constants';
+import { SML_SEARCH_DEFAULT_SIZE } from '../../../services/sml/constants';
 import { queryKeys } from '../../query_keys';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useKibana } from '../use_kibana';
-import { normalizeCeSearchQuery } from './normalize_ce_search_query';
+import { normalizeSmlSearchQuery } from './normalize_sml_search_query';
 
-const CE_SEARCH_DEBOUNCE_MS = 250;
-const CE_SEARCH_STALE_TIME_MS = 60_000;
-const CE_SEARCH_CACHE_TIME_MS = 300_000;
+const SML_SEARCH_DEBOUNCE_MS = 250;
+const SML_SEARCH_STALE_TIME_MS = 60_000;
+const SML_SEARCH_CACHE_TIME_MS = 300_000;
 
-const ceSearchErrorToastTitle = i18n.translate(
-  'xpack.agentBuilder.conversationInput.commandMenu.ceSearchErrorTitle',
+const smlSearchErrorToastTitle = i18n.translate(
+  'xpack.agentBuilder.conversationInput.commandMenu.smlSearchErrorTitle',
   { defaultMessage: 'Unable to load semantic knowledge' }
 );
 
-export interface UseCeSearchOptions {
+export interface UseSmlSearchOptions {
   /** Runtime-imposed per-type id-allowlist constraints. */
   readonly constraints?: CeSearchConstraints;
   /** Agent-discoverable filters (`types[]`, `tags[]`). */
   readonly filters?: CeSearchFilters;
 }
 
-export const useCeSearch = (query: string, options?: UseCeSearchOptions) => {
+export const useSmlSearch = (query: string, options?: UseSmlSearchOptions) => {
   const { services } = useKibana();
-  const { ceService } = useAgentBuilderServices();
-  const debouncedQuery = useDebouncedValue(query, CE_SEARCH_DEBOUNCE_MS);
+  const { smlService } = useAgentBuilderServices();
+  const debouncedQuery = useDebouncedValue(query, SML_SEARCH_DEBOUNCE_MS);
   const constraints = options?.constraints;
   const filters = options?.filters;
 
-  const searchQuery = useMemo(() => normalizeCeSearchQuery(debouncedQuery), [debouncedQuery]);
+  const searchQuery = useMemo(() => normalizeSmlSearchQuery(debouncedQuery), [debouncedQuery]);
 
   const { isError, isLoading, error, data } = useQuery({
-    queryKey: queryKeys.ce.search(searchQuery, constraints, filters),
+    queryKey: queryKeys.sml.search(searchQuery, constraints, filters),
     queryFn: () =>
-      ceService.search({
+      smlService.search({
         query: searchQuery,
-        size: CE_SEARCH_DEFAULT_SIZE,
+        size: SML_SEARCH_DEFAULT_SIZE,
         constraints,
         filters,
       }),
-    staleTime: CE_SEARCH_STALE_TIME_MS,
-    cacheTime: CE_SEARCH_CACHE_TIME_MS,
+    staleTime: SML_SEARCH_STALE_TIME_MS,
+    cacheTime: SML_SEARCH_CACHE_TIME_MS,
   });
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export const useCeSearch = (query: string, options?: UseCeSearchOptions) => {
     services.notifications.toasts.addError(
       err instanceof Error ? err : new Error(formatAgentBuilderErrorMessage(err)),
       {
-        title: ceSearchErrorToastTitle,
+        title: smlSearchErrorToastTitle,
       }
     );
   }, [isError, isLoading, error, services.notifications.toasts]);

@@ -34,7 +34,7 @@ export type CeResolvedItemResult =
  * Does NOT persist — callers are responsible for adding the returned attachments
  * to the conversation via their own `AttachmentStateManager`.
  *
- * Used by the `ce_attach` built-in tool and the internal HTTP `_attach` route.
+ * Used by the `sml_attach` built-in tool and the internal HTTP `_attach` route.
  */
 export const resolveCeAttachItems = async ({
   entryIds,
@@ -129,7 +129,7 @@ export const resolveCeAttachItems = async ({
         };
       } catch (error) {
         logger.error(
-          `ce_attach: error converting item '${entryId}' (type: ${ceDoc.type}): ${
+          `sml_attach: error converting item '${entryId}' (type: ${ceDoc.type}): ${
             error instanceof Error ? error.message : String(error)
           }`
         );

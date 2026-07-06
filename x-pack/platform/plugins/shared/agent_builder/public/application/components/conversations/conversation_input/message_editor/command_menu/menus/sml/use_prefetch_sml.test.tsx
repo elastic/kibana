@@ -7,9 +7,9 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { CeSearchFilterType } from '@kbn/context-engine-plugin/public';
-import { CE_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/ce/constants';
+import { SML_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/sml/constants';
 import { queryKeys } from '../../../../../../../query_keys';
-import { usePrefetchCe } from './use_prefetch_ce';
+import { usePrefetchSml } from './use_prefetch_sml';
 
 const mockPrefetchQuery = jest.fn();
 const mockAutocomplete = jest.fn();
@@ -22,7 +22,7 @@ jest.mock('@kbn/react-query', () => ({
 
 jest.mock('../../../../../../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: () => ({
-    ceService: { autocomplete: mockAutocomplete },
+    smlService: { autocomplete: mockAutocomplete },
   }),
 }));
 
@@ -36,15 +36,15 @@ jest.mock('../../../../../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: () => mockExperimentalEnabled,
 }));
 
-describe('usePrefetchCe', () => {
+describe('usePrefetchSml', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockContextEngineEnabled = true;
     mockExperimentalEnabled = true;
   });
 
-  it('prefetches wildcard CE autocomplete when the Context Engine and experimental features are enabled', () => {
-    const { result } = renderHook(() => usePrefetchCe());
+  it('prefetches wildcard SML autocomplete when the Context Engine and experimental features are enabled', () => {
+    const { result } = renderHook(() => usePrefetchSml());
 
     act(() => {
       result.current();
@@ -52,21 +52,21 @@ describe('usePrefetchCe', () => {
 
     expect(mockPrefetchQuery).toHaveBeenCalledTimes(1);
     expect(mockPrefetchQuery).toHaveBeenCalledWith({
-      queryKey: queryKeys.ce.autocomplete('*'),
+      queryKey: queryKeys.sml.autocomplete('*'),
       queryFn: expect.any(Function),
     });
     const queryFn = mockPrefetchQuery.mock.calls[0][0].queryFn as () => Promise<unknown>;
     void queryFn();
     expect(mockAutocomplete).toHaveBeenCalledWith({
       query: '*',
-      size: CE_SEARCH_DEFAULT_SIZE,
+      size: SML_SEARCH_DEFAULT_SIZE,
       constraints: undefined,
     });
   });
 
   it('does not prefetch when the Context Engine is disabled', () => {
     mockContextEngineEnabled = false;
-    const { result } = renderHook(() => usePrefetchCe());
+    const { result } = renderHook(() => usePrefetchSml());
 
     act(() => {
       result.current();
@@ -77,7 +77,7 @@ describe('usePrefetchCe', () => {
 
   it('does not prefetch when experimental features are disabled', () => {
     mockExperimentalEnabled = false;
-    const { result } = renderHook(() => usePrefetchCe());
+    const { result } = renderHook(() => usePrefetchSml());
 
     act(() => {
       result.current();
@@ -88,21 +88,21 @@ describe('usePrefetchCe', () => {
 
   it('threads agent-derived constraints into the prefetch call and query key', () => {
     const constraints = { [CeSearchFilterType.connector]: { ids: ['gh-1'] } };
-    const { result } = renderHook(() => usePrefetchCe(constraints));
+    const { result } = renderHook(() => usePrefetchSml(constraints));
 
     act(() => {
       result.current();
     });
 
     expect(mockPrefetchQuery).toHaveBeenCalledWith({
-      queryKey: queryKeys.ce.autocomplete('*', constraints),
+      queryKey: queryKeys.sml.autocomplete('*', constraints),
       queryFn: expect.any(Function),
     });
     const queryFn = mockPrefetchQuery.mock.calls[0][0].queryFn as () => Promise<unknown>;
     void queryFn();
     expect(mockAutocomplete).toHaveBeenCalledWith({
       query: '*',
-      size: CE_SEARCH_DEFAULT_SIZE,
+      size: SML_SEARCH_DEFAULT_SIZE,
       constraints,
     });
   });

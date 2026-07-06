@@ -38,9 +38,9 @@ describe('workflowAuthoringSkill', () => {
   });
 
   describe('content', () => {
-    it('mentions CE tools for workflow discovery', () => {
-      expect(workflowAuthoringSkill.content).toContain('platform.core.ce_search');
-      expect(workflowAuthoringSkill.content).toContain('platform.core.ce_attach');
+    it('mentions SML tools for workflow discovery', () => {
+      expect(workflowAuthoringSkill.content).toContain('platform.core.sml_search');
+      expect(workflowAuthoringSkill.content).toContain('platform.core.sml_attach');
     });
 
     it('does not reference list_workflows or get_workflow tools', () => {

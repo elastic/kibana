@@ -12,4 +12,4 @@ export {
   attachmentToolIds,
   type AttachmentToolsOptions,
 } from './attachments';
-export { createCeTools, ceToolIds, type CeToolsOptions } from './ce';
+export { createSmlTools, smlToolIds, type SmlToolsOptions } from './sml';

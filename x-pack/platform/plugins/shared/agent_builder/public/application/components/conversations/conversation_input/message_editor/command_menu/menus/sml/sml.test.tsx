@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import { Ce } from './ce';
+import { Sml } from './sml';
 import { CommandId } from '../../types';
 
 const defaultMockResults = [
@@ -40,10 +40,10 @@ let mockUseCeAutocompleteReturn: {
   error: null,
 };
 
-const mockUseCeAutocomplete = jest.fn(() => mockUseCeAutocompleteReturn);
+const mockUseSmlAutocomplete = jest.fn(() => mockUseCeAutocompleteReturn);
 
-jest.mock('../../../../../../../hooks/ce/use_ce_autocomplete', () => ({
-  useCeAutocomplete: (...args: unknown[]) => mockUseCeAutocomplete(...(args as [])),
+jest.mock('../../../../../../../hooks/sml/use_sml_autocomplete', () => ({
+  useSmlAutocomplete: (...args: unknown[]) => mockUseSmlAutocomplete(...(args as [])),
 }));
 
 jest.mock('../../../../../../../hooks/use_conversation', () => ({
@@ -62,16 +62,16 @@ beforeEach(() => {
     isError: false,
     error: null,
   };
-  mockUseCeAutocomplete.mockClear();
+  mockUseSmlAutocomplete.mockClear();
 });
 
 const renderWithProvider = (ui: React.ReactElement) => {
   return render(<EuiProvider>{ui}</EuiProvider>);
 };
 
-describe('Ce', () => {
-  it('renders CE autocomplete results as type/title', () => {
-    const { container } = renderWithProvider(<Ce query="" onSelect={jest.fn()} />);
+describe('Sml', () => {
+  it('renders SML autocomplete results as type/title', () => {
+    const { container } = renderWithProvider(<Sml query="" onSelect={jest.fn()} />);
 
     expect(container.textContent).toContain('visualization/Pacific Sales');
     expect(container.textContent).toContain('visualization/Atlantic Metrics');
@@ -86,20 +86,20 @@ describe('Ce', () => {
       error: null,
     };
 
-    renderWithProvider(<Ce query="" onSelect={jest.fn()} />);
+    renderWithProvider(<Sml query="" onSelect={jest.fn()} />);
 
-    expect(screen.getByTestId('ceMenu-loading')).toBeInTheDocument();
+    expect(screen.getByTestId('smlMenu-loading')).toBeInTheDocument();
   });
 
-  it('calls onSelect with CE command id, entry id, and type/title label when a row is clicked', () => {
+  it('calls onSelect with SML command id, chunk id, and type/title label when a row is clicked', () => {
     const onSelect = jest.fn();
-    renderWithProvider(<Ce query="" onSelect={onSelect} />);
+    renderWithProvider(<Sml query="" onSelect={onSelect} />);
 
     fireEvent.click(screen.getByText('Pacific Sales'));
 
     expect(onSelect).toHaveBeenCalledTimes(1);
     expect(onSelect).toHaveBeenCalledWith({
-      commandId: CommandId.Ce,
+      commandId: CommandId.Sml,
       id: 'entry-1',
       label: 'visualization/Pacific Sales',
       metadata: {},
@@ -115,14 +115,14 @@ describe('Ce', () => {
       error: new Error('network'),
     };
 
-    renderWithProvider(<Ce query="" onSelect={jest.fn()} />);
+    renderWithProvider(<Sml query="" onSelect={jest.fn()} />);
 
-    expect(screen.queryByTestId('ceMenu-loading')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('ceMenuError')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('smlMenu-loading')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('smlMenuError')).not.toBeInTheDocument();
     expect(screen.getByText('No matching results')).toBeInTheDocument();
   });
 
-  it('still lists cached results when useCeAutocomplete reports error', () => {
+  it('still lists cached results when useSmlAutocomplete reports error', () => {
     mockUseCeAutocompleteReturn = {
       results: defaultMockResults,
       total: defaultMockResults.length,
@@ -131,16 +131,16 @@ describe('Ce', () => {
       error: new Error('stale'),
     };
 
-    const { container } = renderWithProvider(<Ce query="" onSelect={jest.fn()} />);
+    const { container } = renderWithProvider(<Sml query="" onSelect={jest.fn()} />);
 
     expect(container.textContent).toContain('visualization/Pacific Sales');
-    expect(screen.queryByTestId('ceMenu-loading')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('ceMenuError')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('smlMenu-loading')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('smlMenuError')).not.toBeInTheDocument();
   });
 
-  it('passes undefined constraints to useCeAutocomplete when the agent has no connector constraints', () => {
-    renderWithProvider(<Ce query="git" onSelect={jest.fn()} />);
+  it('passes undefined constraints to useSmlAutocomplete when the agent has no connector constraints', () => {
+    renderWithProvider(<Sml query="git" onSelect={jest.fn()} />);
 
-    expect(mockUseCeAutocomplete).toHaveBeenCalledWith('git', { constraints: undefined });
+    expect(mockUseSmlAutocomplete).toHaveBeenCalledWith('git', { constraints: undefined });
   });
 });

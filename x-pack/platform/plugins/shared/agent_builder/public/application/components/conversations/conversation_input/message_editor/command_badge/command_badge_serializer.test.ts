@@ -114,17 +114,17 @@ describe('serializeEditorContent', () => {
     expect(serializeEditorContent(div)).toBe('Use [/Summarize](skill://skill-1)\non this');
   });
 
-  it('serializes a CE badge element', () => {
+  it('serializes a SML badge element', () => {
     const div = document.createElement('div');
     const badge = createCommandBadgeElement({
-      commandId: CommandId.Ce,
+      commandId: CommandId.Sml,
       label: 'visualization/Pacific Sales',
       id: 'chunk-1',
       metadata: {},
     });
     div.appendChild(badge);
 
-    expect(serializeEditorContent(div)).toBe('[@visualization/Pacific Sales](ce://chunk-1)');
+    expect(serializeEditorContent(div)).toBe('[@visualization/Pacific Sales](sml://chunk-1)');
   });
 });
 
@@ -213,14 +213,14 @@ describe('deserializeBadgeContent', () => {
     ]);
   });
 
-  it('parses a CE badge', () => {
-    const segments = deserializeCommandBadge('[@visualization/Pacific Sales](ce://chunk-1)');
+  it('parses a SML badge', () => {
+    const segments = deserializeCommandBadge('[@visualization/Pacific Sales](sml://chunk-1)');
 
     expect(segments).toEqual([
       {
         type: 'badge',
         data: {
-          commandId: CommandId.Ce,
+          commandId: CommandId.Sml,
           label: 'visualization/Pacific Sales',
           id: 'chunk-1',
           metadata: {},
@@ -264,8 +264,8 @@ describe('round-trip serialization', () => {
     expect(serializeEditorContent(div)).toBe(original);
   });
 
-  it('round-trips CE badge', () => {
-    const original = 'Ref [@visualization/Pacific Sales](ce://chunk-1) here';
+  it('round-trips SML badge', () => {
+    const original = 'Ref [@visualization/Pacific Sales](sml://chunk-1) here';
     const segments = deserializeCommandBadge(original);
 
     const div = document.createElement('div');

@@ -15,9 +15,9 @@ import {
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { CeSearchFilterType } from '@kbn/context-engine-plugin/server';
-import type { CeToolsOptions } from './types';
+import type { SmlToolsOptions } from './types';
 
-const ceSearchSchema = z.object({
+const smlSearchSchema = z.object({
   query: z
     .string()
     .min(1)
@@ -38,7 +38,7 @@ const ceSearchSchema = z.object({
     .max(20)
     .optional()
     .describe(
-      'Optional. Restrict results to one or more CE record types (e.g. ["dashboard", "lens"]). ' +
+      'Optional. Restrict results to one or more SML record types (e.g. ["dashboard", "lens"]). ' +
         'ANY semantics — a record matches if its `type` is in this list. Omit to search all types.'
     ),
   tags: z
@@ -52,24 +52,24 @@ const ceSearchSchema = z.object({
 });
 
 /**
- * Creates the ce_search tool.
- * Searches the Context Engine for items matching a query.
+ * Creates the sml_search tool.
+ * Searches the Semantic Metadata Layer for items matching a query.
  */
-export const createCeSearchTool = ({
+export const createSmlSearchTool = ({
   getContextEngine,
-}: CeToolsOptions): BuiltinToolDefinition<typeof ceSearchSchema> => ({
-  id: platformCoreTools.ceSearch,
+}: SmlToolsOptions): BuiltinToolDefinition<typeof smlSearchSchema> => ({
+  id: platformCoreTools.smlSearch,
   type: ToolType.builtin,
   description:
-    'Search the Context Engine for Kibana assets such as saved visualizations, dashboards, ' +
+    'Search the Semantic Metadata Layer (SML) for Kibana assets such as saved visualizations, dashboards, ' +
     'workflows, connectors, and more. Semantic search — concept queries and synonyms match even when the ' +
     'literal terms are absent.\n\n' +
     'When to use this tool:\n' +
     "- The user asks about something that likely exists as a Kibana asset but you don't know its exact title.\n" +
     '- You need to discover what is available before deciding how to proceed.\n' +
-    '- You want to surface candidates to attach to the conversation (then pass entry_id to ce_attach).\n\n' +
-    'Each result includes: entry_id, attachment_id, attachment_type, type, title, description (when present), ' +
-    'tags, references (URI strings to related CE records), and content (the full indexed content for the record).\n\n' +
+    '- You want to surface candidates to attach to the conversation (then pass chunk_id to sml_attach).\n\n' +
+    'Each result includes: chunk_id, attachment_id, attachment_type, type, title, description (when present), ' +
+    'tags, references (URI strings to related SML records), and content (the full indexed content for the record).\n\n' +
     'Examples:\n' +
     '1. Plain natural-language query:\n' +
     '     { "query": "cpu usage over time for production hosts" }\n' +
@@ -79,12 +79,12 @@ export const createCeSearchTool = ({
     '     { "query": "github", "types": ["connector"] }\n' +
     '4. Wildcard inventory check:\n' +
     '     { "query": "*", "size": 50 }\n\n' +
-    'To bring a result into the conversation as an attachment, pass its entry_id to ce_attach.',
-  schema: ceSearchSchema,
-  tags: ['ce', 'search'],
+    'To bring a result into the conversation as an attachment, pass its chunk_id to sml_attach.',
+  schema: smlSearchSchema,
+  tags: ['sml', 'search'],
   availability: {
     cacheMode: 'global',
-    // CE lives inside Agent Builder, so it requires the Agent Builder experimental
+    // SML lives inside Agent Builder, so it requires the Agent Builder experimental
     // flag in addition to the dedicated Context Engine flag. Both must be enabled.
     handler: async ({ uiSettings }) => {
       const [experimentalEnabled, contextEngineEnabled] = await Promise.all([
@@ -96,7 +96,7 @@ export const createCeSearchTool = ({
         : {
             status: 'unavailable',
             reason:
-              'CE features require Agent Builder experimental features and the Context Engine to be enabled',
+              'SML features require Agent Builder experimental features and the Context Engine to be enabled',
           };
     },
   },
@@ -137,7 +137,7 @@ export const createCeSearchTool = ({
       return {
         results: [
           createErrorResult({
-            message: `CE search failed: ${(error as Error).message}`,
+            message: `SML search failed: ${(error as Error).message}`,
             metadata: { query },
           }),
         ],
@@ -151,7 +151,7 @@ export const createCeSearchTool = ({
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
             data: {
-              message: 'No results found in the Context Engine.',
+              message: 'No results found in the Semantic Metadata Layer.',
               query,
               items: [],
             },
@@ -167,7 +167,7 @@ export const createCeSearchTool = ({
           type: ToolResultType.other,
           data: {
             items: searchResult.results.map((hit) => ({
-              entry_id: hit.id,
+              chunk_id: hit.id,
               attachment_id: hit.origin.uri,
               attachment_type: hit.type,
               type: hit.type,

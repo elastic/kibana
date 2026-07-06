@@ -8,9 +8,9 @@
 import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
 
 /**
- * Options for creating CE tools.
+ * Options for creating SML tools.
  * Uses a getter for lazy resolution — the start contract is not available until after plugin start.
  */
-export interface CeToolsOptions {
+export interface SmlToolsOptions {
   getContextEngine: () => ContextEnginePluginStart;
 }

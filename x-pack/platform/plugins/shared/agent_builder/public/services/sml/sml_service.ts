@@ -15,11 +15,11 @@ import type {
 import { ceAutocompletePath, ceSearchPath } from '@kbn/context-engine-plugin/public';
 
 /**
- * Browser client for CE.
+ * Browser client for SML.
  *   - `search(...)` → `/internal/context_engine/_search` (hybrid retrieval)
  *   - `autocomplete(...)` → `/internal/context_engine/_autocomplete` (@ menu / typeahead)
  */
-export class CeService {
+export class SmlService {
   private readonly http: HttpSetup;
 
   constructor({ http }: { http: HttpSetup }) {

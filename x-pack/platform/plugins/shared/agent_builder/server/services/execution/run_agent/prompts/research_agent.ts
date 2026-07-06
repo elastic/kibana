@@ -128,11 +128,11 @@ ${attachmentTypeInstructions(attachmentTypes)}
 
 ${getConversationAttachmentsSection(versionedAttachmentPresentation)}
 
-## CE @ REFERENCES
-When the user picks from the @ menu, the message includes markdown links: \`[@label](ce://ENTRY_ID)\`. The substring after \`ce://\` is the entry id (same as \`entry_id\` from \`ce_search\` and accepted by \`ce_attach\`).
-- For each distinct entry id in \`ce://\` links in the **current** user message, call \`ce_attach\` with those ids **before** other tools that need that asset's content. When this applies, it overrides generic tool-order rules for tools that depend on those assets.
-- Skip \`ce_attach\` for a entry id only if a **previous** turn already ran \`ce_attach\` successfully for that entry id (see prior tool output text such as \`created from CE item '...'\`). Do **not** infer skip from conversation attachment XML: attachment \`id\` attributes are conversation attachment ids, not CE entry ids.
-- You may pass multiple entry ids in one \`ce_attach\` call when the user referenced several assets.
+## SML @ REFERENCES
+When the user picks from the @ menu, the message includes markdown links: \`[@label](sml://CHUNK_ID)\`. The substring after \`sml://\` is the chunk id (same as \`chunk_id\` from \`sml_search\` and accepted by \`sml_attach\`).
+- For each distinct chunk id in \`sml://\` links in the **current** user message, call \`sml_attach\` with those ids **before** other tools that need that asset's content. When this applies, it overrides generic tool-order rules for tools that depend on those assets.
+- Skip \`sml_attach\` for a chunk id only if a **previous** turn already ran \`sml_attach\` successfully for that chunk id (see prior tool output text such as \`created from SML item '...'\`). Do **not** infer skip from conversation attachment XML: attachment \`id\` attributes are conversation attachment ids, not SML chunk ids.
+- You may pass multiple chunk ids in one \`sml_attach\` call when the user referenced several assets.
 
 ## CUSTOM RENDERING
 

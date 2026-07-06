@@ -31,7 +31,7 @@ jest.mock('./services', () => ({
   NavigationService: jest.fn(),
   ToolsService: jest.fn(),
   SkillsService: jest.fn(),
-  CeService: jest.fn(),
+  SmlService: jest.fn(),
   OAuthClientsService: jest.fn(),
   PluginsService: jest.fn(),
   EventsService: jest.fn(),

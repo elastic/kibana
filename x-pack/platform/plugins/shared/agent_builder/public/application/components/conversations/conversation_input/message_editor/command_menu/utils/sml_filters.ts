@@ -11,7 +11,7 @@ import { CeSearchFilterType } from '@kbn/context-engine-plugin/public';
 
 // Three states: undefined → no constraints (all connectors visible),
 // [] → no connectors allowed, ['id1', ...] → only those connectors.
-export const buildCeScopingFromAgent = (
+export const buildSmlScopingFromAgent = (
   agent: AgentDefinition | null
 ): CeSearchConstraints | undefined => {
   const connectorIds = agent?.configuration?.connector_ids;

@@ -17,7 +17,7 @@ import type { ConversationsService } from './conversations';
 import type { DocLinksService } from './doc_links';
 import type { ToolsService } from './tools';
 import type { SkillsService } from './skills/skills_service';
-import type { CeService } from './ce/ce_service';
+import type { SmlService } from './sml/sml_service';
 import type { PluginsService } from './plugins/plugins_service';
 import type { OAuthClientsService } from './oauth_clients';
 import type { NavigationService } from './navigation';
@@ -33,7 +33,7 @@ export interface AgentBuilderInternalService {
   navigationService: NavigationService;
   toolsService: ToolsService;
   skillsService: SkillsService;
-  ceService: CeService;
+  smlService: SmlService;
   pluginsService: PluginsService;
   oauthClientsService: OAuthClientsService;
   startDependencies: AgentBuilderStartDependencies;

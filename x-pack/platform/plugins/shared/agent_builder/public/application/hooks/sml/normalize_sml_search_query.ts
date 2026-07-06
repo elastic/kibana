@@ -8,11 +8,11 @@
 import { CE_HTTP_SEARCH_QUERY_MAX_LENGTH } from '@kbn/context-engine-plugin/public';
 
 /**
- * Normalizes the debounced raw query for CE search API and react-query keys.
+ * Normalizes the debounced raw query for SML search API and react-query keys.
  * Whitespace-only input becomes a wildcard so the menu can load default matches.
  * Length is capped to match the internal HTTP route.
  */
-export const normalizeCeSearchQuery = (debouncedQuery: string): string => {
+export const normalizeSmlSearchQuery = (debouncedQuery: string): string => {
   const trimmed = debouncedQuery.trim();
   const base = trimmed.length > 0 ? trimmed : '*';
   if (base.length <= CE_HTTP_SEARCH_QUERY_MAX_LENGTH) {

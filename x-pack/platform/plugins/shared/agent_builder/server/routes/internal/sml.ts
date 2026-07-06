@@ -19,10 +19,10 @@ import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import { internalApiPath } from '../../../common/constants';
 import {
-  CE_HTTP_ATTACH_ITEMS_MAX,
-  type CeAttachHttpResponse,
-  type CeAttachHttpResultItem,
-} from '../../../common/http_api/ce';
+  SML_HTTP_ATTACH_ITEMS_MAX,
+  type SmlAttachHttpResponse,
+  type SmlAttachHttpResultItem,
+} from '../../../common/http_api/sml';
 import { AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
 import { applyAttachmentRefsToRounds } from '../../services/conversation/client/migrate_attachments';
 
@@ -43,7 +43,7 @@ const mergeAttachmentsById = (
   return Array.from(mergedAttachments.values());
 };
 
-export function registerInternalCeRoutes({
+export function registerInternalSmlRoutes({
   router,
   getInternalServices,
   logger,
@@ -53,13 +53,13 @@ export function registerInternalCeRoutes({
 
   router.post(
     {
-      path: `${internalApiPath}/ce/_attach`,
+      path: `${internalApiPath}/sml/_attach`,
       validate: {
         body: schema.object({
           conversation_id: schema.string(),
-          entry_ids: schema.arrayOf(schema.string(), {
+          chunk_ids: schema.arrayOf(schema.string(), {
             minSize: 1,
-            maxSize: CE_HTTP_ATTACH_ITEMS_MAX,
+            maxSize: SML_HTTP_ATTACH_ITEMS_MAX,
           }),
         }),
       },
@@ -70,7 +70,7 @@ export function registerInternalCeRoutes({
       async (ctx, request, response) => {
         const { conversations: conversationsService, attachments: attachmentsService } =
           getInternalServices();
-        const { conversation_id: conversationId, entry_ids: entryIds } = request.body;
+        const { conversation_id: conversationId, chunk_ids: chunkIds } = request.body;
         const [coreStart, startDeps] = await coreSetup.getStartServices();
         const contextEngine = startDeps.contextEngine;
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
@@ -82,13 +82,13 @@ export function registerInternalCeRoutes({
         if (conversationForAttach.rounds.length === 0) {
           return response.badRequest({
             body: {
-              message: `Conversation '${conversationId}' has no rounds — cannot attach CE items without an existing round`,
+              message: `Conversation '${conversationId}' has no rounds — cannot attach SML items without an existing round`,
             },
           });
         }
 
         const resolvedItems = await contextEngine.resolveCeAttachItems({
-          entryIds,
+          entryIds: chunkIds,
           esClient,
           request,
           spaceId,
@@ -102,11 +102,11 @@ export function registerInternalCeRoutes({
 
         // Format the results for the HTTP API
         const resultItems = await Promise.all(
-          resolvedItems.map(async (r): Promise<CeAttachHttpResultItem> => {
+          resolvedItems.map(async (r): Promise<SmlAttachHttpResultItem> => {
             if (!r.success) {
               return {
                 success: false,
-                entry_id: r.entry_id,
+                chunk_id: r.entry_id,
                 attachment_type: r.attachment_type,
                 message: r.message,
               };
@@ -121,15 +121,15 @@ export function registerInternalCeRoutes({
 
               return {
                 success: true,
-                entry_id: r.entry_id,
+                chunk_id: r.entry_id,
                 conversation_attachment_id: added.id,
                 attachment_type: r.attachment.type,
-                message: `Attachment '${added.id}' of type '${r.attachment.type}' created from CE item '${r.entry_id}'`,
+                message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.entry_id}'`,
               };
             } catch (e) {
               return {
                 success: false,
-                entry_id: r.entry_id,
+                chunk_id: r.entry_id,
                 attachment_type: r.attachment.type,
                 message: e instanceof Error ? e.message : String(e),
               };
@@ -160,12 +160,12 @@ export function registerInternalCeRoutes({
           });
         }
 
-        const body: CeAttachHttpResponse = { results: resultItems };
+        const body: SmlAttachHttpResponse = { results: resultItems };
 
         return response.ok({ body });
       },
       {
-        // CE lives inside Agent Builder, so the route requires both the Agent
+        // SML lives inside Agent Builder, so the route requires both the Agent
         // Builder experimental flag and the dedicated Context Engine flag.
         featureFlag: [
           AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,

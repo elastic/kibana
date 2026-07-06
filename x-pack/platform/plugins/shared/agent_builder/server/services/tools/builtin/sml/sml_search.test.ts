@@ -14,7 +14,7 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
-import { createCeSearchTool } from './ce_search';
+import { createSmlSearchTool } from './sml_search';
 
 const buildAvailabilityContext = (flags: Record<string, boolean>) =>
   ({
@@ -41,21 +41,21 @@ const mockContext = {
   attachments: { add: jest.fn() },
 };
 
-describe('createCeSearchTool', () => {
+describe('createSmlSearchTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('has correct id and tags', () => {
-    const tool = createCeSearchTool({ getContextEngine });
-    expect(tool.id).toBe(platformCoreTools.ceSearch);
+    const tool = createSmlSearchTool({ getContextEngine });
+    expect(tool.id).toBe(platformCoreTools.smlSearch);
     expect(tool.type).toBe(ToolType.builtin);
-    expect(tool.tags).toEqual(['ce', 'search']);
+    expect(tool.tags).toEqual(['sml', 'search']);
   });
 
   describe('availability', () => {
     it('is available only when both experimental features and the Context Engine are enabled', async () => {
-      const tool = createCeSearchTool({ getContextEngine });
+      const tool = createSmlSearchTool({ getContextEngine });
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
@@ -66,7 +66,7 @@ describe('createCeSearchTool', () => {
     });
 
     it('is unavailable when experimental features are disabled', async () => {
-      const tool = createCeSearchTool({ getContextEngine });
+      const tool = createSmlSearchTool({ getContextEngine });
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
@@ -77,7 +77,7 @@ describe('createCeSearchTool', () => {
     });
 
     it('is unavailable when the Context Engine is disabled', async () => {
-      const tool = createCeSearchTool({ getContextEngine });
+      const tool = createSmlSearchTool({ getContextEngine });
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
@@ -89,17 +89,17 @@ describe('createCeSearchTool', () => {
   });
 
   it('description mentions workflows, wildcard query, and the types/tags filters', () => {
-    const tool = createCeSearchTool({ getContextEngine });
+    const tool = createSmlSearchTool({ getContextEngine });
     expect(tool.description).toContain('workflows');
     expect(tool.description).toContain('"*"');
     expect(tool.description).toContain('types');
     expect(tool.description).toContain('tags');
-    expect(tool.description).toContain('ce_attach');
+    expect(tool.description).toContain('sml_attach');
   });
 
   it('calls search with correct params (no constraints, no filters by default)', async () => {
     mockSearch.mockResolvedValue({ results: [] });
-    const tool = createCeSearchTool({ getContextEngine });
+    const tool = createSmlSearchTool({ getContextEngine });
     await tool.handler(
       { query: 'cpu usage', size: 20 },
       mockContext as unknown as ToolHandlerContext
@@ -118,7 +118,7 @@ describe('createCeSearchTool', () => {
 
   it('forwards agent-supplied types and tags as `filters` to the service', async () => {
     mockSearch.mockResolvedValue({ results: [] });
-    const tool = createCeSearchTool({ getContextEngine });
+    const tool = createSmlSearchTool({ getContextEngine });
     await tool.handler(
       { query: 'sales', types: ['dashboard'], tags: ['production'] },
       mockContext as unknown as ToolHandlerContext
@@ -132,7 +132,7 @@ describe('createCeSearchTool', () => {
 
   it('omits filters when types/tags are empty arrays (treated as no constraint)', async () => {
     mockSearch.mockResolvedValue({ results: [] });
-    const tool = createCeSearchTool({ getContextEngine });
+    const tool = createSmlSearchTool({ getContextEngine });
     await tool.handler(
       { query: 'sales', types: [], tags: [] },
       mockContext as unknown as ToolHandlerContext
@@ -156,7 +156,7 @@ describe('createCeSearchTool', () => {
       },
     ];
     mockSearch.mockResolvedValue({ results: hits });
-    const tool = createCeSearchTool({ getContextEngine });
+    const tool = createSmlSearchTool({ getContextEngine });
     const result = (await tool.handler(
       { query: 'cpu' },
       mockContext as unknown as ToolHandlerContext
@@ -167,7 +167,7 @@ describe('createCeSearchTool', () => {
     const data = (result.results[0] as OtherResult<{ items: unknown[] }>).data;
     expect(data.items).toHaveLength(1);
     expect(data.items[0]).toEqual({
-      entry_id: 'entry-1',
+      chunk_id: 'entry-1',
       attachment_id: 'visualization://ref-1',
       attachment_type: 'visualization',
       type: 'visualization',
@@ -182,7 +182,7 @@ describe('createCeSearchTool', () => {
 
   it('returns "No results found" when empty', async () => {
     mockSearch.mockResolvedValue({ results: [] });
-    const tool = createCeSearchTool({ getContextEngine });
+    const tool = createSmlSearchTool({ getContextEngine });
     const result = (await tool.handler(
       { query: 'nonexistent' },
       mockContext as unknown as ToolHandlerContext
@@ -197,7 +197,7 @@ describe('createCeSearchTool', () => {
         items: unknown[];
       }>
     ).data;
-    expect(data.message).toBe('No results found in the Context Engine.');
+    expect(data.message).toBe('No results found in the Semantic Metadata Layer.');
     expect(data.query).toBe('nonexistent');
     expect(data.items).toEqual([]);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.other);
@@ -205,7 +205,7 @@ describe('createCeSearchTool', () => {
 
   it('uses default size when not provided', async () => {
     mockSearch.mockResolvedValue({ results: [] });
-    const tool = createCeSearchTool({ getContextEngine });
+    const tool = createSmlSearchTool({ getContextEngine });
     await tool.handler({ query: 'test' }, mockContext as unknown as ToolHandlerContext);
     expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -222,7 +222,7 @@ describe('createCeSearchTool', () => {
       agentConfiguration: { connector_ids: ['conn-1', 'conn-2'], tools: [] },
     };
 
-    const tool = createCeSearchTool({ getContextEngine });
+    const tool = createSmlSearchTool({ getContextEngine });
     await tool.handler({ query: 'test' }, contextWithConnectors as unknown as ToolHandlerContext);
 
     expect(mockSearch).toHaveBeenCalledWith(
@@ -240,7 +240,7 @@ describe('createCeSearchTool', () => {
       agentConfiguration: { tools: [] },
     };
 
-    const tool = createCeSearchTool({ getContextEngine });
+    const tool = createSmlSearchTool({ getContextEngine });
     await tool.handler(
       { query: 'test' },
       contextWithoutConnectors as unknown as ToolHandlerContext
@@ -260,7 +260,7 @@ describe('createCeSearchTool', () => {
       agentConfiguration: { connector_ids: [], tools: [] },
     };
 
-    const tool = createCeSearchTool({ getContextEngine });
+    const tool = createSmlSearchTool({ getContextEngine });
     await tool.handler(
       { query: 'test' },
       contextWithEmptyConnectors as unknown as ToolHandlerContext
@@ -276,7 +276,7 @@ describe('createCeSearchTool', () => {
   it('does not pass constraints when agentConfiguration is undefined', async () => {
     mockSearch.mockResolvedValue({ results: [] });
 
-    const tool = createCeSearchTool({ getContextEngine });
+    const tool = createSmlSearchTool({ getContextEngine });
     await tool.handler({ query: 'test' }, mockContext as unknown as ToolHandlerContext);
 
     expect(mockSearch).toHaveBeenCalledWith(
@@ -293,7 +293,7 @@ describe('createCeSearchTool', () => {
       agentConfiguration: { connector_ids: ['conn-1'], tools: [] },
     };
 
-    const tool = createCeSearchTool({ getContextEngine });
+    const tool = createSmlSearchTool({ getContextEngine });
     await tool.handler(
       { query: 'test', types: ['connector'], tags: ['prod'] },
       contextWithConnectors as unknown as ToolHandlerContext

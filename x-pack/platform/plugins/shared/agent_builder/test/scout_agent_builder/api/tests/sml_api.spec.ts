@@ -12,7 +12,7 @@ import { expect } from '@kbn/scout/api';
 import { createLlmProxy } from '@kbn/ftr-llm-proxy';
 import type { CeSearchHttpResponse } from '@kbn/context-engine-plugin/common/http_api/ce';
 import { ceElasticsearchIndexMappings, ceIndexName } from '@kbn/context-engine-plugin/server';
-import type { CeAttachHttpResponse } from '../../../../common/http_api/ce';
+import type { SmlAttachHttpResponse } from '../../../../common/http_api/sml';
 import {
   createGenAiConnectorForProxy,
   deleteConnectorById,
@@ -28,7 +28,7 @@ import {
 } from '../fixtures/constants';
 import { postConverse } from '../fixtures/converse_http';
 
-apiTest.describe('Agent Builder — CE internal API', { tag: [...tags.stateful.classic] }, () => {
+apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.classic] }, () => {
   let adminInteractiveCookieHeader: Record<string, string>;
   let sysEsClient: Client;
 
@@ -129,13 +129,13 @@ apiTest.describe('Agent Builder — CE internal API', { tag: [...tags.stateful.c
   });
 
   apiTest(
-    'POST /internal/agent_builder/ce/_attach returns 404 when conversation missing',
+    'POST /internal/agent_builder/sml/_attach returns 404 when conversation missing',
     async ({ apiClient }) => {
-      const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/ce/_attach`, {
+      const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/sml/_attach`, {
         headers: ih(),
         body: {
-          conversation_id: 'non-existent-conversation-id-for-ce-attach-scout',
-          entry_ids: ['irrelevant-entry-id-for-ce-attach-scout'],
+          conversation_id: 'non-existent-conversation-id-for-sml-attach-scout',
+          chunk_ids: ['irrelevant-chunk-id-for-sml-attach-scout'],
         },
         responseType: 'json',
       });
@@ -149,21 +149,21 @@ apiTest.describe('Agent Builder — CE internal API', { tag: [...tags.stateful.c
   );
 
   apiTest(
-    'POST /internal/agent_builder/ce/_attach attaches entry and persists attachment refs',
+    'POST /internal/agent_builder/sml/_attach attaches chunk and persists attachment refs',
     async ({ apiClient, asAdmin, log, kbnClient }) => {
       const runId = randomUUID();
-      const entryId = `ce-scout-attach-${runId}`;
-      const indexedTitle = `ce scout attach ${runId}`;
+      const chunkId = `sml-scout-attach-${runId}`;
+      const indexedTitle = `sml scout attach ${runId}`;
       const llmProxy = await createLlmProxy(log);
       const { id: connectorId } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
 
       const now = '2024-06-01T12:00:00.000Z';
       await sysEsClient.index({
         index: ceIndexName,
-        id: entryId,
+        id: chunkId,
         refresh: 'wait_for',
         document: {
-          id: entryId,
+          id: chunkId,
           type: 'connector',
           title: indexedTitle,
           origin: { uri: `connector://${connectorId}` },
@@ -178,14 +178,14 @@ apiTest.describe('Agent Builder — CE internal API', { tag: [...tags.stateful.c
 
       await setupAgentDirectAnswer({
         proxy: llmProxy,
-        title: `CE attach title ${runId}`,
-        response: 'CE attach response',
+        title: `SML attach title ${runId}`,
+        response: 'SML attach response',
       });
       const converseRes = await postConverse(
         asAdmin,
         {},
         {
-          input: 'Create round for CE attach',
+          input: 'Create round for SML attach',
           attachments: [{ type: 'text', data: { content: `existing text attachment ${runId}` } }],
           connector_id: connectorId,
         },
@@ -195,13 +195,13 @@ apiTest.describe('Agent Builder — CE internal API', { tag: [...tags.stateful.c
       const conversationId = (converseRes.body as { conversation_id: string }).conversation_id;
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      const attachResponse = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/ce/_attach`, {
+      const attachResponse = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/sml/_attach`, {
         headers: ih(),
-        body: { conversation_id: conversationId, entry_ids: [entryId] },
+        body: { conversation_id: conversationId, chunk_ids: [chunkId] },
         responseType: 'json',
       });
       expect(attachResponse).toHaveStatusCode(200);
-      const attachBody = attachResponse.body as CeAttachHttpResponse;
+      const attachBody = attachResponse.body as SmlAttachHttpResponse;
       expect(attachBody.results).toHaveLength(1);
       expect(attachBody.results[0].success).toBe(true);
 
@@ -227,9 +227,9 @@ apiTest.describe('Agent Builder — CE internal API', { tag: [...tags.stateful.c
       llmProxy.close();
       await deleteConnectorById(kbnClient, connectorId);
       try {
-        await sysEsClient.delete({ index: ceIndexName, id: entryId, refresh: true });
+        await sysEsClient.delete({ index: ceIndexName, id: chunkId, refresh: true });
       } catch {
-        // ignore — document may have been cleaned up by CE auto-indexing
+        // ignore — document may have been cleaned up by SML auto-indexing
       }
     }
   );

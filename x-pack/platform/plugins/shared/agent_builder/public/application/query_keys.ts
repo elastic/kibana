@@ -59,11 +59,11 @@ export const queryKeys = {
     byId: (skillId?: string) => ['skills', skillId],
     byAgent: (agentId?: string) => ['skills', 'byAgent', agentId],
   },
-  ce: {
+  sml: {
     search: (query: string, constraints?: CeSearchConstraints, filters?: CeSearchFilters) =>
-      ['ce', 'search', { query, constraints, filters }] as const,
+      ['sml', 'search', { query, constraints, filters }] as const,
     autocomplete: (query: string, constraints?: CeSearchConstraints, filters?: CeSearchFilters) =>
-      ['ce', 'autocomplete', { query, constraints, filters }] as const,
+      ['sml', 'autocomplete', { query, constraints, filters }] as const,
   },
   plugins: {
     all: ['plugins', 'list'] as const,

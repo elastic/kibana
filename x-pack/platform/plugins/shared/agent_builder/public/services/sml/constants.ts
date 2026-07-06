@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { Ce } from './ce';
+/** Default max SML search results for UI (command menu, prefetch). */
+export const SML_SEARCH_DEFAULT_SIZE = 20;

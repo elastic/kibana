@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useCeSearch } from './use_ce_search';
+import { useSmlSearch } from './use_sml_search';
 
 const mockAddError = jest.fn();
 const mockSearch = jest.fn();
@@ -27,7 +27,7 @@ jest.mock('../use_kibana', () => ({
 
 jest.mock('../use_agent_builder_service', () => ({
   useAgentBuilderServices: () => ({
-    ceService: { search: mockSearch },
+    smlService: { search: mockSearch },
   }),
 }));
 
@@ -46,7 +46,7 @@ const createWrapper = () => {
   return Wrapper;
 };
 
-describe('useCeSearch', () => {
+describe('useSmlSearch', () => {
   beforeEach(() => {
     mockAddError.mockClear();
     mockSearch.mockReset();
@@ -56,7 +56,7 @@ describe('useCeSearch', () => {
     const networkError = new Error('network');
     mockSearch.mockRejectedValue(networkError);
 
-    renderHook(() => useCeSearch(''), { wrapper: createWrapper() });
+    renderHook(() => useSmlSearch(''), { wrapper: createWrapper() });
 
     await waitFor(() => {
       expect(mockAddError).toHaveBeenCalledTimes(1);

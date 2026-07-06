@@ -13,7 +13,7 @@ export type { CommandBadgeData };
 export enum CommandId {
   Attachment = 'attachment',
   Skill = 'skill',
-  Ce = 'ce',
+  Sml = 'sml',
 }
 
 /**

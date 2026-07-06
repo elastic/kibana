@@ -17,7 +17,7 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
-import { createCeAttachTool } from './ce_attach';
+import { createSmlAttachTool } from './sml_attach';
 
 const buildAvailabilityContext = (flags: Record<string, boolean>) =>
   ({
@@ -49,21 +49,21 @@ const mockContext = {
   logger: mockLogger,
 };
 
-describe('createCeAttachTool', () => {
+describe('createSmlAttachTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('has correct id and tags', () => {
-    const tool = createCeAttachTool({ getContextEngine });
-    expect(tool.id).toBe(platformCoreTools.ceAttach);
+    const tool = createSmlAttachTool({ getContextEngine });
+    expect(tool.id).toBe(platformCoreTools.smlAttach);
     expect(tool.type).toBe(ToolType.builtin);
-    expect(tool.tags).toEqual(['ce', 'attachment']);
+    expect(tool.tags).toEqual(['sml', 'attachment']);
   });
 
   describe('availability', () => {
     it('is available only when both experimental features and the Context Engine are enabled', async () => {
-      const tool = createCeAttachTool({ getContextEngine });
+      const tool = createSmlAttachTool({ getContextEngine });
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
@@ -74,7 +74,7 @@ describe('createCeAttachTool', () => {
     });
 
     it('is unavailable when experimental features are disabled', async () => {
-      const tool = createCeAttachTool({ getContextEngine });
+      const tool = createSmlAttachTool({ getContextEngine });
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
@@ -85,7 +85,7 @@ describe('createCeAttachTool', () => {
     });
 
     it('is unavailable when the Context Engine is disabled', async () => {
-      const tool = createCeAttachTool({ getContextEngine });
+      const tool = createSmlAttachTool({ getContextEngine });
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
@@ -104,9 +104,9 @@ describe('createCeAttachTool', () => {
         message: 'Access denied: you do not have the required permissions',
       },
     ]);
-    const tool = createCeAttachTool({ getContextEngine });
+    const tool = createSmlAttachTool({ getContextEngine });
     const result = (await tool.handler(
-      { entry_ids: ['entry-1'] },
+      { chunk_ids: ['entry-1'] },
       mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(1);
@@ -122,9 +122,9 @@ describe('createCeAttachTool', () => {
         message: "CE document 'entry-1' not found in the index",
       },
     ]);
-    const tool = createCeAttachTool({ getContextEngine });
+    const tool = createSmlAttachTool({ getContextEngine });
     const result = (await tool.handler(
-      { entry_ids: ['entry-1'] },
+      { chunk_ids: ['entry-1'] },
       mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(1);
@@ -146,9 +146,9 @@ describe('createCeAttachTool', () => {
       },
     ]);
     mockAttachmentsAdd.mockResolvedValue({ id: 'att-123' });
-    const tool = createCeAttachTool({ getContextEngine });
+    const tool = createSmlAttachTool({ getContextEngine });
     const result = (await tool.handler(
-      { entry_ids: ['entry-1'] },
+      { chunk_ids: ['entry-1'] },
       mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(1);
@@ -175,9 +175,9 @@ describe('createCeAttachTool', () => {
       },
     ]);
     mockAttachmentsAdd.mockResolvedValue({ id: 'att-456' });
-    const tool = createCeAttachTool({ getContextEngine });
+    const tool = createSmlAttachTool({ getContextEngine });
     const result = (await tool.handler(
-      { entry_ids: ['denied-entry', 'ok-entry'] },
+      { chunk_ids: ['denied-entry', 'ok-entry'] },
       mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(2);
@@ -187,9 +187,9 @@ describe('createCeAttachTool', () => {
 
   it('calls resolveCeAttachItems with correct params', async () => {
     mockResolveCeAttachItems.mockResolvedValue([]);
-    const tool = createCeAttachTool({ getContextEngine });
+    const tool = createSmlAttachTool({ getContextEngine });
     await tool.handler(
-      { entry_ids: ['entry-a', 'entry-b'] },
+      { chunk_ids: ['entry-a', 'entry-b'] },
       mockContext as unknown as ToolHandlerContext
     );
     expect(mockResolveCeAttachItems).toHaveBeenCalledWith({

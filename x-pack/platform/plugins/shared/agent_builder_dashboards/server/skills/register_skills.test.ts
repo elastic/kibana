@@ -22,9 +22,9 @@ describe('registerSkills', () => {
     expect(register).toHaveBeenCalledWith(dashboardManagementSkill);
   });
 
-  it('includes CE discovery instructions in the skill content', () => {
-    expect(dashboardManagementSkill.content).toContain('platform.core.ce_search');
-    expect(dashboardManagementSkill.content).toContain('platform.core.ce_attach');
+  it('includes SML discovery instructions in the skill content', () => {
+    expect(dashboardManagementSkill.content).toContain('platform.core.sml_search');
+    expect(dashboardManagementSkill.content).toContain('platform.core.sml_attach');
   });
 
   it('inlines the dashboard design guidance directly in the skill body', () => {

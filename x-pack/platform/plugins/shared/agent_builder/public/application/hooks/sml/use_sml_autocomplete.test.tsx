@@ -9,8 +9,8 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CeSearchFilterType } from '@kbn/context-engine-plugin/public';
-import { CE_SEARCH_DEFAULT_SIZE } from '../../../services/ce/constants';
-import { useCeAutocomplete } from './use_ce_autocomplete';
+import { SML_SEARCH_DEFAULT_SIZE } from '../../../services/sml/constants';
+import { useSmlAutocomplete } from './use_sml_autocomplete';
 
 const mockAddError = jest.fn();
 const mockAutocomplete = jest.fn();
@@ -29,7 +29,7 @@ jest.mock('../use_kibana', () => ({
 
 jest.mock('../use_agent_builder_service', () => ({
   useAgentBuilderServices: () => ({
-    ceService: { autocomplete: mockAutocomplete },
+    smlService: { autocomplete: mockAutocomplete },
   }),
 }));
 
@@ -48,7 +48,7 @@ const createWrapper = () => {
   return Wrapper;
 };
 
-describe('useCeAutocomplete', () => {
+describe('useSmlAutocomplete', () => {
   beforeEach(() => {
     mockAddError.mockClear();
     mockAutocomplete.mockReset();
@@ -58,7 +58,7 @@ describe('useCeAutocomplete', () => {
     mockAutocomplete.mockResolvedValue({ results: [] });
     const constraints = { [CeSearchFilterType.connector]: { ids: ['gh-1'] } };
 
-    renderHook(() => useCeAutocomplete('git', { constraints }), { wrapper: createWrapper() });
+    renderHook(() => useSmlAutocomplete('git', { constraints }), { wrapper: createWrapper() });
 
     await waitFor(() => {
       expect(mockAutocomplete).toHaveBeenCalledTimes(1);
@@ -66,7 +66,7 @@ describe('useCeAutocomplete', () => {
 
     expect(mockAutocomplete).toHaveBeenCalledWith({
       query: 'git',
-      size: CE_SEARCH_DEFAULT_SIZE,
+      size: SML_SEARCH_DEFAULT_SIZE,
       constraints,
     });
   });
@@ -75,7 +75,7 @@ describe('useCeAutocomplete', () => {
     const networkError = new Error('network');
     mockAutocomplete.mockRejectedValue(networkError);
 
-    renderHook(() => useCeAutocomplete('git'), { wrapper: createWrapper() });
+    renderHook(() => useSmlAutocomplete('git'), { wrapper: createWrapper() });
 
     await waitFor(() => {
       expect(mockAddError).toHaveBeenCalledTimes(1);

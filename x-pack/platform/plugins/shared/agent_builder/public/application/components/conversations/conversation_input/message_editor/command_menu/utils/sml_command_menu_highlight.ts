@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export interface CeMenuHighlightSearchStrings {
+export interface SmlMenuHighlightSearchStrings {
   readonly type: string;
   readonly title: string;
 }
 
-const parseSlashQueryParts = (keyword: string): CeMenuHighlightSearchStrings => {
+const parseSlashQueryParts = (keyword: string): SmlMenuHighlightSearchStrings => {
   const trimmed = keyword.trim();
   if (trimmed.length === 0) {
     return { type: '', title: '' };
@@ -30,9 +30,11 @@ const parseSlashQueryParts = (keyword: string): CeMenuHighlightSearchStrings => 
 
 /**
  * Builds `search` props for two {@link @elastic/eui#EuiHighlight} instances
- * from the raw CE menu query (`type/title`).
+ * from the raw SML menu query (`type/title`).
  */
-export const getCeMenuHighlightSearchStrings = (rawQuery: string): CeMenuHighlightSearchStrings => {
+export const getSmlMenuHighlightSearchStrings = (
+  rawQuery: string
+): SmlMenuHighlightSearchStrings => {
   const trimmed = rawQuery.trim();
   if (trimmed.length === 0 || trimmed === '*') {
     return { type: '', title: '' };

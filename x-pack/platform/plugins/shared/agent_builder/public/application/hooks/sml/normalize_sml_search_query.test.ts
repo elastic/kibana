@@ -6,24 +6,24 @@
  */
 
 import { CE_HTTP_SEARCH_QUERY_MAX_LENGTH } from '@kbn/context-engine-plugin/public';
-import { normalizeCeSearchQuery } from './normalize_ce_search_query';
+import { normalizeSmlSearchQuery } from './normalize_sml_search_query';
 
-describe('normalizeCeSearchQuery', () => {
+describe('normalizeSmlSearchQuery', () => {
   it('maps empty and whitespace-only input to wildcard', () => {
-    expect(normalizeCeSearchQuery('')).toBe('*');
-    expect(normalizeCeSearchQuery('   ')).toBe('*');
-    expect(normalizeCeSearchQuery('\t\n')).toBe('*');
+    expect(normalizeSmlSearchQuery('')).toBe('*');
+    expect(normalizeSmlSearchQuery('   ')).toBe('*');
+    expect(normalizeSmlSearchQuery('\t\n')).toBe('*');
   });
 
   it('returns trimmed non-empty queries unchanged aside from trim', () => {
-    expect(normalizeCeSearchQuery('  visu  ')).toBe('visu');
-    expect(normalizeCeSearchQuery('type/title')).toBe('type/title');
-    expect(normalizeCeSearchQuery('*')).toBe('*');
+    expect(normalizeSmlSearchQuery('  visu  ')).toBe('visu');
+    expect(normalizeSmlSearchQuery('type/title')).toBe('type/title');
+    expect(normalizeSmlSearchQuery('*')).toBe('*');
   });
 
   it('truncates queries longer than the HTTP max length', () => {
     const long = 'a'.repeat(CE_HTTP_SEARCH_QUERY_MAX_LENGTH + 10);
-    const normalized = normalizeCeSearchQuery(long);
+    const normalized = normalizeSmlSearchQuery(long);
     expect(normalized.length).toBe(CE_HTTP_SEARCH_QUERY_MAX_LENGTH);
   });
 });

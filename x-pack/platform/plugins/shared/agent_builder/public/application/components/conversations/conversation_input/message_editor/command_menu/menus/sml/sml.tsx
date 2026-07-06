@@ -8,26 +8,26 @@
 import React, { forwardRef, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiHighlight, useEuiTheme } from '@elastic/eui';
-import { useCeAutocomplete } from '../../../../../../../hooks/ce/use_ce_autocomplete';
+import { useSmlAutocomplete } from '../../../../../../../hooks/sml/use_sml_autocomplete';
 import { useAgentId } from '../../../../../../../hooks/use_conversation';
 import { useAgentBuilderAgentById } from '../../../../../../../hooks/agents/use_agent_by_id';
 import type { CommandMenuComponentProps, CommandMenuHandle } from '../../types';
 import { CommandId } from '../../types';
-import { getCeMenuHighlightSearchStrings } from '../../utils/ce_command_menu_highlight';
-import { buildCeScopingFromAgent } from '../../utils/ce_filters';
+import { getSmlMenuHighlightSearchStrings } from '../../utils/sml_command_menu_highlight';
+import { buildSmlScopingFromAgent } from '../../utils/sml_filters';
 import { CommandMenuList } from '../components/command_menu_list';
 import type { CommandMenuListOption } from '../components/command_menu_list';
 
-export const Ce = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
+export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
   ({ query, onSelect }, ref) => {
     const agentId = useAgentId();
     const { agent } = useAgentBuilderAgentById(agentId);
-    const constraints = useMemo(() => buildCeScopingFromAgent(agent), [agent]);
+    const constraints = useMemo(() => buildSmlScopingFromAgent(agent), [agent]);
     const { euiTheme } = useEuiTheme();
-    const { results, isLoading } = useCeAutocomplete(query, { constraints });
-    const { type, title } = useMemo(() => getCeMenuHighlightSearchStrings(query), [query]);
+    const { results, isLoading } = useSmlAutocomplete(query, { constraints });
+    const { type, title } = useMemo(() => getSmlMenuHighlightSearchStrings(query), [query]);
 
-    const ceMenuLabelStyles = useMemo(
+    const smlMenuLabelStyles = useMemo(
       () => ({
         root: css`
           word-break: break-word;
@@ -49,8 +49,8 @@ export const Ce = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
             key: item.id,
             label: `${typeLabel}/${titlePlain}`,
             renderLabel: (
-              <span css={ceMenuLabelStyles.root}>
-                <span css={ceMenuLabelStyles.typeSegment}>
+              <span css={smlMenuLabelStyles.root}>
+                <span css={smlMenuLabelStyles.typeSegment}>
                   <EuiHighlight strict={false} search={type}>
                     {typeLabel}
                   </EuiHighlight>
@@ -63,13 +63,13 @@ export const Ce = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
             ),
           };
         }),
-      [results, title, type, ceMenuLabelStyles]
+      [results, title, type, smlMenuLabelStyles]
     );
 
     const handleSelect = useCallback(
       (option: CommandMenuListOption) => {
         onSelect({
-          commandId: CommandId.Ce,
+          commandId: CommandId.Sml,
           label: option.label,
           id: option.key,
           metadata: {},
@@ -84,7 +84,7 @@ export const Ce = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
         options={options}
         isLoading={isLoading}
         onSelect={handleSelect}
-        data-test-subj="ceMenu"
+        data-test-subj="smlMenu"
       />
     );
   }

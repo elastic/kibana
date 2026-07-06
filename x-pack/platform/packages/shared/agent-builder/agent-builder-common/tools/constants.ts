@@ -34,9 +34,9 @@ export const platformCoreTools = {
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
-  // CE tools
-  ceSearch: platformCoreTool('ce_search'),
-  ceAttach: platformCoreTool('ce_attach'),
+  // SML tools
+  smlSearch: platformCoreTool('sml_search'),
+  smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
 } as const;
@@ -138,8 +138,8 @@ export const defaultAgentToolIds = [
   platformCoreTools.listWorkflowExecutions,
   platformCoreTools.generateWorkflow,
   platformCoreTools.executeWorkflow,
-  platformCoreTools.ceSearch,
-  platformCoreTools.ceAttach,
+  platformCoreTools.smlSearch,
+  platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
 ];
 

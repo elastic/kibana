@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Skills } from './menus/skills';
-import { Ce } from './menus/ce';
+import { Sml } from './menus/sml';
 import type { CommandDefinition } from './types';
 import { CommandId } from './types';
 import { useContextEngineEnabled } from '../../../../../hooks/use_context_engine_enabled';
@@ -23,11 +23,11 @@ const semanticKnowledgeCommandName = i18n.translate(
 const COMMAND_DEFINITIONS: readonly CommandDefinition[] = [
   { id: CommandId.Skill, scheme: 'skill', sequence: '/', name: 'Skill', menuComponent: Skills },
   {
-    id: CommandId.Ce,
-    scheme: 'ce',
+    id: CommandId.Sml,
+    scheme: 'sml',
     sequence: '@',
     name: semanticKnowledgeCommandName,
-    menuComponent: Ce,
+    menuComponent: Sml,
     experimental: true,
   },
 ];
@@ -50,18 +50,18 @@ export const getCommandDefinitionByScheme = (scheme: string) => {
 /**
  * Returns the list of command definitions available based on feature flags.
  * The `/` skill command is always available (GA).
- * The `@` CE command lives inside Agent Builder, so it requires both the
+ * The `@` SML command lives inside Agent Builder, so it requires both the
  * Agent Builder experimental flag and the dedicated Context Engine flag.
  */
 export const useAvailableCommandDefinitions = (): readonly CommandDefinition[] => {
   const isContextEngineEnabled = useContextEngineEnabled();
   const isExperimentalEnabled = useExperimentalFeatures();
-  const isCeEnabled = isContextEngineEnabled && isExperimentalEnabled;
+  const isSmlEnabled = isContextEngineEnabled && isExperimentalEnabled;
 
   return useMemo(() => {
-    if (isCeEnabled) {
+    if (isSmlEnabled) {
       return sortedCommandDefinitions;
     }
     return sortedCommandDefinitions.filter((c) => !c.experimental);
-  }, [isCeEnabled]);
+  }, [isSmlEnabled]);
 };

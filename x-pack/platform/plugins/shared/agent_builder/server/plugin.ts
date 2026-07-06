@@ -33,7 +33,7 @@ import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/regist
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
-import { createCeTools } from './services/tools/builtin/ce';
+import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
@@ -162,7 +162,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
     });
 
-    const ceTools = createCeTools({
+    const smlTools = createSmlTools({
       getContextEngine: () => {
         if (!this.startDeps) {
           throw new Error('Context Engine not available — plugin has not started');
@@ -170,7 +170,7 @@ export class AgentBuilderPlugin
         return this.startDeps.contextEngine;
       },
     });
-    ceTools.forEach((tool) => {
+    smlTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
     });
 
