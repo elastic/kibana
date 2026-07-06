@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/275041
+issues:
+- https://github.com/elastic/security-team/issues/17768
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+title: Fix Workflows `while` loops failing when referenced step output exceeds 10KB

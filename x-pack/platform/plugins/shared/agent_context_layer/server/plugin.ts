@@ -31,6 +31,7 @@ import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
 import { registerAgentContextLayerWorkflowSteps } from './workflow_steps';
 import { corpusEntrySmlType } from './sml_types/corpus_entry';
+import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
 export class AgentContextLayerPlugin
   implements
@@ -197,48 +198,20 @@ export class AgentContextLayerPlugin
       },
       getTypeDefinition: smlService.getTypeDefinition,
       resolveSmlAttachItems: (params) => resolveSmlAttachItems({ ...params, sml: smlService }),
-      indexAttachment: async (params) => {
-        const soClient = savedObjects.getScopedClient(params.request, {
-          ...(params.includedHiddenTypes?.length
-            ? { includedHiddenTypes: params.includedHiddenTypes }
-            : {}),
-        });
-        const spaceId =
-          params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-        const base = {
-          originId: params.originId,
-          attachmentType: params.attachmentType,
-          action: params.action,
-          spaces: [spaceId],
-          esClient: elasticsearch.client.asInternalUser,
-          savedObjectsClient: soClient,
-          logger: this.logger.get('sml'),
-        };
-        if (params.content !== undefined) {
-          return smlService.indexAttachment({ ...base, content: params.content });
-        }
-        return smlService.indexAttachment({ ...base, force: params.force });
-      },
-      deleteAttachment: async (params) => {
-        const soClient = savedObjects.getScopedClient(params.request, {
-          ...(params.includedHiddenTypes?.length
-            ? { includedHiddenTypes: params.includedHiddenTypes }
-            : {}),
-        });
-        const spaceId =
-          params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-        return smlService.deleteAttachment({
-          originId: params.originId,
-          attachmentType: params.attachmentType,
-          spaces: [spaceId],
-          esClient: elasticsearch.client.asInternalUser,
-          savedObjectsClient: soClient,
-          logger: this.logger.get('sml'),
-          ...(params.ingestionMethod !== undefined
-            ? { ingestionMethod: params.ingestionMethod }
-            : {}),
-        });
-      },
+      indexAttachment: buildIndexAttachment({
+        smlService,
+        elasticsearch,
+        savedObjects,
+        spaces,
+        logger: this.logger.get('sml'),
+      }),
+      deleteAttachment: buildDeleteAttachment({
+        smlService,
+        elasticsearch,
+        savedObjects,
+        spaces,
+        logger: this.logger.get('sml'),
+      }),
     };
 
     this.startContract = startContract;

@@ -27,6 +27,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import type { FormValues } from '../../../../form/types';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { useIndexSources } from '../../../../form/hooks/use_index_sources';
@@ -53,6 +54,7 @@ import {
   isStatLabelValid,
   isStatFieldValid,
   generateId,
+  getAvailableMetricLabels,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { splitQuery } from '../../use_heuristic_split';
@@ -60,9 +62,11 @@ import {
   AGGREGATION_OPTIONS,
   COMPARATOR_OPTIONS,
   CONDITION_OPERATOR_OPTIONS,
+  EXPRESSION_UNKNOWN_REFERENCE_WARNING,
   STAT_FIELD_REQUIRED_ERROR,
   STAT_LABEL_REQUIRED_ERROR,
 } from './translations';
+import { getInvalidExpressionReferences } from './validate_metric_references';
 
 export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   state,
@@ -361,12 +365,22 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   // ── Alert condition helpers ──
   const metricOptions = useMemo(() => {
-    const statLabels = thresholdValues.stats.filter((s) => s.label.trim()).map((s) => s.label);
-    const evalLabels = thresholdValues.evaluations
-      .filter((e) => e.label.trim())
-      .map((e) => e.label);
-    return [...statLabels, ...evalLabels];
+    return getAvailableMetricLabels(thresholdValues.stats, thresholdValues.evaluations);
   }, [thresholdValues.stats, thresholdValues.evaluations]);
+
+  // Debounced so warnings don't flash on every keystroke while the user is still typing.
+  const debouncedEvaluations = useDebouncedValue(thresholdValues.evaluations);
+
+  const evaluationInvalidRefs = useMemo(() => {
+    const map = new Map<string, string[]>();
+    debouncedEvaluations.forEach((evaluation) => {
+      const invalidRefs = getInvalidExpressionReferences(evaluation.expression, metricOptions);
+      if (invalidRefs.length > 0) {
+        map.set(evaluation.id, invalidRefs);
+      }
+    });
+    return map;
+  }, [debouncedEvaluations, metricOptions]);
 
   const updateCondition = useCallback(
     (index: number, updates: Partial<AlertCondition>) => {
@@ -721,7 +735,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       {thresholdValues.evaluations.map((ev, idx) => (
         <React.Fragment key={ev.id}>
           <EuiPanel paddingSize="s" hasBorder>
-            <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
+            <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={2}>
                 <EuiFormRow
                   label={i18n.translate('xpack.alertingV2.ruleBuilder.evaluations.labelLabel', {
@@ -745,6 +759,11 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                     { defaultMessage: 'Expression' }
                   )}
                   fullWidth
+                  helpText={
+                    evaluationInvalidRefs.has(ev.id)
+                      ? EXPRESSION_UNKNOWN_REFERENCE_WARNING(evaluationInvalidRefs.get(ev.id)!)
+                      : undefined
+                  }
                 >
                   <EuiFieldText
                     fullWidth
@@ -759,7 +778,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
                 <EuiToolTip
                   content={i18n.translate(
                     'xpack.alertingV2.ruleBuilder.evaluations.removeEvaluation',
