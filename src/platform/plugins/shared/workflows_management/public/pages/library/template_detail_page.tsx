@@ -15,12 +15,14 @@ import { Redirect } from 'react-router-dom';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { TemplateDetail, useLibraryEnabled } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
 import { WorkflowsDeepLinks } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
+import { useWorkflowsExperimentalUiSetting } from '../../hooks/use_workflows_experimental_ui_setting';
 
 const libraryBreadcrumbLabel = i18n.translate(
   'workflowsManagement.libraryTemplatePage.libraryBreadcrumb',
@@ -44,6 +46,7 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
   const { euiTheme } = useEuiTheme();
   const { application } = useKibana().services;
   const setWorkflowsBreadcrumbs = useSetWorkflowsBreadcrumbs();
+  const showGraphPreview = useWorkflowsExperimentalUiSetting(WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID);
 
   const goToLibrary = useCallback(() => {
     application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsDeepLinks.library });
@@ -107,6 +110,7 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
         <TemplateDetail
           slug={slug}
           onLoaded={handleTemplateLoaded}
+          showGraphPreview={showGraphPreview}
           backButton={
             <EuiButtonEmpty
               size="xs"

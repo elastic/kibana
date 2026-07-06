@@ -17,20 +17,29 @@ import { createStartServicesMock, type StartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
 const mockSetWorkflowsBreadcrumbs = jest.fn();
+const mockUseWorkflowsExperimentalUiSetting = jest.fn(() => false);
 let mockOnLoaded: ((template: TemplateBody) => void) | undefined;
+let mockShowGraphPreview: boolean | undefined;
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   TemplateDetail: ({
     slug,
     onLoaded,
+    showGraphPreview,
   }: {
     slug: string;
     onLoaded: (template: TemplateBody) => void;
+    showGraphPreview: boolean;
   }) => {
     mockOnLoaded = onLoaded;
+    mockShowGraphPreview = showGraphPreview;
     return <div data-test-subj="mockTemplateDetail">{slug}</div>;
   },
+}));
+
+jest.mock('../../hooks/use_workflows_experimental_ui_setting', () => ({
+  useWorkflowsExperimentalUiSetting: () => mockUseWorkflowsExperimentalUiSetting(),
 }));
 
 jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
@@ -52,7 +61,9 @@ const routeProps = (slug: string) =>
 describe('LibraryTemplateDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseWorkflowsExperimentalUiSetting.mockReturnValue(false);
     mockOnLoaded = undefined;
+    mockShowGraphPreview = undefined;
   });
 
   it('resets breadcrumbs to Library when the route slug changes', async () => {
@@ -78,5 +89,16 @@ describe('LibraryTemplateDetailPage', () => {
         expect.objectContaining({ text: 'Library' }),
       ]);
     });
+  });
+
+  it('passes the visual editor flag through to the template detail preview', () => {
+    mockUseWorkflowsExperimentalUiSetting.mockReturnValue(true);
+    const services = buildEnabledServices();
+
+    render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
+      wrapper: getTestProvider({ services }),
+    });
+
+    expect(mockShowGraphPreview).toBe(true);
   });
 });

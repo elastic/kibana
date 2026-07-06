@@ -19,12 +19,21 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { renderTemplate } from '@kbn/workflows-library';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { CatalogTemplateIcons } from './catalog_template_icons';
 import { WorkflowYamlPreview } from './template_yaml_preview';
+import {
+  ReactFlowProvider,
+  type RenderStepIcon,
+  TypeIcon,
+  WorkflowDetailBottomBar,
+  type WorkflowDetailBottomBarView,
+  WorkflowGraphCanvasWithoutProvider,
+} from '../../components';
 import { useTemplate } from '../hooks/use_template';
 import { getWorkflowTypes } from '../lib/get_workflow_types';
 import { humanizeCategoryId } from '../lib/humanize_category_id';
@@ -35,6 +44,8 @@ export interface TemplateDetailProps {
   onLoaded?: (template: TemplateBody) => void;
   /** Optional navigation control rendered at the top of the metadata column. */
   backButton?: React.ReactNode;
+  /** Enables the graph/YAML preview toggle. Defaults to YAML-only when false. */
+  showGraphPreview?: boolean;
 }
 
 /** App icons for the known solutions; unknown solutions render without one. */
@@ -52,15 +63,30 @@ const capitalize = (value: string): string =>
  * and category badges, step/trigger icons) plus a read-only preview of the
  * template's workflow definition.
  */
-export const TemplateDetail = React.memo<TemplateDetailProps>(({ slug, onLoaded, backButton }) => {
+export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateDetail({
+  slug,
+  onLoaded,
+  backButton,
+  showGraphPreview = false,
+}) {
   const { data, isLoading, isError } = useTemplate(slug);
   const { euiTheme } = useEuiTheme();
+  const [previewView, setPreviewView] = useState<WorkflowDetailBottomBarView>('graph');
+  const [selectedGraphStepId, setSelectedGraphStepId] = useState<string | undefined>();
 
   const previewYaml = useMemo(() => (data ? renderTemplate({ template: data }) : ''), [data]);
+  const workflow = useMemo(() => data?.body as WorkflowYaml | undefined, [data]);
   const { stepTypes, triggerTypes } = useMemo(
     () => (data ? getWorkflowTypes(data.body) : { stepTypes: [], triggerTypes: [] }),
     [data]
   );
+  const activePreviewView = showGraphPreview ? previewView : 'yaml';
+
+  const renderStepIcon = useCallback<RenderStepIcon>(({ stepType, isTrigger, size, color }) => {
+    return (
+      <TypeIcon type={stepType} kind={isTrigger ? 'trigger' : 'step'} size={size} color={color} />
+    );
+  }, []);
 
   useEffect(() => {
     if (data) {
@@ -220,11 +246,34 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(({ slug, onLoaded,
                 defaultMessage: 'Preview',
               })}
             </EuiBadge>
-            <WorkflowYamlPreview
-              yaml={previewYaml}
-              height="100%"
-              data-test-subj="workflowLibraryTemplateDetail-preview"
-            />
+            {activePreviewView === 'graph' ? (
+              <ReactFlowProvider>
+                <WorkflowGraphCanvasWithoutProvider
+                  workflow={workflow}
+                  isYamlValid={true}
+                  selectedStepId={selectedGraphStepId}
+                  onStepSelect={setSelectedGraphStepId}
+                  canRunSteps={false}
+                  renderStepIcon={renderStepIcon}
+                  fitView={true}
+                  fitViewOptions={{ padding: 0.35, minZoom: 0.2, maxZoom: 1.2 }}
+                  showZoomControls={true}
+                />
+              </ReactFlowProvider>
+            ) : (
+              <WorkflowYamlPreview
+                yaml={previewYaml}
+                height="100%"
+                data-test-subj="workflowLibraryTemplateDetail-preview"
+              />
+            )}
+            {showGraphPreview ? (
+              <WorkflowDetailBottomBar
+                editorView={previewView}
+                onEditorViewChange={setPreviewView}
+                disableAutoCollapse={true}
+              />
+            ) : null}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
