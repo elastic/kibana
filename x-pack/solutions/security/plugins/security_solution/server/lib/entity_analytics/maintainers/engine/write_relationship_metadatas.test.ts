@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { EntityMetadataClient } from '@kbn/entity-store/server';
+import type { EntityMetadataClient, BulkDropTypeSummary } from '@kbn/entity-store/server';
 import type { RelationshipMetadataDoc } from '@kbn/entity-store/common';
 
 import { writeRelationshipMetadatas } from './write_relationship_metadatas';
@@ -24,7 +24,8 @@ const baseContext = {
 };
 
 const makeEntityMetadataClient = (
-  failed: number = 0
+  failed: number = 0,
+  dropsByType: BulkDropTypeSummary[] = []
 ): {
   entityMetadataClient: EntityMetadataClient;
   bulkAppend: jest.Mock;
@@ -32,6 +33,7 @@ const makeEntityMetadataClient = (
   const bulkAppend = jest.fn().mockImplementation(async (docs: unknown[]) => ({
     successful: docs.length - failed,
     failed,
+    dropsByType,
   }));
   const entityMetadataClient = {
     bulkAppendMetadata: bulkAppend,
@@ -312,6 +314,47 @@ describe('writeRelationshipMetadatas', () => {
       ];
       await writeRelationshipMetadatas(entityMetadataClient, logger, records, baseContext);
       expect(logger.error).toHaveBeenCalled();
+    });
+
+    it('logs a single aggregated error line including the failure-by-type breakdown, not one per dropped doc', async () => {
+      const logger = loggerMock.create();
+      const { entityMetadataClient } = makeEntityMetadataClient(1, [
+        {
+          type: 'security_exception',
+          count: 1,
+          status: 403,
+          sampleReason: 'action unauthorized for service account',
+        },
+      ]);
+      const records: EntityRelationshipRecord[] = [
+        {
+          entityId: 'user:alice@corp',
+          entityType: 'user',
+          relationships: { accesses_frequently: ['host:laptopA'] },
+        },
+      ];
+      await writeRelationshipMetadatas(entityMetadataClient, logger, records, baseContext);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'security_exception (1, status 403): action unauthorized for service account'
+        )
+      );
+    });
+
+    it('falls back to a plain failure count message when dropsByType is empty', async () => {
+      const logger = loggerMock.create();
+      const { entityMetadataClient } = makeEntityMetadataClient(1, []);
+      const records: EntityRelationshipRecord[] = [
+        {
+          entityId: 'user:alice@corp',
+          entityType: 'user',
+          relationships: { accesses_frequently: ['host:laptopA'] },
+        },
+      ];
+      await writeRelationshipMetadatas(entityMetadataClient, logger, records, baseContext);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith('Failed to append 1 of 1 relationship metadata.');
     });
 
     it('logs at info level (not error) when bulkAppend returns no failures', async () => {

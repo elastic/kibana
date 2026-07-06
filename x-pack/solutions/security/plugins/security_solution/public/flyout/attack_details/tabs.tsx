@@ -6,13 +6,14 @@
  */
 
 import type { ReactElement } from 'react';
-import React from 'react';
+import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttackDetailsPanelPaths } from '.';
 import { OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID, JSON_TAB_TEST_ID } from './constants/test_ids';
 import { TableTab } from './tabs/table_tab';
-import { JsonTab } from './tabs/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
+import { JsonTab as SharedJsonTab } from '../../flyout_v2/shared/components/json_tab';
+import { useAttackDetailsContext } from './context';
 
 export interface AttackDetailsPanelTabType {
   id: AttackDetailsPanelPaths;
@@ -20,6 +21,24 @@ export interface AttackDetailsPanelTabType {
   content: React.ReactElement;
   'data-test-subj': string;
 }
+
+/**
+ * Adapter that bridges the attack details flyout context to the shared `JsonTab`. Reads the
+ * `searchHit` from the context and forwards it as a prop so the JSON view has a single source
+ * of truth in `flyout_v2`.
+ */
+const JsonTabContent = memo(() => {
+  const { searchHit } = useAttackDetailsContext();
+
+  return (
+    <SharedJsonTab
+      value={searchHit as unknown as Record<string, unknown>}
+      showFooterOffset={false}
+      data-test-subj={JSON_TAB_TEST_ID}
+    />
+  );
+});
+JsonTabContent.displayName = 'JsonTabContent';
 
 export const overviewTab: AttackDetailsPanelTabType = {
   id: 'overview',
@@ -54,5 +73,5 @@ export const jsonTab: AttackDetailsPanelTabType = {
       defaultMessage="JSON"
     />
   ),
-  content: <JsonTab />,
+  content: <JsonTabContent />,
 };

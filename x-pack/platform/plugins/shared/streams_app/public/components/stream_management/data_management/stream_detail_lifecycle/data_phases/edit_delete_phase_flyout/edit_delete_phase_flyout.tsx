@@ -192,12 +192,12 @@ export const EditDeletePhaseFlyout = ({
 
   const hasFormErrors = Object.keys(errors).length > 0;
   const isAddingDeletePhase = initialValue.deletePhaseEnabled === false;
-  const isApplyDisabled = hasFormErrors || isSubmitting || (!isAddingDeletePhase && !hasChanges);
+  const isApplyDisabled = hasFormErrors || isSubmitting;
   const disabledApplyTooltip = isSubmitting
     ? editDeletePhaseFlyoutI18n.applySubmittingDisabledTooltip
     : hasFormErrors
     ? editDeletePhaseFlyoutI18n.applyDisabledTooltip
-    : editDeletePhaseFlyoutI18n.applyUnchangedDisabledTooltip;
+    : undefined;
   const maximumRetentionHelpText = maximumRetentionPeriod
     ? getMaximumRetentionMessage(maximumRetentionPeriod)
     : undefined;
@@ -272,9 +272,13 @@ export const EditDeletePhaseFlyout = ({
         <FormProvider {...methods}>
           <form
             id={formId}
-            onSubmit={methods.handleSubmit((data) =>
-              onSave(serializeFormValuesToDeletePhase(data))
-            )}
+            onSubmit={methods.handleSubmit((data) => {
+              if (!isAddingDeletePhase && !hasChanges) {
+                onClose();
+                return;
+              }
+              return onSave(serializeFormValuesToDeletePhase(data));
+            })}
             noValidate
           >
             <EuiPanel hasShadow={false} hasBorder={false} paddingSize="none" css={sectionStyles}>
@@ -330,7 +334,7 @@ export const EditDeletePhaseFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {isApplyDisabled ? (
+            {disabledApplyTooltip ? (
               <EuiToolTip content={disabledApplyTooltip}>{applyButton}</EuiToolTip>
             ) : (
               applyButton

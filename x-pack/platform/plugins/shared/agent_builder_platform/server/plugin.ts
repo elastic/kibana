@@ -17,7 +17,6 @@ import type {
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
 import { registerSkills } from './skills';
-import { visualizationContextEngineType } from './context_engine_types/visualization';
 import { createConnectorContextEngineType } from './context_engine_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
 import { getTracingFeaturesEnabled } from './tracing/get_tracing_features_enabled';
@@ -51,7 +50,6 @@ export class AgentBuilderPlatformPlugin
       setupDeps,
     });
     registerSkills(setupDeps.agentBuilder);
-    setupDeps.contextEngine.registerType(visualizationContextEngineType);
 
     const connectorContextEngineType = createConnectorContextEngineType({
       getActionSavedObjectsClient: async (request) => {
