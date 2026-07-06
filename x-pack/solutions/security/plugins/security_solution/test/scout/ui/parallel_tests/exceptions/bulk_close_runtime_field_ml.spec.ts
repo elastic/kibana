@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout-security';
-import { AddExceptionButtonType } from '@kbn/scout-security/src/playwright/fixtures/test/page_objects/add_exception_flyout';
+import { AddExceptionButtonType, spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 /**
