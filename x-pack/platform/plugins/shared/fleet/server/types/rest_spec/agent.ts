@@ -1029,7 +1029,9 @@ export const PostBulkAgentRollbackRequestSchema = {
 };
 
 export const PostBulkAgentRollbackResponseSchema = schema.oneOf([
-  schema.object({ actionIds: schema.arrayOf(schema.string(), { maxSize: 10000 }) }),
+  schema.object({
+    actionIds: schema.arrayOf(schema.string({ maxLength: 36 }), { maxSize: 10000 }),
+  }),
   DryRunCountSchema,
 ]);
 

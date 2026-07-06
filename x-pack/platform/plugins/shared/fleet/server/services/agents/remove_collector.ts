@@ -64,10 +64,16 @@ export async function removeCollectors(
 
   if (options.dryRun) {
     if ('agentIds' in options) {
-      return { count: options.agentIds.length };
+      const agents = await getAgents(esClient, soClient, options);
+      return { count: agents.filter((a) => a.type === AGENT_TYPE_OPAMP).length };
     }
+    const opampFilter = `agent.type:${AGENT_TYPE_OPAMP}`;
+    const kuery = buildFilterWithNamespace(
+      await agentsKueryNamespaceFilter(spaceId),
+      options.kuery ? `(${options.kuery}) AND ${opampFilter}` : opampFilter
+    );
     const { total } = await getAgentsByKuery(esClient, soClient, {
-      kuery: buildFilterWithNamespace(await agentsKueryNamespaceFilter(spaceId), options.kuery),
+      kuery,
       showAgentless: options.showAgentless,
       showInactive: options.showInactive ?? false,
       page: 1,

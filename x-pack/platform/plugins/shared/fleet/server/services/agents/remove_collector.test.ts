@@ -131,7 +131,7 @@ describe('removeCollectors (bulk)', () => {
       agentIds: [opampAgent.id, fleetAgent.id],
     });
 
-    expect('actionId' in result && result.actionId).toEqual(expect.any(String));
+    expect(result).toHaveProperty('actionId', expect.any(String));
     expect(mockedCrud.bulkUpdateAgents).toHaveBeenCalledTimes(1);
     const [, updates] = mockedCrud.bulkUpdateAgents.mock.calls[0];
     expect(updates).toHaveLength(1);
@@ -159,7 +159,7 @@ describe('removeCollectors (bulk)', () => {
       type: 'REMOVE_COLLECTOR',
       total: 1,
     });
-    expect('actionId' in result && result.actionId).toBe(actionCall.id);
+    expect(result).toHaveProperty('actionId', actionCall.id);
 
     expect(mockedActions.bulkCreateAgentActionResults).toHaveBeenCalledTimes(1);
     const resultsCall = mockedActions.bulkCreateAgentActionResults.mock.calls[0][1];
@@ -180,7 +180,7 @@ describe('removeCollectors (bulk)', () => {
       kuery: 'agent.type:OPAMP',
     });
 
-    expect('actionId' in result && result.actionId).toEqual(expect.any(String));
+    expect(result).toHaveProperty('actionId', expect.any(String));
     expect(mockedCrud.bulkUpdateAgents).toHaveBeenCalledTimes(1);
   });
 
@@ -189,7 +189,7 @@ describe('removeCollectors (bulk)', () => {
 
     const result = await removeCollectors(esClient, soClient, { agentIds: [fleetAgent.id] });
 
-    expect('actionId' in result && result.actionId).toEqual(expect.any(String));
+    expect(result).toHaveProperty('actionId', expect.any(String));
     expect(mockedActions.createAgentAction).not.toHaveBeenCalled();
     expect(mockedActions.bulkCreateAgentActionResults).not.toHaveBeenCalled();
   });

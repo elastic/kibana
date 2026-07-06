@@ -248,7 +248,7 @@ describe('unenroll', () => {
         agentIds: idsToUnenroll,
         revoke: true,
       });
-      expect('actionId' in unenrolledResponse && unenrolledResponse.actionId).toBeDefined();
+      expect(unenrolledResponse).toHaveProperty('actionId');
 
       // calls ES update with correct values
       const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
@@ -312,7 +312,7 @@ describe('unenroll', () => {
         force: true,
       });
 
-      expect('actionId' in unenrolledResponse && unenrolledResponse.actionId).toBeDefined();
+      expect(unenrolledResponse).toHaveProperty('actionId');
 
       // calls ES update with correct values
       const calledWith = esClient.bulk.mock.calls[0][0];
@@ -636,5 +636,31 @@ describe('unenrollAgents kuery path — cheap count and sync/async branching', (
 
     expect(mockUnenrollBatch).toHaveBeenCalled();
     expect(mockUnenrollActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('dry run (kuery) returns count without writing', async () => {
+    const { soClient, esClient } = createClientMock();
+    mockGetAgentsByKuery.mockResolvedValue({ agents: [], total: 42, page: 1, perPage: 0 });
+
+    const result = await unenrollAgents(soClient, esClient, {
+      kuery: 'status:online',
+      dryRun: true,
+    });
+
+    expect(result).toEqual({ count: 42 });
+    expect(mockUnenrollBatch).not.toHaveBeenCalled();
+    expect(mockUnenrollActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('dry run (agentIds) returns count without writing', async () => {
+    const { soClient, esClient } = createClientMock();
+
+    const result = await unenrollAgents(soClient, esClient, {
+      agentIds: ['agent-1', 'agent-2', 'agent-3'],
+      dryRun: true,
+    });
+
+    expect(result).toEqual({ count: 3 });
+    expect(mockUnenrollBatch).not.toHaveBeenCalled();
   });
 });

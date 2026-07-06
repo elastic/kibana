@@ -108,7 +108,7 @@ export interface BulkAgentActionDryRun {
   count: number;
 }
 
-export type PostBulkAgentUnenrollResponse = BulkAgentAction;
+export type PostBulkAgentUnenrollResponse = BulkAgentAction | BulkAgentActionDryRun;
 
 export interface PostRemoveCollectorRequest {
   params: {
@@ -127,7 +127,7 @@ export interface PostBulkRemoveCollectorsRequest {
   };
 }
 
-export type PostBulkRemoveCollectorsResponse = BulkAgentAction;
+export type PostBulkRemoveCollectorsResponse = BulkAgentAction | BulkAgentActionDryRun;
 
 export interface PostAgentUpgradeRequest {
   params: {
@@ -153,7 +153,7 @@ export interface PostBulkAgentUpgradeRequest {
   };
 }
 
-export type PostBulkAgentUpgradeResponse = BulkAgentAction;
+export type PostBulkAgentUpgradeResponse = BulkAgentAction | BulkAgentActionDryRun;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
@@ -177,9 +177,7 @@ export interface PostBulkAgentRollbackRequest {
   };
 }
 
-export interface PostBulkAgentRollbackResponse {
-  actionIds: string[];
-}
+export type PostBulkAgentRollbackResponse = { actionIds: string[] } | BulkAgentActionDryRun;
 
 export interface PostAgentReassignRequest {
   params: {
@@ -212,7 +210,7 @@ export interface PostRequestDiagnosticsRequest {
 }
 
 export type PostRequestDiagnosticsResponse = BulkAgentAction;
-export type PostBulkRequestDiagnosticsResponse = BulkAgentAction;
+export type PostBulkRequestDiagnosticsResponse = BulkAgentAction | BulkAgentActionDryRun;
 
 export interface PostRequestBulkDiagnosticsRequest {
   body: {
@@ -223,9 +221,9 @@ export interface PostRequestBulkDiagnosticsRequest {
   };
 }
 
-export type PostBulkAgentReassignResponse = BulkAgentAction;
+export type PostBulkAgentReassignResponse = BulkAgentAction | BulkAgentActionDryRun;
 
-export type PostBulkUpdateAgentTagsResponse = BulkAgentAction;
+export type PostBulkUpdateAgentTagsResponse = BulkAgentAction | BulkAgentActionDryRun;
 
 export interface DeleteAgentRequest {
   params: {
@@ -279,9 +277,7 @@ export interface BulkMigrateAgentsRequest {
     dryRun?: boolean;
   };
 }
-export interface BulkMigrateAgentsResponse {
-  actionId: string;
-}
+export type BulkMigrateAgentsResponse = BulkAgentAction | BulkAgentActionDryRun;
 export interface UpdateAgentRequest {
   params: {
     agentId: string;
@@ -395,9 +391,7 @@ export interface BulkChangeAgentPrivilegeLevelRequest {
   };
 }
 
-export interface BulkChangeAgentPrivilegeLevelResponse {
-  actionId: string;
-}
+export type BulkChangeAgentPrivilegeLevelResponse = BulkAgentAction | BulkAgentActionDryRun;
 
 export interface PostGenerateAgentsReportRequest {
   body: {

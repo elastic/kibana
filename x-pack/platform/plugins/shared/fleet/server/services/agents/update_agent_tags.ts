@@ -72,13 +72,16 @@ export async function updateAgentTags(
     const kuery = filters.join(' AND ');
     const pitId = await openPointInTime(esClient);
 
-    // calculate total count
+    // calculate total count; close PIT before propagating any ES error
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
       showAgentless: options.showAgentless,
       showInactive: options.showInactive ?? false,
       perPage: 0,
       pitId,
+    }).catch(async (error) => {
+      await closePointInTime(esClient, pitId);
+      throw error;
     });
 
     if (options.dryRun) {
