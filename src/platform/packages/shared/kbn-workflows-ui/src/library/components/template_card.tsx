@@ -112,7 +112,6 @@ export const TemplateCard = React.memo<TemplateCardProps>(({ template, onSelect 
       textAlign="left"
       paddingSize="l"
       hasBorder
-      hasShadow={false}
       onClick={handleClick}
       title={title}
       description={description}
