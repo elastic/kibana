@@ -17,11 +17,6 @@ spec:
     spec:
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/security_solution_quality_gate/mki_security_solution_explore.yml
-      initial_step_plugins:
-        - sparse-checkout#v1.6.0:
-            paths:
-              - .buildkite/pipelines/security_solution_quality_gate/mki_security_solution_explore.yml
-            cleanup_sparse_state: true
       provider_settings:
         build_branches: false
         build_pull_requests: false
