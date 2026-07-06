@@ -76,15 +76,26 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
+      const breachedGroupHashes = new Set(
+        alertEventsBatch.filter((e) => e.status === 'breached').map((e) => e.group_hash)
+      );
+
       const effectiveQuery = getRecoverEsqlQuery(rule.query, rule.recovery_strategy);
       const recoveryEvents = effectiveQuery
-        ? await step.executeRecoveryQuery({ rule, effectiveQuery, input, activeGroupHashes })
+        ? await step.executeRecoveryQuery({
+            rule,
+            effectiveQuery,
+            input,
+            activeGroupHashes,
+            breachedGroupHashes,
+          })
         : buildRecoveryAlertEvents({
             ruleId: rule.id,
             ruleVersion: 1,
             spaceId: input.spaceId,
             activeGroupHashes,
-            breachedGroupHashes: new Set(alertEventsBatch.map((e) => e.group_hash)),
+            breachedGroupHashes,
+            dataPresentGroupHashes: state.dataPresentGroupHashes,
             scheduledTimestamp: input.scheduledAt,
           });
 
@@ -107,11 +118,13 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
     effectiveQuery,
     input,
     activeGroupHashes,
+    breachedGroupHashes,
   }: {
     rule: RuleResponse;
     effectiveQuery: string;
     input: RulePipelineState['input'];
     activeGroupHashes: ActiveAlertGroupHash[];
+    breachedGroupHashes: Set<string>;
   }): Promise<AlertEvent[]> {
     const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
 
@@ -144,6 +157,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         spaceId: input.spaceId,
         ruleAttributes: rule,
         activeGroupHashes,
+        breachedGroupHashes,
         esqlResponse,
         scheduledTimestamp: input.scheduledAt,
       });

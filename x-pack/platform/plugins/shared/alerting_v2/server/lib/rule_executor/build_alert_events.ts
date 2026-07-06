@@ -145,6 +145,7 @@ export interface BuildRecoveryAlertEventsOpts {
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: Set<string>;
   scheduledTimestamp: string;
+  dataPresentGroupHashes?: ReadonlySet<string>;
 }
 
 /**
@@ -160,11 +161,15 @@ export function buildRecoveryAlertEvents({
   activeGroupHashes,
   breachedGroupHashes,
   scheduledTimestamp,
+  dataPresentGroupHashes,
 }: BuildRecoveryAlertEventsOpts): AlertEvent[] {
   const wroteAt = new Date().toISOString();
 
   return activeGroupHashes
     .filter(({ group_hash }) => !breachedGroupHashes.has(group_hash))
+    .filter(
+      ({ group_hash }) => dataPresentGroupHashes == null || dataPresentGroupHashes.has(group_hash)
+    )
     .map(({ group_hash }) => ({
       '@timestamp': wroteAt,
       scheduled_timestamp: scheduledTimestamp,
@@ -176,6 +181,42 @@ export function buildRecoveryAlertEvents({
       type: 'signal' as const,
       space_id: spaceId,
     }));
+}
+
+export interface BuildContinuedBreachAlertEventsOpts {
+  ruleId: string;
+  ruleVersion: number;
+  spaceId: string;
+  groupHashes: string[];
+  scheduledTimestamp: string;
+}
+
+/**
+ * Creates continued `breached` alert events for the supplied group hashes.
+ *
+ * Used when active group that is absent from the breach batch and did not match the
+ * recovery query, but still has data.
+ */
+export function buildContinuedBreachAlertEvents({
+  ruleId,
+  ruleVersion,
+  spaceId,
+  groupHashes,
+  scheduledTimestamp,
+}: BuildContinuedBreachAlertEventsOpts): AlertEvent[] {
+  const wroteAt = new Date().toISOString();
+
+  return groupHashes.map((groupHash) => ({
+    '@timestamp': wroteAt,
+    scheduled_timestamp: scheduledTimestamp,
+    rule: { id: ruleId, version: ruleVersion },
+    group_hash: groupHash,
+    data: {},
+    status: 'breached' as const,
+    source: 'internal',
+    type: 'signal' as const,
+    space_id: spaceId,
+  }));
 }
 
 export interface BuildNoDataAlertEventsOpts {
@@ -230,6 +271,7 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   spaceId: string;
   ruleAttributes: Pick<RuleResponse, 'grouping'>;
   activeGroupHashes: ActiveAlertGroupHash[];
+  breachedGroupHashes: Set<string>;
   esqlResponse: EsqlQueryResponse;
   scheduledTimestamp: string;
 }
@@ -238,6 +280,9 @@ export interface BuildQueryRecoveryAlertEventsOpts {
  *
  * Active groups whose group hash matches a row in the recovery query results
  * are considered recovered. Used when the rule has a recover query configured.
+ *
+ * Breach always takes priority: groups present in the current breach batch are
+ * excluded even if the recovery query also matched them.
  */
 export function buildQueryRecoveryAlertEvents({
   ruleId,
@@ -245,6 +290,7 @@ export function buildQueryRecoveryAlertEvents({
   spaceId,
   ruleAttributes,
   activeGroupHashes,
+  breachedGroupHashes,
   esqlResponse,
   scheduledTimestamp,
 }: BuildQueryRecoveryAlertEventsOpts): AlertEvent[] {
@@ -272,7 +318,11 @@ export function buildQueryRecoveryAlertEvents({
       },
     });
 
-    if (activeGroupHashSet.has(groupHash) && !recoveredByGroupHash.has(groupHash)) {
+    if (
+      activeGroupHashSet.has(groupHash) &&
+      !breachedGroupHashes.has(groupHash) &&
+      !recoveredByGroupHash.has(groupHash)
+    ) {
       recoveredByGroupHash.set(groupHash, rowDoc);
     }
   }
