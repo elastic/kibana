@@ -21,10 +21,6 @@ export const MAX_TOOL_RESULT_BYTES = 2 * 1024 * 1024;
  * Returns `results` unchanged when their combined serialized size is within the limit;
  * otherwise returns a single `other` result carrying a truncation notice and the first
  * `MAX_TOOL_RESULT_BYTES` of the serialized results. Pure function.
- *
- * This is the storage guardrail: it runs before results are stored/persisted, and is
- * distinct from the context-window guardrail (`buildGuardedToolContent`), which caps what
- * the LLM sees. See docs/superpowers/specs/2026-07-03-tool-result-size-limit-design.md.
  */
 export const enforceResultSizeLimit = (results: ToolResult[]): ToolResult[] => {
   const stringified = JSON.stringify({ results });
