@@ -203,6 +203,36 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       (id) => !agentlessDryRunData?.find((dryRunRecord) => dryRunRecord.id === id)?.hasErrors
     );
 
+    // Guard failures (dry-run entries with a `statusCode`, e.g. a policy deleted mid-flight or an
+    // API error while checking it) are excluded from the upgrade set like conflicts, but they are
+    // not announced in the confirm modal's conflict callout — they are not user-resolvable config
+    // conflicts. Announce the skip here so the success toast can't read as a full upgrade.
+    const agentlessGuardFailures =
+      agentlessDryRunData?.filter((item) => item.hasErrors && item.statusCode !== undefined) ?? [];
+    if (agentlessGuardFailures.length > 0) {
+      notifications.toasts.addWarning({
+        title: i18n.translate(
+          'xpack.fleet.integrations.settings.skippedAgentlessPoliciesToast.title',
+          {
+            defaultMessage:
+              'Fleet skipped {skippedCount, plural, one {# agentless policy} other {# agentless policies}}',
+            values: { skippedCount: agentlessGuardFailures.length },
+          }
+        ),
+        text: i18n.translate(
+          'xpack.fleet.integrations.settings.skippedAgentlessPoliciesToast.message',
+          {
+            defaultMessage:
+              'Fleet could not check {skippedNames} for upgrade. Upgrade {skippedCount, plural, one {it} other {them}} manually.',
+            values: {
+              skippedCount: agentlessGuardFailures.length,
+              skippedNames: agentlessGuardFailures.map((item) => item.name ?? item.id).join(', '),
+            },
+          }
+        ),
+      });
+    }
+
     if (!packagePolicyIdsToUpdate.length && !agentlessIdsToUpgrade.length) {
       setIsUpgradingPackagePolicies(false);
       navigateToNewSettingsPage();
