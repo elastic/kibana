@@ -1,7 +1,7 @@
 ---
 navigation_title: "MySQL"
 type: reference
-description: "Connect directly to a MySQL database to search and query data from Workplace AI conversations."
+description: "Use the MySQL connector to run read-only SQL queries and discover databases, tables, and schema against a MySQL database."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -44,7 +44,7 @@ The MySQL connector has the following actions:
 Query
 :   Run a read-only SQL query against the MySQL database.
     - **sql** (required): The SQL query to run.
-    - **maxRows** (optional): Maximum number of rows to return (default: 100).
+    - **maxRows** (optional): Maximum number of rows to return (1-1000, default: 100).
 
 List Databases
 :   List all databases accessible to the authenticated user.
@@ -62,8 +62,8 @@ Search Rows
 :   Search rows in a table by matching a search term against specified columns.
     - **table** (required): The table to search.
     - **searchTerm** (required): The text to search for.
-    - **columns** (required): Array of column names to search in. Use `describe_table` to discover available columns.
-    - **maxRows** (optional): Maximum number of rows to return (default: 50).
+    - **columns** (required): Array of column names to search in. Use `describeTable` to discover available columns.
+    - **maxRows** (optional): Maximum number of rows to return (1-1000, default: 100).
     - **database** (optional): The database name. Uses the configured default if omitted.
 
 

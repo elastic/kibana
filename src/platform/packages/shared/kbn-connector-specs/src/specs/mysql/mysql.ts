@@ -7,6 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * MySQL Connector
+ *
+ * Connects directly to a MySQL database over the native MySQL wire protocol
+ * (via `mysql2`) rather than HTTP — there is no vendor REST/MCP API to wrap.
+ * `ctx.client` (an `AxiosInstance`) is never used; a `mysql2` connection pool
+ * is opened directly from `ctx.config` / `ctx.secrets` instead.
+ *
+ * Username and password are declared under `auth: { types: ['basic'] }`
+ * rather than `schema`, even though nothing here makes an HTTP request.
+ * `schema` fields are stored unencrypted, so credentials must go through
+ * `auth` to be encrypted at rest — `basic`'s username/password shape is a
+ * convenient fit. `configure()` (which sets `axiosInstance.defaults.auth`)
+ * runs but is unused; the handlers read the credentials from `ctx.secrets`.
+ *
+ * All actions are read-only: `assertReadOnly` (see `lib/generic_db_connector`)
+ * rejects any statement that doesn't start with SELECT/SHOW/DESCRIBE/DESC/
+ * EXPLAIN/WITH, and rejects semicolon-delimited multi-statement input. Query
+ * execution wraps user SQL in a bounded outer SELECT so `maxRows` is always
+ * enforced server-side.
+ */
 import type { Pool as Mysql2Pool } from 'mysql2/promise';
 import { Sha256 } from '@kbn/crypto-browser';
 import { i18n } from '@kbn/i18n';
@@ -36,6 +57,10 @@ export const MysqlConnector: ConnectorSpec = {
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
+  },
+
+  auth: {
+    types: ['basic'],
   },
 
   schema: lazySchema(() =>
@@ -94,42 +119,6 @@ export const MysqlConnector: ConnectorSpec = {
           placeholder: 'my_database',
           helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.database.helpText', {
             defaultMessage: 'The name of the default database to query',
-          }),
-        }),
-      username: z
-        .string()
-        .min(1)
-        .describe(
-          i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.description', {
-            defaultMessage: 'The MySQL username',
-          })
-        )
-        .meta({
-          widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.label', {
-            defaultMessage: 'Username',
-          }),
-          placeholder: 'kibana_reader',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.helpText', {
-            defaultMessage: 'The MySQL user to authenticate as',
-          }),
-        }),
-      password: z
-        .string()
-        .min(1)
-        .describe(
-          i18n.translate('core.kibanaConnectorSpecs.mysql.config.password.description', {
-            defaultMessage: 'The MySQL password',
-          })
-        )
-        .meta({
-          widget: 'password',
-          sensitive: true,
-          label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.password.label', {
-            defaultMessage: 'Password',
-          }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.password.helpText', {
-            defaultMessage: 'The password for the MySQL user',
           }),
         }),
     })
@@ -212,7 +201,30 @@ export const MysqlConnector: ConnectorSpec = {
       }
     },
   },
+
+  skill: [
+    '## MySQL Connector',
+    '',
+    'Read-only access to a MySQL database. All statements are checked before execution — only SELECT, SHOW, DESCRIBE, EXPLAIN, and WITH are allowed, and semicolon-delimited multi-statement submissions are rejected.',
+    '',
+    '### Discovery pattern (schema unknown)',
+    '1. `listDatabases` — see what databases are accessible.',
+    '2. `listTables` — list tables in a database (defaults to the configured database if omitted).',
+    '3. `describeTable` — inspect column names, types, and nullability before writing a query.',
+    '4. `query` or `searchRows` — read the data.',
+    '',
+    '### Choosing between `query` and `searchRows`',
+    '- Prefer `query` for structured filtering, joins, aggregation, or anything expressible as a SELECT.',
+    '- Prefer `searchRows` for broad, unstructured text lookups across a known set of columns — it builds a LIKE-based search so you do not need to hand-write SQL wildcards.',
+    '',
+    '### Gotchas',
+    '- Write, DDL, and multi-statement SQL are rejected outright — there is no workflow-only escape hatch for this connector; ask the user to run those directly against the database.',
+    '- `query` and `searchRows` cap results at `maxRows` (default 100, max 1000) to keep responses small — narrow the query with WHERE clauses rather than relying on a large `maxRows`.',
+    '- Database and table names are case-sensitive on case-sensitive filesystems (the common case on Linux). Use the exact casing returned by `listDatabases` / `listTables`.',
+  ].join('\n'),
 };
+
+type ExecuteParams = NonNullable<Parameters<Mysql2Pool['execute']>[1]>;
 
 class MysqlClient {
   private static readonly MAX_POOLS = 10;
@@ -231,7 +243,7 @@ class MysqlClient {
     return rows as unknown[];
   }
 
-  async runParamQuery(ctx: ActionContext, sql: string, params: unknown[]): Promise<unknown[]> {
+  async runParamQuery(ctx: ActionContext, sql: string, params: ExecuteParams): Promise<unknown[]> {
     const [rows] = await (await this.getPool(ctx)).execute(sql, params);
     return rows as unknown[];
   }
@@ -240,8 +252,8 @@ class MysqlClient {
     const host = ctx.config?.host as string;
     const port = ctx.config?.port as number;
     const database = ctx.config?.database as string;
-    const username = ctx.config?.username as string;
-    const password = ctx.config?.password as string;
+    const username = ctx.secrets?.username as string;
+    const password = ctx.secrets?.password as string;
 
     const passwordHash = new Sha256().update(password).digest('hex');
     const key = `${host}:${port}:${database}:${username}:${passwordHash}`;
