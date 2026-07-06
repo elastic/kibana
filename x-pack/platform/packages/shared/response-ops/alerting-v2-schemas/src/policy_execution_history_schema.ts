@@ -34,7 +34,7 @@ const sharedFilterFields = {
     )
     .optional()
     .describe(
-      'Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also intersects the embedded rules array in each item to the matched subset. Accepts a repeated query param (`ruleIds=a&ruleIds=b`) or a single value.'
+      'Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided. Max 50 ids.'
     ),
   outcome: policyExecutionOutcomeFilterSchema
     .optional()
