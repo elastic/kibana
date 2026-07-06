@@ -8,7 +8,7 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
-  STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
+  SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
   STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
 } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -33,7 +33,7 @@ export const DiscoverySettingsProvider: React.FC<{ children: React.ReactNode }> 
   } = useKibana();
 
   const isMemoryEnabled = useObservable(
-    featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false),
+    featureFlags.getBooleanValue$(SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false),
     false
   );
 

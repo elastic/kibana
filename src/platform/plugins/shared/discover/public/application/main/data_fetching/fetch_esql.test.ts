@@ -135,6 +135,24 @@ describe('fetchEsql', () => {
     expect(result.time).toEqual(absoluteTimeRange);
   });
 
+  it('passes isApproximate to the expression searchContext', async () => {
+    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    expressionsExecuteSpy.mockReturnValueOnce({
+      cancel: jest.fn(),
+      getData: jest.fn(() => of({ result: { columns: [], rows: [] } })),
+    } as unknown as ExecutionContract);
+
+    await fetchEsql({ ...fetchEsqlMockProps, isApproximate: true });
+
+    expect(expressionsExecuteSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      null,
+      expect.objectContaining({
+        searchContext: expect.objectContaining({ isApproximate: true }),
+      })
+    );
+  });
+
   it('should add inline_highlights to the raw record when inline highlights are present', async () => {
     const hits = [
       { _index: 'i', _id: '1', snippets: '<em>bar</em>' },

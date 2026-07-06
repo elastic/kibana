@@ -19,6 +19,8 @@ import type {
   AppHeaderMetadataItems as CoreAppHeaderMetadataItems,
   AppHeaderMetadataTextItem as CoreAppHeaderMetadataTextItem,
   AppHeaderTab as CoreAppHeaderTab,
+  AppHeaderTabAction as CoreAppHeaderTabAction,
+  AppHeaderTabActions as CoreAppHeaderTabActions,
   AppHeaderTabBadge as CoreAppHeaderTabBadge,
   AppHeaderTabIconBadge as CoreAppHeaderTabIconBadge,
   AppHeaderTitle as CoreAppHeaderTitle,
@@ -37,6 +39,8 @@ export type AppHeaderMetadataItem = CoreAppHeaderMetadataItem;
 export type AppHeaderMetadataItems = CoreAppHeaderMetadataItems;
 export type AppHeaderMetadataTextItem = CoreAppHeaderMetadataTextItem;
 export type AppHeaderTab = CoreAppHeaderTab;
+export type AppHeaderTabAction = CoreAppHeaderTabAction;
+export type AppHeaderTabActions = CoreAppHeaderTabActions;
 export type AppHeaderTabBadge = CoreAppHeaderTabBadge;
 export type AppHeaderTabIconBadge = CoreAppHeaderTabIconBadge;
 export type AppHeaderTitle = CoreAppHeaderTitle;
