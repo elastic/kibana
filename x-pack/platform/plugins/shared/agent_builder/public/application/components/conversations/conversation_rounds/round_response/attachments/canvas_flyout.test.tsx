@@ -64,6 +64,25 @@ describe('CanvasFlyout', () => {
     mockCanvasState = null;
   });
 
+  it('shows a fallback instead of crashing when renderCanvasContent throws', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    mockAttachmentsService.getAttachmentUiDefinition.mockReturnValue({
+      getLabel: () => 'Test attachment',
+      renderCanvasContent: () => {
+        throw new Error('boom');
+      },
+    });
+    mockCanvasState = {
+      attachment: { id: 'attachment-1', type: 'test', data: {} },
+      isSidebar: false,
+    };
+
+    render(<CanvasFlyout attachmentsService={mockAttachmentsService} />);
+
+    expect(screen.getByText("Couldn't render this attachment")).not.toBeNull();
+  });
+
   it('closes canvas when conversation ID changes', () => {
     const { rerender } = render(<CanvasFlyout attachmentsService={mockAttachmentsService} />);
 
