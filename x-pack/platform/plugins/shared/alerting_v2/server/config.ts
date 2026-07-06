@@ -23,6 +23,27 @@ const MINIMUM_SCHEDULE_INTERVAL_FLOOR = MIN_SCHEDULE_INTERVAL;
 /** Highest value `xpack.alerting_v2.rules.minimumScheduleInterval` may be set to. */
 const MAX_MINIMUM_SCHEDULE_INTERVAL = '30d';
 
+/**
+ * Wire format used by the rule executor's streaming breach query
+ * (`QueryService.executeQueryStream`).
+ *
+ * - `json`: fetch the ES|QL result as JSON and re-emit it as row batches
+ *   through the streaming interface. Default. Buffers the full result in
+ *   memory but avoids the Arrow IPC dependency and its type constraints.
+ * - `arrow`: consume the ES|QL result as an Apache Arrow IPC stream, parsing
+ *   one record batch at a time. Lower memory footprint for large results.
+ *
+ * Both modes expose the same `AsyncIterable<T[]>` contract, so downstream
+ * pipeline steps always handle stream-like (batched) data.
+ */
+export type QueryStreamFormat = 'json' | 'arrow';
+
+const querySchema = schema.object({
+  streamFormat: schema.oneOf([schema.literal('json'), schema.literal('arrow')], {
+    defaultValue: 'json',
+  }),
+});
+
 const rulesSchema = schema.object({
   /**
    * Smallest `schedule.every` a rule is allowed to use. Rules created, updated
@@ -61,7 +82,9 @@ export const configSchema = schema.object({
     removalDelay: schema.string({ defaultValue: '1h', validate: validateDuration }),
   }),
   rules: rulesSchema,
+  query: querySchema,
 });
 
 export type PluginConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
+export type QueryConfig = TypeOf<typeof querySchema>;

@@ -440,4 +440,149 @@ describe('QueryService', () => {
       expect(reader.cancel).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('executeQueryStream (json format)', () => {
+    const mockQuery = 'FROM .alerting-* | LIMIT 10';
+
+    beforeEach(() => {
+      const mocks = createQueryService('json');
+      mockEsClient = mocks.mockEsClient;
+      mockLogger = mocks.mockLogger;
+      queryService = mocks.queryService;
+    });
+
+    it('yields rows from the JSON response as a single batch', async () => {
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'host', type: 'keyword' },
+          { name: 'count', type: 'integer' },
+        ],
+        values: [
+          ['host-a', 1],
+          ['host-b', 2],
+        ],
+      });
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
+      expect(batches).toEqual([
+        [
+          { host: 'host-a', count: 1 },
+          { host: 'host-b', count: 2 },
+        ],
+      ]);
+    });
+
+    it('chunks large results into batches', async () => {
+      const rowCount = 2500;
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [{ name: 'host', type: 'keyword' }],
+        values: Array.from({ length: rowCount }, (_, i) => [`host-${i}`]),
+      });
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(batches).toHaveLength(3);
+      expect(batches[0]).toHaveLength(1000);
+      expect(batches[1]).toHaveLength(1000);
+      expect(batches[2]).toHaveLength(500);
+      expect(batches.flat()).toHaveLength(rowCount);
+    });
+
+    it('yields no batches when the result is empty', async () => {
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [{ name: 'host', type: 'keyword' }],
+        values: [],
+      });
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(batches).toEqual([]);
+    });
+
+    it('coerces BigInt values to Number in streamed rows', async () => {
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'host', type: 'keyword' },
+          { name: 'cpu', type: 'long' },
+        ],
+        values: [['host-a', BigInt(80)]],
+      } as unknown as EsqlQueryResponse);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(batches).toEqual([[{ host: 'host-a', cpu: 80 }]]);
+      expect(typeof batches[0][0].cpu).toBe('number');
+    });
+
+    it('passes the query and abort signal to the JSON ES|QL API', async () => {
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [{ name: 'host', type: 'keyword' }],
+        values: [['host-a']],
+      });
+
+      const abortController = new AbortController();
+      const filter = { bool: { filter: [] } };
+
+      for await (const _batch of queryService.executeQueryStream({
+        query: mockQuery,
+        filter,
+        abortSignal: abortController.signal,
+      })) {
+        // consume
+      }
+
+      expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+        {
+          query: mockQuery,
+          drop_null_columns: false,
+          filter,
+          params: undefined,
+        },
+        { signal: abortController.signal }
+      );
+    });
+
+    it('throws and logs error when the JSON query rejects', async () => {
+      mockEsClient.esql.query.mockRejectedValue(new Error('ES query failed'));
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow('ES query failed');
+
+      expect(mockLogger.error).toHaveBeenCalled();
+    });
+
+    it('logs debug instead of error when cancelled', async () => {
+      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
+      mockEsClient.esql.query.mockRejectedValue(
+        new RuleExecutionCancellationError('Streaming query aborted')
+      );
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow(/aborted/i);
+
+      expect(mockLogger.debug).toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+  });
 });

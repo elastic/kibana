@@ -9,10 +9,18 @@ import type { EsqlQueryRequest, EsqlQueryResponse } from '@elastic/elasticsearch
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import type { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
+import type { QueryStreamFormat } from '../../../config';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import type { ExecutionContext } from '../../execution_context';
 import { createExecutionContext, isRuleExecutionCancellationError } from '../../execution_context';
+
+/**
+ * Number of rows emitted per batch when streaming an ES|QL result in `json`
+ * format. The JSON response is fetched in full and then chunked so downstream
+ * consumers still receive stream-like (batched) data, matching the Arrow path.
+ */
+const JSON_STREAM_BATCH_SIZE = 1000;
 
 export interface ExecuteQueryParams {
   query: EsqlQueryRequest['query'];
@@ -31,7 +39,8 @@ export interface QueryServiceContract {
 export class QueryService implements QueryServiceContract {
   constructor(
     private readonly esClient: ElasticsearchClient,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    private readonly streamFormat: QueryStreamFormat = 'json'
   ) {}
 
   async executeQuery({
@@ -76,7 +85,18 @@ export class QueryService implements QueryServiceContract {
     return this.toRows<T>(response);
   }
 
-  async *executeQueryStream<T = Record<string, unknown>>({
+  async *executeQueryStream<T = Record<string, unknown>>(
+    params: ExecuteQueryParams
+  ): AsyncIterable<T[]> {
+    if (this.streamFormat === 'json') {
+      yield* this.streamViaJson<T>(params);
+      return;
+    }
+
+    yield* this.streamViaArrow<T>(params);
+  }
+
+  private async *streamViaArrow<T>({
     query,
     filter,
     params,
@@ -85,7 +105,7 @@ export class QueryService implements QueryServiceContract {
     const context = createExecutionContext(abortSignal ?? new AbortController().signal);
 
     this.logger.debug({
-      message: () => `QueryService: Executing streaming query`,
+      message: () => `QueryService: Executing streaming query (arrow format)`,
     });
 
     let reader: AsyncRecordBatchStreamReader | undefined;
@@ -126,6 +146,60 @@ export class QueryService implements QueryServiceContract {
       throw error;
     } finally {
       await this.closeReader(reader);
+    }
+  }
+
+  private async *streamViaJson<T>({
+    query,
+    filter,
+    params,
+    abortSignal,
+  }: ExecuteQueryParams): AsyncIterable<T[]> {
+    const context = createExecutionContext(abortSignal ?? new AbortController().signal);
+
+    this.logger.debug({
+      message: () => `QueryService: Executing streaming query (json format)`,
+    });
+
+    try {
+      context.throwIfAborted();
+
+      const response = await this.esClient.esql.query(
+        {
+          query,
+          drop_null_columns: false,
+          filter,
+          params,
+        },
+        { signal: context.signal }
+      );
+
+      const rows = this.toRows<T>(response);
+
+      // The JSON response is materialized in full, then re-emitted as batches so
+      // downstream consumers keep handling stream-like data (as with Arrow).
+      for (let start = 0; start < rows.length; start += JSON_STREAM_BATCH_SIZE) {
+        context.throwIfAborted();
+        yield rows.slice(start, start + JSON_STREAM_BATCH_SIZE);
+      }
+
+      this.logger.debug({
+        message: `QueryService: Streaming query completed successfully`,
+      });
+    } catch (error) {
+      if (isRuleExecutionCancellationError(error)) {
+        this.logger.debug({
+          message: 'QueryService: Streaming query aborted',
+        });
+      } else {
+        this.logger.error({
+          error,
+          code: 'ESQL_QUERY_ERROR',
+          type: 'QueryServiceError',
+        });
+      }
+
+      throw error;
     }
   }
 

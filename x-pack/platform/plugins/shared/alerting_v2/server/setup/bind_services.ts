@@ -6,9 +6,16 @@
  */
 
 import { PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
+import {
+  CoreStart,
+  PluginInitializer,
+  Request,
+  SavedObjectsClientFactory,
+} from '@kbn/core-di-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
+import type { PluginConfig } from '../config';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
@@ -249,7 +256,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceScopedToken);
-      return new QueryService(esClient, loggerService);
+      const { streamFormat } = get<PluginInitializerContext<PluginConfig>['config']>(
+        PluginInitializer('config')
+      ).get<PluginConfig>().query;
+      return new QueryService(esClient, loggerService, streamFormat);
     })
     .inRequestScope();
 
@@ -258,7 +268,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const loggerService = get(LoggerServiceToken);
       // Rule-execution queries run against user data and must respect the space project routing.
       const esClient = get(EsServiceScopedSpaceRoutingToken);
-      return new QueryService(esClient, loggerService);
+      const { streamFormat } = get<PluginInitializerContext<PluginConfig>['config']>(
+        PluginInitializer('config')
+      ).get<PluginConfig>().query;
+      return new QueryService(esClient, loggerService, streamFormat);
     })
     .inRequestScope();
 
@@ -266,7 +279,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceInternalToken);
-      return new QueryService(esClient, loggerService);
+      const { streamFormat } = get<PluginInitializerContext<PluginConfig>['config']>(
+        PluginInitializer('config')
+      ).get<PluginConfig>().query;
+      return new QueryService(esClient, loggerService, streamFormat);
     })
     .inSingletonScope();
 

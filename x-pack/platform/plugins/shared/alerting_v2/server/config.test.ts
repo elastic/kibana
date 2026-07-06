@@ -58,6 +58,23 @@ describe('alerting_v2 config schema', () => {
     });
   });
 
+  describe('query.streamFormat', () => {
+    it('defaults to json', () => {
+      const config = configSchema.validate({});
+      expect(config.query.streamFormat).toBe('json');
+    });
+
+    it('accepts arrow', () => {
+      expect(configSchema.validate({ query: { streamFormat: 'arrow' } }).query.streamFormat).toBe(
+        'arrow'
+      );
+    });
+
+    it('rejects an unknown format', () => {
+      expect(() => configSchema.validate({ query: { streamFormat: 'csv' } })).toThrow();
+    });
+  });
+
   describe('rules.maxScheduledPerMinute', () => {
     it('defaults to 400', () => {
       const config = configSchema.validate({});
