@@ -19,19 +19,6 @@ import { createTelemetryServiceMock } from '../../../common/lib/telemetry/teleme
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { IdentityFields } from '../../document_details/shared/utils';
-import { NewFlyoutContext } from '../../../flyout_v2/shared/context/new_flyout_context';
-
-jest.mock('../../../flyout_v2/shared/components/open_flyout_link', () => ({
-  OpenFlyoutLink: ({
-    field,
-    value,
-    'data-test-subj': dataTestSubj,
-  }: {
-    field: string;
-    value: string;
-    'data-test-subj'?: string;
-  }) => <div data-test-subj={dataTestSubj ?? 'open-flyout-link'}>{`open:${field}:${value}`}</div>,
-}));
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../common/lib/kibana', () => {
@@ -229,25 +216,6 @@ describe('<FlyoutLink />', () => {
         </TestProviders>
       );
       expect(queryByTestId('rule-link')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('when rendered inside the new flyout system', () => {
-    beforeEach(() => {
-      jest.mocked(useWhichFlyout).mockReturnValue(null);
-    });
-
-    it('delegates to OpenFlyoutLink so the ip opens the network flyout as a child', () => {
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders>
-          <NewFlyoutContext.Provider value={true}>
-            <FlyoutLink field={'host.ip'} value={'10.98.83.139'} scopeId={'scopeId'} />
-          </NewFlyoutContext.Provider>
-        </TestProviders>
-      );
-
-      expect(getByTestId('open-flyout-link')).toHaveTextContent('open:host.ip:10.98.83.139');
-      expect(queryByTestId(FLYOUT_LINK_TEST_ID)).not.toBeInTheDocument();
     });
   });
 });

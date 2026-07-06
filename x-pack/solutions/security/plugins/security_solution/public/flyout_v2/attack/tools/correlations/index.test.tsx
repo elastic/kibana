@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../../common/mock';
-import { AttackCorrelationsTool } from '.';
+import { CorrelationsDetails } from '.';
 import { usePaginatedAlerts } from '../../../document/tools/correlations/hooks/use_paginated_alerts';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
@@ -86,11 +86,11 @@ const renderTool = ({
 } = {}) =>
   render(
     <TestProviders>
-      <AttackCorrelationsTool hit={mockHit} alertIds={alertIds} onShowAlert={onShowAlert} />
+      <CorrelationsDetails hit={mockHit} alertIds={alertIds} onShowAlert={onShowAlert} />
     </TestProviders>
   );
 
-describe('AttackCorrelationsTool', () => {
+describe('CorrelationsDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseAlertsPrivileges.mockReturnValue({ hasAlertsRead: true });

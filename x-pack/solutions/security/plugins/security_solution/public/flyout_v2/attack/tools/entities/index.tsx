@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiCallOut,
@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
+import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
 import {
   AttackHostInsightsRow,
   AttackUserInsightsRow,
@@ -37,7 +38,7 @@ const TITLE = i18n.translate('xpack.securitySolution.flyoutV2.attack.tools.entit
   defaultMessage: 'Entities',
 });
 
-export interface AttackEntitiesToolProps {
+export interface EntitiesDetailsProps {
   /**
    * The attack document hit. Used to derive the flyout header title and the timestamp
    * passed to the entity rows.
@@ -54,13 +55,21 @@ export interface AttackEntitiesToolProps {
  * Displays all deduped host and user entities aggregated across the attack's underlying alerts,
  * using the same entity rows as the legacy attack details left panel.
  */
-export const AttackEntitiesTool = memo(({ hit, alertIds }: AttackEntitiesToolProps) => {
+export const EntitiesDetails = memo(({ hit, alertIds }: EntitiesDetailsProps) => {
   const { euiTheme } = useEuiTheme();
   const timestamp = String(hit.flattened?.['@timestamp'] ?? '');
 
   const { userEntityEntries, hostEntityEntries, loading, error } = useAttackEntitiesLists(alertIds);
 
   const hasEntities = userEntityEntries.length > 0 || hostEntityEntries.length > 0;
+
+  // The reused legacy entity overview renders host.ip via the expandable-flyout `FlyoutLink`,
+  // which has no rendered flyout to open into here. Supply a renderer that opens the network
+  // flyout as a child through the new flyout system instead.
+  const renderIpLink = useCallback(
+    (ip: string) => <OpenFlyoutLink field="host.ip" value={ip} />,
+    []
+  );
 
   return (
     <>
@@ -123,6 +132,7 @@ export const AttackEntitiesTool = memo(({ hit, alertIds }: AttackEntitiesToolPro
                       sampleSource={entry.sampleSource}
                       timestamp={timestamp}
                       scopeId=""
+                      renderIpLink={renderIpLink}
                     />
                     <EuiSpacer size="s" />
                   </React.Fragment>
@@ -155,6 +165,7 @@ export const AttackEntitiesTool = memo(({ hit, alertIds }: AttackEntitiesToolPro
                       sampleSource={entry.sampleSource}
                       timestamp={timestamp}
                       scopeId=""
+                      renderIpLink={renderIpLink}
                     />
                     <EuiSpacer size="s" />
                   </React.Fragment>
@@ -168,4 +179,4 @@ export const AttackEntitiesTool = memo(({ hit, alertIds }: AttackEntitiesToolPro
   );
 });
 
-AttackEntitiesTool.displayName = 'AttackEntitiesTool';
+EntitiesDetails.displayName = 'EntitiesDetails';

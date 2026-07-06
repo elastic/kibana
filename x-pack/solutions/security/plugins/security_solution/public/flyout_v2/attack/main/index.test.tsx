@@ -47,21 +47,11 @@ jest.mock('./header', () => ({
 }));
 
 jest.mock('./tabs/overview_tab', () => ({
-  OverviewTab: ({
-    onShowCorrelations,
-    onShowEntities,
-  }: {
-    onShowCorrelations?: () => void;
-    onShowEntities?: () => void;
-  }) => (
-    <>
-      <button
-        type="button"
-        data-test-subj="mock-overview-tab-correlations"
-        onClick={onShowCorrelations}
-      />
-      <button type="button" data-test-subj="mock-overview-tab-entities" onClick={onShowEntities} />
-    </>
+  OverviewTab: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
+    <div
+      data-test-subj="mock-overview-tab"
+      data-has-on-attack-updated={String(onAttackUpdated != null)}
+    />
   ),
 }));
 jest.mock('./tabs/table_tab', () => ({
@@ -73,18 +63,6 @@ jest.mock('../../shared/components/json_tab', () => ({
 
 jest.mock('../../shared/tools/notes', () => ({
   NotesDetails: () => <div data-test-subj="mock-notes-details" />,
-}));
-
-jest.mock('../tools/correlations', () => ({
-  AttackCorrelationsTool: () => <div data-test-subj="mock-attack-correlations-tool" />,
-}));
-
-jest.mock('../tools/entities', () => ({
-  AttackEntitiesTool: () => <div data-test-subj="mock-attack-entities-tool" />,
-}));
-
-jest.mock('./hooks/use_attack_alert_ids', () => ({
-  useAttackAlertIds: jest.fn(() => ['alert-1', 'alert-2']),
 }));
 
 const createAttackHit = (extra: DataTableRecord['flattened'] = {}): DataTableRecord =>
@@ -200,62 +178,6 @@ describe('<AttackFlyout />', () => {
     );
   });
 
-  it('opens the Correlations tool in a system flyout when the correlations action is clicked', () => {
-    const openSystemFlyout = jest.fn();
-    startServices.overlays = {
-      ...startServices.overlays,
-      openSystemFlyout,
-    };
-
-    const { getByTestId } = render(
-      <TestProviders startServices={startServices}>
-        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
-      </TestProviders>
-    );
-
-    fireEvent.click(getByTestId('mock-overview-tab-correlations'));
-
-    expect(openSystemFlyout).toHaveBeenCalledTimes(1);
-    expect(openSystemFlyout).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        session: 'start',
-        historyKey: documentFlyoutHistoryKey,
-      })
-    );
-  });
-
-  it('opens the Entities tool in a system flyout when the entities action is clicked', () => {
-    const openSystemFlyout = jest.fn();
-    startServices.overlays = {
-      ...startServices.overlays,
-      openSystemFlyout,
-    };
-
-    const { getByTestId } = render(
-      <TestProviders startServices={startServices}>
-        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
-      </TestProviders>
-    );
-
-    fireEvent.click(getByTestId('mock-overview-tab-entities'));
-
-    expect(openSystemFlyout).toHaveBeenCalledTimes(1);
-    expect(openSystemFlyout).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        session: 'start',
-        historyKey: documentFlyoutHistoryKey,
-      })
-    );
-  });
-
   it('uses the discover history key when outside the security app', () => {
     jest.mocked(useIsInSecurityApp).mockReturnValue(false);
     const openSystemFlyout = jest.fn();
@@ -270,7 +192,7 @@ describe('<AttackFlyout />', () => {
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('mock-overview-tab-entities'));
+    fireEvent.click(getByTestId('mock-header'));
 
     expect(openSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),

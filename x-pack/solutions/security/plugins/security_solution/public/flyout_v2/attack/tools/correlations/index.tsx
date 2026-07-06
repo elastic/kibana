@@ -22,7 +22,7 @@ const TITLE = i18n.translate('xpack.securitySolution.flyoutV2.attack.tools.corre
 
 const noopShowAlert = (_id: string, _indexName: string) => {};
 
-export interface AttackCorrelationsToolProps {
+export interface CorrelationsDetailsProps {
   /**
    * The attack document hit. Used to derive the flyout header title and the eventId
    * passed to the correlated-alerts table.
@@ -45,8 +45,8 @@ export interface AttackCorrelationsToolProps {
  * attack's underlying alert IDs, using the same table as the document flyout's
  * Correlations tool.
  */
-export const AttackCorrelationsTool = memo(
-  ({ hit, alertIds, onShowAlert = noopShowAlert }: AttackCorrelationsToolProps) => {
+export const CorrelationsDetails = memo(
+  ({ hit, alertIds, onShowAlert = noopShowAlert }: CorrelationsDetailsProps) => {
     const { euiTheme } = useEuiTheme();
     const eventId = hit.raw._id ?? '';
 
@@ -98,4 +98,4 @@ export const AttackCorrelationsTool = memo(
   }
 );
 
-AttackCorrelationsTool.displayName = 'AttackCorrelationsTool';
+CorrelationsDetails.displayName = 'CorrelationsDetails';

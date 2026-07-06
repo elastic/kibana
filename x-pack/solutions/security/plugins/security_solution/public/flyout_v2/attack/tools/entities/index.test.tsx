@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../../common/mock';
-import { AttackEntitiesTool } from '.';
+import { EntitiesDetails } from '.';
 import { useAttackEntitiesLists } from './hooks/use_attack_entities_lists';
 import {
   ATTACK_ENTITIES_TOOL_ERROR_TEST_ID,
@@ -65,11 +65,11 @@ const defaultEntitiesResult = {
 const renderTool = ({ alertIds = ['alert-id-1', 'alert-id-2'] }: { alertIds?: string[] } = {}) =>
   render(
     <TestProviders>
-      <AttackEntitiesTool hit={mockHit} alertIds={alertIds} />
+      <EntitiesDetails hit={mockHit} alertIds={alertIds} />
     </TestProviders>
   );
 
-describe('AttackEntitiesTool', () => {
+describe('EntitiesDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseAttackEntitiesLists.mockReturnValue(defaultEntitiesResult);

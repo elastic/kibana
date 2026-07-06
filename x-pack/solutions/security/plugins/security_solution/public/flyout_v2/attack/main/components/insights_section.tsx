@@ -21,14 +21,17 @@ const STORAGE_KEY = 'securitySolution.attackDetailsFlyout.overviewSectionExpande
 export interface InsightsSectionProps {
   /** The raw attack document hit. */
   hit: DataTableRecord;
-  /** Optional callback to show the related entities. Forwarded to EntitiesOverview. */
-  onShowEntities?: () => void;
-  /** Optional callback to show the related alerts. Forwarded to CorrelationsOverview. */
-  onShowCorrelations?: () => void;
+  /** Callback to show the related entities. Forwarded to EntitiesOverview. */
+  onShowEntities: () => void;
+  /** Callback to show the related alerts. Forwarded to CorrelationsOverview. */
+  onShowCorrelations: () => void;
 }
 
 /**
  * Insights section for the attack flyout. Renders entities and correlations panels.
+ * The callbacks that open the entities/correlations views are supplied by the caller so this
+ * section can be reused by both the v2 flyout (system flyouts) and the legacy attack details
+ * flyout (left panel tabs).
  */
 export const InsightsSection = memo(
   ({ hit, onShowEntities, onShowCorrelations }: InsightsSectionProps) => {
