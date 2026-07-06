@@ -43,3 +43,21 @@ export const InstallFormSchema = z
     form: z.array(InstallFormFieldSchema).max(100),
   })
   .strict();
+
+/**
+ * Lenient ("tolerant reader") variant of {@link InstallFormSchema} used on the
+ * runtime body-fetch path (see `parseTemplateYaml`'s `lenient` mode). It strips
+ * unknown keys at every level — the `install` object, each form field, and each
+ * option — because the top-level `TemplateMetadataSchema.strip()` is shallow and
+ * would otherwise reject a newer publisher's nested `install` field, 503-ing a
+ * template the catalog already lists. Authoring / CI keeps the strict schemas.
+ */
+export const InstallFormLenientSchema = InstallFormSchema.strip().extend({
+  form: z
+    .array(
+      InstallFormFieldSchema.strip().extend({
+        options: z.array(InstallFormFieldOptionSchema.strip()).max(100).optional(),
+      })
+    )
+    .max(100),
+});

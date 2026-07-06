@@ -8,6 +8,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import { handleRouteError } from './route_error_handlers';
 import { WorkflowChangeHistoryDisabledError } from '../../../lib/workflow_change_history_disabled_error';
 import { ManagedWorkflowDeleteForbiddenError } from '../../managed_workflow_delete_error';
@@ -50,6 +51,36 @@ describe('handleRouteError', () => {
           code: 'HISTORY_DISABLED',
         },
       },
+    });
+  });
+
+  it('returns bad request carrying validation reasons under attributes', () => {
+    const response = httpServerMock.createResponseFactory();
+    const validationErrors = [
+      'Parallel step "outer" has a branch body containing unsupported flow-control ("enter-parallel").',
+      'Parallel step "fan_out" requires at least 2 branches.',
+    ];
+
+    handleRouteError(
+      response,
+      new WorkflowValidationError('Workflow validation failed', validationErrors)
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: {
+        message: 'Workflow validation failed',
+        attributes: { validationErrors },
+      },
+    });
+  });
+
+  it('omits attributes when the validation error carries no reasons', () => {
+    const response = httpServerMock.createResponseFactory();
+
+    handleRouteError(response, new WorkflowValidationError('Workflow validation failed'));
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: 'Workflow validation failed' },
     });
   });
 });

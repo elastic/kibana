@@ -31,6 +31,7 @@ import {
   SEARCH_ON_PAGE_LOAD_SETTING,
   getChartHidden,
   getTableHidden,
+  getSidebarHidden,
   getEsqlDataView,
 } from '@kbn/discover-utils';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
@@ -413,6 +414,7 @@ export function getDataStateContainer({
                         ...getCurrentTab().appState,
                         hideChart: getChartHidden(services.storage, 'discover'),
                         hideTable: getTableHidden(services.storage, 'discover'),
+                        hideSidebar: getSidebarHidden(services.storage, 'discover'),
                       },
                       isSystemTriggered: true,
                     })

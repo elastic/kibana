@@ -121,6 +121,49 @@ describe('search for attacks', () => {
       );
     });
 
+    test('returns 200 when searching by ids', async () => {
+      const attackId = '40980216-cf98-4447-af57-894c0e7c39b4';
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ATTACKS_SEARCH_URL,
+        body: { ids: [attackId] },
+      });
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(200);
+      expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: { terms: { _id: [attackId] } },
+            },
+          },
+        })
+      );
+    });
+
+    test('merges ids with an existing query', async () => {
+      const attackId = '40980216-cf98-4447-af57-894c0e7c39b4';
+      const existingQuery = { match_all: {} };
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ATTACKS_SEARCH_URL,
+        body: { ids: [attackId], query: existingQuery },
+      });
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(200);
+      expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [{ terms: { _id: [attackId] } }, existingQuery],
+            },
+          },
+        })
+      );
+    });
+
     test('catches error if search throws error', async () => {
       context.core.elasticsearch.client.asCurrentUser.search.mockRejectedValue(
         new Error('Test error')

@@ -59,6 +59,28 @@ jest.mock('../../../../../hooks/use_streams_app_router', () => ({
   useStreamsAppRouter: () => ({ link: jest.fn(() => '/mock-router-link') }),
 }));
 
+// The frozen-phase gating hook reaches into licensing/cloud/application; this test focuses on the
+// unsaved-changes prompt wiring, so stub it out with non-gating defaults.
+jest.mock('../hooks/use_dlm_frozen_phase_gating', () => ({
+  useDlmFrozenPhaseGating: () => ({
+    excludeFrozen: false,
+    addPhaseBadges: {
+      showEnterpriseLicenseRequiredBadge: false,
+      showDefaultRepositoryRequiredBadge: false,
+    },
+    flyoutProps: {
+      isMissingEnterpriseLicense: false,
+      onUpgradeEnterprise: jest.fn(),
+      onRefreshDefaultRepository: jest.fn(),
+      isRefreshingDefaultRepository: false,
+      manageRepositoriesHref: '/mock-repositories',
+      defaultRepositoryName: undefined,
+    },
+    handleAddPhaseGating: () => false,
+    modals: null,
+  }),
+}));
+
 jest.mock('../../../../../hooks/use_timefilter', () => ({
   useTimefilter: () => ({
     timeState: {},
