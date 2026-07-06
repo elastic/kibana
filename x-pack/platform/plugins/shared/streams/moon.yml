@@ -101,7 +101,6 @@ fileGroups:
   src:
     - common/**/*
     - docs/**/*
-    - scripts/**/*
     - server/**/*
     - public/**/*
     - types/**/*

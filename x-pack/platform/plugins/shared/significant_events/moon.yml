@@ -68,6 +68,7 @@ dependsOn:
   - '@kbn/server-route-repository'
   - '@kbn/workflows-extensions'
   - '@kbn/server-route-repository-utils'
+  - '@kbn/workflows-extensions'
   - '@kbn/zod-helpers'
   - '@kbn/licensing-plugin'
   - '@kbn/fields-metadata-plugin'

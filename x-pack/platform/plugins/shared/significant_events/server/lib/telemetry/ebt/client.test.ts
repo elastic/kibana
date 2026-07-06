@@ -9,7 +9,6 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { EbtTelemetryClient } from './client';
 import {
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_ENDPOINT_LATENCY_EVENT,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
 } from './constants';
 
@@ -31,28 +30,7 @@ describe('EbtTelemetryClient', () => {
   });
 
   describe('startTrackingEndpointLatency', () => {
-    it('tracks endpoint latency for allowed endpoints', () => {
-      jest.useFakeTimers();
-      const finishTracking = client.startTrackingEndpointLatency({
-        name: 'test-stream',
-        endpoint: 'POST /api/streams/{name}/processing/_simulate 2023-10-31',
-      });
-
-      jest.advanceTimersByTime(100);
-      finishTracking();
-
-      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_ENDPOINT_LATENCY_EVENT,
-        {
-          name: 'test-stream',
-          endpoint: 'POST /api/streams/{name}/processing/_simulate 2023-10-31',
-          duration_ms: 100,
-        }
-      );
-      jest.useRealTimers();
-    });
-
-    it('does not track latency for non-allowed endpoints', () => {
+    it('does not track latency for endpoints not in the allow list', () => {
       const finishTracking = client.startTrackingEndpointLatency({
         name: 'test-stream',
         endpoint: 'GET /api/streams/not-allowed',

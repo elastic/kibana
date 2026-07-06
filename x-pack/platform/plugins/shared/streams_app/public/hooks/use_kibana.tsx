@@ -48,8 +48,8 @@ const useTypedKibana = (): StreamsAppKibanaContext => {
           ...dependencies.start,
           streams: {
             ...dependencies.start.streams,
-            streamsRepositoryClient:
-              dependencies.start.streams.streamsRepositoryClient as unknown as MergedRepositoryClient,
+            streamsRepositoryClient: dependencies.start.streams
+              .streamsRepositoryClient as unknown as MergedRepositoryClient,
           },
         },
       },

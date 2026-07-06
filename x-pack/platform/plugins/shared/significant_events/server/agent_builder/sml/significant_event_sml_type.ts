@@ -9,7 +9,7 @@ import type { SmlData, SmlTypeDefinition } from '@kbn/agent-context-layer-plugin
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
-import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { EventService } from '../../lib/significant_events/events/event_service';
 import type { GetScopedClients } from '../../routes/types';
 
@@ -114,7 +114,7 @@ export const createSignificantEventSmlType = ({
      * same gate the Streams API checks before surfacing event data.
      */
     getPermissions: () => ({
-      kibana: { privileges: [{ name: `api:${SIGNIFICANT_EVENTS_API_PRIVILEGES.read}` }] },
+      kibana: { privileges: [{ name: `api:${STREAMS_API_PRIVILEGES.read}` }] },
       elasticsearch: { indices: [] },
     }),
 

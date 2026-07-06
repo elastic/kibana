@@ -20,7 +20,6 @@ apiTest.describe(
     const rootStream = 'logs.otel';
     const streamNamePrefix = `${rootStream}.rt`;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type StreamWhere = any;
 
     apiTest.afterEach(async ({ apiServices }) => {
