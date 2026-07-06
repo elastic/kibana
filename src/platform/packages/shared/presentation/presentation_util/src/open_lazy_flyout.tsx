@@ -65,14 +65,28 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   // sending them to the top of the DOM (WCAG 2.4.3 Focus Order).
   const previouslyFocusedElement =
     document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  // The captured node may be removed from the DOM while the flyout is open (e.g.
+  // opening the flyout re-renders the triggering panel). If the trigger has an id,
+  // remember it so focus can be restored to the freshly rendered element on close.
+  const previouslyFocusedElementId = previouslyFocusedElement?.id || undefined;
+
+  const getTriggerElement = () => {
+    if (triggerId) return document.getElementById(triggerId);
+    // Prefer re-querying by id in case the original node was replaced by a re-render.
+    if (previouslyFocusedElementId) {
+      const refreshed = document.getElementById(previouslyFocusedElementId);
+      if (refreshed) return refreshed;
+    }
+    // Fall back to the captured node, but only if it is still attached to the DOM.
+    return previouslyFocusedElement && document.body.contains(previouslyFocusedElement)
+      ? previouslyFocusedElement
+      : null;
+  };
 
   const onClose = () => {
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
-    const triggerElement = triggerId
-      ? document.getElementById(triggerId)
-      : previouslyFocusedElement;
-    focusFirstFocusable(triggerElement);
+    focusFirstFocusable(getTriggerElement());
   };
 
   const flyoutRef = core.overlays.openFlyout(

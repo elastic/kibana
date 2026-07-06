@@ -139,6 +139,42 @@ describe('openLazyFlyout', () => {
       expect(document.activeElement).toBe(trigger);
     });
 
+    it('re-queries the trigger by id when the original node was replaced by a re-render', () => {
+      const trigger = document.createElement('button');
+      trigger.id = 'panelActionButton';
+      document.body.appendChild(trigger);
+      trigger.focus();
+
+      openLazyFlyout({ core, loadContent });
+
+      // Simulate the triggering panel re-rendering while the flyout is open: the
+      // original node is removed and a fresh node with the same id is inserted.
+      document.body.removeChild(trigger);
+      const refreshed = document.createElement('button');
+      refreshed.id = 'panelActionButton';
+      document.body.appendChild(refreshed);
+
+      getOnClose()();
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(refreshed);
+    });
+
+    it('does not throw when the trigger was removed and has no id to re-query', () => {
+      const trigger = document.createElement('button');
+      document.body.appendChild(trigger);
+      trigger.focus();
+
+      openLazyFlyout({ core, loadContent });
+
+      document.body.removeChild(trigger);
+
+      expect(() => {
+        getOnClose()();
+        jest.runAllTimers();
+      }).not.toThrow();
+    });
+
     it('returns focus to the triggerId element when provided', () => {
       const trigger = document.createElement('button');
       trigger.id = 'myTrigger';

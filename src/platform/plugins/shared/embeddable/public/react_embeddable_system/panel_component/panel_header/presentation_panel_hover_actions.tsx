@@ -62,6 +62,16 @@ const getContextMenuAriaLabel = (title?: string, index?: number) => {
 
 const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
 
+/**
+ * Stable DOM ids for the panel hover action buttons. These let overlays opened by
+ * an action (e.g. the panel settings/edit flyout) return focus to the triggering
+ * button when they close, even if opening the flyout re-renders the panel and
+ * replaces the original button node (WCAG 2.4.3 Focus Order).
+ */
+const getQuickActionElementId = (actionId: string, uuid: string) =>
+  `presentationPanelQuickAction-${actionId}-${uuid}`;
+const getContextMenuElementId = (uuid: string) => `presentationPanelContextMenu-${uuid}`;
+
 const createClickHandler =
   (action: Action<EmbeddableApiContext>, context: ActionExecutionContext<EmbeddableApiContext>) =>
   (event: React.MouseEvent) => {
@@ -382,6 +392,7 @@ export const PresentationPanelHoverActions = ({
   const ContextMenuButton = (
     <EuiToolTip content={getContextMenuAriaLabel(title, index)} disableScreenReaderOutput>
       <EuiButtonIcon
+        id={api?.uuid ? getContextMenuElementId(api.uuid) : undefined}
         color="text"
         data-test-subj="embeddablePanelToggleMenuIcon"
         aria-label={getContextMenuAriaLabel(title, index)}
@@ -463,13 +474,14 @@ export const PresentationPanelHoverActions = ({
               />
             )}
             {quickActionElements.map(
-              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
+              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name, id }) => (
                 <EuiToolTip
                   key={`main_action_${dataTestSubj}_${api?.uuid}`}
                   content={name}
                   disableScreenReaderOutput
                 >
                   <EuiButtonIcon
+                    id={api?.uuid ? getQuickActionElementId(id, api.uuid) : undefined}
                     iconType={iconType}
                     color="text"
                     onClick={onClick as MouseEventHandler}
