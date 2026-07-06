@@ -84,7 +84,10 @@ export type EisInferenceEndpoint = InferenceAPIConfigResponse & {
 
 export type InferenceEndpointWithMetadata = EisInferenceEndpoint & {
   metadata: EisInferenceEndpointMetadata & {
-    regions?: CspRegion[];
+    // Typed as unknown[] because EIS can return mixed entries:
+    // full { csp, region, geo } objects and geo-only { geo } objects.
+    // Use isCspRegion() to narrow individual items before use.
+    regions?: unknown[];
   };
 };
 

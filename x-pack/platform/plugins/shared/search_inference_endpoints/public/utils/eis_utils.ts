@@ -340,6 +340,8 @@ export interface RegionZoneCount {
   modelCount: number;
   totalCount: number;
   modelRegions: CspRegion[];
+  /** True when the model only has geo-level availability (no csp+region data). Show badge without counter. */
+  geoOnly: boolean;
 }
 
 const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, CspRegion[]> => {
@@ -363,10 +365,33 @@ const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, Cs
 };
 
 /**
+ * Collects geo codes that appear only as geo-only entries (no csp+region) across the given endpoints.
+ * These indicate zone-level availability without specific region data.
+ */
+const collectGeoOnlyZones = (endpoints: EisInferenceEndpoint[]): Set<string> => {
+  const geoOnly = new Set<string>();
+  for (const ep of endpoints) {
+    if (!isInferenceEndpointWithMetadata(ep)) continue;
+    const regions = ep.metadata.regions;
+    if (!Array.isArray(regions)) continue;
+    for (const region of regions) {
+      if (typeof region !== 'object' || region === null || isCspRegion(region)) continue;
+      const r = region as { geo?: unknown };
+      if (typeof r.geo === 'string') {
+        geoOnly.add(r.geo);
+      }
+    }
+  }
+  return geoOnly;
+};
+
+/**
  * Computes per-zone region availability counts for a specific model relative to
  * all EIS models, for use in the model detail flyout region badges.
  *
- * Returns entries only for zones where the model has at least one available region.
+ * Returns entries for zones where:
+ * - The model has at least one region with full csp+region data (geoOnly: false), OR
+ * - The model only has geo-level availability with no csp+region data (geoOnly: true)
  */
 export const getRegionZoneCounts = (
   modelEndpoints: EisInferenceEndpoint[],
@@ -374,16 +399,25 @@ export const getRegionZoneCounts = (
 ): RegionZoneCount[] => {
   const modelByGeo = collectRegionsPerGeo(modelEndpoints);
   const allByGeo = collectRegionsPerGeo(allEisEndpoints);
+  const modelGeoOnly = collectGeoOnlyZones(modelEndpoints);
 
-  return GEO_ORDER.map((geo) => {
+  return GEO_ORDER.flatMap((geo) => {
     const modelRegions = modelByGeo.get(geo) ?? [];
-    return {
-      geo,
-      modelRegions,
-      modelCount: modelRegions.length,
-      totalCount: allByGeo.get(geo)?.length ?? 0,
-    };
-  }).filter(({ modelCount }) => modelCount > 0);
+    const modelCount = modelRegions.length;
+    const isGeoOnly = modelCount === 0 && modelGeoOnly.has(geo);
+
+    if (modelCount === 0 && !isGeoOnly) return [];
+
+    return [
+      {
+        geo,
+        modelRegions,
+        modelCount,
+        totalCount: allByGeo.get(geo)?.length ?? 0,
+        geoOnly: isGeoOnly,
+      },
+    ];
+  });
 };
 
 /**

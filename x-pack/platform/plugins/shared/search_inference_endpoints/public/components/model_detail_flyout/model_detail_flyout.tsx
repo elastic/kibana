@@ -179,37 +179,54 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
             }),
             description: (
               <EuiBadgeGroup data-test-subj="flyoutRegionBadges">
-                {regionZoneCounts.map(({ geo, modelCount, totalCount, modelRegions }) => (
-                  <EuiToolTip
-                    key={geo}
-                    title={i18n.translate(
-                      'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.title',
-                      {
-                        defaultMessage: 'Available in {count} of {total} regions',
-                        values: { count: modelCount, total: totalCount },
-                      }
-                    )}
-                    content={(() => {
-                      const names = modelRegions.map(
-                        (r) => REGION_DISPLAY_NAMES[`${r.csp}::${r.region}`] ?? r.region
-                      );
-                      const visible = names.slice(0, TOOLTIP_MAX_VISIBLE_REGIONS).join(', ');
-                      return names.length > TOOLTIP_MAX_VISIBLE_REGIONS
-                        ? `${visible} ${i18n.translate(
-                            'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.andMore',
-                            {
-                              defaultMessage: 'and {count} more',
-                              values: { count: names.length - TOOLTIP_MAX_VISIBLE_REGIONS },
-                            }
-                          )}`
-                        : visible;
-                    })()}
-                  >
-                    <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
-                      {`${geo.toUpperCase()} (${modelCount}/${totalCount})`}
-                    </EuiBadge>
-                  </EuiToolTip>
-                ))}
+                {regionZoneCounts.map(({ geo, modelCount, totalCount, modelRegions, geoOnly }) =>
+                  geoOnly ? (
+                    <EuiToolTip
+                      key={geo}
+                      content={i18n.translate(
+                        'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.geoOnly',
+                        {
+                          defaultMessage: 'Available in the {geo} zone',
+                          values: { geo: geo.toUpperCase() },
+                        }
+                      )}
+                    >
+                      <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
+                        {geo.toUpperCase()}
+                      </EuiBadge>
+                    </EuiToolTip>
+                  ) : (
+                    <EuiToolTip
+                      key={geo}
+                      title={i18n.translate(
+                        'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.title',
+                        {
+                          defaultMessage: 'Available in {count} of {total} regions',
+                          values: { count: modelCount, total: totalCount },
+                        }
+                      )}
+                      content={(() => {
+                        const names = modelRegions.map(
+                          (r) => REGION_DISPLAY_NAMES[`${r.csp}::${r.region}`] ?? r.region
+                        );
+                        const visible = names.slice(0, TOOLTIP_MAX_VISIBLE_REGIONS).join(', ');
+                        return names.length > TOOLTIP_MAX_VISIBLE_REGIONS
+                          ? `${visible} ${i18n.translate(
+                              'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.andMore',
+                              {
+                                defaultMessage: 'and {count} more',
+                                values: { count: names.length - TOOLTIP_MAX_VISIBLE_REGIONS },
+                              }
+                            )}`
+                          : visible;
+                      })()}
+                    >
+                      <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
+                        {`${geo.toUpperCase()} (${modelCount}/${totalCount})`}
+                      </EuiBadge>
+                    </EuiToolTip>
+                  )
+                )}
               </EuiBadgeGroup>
             ),
           },
