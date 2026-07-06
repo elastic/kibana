@@ -209,6 +209,9 @@ export function HeaderActions({
             isOpen={isPopoverOpen}
             closePopover={handleClosePopover}
             panelStyle={showSnoozeForm ? { maxHeight: '50vh', overflowY: 'auto' } : undefined}
+            aria-label={i18n.translate('xpack.observability.alertDetails.actionsButtonLabel', {
+              defaultMessage: 'Actions',
+            })}
             button={
               <EuiToolTip
                 content={i18n.translate('xpack.observability.alertDetails.actionsButtonLabel', {

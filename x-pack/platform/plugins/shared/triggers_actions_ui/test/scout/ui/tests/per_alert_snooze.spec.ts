@@ -266,6 +266,6 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
 
     // After the unsnooze API call resolves and the table re-fetches snooze state,
     // the badge should no longer be visible.
-    await expect(page.testSubj.locator('alertSnoozedBadge')).not.toBeVisible();
+    await expect(page.testSubj.locator('alertSnoozedBadge')).toBeHidden();
   });
 });
