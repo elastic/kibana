@@ -45,6 +45,7 @@ import {
   SignificantEventsTuningConfigEditor,
   configToAnnotatedYaml,
 } from './significant_events_tuning_config_editor';
+import { AppsSection } from './apps_section';
 
 export function SettingsTab() {
   const { core } = useKibana();
@@ -498,6 +499,8 @@ export function SettingsTab() {
           />
         </EuiPanel>
       </EuiPanel>
+
+      <AppsSection canEdit={canEditSettings} />
 
       {hasChanges && (
         <EuiBottomBar data-test-subj="streams-significant-events-settings-bottom-bar">

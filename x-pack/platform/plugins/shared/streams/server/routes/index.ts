@@ -35,6 +35,7 @@ import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
 import { internalQueriesRoutes } from './internal/significant_events/queries/route';
 import { internalEligibleStreamsRoutes } from './internal/significant_events/extraction/eligible_streams_route';
 import { internalSignificantEventsSettingsRoutes } from './internal/significant_events/significant_events_settings/route';
+import { internalSlackAppRoutes } from './internal/significant_events/apps/slack/route';
 import { timeSeriesRoutes } from './internal/streams/time_series/route';
 import { internalMemoryRoutes } from './internal/memory/route';
 import { internalSigEventsAvailabilityRoutes } from './internal/significant_events/availability/route';
@@ -64,6 +65,7 @@ export const streamsRouteRepository = {
   ...internalQueriesRoutes,
   ...internalEligibleStreamsRoutes,
   ...internalSignificantEventsSettingsRoutes,
+  ...internalSlackAppRoutes,
   ...internalMemoryRoutes,
   ...internalSigEventsAvailabilityRoutes,
   ...internalSigEventsDetectionsRoutes,

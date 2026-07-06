@@ -1,0 +1,332 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { SLACK_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
+import type { StreamsServer } from '../../types';
+import { SlackAppService } from './service';
+import { SlackAppUnavailableError } from './errors';
+import { RelayClient } from './relay_client';
+import { RelayRequestError } from './relay_error';
+import { SLACK_APP_CONNECTION_SO_ID, SLACK_APP_CONNECTION_SO_TYPE } from './saved_object';
+
+jest.mock('./relay_client');
+
+const RelayClientMock = RelayClient as jest.MockedClass<typeof RelayClient>;
+
+const request = {} as unknown as KibanaRequest;
+
+function createHarness(configOverride?: Partial<StreamsServer['config']['slackApp']>) {
+  const soClient = {
+    get: jest.fn(),
+    create: jest.fn().mockResolvedValue({}),
+    delete: jest.fn().mockResolvedValue({}),
+  };
+  const grantAsInternalUser = jest.fn();
+  const invalidateAsInternalUser = jest.fn().mockResolvedValue({});
+  const logger = {
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+    info: jest.fn(),
+    get: jest.fn(),
+  } as unknown as Logger;
+  (logger.get as jest.Mock).mockReturnValue(logger);
+
+  const server = {
+    logger,
+    config: { slackApp: { enabled: true, relayUrl: 'https://relay.test', ...configOverride } },
+    agentBuilder: {},
+    core: {
+      savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
+    },
+    security: {
+      authc: {
+        apiKeys: { grantAsInternalUser, invalidateAsInternalUser },
+        getCurrentUser: jest.fn().mockReturnValue({ username: 'admin' }),
+      },
+    },
+  } as unknown as StreamsServer;
+
+  return { server, soClient, grantAsInternalUser, invalidateAsInternalUser };
+}
+
+describe('SlackAppService', () => {
+  const startInstall = jest.fn();
+  const fetchClaim = jest.fn();
+  const unbind = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    RelayClientMock.mockImplementation(
+      () => ({ startInstall, fetchClaim, unbind } as unknown as RelayClient)
+    );
+  });
+
+  describe('connect', () => {
+    it('throws when the feature is not available', async () => {
+      const { server } = createHarness({ enabled: false });
+      await expect(new SlackAppService(server).connect(request)).rejects.toBeInstanceOf(
+        SlackAppUnavailableError
+      );
+    });
+
+    it('mints a scoped API key, supplies it as the deployment token, and persists in-progress state', async () => {
+      const { server, soClient, grantAsInternalUser } = createHarness();
+      grantAsInternalUser.mockResolvedValue({ id: 'key-1', name: 'k', api_key: 'secret' });
+      startInstall.mockResolvedValue({
+        authorize_url: 'https://slack/oauth',
+        state: 's',
+        claim_id: 'claim-1',
+        deployment_ref: 'dep-1',
+      });
+
+      const result = await new SlackAppService(server).connect(request);
+
+      expect(grantAsInternalUser).toHaveBeenCalledWith(
+        request,
+        expect.objectContaining({
+          metadata: expect.objectContaining({ managed: true, managed_by: 'nightshift-relay' }),
+          kibana_role_descriptors: {
+            nightshift_relay_agent_builder: expect.objectContaining({
+              kibana: [{ spaces: ['*'], feature: { agentBuilder: ['read'] } }],
+            }),
+          },
+        })
+      );
+      // The minted key is the caller-supplied credential; no relay-minted
+      // secret exists anywhere in the exchange.
+      expect(startInstall).toHaveBeenCalledWith({
+        kibana_api_key: Buffer.from('key-1:secret').toString('base64'),
+        created_by_user_key: 'admin',
+      });
+      expect(soClient.create).toHaveBeenCalledWith(
+        SLACK_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({
+          status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: 'key-1',
+          claimId: 'claim-1',
+          deploymentRef: 'dep-1',
+        }),
+        { id: SLACK_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+      expect(result).toEqual({ authorizeUrl: 'https://slack/oauth' });
+    });
+
+    it('invalidates the minted key if the Relay install fails', async () => {
+      const { server, invalidateAsInternalUser, grantAsInternalUser } = createHarness();
+      grantAsInternalUser.mockResolvedValue({ id: 'key-1', name: 'k', api_key: 'secret' });
+      startInstall.mockRejectedValue(new Error('relay down'));
+
+      await expect(new SlackAppService(server).connect(request)).rejects.toThrow('relay down');
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
+    });
+  });
+
+  describe('getStatus', () => {
+    it('reports unavailable when relayUrl is not configured', async () => {
+      const { server } = createHarness({ relayUrl: undefined });
+      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+        available: false,
+        status: SLACK_APP_CONNECTION_STATUS.notConnected,
+      });
+    });
+
+    it('reports not_connected when no connection document exists', async () => {
+      const { server, soClient } = createHarness();
+      soClient.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(SLACK_APP_CONNECTION_SO_TYPE)
+      );
+      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+        available: true,
+        status: SLACK_APP_CONNECTION_STATUS.notConnected,
+      });
+    });
+
+    it('stays in progress while the Relay claim is pending', async () => {
+      const { server, soClient } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: 'key-1',
+          claimId: 'claim-1',
+        },
+      });
+      fetchClaim.mockResolvedValue({ status: 'pending' });
+
+      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+        available: true,
+        status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+      });
+      expect(fetchClaim).toHaveBeenCalledWith('claim-1');
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('fails terminally when an in-progress install has no claim id to poll with', async () => {
+      const { server, soClient, invalidateAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: 'key-1',
+        },
+      });
+
+      const result = await new SlackAppService(server).getStatus(request);
+
+      expect(fetchClaim).not.toHaveBeenCalled();
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
+      expect(result).toEqual({
+        available: true,
+        status: SLACK_APP_CONNECTION_STATUS.error,
+        error: 'missing claim id',
+      });
+    });
+
+    it('fails the install terminally on a 4xx claim response, invalidating the orphaned key', async () => {
+      const { server, soClient, invalidateAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: 'key-1',
+          claimId: 'claim-1',
+        },
+      });
+      fetchClaim.mockRejectedValue(
+        new RelayRequestError('/v1/slack/install/claim', 400, 'workspace already bound')
+      );
+
+      const result = await new SlackAppService(server).getStatus(request);
+
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
+      expect(soClient.create).toHaveBeenCalledWith(
+        SLACK_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({
+          status: SLACK_APP_CONNECTION_STATUS.error,
+          apiKeyId: undefined,
+          error: 'workspace already bound',
+        }),
+        { id: SLACK_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+      expect(result).toEqual({
+        available: true,
+        status: SLACK_APP_CONNECTION_STATUS.error,
+        error: 'workspace already bound',
+      });
+    });
+
+    it('keeps polling on transient (5xx / network) claim failures', async () => {
+      const { server, soClient, invalidateAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: 'key-1',
+          claimId: 'claim-1',
+        },
+      });
+      fetchClaim.mockRejectedValue(new RelayRequestError('/v1/slack/install/claim', 502));
+
+      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+        available: true,
+        status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+      });
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('advances an in-progress install to connected when the Relay claim completes', async () => {
+      const { server, soClient } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: SLACK_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: 'key-1',
+          claimId: 'claim-1',
+        },
+      });
+      fetchClaim.mockResolvedValue({ status: 'complete', deployment_ref: 'dep-1' });
+
+      const result = await new SlackAppService(server).getStatus(request);
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        SLACK_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({
+          status: SLACK_APP_CONNECTION_STATUS.connected,
+          deploymentRef: 'dep-1',
+        }),
+        { id: SLACK_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+      expect(result).toEqual({
+        available: true,
+        status: SLACK_APP_CONNECTION_STATUS.connected,
+      });
+    });
+  });
+
+  describe('disconnect', () => {
+    it('invalidates the key, unbinds from the Relay, and deletes the connection', async () => {
+      const { server, soClient, invalidateAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: SLACK_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'key-1',
+          deploymentRef: 'dep-1',
+        },
+      });
+      unbind.mockResolvedValue(undefined);
+
+      const result = await new SlackAppService(server).disconnect(request);
+
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
+      expect(unbind).toHaveBeenCalled();
+      expect(soClient.delete).toHaveBeenCalledWith(
+        SLACK_APP_CONNECTION_SO_TYPE,
+        SLACK_APP_CONNECTION_SO_ID
+      );
+      expect(result).toEqual({ success: true });
+    });
+
+    it('treats a 404 from the not-yet-implemented Relay uninstall endpoint as expected', async () => {
+      const { server, soClient, invalidateAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: SLACK_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'key-1',
+        },
+      });
+      unbind.mockRejectedValue(
+        new RelayRequestError(
+          '/v1/slack/uninstall',
+          404,
+          'Route POST:/v1/slack/uninstall not found'
+        )
+      );
+
+      const result = await new SlackAppService(server).disconnect(request);
+
+      // Local cleanup still completes: key invalidated, state deleted.
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
+      expect(soClient.delete).toHaveBeenCalledWith(
+        SLACK_APP_CONNECTION_SO_TYPE,
+        SLACK_APP_CONNECTION_SO_ID
+      );
+      expect(result).toEqual({ success: true });
+    });
+
+    it('is a no-op when there is no connection', async () => {
+      const { server, soClient, invalidateAsInternalUser } = createHarness();
+      soClient.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(SLACK_APP_CONNECTION_SO_TYPE)
+      );
+
+      await expect(new SlackAppService(server).disconnect(request)).resolves.toEqual({
+        success: true,
+      });
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
+  });
+});

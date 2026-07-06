@@ -23,6 +23,15 @@ export const configSchema = schema.object({
       taskTimeout: schema.duration({ defaultValue: '30s' }),
     }),
   }),
+  /**
+   * Configures the "Elastic Slack App" entry point under Significant Events settings,
+   * which connects a deployment to the Nightshift Relay service. `relayUrl` is the
+   * base URL the Kibana server uses to reach Relay (never exposed to the browser).
+   */
+  slackApp: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    relayUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+  }),
 });
 
 export type StreamsConfig = TypeOf<typeof configSchema>;
@@ -37,7 +46,16 @@ export type PatternExtractionWorkerConfig = StreamsConfig['workers']['patternExt
  * NOTE: anything exposed here will be visible in the UI dev tools,
  * and therefore MUST NOT be anything that is sensitive information!
  */
-export const exposeToBrowserConfig = {} as const;
+export const exposeToBrowserConfig = {
+  slackApp: {
+    // Only the coarse on/off flag is exposed so the UI can decide whether to render
+    // the Apps section. `relayUrl` stays server-side.
+    enabled: true,
+  },
+} as const;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StreamsPublicConfig {}
+export interface StreamsPublicConfig {
+  slackApp: {
+    enabled: boolean;
+  };
+}
