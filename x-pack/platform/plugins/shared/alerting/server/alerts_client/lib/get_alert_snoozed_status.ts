@@ -8,9 +8,18 @@
 import type { AlertRuleData } from '../types';
 
 export function getAlertSnoozedStatus(alertInstanceId: string, ruleData?: AlertRuleData): boolean {
-  if (!ruleData?.snoozedInstances?.length) {
+  if (!ruleData) {
     return false;
   }
 
-  return ruleData.snoozedInstances.some((instance) => instance.instanceId === alertInstanceId);
+  // A per-alert "snooze indefinitely" reuses the mute API, so it is stored in
+  // `mutedInstanceIds`. Treat those instances as snoozed too, so the alert reflects
+  // `snoozed: true` for indefinite snoozes.
+  if (ruleData.mutedInstanceIds.includes(alertInstanceId)) {
+    return true;
+  }
+
+  return Boolean(
+    ruleData.snoozedInstances?.some((instance) => instance.instanceId === alertInstanceId)
+  );
 }
