@@ -807,7 +807,7 @@ const histogramQuantileDefinition: PromQLFunctionDefinition = {
   name: 'histogram_quantile',
   description: i18n.translate('kbn-esql-language.promql.definitions.histogram_quantile', {
     defaultMessage:
-      'Returns the φ-quantile of a classic histogram represented by cumulative `le` buckets.',
+      'Returns the φ-quantile of a classic histogram represented by cumulative `le` buckets or a native (exponential) histogram.',
   }),
   preview: false,
   signatures: [

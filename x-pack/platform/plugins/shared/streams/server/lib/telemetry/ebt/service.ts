@@ -20,6 +20,7 @@ import {
   streamsAgentToolEventInvestigationAttachEventType,
   streamsCodeAnalysisGroundingEventType,
   streamsSignificantEventsDiscoveryTriggeredEventType,
+  streamsSignificantEventsDetectionScanEventType,
   streamsOnboardingScheduledEventType,
 } from './events';
 import { EbtTelemetryClient } from './client';
@@ -44,6 +45,7 @@ export class EbtTelemetryService {
     this.analytics.registerEventType(streamsAgentToolEventInvestigationAttachEventType);
     this.analytics.registerEventType(streamsCodeAnalysisGroundingEventType);
     this.analytics.registerEventType(streamsSignificantEventsDiscoveryTriggeredEventType);
+    this.analytics.registerEventType(streamsSignificantEventsDetectionScanEventType);
     this.analytics.registerEventType(streamsOnboardingScheduledEventType);
   }
 
