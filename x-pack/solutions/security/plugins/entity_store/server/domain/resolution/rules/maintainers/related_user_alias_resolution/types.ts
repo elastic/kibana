@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TargetSelectionEntity } from '../../domain/resolution';
+import type { TargetSelectionEntity } from '../../..';
 
 export const SEED_IDENTITY_PREFILTER_FIELDS = ['user.id', 'user.email', 'user.name'] as const;
 

@@ -7,8 +7,8 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ResolutionClient } from '../../domain/resolution';
-import { selectTarget } from '../../domain/resolution';
+import type { ResolutionClient } from '../../..';
+import { selectTarget } from '../../..';
 import { runEmailRuleResolution } from './run';
 import type { EntityHit, PerRuleState } from './types';
 import type { RunDeps } from './run';
@@ -465,7 +465,7 @@ describe('Email rule resolution', () => {
           ]) as any
         );
 
-      const { ChainResolutionError } = jest.requireActual('../../domain/errors');
+      const { ChainResolutionError } = jest.requireActual('../../../../errors');
       mockLinkEntities.mockRejectedValueOnce(new ChainResolutionError('user-2', 'some-target'));
 
       const result = await runEmailRuleResolution(

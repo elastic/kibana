@@ -7,11 +7,11 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EntityMaintainerTaskMethodContext } from '../../tasks/entity_maintainers/types';
+import type { EntityMaintainerTaskMethodContext } from '../../../../../tasks/entity_maintainers/types';
 import {
   RESOLUTION_RULE_IDS,
   RESOLUTION_RULE_KINDS,
-} from '../../../common/domain/resolution_rules/constants';
+} from '../../../../../../common/domain/resolution_rules/constants';
 import { automatedResolutionMaintainerConfig, MAINTAINER_ID } from '.';
 import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
 import type { AutomatedResolutionState } from './types';

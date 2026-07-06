@@ -8,12 +8,12 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { getLatestEntitiesIndexName } from '../../../common';
-import type { ResolutionClient } from '../../domain/resolution';
-import { NAMESPACE_PRIORITY, selectTarget } from '../../domain/resolution';
-import { getFieldValue } from '../../../common/domain/euid/commons';
-import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
-import type { MaintainerTelemetryClient } from '../../tasks/entity_maintainers/maintainer_telemetry_client';
+import { getLatestEntitiesIndexName } from '../../../../../../common';
+import type { ResolutionClient } from '../../..';
+import { NAMESPACE_PRIORITY, selectTarget } from '../../..';
+import { getFieldValue } from '../../../../../../common/domain/euid/commons';
+import { ENTITY_ID_FIELD } from '../../../../../../common/domain/definitions/common_fields';
+import type { MaintainerTelemetryClient } from '../../../../../tasks/entity_maintainers/maintainer_telemetry_client';
 import type { PerRuleState } from '../automated_resolution/types';
 import { getFieldStringValues, readRelatedUserBundleForSeed } from './left';
 import {

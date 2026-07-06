@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RESOLUTION_RULE_IDS, RESOLUTION_RULE_KINDS } from '../../../../common';
+import { RESOLUTION_RULE_IDS, RESOLUTION_RULE_KINDS } from '../../../../../common';
 import { EntityResolutionRuleType, EntityResolutionRuleTypeName } from '.';
 
 interface TestSchema {

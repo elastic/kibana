@@ -8,7 +8,7 @@
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { RESOLUTION_RULE_KINDS, RESOLUTION_RULE_IDS } from '../../../../common';
+import { RESOLUTION_RULE_KINDS, RESOLUTION_RULE_IDS } from '../../../../../common';
 import { EntityResolutionRuleTypeName } from './constants';
 
 const entityResolutionRuleAttributesSchema = schema.object({

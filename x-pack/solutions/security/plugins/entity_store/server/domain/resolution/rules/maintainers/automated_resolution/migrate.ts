@@ -7,7 +7,7 @@
 
 import { isPlainObject } from 'lodash';
 import type { Logger } from '@kbn/logging';
-import { RESOLUTION_RULE_IDS } from '../../../common/domain/resolution_rules/constants';
+import { RESOLUTION_RULE_IDS } from '../../../../../../common/domain/resolution_rules/constants';
 import type { AutomatedResolutionState, PerRuleLastRunStats, PerRuleState } from './types';
 
 const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);

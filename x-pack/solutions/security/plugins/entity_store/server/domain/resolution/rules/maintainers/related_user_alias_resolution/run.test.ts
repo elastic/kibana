@@ -7,8 +7,8 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ResolutionClient } from '../../domain/resolution';
-import type { MaintainerTelemetryClient } from '../../tasks/entity_maintainers/maintainer_telemetry_client';
+import type { ResolutionClient } from '../../..';
+import type { MaintainerTelemetryClient } from '../../../../../tasks/entity_maintainers/maintainer_telemetry_client';
 import type { PerRuleState } from '../automated_resolution/types';
 import { collectSeeds, runRelatedUserAliasResolution } from './run';
 

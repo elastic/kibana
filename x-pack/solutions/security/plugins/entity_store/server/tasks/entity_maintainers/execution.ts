@@ -19,7 +19,7 @@ import {
   type EntityMaintainerTaskMethod,
 } from './types';
 import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
-import { ResolutionRulesClient } from '../../domain/resolution_rules';
+import { ResolutionRulesClient } from '../../domain/resolution/rules';
 import { EntityMetadataClient } from '../../domain/entity_metadata';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';

@@ -17,12 +17,12 @@ import type {
   AggregationsStringTermsBucket,
   AggregationsTopHitsAggregate,
 } from '@elastic/elasticsearch/lib/api/types';
-import { getLatestEntitiesIndexName } from '../../../common';
-import type { ResolutionClient } from '../../domain/resolution';
-import { selectTarget } from '../../domain/resolution';
-import { getFieldValue } from '../../../common/domain/euid/commons';
-import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
-import type { MaintainerTelemetryClient } from '../../tasks/entity_maintainers/maintainer_telemetry_client';
+import { getLatestEntitiesIndexName } from '../../../../../../common';
+import type { ResolutionClient } from '../../..';
+import { selectTarget } from '../../..';
+import { getFieldValue } from '../../../../../../common/domain/euid/commons';
+import { ENTITY_ID_FIELD } from '../../../../../../common/domain/definitions/common_fields';
+import type { MaintainerTelemetryClient } from '../../../../../tasks/entity_maintainers/maintainer_telemetry_client';
 import type { PerRuleState, MatchBucket, EntityHit } from './types';
 
 const MATCH_FIELD = 'user.email';

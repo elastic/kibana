@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { RESOLUTION_RULE_IDS } from '../../../common/domain/resolution_rules/constants';
+import { RESOLUTION_RULE_IDS } from '../../../../../../common/domain/resolution_rules/constants';
 import { migrate } from './migrate';
 import type { AutomatedResolutionState } from './types';
 

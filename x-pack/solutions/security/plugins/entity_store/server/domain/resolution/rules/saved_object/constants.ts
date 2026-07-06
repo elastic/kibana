@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { RESOLUTION_RULE_KINDS, RESOLUTION_RULE_IDS } from '../../../../common';
+import { RESOLUTION_RULE_KINDS, RESOLUTION_RULE_IDS } from '../../../../../common';
 
 export const EntityResolutionRuleTypeName = 'entity-resolution-rule';
 

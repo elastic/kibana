@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RESOLUTION_RULE_IDS } from '../../../common/domain/resolution_rules/constants';
-import { RESOLUTION_RULE_KINDS } from '../../../common/domain/resolution_rules/constants';
-import type { RegisterEntityMaintainerConfig } from '../../tasks/entity_maintainers/types';
-import { ResolutionClient } from '../../domain/resolution';
+import { RESOLUTION_RULE_IDS } from '../../../../../../common/domain/resolution_rules/constants';
+import { RESOLUTION_RULE_KINDS } from '../../../../../../common/domain/resolution_rules/constants';
+import type { RegisterEntityMaintainerConfig } from '../../../../../tasks/entity_maintainers/types';
+import { ResolutionClient } from '../../..';
 import type { AutomatedResolutionState, PerRuleState } from './types';
 import { migrate } from './migrate';
-import { RESOLUTION_RULE_CONFIGS } from '../../domain/resolution_rules';
+import { RESOLUTION_RULE_CONFIGS } from '../..';
 import { runEmailRuleResolution } from './run';
 import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
 

@@ -41,7 +41,7 @@ import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
 import type { EntityMetadataClient } from './domain/entity_metadata';
 import type { ResolutionClient } from './domain/resolution';
-import type { ResolutionRulesClient } from './domain/resolution_rules';
+import type { ResolutionRulesClient } from './domain/resolution/rules';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import type { TelemetryReporter } from './telemetry/events';
 

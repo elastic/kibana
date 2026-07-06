@@ -10,7 +10,7 @@ import {
   RESOLUTION_RULE_IDS,
   type ResolutionRuleKind,
   type ResolutionRuleId,
-} from '../../../common/domain/resolution_rules/constants';
+} from '../../../../common/domain/resolution_rules/constants';
 
 export interface ResolutionRuleConfig {
   id: ResolutionRuleId;

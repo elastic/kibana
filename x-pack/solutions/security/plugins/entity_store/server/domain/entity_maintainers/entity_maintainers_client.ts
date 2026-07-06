@@ -36,7 +36,7 @@ import type {
 import { EntityMaintainerTaskStatus } from '../../tasks/entity_maintainers/types';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { CRUDClient } from '../crud';
-import { ResolutionRulesClient } from '../resolution_rules';
+import { ResolutionRulesClient } from '../resolution/rules';
 import { EntityMetadataClient } from '../entity_metadata';
 import { createMaintainerTelemetryClient } from '../../tasks/entity_maintainers/maintainer_telemetry_client';
 

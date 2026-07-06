@@ -8,8 +8,8 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { RESOLUTION_RULE_IDS, RESOLUTION_RULE_KINDS } from '../../../common';
-import { EntityResolutionRuleTypeName } from '../saved_objects';
+import { RESOLUTION_RULE_IDS, RESOLUTION_RULE_KINDS } from '../../../../common';
+import { EntityResolutionRuleTypeName } from './saved_object';
 import { ResolutionRulesClient } from './rule_client';
 
 const NAMESPACE = 'default';

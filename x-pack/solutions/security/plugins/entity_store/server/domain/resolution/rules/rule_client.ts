@@ -7,9 +7,9 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
-import type { ResolutionRuleId } from '../../../common';
-import { EntityResolutionRuleTypeName } from '../saved_objects';
-import { EntityResolutionRuleAttributes } from '../saved_objects';
+import type { ResolutionRuleId } from '../../../../common';
+import { EntityResolutionRuleTypeName } from './saved_object';
+import { EntityResolutionRuleAttributes } from './saved_object';
 import {
   RESOLUTION_RULE_CONFIGS,
   getResolutionRuleConfig,

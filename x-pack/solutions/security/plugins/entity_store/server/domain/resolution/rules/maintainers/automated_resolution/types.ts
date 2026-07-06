@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityMaintainerState } from '../../tasks/entity_maintainers/types';
+import type { EntityMaintainerState } from '../../../../../tasks/entity_maintainers/types';
 
 // These extend `EntityMaintainerState` (the framework's JSON-serializable task-state
 // type) so the maintainer can hand them to task-manager directly, without casting at

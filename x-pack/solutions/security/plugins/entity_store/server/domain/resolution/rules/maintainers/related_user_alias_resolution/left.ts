@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { getEuidFromObject } from '../../../common/domain/euid';
+import { getEuidFromObject } from '../../../../../../common/domain/euid';
 import { SEED_IDENTITY_PREFILTER_FIELDS, type RelatedUserBundle, type SeedEntity } from './types';
 
 const SOURCE_INDEX_BY_NAMESPACE: Record<string, string> = {
