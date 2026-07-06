@@ -130,20 +130,25 @@ Every step (regardless of type) supports these properties. They are NOT repeated
 - **elasticsearch.search**: Query Elasticsearch indices
 - **elasticsearch.bulk**: Bulk index documents
 - **ai.prompt**: One-shot LLM call (prompt in, structured output out)
+- **ai.summarize**: Purpose-built summarization step (text in, summary out)
+- **ai.classify**: Purpose-built classification step (text + labels in, label out)
 - **ai.agent**: Invoke an AI agent (multi-turn, tool-using)
 
-**AI steps: ONLY use \`ai.prompt\` or \`ai.agent\`.** Discovery may also surface
+**AI steps: ONLY use the \`ai.*\` step family.** Discovery may also surface
 direct model-connector step types (\`inference.*\`, \`bedrock.*\`, \`gen-ai.*\`,
-\`gemini.*\`); these are deprecated and must NOT be used for new steps. Route all
-LLM calls through \`ai.prompt\` (for one-shot inference/analysis) or \`ai.agent\`
-(when tool use or multi-turn reasoning is needed).
+\`gemini.*\`); these are deprecated and must NOT be used for new steps. Pick the
+narrowest \`ai.*\` step that fits the use case:
+- summarization → \`ai.summarize\`
+- classification / routing / labeling → \`ai.classify\`
+- multi-turn or tool-using flows → \`ai.agent\`
+- everything else (generic one-shot inference / analysis / extraction) → \`ai.prompt\`
 
 **AI step example (PREFERRED):**
 \`\`\`yaml
 - name: triage_analysis
   type: ai.prompt
   with:
-    prompt: "Summarize the alert: {{ steps.fetch_alert.output }}"
+    prompt: "Analyze the alert: {{ steps.fetch_alert.output }}"
 \`\`\`
 
 #### Connector-Based Step Types (PREFERRED for integrations!)

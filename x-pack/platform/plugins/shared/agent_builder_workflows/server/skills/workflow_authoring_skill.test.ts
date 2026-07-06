@@ -63,8 +63,12 @@ describe('workflowAuthoringSkill', () => {
       expect(workflowAuthoringSkill.content).not.toMatch(/type: slack_api/);
     });
 
-    it('instructs to use ai.prompt/ai.agent and avoid deprecated model-connector step types', () => {
-      expect(workflowAuthoringSkill.content).toContain('ONLY use `ai.prompt` or `ai.agent`');
+    it('instructs to use the ai.* step family and avoid deprecated model-connector step types', () => {
+      expect(workflowAuthoringSkill.content).toContain('ONLY use the `ai.*` step family');
+      expect(workflowAuthoringSkill.content).toContain('`ai.prompt`');
+      expect(workflowAuthoringSkill.content).toContain('`ai.summarize`');
+      expect(workflowAuthoringSkill.content).toContain('`ai.classify`');
+      expect(workflowAuthoringSkill.content).toContain('`ai.agent`');
       expect(workflowAuthoringSkill.content).toContain('type: ai.prompt');
       expect(workflowAuthoringSkill.content).not.toMatch(/type: inference\./);
       expect(workflowAuthoringSkill.content).not.toMatch(/type: bedrock\./);
