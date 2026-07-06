@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useCreateAttackDiscoverySchedule } from './use_create_schedule';
@@ -47,18 +47,15 @@ export interface ScheduleApi {
  */
 export const useScheduleApi = (): ScheduleApi => {
   const { featureFlags } = useKibana().services;
-  const [isWorkflowsEnabled, setIsWorkflowsEnabled] = useState(false);
 
-  useEffect(() => {
-    const loadFeatureFlag = async () => {
-      const enabled = await featureFlags.getBooleanValue(
-        'securitySolution.attackDiscoveryWorkflowsEnabled',
-        false
-      );
-      setIsWorkflowsEnabled(enabled);
-    };
-    loadFeatureFlag();
-  }, [featureFlags]);
+  // Read the flag synchronously during render so the returned hook set is stable
+  // from the first render. Reading it asynchronously (useEffect + useState) would
+  // swap the returned hooks after mount when the flag is ON, violating the Rules
+  // of Hooks in consumers that call these hooks by identity.
+  const isWorkflowsEnabled = featureFlags.getBooleanValue(
+    'securitySolution.attackDiscoveryWorkflowsEnabled',
+    false
+  );
 
   return useMemo(
     () => ({

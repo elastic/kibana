@@ -28,12 +28,44 @@ const mockGetMarkdownFields = jest.fn().mockReturnValue({
   title: 'mock title',
 });
 
-const mockUpdateAlertsWithAttackIds = jest.fn().mockResolvedValue(undefined);
+const mockBackfillAttackIdsBestEffort = jest.fn().mockResolvedValue(undefined);
 
 jest.mock('@kbn/attack-discovery-schedules-common', () => ({
+  // Faithful inline copy of the pure aggregator (the real implementation is
+  // covered by the package's own unit test). Requiring the actual barrel here
+  // would evaluate schedule params that depend on the mocked
+  // `@kbn/elastic-assistant-common` module below.
+  buildAlertIdToAttackIdsMap: ({
+    attacks,
+  }: {
+    attacks: Array<{ alertIds: string[]; attackId: string }>;
+  }) =>
+    attacks.reduce<Record<string, string[]>>(
+      (acc, { alertIds, attackId }) =>
+        alertIds.reduce(
+          (innerAcc, alertId) => ({
+            ...innerAcc,
+            [alertId]: [...(innerAcc[alertId] ?? []), attackId],
+          }),
+          acc
+        ),
+      {}
+    ),
+  backfillAttackIdsBestEffort: (...args: unknown[]) => mockBackfillAttackIdsBestEffort(...args),
   generateAttackDiscoveryAlertHash: (...args: unknown[]) => mockGenerateHash(...args),
+  // Faithful inline copy of the shared normalizer (the real implementation is
+  // covered by the package's own unit test); handles snake_case + camelCase keys.
+  normalizeAttackDiscovery: (raw: Record<string, unknown>) => ({
+    alertIds: raw.alertIds ?? raw.alert_ids ?? [],
+    detailsMarkdown: raw.detailsMarkdown ?? raw.details_markdown ?? '',
+    entitySummaryMarkdown: raw.entitySummaryMarkdown ?? raw.entity_summary_markdown,
+    id: raw.id,
+    mitreAttackTactics: raw.mitreAttackTactics ?? raw.mitre_attack_tactics,
+    summaryMarkdown: raw.summaryMarkdown ?? raw.summary_markdown ?? '',
+    timestamp: raw.timestamp ?? '',
+    title: raw.title ?? '',
+  }),
   transformToBaseAlertDocument: (...args: unknown[]) => mockTransformToBaseAlertDocument(...args),
-  updateAlertsWithAttackIds: (...args: unknown[]) => mockUpdateAlertsWithAttackIds(...args),
 }));
 
 jest.mock('@kbn/elastic-assistant-common', () => ({
@@ -590,19 +622,22 @@ describe('workflowExecutor', () => {
       );
     });
 
-    it('calls updateAlertsWithAttackIds with correct alertIdToAttackIdsMap', async () => {
+    it('calls backfillAttackIdsBestEffort with correct alertIdToAttackIdsMap', async () => {
       const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
       await workflowExecutor({ deps, options });
 
-      expect(mockUpdateAlertsWithAttackIds).toHaveBeenCalledWith({
-        alertIdToAttackIdsMap: {
-          'alert-1': ['mock-alert-doc-id'],
-          'alert-2': ['mock-alert-doc-id'],
-        },
-        esClient: ruleExecutorServices.scopedClusterClient.asCurrentUser,
-        spaceId: 'test-space',
-      });
+      expect(mockBackfillAttackIdsBestEffort).toHaveBeenCalledWith(
+        expect.objectContaining({
+          alertIdToAttackIdsMap: {
+            'alert-1': ['mock-alert-doc-id'],
+            'alert-2': ['mock-alert-doc-id'],
+          },
+          esClient: ruleExecutorServices.scopedClusterClient.asCurrentUser,
+          logger: expect.anything(),
+          spaceId: 'test-space',
+        })
+      );
     });
 
     it('builds alertIdToAttackIds mapping across multiple discoveries', async () => {
@@ -636,7 +671,7 @@ describe('workflowExecutor', () => {
 
       await workflowExecutor({ deps, options });
 
-      expect(mockUpdateAlertsWithAttackIds).toHaveBeenCalledWith(
+      expect(mockBackfillAttackIdsBestEffort).toHaveBeenCalledWith(
         expect.objectContaining({
           alertIdToAttackIdsMap: {
             'alert-1': ['doc-id-1'],
@@ -647,7 +682,7 @@ describe('workflowExecutor', () => {
       );
     });
 
-    it('does not call updateAlertsWithAttackIds when outcome is validation_failed', async () => {
+    it('does not call backfillAttackIdsBestEffort when outcome is validation_failed', async () => {
       (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
         outcome: 'validation_failed',
       });
@@ -658,7 +693,7 @@ describe('workflowExecutor', () => {
         'Attack discovery validation step failed'
       );
 
-      expect(mockUpdateAlertsWithAttackIds).not.toHaveBeenCalled();
+      expect(mockBackfillAttackIdsBestEffort).not.toHaveBeenCalled();
     });
 
     it('normalizes snake_case attack discoveries from workflow output', async () => {
@@ -792,7 +827,7 @@ describe('workflowExecutor', () => {
       );
     });
 
-    it('does not call updateAlertsWithAttackIds when the handover is empty', async () => {
+    it('does not call backfillAttackIdsBestEffort when the handover is empty', async () => {
       (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
         generationResult: mockGenerationResult,
@@ -804,7 +839,7 @@ describe('workflowExecutor', () => {
 
       await workflowExecutor({ deps, options });
 
-      expect(mockUpdateAlertsWithAttackIds).not.toHaveBeenCalled();
+      expect(mockBackfillAttackIdsBestEffort).not.toHaveBeenCalled();
     });
 
     it('does not call alertsClient.report when the handover is absent', async () => {

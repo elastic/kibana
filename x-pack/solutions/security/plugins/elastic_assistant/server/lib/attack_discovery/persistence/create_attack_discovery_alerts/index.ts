@@ -46,10 +46,11 @@ export const createAttackDiscoveryAlerts = async ({
   spaceId,
 }: CreateAttackDiscoveryAlerts): Promise<AttackDiscoveryApiAlert[]> => {
   const traceId = `[trace: ${createAttackDiscoveryAlertsParams.generationUuid}]`;
-  logger.info(
-    `[PERSIST] createAttackDiscoveryAlerts called with ${
-      createAttackDiscoveryAlertsParams.attackDiscoveries?.length ?? 0
-    } discoveries ${traceId}`
+  logger.debug(
+    () =>
+      `[PERSIST] createAttackDiscoveryAlerts called with ${
+        createAttackDiscoveryAlertsParams.attackDiscoveries?.length ?? 0
+      } discoveries ${traceId}`
   );
 
   const attackDiscoveryAlertsIndex = adhocAttackDiscoveryDataClient.indexNameWithNamespace(spaceId);
@@ -65,8 +66,9 @@ export const createAttackDiscoveryAlerts = async ({
     spaceId,
   });
 
-  logger.info(
-    `[PERSIST] transformToAlertDocuments returned ${alertDocuments.length} documents ${traceId}`
+  logger.debug(
+    () =>
+      `[PERSIST] transformToAlertDocuments returned ${alertDocuments.length} documents ${traceId}`
   );
 
   if (isEmpty(alertDocuments)) {

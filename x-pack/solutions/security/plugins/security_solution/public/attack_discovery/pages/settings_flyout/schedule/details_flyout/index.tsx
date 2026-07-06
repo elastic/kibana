@@ -200,7 +200,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
           grow={false}
         >
           <EuiFlexItem grow={false}>
-            <WithMissingPrivileges>
+            <WithMissingPrivileges requireWorkflowsExecute>
               {(enabled) => (
                 <EuiButton
                   data-test-subj="edit"

@@ -35,6 +35,7 @@ describe('updateAlertsWithAttackIds', () => {
       expect(esClient.updateByQuery).toHaveBeenCalledWith({
         conflicts: 'proceed',
         index: '.alerts-security.alerts-default',
+        refresh: true,
         query: {
           ids: {
             values: ['alert-id-1', 'alert-id-2', 'alert-id-3'],

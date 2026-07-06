@@ -107,8 +107,7 @@ const renderComponent = async () => {
   });
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/255131
-describe.skip('EditForm', () => {
+describe('EditForm', () => {
   const mockTriggersActionsUi = triggersActionsUiMock.createStart();
 
   beforeEach(() => {
@@ -137,6 +136,20 @@ describe.skip('EditForm', () => {
     (useConnectors as jest.Mock).mockReturnValue({
       connectors: mockConnectors,
       setCurrentConnector: jest.fn(),
+    });
+
+    (useListWorkflows as jest.Mock).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isSuccess: true,
+      status: 'success' as const,
+    });
+
+    (useGenerateWorkflow as jest.Mock).mockReturnValue({
+      cancelGeneration: jest.fn(),
+      generatedWorkflow: null,
+      isGenerating: false,
+      startGeneration: jest.fn(),
     });
   });
 

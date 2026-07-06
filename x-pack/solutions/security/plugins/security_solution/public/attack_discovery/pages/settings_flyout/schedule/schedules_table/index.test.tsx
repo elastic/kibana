@@ -78,6 +78,9 @@ describe('SchedulesTable', () => {
             },
           },
         },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(false),
+        },
       },
     });
 

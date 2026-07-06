@@ -30,7 +30,14 @@ describe('EmptyPage', () => {
             [ATTACK_DISCOVERY_FEATURE_ID]: {
               updateAttackDiscoverySchedule: true,
             },
+            workflowsManagement: {
+              executeWorkflow: true,
+              readWorkflow: true,
+            },
           },
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(false),
         },
       },
     } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
