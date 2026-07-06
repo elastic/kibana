@@ -23,6 +23,7 @@ export const mockAuthenticatedUser: AuthenticatedUser = {
     name: 'test_authentication_provider_name',
   },
   elastic_cloud_user: false,
+  http_authentication_scheme: null,
   profile_uid: 'u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0',
   roles: ['admin'],
   username: 'test_user',
