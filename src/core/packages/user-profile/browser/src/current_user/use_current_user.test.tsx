@@ -53,14 +53,21 @@ const createAuthc = (
   getCurrentUser: jest.Mock = jest.fn().mockResolvedValue(authenticatedUser)
 ): CoreAuthenticationService => ({ getCurrentUser });
 
+// Stable observable instances: `useObservable` resubscribes whenever the observable reference
+// changes, so a mock that returns a *new* `of(...)` on every call would resubscribe and
+// synchronously re-emit on every render, causing an infinite render loop.
+const userProfile$ = of(null);
+const enabled$ = of(false);
+const dataUpdates$ = of({});
+
 const createUserProfile = (
   getCurrent: jest.Mock = jest.fn().mockResolvedValue(profileResponse)
 ): UserProfileService =>
   ({
     getCurrent,
-    getUserProfile$: () => of(null),
-    getEnabled$: () => of(false),
-    getDataUpdates$: () => of({}),
+    getUserProfile$: () => userProfile$,
+    getEnabled$: () => enabled$,
+    getDataUpdates$: () => dataUpdates$,
     bulkGet: jest.fn(),
     suggest: jest.fn(),
     update: jest.fn(),

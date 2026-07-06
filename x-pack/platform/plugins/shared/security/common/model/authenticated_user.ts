@@ -6,16 +6,10 @@
  */
 
 import type { Capabilities } from '@kbn/core/types';
-import { canUserHaveProfile, isUserAnonymous } from '@kbn/core-security-common';
+import { isUserAnonymous } from '@kbn/core-security-common';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 const REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE = ['reserved', 'native'];
-
-/**
- * Re-exported from `@kbn/core-security-common` so the shared `useCurrentUser` hook in
- * `@kbn/core-user-profile-browser` can reuse the same logic without depending on this plugin.
- */
-export { isUserAnonymous, canUserHaveProfile };
 
 export function canUserChangePassword(
   user: Pick<AuthenticatedUser, 'authentication_realm' | 'authentication_provider'>
