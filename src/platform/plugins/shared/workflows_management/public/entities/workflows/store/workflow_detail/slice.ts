@@ -12,8 +12,7 @@ import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/w
 import { WORKFLOW_GRAPH_FOCUS_TRIGGER } from '@kbn/workflows';
 import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState } from './types';
 import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
-import { findStepByLine } from './utils/step_finder';
-import { isLineInTriggers } from './utils/trigger_finder';
+import { resolveFocusForLine } from './utils/trigger_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
 import { triggerSchemas } from '../../../../trigger_schemas';
 import type { WorkflowsResponse } from '../../model/types';
@@ -95,13 +94,7 @@ const workflowDetailSlice = createSlice({
         state.focusedTriggerId = undefined;
         return;
       }
-      if (isLineInTriggers(action.payload.lineNumber, lookup)) {
-        state.focusedTriggerId = HIGHLIGHTED_STEP_TRIGGER;
-        state.focusedStepId = undefined;
-      } else {
-        state.focusedStepId = findStepByLine(action.payload.lineNumber, lookup);
-        state.focusedTriggerId = undefined;
-      }
+      Object.assign(state, resolveFocusForLine(action.payload.lineNumber, lookup));
     },
     setHighlightedStepId: (state, action: { payload: { stepId: string | undefined } }) => {
       state.highlightedStepId = action.payload.stepId;
@@ -178,13 +171,7 @@ const workflowDetailSlice = createSlice({
       // debounced YAML computation completed.
       const lookup = action.payload.workflowLookup;
       if (state.cursorPosition && lookup) {
-        if (isLineInTriggers(state.cursorPosition.lineNumber, lookup)) {
-          state.focusedTriggerId = HIGHLIGHTED_STEP_TRIGGER;
-          state.focusedStepId = undefined;
-        } else {
-          state.focusedStepId = findStepByLine(state.cursorPosition.lineNumber, lookup);
-          state.focusedTriggerId = undefined;
-        }
+        Object.assign(state, resolveFocusForLine(state.cursorPosition.lineNumber, lookup));
       }
     },
     _clearComputedData: (state) => {

@@ -337,7 +337,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       setRenderGraph(true);
       return;
     }
-    const t = setTimeout(() => setRenderGraph(false), 260);
+    const t = setTimeout(() => setRenderGraph(false), GRAPH_FADE_DURATION_MS + 40);
     return () => clearTimeout(t);
   }, [showGraph]);
 
@@ -350,7 +350,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
            * position:relative yamlEditor flex item:
            *  - Layer 1 (YAML): always mounted so validation keeps running.
            *  - Layer 2 (Graph): mounted while renderGraph is true; kept alive
-           *    for 260ms after switching back to YAML so the cross-fade plays out.
+           *    for GRAPH_FADE_DURATION_MS + 40ms after switching back to YAML so the cross-fade plays out.
            * The bottom bar floats (position:absolute) and overlays both layers.
            */}
           <div css={[styles.editorLayer, showGraph ? styles.layerHidden : styles.layerVisible]}>
@@ -406,6 +406,9 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
 });
 WorkflowDetailEditor.displayName = 'WorkflowDetailEditor';
 
+/** Duration of the YAML↔graph cross-fade. Keep in sync with the setTimeout in renderGraph. */
+const GRAPH_FADE_DURATION_MS = 220;
+
 const componentStyles = {
   yamlEditor: css({
     flex: 1,
@@ -419,7 +422,7 @@ const componentStyles = {
     // display:flex so the YAML editor's internal flex:1 root stretches to fill
     display: 'flex',
     flexDirection: 'column',
-    transition: 'opacity 220ms ease, transform 220ms ease',
+    transition: `opacity ${GRAPH_FADE_DURATION_MS}ms ease, transform ${GRAPH_FADE_DURATION_MS}ms ease`,
   }),
   layerVisible: css({
     opacity: 1,
