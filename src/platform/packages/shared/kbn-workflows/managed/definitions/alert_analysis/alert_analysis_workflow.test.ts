@@ -59,14 +59,14 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(workflow.consts.create_conversation).toBeUndefined();
   });
 
-  it('guards the expensive work on the runtime enabled flag and a configured connector', () => {
-    const gate = findStepByName(workflow.steps, 'already_analyzed') as { condition: string };
+  it('guards the whole alert loop on the runtime enabled flag and a configured connector', () => {
+    const loop = findStepByName(workflow.steps, 'loop_over_results') as { if: string };
 
-    expect(gate).toBeDefined();
+    expect(loop).toBeDefined();
     // A disabled space or a space with no connector must skip enrichment, the AI agent call, and
-    // auto-close (fixes enabled-with-no-connector and moves the on/off decision to run time).
-    expect(gate.condition).toContain('variables.workflow_enabled == false');
-    expect(gate.condition).toContain("variables.connector_id == ''");
+    // auto-close (fixes enabled-with-no-connector and moves the on/off decision to run time). The
+    // guard is a parens-free `and` because the workflow template parser reads `(` as range syntax.
+    expect(loop.if).toBe("${{ variables.workflow_enabled and variables.connector_id != '' }}");
   });
 
   it('passes the runtime connector id and create-conversation flag to the AI agent step', () => {

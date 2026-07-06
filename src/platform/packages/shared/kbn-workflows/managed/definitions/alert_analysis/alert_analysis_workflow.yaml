@@ -117,8 +117,12 @@ steps:
   # ---------------------------------------------------------------------------
   # Iterate over each alert in the trigger batch
   # ---------------------------------------------------------------------------
+  # Runtime guard: the whole loop (enrichment, the AI agent call, auto-close) only runs when this
+  # space has the workflow enabled and a connector configured. A disabled or unconfigured space
+  # no-ops, which is why enabled-by-default with an empty connector is safe.
   - name: loop_over_results
     type: foreach
+    if: "${{ variables.workflow_enabled and variables.connector_id != '' }}"
     foreach: "{{ event.alerts | json }}"
     steps:
       # Log a link to the alert for traceability at the start of processing.
@@ -145,21 +149,18 @@ steps:
           already_analyzed_condition: "${{ foreach.item.kibana.alert.workflow_tags | has_exp: 'tag', variables.already_analyzed_expr }}"
 
       # -----------------------------------------------------------------------
-      # Gate: skip this alert when it was already analyzed, or when the workflow
-      # is disabled or has no connector configured for this space. This is where
-      # the runtime config guards all the expensive work (enrichment, the AI
-      # agent call, auto-close): a disabled or unconfigured space no-ops here.
+      # Gate: skip if the alert was already analyzed
       # -----------------------------------------------------------------------
       - name: already_analyzed
         type: if
-        condition: "${{ (variables.already_analyzed_condition and consts.override_previous == false) or variables.workflow_enabled == false or variables.connector_id == '' }}"
+        condition: "${{ variables.already_analyzed_condition and consts.override_previous == false }}"
         steps:
           - name: log_already_analyzed
             type: console
             with:
               message: >-
-                Skipping alert {{ foreach.item._id }} (already analyzed, workflow
-                disabled, or no connector configured).
+                Alert {{ foreach.item._id }} has already been analyzed.
+                Remove the "{{ variables.tag_prefix }}" tag to re-run.
         else:
 
           # -------------------------------------------------------------------
