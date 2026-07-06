@@ -106,7 +106,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           <p>
             <FormattedMessage
               id="xpack.searchInferenceEndpoints.manageRegions.description"
-              defaultMessage="You can restrict the routing of inference calls by specifying only those regions."
+              defaultMessage="You can restrict inference calls to specific regions."
             />
           </p>
         </EuiText>
