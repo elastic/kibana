@@ -59,6 +59,9 @@ export function registerSnapshotRepositoriesRoute({
           persistent?.repositories?.default_repository
         );
 
+        const repositories = await client.asCurrentUser.snapshot.getRepository();
+        const hasRepositories = Object.keys(repositories).length > 0;
+
         const canCreateRepository = await getCanCreateRepository(
           client,
           config.isSecurityEnabled()
@@ -68,6 +71,7 @@ export function registerSnapshotRepositoriesRoute({
           body: {
             hasDefaultRepository: defaultRepository !== undefined,
             defaultRepository,
+            hasRepositories,
             canCreateRepository,
           },
         });

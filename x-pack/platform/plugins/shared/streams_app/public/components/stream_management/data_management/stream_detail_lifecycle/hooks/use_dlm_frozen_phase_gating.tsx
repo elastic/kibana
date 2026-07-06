@@ -47,6 +47,7 @@ export interface DlmFrozenPhaseGating {
     isRefreshingDefaultRepository: boolean;
     manageRepositoriesHref: string;
     createDefaultRepositoryHref?: string;
+    hasExistingRepositories: boolean;
     defaultRepositoryName?: string;
   };
   /**
@@ -78,6 +79,7 @@ export const useDlmFrozenPhaseGating = ({
   const hasEnterpriseLicense = !isLicenseLoading && Boolean(license?.hasAtLeast('enterprise'));
 
   const {
+    repositories,
     defaultRepository,
     hasFetched: hasRepositoryFetched,
     isLoading: isRefreshingDefaultRepository,
@@ -85,6 +87,7 @@ export const useDlmFrozenPhaseGating = ({
   } = useSnapshotRepositories({ enabled });
 
   const hasDefaultRepository = Boolean(defaultRepository);
+  const hasExistingRepositories = repositories.length > 0;
   const isRepositoriesLoading = enabled && !hasRepositoryFetched;
   const canCreateRepository = Boolean(definition.privileges.create_snapshot_repository);
 
@@ -172,6 +175,8 @@ export const useDlmFrozenPhaseGating = ({
       {activeModal === 'defaultRepository' && (
         <DefaultSnapshotRepositoryRequiredModal
           createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+          manageRepositoriesUrl={manageRepositoriesHref}
+          hasExistingRepositories={hasExistingRepositories}
           isRefreshing={isRefreshingDefaultRepository}
           onRefresh={refreshSnapshotRepositories}
           onCancel={closeModal}
@@ -201,6 +206,7 @@ export const useDlmFrozenPhaseGating = ({
       manageRepositoriesHref,
       // Only surface the create-repository link when the user actually has permission to create one.
       createDefaultRepositoryHref: canCreateRepository ? createDefaultRepositoryUrl : undefined,
+      hasExistingRepositories,
       defaultRepositoryName: defaultRepository,
     },
     handleAddPhaseGating,

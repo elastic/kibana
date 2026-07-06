@@ -29,6 +29,7 @@ import {
   updateDataLifecycle,
   updateDataStreamSettings,
   updateIndexSettings,
+  useLoadSnapshotRepositories,
 } from '../../../../../services/api';
 import { sendRequest } from '../../../../../services/use_request';
 // Import the constant directly from its module (not the public barrel `../../../../../..`)
@@ -99,6 +100,14 @@ export const useEditDataLifecycle = ({
 }: UseEditDataLifecycleArgs) => {
   const { config, core, docLinks, plugins, services, url } = useAppContext();
   const locator = url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID);
+  // Used only to determine whether other snapshot repositories already exist. If this call
+  // fails, `hasExistingRepositories` below falls back to the cluster-setting-based default
+  // repository check (the pre-existing signal) rather than assuming there are none.
+  const {
+    data: snapshotRepositoriesInfo,
+    error: snapshotRepositoriesError,
+    resendRequest: refreshSnapshotRepositoriesInfo,
+  } = useLoadSnapshotRepositories();
 
   const [isEditingDataLifecycle, setIsEditingDataLifecycle] = useState(false);
   const [ilmPolicies, setIlmPolicies] = useState<IlmPolicyForFlyout[]>([]);
@@ -115,6 +124,7 @@ export const useEditDataLifecycle = ({
   );
 
   const loadDefaultSnapshotRepository = useCallback(async () => {
+    refreshSnapshotRepositoriesInfo();
     try {
       const { data } = await sendRequest<{ repositoryName: string | null }>({
         path: '/api/snapshot_restore/default_repository',
@@ -124,7 +134,7 @@ export const useEditDataLifecycle = ({
     } catch {
       setDefaultSnapshotRepository(null);
     }
-  }, []);
+  }, [refreshSnapshotRepositoriesInfo]);
 
   const loadIlmPolicies = useCallback(async () => {
     try {
@@ -801,6 +811,11 @@ export const useEditDataLifecycle = ({
         hasEnterpriseLicense,
         hasDefaultSnapshotRepository: defaultSnapshotRepository !== null,
         defaultSnapshotRepository: defaultSnapshotRepository ?? undefined,
+        // Fall back to the cluster-setting-based default repository check when the
+        // repositories list fails to load, instead of assuming none exist.
+        hasExistingRepositories: snapshotRepositoriesError
+          ? defaultSnapshotRepository !== null
+          : Boolean(snapshotRepositoriesInfo?.hasRepositories),
         manageRepositoriesUrl: core.getUrlForApp('management', {
           path: '/data/snapshot_restore/repositories',
         }),
@@ -845,6 +860,8 @@ export const useEditDataLifecycle = ({
       loadDefaultSnapshotRepository,
       plugins.cloud,
       selectedIlmPolicyName,
+      snapshotRepositoriesError,
+      snapshotRepositoriesInfo?.hasRepositories,
       successfulDlmDefaultValue,
     ]
   );
