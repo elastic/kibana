@@ -18,7 +18,7 @@ import {
   IS_AGENTLESS_QUERY_PARAM,
 } from '../../../../../../common/constants';
 
-import { Loading, Error } from '../../../components';
+import { Loading, Error as ErrorComponent } from '../../../components';
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 
 import { CreatePackagePolicySinglePage } from '../create_package_policy_page/single_page_layout';
@@ -114,7 +114,7 @@ export const CopyPackagePolicyPage = memo(() => {
           });
     return (
       <ContentWrapper justifyContent="center" alignItems="center">
-        <Error
+        <ErrorComponent
           title={
             <FormattedMessage
               id="xpack.fleet.copyPackagePolicyPage.loadingErrorTitle"
