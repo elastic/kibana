@@ -70,12 +70,24 @@ const significantEventsRequirements: Record<SignificantEventsUnavailableReason, 
         : new FeatureNotEnabledError(
             'An Enterprise license or higher is required to use significant events.'
           ),
-    ui_setting: async ({ uiSettingsClient }) =>
-      (await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS))
+    ui_setting: async ({ uiSettingsClient }) => {
+      let enabled: boolean;
+      try {
+        enabled = await uiSettingsClient.get<boolean>(
+          OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS
+        );
+      } catch {
+        // Setting not registered (e.g. pricing tier check skipped registration).
+        // Treat as disabled so callers get a clean 403 rather than an unhandled
+        // rejection propagating through Promise.all as a 500.
+        enabled = false;
+      }
+      return enabled
         ? undefined
         : new FeatureNotEnabledError(
             `Significant events is disabled. Enable "${OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS}" in Advanced Settings to start using it.`
-          ),
+          );
+    },
     ...pluginRequirements,
   };
 
