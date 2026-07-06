@@ -97,7 +97,10 @@ export const initialNodes: Node[] = [
     { label: 'routing-1', percentage: '25%' },
     { label: 'routing-2', percentage: '75%' },
   ]),
-  dstNode('dst-logs-nginx-default', 760, 40, dst('logs-nginx-default', '15k eps・175ms')),
+  dstNode('dst-logs-nginx-default', 760, 40, {
+    ...dst('logs-nginx-default', '15k eps・175ms'),
+    footerIcon: 'processor',
+  }),
   dstNode('dst-logs-otel', 760, 180, {
     ...dst('logs.otel', '7k eps・175ms'),
     attachedRouting: true,

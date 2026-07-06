@@ -294,6 +294,18 @@ function ConfiguredDestinationBody({
     line-height: ${euiTheme.size.base};
     color: ${euiTheme.colors.textSubdued};
   `;
+  // Boxed glyph (e.g. `processor`) leading the footer — subdued chip matching the
+  // Figma "processor" cell: subdued fill, thin subdued border, panel radius.
+  const footerIconClassName = css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: ${euiTheme.size.xxs};
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+    border-radius: ${euiTheme.border.radius.medium};
+    overflow: hidden;
+  `;
   return (
     <>
       <EuiText
@@ -311,13 +323,24 @@ function ConfiguredDestinationBody({
       </EuiText>
       {isConnected ? (
         <EuiFlexGroup
-          gutterSize="s"
+          gutterSize="xs"
           alignItems="center"
           responsive={false}
           justifyContent="spaceBetween"
         >
           <EuiFlexItem grow={false}>
-            <EuiText className={metaTextClassName}>{data.meta}</EuiText>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              {data.footerIcon ? (
+                <EuiFlexItem grow={false}>
+                  <div className={footerIconClassName}>
+                    <EuiIcon type={data.footerIcon} size="s" />
+                  </div>
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem grow={false}>
+                <EuiText className={metaTextClassName}>{data.meta}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBadge color="success">{data.status}</EuiBadge>

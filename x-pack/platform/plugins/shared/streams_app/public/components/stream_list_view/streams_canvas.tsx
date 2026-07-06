@@ -236,6 +236,9 @@ function StreamsCanvasInner() {
   // Presentational search box for the canvas toolbar (mirrors the list tables).
   const [searchQuery, setSearchQuery] = useState('');
   const [flyoutDestination, setFlyoutDestination] = useState<string | null>(null);
+  // Whether the destination whose flyout is open runs a processor (marked by the
+  // `processor` footer glyph). Gates the flyout's extra "Processing" tab.
+  const [flyoutDestinationHasProcessing, setFlyoutDestinationHasProcessing] = useState(false);
   const [flyoutSource, setFlyoutSource] = useState<string | null>(null);
   const [pipelineFlyoutEdgeId, setPipelineFlyoutEdgeId] = useState<string | null>(null);
   // The id of the connector whose "Add step" menu opened the routing flyout.
@@ -277,8 +280,9 @@ function StreamsCanvasInner() {
   } | null>(null);
   // Right-click context menu over a selection: screen position + the node ids
   // it acts on. Null when closed.
-  const openDestinationFlyout = useCallback((destinationName: string) => {
+  const openDestinationFlyout = useCallback((destinationName: string, hasProcessing = false) => {
     setFlyoutDestination(destinationName);
+    setFlyoutDestinationHasProcessing(hasProcessing);
   }, []);
 
   const openSourceFlyout = useCallback((sourceName: string) => {
@@ -751,7 +755,7 @@ function StreamsCanvasInner() {
         }
         const connected = getEdges().some((edge) => edge.target === node.id);
         if (data.mode === 'configured' && connected) {
-          openDestinationFlyout(data.title);
+          openDestinationFlyout(data.title, Boolean(data.footerIcon));
         } else {
           // Unconfigured, or configured-but-not-connected: open the config form.
           setNodes((current) =>
@@ -1446,6 +1450,7 @@ function StreamsCanvasInner() {
                 {flyoutDestination !== null ? (
                   <DestinationFlyout
                     destinationName={flyoutDestination}
+                    hasProcessing={flyoutDestinationHasProcessing}
                     onClose={() => setFlyoutDestination(null)}
                   />
                 ) : null}

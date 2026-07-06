@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Axis,
   BarSeries,
@@ -37,6 +37,7 @@ import {
   EuiTab,
   EuiText,
   EuiTitle,
+  EuiToken,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -221,6 +222,16 @@ const TABS = [
     }),
   },
 ];
+
+// Destinations that run a processor before storage (marked with the `processor`
+// footer glyph on the canvas) expose an extra "Processing" tab, slotted right
+// after "Retention".
+const PROCESSING_TAB = {
+  id: 'processing',
+  label: i18n.translate('xpack.streams.destinationFlyout.tab.processing', {
+    defaultMessage: 'Processing',
+  }),
+};
 
 const METRIC_OPTIONS = [
   {
@@ -826,15 +837,477 @@ function ChartPanel() {
   );
 }
 
+// ── Processing tab ──────────────────────────────────────────────────────────
+// The pipeline/steps editor shown when the "Processing" tab is active: a Steps
+// column (WHERE condition + processors) beside a Data preview table. Technical
+// identifiers (field/value names, the grok pattern, sample rows) are held as
+// constants/data so they read as literal config, not translatable UI copy.
+
+const WHERE_FIELD = 'service.name';
+const WHERE_VALUE = 'postgresql';
+const MANUAL_PIPELINE_NAME = 'MANUAL_INGEST_PIPELINE';
+const MANUAL_PIPELINE_DESC = 'set value of "foo" to "bar"';
+const GROK_PATTERN = '\\[%{WORD:service}\\] %{GREEDYDATA:message} %{NUMBER:error_code}';
+const PREVIEW_FIELD_MESSAGE = 'message';
+const PREVIEW_FIELD_LEVEL = 'log.level';
+
+const PROCESSING_SAMPLE_ROWS: Array<{ message: string; level: string }> = [
+  { message: '2024-10-30 14:25:20 ERROR [MySQL] Query execution failed: "…', level: 'ERROR' },
+  { message: '2024-11-01 10:15:32 ERROR [PostgreSQL] Query execution fail…', level: 'WARN' },
+  { message: '2024-11-01 10:17:45 ERROR [MySQL] Transaction rollback: "UP…', level: 'ERROR' },
+  { message: '2024-11-01 10:19:58 WARN [Redis] Connection timeout: Unable…', level: 'INFO' },
+  { message: '2024-11-01 10:22:14 ERROR [PostgreSQL] Query execution fail…', level: 'ERROR' },
+  { message: '2024-11-02 09:13:58 ERROR [Redis] Connection lost: Unable t…', level: 'ERROR' },
+  { message: '2024-11-01 10:25:30 ERROR [API] Request failed: POST /users…', level: 'ERROR' },
+  { message: '2024-10-30 14:25:20 ERROR [MySQL] Query execution failed: "…', level: 'INFO' },
+  { message: '2024-11-01 10:39:25 WARN [System] High CPU usage detected:…', level: 'ERROR' },
+  { message: '2024-11-02 09:20:30 INFO [System] Scheduled job started: jo…', level: 'ERROR' },
+  { message: '2024-10-30 14:25:20 ERROR [MySQL] Query execution failed: "…', level: 'ERROR' },
+  { message: '2024-11-01 10:15:32 ERROR [PostgreSQL] Query execution fail…', level: 'WARN' },
+  { message: '2024-11-01 10:17:45 ERROR [MySQL] Transaction rollback: "UP…', level: 'ERROR' },
+  { message: '2024-11-01 10:19:58 WARN [Redis] Connection timeout: Unable…', level: 'INFO' },
+  { message: '2024-11-01 10:22:14 ERROR [PostgreSQL] Query execution fail…', level: 'ERROR' },
+  { message: '2024-11-02 09:13:58 ERROR [Redis] Connection lost: Unable t…', level: 'ERROR' },
+  { message: '2024-11-01 10:25:30 ERROR [API] Request failed: POST /users…', level: 'ERROR' },
+  { message: '2024-10-30 14:25:20 ERROR [MySQL] Query execution failed: "…', level: 'INFO' },
+  { message: '2024-10-30 14:25:20 ERROR [MySQL] Query execution failed: "…', level: 'INFO' },
+  { message: '2024-10-30 14:25:20 ERROR [MySQL] Query execution failed: "…', level: 'INFO' },
+];
+
+function CompletenessBadge() {
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="checkInCircleFilled" color="success" size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="success">
+          100%
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+function StepRowActions() {
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="pencil"
+          color="text"
+          size="xs"
+          aria-label={i18n.translate('xpack.streams.destinationFlyout.processing.editStep', {
+            defaultMessage: 'Edit step',
+          })}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="boxesVertical"
+          color="text"
+          size="xs"
+          aria-label={i18n.translate('xpack.streams.destinationFlyout.processing.stepActions', {
+            defaultMessage: 'More actions',
+          })}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+function ProcessingStepsPanel() {
+  const { euiTheme } = useEuiTheme();
+  const monoClassName = css`
+    font-family: ${euiTheme.font.familyCode};
+    font-size: 11px;
+    line-height: ${euiTheme.size.base};
+    color: ${euiTheme.colors.textParagraph};
+    word-break: break-word;
+  `;
+  return (
+    <EuiPanel hasBorder paddingSize="m">
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.streams.destinationFlyout.processing.stepsTitle', {
+                defaultMessage: 'Steps',
+              })}
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem />
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="clickLeft"
+            display="base"
+            color="text"
+            size="s"
+            aria-label={i18n.translate('xpack.streams.destinationFlyout.processing.visualEditor', {
+              defaultMessage: 'Visual editor',
+            })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="editorCodeBlock"
+            display="base"
+            color="text"
+            size="s"
+            aria-label={i18n.translate('xpack.streams.destinationFlyout.processing.codeEditor', {
+              defaultMessage: 'Code editor',
+            })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton size="s" color="text" iconType="plus">
+            {i18n.translate('xpack.streams.destinationFlyout.processing.addCondition', {
+              defaultMessage: 'Condition',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton size="s" color="text" iconType="plus">
+            {i18n.translate('xpack.streams.destinationFlyout.processing.addProcessor', {
+              defaultMessage: 'Processor',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      {/* WHERE condition step (expanded) */}
+      <EuiPanel hasBorder paddingSize="s">
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="arrowDown" size="s" color="subdued" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>
+                {i18n.translate('xpack.streams.destinationFlyout.processing.where', {
+                  defaultMessage: 'WHERE',
+                })}
+              </strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToken iconType="tokenKeyword" size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">{WHERE_FIELD}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.streams.destinationFlyout.processing.equals', {
+                defaultMessage: 'equals',
+              })}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{WHERE_VALUE}</EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <CompletenessBadge />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <StepRowActions />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        <EuiPanel hasShadow={false} color="subdued" paddingSize="s">
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="checkInCircleFilled" color="success" size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                <strong>{MANUAL_PIPELINE_NAME}</strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem />
+            <EuiFlexItem grow={false}>
+              <StepRowActions />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            {MANUAL_PIPELINE_DESC}
+          </EuiText>
+        </EuiPanel>
+      </EuiPanel>
+
+      <EuiSpacer size="s" />
+
+      {/* GROK processor step */}
+      <EuiPanel hasBorder paddingSize="s">
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="checkInCircleFilled" color="success" size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>
+                {i18n.translate('xpack.streams.destinationFlyout.processing.grok', {
+                  defaultMessage: 'GROK',
+                })}
+              </strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <CompletenessBadge />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">
+              {i18n.translate('xpack.streams.destinationFlyout.processing.unsaved', {
+                defaultMessage: 'Unsaved',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <StepRowActions />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <div className={monoClassName}>{GROK_PATTERN}</div>
+      </EuiPanel>
+    </EuiPanel>
+  );
+}
+
+function ProcessingDataPreviewPanel() {
+  const { euiTheme } = useEuiTheme();
+  const [selectedPreviewTab, setSelectedPreviewTab] = useState('data-preview');
+  const cellPadding = css`
+    padding: ${euiTheme.size.xs} ${euiTheme.size.m};
+  `;
+  const monoClassName = css`
+    font-family: ${euiTheme.font.familyCode};
+    font-size: 11px;
+    line-height: ${euiTheme.size.base};
+    color: ${euiTheme.colors.textParagraph};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  `;
+  return (
+    <EuiPanel hasBorder paddingSize="none">
+      {/* Preview tabs + sampling controls */}
+      <div
+        className={css`
+          padding: 0 ${euiTheme.size.m};
+        `}
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+          <EuiFlexItem grow={false}>
+            <EuiTabs bottomBorder={false} size="s">
+              <EuiTab
+                isSelected={selectedPreviewTab === 'data-preview'}
+                onClick={() => setSelectedPreviewTab('data-preview')}
+              >
+                {i18n.translate('xpack.streams.destinationFlyout.processing.dataPreview', {
+                  defaultMessage: 'Data preview',
+                })}
+              </EuiTab>
+              <EuiTab
+                isSelected={selectedPreviewTab === 'detected-fields'}
+                onClick={() => setSelectedPreviewTab('detected-fields')}
+              >
+                {i18n.translate('xpack.streams.destinationFlyout.processing.detectedFields', {
+                  defaultMessage: 'Detected fields',
+                })}
+              </EuiTab>
+            </EuiTabs>
+          </EuiFlexItem>
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.streams.destinationFlyout.processing.latestSamples', {
+                defaultMessage: 'Latest samples',
+              })}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="s" color="text" iconType="arrowDown" iconSide="right">
+              {i18n.translate('xpack.streams.destinationFlyout.processing.partial', {
+                defaultMessage: 'Partial',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="controlsHorizontal"
+              display="base"
+              color="text"
+              size="s"
+              aria-label={i18n.translate(
+                'xpack.streams.destinationFlyout.processing.previewSettings',
+                { defaultMessage: 'Preview settings' }
+              )}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="refresh"
+              display="base"
+              color="text"
+              size="s"
+              aria-label={i18n.translate('xpack.streams.destinationFlyout.processing.refresh', {
+                defaultMessage: 'Refresh',
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+      <EuiHorizontalRule margin="none" />
+
+      {/* Table controls */}
+      <div className={cellPadding}>
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="xs" color="text" iconType="inspect">
+              {i18n.translate('xpack.streams.destinationFlyout.processing.summary', {
+                defaultMessage: 'Summary',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="xs" color="text" iconType="tableDensityNormal">
+              {i18n.translate('xpack.streams.destinationFlyout.processing.columns', {
+                defaultMessage: 'Columns {count}',
+                values: { count: 2 },
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="xs" color="text" iconType="sortable">
+              {i18n.translate('xpack.streams.destinationFlyout.processing.sortFields', {
+                defaultMessage: 'Sort fields {count}',
+                values: { count: 1 },
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="controls"
+              color="text"
+              size="xs"
+              aria-label={i18n.translate(
+                'xpack.streams.destinationFlyout.processing.columnSettings',
+                { defaultMessage: 'Column settings' }
+              )}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="fullScreen"
+              color="text"
+              size="xs"
+              aria-label={i18n.translate('xpack.streams.destinationFlyout.processing.fullScreen', {
+                defaultMessage: 'Full screen',
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+      <EuiHorizontalRule margin="none" />
+
+      {/* Table header */}
+      <div className={cellPadding}>
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+          <EuiFlexItem grow={false} style={{ width: 16 }} />
+          <EuiFlexItem>
+            <EuiText size="xs" color="subdued">
+              <strong>{PREVIEW_FIELD_MESSAGE}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ width: 72 }}>
+            <EuiText size="xs" color="subdued">
+              <strong>{PREVIEW_FIELD_LEVEL}</strong>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+      <EuiHorizontalRule margin="none" />
+
+      {/* Rows */}
+      {PROCESSING_SAMPLE_ROWS.map((row, index) => (
+        <React.Fragment key={index}>
+          <div className={cellPadding}>
+            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap={false}>
+              <EuiFlexItem grow={false} style={{ width: 16 }}>
+                <EuiIcon type="expand" size="s" color="subdued" />
+              </EuiFlexItem>
+              <EuiFlexItem
+                className={css`
+                  min-width: 0;
+                `}
+              >
+                <div className={monoClassName}>{row.message}</div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} style={{ width: 72 }}>
+                <EuiText size="xs">{row.level}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+          {index < PROCESSING_SAMPLE_ROWS.length - 1 ? <EuiHorizontalRule margin="none" /> : null}
+        </React.Fragment>
+      ))}
+    </EuiPanel>
+  );
+}
+
+function ProcessingPanel() {
+  return (
+    <EuiFlexGroup gutterSize="m" alignItems="flexStart">
+      <EuiFlexItem
+        grow={1}
+        className={css`
+          min-width: 0;
+        `}
+      >
+        <ProcessingStepsPanel />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={1}
+        className={css`
+          min-width: 0;
+        `}
+      >
+        <ProcessingDataPreviewPanel />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
 export function DestinationFlyout({
   destinationName,
+  hasProcessing = false,
   onClose,
 }: {
   destinationName: string;
+  hasProcessing?: boolean;
   onClose: () => void;
 }) {
   const titleId = useGeneratedHtmlId({ prefix: 'destinationFlyoutTitle' });
   const [selectedTab, setSelectedTab] = useState('overview');
+
+  const tabs = useMemo(() => {
+    if (!hasProcessing) {
+      return TABS;
+    }
+    const retentionIndex = TABS.findIndex((tab) => tab.id === 'retention');
+    const next = [...TABS];
+    next.splice(retentionIndex + 1, 0, PROCESSING_TAB);
+    return next;
+  }, [hasProcessing]);
 
   return (
     <EuiFlyout
@@ -890,7 +1363,7 @@ export function DestinationFlyout({
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiTabs bottomBorder={false}>
-          {TABS.map((tab) => (
+          {tabs.map((tab) => (
             <EuiTab
               key={tab.id}
               isSelected={tab.id === selectedTab}
@@ -903,7 +1376,10 @@ export function DestinationFlyout({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiFlexGroup gutterSize="m" alignItems="flexStart">
+        {selectedTab === 'processing' ? (
+          <ProcessingPanel />
+        ) : (
+          <EuiFlexGroup gutterSize="m" alignItems="flexStart">
           {/* Left lane */}
           <EuiFlexItem
             grow={2}
@@ -940,7 +1416,8 @@ export function DestinationFlyout({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-        </EuiFlexGroup>
+          </EuiFlexGroup>
+        )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );

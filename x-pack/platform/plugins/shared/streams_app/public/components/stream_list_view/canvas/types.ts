@@ -29,6 +29,12 @@ export interface DestinationNodeData {
   status?: string;
   storage?: DestinationStorage;
   /**
+   * EUI icon type shown in a small boxed glyph at the start of the configured
+   * destination footer (e.g. `processor` to mark a destination that runs a
+   * processor before storage). Omitted destinations render no footer glyph.
+   */
+  footerIcon?: string;
+  /**
    * When true, the configured destination renders an attached routing "tab" on
    * its left (the "opinionated routing" / routing-with-inheritance result). The
    * tab exposes an `attached-routing` source handle that fans a branch out to a
