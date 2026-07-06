@@ -96,6 +96,7 @@ function createNavTree({
             renderAs: 'extension',
             extensionId: 'recentlyAccessedDashboards',
             popoverOnly: true,
+            hideWhenEmpty: true,
           },
         ],
       },

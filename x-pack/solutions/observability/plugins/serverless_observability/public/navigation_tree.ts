@@ -87,6 +87,7 @@ export const createNavigationTree = ({
             renderAs: 'extension',
             extensionId: 'recentlyAccessedDashboards',
             popoverOnly: true,
+            hideWhenEmpty: true,
           },
         ],
       },
