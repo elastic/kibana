@@ -11,7 +11,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { useAnomalyOverview } from '../../../entity_analytics/api/hooks/use_anomaly_overview';
 import { useAnomalyPrivileges } from '../../../entity_analytics/api/hooks/use_anomaly_privileges';
-import { ObservedDataSection } from './components/observed_data_section';
+import { ObservedDataSection } from '../../../flyout_v2/entity/shared/components/observed_data_section';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -24,7 +24,7 @@ import type { EntityDetailsPath } from '../shared/components/left_panel/left_pan
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import type { EntityRiskScore, UserItem } from '../../../../common/search_strategy';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import type { ObservedEntityData } from '../../../flyout_v2/entity/shared/components/observed_entity/types';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
@@ -91,7 +91,7 @@ export const UserPanelContent = ({
     <>
       {!skipRiskAndCriticality && (
         <EntityHighlightsAccordion
-          entityIdentifier={entityRecord ? entityRecord.entity.id : userName}
+          entityIdentifier={entityRecord?.entity?.id ?? userName}
           entityType={EntityType.user}
         />
       )}
@@ -107,7 +107,7 @@ export const UserPanelContent = ({
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
               entityType={EntityType.user}
-              entityId={entityRecord?.entity.id}
+              entityId={entityRecord?.entity?.id}
               prefetchedResolutionRisk={prefetchedResolutionRisk}
             />
             <EuiHorizontalRule />
@@ -159,10 +159,10 @@ export const UserPanelContent = ({
         entityType={EntityType.user}
       />
       <ObservedDataSection
+        entityType={EntityType.user}
         identityFields={identityFields}
         entityRecord={entityRecord}
-        userName={userName}
-        observedUser={observedUser}
+        observedData={observedUser}
         contextID={contextID}
         scopeId={scopeId}
         queryId={USER_PANEL_OBSERVED_USER_QUERY_ID}

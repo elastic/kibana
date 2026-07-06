@@ -20,7 +20,10 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { IInterpreterRenderEvent } from '@kbn/expressions-plugin/common';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
-import { getComputedColumnWarningForColumns } from '@kbn/chart-expressions-common';
+import {
+  isFilterableColumnSet,
+  getFilterDrilldownWarningMessage,
+} from '@kbn/chart-expressions-common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { PartitionVisParams } from '../../common/types';
 import type { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
@@ -87,11 +90,14 @@ export const getLegendActions = (
     // column may be undefined when columnIndex === -1; the early return below ensures it is
     // non-null for the rest of the component.
     const column = columnIndex !== -1 ? visData.columns[columnIndex] : undefined;
-    const warningMessage: string | undefined =
-      isEsqlMode && column ? getComputedColumnWarningForColumns([column]) : undefined;
+    // isComputedColumnFilterable gates the disabled state below; warningMessage is
+    // display-only and can be suppressed (e.g. for dates) without affecting it.
+    const isComputedColumnFilterable = !isEsqlMode || !column || isFilterableColumnSet([column]);
+    const warningMessage =
+      isEsqlMode && column ? getFilterDrilldownWarningMessage([column]) : undefined;
 
     useEffect(() => {
-      if (!canFilter || !filterData || warningMessage) {
+      if (!canFilter || !filterData || !isComputedColumnFilterable) {
         setIsFilterable(false);
         return;
       }
@@ -99,7 +105,7 @@ export const getLegendActions = (
       // while the promise is in flight.
       setIsFilterable(true);
       (async () => setIsFilterable(await canFilter(filterData)))();
-    }, [filterData, warningMessage]);
+    }, [filterData, isComputedColumnFilterable]);
 
     if (columnIndex === -1 || !column) {
       return null;
@@ -118,8 +124,7 @@ export const getLegendActions = (
 
     const panelItems: EuiContextMenuPanelDescriptor['items'] = [];
 
-    if (warningMessage) {
-      // Show disabled filter items with a warning message for ES|QL computed columns
+    if (!isComputedColumnFilterable && warningMessage) {
       panelItems.push(
         {
           name: filterForValueLabel,
@@ -134,13 +139,19 @@ export const getLegendActions = (
           icon: <EuiIcon type="minusCircle" size="m" aria-hidden={true} />,
           disabled: true,
           onClick: () => {},
+        },
+        {
+          renderItem: () => <PopoverFooterMessage message={warningMessage} />,
         }
       );
-      // Show warning message
-      panelItems.push({
-        renderItem: () => <PopoverFooterMessage message={warningMessage} />,
-      });
-    } else if (!hasFilterCellAction(compatibleCellActions) && isFilterable && filterData) {
+    }
+
+    if (
+      isComputedColumnFilterable &&
+      !hasFilterCellAction(compatibleCellActions) &&
+      isFilterable &&
+      filterData
+    ) {
       panelItems.push(
         {
           name: filterForValueLabel,

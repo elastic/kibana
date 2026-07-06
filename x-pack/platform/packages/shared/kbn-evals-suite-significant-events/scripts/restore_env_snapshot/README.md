@@ -62,13 +62,13 @@ node scripts/restore_sigevents_env_snapshot.js \
 
 All steps run inside a temporary-user context: the script creates `restore_sigevents_env_snapshot_tmp` with the `system_indices_superuser` role before Step 1 and deletes it after Step 7 (or on any failure).
 
-1. **Step 1/7 — Restore system indices**: calls `restoreSnapshot` with rename pattern `snapshot-(.*)` → `.$1`. Plain system indices were captured as `snapshot-kibana_streams_tasks-000001` and are restored back to `.kibana_streams_tasks-000001`. Missing indices are a hard error (no `allowNoMatches`).
+1. **Step 1/7 — Restore system indices**: calls `restoreSnapshot` with rename pattern `snapshot-(.*)` → `.$1`. Plain system indices were captured as `snapshot-kibana_streams_tasks-000001` and are restored back to `.kibana_streams_tasks-000001`. Missing indices are skipped (`allowNoMatches: true`) — expected for older snapshots captured before the index was created. Kibana recreates `.kibana_streams_tasks` on startup, so skipping is safe. A warning is logged when nothing restores.
 
 2. **Step 2/7 — Ensure system-index aliases**: calls `ensureKnownAliases` for the restored system indices. Uses a known alias configuration (`INDEX_ALIAS_CONFIG`) to recreate aliases with `is_write_index: true` and `is_hidden: true`. Idempotent — skips aliases that already exist.
 
 3. **Step 3/7 — Enable streams**: calls `ensureStreamsEnabled` to enable Streams via the Kibana API (`POST /api/streams/_enable`). This must happen before replaying data so that Streams-managed data streams are properly configured.
 
-4. **Step 4/7 — Restore the Significant Events data streams**: `.significant_events-knowledge_indicators`, `.significant_events-discoveries`, and `.significant_events-detections` are each captured as a plain `snapshot-*` index but are data streams owned by the streams plugin. Restoring one under its real name would create a concrete index squatting the data-stream name (which ES cannot then materialize as a data stream), so each snapshot is restored to a temp index and reindexed into the data-stream name — ES auto-creates the data stream from the always-present template. No-op for any data stream absent from an older snapshot — logs a notice and continues.
+4. **Step 4/7 — Restore the Significant Events data streams**: each stream is restored from its `snapshot-*` plain index and reindexed into the data-stream name — ES auto-creates the stream from the always-present template. Discoveries and detections are skipped silently when not in the snapshot (the user chose not to run the discovery workflow at capture time).
 
 5. **Step 5/7 — Replay data indices**: calls `replaySnapshot` from `@kbn/es-snapshot-loader` with a GCS repository and the resolved `--patterns`. This restores data streams (e.g. `logs.otel`) with timestamp transformation so timestamps are shifted to the current time window.
 
@@ -84,4 +84,4 @@ See [`capture_env_snapshot/README.md`](../capture_env_snapshot/README.md) for th
 
 ## Required privileges
 
-The script automatically creates and deletes a temporary `system_indices_superuser` user. The credentials you pass (`--es-username` / `--es-password`) only need the `manage_security` cluster privilege to do so — the built-in `elastic` superuser works out of the box.
+The script automatically creates and deletes a temporary `system_indices_superuser` user. On self-managed Elasticsearch the `system_indices_superuser` role may not exist; the script creates it automatically on first run (it is a built-in on Elastic Cloud). The credentials you pass (`--es-username` / `--es-password`) only need the `manage_security` cluster privilege — the built-in `elastic` superuser works out of the box.
