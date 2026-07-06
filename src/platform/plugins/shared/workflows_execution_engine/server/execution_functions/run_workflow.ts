@@ -17,6 +17,7 @@ import {
 } from '@kbn/workflows';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
+import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
 import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
@@ -59,6 +60,35 @@ export async function runWorkflow({
 }): Promise<RunWorkflowResult | void> {
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
+  let setupResult: Awaited<ReturnType<typeof setupDependencies>>;
+  const workflowRunId = workflowExecutionWithVersion.id;
+
+  try {
+    setupResult = await setupDependencies(
+      workflowExecutionWithVersion,
+      spaceId,
+      logger,
+      config,
+      dependencies,
+      fakeRequest,
+      workflowsExecutionEngine
+    );
+  } catch (error) {
+    // The graph could not be built — a permanent author error (the parallel
+    // branch-body constraints, normally caught in the editor by validateGraphBuild
+    // but reachable here for API/imported/legacy workflows that bypass the UI).
+    // setupDependencies has already persisted the execution as FAILED with the
+    // actionable reason, so return cleanly here instead of rethrowing — a rethrow
+    // would be treated as a transient task failure and recovered into an opaque
+    // TaskRecoveryError.
+    if (isWorkflowGraphSetupError(error)) {
+      return;
+    }
+    throw error;
+  } finally {
+    setupSpan?.end();
+  }
+
   const {
     workflowRuntime,
     stepExecutionRuntimeFactory,
@@ -71,19 +101,7 @@ export async function runWorkflow({
     workflowExecutionRepository,
     esClient,
     telemetryClient,
-  } = await setupDependencies(
-    workflowExecutionWithVersion,
-    spaceId,
-    logger,
-    config,
-    dependencies,
-    fakeRequest,
-    workflowsExecutionEngine
-  );
-
-  const workflowRunId = workflowExecutionWithVersion.doc.id;
-
-  setupSpan?.end();
+  } = setupResult;
 
   const execution = workflowExecutionState.getWorkflowExecution();
   if (isTerminalStatus(execution.status)) {

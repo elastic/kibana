@@ -15,13 +15,19 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardOut } from '../transforms';
-import type { DashboardSearchRequestParams, DashboardSearchResponseBody } from './types';
+import type {
+  DashboardSearchRequestParams,
+  DashboardSearchResponseBody,
+  LegacyDashboardSearchRequestParams,
+  LegacyDashboardSearchResponseBody,
+} from './types';
 
 export async function search(
   requestCtx: RequestHandlerContext,
-  searchParams: DashboardSearchRequestParams,
-  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
-): Promise<DashboardSearchResponseBody> {
+  searchParams: DashboardSearchRequestParams | LegacyDashboardSearchRequestParams,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
+  useAsCodeSearchSchemas: boolean
+): Promise<DashboardSearchResponseBody | LegacyDashboardSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const normalizeToArray = (value?: string | string[]) => {
     if (value === undefined) return undefined;
@@ -49,29 +55,33 @@ export async function search(
     ...tagsToFindOptions({ included: includedTags, excluded: excludedTags }),
   });
 
-  return {
-    dashboards: soResponse.saved_objects.map((so) => {
-      const {
-        dashboardState: { description, tags, time_range, title },
-      } = transformDashboardOut(so.attributes, so.references, undefined, strictValidationSchema);
+  const dashboards = soResponse.saved_objects.map((so) => {
+    const {
+      dashboardState: { description, tags, time_range, title },
+    } = transformDashboardOut(so.attributes, so.references, undefined, strictValidationSchema);
 
-      return {
-        id: so.id,
-        data: {
-          ...(description && { description }),
-          ...(tags && { tags }),
-          ...(time_range && { time_range }),
-          ...(so?.accessControl && {
-            access_control: {
-              access_mode: so.accessControl.accessMode,
-            },
-          }),
-          title: title ?? '',
-        },
-        meta: getMeta(so),
-      };
-    }),
-    page: soResponse.page,
-    total: soResponse.total,
-  };
+    return {
+      id: so.id,
+      data: {
+        ...(description && { description }),
+        ...(tags && { tags }),
+        ...(time_range && { time_range }),
+        ...(so?.accessControl && {
+          access_control: {
+            access_mode: so.accessControl.accessMode,
+          },
+        }),
+        title: title ?? '',
+      },
+      meta: getMeta(so),
+    };
+  });
+
+  const { total, page, per_page } = soResponse;
+
+  // The dashboard summaries are identical across schemas; only the response envelope differs.
+  // The legacy branch can be removed once the `asCode.useGASchemas` flag is gone.
+  return useAsCodeSearchSchemas
+    ? ({ data: dashboards, meta: { total, page, per_page } } as DashboardSearchResponseBody)
+    : ({ dashboards, page, total } as LegacyDashboardSearchResponseBody);
 }

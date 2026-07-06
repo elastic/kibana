@@ -254,6 +254,105 @@ describe('WorkflowExecuteSyncStrategy', () => {
       expect(result.error!.message).toContain('timed_out');
     });
 
+    it('names the failing step and its error when the child timed out', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.TIMED_OUT,
+        stepExecutionIds: ['step-1', 'step-2'],
+      } as any);
+
+      mockStepRepo.getStepExecutionsByWorkflowExecution.mockResolvedValue([
+        {
+          id: 'step-1',
+          stepId: 'sampling',
+          stepType: 'esql',
+          status: ExecutionStatus.COMPLETED,
+          globalExecutionIndex: 0,
+        },
+        {
+          id: 'step-2',
+          stepId: 'long_wait',
+          stepType: 'wait',
+          status: ExecutionStatus.FAILED,
+          error: { type: 'TimeoutError', message: 'Failed due to workflow timeout' },
+          globalExecutionIndex: 1,
+        },
+      ] as any);
+
+      const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(result.status).toBe('failed');
+      expect(result.error!.message).toBe(
+        "Sub-workflow execution timed_out at step 'long_wait' (wait): Failed due to workflow timeout"
+      );
+    });
+
+    it('falls back to plain timed_out when no child step carries an error or is running', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.TIMED_OUT,
+        stepExecutionIds: ['step-1'],
+      } as any);
+
+      mockStepRepo.getStepExecutionsByWorkflowExecution.mockResolvedValue([
+        {
+          id: 'step-1',
+          stepId: 'sampling',
+          status: ExecutionStatus.COMPLETED,
+          globalExecutionIndex: 0,
+        },
+      ] as any);
+
+      const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(result.status).toBe('failed');
+      expect(result.error!.message).toBe('Sub-workflow execution timed_out');
+    });
+
+    it('surfaces cancellationReason for a skipped child', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.SKIPPED,
+        cancellationReason: 'Skipped due to existing non-terminal scheduled execution',
+      } as any);
+
+      const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(result.status).toBe('failed');
+      expect(result.error!.message).toBe(
+        'Sub-workflow execution skipped: Skipped due to existing non-terminal scheduled execution'
+      );
+    });
+
+    it('prefers the child error object over status/cancellationReason when present', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.TIMED_OUT,
+        cancellationReason: 'some reason',
+        error: { type: 'Error', message: 'real child error' },
+      } as any);
+
+      const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(result.status).toBe('failed');
+      expect(result.error!.message).toBe('real child error');
+      expect(mockStepRepo.getStepExecutionsByWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('does not fail the parent step if reading child steps throws during enrichment', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.TIMED_OUT,
+        stepExecutionIds: ['step-1'],
+      } as any);
+      mockStepRepo.getStepExecutionsByWorkflowExecution.mockRejectedValue(new Error('mget down'));
+
+      const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(result.status).toBe('failed');
+      expect(result.error!.message).toBe('Sub-workflow execution timed_out');
+    });
+
     it('should return waiting when child is not terminal (e.g. parent resume before child completes)', async () => {
       mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
         id: 'child-exec-1',
