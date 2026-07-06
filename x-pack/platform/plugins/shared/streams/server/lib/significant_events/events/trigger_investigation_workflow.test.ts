@@ -36,7 +36,9 @@ const createWorkflowsManagement = ({
     getWorkflow: jest
       .fn()
       .mockResolvedValue(
-        workflowExists ? { id: 'system-streams-investigation', definition: 'yaml: ...' } : null
+        workflowExists
+          ? { id: 'system-significant-events-investigation', definition: 'yaml: ...' }
+          : null
       ),
     runWorkflow: jest.fn().mockResolvedValue(executionId),
   },

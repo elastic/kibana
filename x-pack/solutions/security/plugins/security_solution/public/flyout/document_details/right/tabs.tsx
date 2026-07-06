@@ -6,13 +6,16 @@
  */
 
 import type { ReactElement } from 'react';
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './test_ids';
 import type { RightPanelPaths } from '.';
-import { JsonTab } from './tabs/json_tab';
+import { JsonTab } from '../../../flyout_v2/document/main/tabs/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
+import { useDocumentDetailsContext } from '../shared/context';
 
 export interface RightPanelTabType {
   id: RightPanelPaths;
@@ -20,6 +23,17 @@ export interface RightPanelTabType {
   content: React.ReactElement;
   'data-test-subj': string;
 }
+
+/**
+ * Adapter that bridges the expandable flyout's `DocumentDetailsContext` to the prop-based
+ * `JsonTab` that now lives in `flyout_v2`.
+ */
+const JsonTabContent = memo(() => {
+  const { searchHit, isRulePreview } = useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+  return <JsonTab hit={hit} isRulePreview={isRulePreview} />;
+});
+JsonTabContent.displayName = 'JsonTabContent';
 
 export const overviewTab: RightPanelTabType = {
   id: 'overview',
@@ -54,5 +68,5 @@ export const jsonTab: RightPanelTabType = {
       defaultMessage="JSON"
     />
   ),
-  content: <JsonTab />,
+  content: <JsonTabContent />,
 };
