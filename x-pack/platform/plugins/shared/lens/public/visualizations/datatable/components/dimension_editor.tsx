@@ -34,6 +34,7 @@ import {
   getColorByValuePalette,
   getDefaultProgressPalette,
   getDefaultFillConfig,
+  isPaletteFillMode,
 } from '../utils';
 import {
   CELL_DECORATION_CAPABILITIES,
@@ -188,6 +189,11 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
     getDataBoundsForAccessor(accessor, currentData, localState.columns) ?? getFallbackDataBounds();
 
   let activePalette: PaletteOutput<CustomPaletteParams>;
+  const shouldUseDefaultProgressPalette =
+    currentColorMode === 'progress' &&
+    column?.fillStyle != null &&
+    isPaletteFillMode(column.fillStyle.fillMode) &&
+    !column.palette;
 
   if (showColorByTerms) {
     // Terms coloring uses the existing palette or the 'default' categorical palette
@@ -196,8 +202,11 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
       name: column?.palette?.name ?? 'default',
     };
   } else {
-    // Value coloring uses the existing palette or the 'positive' color by value palette
-    activePalette = getColorByValuePalette(props.paletteService, currentMinMax, column?.palette);
+    // Progress bars with a palette fill but no persisted palette should show the
+    // same default palette the renderer uses, instead of the generic numeric fallback.
+    activePalette = shouldUseDefaultProgressPalette
+      ? getDefaultProgressPalette()
+      : getColorByValuePalette(props.paletteService, currentMinMax, column?.palette);
   }
 
   // Check if a legacy palette is used for terms coloring instead of a color mapping

@@ -492,6 +492,32 @@ describe('data table progress bar regressions', () => {
     );
   });
 
+  it('shows the default progress palette for a solid progress metric with no persisted palette', () => {
+    state.columns[0] = {
+      columnId: 'foo',
+      colorMode: 'progress',
+      fillStyle: { fillMode: 'solid', valueRange: { mode: 'auto' } },
+    };
+
+    renderEditor();
+
+    expect(screen.getByTestId('mock-current-palette')).toHaveTextContent('status');
+  });
+
+  it('switches a single progress metric without a persisted palette to the default progress palette', async () => {
+    state.columns[0] = {
+      columnId: 'foo',
+      colorMode: 'progress',
+      fillStyle: { fillMode: 'single', valueRange: { mode: 'auto' }, color: '#1ba9f5' },
+    };
+
+    renderEditor();
+
+    await user.click(screen.getByTestId('lnsDatatable_progressBar_barColor_solid'));
+
+    expect(screen.getByTestId('mock-current-palette')).toHaveTextContent('status');
+  });
+
   it('flushes progress-bar palette changes to Lens state immediately', async () => {
     state.columns[0] = {
       columnId: 'foo',
