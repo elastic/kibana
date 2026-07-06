@@ -37,10 +37,21 @@ describe('setAssetCriticalityTool', () => {
   const handlerContext = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
   const mockCheckPrivileges = jest.fn().mockResolvedValue({
+    hasAllRequested: true,
     privileges: {
       elasticsearch: {
-        index: new Proxy({}, { get: () => [{ privilege: 'write', authorized: true }] }),
+        cluster: [],
+        index: new Proxy(
+          {},
+          {
+            get: () => [
+              { privilege: 'read', authorized: true },
+              { privilege: 'write', authorized: true },
+            ],
+          }
+        ),
       },
+      kibana: [],
     },
   });
   const mockSecurity = {

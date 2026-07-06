@@ -12,6 +12,8 @@ import {
 } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { checkEntityStoreIndexPrivileges } from '../../routes/apis/utils/check_and_format_privileges';
 import {
   MAX_WORKFLOW_MESSAGE_LENGTH,
   updateAssetCriticalityStepCommonDefinition,
@@ -25,7 +27,8 @@ const MAX_RECALC_ERROR_MESSAGE_LENGTH = 200;
 export const getUpdateAssetCriticalityStepDefinition = (
   getCreateCRUDClient: () => Promise<EntityStoreStartContract['createCRUDClient']>,
   getWorkflowsExtensionsStart: () => Promise<WorkflowsExtensionsServerPluginStart | undefined>,
-  getLicensingStart: () => Promise<LicensingPluginStart>
+  getLicensingStart: () => Promise<LicensingPluginStart>,
+  getSecurityStart: () => Promise<SecurityPluginStart>
 ) =>
   createServerStepDefinition({
     ...updateAssetCriticalityStepCommonDefinition,
@@ -42,6 +45,23 @@ export const getUpdateAssetCriticalityStepDefinition = (
         const esClient = context.contextManager.getScopedEsClient();
         const { workflow } = context.contextManager.getContext();
         const workflowsExtensions = await getWorkflowsExtensionsStart();
+        const security = await getSecurityStart();
+        const fakeRequest = context.contextManager.getFakeRequest();
+
+        const { has_write_permissions: hasWritePermissions } =
+          await checkEntityStoreIndexPrivileges({
+            request: fakeRequest,
+            security,
+            spaceId: workflow.spaceId,
+          });
+
+        if (!hasWritePermissions) {
+          throw new ExecutionError({
+            type: 'PermissionError',
+            message: 'You do not have permission to update asset criticality in this space.',
+          });
+        }
+
         const crudClient = createCRUDClient(
           esClient,
           workflow.spaceId,

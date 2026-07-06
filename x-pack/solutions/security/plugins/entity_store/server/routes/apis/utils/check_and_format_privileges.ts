@@ -11,6 +11,13 @@ import type {
   CheckPrivilegesResponse,
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
+import {
+  getEntitiesAlias,
+  getLatestEntityIndexPattern,
+  getEntityMetadataAlias,
+  getMetadataEntityIndexPattern,
+  ENTITY_LATEST,
+} from '../../../../common';
 
 export type Privileges = z.infer<typeof Privileges>;
 export const Privileges = z.object({
@@ -91,6 +98,54 @@ export async function checkAndFormatPrivileges({
     has_all_required: hasAllRequested,
     ...hasReadWritePermissions(privileges.elasticsearch, indexPatterns),
   };
+}
+
+export interface CheckEntityStoreIndexPrivilegesOpts {
+  request: KibanaRequest;
+  security: SecurityPluginStart;
+  spaceId: string;
+  /**
+   * Also checks read access to the metadata alias/index pattern, e.g. for the
+   * `check_privileges` route, which needs to know whether the metadata indices are readable.
+   */
+  includeMetadataPrivileges?: boolean;
+}
+
+/**
+ * Shared write/read privilege check for the entities + latest entity indices, reused by the
+ * `check_privileges` route, the `entityStore.updateAssetCriticality` workflow step, and the
+ * Security Solution `set_asset_criticality` agent builder tool.
+ */
+export async function checkEntityStoreIndexPrivileges({
+  request,
+  security,
+  spaceId,
+  includeMetadataPrivileges = false,
+}: CheckEntityStoreIndexPrivilegesOpts): Promise<Privileges> {
+  const entitiesAliasPattern = getEntitiesAlias(ENTITY_LATEST, spaceId);
+  const latestEntityIndexPattern = getLatestEntityIndexPattern(spaceId);
+
+  const index: Record<string, string[]> = {
+    [entitiesAliasPattern]: ['read', 'write'],
+    [latestEntityIndexPattern]: ['read', 'write'],
+  };
+
+  if (includeMetadataPrivileges) {
+    index[getEntityMetadataAlias(spaceId)] = ['read'];
+    index[getMetadataEntityIndexPattern(spaceId)] = ['read'];
+  }
+
+  return checkAndFormatPrivileges({
+    request,
+    security,
+    indexPatterns: [entitiesAliasPattern, latestEntityIndexPattern],
+    privilegesToCheck: {
+      elasticsearch: {
+        cluster: [],
+        index,
+      },
+    },
+  });
 }
 
 export const hasReadWritePermissions = (

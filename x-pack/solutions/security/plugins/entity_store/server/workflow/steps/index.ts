@@ -19,7 +19,8 @@ export const registerSteps = (
     getUpdateAssetCriticalityStepDefinition(
       () => startServices.then(([, , startContract]) => startContract.createCRUDClient),
       () => startServices.then(([, pluginsStart]) => pluginsStart.workflowsExtensions),
-      () => startServices.then(([, pluginsStart]) => pluginsStart.licensing)
+      () => startServices.then(([, pluginsStart]) => pluginsStart.licensing),
+      () => startServices.then(([, pluginsStart]) => pluginsStart.security)
     )
   );
 };

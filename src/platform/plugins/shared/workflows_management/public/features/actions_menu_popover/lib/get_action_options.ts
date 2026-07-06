@@ -87,7 +87,7 @@ export function getActionOptions(
       defaultMessage: 'Work with Kibana data and features directly from your workflow',
     }),
     options: [],
-    nestedGroups: [kibanaCasesGroup, kibanaSecurityGroup],
+    nestedGroups: [kibanaCasesGroup, kibanaEntityStoreGroup, kibanaSecurityGroup],
   };
   const externalGroup: ActionOptionData = {
     iconType: 'plugs',

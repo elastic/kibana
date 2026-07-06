@@ -17,8 +17,8 @@ export const UPDATE_ASSET_CRITICALITY_STEP_ID = 'entityStore.updateAssetCritical
 const MAX_ENTITY_ID_VALUE_LENGTH = 1000;
 
 /**
- * Workflow messages are typically short text strings (~1000 characters). We use 1000 here to
- * safely accommodate them while preventing unbounded string input (DoS). The server handler
+ * Workflow messages are typically short text strings. We use 1500 here to
+ * safely accommodate these messages that may include the entity ID (max 1000). The server handler
  * truncates its output message to this same limit, since it interpolates the (up to
  * `MAX_ENTITY_ID_VALUE_LENGTH`-long) `entity_id` and, on failure, an upstream error message of
  * unbounded length.
@@ -35,7 +35,7 @@ export const updateAssetCriticalityInputSchema = z.object({
     .max(MAX_ENTITY_ID_VALUE_LENGTH)
     .describe('The Entity Store entity ID (EUID), e.g. "host:my-host"'),
   criticality_level: AssetCriticalityLevel.nullable().describe(
-    'The criticality level to assign to the entity. Pass `null` to remove the existing criticality level.'
+    'The criticality level ("low_impact", "medium_impact", "high_impact", "extreme_impact") to assign to the entity. Pass `null` to remove the existing criticality level.'
   ),
 });
 
@@ -99,6 +99,17 @@ export const updateAssetCriticalityStepCommonDefinition: CommonStepDefinition<
     entity_type: "host"
     entity_id: "{{ variables.host_entity_id }}"
     criticality_level: null
+\`\`\``,
+      `## Set criticality for a user without triggering risk score recalculation
+\`\`\`yaml
+- name: mark_user_critical
+  type: entityStore.updateAssetCriticality
+  with:
+    entity_type: "user"
+    entity_id: "{{ variables.user_entity_id }}"
+    criticality_level: "extreme_impact"
+  config:
+    recalculate-risk-score: false
 \`\`\``,
     ],
   },

@@ -12,10 +12,36 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { getEntitiesAlias, getLatestEntityIndexPattern, ENTITY_LATEST } from '../../../common';
 import { MAX_WORKFLOW_MESSAGE_LENGTH } from '../../../common/workflow/steps/update_asset_criticality';
 import type { EntityStoreStartContract } from '../../types';
 
 const fakeRequest = { fake: true };
+
+const buildCheckPrivilegesResponse = (authorized: boolean, spaceId = 'default') => {
+  const entitiesAlias = getEntitiesAlias(ENTITY_LATEST, spaceId);
+  const latestIndexPattern = getLatestEntityIndexPattern(spaceId);
+  return {
+    hasAllRequested: authorized,
+    privileges: {
+      elasticsearch: {
+        cluster: [],
+        index: {
+          [entitiesAlias]: [
+            { privilege: 'read', authorized },
+            { privilege: 'write', authorized },
+          ],
+          [latestIndexPattern]: [
+            { privilege: 'read', authorized },
+            { privilege: 'write', authorized },
+          ],
+        },
+      },
+      kibana: [],
+    },
+  };
+};
 
 const createMockContext = (
   input: Record<string, unknown>,
@@ -63,11 +89,20 @@ describe('updateAssetCriticalityStepDefinition', () => {
   const getLicensingStart = jest.fn(
     async () => ({ getLicense } as unknown as LicensingPluginStart)
   );
+  const checkPrivileges = jest.fn().mockResolvedValue(buildCheckPrivilegesResponse(true));
+  const checkPrivilegesDynamicallyWithRequest = jest.fn().mockReturnValue(checkPrivileges);
+  const getSecurityStart = jest.fn(
+    async () =>
+      ({
+        authz: { checkPrivilegesDynamicallyWithRequest },
+      } as unknown as SecurityPluginStart)
+  );
 
   const updateAssetCriticalityStepDefinition = getUpdateAssetCriticalityStepDefinition(
     getCreateCRUDClient,
     getWorkflowsExtensionsStart,
-    getLicensingStart
+    getLicensingStart,
+    getSecurityStart
   );
 
   beforeEach(() => {
@@ -76,6 +111,8 @@ describe('updateAssetCriticalityStepDefinition', () => {
     getCreateCRUDClient.mockImplementation(async () => createCRUDClient);
     updateEntity.mockResolvedValue(undefined);
     getLicense.mockResolvedValue({ hasAtLeast: () => true });
+    checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    checkPrivileges.mockResolvedValue(buildCheckPrivilegesResponse(true));
   });
 
   describe('handler', () => {
@@ -178,6 +215,44 @@ describe('updateAssetCriticalityStepDefinition', () => {
       await expect(updateAssetCriticalityStepDefinition.handler(mockContext)).rejects.toThrow(
         ExecutionError
       );
+    });
+
+    it('checks write privileges on the entities indices before updating', async () => {
+      const mockContext = createMockContext({
+        entity_type: 'host',
+        entity_id: 'host:my-host',
+        criticality_level: 'high_impact',
+      });
+
+      await updateAssetCriticalityStepDefinition.handler(mockContext);
+
+      expect(checkPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(fakeRequest);
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        elasticsearch: {
+          cluster: [],
+          index: {
+            [getEntitiesAlias(ENTITY_LATEST, 'default')]: ['read', 'write'],
+            [getLatestEntityIndexPattern('default')]: ['read', 'write'],
+          },
+        },
+      });
+      expect(updateEntity).toHaveBeenCalled();
+    });
+
+    it('throws a PermissionError ExecutionError and does not update the entity when the caller lacks write access', async () => {
+      checkPrivileges.mockResolvedValueOnce(buildCheckPrivilegesResponse(false));
+      const mockContext = createMockContext({
+        entity_type: 'host',
+        entity_id: 'host:my-host',
+        criticality_level: 'high_impact',
+      });
+
+      await expect(updateAssetCriticalityStepDefinition.handler(mockContext)).rejects.toMatchObject(
+        {
+          type: 'PermissionError',
+        }
+      );
+      expect(updateEntity).not.toHaveBeenCalled();
     });
   });
 
