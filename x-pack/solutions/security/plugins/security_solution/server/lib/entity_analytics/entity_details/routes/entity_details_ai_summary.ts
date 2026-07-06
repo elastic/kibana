@@ -152,7 +152,12 @@ export const entityDetailsAiSummaryRoute = ({
             'ai_summary.staleness': summary.staleness,
           };
 
-          await metadataClient.bulkAppendMetadata([doc]);
+          // A dropped doc resolves (not throws) as `failed > 0`; treat it as a hard failure so
+          // we don't report success for a summary that was never written.
+          const { failed } = await metadataClient.bulkAppendMetadata([doc]);
+          if (failed > 0) {
+            throw new Error('AI summary document was dropped from the metadata bulk write');
+          }
 
           // Emit the model's raw (pre-cap) output sizes so we can measure how often and by how
           // much it overshoots the caps, and tune the prompt from data. These counts are
