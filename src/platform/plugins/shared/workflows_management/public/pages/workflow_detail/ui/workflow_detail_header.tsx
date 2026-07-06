@@ -18,7 +18,7 @@ import { AppHeader } from '@kbn/app-header';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
+import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
 import { WorkflowDetailActionsMenu } from './workflow_detail_actions_menu';
@@ -241,7 +241,7 @@ export const WorkflowDetailHeader = React.memo(
     );
 
     const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
-      WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID
+      WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
     );
 
     const { handleRunClick, runConfirmationModal } = useRunWorkflowWithConfirmation(openTestModal);
