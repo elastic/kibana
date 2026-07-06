@@ -1431,7 +1431,7 @@
     },
     {
       "id": "1b65711126013c6-7ec29fa26d8296c",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search autocomplete",
+      "title": "Agent Builder — SML internal API POST /internal/agent_context_layer/sml/_search autocomplete",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1445,7 +1445,7 @@
     },
     {
       "id": "1b65711126013c6-db0d1ab812dd7f2",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search wildcard returns item fields",
+      "title": "Agent Builder — SML internal API POST /internal/agent_context_layer/sml/_search wildcard returns item fields",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1459,7 +1459,7 @@
     },
     {
       "id": "1b65711126013c6-ff0990d6a368fe5",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search rejects empty query",
+      "title": "Agent Builder — SML internal API POST /internal/agent_context_layer/sml/_search rejects empty query",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

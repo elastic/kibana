@@ -87,7 +87,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     ...adminInteractiveCookieHeader,
   });
 
-  apiTest('POST /internal/agent_builder/sml/_search autocomplete', async ({ apiClient }) => {
+  apiTest('POST /internal/agent_context_layer/sml/_search autocomplete', async ({ apiClient }) => {
     const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
       headers: ih(),
       body: { query: 'pacif', size: 20 },
@@ -103,7 +103,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   });
 
   apiTest(
-    'POST /internal/agent_builder/sml/_search wildcard returns item fields',
+    'POST /internal/agent_context_layer/sml/_search wildcard returns item fields',
     async ({ apiClient }) => {
       const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
         headers: ih(),
@@ -122,14 +122,17 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     }
   );
 
-  apiTest('POST /internal/agent_builder/sml/_search rejects empty query', async ({ apiClient }) => {
-    const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
-      headers: ih(),
-      body: { query: '' },
-      responseType: 'json',
-    });
-    expect(response).toHaveStatusCode(400);
-  });
+  apiTest(
+    'POST /internal/agent_context_layer/sml/_search rejects empty query',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
+        headers: ih(),
+        body: { query: '' },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+    }
+  );
 
   apiTest(
     'POST /internal/agent_builder/sml/_attach returns 404 when conversation missing',
