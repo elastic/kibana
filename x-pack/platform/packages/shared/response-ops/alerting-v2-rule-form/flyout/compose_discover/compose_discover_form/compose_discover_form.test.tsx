@@ -15,6 +15,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ComposeDiscoverForm, getSteps } from '.';
 import { validateStep } from '../validate_step';
+import { Comparator, Aggregation } from '../rule_builder/threshold/form_types';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
 import { createMockServices, createTestQueryClient } from '../../../test_utils';
 import type { FormValues } from '../../../form/types';
@@ -292,6 +293,37 @@ describe('step validation', () => {
     it('recoveryCondition has no validate function', () => {
       const recoveryStep = getSteps(true).steps.find((s) => s.id === 'recoveryCondition')!;
       expect(recoveryStep.validate).toBeUndefined();
+    });
+
+    it('builderCondition does not inherit queryCommitted uiGate from the ES|QL registry', () => {
+      const builderStep = getSteps(true, 'threshold').steps.find(
+        (s) => s.id === 'builderCondition'
+      )!;
+      expect(builderStep.uiGate).toBeUndefined();
+    });
+
+    it('validateStep uses threshold builder validation without queryCommitted', async () => {
+      const builderStep = getSteps(true, 'threshold').steps.find(
+        (s) => s.id === 'builderCondition'
+      )!;
+      const state = createState({ queryCommitted: false });
+      const methods = {} as UseFormReturn<FormValues>;
+      const validBuilderState = {
+        indexPattern: 'logs-*',
+        timeField: '@timestamp',
+        stats: [{ id: 's1', label: 'count', aggregation: Aggregation.COUNT }],
+        evaluations: [],
+        alertConditions: [
+          { id: 'c1', metric: 'count', comparator: Comparator.GT, threshold: [100] },
+        ],
+        conditionOperator: 'AND' as const,
+        groupByFields: [],
+      };
+
+      expect(await validateStep(builderStep, methods, state, undefined, validBuilderState)).toBe(
+        true
+      );
+      expect(await validateStep(builderStep, methods, state, undefined, undefined)).toBe(false);
     });
   });
 

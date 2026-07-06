@@ -21,7 +21,7 @@ import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { FormValues } from '../../../form/types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
-import { isAlertConditionStepValid } from '../validation/committed_query_validation';
+import { isCommittedQueryValid } from '../validation/committed_query_validation';
 import { isNotificationsStepValid } from '../validation/notifications_validation';
 import { ModeSelect } from '../../../form/fields/mode_select';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
@@ -62,10 +62,11 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         onManualSplit={props.onManualSplit}
       />
     ),
+    // PR 2: `fields` drives trigger() once RHF rules exist; `validate` takes precedence until then.
     fields: ['query'],
     uiGate: (s) => s.queryCommitted,
     validate: (methods, s) =>
-      isAlertConditionStepValid(
+      isCommittedQueryValid(
         methods.getValues('query'),
         methods.getValues('kind'),
         s.queryCommitted
@@ -77,8 +78,6 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       defaultMessage: 'Alert Condition',
     }),
     render: () => null,
-    uiGate: (s) => s.queryCommitted,
-    validate: (_methods, s) => s.queryCommitted,
   },
   recoveryCondition: {
     id: 'recoveryCondition',
@@ -120,6 +119,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         )}
       </>
     ),
+    // PR 2: `fields` drives trigger() once RHF rules exist; `validate` takes precedence until then.
     fields: ['notifications'],
     validate: (methods) => isNotificationsStepValid(methods.getValues('notifications')),
   },
@@ -137,8 +137,9 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
   const steps = ids.map((id) => {
     const base = STEP_REGISTRY[id];
     if (id === 'builderCondition' && definition) {
+      const { uiGate: _uiGate, validate: _validate, fields: _fields, ...builderBase } = base;
       const step: StepDefinition = {
-        ...base,
+        ...builderBase,
         title: definition.stepTitle,
         render: (props) =>
           definition.renderStep({
@@ -148,7 +149,7 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
           }),
         validate: definition.validate
           ? (_methods, s, _services, bs) => definition.validate!(s, bs)
-          : base.validate,
+          : undefined,
       };
       return step;
     }

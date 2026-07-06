@@ -18,24 +18,8 @@ export const getAlertConditionSummaryState = (
   queryCommitted: boolean
 ): EsqlSummaryState => getEsqlSummaryState(queryCommitted, query);
 
-export const isAlertConditionNextBlocked = (query: RuleQuery, queryCommitted: boolean): boolean =>
-  getEsqlSummaryState(queryCommitted, query) !== 'success';
-
-export const isAlertConditionStepValid = (
-  query: RuleQuery,
-  kind: RuleKind,
-  queryCommitted: boolean
-): boolean => {
-  if (!queryCommitted) {
-    return false;
-  }
-  if (kind === 'alert') {
-    return getEsqlSummaryState(queryCommitted, query) === 'success';
-  }
-  return getBreachQuery(query).trim().length > 0;
-};
-
-export const isQueryValidForSubmit = (
+/** Shared gate for step navigation and final submit — keep a single implementation. */
+export const isCommittedQueryValid = (
   query: RuleQuery,
   kind: RuleKind,
   queryCommitted: boolean

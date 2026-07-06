@@ -9,7 +9,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { FormValues } from '../../form/types';
 import { createInitialState } from './use_compose_discover_state';
 import type { StepDefinition } from './types';
-import { validateStep } from './validate_step';
+import { validateStep, evaluateStepValidation } from './validate_step';
 
 const createStep = (overrides: Partial<StepDefinition> = {}): StepDefinition => ({
   id: 'details',
@@ -80,5 +80,17 @@ describe('validateStep', () => {
     await expect(validateStep(step, methods, createInitialState({ mode: 'create' }))).resolves.toBe(
       true
     );
+  });
+
+  it('evaluateStepValidation mirrors validateStep for synchronous results', async () => {
+    const step = createStep({
+      uiGate: () => true,
+      validate: () => true,
+    });
+    const methods = {} as UseFormReturn<FormValues>;
+    const state = createInitialState({ mode: 'create' });
+
+    expect(evaluateStepValidation(step, methods, state)).toBe(true);
+    await expect(validateStep(step, methods, state)).resolves.toBe(true);
   });
 });

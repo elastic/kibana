@@ -11,6 +11,25 @@ import type { FormValues } from '../../form/types';
 import type { BuilderState } from './rule_builder/types';
 import type { ComposeDiscoverState, StepDefinition } from './types';
 
+export const evaluateStepValidation = (
+  step: StepDefinition,
+  methods: UseFormReturn<FormValues>,
+  state: ComposeDiscoverState,
+  services?: RuleFormServices,
+  builderState?: BuilderState
+): boolean | Promise<boolean> => {
+  if (step.uiGate && !step.uiGate(state)) {
+    return false;
+  }
+  if (step.validate) {
+    return step.validate(methods, state, services, builderState);
+  }
+  if (step.fields?.length) {
+    return methods.trigger(step.fields);
+  }
+  return true;
+};
+
 export const validateStep = async (
   step: StepDefinition,
   methods: UseFormReturn<FormValues>,
@@ -18,15 +37,6 @@ export const validateStep = async (
   services?: RuleFormServices,
   builderState?: BuilderState
 ): Promise<boolean> => {
-  if (step.uiGate && !step.uiGate(state)) {
-    return false;
-  }
-  if (step.validate) {
-    const result = step.validate(methods, state, services, builderState);
-    return typeof result === 'boolean' ? result : await result;
-  }
-  if (step.fields?.length) {
-    return methods.trigger(step.fields);
-  }
-  return true;
+  const result = evaluateStepValidation(step, methods, state, services, builderState);
+  return typeof result === 'boolean' ? result : await result;
 };

@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import {
-  isAlertConditionNextBlocked,
-  isAlertConditionStepValid,
-  isQueryValidForSubmit,
-} from './committed_query_validation';
+import { getAlertConditionSummaryState, isCommittedQueryValid } from './committed_query_validation';
 
 describe('committed query validation', () => {
-  describe('isAlertConditionStepValid', () => {
+  describe('isCommittedQueryValid', () => {
     it('returns false when query is not committed', () => {
       expect(
-        isAlertConditionStepValid(
+        isCommittedQueryValid(
           { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
           'alert',
           false
@@ -25,7 +21,7 @@ describe('committed query validation', () => {
 
     it('returns true for a valid composed alert query', () => {
       expect(
-        isAlertConditionStepValid(
+        isCommittedQueryValid(
           { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
           'alert',
           true
@@ -35,7 +31,7 @@ describe('committed query validation', () => {
 
     it('returns false for a base-only alert persisted as standalone', () => {
       expect(
-        isAlertConditionStepValid(
+        isCommittedQueryValid(
           { format: 'standalone', breach: { query: 'FROM logs-*' } },
           'alert',
           true
@@ -45,7 +41,7 @@ describe('committed query validation', () => {
 
     it('returns true for a signal rule with a non-empty standalone query', () => {
       expect(
-        isAlertConditionStepValid(
+        isCommittedQueryValid(
           { format: 'standalone', breach: { query: 'FROM logs-*' } },
           'signal',
           true
@@ -55,64 +51,47 @@ describe('committed query validation', () => {
 
     it('returns false for a signal rule with an empty query', () => {
       expect(
-        isAlertConditionStepValid(
+        isCommittedQueryValid(
           { format: 'composed', base: '', breach: { segment: '' } },
           'signal',
           true
         )
       ).toBe(false);
     });
+
+    it('matches submit and step-navigation semantics for alert rules', () => {
+      const invalidQuery = {
+        format: 'composed' as const,
+        base: 'FROM logs-*',
+        breach: { segment: '' },
+      };
+      expect(isCommittedQueryValid(invalidQuery, 'alert', true)).toBe(false);
+    });
+
+    it('matches submit and step-navigation semantics for signal rules', () => {
+      expect(
+        isCommittedQueryValid({ format: 'standalone', breach: { query: '' } }, 'signal', true)
+      ).toBe(false);
+    });
   });
 
-  describe('isAlertConditionNextBlocked', () => {
-    it('blocks alert rules without a valid alert condition', () => {
+  describe('getAlertConditionSummaryState', () => {
+    it('returns success for a complete composed alert query', () => {
       expect(
-        isAlertConditionNextBlocked(
+        getAlertConditionSummaryState(
+          { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+          true
+        )
+      ).toBe('success');
+    });
+
+    it('returns no_alert_condition when the breach segment is missing', () => {
+      expect(
+        getAlertConditionSummaryState(
           { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
           true
         )
-      ).toBe(true);
-    });
-
-    it('does not block when the composed alert query is complete', () => {
-      expect(
-        isAlertConditionNextBlocked(
-          { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
-          true
-        )
-      ).toBe(false);
-    });
-  });
-
-  describe('isQueryValidForSubmit', () => {
-    it('requires a non-empty breach query for signal rules', () => {
-      expect(
-        isQueryValidForSubmit(
-          { format: 'standalone', breach: { query: 'FROM logs-*' } },
-          'signal',
-          true
-        )
-      ).toBe(true);
-      expect(
-        isQueryValidForSubmit({ format: 'standalone', breach: { query: '' } }, 'signal', true)
-      ).toBe(false);
-    });
-
-    it('requires a successful alert split for alert rules', () => {
-      expect(
-        isQueryValidForSubmit(
-          { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
-          'alert',
-          true
-        )
-      ).toBe(true);
-      expect(
-        isQueryValidForSubmit(
-          { format: 'standalone', breach: { query: 'FROM logs-*' } },
-          'alert',
-          true
-        )
-      ).toBe(false);
+      ).toBe('no_alert_condition');
     });
   });
 });

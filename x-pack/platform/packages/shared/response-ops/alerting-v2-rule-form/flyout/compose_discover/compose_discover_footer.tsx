@@ -14,8 +14,7 @@ import { isAlertConditionStepId, isBuilderConditionStepId } from './types';
 import type { FormValues } from '../../form/types';
 import {
   getAlertConditionSummaryState,
-  isAlertConditionNextBlocked,
-  isQueryValidForSubmit,
+  isCommittedQueryValid,
 } from './validation/committed_query_validation';
 
 const CREATE_RULE_BUTTON_LABEL = i18n.translate(
@@ -115,9 +114,7 @@ export const ComposeDiscoverFooter = ({
    * dead-ending users at Create with an unresolvable query.
    */
   const invalidAlertCondition =
-    currentStep?.id === 'alertCondition' &&
-    isAlert &&
-    isAlertConditionNextBlocked(watchedQuery, uiState.queryCommitted);
+    alertConditionState !== undefined && alertConditionState !== 'success';
 
   const nextDisabled =
     (!isBuilderMode && uiState.childOpen) ||
@@ -137,7 +134,7 @@ export const ComposeDiscoverFooter = ({
 
   const submitDisabled =
     hasValidationErrors ||
-    !isQueryValidForSubmit(watchedQuery, isAlert ? 'alert' : 'signal', uiState.queryCommitted);
+    !isCommittedQueryValid(watchedQuery, isAlert ? 'alert' : 'signal', uiState.queryCommitted);
   const submitLabel = isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL;
 
   if (uiState.yamlMode) {

@@ -56,7 +56,7 @@ import {
 } from './rule_builder';
 import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { isBuilderConditionStepId } from './types';
-import { validateStep } from './validate_step';
+import { validateStep, evaluateStepValidation } from './validate_step';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import {
@@ -900,9 +900,16 @@ export function ComposeDiscoverFlyout({
   ]);
 
   const isBuilderStepValid = useMemo(() => {
-    if (!currentStep || !isBuilderConditionStepId(currentStep.id) || !currentStep.validate)
+    if (!currentStep || !isBuilderConditionStepId(currentStep.id)) {
       return true;
-    const result = currentStep.validate(methods, uiState, baseServices, builderState);
+    }
+    const result = evaluateStepValidation(
+      currentStep,
+      methods,
+      uiState,
+      baseServices,
+      builderState
+    );
     return typeof result === 'boolean' ? result : true;
   }, [currentStep, methods, uiState, baseServices, builderState]);
 
