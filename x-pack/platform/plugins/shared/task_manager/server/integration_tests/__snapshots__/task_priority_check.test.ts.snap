@@ -4,7 +4,7 @@ exports[`Task priority checks detects tasks with priority definitions 1`] = `
 Array [
   Object {
     "priority": 1,
-    "taskType": "context_engine:ce_crawler",
+    "taskType": "context_engine:crawler",
   },
   Object {
     "priority": 1,

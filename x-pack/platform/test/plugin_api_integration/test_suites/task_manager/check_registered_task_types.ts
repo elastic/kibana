@@ -177,7 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases-telemetry-task',
         'cases_incremental_id_assignment',
         'cloud_security_posture-stats_task',
-        'context_engine:ce_crawler',
+        'context_engine:crawler',
         'dashboard_telemetry',
         'endpoint:complete-external-response-actions',
         'endpoint:metadata-check-transforms-task',
