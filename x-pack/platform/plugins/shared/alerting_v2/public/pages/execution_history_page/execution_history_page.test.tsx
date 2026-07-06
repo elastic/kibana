@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { I18nProvider } from '@kbn/i18n-react';
+import { ListPageTestProviders } from '../../test_utils/test_providers';
 import type { PolicyExecutionHistoryItem } from '../../services/execution_history_api';
 import type { useFetchRuleExecutions } from '../../hooks/use_fetch_rule_executions';
 import { ExecutionHistoryPage } from './execution_history_page';
@@ -140,9 +140,9 @@ const mockFetchResult = (
 
 const renderPage = () =>
   render(
-    <I18nProvider>
+    <ListPageTestProviders>
       <ExecutionHistoryPage />
-    </I18nProvider>
+    </ListPageTestProviders>
   );
 
 const mockRuleFetchResult = (
@@ -185,11 +185,19 @@ describe('ExecutionHistoryPage', () => {
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
-  it('renders the denormalization info tooltip next to the Policies tab', () => {
+  it('renders the denormalization info tooltip next to the Policies tab', async () => {
     mockFetchResult();
     renderPage();
 
-    expect(screen.getByTestId('executionHistoryDenormalizationTip')).toBeInTheDocument();
+    const policiesTab = screen.getByTestId('executionHistoryPoliciesTab');
+    const infoIcon = policiesTab.querySelector('[data-euiicon-type="info"]');
+    expect(infoIcon).not.toBeNull();
+
+    await userEvent.hover(infoIcon!);
+
+    expect(
+      await screen.findByText(/A single event may show as multiple rows/i)
+    ).toBeInTheDocument();
   });
 
   describe('Rules tab (default)', () => {

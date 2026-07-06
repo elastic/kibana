@@ -9,6 +9,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { distinctUntilChanged, map } from 'rxjs';
 import UseUnmount from 'react-use/lib/useUnmount';
 
 import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
@@ -24,11 +25,19 @@ import {
 import { css } from '@emotion/react';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { ESQL_APPROXIMATION_FEATURE_FLAG_KEY } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  apiPublishesUnifiedSearch,
+  combineCompatibleChildrenApis,
+  type PublishesUnifiedSearch,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
@@ -93,6 +102,7 @@ export function InternalDashboardTopNav({
     allDataViews,
     fullScreenMode,
     hasUnsavedChanges,
+    isApproximate,
     lastSavedId,
     query,
     title,
@@ -107,6 +117,7 @@ export function InternalDashboardTopNav({
     dashboardApi.dataViews$,
     dashboardApi.fullScreenMode$,
     dashboardApi.hasUnsavedChanges$,
+    dashboardApi.isApproximate$,
     dashboardApi.savedObjectId$,
     dashboardApi.query$,
     dashboardApi.title$,
@@ -128,6 +139,26 @@ export function InternalDashboardTopNav({
   const hasUnpublishedVariables = useMemo(() => {
     return !deepEqual(publishedEsqlVariables, unpublishedEsqlVariables);
   }, [publishedEsqlVariables, unpublishedEsqlVariables]);
+
+  // temporary flag — will be removed once the feature is fully enabled
+  const isEsqlApproximationEnabled = useMemo(
+    () => coreServices.featureFlags.getBooleanValue(ESQL_APPROXIMATION_FEATURE_FLAG_KEY, false),
+    []
+  );
+
+  const [hasEsqlPanel, setHasEsqlPanel] = useState(false);
+  useEffect(() => {
+    const subscription = combineCompatibleChildrenApis<
+      PublishesUnifiedSearch,
+      (Query | AggregateQuery | undefined)[]
+    >(dashboardApi, 'query$', apiPublishesUnifiedSearch, [])
+      .pipe(
+        map((queries) => queries.some((q) => isOfAggregateQueryType(q))),
+        distinctUntilChanged()
+      )
+      .subscribe(setHasEsqlPanel);
+    return () => subscription.unsubscribe();
+  }, [dashboardApi]);
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -420,6 +451,22 @@ export function InternalDashboardTopNav({
           useBackgroundSearchButton={
             dataService.search.isBackgroundSearchEnabled &&
             getDashboardCapabilities().storeSearchSession
+          }
+          esqlApproximation={
+            isEsqlApproximationEnabled
+              ? {
+                  isApproximate: isApproximate ?? false,
+                  onChange: dashboardApi.setIsApproximate,
+                  disabled: !hasEsqlPanel,
+                  additionalText: i18n.translate(
+                    'dashboard.esqlApproximationToggle.additionalText',
+                    {
+                      defaultMessage:
+                        'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
+                    }
+                  ),
+                }
+              : undefined
           }
         />
       )}

@@ -6,9 +6,9 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
@@ -17,17 +17,18 @@ import { NotesDetails } from '../../shared/tools/notes';
 import { useKibana } from '../../../common/lib/kibana';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
-
-const FOOTER_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.flyoutV2.attack.footer.placeholder',
-  { defaultMessage: 'Attack details footer' }
-);
+import { Footer } from './footer';
 
 export interface AttackFlyoutProps {
   /**
    * The attack document to display.
    */
   hit: DataTableRecord;
+  /**
+   * The attack discovery alert object resolved from the same fetch as `hit`.
+   * Owned by `AttackFlyoutWrapper` so the flyout has a single source of truth.
+   */
+  attack: AttackDiscoveryAlert;
   /**
    * Callback invoked after attack mutations (status change, assignee update, etc.).
    * Provided by `AttackFlyoutWrapper`; it refetches the attack document so the
@@ -38,11 +39,11 @@ export interface AttackFlyoutProps {
 }
 
 /**
- * Content for the attack flyout. Receives a fully-resolved `hit` from
- * `AttackFlyoutWrapper` and renders the header and overview tab. The footer is
- * wired in a subsequent PR; it currently renders a placeholder.
+ * Content for the v2 attack flyout. Receives a fully-resolved `hit` and `attack`
+ * from `AttackFlyoutWrapper` (which owns the single data fetch) and renders the
+ * header, overview tab, and footer.
  */
-export const AttackFlyout = memo(({ hit, onAttackUpdated }: AttackFlyoutProps) => {
+export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyoutProps) => {
   const { services } = useKibana();
   const { overlays } = services;
   const store = useStore();
@@ -69,9 +70,7 @@ export const AttackFlyout = memo(({ hit, onAttackUpdated }: AttackFlyoutProps) =
         <OverviewTab hit={hit} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter data-test-subj="attack-flyout-footer">
-        <EuiText>
-          <p>{FOOTER_PLACEHOLDER}</p>
-        </EuiText>
+        <Footer attack={attack} hit={hit} onAttackUpdated={onAttackUpdated} />
       </EuiFlyoutFooter>
     </>
   );
