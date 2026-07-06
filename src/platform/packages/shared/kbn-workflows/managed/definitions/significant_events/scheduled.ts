@@ -50,7 +50,7 @@ const renderTemplate = (template: string, values: Record<string, string | number
 
 export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  pluginId: 'streams',
+  pluginId: 'significant_events',
   version: 1,
   billable: false,
   yamlTemplate: ({ detectionIntervalMinutes }) =>
@@ -63,7 +63,7 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-  pluginId: 'streams',
+  pluginId: 'significant_events',
   version: 1,
   billable: false,
   yamlTemplate: ({ reviewIntervalMinutes, discoveryBatchSize, triageBatchSize, maxReviewPasses }) =>

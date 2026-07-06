@@ -14,7 +14,7 @@ export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID = 'system-streams-m
 
 export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-  pluginId: 'streams',
+  pluginId: 'significant_events',
   version: 1,
   billable: false,
   yaml: MEMORY_SYNTHESIS_YAML,
