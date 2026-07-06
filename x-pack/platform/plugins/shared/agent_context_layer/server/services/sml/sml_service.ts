@@ -21,6 +21,7 @@ import type {
   SmlSearchConstraints,
   MatchedDiscoveryLabel,
   SmlPermissions,
+  SmlIngestionMethod,
 } from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
 import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
@@ -836,7 +837,7 @@ const buildSmlEsqlQuery = ({
   lines.push('| EVAL perm_kibana = permissions.kibana.privileges.name');
   lines.push('| EVAL perm_es_indices = permissions.elasticsearch.indices.name');
 
-  // spaces is purely opt-in.
+  // spaces, created_at, updated_at, ingestion_method are purely opt-in.
   const keepCols = [
     'id',
     'type',
@@ -849,6 +850,9 @@ const buildSmlEsqlQuery = ({
     'perm_kibana',
     'perm_es_indices',
     ...(shouldKeep('content') ? ['content'] : []),
+    ...(shouldKeep('created_at') ? ['created_at'] : []),
+    ...(shouldKeep('updated_at') ? ['updated_at'] : []),
+    ...(shouldKeep('ingestion_method') ? ['ingestion_method'] : []),
   ];
   lines.push(`| KEEP ${keepCols.join(', ')}`);
 
@@ -1097,6 +1101,24 @@ const searchSml = async ({
     if (refUrisIdx !== undefined) {
       const refUris = toStringArray(row[refUrisIdx]);
       if (refUris.length > 0) result.references = refUris.map((uri) => ({ uri }));
+    }
+
+    const createdAtIdx = colIndex.get('created_at');
+    if (createdAtIdx !== undefined) {
+      const createdAt = row[createdAtIdx];
+      if (createdAt != null) result.created_at = String(createdAt);
+    }
+
+    const updatedAtIdx = colIndex.get('updated_at');
+    if (updatedAtIdx !== undefined) {
+      const updatedAt = row[updatedAtIdx];
+      if (updatedAt != null) result.updated_at = String(updatedAt);
+    }
+
+    const ingestionMethodIdx = colIndex.get('ingestion_method');
+    if (ingestionMethodIdx !== undefined) {
+      const ingestionMethod = row[ingestionMethodIdx];
+      if (ingestionMethod != null) result.ingestion_method = ingestionMethod as SmlIngestionMethod;
     }
 
     return result;

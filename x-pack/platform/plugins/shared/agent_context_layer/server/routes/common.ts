@@ -18,6 +18,8 @@ export const toSmlHttpItem = (doc: SmlDocument): SmlHttpItem => ({
   title: doc.title,
   origin: doc.origin,
   content: doc.content,
+  description: doc.description ?? '',
+  references: doc.references ?? [],
   created_at: doc.created_at,
   updated_at: doc.updated_at,
   spaces: doc.spaces,

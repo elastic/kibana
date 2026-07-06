@@ -10,7 +10,7 @@ import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { SmlSearchHttpResponse, SmlSearchHttpResultItem } from '../../common/http_api/sml';
 import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH, SmlSearchFilterType } from '../../common/http_api/sml';
 import { smlSearchPath } from '../../common/constants';
-import type { SmlService } from '../services/sml/types';
+import type { SmlSearchResult, SmlService } from '../services/sml/types';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
 import {
   SmlAuthzEnumerationIncompleteError,
@@ -20,6 +20,42 @@ import { READ_SECURITY, withSmlFeatureFlag } from './common';
 
 const SML_SEARCH_SIZE_MAX = 1000;
 const SML_SEARCH_FILTER_ARRAY_MAX = 100;
+// Count of `fields[]` literals in the request schema below — keep in sync
+// with the `schema.oneOf` list; `maxSize` bounds the array length below.
+const SML_SEARCH_FIELDS_MAX = 9;
+
+/**
+ * Builds the `SmlSearchHttpResultItem` for one service-layer hit.
+ *
+ * Deliberately a hand-written, one-line-per-field mapping rather than a
+ * generic loop over `SmlSearchResult`'s keys: `SmlSearchResult` is an
+ * internal service-layer type describing what the storage/query layer can
+ * produce, while `SmlSearchHttpResultItem` is the public wire contract. This
+ * function is the seam where those two are deliberately decoupled — a
+ * generic key-driven copy would silently couple the API response shape to
+ * internal storage schema changes. Keep it explicit; when adding a new
+ * `fields[]`-requestable field, add both the schema literal above and a line
+ * here (this pairing is exactly what search-team#15114 tracked, so this
+ * comment doubles as the reminder to update both).
+ */
+const toSmlSearchHttpResultItem = (hit: SmlSearchResult): SmlSearchHttpResultItem => {
+  const item: SmlSearchHttpResultItem = {
+    id: hit.id,
+    type: hit.type,
+    origin: hit.origin,
+    title: hit.title,
+  };
+  if (hit.content !== undefined) item.content = hit.content;
+  if (hit.description !== undefined) item.description = hit.description;
+  if (hit.references !== undefined) item.references = hit.references;
+  if (hit.tags !== undefined) item.tags = hit.tags;
+  if (hit.spaces !== undefined) item.spaces = hit.spaces;
+  if (hit.permissions !== undefined) item.permissions = hit.permissions;
+  if (hit.created_at !== undefined) item.created_at = hit.created_at;
+  if (hit.updated_at !== undefined) item.updated_at = hit.updated_at;
+  if (hit.ingestion_method !== undefined) item.ingestion_method = hit.ingestion_method;
+  return item;
+};
 
 export const registerSearchRoute = ({
   router,
@@ -79,8 +115,11 @@ export const registerSearchRoute = ({
                 schema.literal('references'),
                 schema.literal('spaces'),
                 schema.literal('permissions'),
+                schema.literal('created_at'),
+                schema.literal('updated_at'),
+                schema.literal('ingestion_method'),
               ]),
-              { maxSize: 6 }
+              { maxSize: SML_SEARCH_FIELDS_MAX }
             )
           ),
         }),
@@ -110,20 +149,7 @@ export const registerSearchRoute = ({
         });
 
         const body: SmlSearchHttpResponse = {
-          results: results.map((hit) => {
-            const item: SmlSearchHttpResultItem = {
-              id: hit.id,
-              type: hit.type,
-              origin: hit.origin,
-              title: hit.title,
-            };
-            if (hit.content !== undefined) item.content = hit.content;
-            if (hit.description !== undefined) item.description = hit.description;
-            if (hit.references !== undefined) item.references = hit.references;
-            if (hit.tags !== undefined) item.tags = hit.tags;
-            if (hit.permissions !== undefined) item.permissions = hit.permissions;
-            return item;
-          }),
+          results: results.map(toSmlSearchHttpResultItem),
         };
 
         return response.ok({ body });

@@ -65,6 +65,8 @@ export const sampleDocument: SmlDocument = {
   origin_id: 'viz-1',
   origin: { uri: 'visualization://viz-1' },
   content: 'some content',
+  description: 'A test viz for CPU usage',
+  references: [{ uri: 'dashboard://abc' }],
   created_at: '2024-01-01',
   updated_at: '2024-01-02',
   spaces: ['test-space'],

@@ -62,27 +62,20 @@ export interface SmlSearchHttpResponse {
 }
 
 /**
- * Per-hit shape returned by `POST /sml/_search`.
- * Baseline always includes id, type, title, origin, description. Optional fields
- * (content, tags, references, spaces, permissions) are included only when
- * explicitly requested via the `fields[]` parameter.
+ * Permissions required to access the underlying element. Always present
+ * on `SmlHttpItem`; inner arrays may be empty.
  */
-export interface SmlSearchHttpResultItem {
-  id: string;
-  type: string;
-  origin: { uri: string };
-  title: string;
-  description?: string;
-  content?: string;
-  references?: Array<{ uri: string }>;
-  tags?: string[];
-  permissions?: SmlHttpItem['permissions'];
+export interface SmlPermissionsHttp {
+  kibana: { privileges: Array<{ name: string }> };
+  elasticsearch: { indices: Array<{ name: string }> };
 }
 
 /**
  * Wire representation of a single SML object.
  *
  * Mirrors the server-side `SmlDocument` shape used by the storage layer.
+ * Every field is always present — GET/list/PUT have no `fields[]` opt-in
+ * mechanism, unlike `_search` (see `SmlSearchHttpResultItem`).
  */
 export interface SmlHttpItem {
   id: string;
@@ -90,21 +83,36 @@ export interface SmlHttpItem {
   title: string;
   origin: { uri: string };
   content: string;
+  description: string;
+  references: Array<{ uri: string }>;
   created_at: string;
   updated_at: string;
   spaces: string[];
   tags: string[];
-  /**
-   * Permissions required to access the underlying element. Always
-   * present; inner arrays may be empty.
-   */
-  permissions: {
-    kibana: { privileges: Array<{ name: string }> };
-    elasticsearch: { indices: Array<{ name: string }> };
-  };
+  permissions: SmlPermissionsHttp;
   /** How this chunk was produced. */
   ingestion_method: 'manual' | 'crawled';
 }
+
+/**
+ * `T`, but every key in `K` is made optional rather than required.
+ */
+type WithOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+/**
+ * Per-hit shape returned by `POST /sml/_search`.
+ *
+ * Structurally `SmlHttpItem` with every field except the baseline identity
+ * fields (`id`, `type`, `title`, `origin`) made optional — those are the
+ * only fields not gated by the `fields[]` request parameter. This
+ * derivation keeps `_search`'s per-hit shape from drifting out of sync with
+ * `SmlHttpItem`: a field added, renamed, or reshaped on one is reflected on
+ * the other automatically, at compile time.
+ */
+export type SmlSearchHttpResultItem = WithOptional<
+  SmlHttpItem,
+  Exclude<keyof SmlHttpItem, 'id' | 'type' | 'title' | 'origin'>
+>;
 
 /**
  * Response body for `GET /internal/agent_context_layer/sml/{originId}`.

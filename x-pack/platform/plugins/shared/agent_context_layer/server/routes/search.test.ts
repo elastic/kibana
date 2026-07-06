@@ -164,6 +164,61 @@ describe('registerSearchRoute', () => {
     expect(results[0]).not.toHaveProperty('permissions');
   });
 
+  it('includes spaces, created_at, updated_at, and ingestion_method when requested via fields', async () => {
+    const mockResults: SmlSearchResult[] = [
+      {
+        id: 'chunk-1',
+        type: 'dashboard',
+        title: 'Test Dashboard',
+        origin: { uri: 'dashboard-1' },
+        spaces: ['default'],
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-02T00:00:00.000Z',
+        ingestion_method: 'crawled',
+      },
+    ];
+    mockSmlService.search.mockResolvedValue({ results: mockResults });
+
+    const response = await callHandler({
+      query: 'test',
+      size: 10,
+      fields: ['spaces', 'created_at', 'updated_at', 'ingestion_method'],
+    });
+    expect(mockSmlService.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: ['spaces', 'created_at', 'updated_at', 'ingestion_method'],
+      })
+    );
+    const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
+    const results = (body as any).results;
+    expect(results[0]).toMatchObject({
+      spaces: ['default'],
+      created_at: '2024-01-01T00:00:00.000Z',
+      updated_at: '2024-01-02T00:00:00.000Z',
+      ingestion_method: 'crawled',
+    });
+  });
+
+  it('omits spaces, created_at, updated_at, and ingestion_method from the response when the service result has none', async () => {
+    const mockResults: SmlSearchResult[] = [
+      {
+        id: 'chunk-1',
+        type: 'dashboard',
+        title: 'Test Dashboard',
+        origin: { uri: 'dashboard-1' },
+      },
+    ];
+    mockSmlService.search.mockResolvedValue({ results: mockResults });
+
+    const response = await callHandler({ query: 'test', size: 10 });
+    const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
+    const results = (body as any).results;
+    expect(results[0]).not.toHaveProperty('spaces');
+    expect(results[0]).not.toHaveProperty('created_at');
+    expect(results[0]).not.toHaveProperty('updated_at');
+    expect(results[0]).not.toHaveProperty('ingestion_method');
+  });
+
   it('passes constraints and agent-supplied filters through to sml.search', async () => {
     mockSmlService.search.mockResolvedValue({ results: [] });
     await callHandler({

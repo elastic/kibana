@@ -269,21 +269,19 @@ export interface SmlDocument {
 }
 
 /**
- * Compact SML search result — LLM-shaped. Drops the full `content` blob, the
- * full `extended_attrs`, and bookkeeping fields. Callers fetch full content via the
- * lookup tool (`sml_read`) when they need it.
+ * Compact SML search result — LLM-shaped by default. Baseline (`id`, `type`,
+ * `title`, `origin`) is always present; every other field is opt-in via the
+ * caller's `fields` array, including the full `content` blob and bookkeeping
+ * fields (`created_at`, `updated_at`, `ingestion_method`) that are excluded
+ * unless explicitly requested — callers fetch full content via the lookup
+ * tool (`sml_read`) when they don't need it inline. `extended_attrs` and
+ * `discovery_labels` are never surfaced through search at all; there is no
+ * `fields` value for them.
  *
  * `permissions` is retained here so callers (route / tool wrapper) can apply
  * post-hoc authorization filtering. Callers should not expose it
  * unconditionally or by default — the `sml_search` LLM tool wrapper never
  * forwards it, by construction (it whitelists an explicit output shape).
- *
- * Optional fields (`content`, `description`, `tags`, `references`,
- * `spaces`, `permissions`) are omitted unless the caller passes a `fields`
- * array that includes them. The `_search` HTTP route currently only wires
- * `permissions` through to callers that request it; `spaces` is computed
- * here but not yet forwarded by that route (TODO: wire `spaces` through
- * `SmlSearchHttpResultItem` the same way, see search-team#15114).
  */
 export interface SmlSearchResult {
   id: string;
@@ -296,6 +294,9 @@ export interface SmlSearchResult {
   tags?: string[];
   spaces?: string[];
   permissions?: SmlPermissions;
+  created_at?: string;
+  updated_at?: string;
+  ingestion_method?: SmlIngestionMethod;
 }
 
 /**

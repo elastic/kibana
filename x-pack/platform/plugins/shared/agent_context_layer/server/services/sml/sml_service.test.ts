@@ -58,7 +58,11 @@ const buildTermsEnumMock = (universe: { kibana?: string[]; esIndices?: string[] 
 // Column order produced by buildSmlEsqlQuery. The permission name fields
 // (perm_kibana, perm_es_indices) are always present; spaces and other optional
 // fields appear only when explicitly requested.
-const makeEsqlColumns = (includeContent = true, includeSpaces = false) => [
+const makeEsqlColumns = (
+  includeContent = true,
+  includeSpaces = false,
+  includeBookkeeping = false
+) => [
   { name: 'id', type: 'keyword' },
   { name: 'type', type: 'keyword' },
   { name: 'title', type: 'text' },
@@ -70,6 +74,13 @@ const makeEsqlColumns = (includeContent = true, includeSpaces = false) => [
   { name: 'perm_kibana', type: 'keyword' },
   { name: 'perm_es_indices', type: 'keyword' },
   ...(includeContent ? [{ name: 'content', type: 'text' }] : []),
+  ...(includeBookkeeping
+    ? [
+        { name: 'created_at', type: 'date' },
+        { name: 'updated_at', type: 'date' },
+        { name: 'ingestion_method', type: 'keyword' },
+      ]
+    : []),
 ];
 
 // Build a single ES|QL row value array matching makeEsqlColumns order. The
@@ -90,6 +101,10 @@ const makeEsqlRow = (
     esIndices,
     includeContent = true,
     includeSpaces = false,
+    createdAt,
+    updatedAt,
+    ingestionMethod,
+    includeBookkeeping = false,
   }: {
     spaces?: string | string[];
     description?: string;
@@ -99,6 +114,10 @@ const makeEsqlRow = (
     esIndices?: string | string[] | null;
     includeContent?: boolean;
     includeSpaces?: boolean;
+    createdAt?: string | null;
+    updatedAt?: string | null;
+    ingestionMethod?: string | null;
+    includeBookkeeping?: boolean;
   } = {}
 ): unknown[] => [
   id,
@@ -112,6 +131,7 @@ const makeEsqlRow = (
   permissions,
   esIndices ?? null,
   ...(includeContent ? [content ?? null] : []),
+  ...(includeBookkeeping ? [createdAt ?? null, updatedAt ?? null, ingestionMethod ?? null] : []),
 ];
 
 const createMockScopedClient = (
@@ -594,6 +614,47 @@ describe('SmlService', () => {
         title: 'My Viz',
         origin: { uri: 'ref-1' },
         permissions: makePermissions(['saved_object:lens/get'], ['metrics-*']),
+      });
+    });
+
+    it('attaches spaces, created_at, updated_at, and ingestion_method when requested via fields', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(false, true, true),
+        values: [
+          makeEsqlRow('chunk-1', 'lens', 'My Viz', 'ref-1', ['saved_object:lens/get'], {
+            includeContent: false,
+            includeSpaces: true,
+            spaces: ['default'],
+            includeBookkeeping: true,
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-02T00:00:00.000Z',
+            ingestionMethod: 'manual',
+          }),
+        ],
+      } as any);
+
+      const result = await smlService.search({
+        query: 'viz',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+        fields: ['spaces', 'created_at', 'updated_at', 'ingestion_method'],
+      });
+
+      expect(result.results[0]).toEqual({
+        id: 'chunk-1',
+        type: 'lens',
+        title: 'My Viz',
+        origin: { uri: 'ref-1' },
+        spaces: ['default'],
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-02T00:00:00.000Z',
+        ingestion_method: 'manual',
       });
     });
 
