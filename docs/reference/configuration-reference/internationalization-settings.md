@@ -42,11 +42,17 @@ When a user sets a preferred language, it is stored in their user profile and ta
    on surfaces where the profile isn't available — login pages, error
    pages, and any browsing the user does after signing out. Only used
    when the cookie value matches a locale {{kib}} can serve.
-3. **`Accept-Language` header** — When neither the profile setting nor
-   the cookie produces a match, {{kib}} consults the browser's
-   `Accept-Language` preferences. The first weighted preference that's an
-   exact match (region included) for an entry in `i18n.locales` wins.
-4. **`i18n.defaultLocale` config** — The server-wide default set in `kibana.yml`.
+3. **`i18n.defaultLocale` config (when explicitly set)** — When an admin
+   sets `i18n.defaultLocale` to a value other than the built-in `en`
+   default, that server-wide choice takes precedence over browser
+   detection. Per-user signals (profile, cookie) above still win over it.
+4. **`Accept-Language` header** — When the steps above produce no match
+   and `i18n.defaultLocale` is left at its `en` default, {{kib}} consults
+   the browser's `Accept-Language` preferences. The first weighted
+   preference that's an exact match (region included) for an entry in
+   `i18n.locales` wins.
+5. **`i18n.defaultLocale` config** — The server-wide default (`en` unless
+   overridden) set in `kibana.yml`, used when nothing above matches.
 
 #### About the `KBN_LOCALE` cookie
 
@@ -63,8 +69,9 @@ It does not track the user, store identity, or enable cross-site activity.
 To disable the cookie entirely, set `i18n.allowLocaleCookie: false` in
 `kibana.yml`. When disabled, the per-user language selection still works via
 user profiles; however, anonymous pages and pages visited after signing out
-resolve their locale from the browser's `Accept-Language` preferences (or
-`i18n.defaultLocale` when no preference matches) rather than remembering the
+resolve their locale from `i18n.defaultLocale` when it is explicitly set, and
+otherwise from the browser's `Accept-Language` preferences (falling back to the
+`en` default when no preference matches), rather than remembering the
 previously resolved locale.
 
 ## Example configurations

@@ -113,6 +113,37 @@ describe('resolveLocale', () => {
       expect(result.locale).toBe('fr-FR');
     });
 
+    it('prefers an explicitly-configured non-default configLocale over a matching Accept-Language header', () => {
+      const result = resolveLocale(
+        baseArgs({
+          configLocale: 'fr-FR',
+          request: buildRequest({ acceptLanguage: 'ja-JP,en;q=0.5' }),
+        })
+      );
+      expect(result.locale).toBe('fr-FR');
+    });
+
+    it('still prefers the user profile over an explicitly-configured non-default configLocale', () => {
+      const result = resolveLocale(
+        baseArgs({
+          configLocale: 'fr-FR',
+          userSettingLocale: 'ja-JP',
+          request: buildRequest({ acceptLanguage: 'fr-FR,en;q=0.5' }),
+        })
+      );
+      expect(result.locale).toBe('ja-JP');
+    });
+
+    it('still prefers the KBN_LOCALE cookie over an explicitly-configured non-default configLocale', () => {
+      const result = resolveLocale(
+        baseArgs({
+          configLocale: 'fr-FR',
+          request: buildRequest({ cookie: `${KBN_LOCALE_COOKIE_NAME}=ja-JP` }),
+        })
+      );
+      expect(result.locale).toBe('ja-JP');
+    });
+
     it('falls through to configLocale when no Accept-Language entry matches the configured allow-list', () => {
       const result = resolveLocale(
         baseArgs({

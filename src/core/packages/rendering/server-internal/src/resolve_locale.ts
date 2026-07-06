@@ -8,6 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { EN_LOCALE } from '@kbn/i18n';
 
 /**
  * Name of the browser-side cookie used to remember the resolved locale across
@@ -52,8 +53,9 @@ export interface ResolveLocaleResult {
  * Resolves the effective locale for a render using the following priority chain:
  *   1. User profile setting (when value is in `translationHashes`)
  *   2. KBN_LOCALE cookie (only when `allowLocaleCookie` is `true` and value is in `translationHashes`)
- *   3. Accept-Language header (strict match against `configuredLocales`)
- *   4. `configLocale`
+ *   3. Explicitly-configured `configLocale` (any `i18n.defaultLocale` other than the built-in `en`)
+ *   4. Accept-Language header (strict match against `configuredLocales`)
+ *   5. `configLocale` (the built-in `en` default)
  */
 export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
   const {
@@ -75,6 +77,12 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
     if (cookieLocale && translationHashes[cookieLocale]) {
       return finalize(cookieLocale, request, serverBasePath);
     }
+  }
+
+  // An explicitly-configured default locale (any value other than the built-in
+  // EN_LOCALE) outranks Accept-Language detection.
+  if (configLocale !== EN_LOCALE) {
+    return finalize(configLocale, request, serverBasePath);
   }
 
   const headerLocale = pickFromAcceptLanguage(
