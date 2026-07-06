@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/269018
+issues:
+- https://github.com/elastic/kibana/issues/269016
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+areas:
+- Discover and ES|QL
+title: Fix empty sort array triggering unsaved changes
