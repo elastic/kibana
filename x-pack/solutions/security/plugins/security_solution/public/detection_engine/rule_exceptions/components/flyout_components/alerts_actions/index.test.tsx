@@ -11,26 +11,13 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
-import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 import { ExceptionItemsFlyoutAlertsActions } from '.';
 import * as i18n from './translations';
 import { TestProviders } from '../../../../../common/mock';
 import type { AlertData } from '../../../utils/types';
-import { useFetchIndex } from '../../../../../common/containers/source';
-import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
-
-const sourceIndexPatternFor = (
-  fields: Array<Partial<DataViewFieldBase> & { name: string }>
-): DataViewBase =>
-  ({
-    title: 'rule-source',
-    fields: fields.map((f) => ({ type: 'string', ...f })) as DataViewFieldBase[],
-  } as DataViewBase);
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/containers/source');
-jest.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
 
 const alertDataMock: AlertData = {
   '@timestamp': '1234567890',
@@ -38,42 +25,42 @@ const alertDataMock: AlertData = {
   file: { path: 'test/path' },
 };
 
-const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
-const mockUseFetchIndex = useFetchIndex as jest.Mock;
+type ComponentProps = React.ComponentProps<typeof ExceptionItemsFlyoutAlertsActions>;
+
+const defaultProps: ComponentProps = {
+  exceptionListItems: [getExceptionListItemSchemaMock()],
+  exceptionListType: ExceptionListTypeEnum.DETECTION,
+  shouldCloseSingleAlert: false,
+  shouldBulkCloseAlert: false,
+  disableBulkClose: false,
+  alertData: alertDataMock,
+  alertStatus: 'open',
+  isAlertDataLoading: false,
+  isSignalIndexLoading: false,
+  signalIndexNames: ['mock-siem-signals-index'],
+  isSignalIndexPatternLoading: false,
+  signalIndexPatterns: stubIndexPattern,
+  onDisableBulkClose: jest.fn(),
+  onUpdateBulkCloseIndex: jest.fn(),
+  onBulkCloseCheckboxChange: jest.fn(),
+  onSingleAlertCloseCheckboxChange: jest.fn(),
+};
+
+const mountComponent = (props: Partial<ComponentProps> = {}) =>
+  mountWithIntl(
+    <TestProviders>
+      <ExceptionItemsFlyoutAlertsActions {...defaultProps} {...props} />
+    </TestProviders>
+  );
 
 describe('ExceptionItemsFlyoutAlertsActions', () => {
-  beforeEach(() => {
-    mockUseSignalIndex.mockImplementation(() => ({
-      loading: false,
-      signalIndexName: 'mock-siem-signals-index',
-    }));
-    mockUseFetchIndex.mockImplementation(() => [false, { indexPatterns: stubIndexPattern }]);
-  });
-
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Endpoint specific logic', () => {
     it('it displays endpoint quarantine text if exception list type is "endpoint"', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={[getExceptionListItemSchemaMock()]}
-            exceptionListType={ExceptionListTypeEnum.ENDPOINT}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={false}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+      const wrapper = mountComponent({ exceptionListType: ExceptionListTypeEnum.ENDPOINT });
 
       expect(wrapper.find('[data-test-subj="addExceptionEndpointText"]').exists()).toBeTruthy();
     });
@@ -81,24 +68,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
 
   describe('alert data exists', () => {
     it('it displays single alert close checkbox if alert status is not "closed" and "alertData" exists', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={[getExceptionListItemSchemaMock()]}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={false}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+      const wrapper = mountComponent();
 
       expect(
         wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"]').exists()
@@ -109,24 +79,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
     });
 
     it('it displays single alert close checkbox disabled if "isAlertDataLoading" is true', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={[getExceptionListItemSchemaMock()]}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={false}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading
-          />
-        </TestProviders>
-      );
+      const wrapper = mountComponent({ isAlertDataLoading: true });
 
       expect(
         wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"] input').prop('disabled')
@@ -134,29 +87,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
     });
 
     it('it displays single alert close checkbox disabled if "isSignalIndexLoading" is true', () => {
-      mockUseSignalIndex.mockImplementation(() => ({
-        loading: true,
-        signalIndexName: 'mock-siem-signals-index',
-      }));
-
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={[getExceptionListItemSchemaMock()]}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={false}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+      const wrapper = mountComponent({ isSignalIndexLoading: true });
 
       expect(
         wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"] input').prop('disabled')
@@ -164,24 +95,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
     });
 
     it('it does not display single alert close checkbox if alert status is "closed"', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={[getExceptionListItemSchemaMock()]}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={false}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="closed"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+      const wrapper = mountComponent({ alertStatus: 'closed' });
 
       expect(
         wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"]').exists()
@@ -191,24 +105,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
 
   describe('bulk close alert', () => {
     it('it does not display single alert close checkbox if "alertData" does not exist', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={[getExceptionListItemSchemaMock()]}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={false}
-            disableBulkClose={false}
-            alertData={undefined}
-            alertStatus="open"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+      const wrapper = mountComponent({ alertData: undefined });
 
       expect(
         wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"]').exists()
@@ -216,24 +113,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
     });
 
     it('it displays bulk close checkbox', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={[getExceptionListItemSchemaMock()]}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={false}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+      const wrapper = mountComponent();
 
       expect(
         wrapper.find('[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').exists()
@@ -241,24 +121,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
     });
 
     it('it displays checkboxes disabled if "isAlertDataLoading" is "true"', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={[getExceptionListItemSchemaMock()]}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={false}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading
-          />
-        </TestProviders>
-      );
+      const wrapper = mountComponent({ isAlertDataLoading: true });
 
       expect(
         wrapper.find('[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').at(0).props()
@@ -270,24 +133,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
     });
 
     it('it displays bulk close checkbox disabled if "disableBulkCloseAlert" is "true"', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={[getExceptionListItemSchemaMock()]}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={false}
-            disableBulkClose={true}
-            alertData={alertDataMock}
-            alertStatus="open"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+      const wrapper = mountComponent({ disableBulkClose: true });
 
       expect(
         wrapper.find('[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').at(0).props()
@@ -297,29 +143,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
     });
 
     it('it displays bulk close checkbox disabled if "isSignalIndexLoading" is "true"', () => {
-      mockUseSignalIndex.mockImplementation(() => ({
-        loading: true,
-        signalIndexName: 'mock-siem-signals-index',
-      }));
-
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={[getExceptionListItemSchemaMock()]}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={false}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+      const wrapper = mountComponent({ isSignalIndexLoading: true });
 
       expect(
         wrapper.find('[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').at(0).props()
@@ -339,47 +163,19 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
     ];
 
     it('does not show the warning callout when bulk close is unchecked, even if the field is not on the alerts index', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={nonEcsExceptionItems}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={false}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+      const wrapper = mountComponent({
+        exceptionListItems: nonEcsExceptionItems,
+        shouldBulkCloseAlert: false,
+      });
 
       expect(wrapper.find('[data-test-subj="bulkCloseRuntimeFieldWarning"]').exists()).toBeFalsy();
     });
 
     it('shows the warning callout with the title and main body when bulk close is checked and the exception references a field not on the alerts index', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={nonEcsExceptionItems}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={true}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+      const wrapper = mountComponent({
+        exceptionListItems: nonEcsExceptionItems,
+        shouldBulkCloseAlert: true,
+      });
 
       const callout = wrapper.find('[data-test-subj="bulkCloseRuntimeFieldWarning"]').first();
       expect(callout.exists()).toBe(true);
@@ -387,9 +183,19 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       expect(callout.text()).toContain(i18n.BULK_CLOSE_RUNTIME_FIELD_WARNING_BODY);
     });
 
+    it('does not show the warning callout while the alerts-index fields are still loading', () => {
+      const wrapper = mountComponent({
+        exceptionListItems: nonEcsExceptionItems,
+        shouldBulkCloseAlert: true,
+        isSignalIndexPatternLoading: true,
+      });
+
+      expect(wrapper.find('[data-test-subj="bulkCloseRuntimeFieldWarning"]').exists()).toBeFalsy();
+    });
+
     it('does not show the warning callout when all entries reference fields present on the alerts index', () => {
-      // `stubIndexPattern` (returned by mockUseFetchIndex) contains
-      // `machine.os.raw`, so the entry below should be treated as ECS-OK.
+      // `stubIndexPattern` contains `machine.os.raw`, so the entry below
+      // should be treated as ECS-OK.
       const ecsExceptionItems = [
         {
           ...getExceptionListItemSchemaMock(),
@@ -399,202 +205,52 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
         },
       ];
 
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={ecsExceptionItems}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={true}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+      const wrapper = mountComponent({
+        exceptionListItems: ecsExceptionItems,
+        shouldBulkCloseAlert: true,
+      });
 
       expect(wrapper.find('[data-test-subj="bulkCloseRuntimeFieldWarning"]').exists()).toBeFalsy();
     });
-  });
 
-  describe('runtime fields map (onRuntimeFieldsChange)', () => {
-    const runtimeFieldExceptionItems = [
-      {
-        ...getExceptionListItemSchemaMock(),
-        // Field is not on the stub alerts index, so treated as non-ECS.
-        entries: [{ field: 'source.ip_ecs', operator: 'included', type: 'match' }] as EntriesArray,
-      },
-    ];
-
-    it('does not invoke onRuntimeFieldsChange with a populated map when bulk close is unchecked', () => {
-      const onRuntimeFieldsChange = jest.fn();
-      mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={runtimeFieldExceptionItems}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={false}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            sourceIndexPatterns={sourceIndexPatternFor([
-              { name: 'source.ip_ecs', esTypes: ['ip'] },
-            ])}
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            onRuntimeFieldsChange={onRuntimeFieldsChange}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
-
-      // Component still fires the callback (with an empty map) so the parent
-      // can clear any stale state; what we assert is that no real runtime
-      // field types are surfaced when the user hasn't opted in to bulk close.
-      expect(onRuntimeFieldsChange).toHaveBeenCalledWith({}, false);
-    });
-
-    it('emits the resolved type for a non-ECS field present on the source data view', () => {
-      const onRuntimeFieldsChange = jest.fn();
-      mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={runtimeFieldExceptionItems}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={true}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            sourceIndexPatterns={sourceIndexPatternFor([
-              { name: 'source.ip_ecs', esTypes: ['ip'] },
-            ])}
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            onRuntimeFieldsChange={onRuntimeFieldsChange}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
-
-      expect(onRuntimeFieldsChange).toHaveBeenLastCalledWith({ 'source.ip_ecs': 'ip' }, false);
-    });
-
-    it('falls back to keyword + hasUntypedFields=true when the field is missing from the source data view', () => {
-      const onRuntimeFieldsChange = jest.fn();
-      mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={runtimeFieldExceptionItems}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={true}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            // Source data view doesn't contain the field — rule-drift scenario.
-            sourceIndexPatterns={sourceIndexPatternFor([])}
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            onRuntimeFieldsChange={onRuntimeFieldsChange}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
-
-      expect(onRuntimeFieldsChange).toHaveBeenLastCalledWith({ 'source.ip_ecs': 'keyword' }, true);
-    });
-
-    it('emits an empty map when sourceIndexPatterns is not provided', () => {
-      const onRuntimeFieldsChange = jest.fn();
-      mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={runtimeFieldExceptionItems}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={true}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            onRuntimeFieldsChange={onRuntimeFieldsChange}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
-
-      // Endpoint exceptions and other rule-less callers go through this path.
-      expect(onRuntimeFieldsChange).toHaveBeenCalledWith({}, false);
-    });
-
-    it('renders the untyped-fallback callout body when any field defaults to keyword', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={runtimeFieldExceptionItems}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={true}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            sourceIndexPatterns={sourceIndexPatternFor([])}
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+    it('renders the untyped-fallback callout body when "hasUntypedRuntimeFields" is true', () => {
+      const wrapper = mountComponent({
+        exceptionListItems: nonEcsExceptionItems,
+        shouldBulkCloseAlert: true,
+        hasUntypedRuntimeFields: true,
+      });
 
       const callout = wrapper.find('[data-test-subj="bulkCloseRuntimeFieldWarning"]').first();
       expect(callout.exists()).toBeTruthy();
       expect(callout.text()).toContain(i18n.BULK_CLOSE_RUNTIME_FIELD_WARNING_UNTYPED_BODY);
     });
 
-    it('does not render the untyped-fallback callout body when every field has a resolved type', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ExceptionItemsFlyoutAlertsActions
-            exceptionListItems={runtimeFieldExceptionItems}
-            exceptionListType={ExceptionListTypeEnum.DETECTION}
-            shouldCloseSingleAlert={false}
-            shouldBulkCloseAlert={true}
-            disableBulkClose={false}
-            alertData={alertDataMock}
-            alertStatus="open"
-            sourceIndexPatterns={sourceIndexPatternFor([
-              { name: 'source.ip_ecs', esTypes: ['ip'] },
-            ])}
-            onDisableBulkClose={jest.fn()}
-            onUpdateBulkCloseIndex={jest.fn()}
-            onBulkCloseCheckboxChange={jest.fn()}
-            onSingleAlertCloseCheckboxChange={jest.fn()}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+    it('does not render the untyped-fallback callout body when "hasUntypedRuntimeFields" is false', () => {
+      const wrapper = mountComponent({
+        exceptionListItems: nonEcsExceptionItems,
+        shouldBulkCloseAlert: true,
+        hasUntypedRuntimeFields: false,
+      });
 
       const callout = wrapper.find('[data-test-subj="bulkCloseRuntimeFieldWarning"]').first();
       expect(callout.exists()).toBeTruthy();
       expect(callout.text()).not.toContain(i18n.BULK_CLOSE_RUNTIME_FIELD_WARNING_UNTYPED_BODY);
+    });
+  });
+
+  describe('bulk close index', () => {
+    it('reports the signal index names when bulk close is checked', () => {
+      const onUpdateBulkCloseIndex = jest.fn();
+      mountComponent({ shouldBulkCloseAlert: true, onUpdateBulkCloseIndex });
+
+      expect(onUpdateBulkCloseIndex).toHaveBeenLastCalledWith(['mock-siem-signals-index']);
+    });
+
+    it('reports undefined when bulk close is unchecked', () => {
+      const onUpdateBulkCloseIndex = jest.fn();
+      mountComponent({ shouldBulkCloseAlert: false, onUpdateBulkCloseIndex });
+
+      expect(onUpdateBulkCloseIndex).toHaveBeenLastCalledWith(undefined);
     });
   });
 });

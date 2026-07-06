@@ -55,6 +55,8 @@ import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
 import { ExceptionsLinkedToLists } from '../flyout_components/linked_to_list';
 import { ExceptionsLinkedToRule } from '../flyout_components/linked_to_rule';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
+import { useRuntimeFieldsForBulkClose } from '../flyout_components/alerts_actions/use_runtime_fields_for_bulk_close';
+import { useSignalIndexPatterns } from '../flyout_components/alerts_actions/use_signal_index_patterns';
 import { ExceptionsConditions } from '../flyout_components/item_conditions';
 
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
@@ -62,7 +64,6 @@ import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import { enrichExceptionItemsForUpdate } from '../flyout_components/utils';
 import { ExceptionItemComments } from '../item_comments';
-import type { RuntimeFieldType } from '../../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import { createExceptionItemsReducer } from './reducer';
 import { useEditExceptionItems } from './use_edit_exception';
 
@@ -119,9 +120,6 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
   const { read: canReadExceptions } = useUserPrivileges().rulesPrivileges.exceptions;
   const { hasAlertsUpdate } = useAlertsPrivileges();
-  const [runtimeFieldsForBulkClose, setRuntimeFieldsForBulkClose] = useState<
-    Record<string, RuntimeFieldType>
-  >({});
 
   const [
     {
@@ -156,6 +154,23 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     partialCodeSignatureWarningExists: false,
     malformedMatchesValueExists: false,
     malformedMatchesFields: [],
+  });
+
+  const {
+    isSignalIndexLoading,
+    signalIndexNames,
+    isSignalIndexPatternLoading,
+    signalIndexPatterns,
+    areSignalIndexPatternsReady,
+  } = useSignalIndexPatterns();
+
+  const runtimeFieldsResolution = useRuntimeFieldsForBulkClose({
+    exceptionListItems: exceptionItems,
+    shouldBulkCloseAlert: bulkCloseAlerts,
+    sourceIndexPatterns: indexPatterns,
+    isSourceIndexPatternsLoading: isLoading,
+    alertsIndexPatterns: signalIndexPatterns,
+    areAlertsIndexPatternsReady: areSignalIndexPatternsReady,
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -343,7 +358,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
             items,
             undefined,
             bulkCloseIndex,
-            runtimeFieldsForBulkClose
+            runtimeFieldsResolution.runtimeFields
           );
         }
 
@@ -367,7 +382,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     bulkCloseAlerts,
     onConfirm,
     bulkCloseIndex,
-    runtimeFieldsForBulkClose,
+    runtimeFieldsResolution.runtimeFields,
     onCancel,
     expireTime,
   ]);
@@ -388,7 +403,11 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       isLoading ||
       entryErrorExists ||
       expireErrorExists ||
-      commentErrorExists,
+      commentErrorExists ||
+      // Bulk close sends the runtime-field map with the close-by-query
+      // request; hold submit until the map is resolved so alerts on runtime
+      // fields aren't silently skipped.
+      (bulkCloseAlerts && runtimeFieldsResolution.isResolving),
     [
       isLoading,
       entryErrorExists,
@@ -397,6 +416,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       isClosingAlerts,
       expireErrorExists,
       commentErrorExists,
+      bulkCloseAlerts,
+      runtimeFieldsResolution.isResolving,
     ]
   );
 
@@ -521,11 +542,14 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
               shouldBulkCloseAlert={bulkCloseAlerts}
               disableBulkClose={disableBulkClose}
               exceptionListItems={exceptionItems}
-              sourceIndexPatterns={indexPatterns}
+              isSignalIndexLoading={isSignalIndexLoading}
+              signalIndexNames={signalIndexNames}
+              isSignalIndexPatternLoading={isSignalIndexPatternLoading}
+              signalIndexPatterns={signalIndexPatterns}
+              hasUntypedRuntimeFields={runtimeFieldsResolution.hasUntypedFields}
               onDisableBulkClose={setDisableBulkCloseAlerts}
               onUpdateBulkCloseIndex={setBulkCloseIndex}
               onBulkCloseCheckboxChange={setBulkCloseAlerts}
-              onRuntimeFieldsChange={setRuntimeFieldsForBulkClose}
             />
           </>
         )}

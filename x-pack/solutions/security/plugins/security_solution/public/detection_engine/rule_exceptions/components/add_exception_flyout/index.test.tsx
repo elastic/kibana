@@ -8,7 +8,7 @@
 import React from 'react';
 import type { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { EntriesArray, EntryMatch } from '@kbn/securitysolution-io-ts-list-types';
@@ -77,6 +77,13 @@ describe('When the add exception modal is opened', () => {
       loading: false,
       signalIndexName: 'mock-siem-signals-index',
     }));
+    // The flyout resolves runtime fields for bulk close on every render, so
+    // the alerts-index fields fetch needs a default. A non-null `dataView`
+    // marks the fetch as completed.
+    mockUseFetchIndex.mockImplementation(() => [
+      false,
+      { indexPatterns: stubIndexPattern, dataView: { id: 'stub-alerts-data-view' } },
+    ]);
     mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
   });
 
@@ -1101,6 +1108,67 @@ describe('When the add exception modal is opened', () => {
       expect(
         wrapper.find('[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').exists()
       ).toBeFalsy();
+    });
+  });
+
+  describe('bulk close and runtime-field resolution', () => {
+    const renderFlyout = () => {
+      render(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[{ ...getRulesSchemaMock(), index: ['filebeat-*'] } as Rule]}
+            isBulkAction={false}
+            alertData={alertDataMock}
+            isAlertDataLoading={false}
+            alertStatus="open"
+            isEndpointItem={false}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+    };
+
+    const fillRequiredFields = async () => {
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] })
+      );
+      fireEvent.change(screen.getByTestId('exceptionFlyoutNameInput'), {
+        target: { value: 'Exception name' },
+      });
+    };
+
+    beforeEach(() => {
+      mockFetchIndexPatterns.mockImplementation(() => ({
+        isLoading: false,
+        indexPatterns: stubIndexPattern,
+        getExtendedFields: () => Promise.resolve([]),
+      }));
+    });
+
+    it('disables submit while the alerts-index fields are loading and bulk close is checked', async () => {
+      mockUseFetchIndex.mockImplementation(() => [true, { indexPatterns: stubIndexPattern }]);
+      renderFlyout();
+      await fillRequiredFields();
+
+      fireEvent.click(screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox'));
+
+      expect(screen.getByTestId('addExceptionConfirmButton')).toBeDisabled();
+    });
+
+    it('enables submit once the runtime-field map is resolved', async () => {
+      mockUseFetchIndex.mockImplementation(() => [
+        false,
+        { indexPatterns: stubIndexPattern, dataView: { id: 'stub-alerts-data-view' } },
+      ]);
+      renderFlyout();
+      await fillRequiredFields();
+
+      fireEvent.click(screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox'));
+
+      expect(screen.getByTestId('addExceptionConfirmButton')).not.toBeDisabled();
     });
   });
 });

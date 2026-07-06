@@ -769,6 +769,75 @@ describe('When the edit exception modal is opened', () => {
     });
   });
 
+  describe('bulk close and runtime-field resolution', () => {
+    // Stable instance — the alerts-actions component memoizes on the
+    // `indexPatterns` identity, so the mock must not mint a new stub per call.
+    const alertsIndexStub = createStubIndexPattern({
+      spec: { id: 'alerts-stub', title: '.alerts-security.alerts-default' },
+    });
+
+    const renderFlyoutAndSetItems = async () => {
+      render(
+        <TestProviders>
+          <EditExceptionFlyout
+            list={{
+              ...getExceptionListSchemaMock(),
+              type: 'detection',
+              namespace_type: 'single',
+              list_id: 'my_list_id',
+              id: '1234',
+            }}
+            rule={
+              {
+                ...getRulesSchemaMock(),
+                id: '345',
+                name: 'My rule',
+                rule_id: 'my_rule_id',
+                exceptions_list: [
+                  {
+                    id: '1234',
+                    list_id: 'my_list_id',
+                    type: 'detection',
+                    namespace_type: 'single',
+                  },
+                ],
+              } as Rule
+            }
+            itemToEdit={getExceptionListItemSchemaMock()}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
+    };
+
+    it('disables submit while the alerts-index fields are loading and bulk close is checked', async () => {
+      mockUseFetchIndex.mockImplementation(() => [true, { indexPatterns: alertsIndexStub }]);
+      await renderFlyoutAndSetItems();
+
+      fireEvent.click(screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox'));
+
+      expect(screen.getByTestId('editExceptionConfirmButton')).toBeDisabled();
+    });
+
+    it('enables submit once the runtime-field map is resolved', async () => {
+      mockUseFetchIndex.mockImplementation(() => [
+        false,
+        { indexPatterns: alertsIndexStub, dataView: { id: 'stub-alerts-data-view' } },
+      ]);
+      await renderFlyoutAndSetItems();
+
+      fireEvent.click(screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox'));
+
+      expect(screen.getByTestId('editExceptionConfirmButton')).not.toBeDisabled();
+    });
+  });
+
   describe('when user does not have alerts privileges', () => {
     it('should NOT render bulk close alerts section when hasAlertsUpdate is false', async () => {
       mockUseAlertsPrivileges.mockReturnValue({

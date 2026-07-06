@@ -59,6 +59,8 @@ import { ExceptionsConditions } from '../flyout_components/item_conditions';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import type { Rule } from '../../../rule_management/logic/types';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
+import { useRuntimeFieldsForBulkClose } from '../flyout_components/alerts_actions/use_runtime_fields_for_bulk_close';
+import { useSignalIndexPatterns } from '../flyout_components/alerts_actions/use_signal_index_patterns';
 import { ExceptionsAddToRulesOrLists } from '../flyout_components/add_exception_to_rule_or_list';
 import { useAddNewExceptionItems } from './use_add_new_exceptions';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
@@ -74,7 +76,6 @@ import { ExceptionFlyoutHeader } from '../flyout_components/header';
 import * as headerI18n from '../flyout_components/header/translations';
 import { isSubmitDisabled, prepareNewItemsForSubmission, prepareToCloseAlerts } from './helpers';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import type { RuntimeFieldType } from '../../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 
 const SectionHeader = styled(EuiTitle)`
   font-weight: ${({ theme }) => theme.euiTheme.font.weight.semiBold};
@@ -122,9 +123,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   } = useKibana().services;
   const { hasAlertsUpdate } = useAlertsPrivileges();
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
-  const [runtimeFieldsForBulkClose, setRuntimeFieldsForBulkClose] = useState<
-    Record<string, RuntimeFieldType>
-  >({});
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
@@ -189,6 +187,23 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const hasAlertData = useMemo((): boolean => {
     return alertData != null;
   }, [alertData]);
+
+  const {
+    isSignalIndexLoading,
+    signalIndexNames,
+    isSignalIndexPatternLoading,
+    signalIndexPatterns,
+    areSignalIndexPatternsReady,
+  } = useSignalIndexPatterns();
+
+  const runtimeFieldsResolution = useRuntimeFieldsForBulkClose({
+    exceptionListItems: exceptionItems,
+    shouldBulkCloseAlert: bulkCloseAlerts,
+    sourceIndexPatterns: indexPatterns,
+    isSourceIndexPatternsLoading: isLoading,
+    alertsIndexPatterns: signalIndexPatterns,
+    areAlertsIndexPatternsReady: areSignalIndexPatternsReady,
+  });
 
   /**
    * Reducer action dispatchers
@@ -446,7 +461,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           addedItems,
           alertIdToClose,
           bulkCloseIndex,
-          runtimeFieldsForBulkClose
+          runtimeFieldsResolution.runtimeFields
         );
       }
 
@@ -475,7 +490,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     bulkCloseAlerts,
     onConfirm,
     bulkCloseIndex,
-    runtimeFieldsForBulkClose,
+    runtimeFieldsResolution.runtimeFields,
     setErrorSubmitting,
     invalidateFetchRuleByIdQuery,
     expireTime,
@@ -502,6 +517,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     selectedRulesToAddTo,
     listType,
     exceptionListsToAddTo,
+    bulkCloseAlerts,
+    isRuntimeFieldsResolving: runtimeFieldsResolution.isResolving,
   });
 
   const handleDismissError = useCallback((): void => {
@@ -663,12 +680,15 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
               alertData={alertData}
               alertStatus={alertStatus}
               isAlertDataLoading={isAlertDataLoading ?? false}
-              sourceIndexPatterns={indexPatterns}
+              isSignalIndexLoading={isSignalIndexLoading}
+              signalIndexNames={signalIndexNames}
+              isSignalIndexPatternLoading={isSignalIndexPatternLoading}
+              signalIndexPatterns={signalIndexPatterns}
+              hasUntypedRuntimeFields={runtimeFieldsResolution.hasUntypedFields}
               onDisableBulkClose={setDisableBulkCloseAlerts}
               onUpdateBulkCloseIndex={setBulkCloseIndex}
               onBulkCloseCheckboxChange={setBulkCloseAlerts}
               onSingleAlertCloseCheckboxChange={setCloseSingleAlert}
-              onRuntimeFieldsChange={setRuntimeFieldsForBulkClose}
             />
           </>
         )}
