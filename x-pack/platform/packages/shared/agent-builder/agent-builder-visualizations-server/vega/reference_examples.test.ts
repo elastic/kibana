@@ -38,6 +38,16 @@ describe('selectReferenceExamples', () => {
     expect(idsFor('a heatmap of activity by hour and day')).toContain('heatmap');
   });
 
+  it('selects the timeline/gantt example for a gantt/duration request', () => {
+    expect(idsFor('a gantt chart of deployment stage durations')).toContain('timeline_gantt');
+  });
+
+  it('selects the calendar-heatmap example for a calendar request', () => {
+    expect(idsFor('a calendar heatmap of logins by week and weekday')).toContain(
+      'calendar_heatmap'
+    );
+  });
+
   it('returns no example for a plain single-series chart (routes to Lens)', () => {
     expect(selectReferenceExamples('top 10 services by error count as a bar chart')).toEqual([]);
   });
@@ -140,9 +150,7 @@ describe('formatReferenceExamples', () => {
   });
 
   it('renders a titled JSON block per example and warns against copying data', async () => {
-    const rendered = formatReferenceExamples(
-      await loadReferenceExamples('scatter of x vs y')
-    );
+    const rendered = formatReferenceExamples(await loadReferenceExamples('scatter of x vs y'));
     expect(rendered).toContain('REFERENCE EXAMPLES');
     expect(rendered).toContain('Scatter / bubble plot (encoded size)');
     expect(rendered).toContain('```json');

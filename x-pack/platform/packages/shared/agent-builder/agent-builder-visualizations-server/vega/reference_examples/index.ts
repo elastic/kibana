@@ -13,8 +13,10 @@ import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_re
  * The catalog only covers the *non-trivial* chart shapes that a standard Lens
  * chart cannot express and that the model most often gets structurally wrong —
  * combination (dual-axis) charts, faceted small multiples, scatter/bubble plots,
- * and heatmaps. Simple single-series bar/line charts are deliberately omitted:
- * they route to Lens and need no example here.
+ * heatmaps, timeline/Gantt ranged bars, and calendar heatmaps. Simple single-series
+ * bar/line charts are deliberately omitted: they route to Lens and need no example
+ * here. Chart shapes that Vega-Lite cannot express (Sankey, radar, sunburst) are
+ * out of scope until raw-Vega support lands.
  *
  * Only lightweight metadata (`match`, `title`, `description`) lives here; the
  * spec body is *referenced content* loaded on demand via {@link VegaReferenceExample.load}
@@ -103,14 +105,37 @@ export const VEGA_REFERENCE_EXAMPLES: readonly VegaReferenceExample[] = [
     title: 'Heatmap (two categories + color measure)',
     description:
       'Density across two dimensions with a `rect` mark: an ordinal/nominal `x` and `y`, and a sequential `color` scheme for the measure. Extract categorical buckets with `EVAL`, but keep the time-picker filter on the raw source field.',
-    match: [
-      /heat\s?map/,
-      /\bmatrix\b/,
-      /\bby hour\b.*\bday\b|\bday\b.*\bby hour\b/,
-      /density/,
-      /calendar/,
-    ],
+    match: [/heat\s?map/, /\bmatrix\b/, /\bby hour\b.*\bday\b|\bday\b.*\bby hour\b/, /density/],
     load: () => import('./heatmap').then((module) => module.spec),
+  },
+  {
+    id: 'timeline_gantt',
+    title: 'Timeline / Gantt (ranged bars)',
+    description:
+      'Show the start-to-end span of each item as a horizontal ranged bar: a `bar` mark with a temporal `x` (start) and `x2` (end) against a nominal `y` (the item). Produce the start/end columns in ES|QL (e.g. `MIN`/`MAX` of the time field per item), pre-sort by start and set `sort: null` on `y`. Keep the time-picker filter on the raw source field.',
+    match: [
+      /\bgantt\b/,
+      /timeline/,
+      /\bschedule\b/,
+      /duration(s)? (of|per|by|for)\b/,
+      /start (and|to) end|(start|end) (time|date)s?/,
+      /\bspans?\b/,
+    ],
+    load: () => import('./timeline_gantt').then((module) => module.spec),
+  },
+  {
+    id: 'calendar_heatmap',
+    title: 'Calendar heatmap (week × weekday grid)',
+    description:
+      'GitHub-style calendar heatmap: a `rect` mark with an ordinal `x` for the week and an ordinal `y` for the weekday (explicitly sorted Mon→Sun via `sort`), colored by a sequential `scheme`. Derive the week/weekday buckets with `EVAL DATE_FORMAT(...)` and keep the time-picker filter on the raw source field.',
+    match: [
+      /calendar/,
+      /contribution (graph|chart)/,
+      /github[-\s]?style/,
+      /by (week and )?weekday/,
+      /activity (heat\s?map|calendar)/,
+    ],
+    load: () => import('./calendar_heatmap').then((module) => module.spec),
   },
 ];
 
