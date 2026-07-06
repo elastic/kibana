@@ -15,7 +15,8 @@ import { getCachedAllConnectors } from './connectors_cache';
 
 export interface RequiredParamForConnector {
   name: string;
-  example?: string;
+  // `example` holds a type-aware placeholder value (string, array, enum value, etc.), not only strings.
+  example?: unknown;
   defaultValue?: string;
 }
 
@@ -114,73 +115,230 @@ export function getRequiredParamsForConnector(
   return basicConnectorParams[connectorType] || [];
 }
 
+interface ExtractedParam {
+  name: string;
+  example?: unknown;
+  defaultValue?: string;
+  required: boolean;
+}
+
+// Fields that are transport/formatting concerns rather than meaningful step parameters.
+const NON_PARAMETER_FIELDS = ['pretty', 'human', 'error_trace', 'source', 'filter_path'];
+
 /**
- * Extract required parameters from a Zod schema
+ * Peel wrapper schemas (optional / default / nullable / lazy) until reaching the inner type.
+ * Mirrors the unwrap pattern used across `@kbn/workflows-yaml` zod helpers.
  */
-function extractRequiredParamsFromSchema(
-  schema: z.ZodType
-): Array<{ name: string; example?: string; defaultValue?: string; required: boolean }> {
-  const params: Array<{
-    name: string;
-    example?: string;
-    defaultValue?: string;
-    required: boolean;
-  }> = [];
+function unwrapSchema(schema: z.ZodType): z.ZodType {
+  let current = schema;
+  while (
+    current instanceof z.ZodOptional ||
+    current instanceof z.ZodDefault ||
+    current instanceof z.ZodNullable ||
+    current instanceof z.ZodLazy
+  ) {
+    current = current.unwrap() as z.ZodType;
+  }
+  return current;
+}
 
-  if (schema instanceof z.ZodObject) {
-    const shape = schema.shape;
-    for (const [key, fieldSchema] of Object.entries(shape)) {
-      const zodField = fieldSchema as z.ZodType;
+function isFieldRequired(fieldSchema: z.ZodType): boolean {
+  // A field is optional when `undefined` is a valid value for it.
+  return !fieldSchema.safeParse(undefined).success;
+}
 
-      // Skip common non-parameter fields
-      if (['pretty', 'human', 'error_trace', 'source', 'filter_path'].includes(key)) {
-        // eslint-disable-next-line no-continue
-        continue;
-      }
+function getObjectShape(schema: z.ZodType): Record<string, z.ZodType> | null {
+  const unwrapped = unwrapSchema(schema);
+  if (unwrapped instanceof z.ZodObject) {
+    return unwrapped.shape as Record<string, z.ZodType>;
+  }
+  return null;
+}
 
-      // Recommended way to check if field is required (not optional)
-      const isOptional = zodField.safeParse(undefined).success;
-      const isRequired = !isOptional;
+/**
+ * Build a YAML-friendly placeholder value that matches the field's zod type, so the snippet renders
+ * e.g. `ids: [""]` (array), `status: acknowledged` (enum/literal) rather than everything as `""`.
+ */
+function getPlaceholderForSchema(schema: z.ZodType, depth = 0): unknown {
+  const s = unwrapSchema(schema);
 
-      // Extract description for examples
-      let description = '';
-      let example = '';
+  if (depth > 3) {
+    return '';
+  }
+  if (s instanceof z.ZodString) {
+    return '';
+  }
+  if (s instanceof z.ZodNumber) {
+    return 0;
+  }
+  if (s instanceof z.ZodBoolean) {
+    return false;
+  }
+  if (s instanceof z.ZodLiteral) {
+    return s.value;
+  }
+  if (s instanceof z.ZodEnum) {
+    return s.options[0];
+  }
+  if (s instanceof z.ZodArray) {
+    return [getPlaceholderForSchema(s.element as z.ZodType, depth + 1)];
+  }
+  if (s instanceof z.ZodUnion) {
+    const options = s.options as z.ZodType[];
+    // For `id | id[]` style unions (common in the security bulk-update steps) prefer the array member
+    // so the snippet communicates that a list is accepted; otherwise fall back to the first member.
+    const arrayMember = options.find((option) => unwrapSchema(option) instanceof z.ZodArray);
+    return getPlaceholderForSchema(arrayMember ?? options[0], depth + 1);
+  }
+  if (s instanceof z.ZodObject) {
+    // Keep nested objects shallow to avoid noisy placeholders.
+    return {};
+  }
+  return '';
+}
 
-      if ('description' in zodField && typeof zodField.description === 'string') {
-        description = zodField.description;
-        // Try to extract example from description
-        const exampleMatch = description.match(
-          /example[:\s]+['"]*([^'"]+)['"]*|default[:\s]+['"]*([^'"]+)['"]*/i
-        );
-        if (exampleMatch) {
-          example = exampleMatch[1] || exampleMatch[2] || '';
-        }
-      }
+/**
+ * Turn a single object field into a parameter descriptor, deriving an example from (in order):
+ * the field description, common ES parameter-name heuristics, then a type-aware placeholder.
+ */
+function buildParamFromField(key: string, fieldSchema: z.ZodType): ExtractedParam {
+  const required = isFieldRequired(fieldSchema);
 
-      // Add some default examples based on common parameter names
-      if (!example) {
-        if (key === 'index') {
-          example = 'my-index';
-        } else if (key === 'id') {
-          example = 'doc-id';
-        } else if (key === 'body') {
-          // Try to extract body structure from schema
-          example = extractBodyExample(zodField);
-        } else if (key === 'query') {
-          example = '{}';
-        } else if (key.includes('name')) {
-          example = 'my-name';
-        }
-      }
+  let example: unknown = '';
 
-      // Only include required parameters or very common ones
-      if (isRequired || ['index', 'id', 'body'].includes(key)) {
-        params.push({
-          name: key,
-          example,
-          required: isRequired,
-        });
-      }
+  if ('description' in fieldSchema && typeof fieldSchema.description === 'string') {
+    const description = fieldSchema.description;
+    const exampleMatch = description.match(
+      /example[:\s]+['"]*([^'"]+)['"]*|default[:\s]+['"]*([^'"]+)['"]*/i
+    );
+    if (exampleMatch) {
+      example = exampleMatch[1] || exampleMatch[2] || '';
+    }
+  }
+
+  if (example === '') {
+    if (key === 'index') {
+      example = 'my-index';
+    } else if (key === 'id') {
+      example = 'doc-id';
+    } else if (key === 'body') {
+      example = extractBodyExample(fieldSchema);
+    } else if (key === 'query') {
+      example = '{}';
+    } else if (key.includes('name')) {
+      example = 'my-name';
+    }
+  }
+
+  // Fall back to a type-aware placeholder only when no example was derived above.
+  if (example === '') {
+    example = getPlaceholderForSchema(fieldSchema);
+  }
+
+  return { name: key, example, required };
+}
+
+/**
+ * Extract required parameters from a Zod schema.
+ *
+ * Handles plain objects as well as (discriminated) unions used by steps whose input schema is not a
+ * top-level `z.object(...)` — e.g. the `security.*` alert/attack steps.
+ */
+function extractRequiredParamsFromSchema(schema: z.ZodType): ExtractedParam[] {
+  const normalized = unwrapSchema(schema);
+
+  if (normalized instanceof z.ZodObject) {
+    return extractFromObject(normalized);
+  }
+
+  if (normalized instanceof z.ZodDiscriminatedUnion) {
+    return extractFromDiscriminatedUnion(normalized);
+  }
+
+  if (normalized instanceof z.ZodUnion) {
+    return extractFromUnion(normalized);
+  }
+
+  return [];
+}
+
+function extractFromObject(schema: z.ZodObject): ExtractedParam[] {
+  const params: ExtractedParam[] = [];
+  const shape = schema.shape as Record<string, z.ZodType>;
+
+  for (const [key, fieldSchema] of Object.entries(shape)) {
+    if (NON_PARAMETER_FIELDS.includes(key)) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    const param = buildParamFromField(key, fieldSchema);
+
+    // Only include required parameters or the most common ES fields.
+    if (param.required || ['index', 'id', 'body'].includes(key)) {
+      params.push(param);
+    }
+  }
+
+  return params;
+}
+
+/**
+ * For a discriminated union, surface the discriminator (with a valid example from the first variant)
+ * plus the intersection of fields that are required in *every* variant, so the emitted params always
+ * apply regardless of which discriminator value the user ultimately picks. Field order follows the
+ * first variant's declaration order.
+ */
+function extractFromDiscriminatedUnion(schema: z.ZodType): ExtractedParam[] {
+  const options = (schema as z.ZodDiscriminatedUnion).options as z.ZodType[];
+  const shapes = options.map(getObjectShape);
+  const firstShape = shapes[0];
+
+  if (!firstShape || shapes.some((shape) => shape === null)) {
+    return [];
+  }
+
+  const params: ExtractedParam[] = [];
+  for (const [key, fieldSchema] of Object.entries(firstShape)) {
+    if (NON_PARAMETER_FIELDS.includes(key)) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    const requiredInEveryVariant = shapes.every(
+      (shape) => shape !== null && shape[key] !== undefined && isFieldRequired(shape[key])
+    );
+
+    if (requiredInEveryVariant) {
+      params.push(buildParamFromField(key, fieldSchema));
+    }
+  }
+
+  return params;
+}
+
+/**
+ * For a non-discriminated union there is no shared discriminator to key off, so fall back to the
+ * required fields of the first object member. This is a heuristic: it produces a valid single variant
+ * (e.g. the `tags_to_add` branch of `security.setAlertTags`) rather than an empty placeholder.
+ */
+function extractFromUnion(schema: z.ZodUnion): ExtractedParam[] {
+  const options = schema.options as z.ZodType[];
+  const firstShape = getObjectShape(options[0]);
+
+  if (!firstShape) {
+    return [];
+  }
+
+  const params: ExtractedParam[] = [];
+  for (const [key, fieldSchema] of Object.entries(firstShape)) {
+    if (NON_PARAMETER_FIELDS.includes(key)) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    if (isFieldRequired(fieldSchema)) {
+      params.push(buildParamFromField(key, fieldSchema));
     }
   }
 
