@@ -11,7 +11,7 @@ import { createMemoryTools } from '../tools/memory';
 import description from './significant_events_memory.description.text';
 import content from './significant_events_memory.skill.md.text';
 
-export const createSigEventsMemorySkill = (options: MemoryToolsOptions) =>
+export const createSignificantEventsMemorySkill = (options: MemoryToolsOptions) =>
   defineSkillType({
     id: 'significant-events-memory',
     name: 'significant-events-memory',
