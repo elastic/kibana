@@ -55,7 +55,7 @@ export const ruleHistoryRoute = (router: SecuritySolutionPluginRouter) => {
           if (!isRuleChangesHistoryEnabled) {
             return siemResponse.error({
               statusCode: 403,
-              body: 'Rule changes history is disabled.',
+              body: 'Rule changes history is disabled. You may enable it in Advanced Settings.',
             });
           }
 

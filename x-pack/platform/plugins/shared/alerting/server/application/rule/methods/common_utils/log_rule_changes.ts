@@ -118,10 +118,17 @@ export async function logRuleChanges({
     // "Enable rule changes history" advanced setting, on top of the static config flag above.
     if (ruleType.solution === 'security') {
       if (securityRuleChangesHistoryEnabled === undefined) {
-        const uiSettingsClient = uiSettings.asScopedToClient(unsecuredSavedObjectsClient);
-        securityRuleChangesHistoryEnabled = await uiSettingsClient.get<boolean>(
-          SECURITY_SOLUTION_ENABLE_RULE_CHANGES_HISTORY_SETTING
-        );
+        try {
+          const uiSettingsClient = uiSettings.asScopedToClient(unsecuredSavedObjectsClient);
+          securityRuleChangesHistoryEnabled = await uiSettingsClient.get<boolean>(
+            SECURITY_SOLUTION_ENABLE_RULE_CHANGES_HISTORY_SETTING
+          );
+        } catch (e) {
+          logger.warn(
+            `Unable to read "${SECURITY_SOLUTION_ENABLE_RULE_CHANGES_HISTORY_SETTING}" advanced setting: ${e}`
+          );
+          securityRuleChangesHistoryEnabled = false;
+        }
       }
 
       if (!securityRuleChangesHistoryEnabled) {

@@ -329,16 +329,17 @@ export const initUiSettings = (
         solutionViews: ['classic', 'security'],
       },
     }),
+    // TODO(rule-changes-history GA): remove this setting and its call sites (including alerting `log_rule_changes.ts`)
     ...(experimentalFeatures.ruleChangesHistoryEnabled && {
       [ENABLE_RULE_CHANGES_HISTORY_SETTING]: {
         name: i18n.translate('xpack.securitySolution.uiSettings.enableRuleChangesHistoryLabel', {
-          defaultMessage: 'Enable rule changes history',
+          defaultMessage: 'Enable detection rule changes history',
         }),
         description: i18n.translate(
           'xpack.securitySolution.uiSettings.enableRuleChangesHistoryDescription',
           {
             defaultMessage:
-              '<p>Enables the rule changes history feature within Security Solution.</p>',
+              '<p>Enables the detection rule changes history feature within Security Solution.</p>',
             values: { p: (chunks) => `<p>${chunks}</p>` },
           }
         ),
