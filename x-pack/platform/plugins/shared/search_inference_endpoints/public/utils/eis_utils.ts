@@ -350,7 +350,7 @@ const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, Cs
   for (const ep of endpoints) {
     if (!isInferenceEndpointWithMetadata(ep)) continue;
     const regions = ep.metadata.regions;
-    if (!Array.isArray(regions)) continue;
+    if (!regions) continue;
 
     for (const region of regions) {
       if (!isCspRegion(region)) continue;
@@ -373,12 +373,10 @@ const collectGeoOnlyZones = (endpoints: EisInferenceEndpoint[]): Set<string> => 
   for (const ep of endpoints) {
     if (!isInferenceEndpointWithMetadata(ep)) continue;
     const regions = ep.metadata.regions;
-    if (!Array.isArray(regions)) continue;
+    if (!regions) continue;
     for (const region of regions) {
-      if (typeof region !== 'object' || region === null || isCspRegion(region)) continue;
-      const r = region as { geo?: unknown };
-      if (typeof r.geo === 'string') {
-        geoOnly.add(r.geo);
+      if (!isCspRegion(region)) {
+        geoOnly.add(region.geo);
       }
     }
   }
@@ -430,7 +428,7 @@ export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegio
   for (const ep of endpoints) {
     if (!isInferenceEndpointWithMetadata(ep)) continue;
     const regions = ep.metadata.regions;
-    if (!Array.isArray(regions)) continue;
+    if (!regions) continue;
 
     for (const region of regions) {
       if (!isCspRegion(region)) continue;
