@@ -11,6 +11,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import type { SanitizedRule } from '@kbn/alerting-types';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -49,7 +50,7 @@ const processDashboardResults = (
   savedObjects: Array<SavedObject<DashboardSOAttributes>>
 ): AttachmentData[] => {
   return savedObjects
-    .filter((savedObject) => !savedObject.error)
+    .filter((savedObject) => !isSavedObjectErrorResult(savedObject))
     .map((savedObject) => ({
       id: savedObject.id,
       redirectId: savedObject.id,
@@ -64,7 +65,7 @@ const processDashboardResults = (
 
 const processSloResults = (savedObjects: Array<SavedObject<SloSOAttributes>>): AttachmentData[] => {
   return savedObjects
-    .filter((savedObject) => !savedObject.error)
+    .filter((savedObject) => !isSavedObjectErrorResult(savedObject))
     .map((savedObject) => ({
       id: savedObject.id,
       redirectId: savedObject.attributes.id,
@@ -156,7 +157,7 @@ export const getRulesByIds = async ({
     const { rules } = await rulesClient.bulkGetRules({ ids });
     return processRuleResults(rules);
   } catch (error) {
-    if (error.message === 'No rules found for bulk get') {
+    if (error instanceof Error && error.message === 'No rules found for bulk get') {
       return [];
     }
     throw error;

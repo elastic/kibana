@@ -109,7 +109,7 @@ describe('Invalidate API keys', () => {
           'request body'
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[request body.apiKeys.0.unknown]: definition for this key is missing"`
+        `"[request body.apiKeys.0.unknown]: Additional properties are not allowed ('unknown' was unexpected)"`
       );
     });
   });

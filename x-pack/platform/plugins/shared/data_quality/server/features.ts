@@ -33,6 +33,9 @@ const canManageRules: SubFeaturePrivilegeGroupConfig = {
       alerting: {
         rule: {
           all: [degradedDocsAlertingFeatures],
+          enable: [degradedDocsAlertingFeatures],
+          manual_run: [degradedDocsAlertingFeatures],
+          manage_rule_settings: [degradedDocsAlertingFeatures],
         },
       },
       savedObject: {

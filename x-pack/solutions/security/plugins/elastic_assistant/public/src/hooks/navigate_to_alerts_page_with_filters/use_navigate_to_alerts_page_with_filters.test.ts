@@ -19,10 +19,10 @@ describe('useNavigateToAlertsPageWithFilters', () => {
   it('navigates to alerts page with single filter', () => {
     const filter = {
       title: 'test filter',
-      selectedOptions: ['test value'],
-      fieldName: 'test field',
+      selected_options: ['test value'],
+      field_name: 'test field',
       exclude: false,
-      existsSelected: false,
+      exists_selected: false,
     };
 
     const {
@@ -33,7 +33,7 @@ describe('useNavigateToAlertsPageWithFilters', () => {
 
     expect(mockNavigateTo).toHaveBeenCalledWith({
       deepLinkId: SecurityPageName.alerts,
-      path: "?pageFilters=!((displaySettings:(hideActionBar:!f),exclude:!f,existsSelected:!f,fieldName:'test field',selectedOptions:!('test value'),title:'test filter'))",
+      path: "?pageFilters=!((display_settings:(hide_action_bar:!f),exclude:!f,exists_selected:!f,field_name:'test field',selected_options:!('test value'),title:'test filter'))",
       openInNewTab: false,
     });
   });
@@ -42,18 +42,18 @@ describe('useNavigateToAlertsPageWithFilters', () => {
     const filters = [
       {
         title: 'test filter 1',
-        selectedOptions: ['test value 1'],
-        fieldName: 'test field 1',
+        selected_options: ['test value 1'],
+        field_name: 'test field 1',
         exclude: false,
-        existsSelected: false,
+        exists_selected: false,
       },
       {
         title: 'test filter 2',
-        selectedOptions: ['test value 2'],
-        fieldName: 'test field 2',
+        selected_options: ['test value 2'],
+        field_name: 'test field 2',
         exclude: true,
-        existsSelected: true,
-        displaySettings: { hideActionBar: true },
+        exists_selected: true,
+        display_settings: { hide_action_bar: true },
       },
     ];
 
@@ -65,7 +65,7 @@ describe('useNavigateToAlertsPageWithFilters', () => {
 
     expect(mockNavigateTo).toHaveBeenCalledWith({
       deepLinkId: SecurityPageName.alerts,
-      path: "?pageFilters=!((displaySettings:(hideActionBar:!f),exclude:!f,existsSelected:!f,fieldName:'test field 1',selectedOptions:!('test value 1'),title:'test filter 1'),(displaySettings:(hideActionBar:!t),exclude:!t,existsSelected:!t,fieldName:'test field 2',selectedOptions:!('test value 2'),title:'test filter 2'))",
+      path: "?pageFilters=!((display_settings:(hide_action_bar:!f),exclude:!f,exists_selected:!f,field_name:'test field 1',selected_options:!('test value 1'),title:'test filter 1'),(display_settings:(hide_action_bar:!t),exclude:!t,exists_selected:!t,field_name:'test field 2',selected_options:!('test value 2'),title:'test filter 2'))",
       openInNewTab: false,
     });
   });
@@ -85,10 +85,10 @@ describe('useNavigateToAlertsPageWithFilters', () => {
   it('navigates to alerts page in new tab', () => {
     const filter = {
       title: 'test filter',
-      selectedOptions: ['test value'],
-      fieldName: 'test field',
+      selected_options: ['test value'],
+      field_name: 'test field',
       exclude: false,
-      existsSelected: false,
+      exists_selected: false,
     };
     const openInNewTab = true;
 
@@ -100,7 +100,7 @@ describe('useNavigateToAlertsPageWithFilters', () => {
 
     expect(mockNavigateTo).toHaveBeenCalledWith({
       deepLinkId: SecurityPageName.alerts,
-      path: "?pageFilters=!((displaySettings:(hideActionBar:!f),exclude:!f,existsSelected:!f,fieldName:'test field',selectedOptions:!('test value'),title:'test filter'))",
+      path: "?pageFilters=!((display_settings:(hide_action_bar:!f),exclude:!f,exists_selected:!f,field_name:'test field',selected_options:!('test value'),title:'test filter'))",
       openInNewTab: true,
     });
   });
@@ -108,10 +108,10 @@ describe('useNavigateToAlertsPageWithFilters', () => {
   it('navigates to alerts page with timerange', () => {
     const filter = {
       title: 'test filter',
-      selectedOptions: ['test value'],
-      fieldName: 'test field',
+      selected_options: ['test value'],
+      field_name: 'test field',
       exclude: false,
-      existsSelected: false,
+      exists_selected: false,
     };
 
     const timerange =
@@ -127,7 +127,7 @@ describe('useNavigateToAlertsPageWithFilters', () => {
 
     expect(mockNavigateTo).toHaveBeenCalledWith({
       deepLinkId: SecurityPageName.alerts,
-      path: `?pageFilters=!((displaySettings:(hideActionBar:!f),exclude:!f,existsSelected:!f,fieldName:'test field',selectedOptions:!('test value'),title:'test filter'))&timerange=(global:(timerange:(from:"2024-12-12T17:03:23.481Z",kind:absolute,to:"2025-01-04T07:59:59.999Z")))`,
+      path: `?pageFilters=!((display_settings:(hide_action_bar:!f),exclude:!f,exists_selected:!f,field_name:'test field',selected_options:!('test value'),title:'test filter'))&timerange=(global:(timerange:(from:"2024-12-12T17:03:23.481Z",kind:absolute,to:"2025-01-04T07:59:59.999Z")))`,
       openInNewTab: true,
     });
   });

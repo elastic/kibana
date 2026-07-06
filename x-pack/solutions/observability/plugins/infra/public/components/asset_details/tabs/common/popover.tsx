@@ -29,6 +29,7 @@ export const Popover = ({
   return (
     <EuiPopover
       panelPaddingSize="s"
+      aria-label={props['aria-label']}
       focusTrapProps={{
         returnFocus: true,
       }}
@@ -44,7 +45,12 @@ export const Popover = ({
           `}
           data-test-subj={props['data-test-subj']}
         >
-          <EuiIcon type="question" color={iconColor ?? 'text'} size={iconSize ?? 'original'} />
+          <EuiIcon
+            type={icon}
+            color={iconColor ?? 'text'}
+            size={iconSize ?? 'original'}
+            aria-hidden={true}
+          />
         </button>
       }
       isOpen={isPopoverOpen}

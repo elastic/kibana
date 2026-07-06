@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import { Streams, isDraftStream } from '@kbn/streams-schema';
 import type { StateDependencies } from '../types';
 import type { StreamActiveRecord } from './stream_active_record';
 import { ClassicStream } from '../streams/classic_stream';
+import { DraftStream } from '../streams/draft_stream';
 import { WiredStream } from '../streams/wired_stream';
+import { QueryStream } from '../streams/query_stream';
 
 // This should be the only thing that knows about the various stream types
 export function streamFromDefinition(
   definition: Streams.all.Definition,
   dependencies: StateDependencies
 ): StreamActiveRecord {
-  if (Streams.WiredStream.Definition.is(definition)) {
+  if (isDraftStream(definition)) {
+    return DraftStream.create(definition, dependencies);
+  } else if (Streams.WiredStream.Definition.is(definition)) {
     return new WiredStream(definition, dependencies);
   } else if (Streams.ClassicStream.Definition.is(definition)) {
     return new ClassicStream(definition, dependencies);
+  } else if (Streams.QueryStream.Definition.is(definition)) {
+    return new QueryStream(definition, dependencies);
   }
 
   throw new Error('Unsupported stream type');

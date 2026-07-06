@@ -8,10 +8,12 @@
 import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import {
+  ALERTS_API_ALL,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
-import { AlertStatusEnum } from '../../../../../common/api/model';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
@@ -21,13 +23,14 @@ import { buildSiemResponse } from '../utils';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
 import {
-  getSessionIDfromKibanaRequest,
   createAlertStatusPayloads,
+  getSessionIDfromKibanaRequest,
 } from '../../../telemetry/insights';
 import {
-  setWorkflowStatusHandler,
-  getUpdateSignalStatusScript,
-} from '../common/set_workflow_status_handler';
+  getUpdateAlertsWorkflowStatusScript,
+  updateAlertsWorkflowStatus,
+} from '../common/operations/update_alerts_workflow_status';
+import { validateClosingReason } from '../common/validators/validate_closing_reason';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -40,7 +43,9 @@ export const setSignalsStatusRoute = (
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: [ALERTS_API_READ],
+          requiredPrivileges: [
+            { anyRequired: [ALERTS_API_ALL, ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE] },
+          ],
         },
       },
     })
@@ -55,11 +60,6 @@ export const setSignalsStatusRoute = (
       },
       async (context, request, response) => {
         const { status } = request.body;
-        let reason;
-
-        if (request.body.status === AlertStatusEnum.closed) {
-          reason = request.body.reason;
-        }
 
         const core = await context.core;
         const securitySolution = await context.securitySolution;
@@ -67,6 +67,16 @@ export const setSignalsStatusRoute = (
         const siemClient = securitySolution?.getAppClient();
         const siemResponse = buildSiemResponse(response);
         const spaceId = securitySolution?.getSpaceId() ?? 'default';
+
+        const closingReason = await validateClosingReason({
+          core,
+          status,
+          reason: 'reason' in request.body ? request.body.reason : undefined,
+        });
+        if (!closingReason.valid) {
+          return siemResponse.error({ statusCode: 400, body: closingReason.message });
+        }
+        const reason = closingReason.reason;
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
@@ -100,14 +110,16 @@ export const setSignalsStatusRoute = (
 
         try {
           if ('signal_ids' in request.body) {
-            // Use common handler for "by IDs" case
-            const getIndexPattern = async () => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
-            return setWorkflowStatusHandler({
+            // Use common operation for "by IDs" case
+            const body = await updateAlertsWorkflowStatus({
               context,
-              request,
-              response,
-              getIndexPattern,
+              index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+              ids: request.body.signal_ids,
+              status,
+              reason,
             });
+
+            return response.ok({ body });
           } else {
             const { conflicts, query } = request.body;
 
@@ -153,7 +165,7 @@ const updateSignalsStatusByQuery = async (
     index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
     conflicts: options.conflicts,
     refresh: true,
-    script: getUpdateSignalStatusScript(status, user, reason),
+    script: getUpdateAlertsWorkflowStatusScript(status, user, reason),
     query: {
       bool: {
         filter: query,

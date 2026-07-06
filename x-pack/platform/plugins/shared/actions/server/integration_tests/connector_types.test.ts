@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import zodToJsonSchema from 'zod-to-json-schema';
-import type { z } from '@kbn/zod';
+import { z, setLazySchemaDisabled } from '@kbn/zod';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ActionTypeRegistry } from '../action_type_registry';
 import { setupTestServers } from './lib';
@@ -50,6 +49,7 @@ describe('Connector type config checks', () => {
   let actionTypeRegistry: ActionTypeRegistry;
 
   beforeAll(async () => {
+    setLazySchemaDisabled(true);
     const setupResult = await setupTestServers();
     esServer = setupResult.esServer;
     kibanaServer = setupResult.kibanaServer;
@@ -60,6 +60,7 @@ describe('Connector type config checks', () => {
   });
 
   afterAll(async () => {
+    setLazySchemaDisabled(false);
     if (kibanaServer) {
       await kibanaServer.stop();
     }
@@ -128,15 +129,17 @@ describe('Connector type config checks', () => {
         });
       }
 
-      expect(
-        zodToJsonSchema(config.schema as z.ZodType, { name: 'config', $refStrategy: 'none' })
-      ).toMatchSnapshot();
-      expect(
-        zodToJsonSchema(secrets.schema as z.ZodType, { name: 'secrets', $refStrategy: 'none' })
-      ).toMatchSnapshot();
-      expect(
-        zodToJsonSchema(params!.schema as z.ZodType, { name: 'params', $refStrategy: 'none' })
-      ).toMatchSnapshot();
+      const toJsonSchema = (schema: unknown) => {
+        const { $schema, ...jsonSchema } = z.toJSONSchema(schema as z.ZodType, {
+          unrepresentable: 'any',
+          io: 'input',
+        }) as Record<string, unknown>;
+        return jsonSchema;
+      };
+
+      expect(toJsonSchema(config.schema as z.ZodType)).toMatchSnapshot();
+      expect(toJsonSchema(secrets.schema as z.ZodType)).toMatchSnapshot();
+      expect(toJsonSchema(params!.schema as z.ZodType)).toMatchSnapshot();
     });
   }
 });

@@ -43,7 +43,6 @@ import {
   getSimilarCases,
   patchObservable,
   deleteObservable,
-  bulkPostObservables,
 } from './api';
 
 import {
@@ -160,6 +159,7 @@ describe('Cases API', () => {
         method: 'GET',
         query: {
           includeComments: true,
+          mode: 'legacy',
         },
         signal: abortCtrl.signal,
       });
@@ -224,6 +224,7 @@ describe('Cases API', () => {
           owner: [SECURITY_SOLUTION_OWNER],
           category: [],
           customFields: {},
+          extendedFieldFilters: [],
           from: DEFAULT_FROM_DATE,
           to: DEFAULT_TO_DATE,
         },
@@ -764,9 +765,16 @@ describe('Cases API', () => {
   });
 
   describe('updateCases', () => {
+    const casesSnakeWithUpdateSummary = casesSnake.map((theCase) => ({
+      ...theCase,
+      updateSummary: {
+        syncedAlertCount: 0,
+      },
+    }));
+
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(casesSnake);
+      fetchMock.mockResolvedValue(casesSnakeWithUpdateSummary);
     });
 
     const data = [
@@ -788,12 +796,45 @@ describe('Cases API', () => {
 
     it('should return correct response should not covert to camel case registered attachments', async () => {
       const resp = await updateCases({ cases: data, signal: abortCtrl.signal });
-      expect(resp).toEqual(cases);
+      expect(resp).toHaveLength(cases.length);
+      expect(resp[0]).toEqual(
+        expect.objectContaining({
+          id: cases[0].id,
+          updateSummary: {
+            syncedAlertCount: 0,
+          },
+        })
+      );
     });
 
     it('returns an empty array if the cases are empty', async () => {
       const resp = await updateCases({ cases: [], signal: abortCtrl.signal });
       expect(resp).toEqual([]);
+    });
+
+    it('returns cases with per-case alert status update summary', async () => {
+      fetchMock.mockResolvedValue(casesSnakeWithUpdateSummary);
+
+      const resp = await updateCases({
+        cases: data,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ cases: data }),
+        signal: abortCtrl.signal,
+      });
+
+      expect(resp).toHaveLength(cases.length);
+      expect(resp[0]).toEqual(
+        expect.objectContaining({
+          id: cases[0].id,
+          updateSummary: {
+            syncedAlertCount: 0,
+          },
+        })
+      );
     });
   });
 
@@ -1343,64 +1384,6 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await deleteObservable(mockCase.id, observableId, abortCtrl.signal);
       expect(resp).toEqual(undefined);
-    });
-  });
-
-  describe('bulkPostObservables', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(basicCaseSnake);
-    });
-
-    it('should be called with correct check url, method, signal', async () => {
-      await bulkPostObservables(
-        {
-          caseId: mockCase.id,
-          observables: [
-            {
-              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
-              value: 'test value',
-              description: '',
-            },
-          ],
-        },
-        abortCtrl.signal
-      );
-
-      expect(fetchMock).toHaveBeenCalledWith(
-        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/_bulk_create`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            caseId: mockCase.id,
-            observables: [
-              {
-                typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
-                value: 'test value',
-                description: '',
-              },
-            ],
-          }),
-          signal: abortCtrl.signal,
-        }
-      );
-    });
-
-    it('should return correct response', async () => {
-      const resp = await bulkPostObservables(
-        {
-          caseId: mockCase.id,
-          observables: [
-            {
-              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
-              value: 'test value',
-              description: '',
-            },
-          ],
-        },
-        abortCtrl.signal
-      );
-      expect(resp).toEqual(basicCase);
     });
   });
 });

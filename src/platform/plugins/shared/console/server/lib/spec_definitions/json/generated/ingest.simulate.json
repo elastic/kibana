@@ -16,6 +16,7 @@
       "_ingest/pipeline/{id}/_simulate"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-simulate",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-ingest-simulate",
     "availability": {
       "stack": true,
       "serverless": true

@@ -96,7 +96,7 @@ function extractMessages(samples: Array<Record<string, unknown>>): string[] {
     // Try common message field locations
     const message =
       (sample['body.text'] as string) ||
-      (sample.body as any)?.text ||
+      (sample.body as { text?: string } | undefined)?.text ||
       (sample.message as string) ||
       (sample['@message'] as string);
 

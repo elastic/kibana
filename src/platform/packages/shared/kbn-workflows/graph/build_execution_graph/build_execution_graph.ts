@@ -9,55 +9,86 @@
 
 import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
+import { GraphBuildError } from './graph_build_error';
+import { DEFAULT_LOOP_MAX_ITERATIONS } from '../../spec/schema';
 import type {
   BaseStep,
   DataSetStep,
   ElasticsearchStep,
   ForEachStep,
-  HttpStep,
   IfStep,
   KibanaStep,
+  LoopBreakStep,
+  LoopContinueStep,
+  LoopStepProps,
+  MaxIterations,
+  ParallelStep,
   StepWithForeach,
   StepWithIfCondition,
   StepWithOnFailure,
+  SwitchStep,
   TimeoutProp,
+  WaitForInputStep,
   WaitStep,
+  WhileStep,
+  WorkflowExecuteAsyncStep,
+  WorkflowExecuteStep,
+  WorkflowFailStep,
   WorkflowOnFailure,
+  WorkflowOutputStep,
   WorkflowRetry,
   WorkflowSettings,
   WorkflowYaml,
 } from '../../spec/schema';
 import type {
-  AtomicGraphNode,
-  DataSetGraphNode,
-  ElasticsearchGraphNode,
+  EnterCaseBranchNode,
   EnterConditionBranchNode,
   EnterContinueNode,
+  EnterDefaultBranchNode,
   EnterFallbackPathNode,
   EnterForeachNode,
   EnterIfNode,
   EnterNormalPathNode,
+  EnterParallelNode,
   EnterRetryNode,
+  EnterSwitchNode,
   EnterTimeoutZoneNode,
   EnterTryBlockNode,
+  EnterWhileNode,
+  ExitCaseBranchNode,
   ExitConditionBranchNode,
   ExitContinueNode,
+  ExitDefaultBranchNode,
   ExitFallbackPathNode,
   ExitForeachNode,
   ExitIfNode,
   ExitNormalPathNode,
+  ExitParallelNode,
   ExitRetryNode,
+  ExitSwitchNode,
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
+  ExitWhileNode,
   GraphNodeUnion,
-  HttpGraphNode,
-  KibanaGraphNode,
-  WaitGraphNode,
+  LoopBreakNode,
+  LoopContinueNode,
+  LoopEnterNode,
+  WaitForInputGraphNode,
   WorkflowGraphType,
+  WorkflowOutputGraphNode,
 } from '../types';
+import { isLoopEnterNode } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
 
-const flowControlStepTypes = new Set(['if', 'foreach']);
+const flowControlStepTypes = new Set([
+  'if',
+  'foreach',
+  'while',
+  'parallel',
+  'loop.break',
+  'loop.continue',
+  'switch',
+]);
 const disallowedWorkflowLevelOnFailureSteps = new Set(['wait']);
 
 /** Context used during the graph construction to keep track of settings and avoid cycles */
@@ -111,16 +142,20 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return createIfGraphForIfStepLevel(currentStep as StepWithIfCondition, context);
   }
 
-  if ((currentStep as IfStep).type === 'if') {
+  if (currentStep.type === 'if') {
     return createIfGraph(getStepId(currentStep, context), currentStep as IfStep, context);
   }
 
-  if ((currentStep as ForEachStep).type === 'foreach') {
-    return createForeachGraph(getStepId(currentStep, context), currentStep as ForEachStep, context);
+  if (currentStep.type === 'switch') {
+    return createSwitchGraph(getStepId(currentStep, context), currentStep as SwitchStep, context);
   }
 
-  if ((currentStep as StepWithForeach).foreach) {
-    return createForeachGraphForStepWithForeach(currentStep as StepWithForeach, context);
+  if (currentStep.type === 'loop.break') {
+    return visitLoopBreakStep(currentStep as LoopBreakStep, context);
+  }
+
+  if (currentStep.type === 'loop.continue') {
+    return visitLoopContinueStep(currentStep as LoopContinueStep, context);
   }
 
   if ((currentStep as TimeoutProp).timeout) {
@@ -134,45 +169,120 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     );
   }
 
-  if ((currentStep as WaitStep).type === 'wait') {
+  if (currentStep.type === 'foreach') {
+    return createForeachGraph(getStepId(currentStep, context), currentStep as ForEachStep, context);
+  }
+
+  if (currentStep.type === 'while') {
+    return createWhileGraph(getStepId(currentStep, context), currentStep as WhileStep, context);
+  }
+
+  if (currentStep.type === 'parallel') {
+    return createParallelGraph(
+      getStepId(currentStep, context),
+      currentStep as ParallelStep,
+      context
+    );
+  }
+
+  if ((currentStep as StepWithForeach).foreach) {
+    return createForeachGraphForStepWithForeach(currentStep as StepWithForeach, context);
+  }
+
+  if (currentStep.type === 'wait') {
     return visitWaitStep(currentStep as WaitStep, context);
   }
 
-  if ((currentStep as DataSetStep).type === 'data.set') {
+  if (currentStep.type === 'waitForInput') {
+    return visitWaitForInputStep(currentStep as WaitForInputStep, context);
+  }
+
+  if (currentStep.type === 'data.set') {
     return visitDataSetStep(currentStep as DataSetStep, context);
   }
 
-  if ((currentStep as HttpStep).type === 'http') {
-    return visitHttpStep(currentStep as HttpStep, context);
-  }
-
-  if ((currentStep as ElasticsearchStep).type?.startsWith('elasticsearch.')) {
+  if (currentStep.type?.startsWith('elasticsearch.')) {
     return visitElasticsearchStep(currentStep as ElasticsearchStep, context);
   }
 
-  if ((currentStep as KibanaStep).type?.startsWith('kibana.')) {
+  if (currentStep.type?.startsWith('kibana.')) {
     return visitKibanaStep(currentStep as KibanaStep, context);
   }
 
+  if (currentStep.type === 'workflow.execute') {
+    return visitWorkflowExecuteStep(currentStep as WorkflowExecuteStep, context);
+  }
+
+  if (currentStep.type === 'workflow.executeAsync') {
+    return visitWorkflowExecuteAsyncStep(currentStep as WorkflowExecuteAsyncStep, context);
+  }
+
+  if (currentStep.type === 'workflow.output') {
+    return visitWorkflowOutputStep(currentStep, context);
+  }
+
+  if (currentStep.type === 'workflow.fail') {
+    const transformedStep: WorkflowOutputStep = {
+      ...currentStep,
+      type: 'workflow.output',
+      status: 'failed',
+      with: (currentStep as WorkflowFailStep).with ?? {},
+    };
+    return visitWorkflowOutputStep(transformedStep, context);
+  }
+
   return visitAtomicStep(currentStep, context);
+}
+
+type LeafNodeType =
+  | 'atomic'
+  | 'wait'
+  | 'data.set'
+  | 'workflow.execute'
+  | 'workflow.executeAsync'
+  | `elasticsearch.${string}`
+  | `kibana.${string}`;
+
+function createLeafStepGraph(
+  currentStep: BaseStep,
+  context: GraphBuildContext,
+  nodeType: LeafNodeType
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  graph.setNode(stepId, {
+    id: stepId,
+    type: nodeType,
+    stepId,
+    stepType: currentStep.type,
+    configuration: { ...currentStep },
+  });
+  return graph;
 }
 
 export function visitWaitStep(
   currentStep: WaitStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
+  return createLeafStepGraph(currentStep, context, 'wait');
+}
+
+export function visitWaitForInputStep(
+  currentStep: WaitForInputStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
-  const waitNode: WaitGraphNode = {
-    id: getStepId(currentStep, context),
-    type: 'wait',
+  const waitForInputNode: WaitForInputGraphNode = {
+    id: stepId,
+    type: 'waitForInput',
     stepId,
     stepType: currentStep.type,
     configuration: {
       ...currentStep,
     },
   };
-  graph.setNode(waitNode.id, waitNode);
+  graph.setNode(waitForInputNode.id, waitForInputNode);
 
   return graph;
 }
@@ -181,77 +291,65 @@ export function visitDataSetStep(
   currentStep: DataSetStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const stepId = getStepId(currentStep, context);
-  const graph = createTypedGraph({ directed: true });
-  const dataSetNode: DataSetGraphNode = {
-    id: getStepId(currentStep, context),
-    type: 'data.set',
-    stepId,
-    stepType: currentStep.type,
-    configuration: {
-      ...currentStep,
-    },
-  };
-  graph.setNode(dataSetNode.id, dataSetNode);
-
-  return graph;
+  return createLeafStepGraph(currentStep, context, 'data.set');
 }
 
-export function visitHttpStep(
-  currentStep: HttpStep,
-  context: GraphBuildContext
-): WorkflowGraphType {
-  const stepId = getStepId(currentStep, context);
-  const graph = createTypedGraph({ directed: true });
-  const httpNode: HttpGraphNode = {
-    id: getStepId(currentStep, context),
-    type: 'http',
-    stepId,
-    stepType: currentStep.type,
-    configuration: {
-      ...currentStep,
-    },
-  };
-  graph.setNode(httpNode.id, httpNode);
+function assertElasticsearchType(type: string): asserts type is `elasticsearch.${string}` {
+  if (!type.startsWith('elasticsearch.')) {
+    throw new Error(`Expected elasticsearch step type, got: ${type}`);
+  }
+}
 
-  return graph;
+function assertKibanaType(type: string): asserts type is `kibana.${string}` {
+  if (!type.startsWith('kibana.')) {
+    throw new Error(`Expected kibana step type, got: ${type}`);
+  }
 }
 
 export function visitElasticsearchStep(
   currentStep: ElasticsearchStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const graph = createTypedGraph({ directed: true });
-  const elasticsearchNode: ElasticsearchGraphNode = {
-    id: getStepId(currentStep, context),
-    stepId: getStepId(currentStep, context),
-    stepType: currentStep.type,
-    type: currentStep.type, // e.g., 'elasticsearch.search.query'
-    configuration: {
-      ...currentStep,
-    },
-  };
-  graph.setNode(elasticsearchNode.id, elasticsearchNode);
-
-  return graph;
+  assertElasticsearchType(currentStep.type);
+  return createLeafStepGraph(currentStep, context, currentStep.type);
 }
 
 export function visitKibanaStep(
   currentStep: KibanaStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const graph = createTypedGraph({ directed: true });
-  const kibanaNode: KibanaGraphNode = {
-    id: getStepId(currentStep, context),
-    stepId: getStepId(currentStep, context),
-    stepType: currentStep.type,
-    type: currentStep.type, // e.g., 'kibana.cases.create'
-    configuration: {
-      ...currentStep,
-    },
-  };
-  graph.setNode(kibanaNode.id, kibanaNode);
+  assertKibanaType(currentStep.type);
+  return createLeafStepGraph(currentStep, context, currentStep.type);
+}
 
+export function visitWorkflowExecuteStep(
+  currentStep: WorkflowExecuteStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  return createLeafStepGraph(currentStep, context, 'workflow.execute');
+}
+
+export function visitWorkflowExecuteAsyncStep(
+  currentStep: WorkflowExecuteAsyncStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  return createLeafStepGraph(currentStep, context, 'workflow.executeAsync');
+}
+
+export function visitWorkflowOutputStep(
+  currentStep: BaseStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const workflowOutputNode: WorkflowOutputGraphNode = {
+    id: stepId,
+    type: 'workflow.output',
+    stepId,
+    stepType: 'workflow.output',
+    configuration: currentStep as WorkflowOutputStep,
+  };
+  graph.setNode(workflowOutputNode.id, workflowOutputNode);
   return graph;
 }
 
@@ -259,20 +357,7 @@ export function visitAtomicStep(
   currentStep: BaseStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const stepId = getStepId(currentStep, context);
-  const graph = createTypedGraph({ directed: true });
-  const atomicNode: AtomicGraphNode = {
-    id: getStepId(currentStep, context),
-    type: 'atomic',
-    stepId,
-    stepType: currentStep.type,
-    configuration: {
-      ...currentStep,
-    },
-  };
-  graph.setNode(atomicNode.id, atomicNode);
-
-  return graph;
+  return createLeafStepGraph(currentStep, context, 'atomic');
 }
 
 function createIfGraph(
@@ -372,31 +457,109 @@ function createIfGraphForIfStepLevel(
   return createIfGraph(generatedStepId, ifStep, context);
 }
 
-function visitOnFailure(
-  currentStep: BaseStep,
+function createSwitchGraph(
+  stepId: string,
+  switchStep: SwitchStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
+  const enterSwitchNodeId = `enterSwitch_${stepId}`;
+  const exitSwitchNodeId = `exitSwitch_${stepId}`;
+
+  const enterSwitchNode: EnterSwitchNode = {
+    id: enterSwitchNodeId,
+    type: 'enter-switch',
+    stepId,
+    stepType: switchStep.type,
+    exitNodeId: exitSwitchNodeId,
+    templateDependencies: (switchStep.cases ?? []).map(({ match }) => match),
+    configuration: {
+      ...omit(switchStep, ['cases', 'default']),
+    },
+  };
+  context.stack.push(enterSwitchNode);
+  graph.setNode(enterSwitchNodeId, enterSwitchNode);
+
+  const exitSwitchNode: ExitSwitchNode = {
+    type: 'exit-switch',
+    id: exitSwitchNodeId,
+    stepId,
+    stepType: switchStep.type,
+    startNodeId: enterSwitchNodeId,
+  };
+  graph.setNode(exitSwitchNodeId, exitSwitchNode);
+
+  const cases = switchStep.cases || [];
+  for (let i = 0; i < cases.length; i++) {
+    const caseItem = cases[i];
+    const enterCaseId = `enterCase_${stepId}_${i}`;
+    const exitCaseId = `exitCase_${stepId}_${i}`;
+
+    const enterCaseNode: EnterCaseBranchNode = {
+      id: enterCaseId,
+      type: 'enter-case-branch',
+      match: caseItem.match,
+      index: i,
+      stepId,
+      stepType: switchStep.type,
+    };
+    graph.setNode(enterCaseId, enterCaseNode);
+    graph.setEdge(enterSwitchNodeId, enterCaseId);
+
+    const exitCaseNode: ExitCaseBranchNode = {
+      id: exitCaseId,
+      type: 'exit-case-branch',
+      startNodeId: enterCaseId,
+      stepId,
+      stepType: switchStep.type,
+    };
+
+    const caseGraph = createStepsSequence(caseItem.steps || [], context);
+    insertGraphBetweenNodes(graph, caseGraph, enterCaseId, exitCaseId);
+    graph.setNode(exitCaseId, exitCaseNode);
+    graph.setEdge(exitCaseId, exitSwitchNodeId);
+  }
+
+  if (switchStep.default?.length) {
+    const enterDefaultId = `enterDefault_${stepId}`;
+    const exitDefaultId = `exitDefault_${stepId}`;
+
+    const enterDefaultNode: EnterDefaultBranchNode = {
+      id: enterDefaultId,
+      type: 'enter-default-branch',
+      stepId,
+      stepType: switchStep.type,
+    };
+    graph.setNode(enterDefaultId, enterDefaultNode);
+    graph.setEdge(enterSwitchNodeId, enterDefaultId);
+
+    const exitDefaultNode: ExitDefaultBranchNode = {
+      id: exitDefaultId,
+      type: 'exit-default-branch',
+      startNodeId: enterDefaultId,
+      stepId,
+      stepType: switchStep.type,
+    };
+
+    const defaultGraph = createStepsSequence(switchStep.default, context);
+    insertGraphBetweenNodes(graph, defaultGraph, enterDefaultId, exitDefaultId);
+    graph.setNode(exitDefaultId, exitDefaultNode);
+    graph.setEdge(exitDefaultId, exitSwitchNodeId);
+  }
+
+  context.stack.pop();
+  return graph;
+}
+
+function applyOnFailure(
+  stepId: string,
+  innerGraph: WorkflowGraphType,
   onFailureConfiguration: WorkflowOnFailure,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const stepId = getStepId(currentStep, context);
-  const onFailureGraphNode: GraphNodeUnion = {
-    id: `onFailure_${stepId}`,
-    type: 'on-failure',
-    stepId,
-    stepType: 'on-failure',
-  };
+  let graph = innerGraph;
 
-  context.stack.push(onFailureGraphNode);
-  let graph = createStepsSequence(
-    [
-      {
-        ...currentStep,
-        'on-failure': undefined, // Remove 'on-failure' to avoid infinite recursion
-      } as BaseStep,
-    ],
-    context
-  );
-
-  if (onFailureConfiguration?.retry) {
+  if (onFailureConfiguration.retry) {
     graph = createRetry(stepId, graph, onFailureConfiguration.retry);
   }
 
@@ -413,9 +576,64 @@ function visitOnFailure(
     graph = createContinue(stepId, onFailureConfiguration.continue, graph);
   }
 
-  context.stack.pop();
+  return graph;
+}
+
+function applyIterationGuardrails(
+  stepId: string,
+  innerGraph: WorkflowGraphType,
+  loopStep: LoopStepProps,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  let graph = innerGraph;
+
+  const iterationTimeout = loopStep['iteration-timeout'];
+  if (iterationTimeout) {
+    graph = handleTimeout(
+      `iteration_${stepId}`,
+      'step_level_timeout',
+      iterationTimeout,
+      graph,
+      context
+    );
+  }
+
+  const iterationOnFailure = loopStep['iteration-on-failure'];
+  if (iterationOnFailure) {
+    graph = applyOnFailure(`iteration_${stepId}`, graph, iterationOnFailure, context);
+  }
 
   return graph;
+}
+
+function visitOnFailure(
+  currentStep: BaseStep,
+  onFailureConfiguration: WorkflowOnFailure,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const onFailureGraphNode: GraphNodeUnion = {
+    id: `onFailure_${stepId}`,
+    type: 'on-failure',
+    stepId,
+    stepType: 'on-failure',
+  };
+
+  context.stack.push(onFailureGraphNode);
+  const graph = createStepsSequence(
+    [
+      {
+        ...currentStep,
+        'on-failure': undefined, // Remove 'on-failure' to avoid infinite recursion
+      } as BaseStep,
+    ],
+    context
+  );
+
+  const result = applyOnFailure(stepId, graph, onFailureConfiguration, context);
+  context.stack.pop();
+
+  return result;
 }
 
 function handleTimeout(
@@ -740,6 +958,15 @@ function insertGraphBetweenNodes(
   });
 }
 
+function normalizeMaxIterations(raw?: MaxIterations): {
+  maxIterations: number;
+  onLimit: 'continue' | 'fail';
+} {
+  if (raw == null) return { maxIterations: DEFAULT_LOOP_MAX_ITERATIONS, onLimit: 'continue' };
+  if (typeof raw === 'number') return { maxIterations: raw, onLimit: 'continue' };
+  return { maxIterations: raw.limit, onLimit: raw['on-limit'] };
+}
+
 function createForeachGraph(
   stepId: string,
   foreachStep: ForEachStep,
@@ -760,15 +987,19 @@ function createForeachGraph(
   };
   context.stack.push(enterForeachNode);
   graph.setNode(enterForeachNodeId, enterForeachNode);
+  const { maxIterations, onLimit } = normalizeMaxIterations(foreachStep['max-iterations']);
   const exitForeachNode: ExitForeachNode = {
     type: 'exit-foreach',
     id: exitNodeId,
     stepType: foreachStep.type,
     stepId,
     startNodeId: enterForeachNodeId,
+    maxIterations,
+    onLimit,
   };
   graph.setNode(exitNodeId, exitForeachNode);
-  const innerGraph = createStepsSequence(foreachStep.steps || [], context);
+  let innerGraph = createStepsSequence(foreachStep.steps || [], context);
+  innerGraph = applyIterationGuardrails(stepId, innerGraph, foreachStep, context);
 
   insertGraphBetweenNodes(graph, innerGraph, enterForeachNodeId, exitNodeId);
   context.stack.pop();
@@ -788,6 +1019,238 @@ function createForeachGraphForStepWithForeach(
     steps: [omit(stepWithForeach, ['foreach'])],
   } as ForEachStep;
   return createForeachGraph(generatedStepId, foreachStep, context);
+}
+
+// Compiles a parallel branch body into a real subgraph and enforces the v1
+// branch-body constraints (straight-line only; no `waitForInput`). Returns the
+// subgraph plus its single start node.
+function buildParallelBranchBody(
+  stepId: string,
+  steps: BaseStep[],
+  context: GraphBuildContext
+): { bodyGraph: WorkflowGraphType; startNodeId: string } {
+  // The branch body is compiled into a real subgraph so that adding nested
+  // flow-control inside a branch later is an executor change, not a graph one.
+  // v1 supports a straight-line body (one or more atomic/wait steps); nested
+  // flow-control (if/switch/foreach/while) inside a branch is not yet supported
+  // by the parallel executor and is rejected here so it fails loudly at compile
+  // time rather than silently running only one path at runtime.
+  const bodyGraph = createStepsSequence(steps || [], context);
+
+  const branchingNode = bodyGraph
+    .nodes()
+    .find((nodeId) => (bodyGraph.outEdges(nodeId)?.length ?? 0) > 1);
+  if (branchingNode) {
+    throw new GraphBuildError(
+      `Parallel step "${stepId}" has a branch body with nested flow-control, which is not supported yet. ` +
+        `A parallel branch body must be a straight-line sequence of steps (no if/switch/foreach/while inside the branch).`,
+      stepId
+    );
+  }
+
+  // A straight-line body of atomic/connector/wait steps compiles to leaf nodes
+  // only. Any `enter-*`/`exit-*` node means the body was wrapped in flow-control
+  // (if/switch/foreach/while), an `on-failure` handler (retry/continue/fallback),
+  // or a step-level `timeout` zone. The parallel executor walks branch bodies as
+  // a straight line and cannot drive these wrapper nodes, so a branch would hang
+  // at runtime. Reject at compile time with an actionable message instead.
+  const flowControlNode = bodyGraph
+    .nodes()
+    .map((nodeId) => bodyGraph.node(nodeId))
+    .find((bodyNode) => {
+      const type = bodyNode?.type as string | undefined;
+      return type !== undefined && (type.startsWith('enter-') || type.startsWith('exit-'));
+    });
+  if (flowControlNode) {
+    throw new GraphBuildError(
+      `Parallel step "${stepId}" has a branch body containing unsupported flow-control ` +
+        `("${flowControlNode.type}"). A parallel branch body must be a straight-line sequence of ` +
+        `atomic steps with no nested flow-control (if/switch/foreach/while), no step-level ` +
+        `"on-failure" handler, and no step-level "timeout".`,
+      stepId
+    );
+  }
+
+  // The parallel executor drives each branch in-process. Timer-based `wait`
+  // steps are supported: a waiting branch parks across ticks and the parallel
+  // re-ticks at the earliest branch `resumeAt`. `waitForInput`, however, is an
+  // indefinite, externally-resumed wait that has no per-branch resume signal,
+  // so it cannot run inside a branch yet — reject it at compile time instead of
+  // hanging the branch at runtime.
+  const UNSUPPORTED_BRANCH_NODE_TYPES = new Set(['waitForInput']);
+  const unsupportedNode = bodyGraph
+    .nodes()
+    .map((nodeId) => bodyGraph.node(nodeId))
+    .find((bodyNode) => UNSUPPORTED_BRANCH_NODE_TYPES.has(bodyNode?.type as string));
+  if (unsupportedNode) {
+    throw new GraphBuildError(
+      `Parallel step "${stepId}" has a branch body containing an unsupported step type "${unsupportedNode.stepType}". ` +
+        `"waitForInput" steps are not supported inside a parallel branch yet.`,
+      stepId
+    );
+  }
+
+  const startNodeId = bodyGraph
+    .nodes()
+    .filter((nodeId) => bodyGraph.inEdges(nodeId)?.length === 0)[0];
+
+  return { bodyGraph, startNodeId };
+}
+
+function createParallelGraph(
+  stepId: string,
+  parallelStep: ParallelStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
+  const enterNodeId = `enterParallel_${stepId}`;
+  const exitNodeId = `exitParallel_${stepId}`;
+  const staticBranches = parallelStep.branches;
+
+  // Build one body subgraph per branch. Dynamic mode has a single shared body
+  // (`steps`); static mode has one heterogeneous body per named branch.
+  const branchBodies: Array<{ name?: string; bodyGraph: WorkflowGraphType; startNodeId: string }> =
+    staticBranches
+      ? staticBranches.map((branch) => ({
+          name: branch.name,
+          ...buildParallelBranchBody(stepId, branch.steps, context),
+        }))
+      : [buildParallelBranchBody(stepId, parallelStep.steps || [], context)];
+
+  const enterParallelNode: EnterParallelNode = {
+    id: enterNodeId,
+    type: 'enter-parallel',
+    stepId,
+    stepType: parallelStep.type,
+    exitNodeId,
+    // Dynamic: the single shared body start node. Static: one descriptor per branch.
+    ...(staticBranches
+      ? {
+          branches: branchBodies.map(({ name, startNodeId }) => ({
+            name: name as string,
+            startNodeId,
+          })),
+        }
+      : { branchStartNodeId: branchBodies[0].startNodeId }),
+    configuration: {
+      ...omit(parallelStep, ['steps', 'branches']), // bodies are represented in the graph
+    },
+  };
+  context.stack.push(enterParallelNode);
+  graph.setNode(enterNodeId, enterParallelNode);
+
+  const exitParallelNode: ExitParallelNode = {
+    id: exitNodeId,
+    type: 'exit-parallel',
+    stepId,
+    stepType: parallelStep.type,
+    startNodeId: enterNodeId,
+  };
+  graph.setNode(exitNodeId, exitParallelNode);
+
+  // Wire every branch body between enter and exit. Each body's start node gets an
+  // edge from enter; each body's end node(s) get an edge to exit.
+  for (const { bodyGraph } of branchBodies) {
+    insertGraphBetweenNodes(graph, bodyGraph, enterNodeId, exitNodeId);
+  }
+  context.stack.pop();
+  return graph;
+}
+
+function createWhileGraph(
+  stepId: string,
+  whileStep: WhileStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
+  const enterWhileNodeId = `enterWhile_${stepId}`;
+  const exitNodeId = `exitWhile_${stepId}`;
+  const enterWhileNode: EnterWhileNode = {
+    id: enterWhileNodeId,
+    type: 'enter-while',
+    stepId,
+    stepType: whileStep.type,
+    exitNodeId,
+    configuration: {
+      ...omit(whileStep, ['steps']),
+    },
+  };
+  context.stack.push(enterWhileNode);
+  graph.setNode(enterWhileNodeId, enterWhileNode);
+  const { maxIterations, onLimit } = normalizeMaxIterations(whileStep['max-iterations']);
+  const exitWhileNode: ExitWhileNode = {
+    type: 'exit-while',
+    id: exitNodeId,
+    stepType: whileStep.type,
+    stepId,
+    startNodeId: enterWhileNodeId,
+    condition: whileStep.condition,
+    maxIterations,
+    onLimit,
+  };
+  graph.setNode(exitNodeId, exitWhileNode);
+  let innerGraph = createStepsSequence(whileStep.steps || [], context);
+  innerGraph = applyIterationGuardrails(stepId, innerGraph, whileStep, context);
+
+  insertGraphBetweenNodes(graph, innerGraph, enterWhileNodeId, exitNodeId);
+  context.stack.pop();
+  return graph;
+}
+
+function findEnclosingLoop(context: GraphBuildContext): LoopEnterNode {
+  for (let i = context.stack.length - 1; i >= 0; i--) {
+    const node = context.stack[i];
+    if (isLoopEnterNode(node)) {
+      return node;
+    }
+  }
+  throw new Error(
+    'loop.break and loop.continue are only valid inside a loop body (foreach or while). ' +
+      'Move the step inside a loop, or remove it.'
+  );
+}
+
+function visitLoopBreakStep(
+  currentStep: LoopBreakStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const enclosingLoop = findEnclosingLoop(context);
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+
+  const { exitNodeId: loopExitNodeId } = enclosingLoop;
+
+  const loopBreakNode: LoopBreakNode = {
+    id: stepId,
+    type: 'loop-break',
+    stepId,
+    stepType: currentStep.type,
+    loopExitNodeId,
+    loopStepId: enclosingLoop.stepId,
+  };
+  graph.setNode(loopBreakNode.id, loopBreakNode);
+  return graph;
+}
+
+function visitLoopContinueStep(
+  currentStep: LoopContinueStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const enclosingLoop = findEnclosingLoop(context);
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+
+  const { exitNodeId: loopExitNodeId } = enclosingLoop;
+
+  const loopContinueNode: LoopContinueNode = {
+    id: stepId,
+    type: 'loop-continue',
+    stepId,
+    stepType: currentStep.type,
+    loopExitNodeId,
+  };
+  graph.setNode(loopContinueNode.id, loopContinueNode);
+  return graph;
 }
 
 export function convertToWorkflowGraph(
@@ -832,7 +1295,7 @@ function resolveWorklfowSettings(
     ...workflowSettings,
     timeout: workflowSettings.timeout ?? defaultSettings.timeout,
     'on-failure': workflowSettings['on-failure'] ?? defaultSettings['on-failure'],
-    timezone: workflowSettings.timeout ?? defaultSettings.timezone,
+    timezone: workflowSettings.timezone ?? defaultSettings.timezone,
   };
 }
 

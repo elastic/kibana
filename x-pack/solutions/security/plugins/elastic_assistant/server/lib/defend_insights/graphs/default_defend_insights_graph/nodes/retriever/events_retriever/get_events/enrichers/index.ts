@@ -17,7 +17,7 @@ export function enrichEvents(
   params: { kbDataClient: AIAssistantKnowledgeBaseDataClient | null }
 ): Promise<typeof events> | ReturnType<typeof enrichPolicyResponseFailureEvents> {
   switch (insightType) {
-    case DefendInsightType.Enum.policy_response_failure:
+    case DefendInsightType.enum.policy_response_failure:
       return enrichPolicyResponseFailureEvents(
         events as {
           _id: string[];

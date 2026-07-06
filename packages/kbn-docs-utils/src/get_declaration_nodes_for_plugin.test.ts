@@ -38,9 +38,9 @@ describe('getDeclarationNodesForPluginScope', () => {
       },
     };
 
-    const nodes = getDeclarationNodesForPluginScope(project, plugin, ApiScope.CLIENT, log);
+    const result = getDeclarationNodesForPluginScope(project, plugin, ApiScope.CLIENT, log);
 
-    expect(nodes).toEqual([]);
+    expect(result).toEqual({ nodes: [], unnamedExports: [] });
   });
 
   it('handles files that do not exist gracefully', () => {
@@ -61,9 +61,9 @@ describe('getDeclarationNodesForPluginScope', () => {
       },
     };
 
-    const nodes = getDeclarationNodesForPluginScope(project, plugin, ApiScope.CLIENT, log);
+    const result = getDeclarationNodesForPluginScope(project, plugin, ApiScope.CLIENT, log);
 
-    // Should return empty array when file doesn't exist
-    expect(nodes).toEqual([]);
+    // Should return empty result when file doesn't exist
+    expect(result).toEqual({ nodes: [], unnamedExports: [] });
   });
 });

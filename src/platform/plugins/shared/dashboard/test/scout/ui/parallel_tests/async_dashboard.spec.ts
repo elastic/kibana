@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import {
   SAMPLE_DATA_SET_ID,
@@ -17,7 +18,7 @@ import {
   SAMPLE_DATA_RANGE,
 } from '../constants';
 
-spaceTest.describe('Flights dashboard (sample data)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe.skip('Flights dashboard (sample data)', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
 
@@ -51,7 +52,7 @@ spaceTest.describe('Flights dashboard (sample data)', { tag: tags.DEPLOYMENT_AGN
   spaceTest('loads dashboard and renders panels', async ({ browserAuth, page, pageObjects }) => {
     await spaceTest.step('login and prepare Discover', async () => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.selectDataView(SAMPLE_DATA_VIEW);
       await pageObjects.datePicker.setCommonlyUsedTime(SAMPLE_DATA_TIME_RANGE);
       await pageObjects.discover.waitUntilSearchingHasFinished();

@@ -8,16 +8,27 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
-import { WorkflowGraph } from '@kbn/workflows/graph';
+import type { EsWorkflowExecution } from '@kbn/workflows';
+import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
+import { WorkflowGraphSetupError } from './workflow_graph_setup_error';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
-import { UrlValidator } from '../lib/url_validator';
+import { defaultWorkflowSettings } from '../default_workflow_settings';
+import {
+  extractEventChainDepthFromExecution,
+  extractEventChainVisitedWorkflowIdsFromExecution,
+  mergeEmitterWorkflowIntoEventChainVisited,
+} from '../lib/telemetry/utils/extract_execution_metadata';
+import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
+import { setWorkflowEventChainContext } from '../trigger_events/event_context/event_chain_context';
+import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import { StepIoService } from '../workflow_context_manager/step_io_service';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
@@ -25,25 +36,29 @@ import { WorkflowExecutionState } from '../workflow_context_manager/workflow_exe
 import { WorkflowEventLoggerService } from '../workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
-const defaultWorkflowSettings: WorkflowSettings = {
-  timeout: '6h',
-};
-
 export async function setupDependencies(
   workflowRunId: string,
   spaceId: string,
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
   dependencies: ContextDependencies,
-  fakeRequest?: KibanaRequest
+  fakeRequest?: KibanaRequest,
+  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart
 ) {
-  const { coreStart, actions, taskManager } = dependencies;
+  const { coreStart, actions, taskManager, workflowsExtensions } = dependencies;
 
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
   const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
   const stepExecutionRepository = new StepExecutionRepository(internalEsClient);
+  const workflowRepository = new WorkflowRepository({
+    esClient: internalEsClient,
+    logger,
+  });
+
+  // Wait for the workflows extensions registries to be ready
+  await workflowsExtensions.isReady();
 
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
@@ -61,10 +76,57 @@ export async function setupDependencies(
     );
   }
 
-  let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
-    workflowExecution.workflowDefinition,
-    defaultWorkflowSettings
+  const eventChainDepth = extractEventChainDepthFromExecution(workflowExecution) ?? -1;
+  const baseVisited = extractEventChainVisitedWorkflowIdsFromExecution(
+    workflowExecution,
+    config.eventDriven.maxChainDepth
   );
+  const visitedWorkflowIds = mergeEmitterWorkflowIntoEventChainVisited(
+    baseVisited,
+    workflowExecution.workflowId,
+    config.eventDriven.maxChainDepth
+  );
+  setWorkflowEventChainContext(fakeRequest, {
+    depth: eventChainDepth,
+    sourceExecutionId: workflowExecution.id,
+    ...(visitedWorkflowIds.length > 0 ? { visitedWorkflowIds } : {}),
+  });
+
+  // Compiling the definition into its execution graph can throw a GraphBuildError
+  // for a structurally-unsupported workflow (currently only the parallel-branch
+  // constraints: nested flow-control / unsupported step types inside a branch
+  // body). This same rule is validated in the editor (see the client-side
+  // `validateGraphBuild`, which squiggles the offending step), so authored-in-UI
+  // workflows are rejected before they ever run. This block is the defense-in-depth
+  // runtime net for the paths that bypass the editor — API/programmatic creation,
+  // imports, or workflows authored before the constraint existed. It is a permanent
+  // author error, not a transient fault, so we mark the execution FAILED with the
+  // actionable message and rethrow a typed, non-retryable error — otherwise the raw
+  // throw escapes the task runner and the run is force-recovered into an opaque
+  // "Execution abandoned" TaskRecoveryError with no failure reason and no step records.
+  let workflowExecutionGraph: WorkflowGraph;
+  try {
+    workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
+      workflowExecution.workflowDefinition,
+      defaultWorkflowSettings
+    );
+  } catch (error) {
+    if (isGraphBuildError(error)) {
+      const finishedAt = new Date();
+      await workflowExecutionRepository.updateWorkflowExecution({
+        id: workflowRunId,
+        status: ExecutionStatus.FAILED,
+        error: { type: 'GraphBuildError', message: error.message },
+        finishedAt: finishedAt.toISOString(),
+        duration: finishedAt.getTime() - new Date(workflowExecution.startedAt).getTime(),
+      });
+      logger.error(
+        `Workflow execution ${workflowRunId} failed to build its execution graph: ${error.message}`
+      );
+      throw new WorkflowGraphSetupError(error.message);
+    }
+    throw error;
+  }
 
   // If the execution is for a specific step, narrow the graph to that step
   if (workflowExecution.stepId) {
@@ -89,9 +151,18 @@ export async function setupDependencies(
 
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,
-    workflowExecutionRepository,
-    stepExecutionRepository
+    workflowExecutionRepository
   );
+
+  const stepIoService = new StepIoService({
+    stepRepository: stepExecutionRepository,
+    state: workflowExecutionState,
+    evictionMinBytes: config.eviction.minPayloadSize.getValueInBytes(),
+    logger,
+  });
+
+  // Create telemetry client
+  const telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, logger);
 
   // Create workflow runtime first (simpler, fewer dependencies)
   const workflowRuntime = new WorkflowExecutionRuntimeManager({
@@ -99,8 +170,10 @@ export async function setupDependencies(
     workflowExecutionGraph,
     workflowLogger,
     workflowExecutionState,
+    stepIoService,
     coreStart,
     dependencies,
+    telemetryClient,
   });
 
   const esClient: ElasticsearchClient =
@@ -108,28 +181,35 @@ export async function setupDependencies(
 
   const workflowTaskManager = new WorkflowTaskManager(taskManager);
 
-  const urlValidator = new UrlValidator({
-    allowedHosts: config.http.allowedHosts,
-  });
+  const enhancedDependencies: ContextDependencies = {
+    ...dependencies,
+    workflowRepository,
+    workflowExecutionRepository,
+    stepExecutionRepository,
+    workflowsExecutionEngine,
+    spaceId,
+    request: fakeRequest,
+  };
 
   const stepExecutionRuntimeFactory = new StepExecutionRuntimeFactory({
     workflowExecutionGraph,
     workflowExecutionState,
+    stepIoService,
     workflowLogger,
     esClient,
     fakeRequest,
     coreStart,
-    dependencies,
+    dependencies: enhancedDependencies,
   });
 
   const nodesFactory = new NodesFactory(
     connectorExecutor,
     workflowRuntime,
     workflowLogger,
-    urlValidator,
     workflowExecutionGraph,
     stepExecutionRuntimeFactory,
-    dependencies
+    enhancedDependencies,
+    stepIoService
   );
 
   return {
@@ -137,10 +217,12 @@ export async function setupDependencies(
     workflowRuntime,
     stepExecutionRuntimeFactory,
     workflowExecutionState,
+    stepIoService,
     workflowLogger,
     workflowTaskManager,
     nodesFactory,
     workflowExecutionRepository,
     esClient,
+    telemetryClient,
   };
 }

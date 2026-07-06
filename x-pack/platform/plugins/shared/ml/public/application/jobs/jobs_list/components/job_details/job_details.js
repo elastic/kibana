@@ -91,7 +91,7 @@ export class JobDetailsUI extends Component {
                 datafeedChartFlyoutVisible: true,
               })
             }
-            iconType="visAreaStacked"
+            iconType="chartAreaStack"
             size="s"
           >
             <FormattedMessage

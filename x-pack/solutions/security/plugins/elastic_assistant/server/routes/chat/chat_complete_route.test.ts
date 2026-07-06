@@ -20,6 +20,7 @@ import {
   getFindAnonymizationFieldsResultWithSingleHit,
 } from '../../__mocks__/response';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { chatCompleteRoute } from './chat_complete_route';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
@@ -72,6 +73,22 @@ const mockContext = {
       getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
       logger: loggingSystemMock.createLogger(),
       telemetry: { ...coreMock.createSetup().analytics, reportEvent },
+      inference: {
+        getConnectorById: jest.fn().mockImplementation((id: string) => {
+          if (id === 'mock-connector-id') {
+            return Promise.resolve({
+              connectorId: 'mock-connector-id',
+              type: InferenceConnectorType.OpenAI,
+              name: 'mock connector',
+              config: {},
+              capabilities: {},
+              isInferenceEndpoint: false,
+              isPreconfigured: false,
+            });
+          }
+          return Promise.resolve(undefined);
+        }),
+      },
       llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
       getCurrentUser: () => ({
         username: 'user',
@@ -403,7 +420,7 @@ describe('chatCompleteRoute', () => {
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
                 errorMessage: 'simulated error',
                 errorLocation: 'chatCompleteRoute',
-                actionTypeId: '.gen-ai',
+                actionTypeId: '.inference',
                 model: 'gpt-4',
                 assistantStreamingEnabled: false,
                 isEnabledKnowledgeBase: false,

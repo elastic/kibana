@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { SearchHomepagePlugin } from './plugin';
 
-export function plugin() {
-  return new SearchHomepagePlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new SearchHomepagePlugin(initializerContext);
 }
 
 export type {

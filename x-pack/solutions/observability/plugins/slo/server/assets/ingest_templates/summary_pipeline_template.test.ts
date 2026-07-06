@@ -60,10 +60,10 @@ describe('getSummaryPipelineTemplate', () => {
     const template = getSummaryPipelineTemplate(slo, 'default', basePath);
 
     const hasTimesliceTarget = template.processors?.some(
-      (p) => 'set' in p && p.set?.field === 'slo.objective.timesliceTarget'
+      (p) => p?.set?.field === 'slo.objective.timesliceTarget'
     );
     const hasTimesliceWindow = template.processors?.some(
-      (p) => 'set' in p && p.set?.field === 'slo.objective.timesliceWindow'
+      (p) => p?.set?.field === 'slo.objective.timesliceWindow'
     );
 
     expect(hasTimesliceTarget).toBe(true);

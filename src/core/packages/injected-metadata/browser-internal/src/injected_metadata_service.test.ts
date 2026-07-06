@@ -195,3 +195,17 @@ describe('setup.getFeatureFlags()', () => {
     expect(contract.getFeatureFlags()).toBeUndefined();
   });
 });
+
+describe('setup.getUserStorage()', () => {
+  it('returns injectedMetadata.userStorage', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        userStorage: { values: { 'navigation:layout': { hidden: ['discover'] } } },
+      },
+    } as unknown as InjectedMetadataParams);
+
+    expect(injectedMetadata.setup().getUserStorage()).toEqual({
+      values: { 'navigation:layout': { hidden: ['discover'] } },
+    });
+  });
+});

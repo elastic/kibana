@@ -16,6 +16,7 @@
     "@kbn/tooling-log",
     "@kbn/es-archiver",
     "@kbn/test",
+    "@kbn/test-saml-auth",
     "@kbn/expect",
     "@kbn/search-types",
     "@kbn/core-http-common",

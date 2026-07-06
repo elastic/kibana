@@ -21,7 +21,7 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY,
   validate: {
     query: schema.object({
-      spaces: schema.maybe(schema.arrayOf(schema.string())),
+      spaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
       accessToElasticManagedLocations: schema.maybe(schema.boolean()),
     }),
   },

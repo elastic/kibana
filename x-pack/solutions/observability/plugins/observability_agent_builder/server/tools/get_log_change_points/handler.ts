@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { orderBy } from 'lodash';
 import { getTotalHits } from '../../utils/get_total_hits';
 import { type Bucket, getChangePoints } from '../../utils/get_change_points';
+import { computeSamplingProbability } from '../../utils/compute_sampling_probability';
 import { parseDatemath } from '../../utils/time';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { getTypedSearch } from '../../utils/get_typed_search';
-
-function getProbability(totalHits: number): number {
-  const probability = Math.min(1, 500_000 / totalHits);
-  return probability > 0.5 ? 1 : probability;
-}
 
 async function getLogChangePoint({
   index,
@@ -60,7 +55,7 @@ async function getLogChangePoint({
   const aggregations = {
     sampler: {
       random_sampler: {
-        probability: getProbability(totalHits),
+        probability: computeSamplingProbability({ totalHits, targetSampleSize: 500000 }),
       },
       aggs: {
         groups: {
@@ -79,8 +74,7 @@ async function getLogChangePoint({
               change_point: {
                 buckets_path: 'time_series>_count',
               },
-              // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
-            } as AggregationsAggregationContainer,
+            },
           },
         },
       },

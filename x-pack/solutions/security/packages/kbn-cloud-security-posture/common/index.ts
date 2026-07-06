@@ -17,7 +17,7 @@ export type {
   BaseCspSetupStatus,
   CspSetupStatus,
 } from './types/status';
-export type { CspFinding, CspFindingResult } from './types/findings';
+export type { CspFinding, CspFindingResource, CspFindingResult } from './types/findings';
 export type {
   CspVulnerabilityFinding,
   Vulnerability,

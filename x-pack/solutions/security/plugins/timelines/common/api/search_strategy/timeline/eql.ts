@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { filterQuery } from '../model/filter_query';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { sort } from '../model/sort';

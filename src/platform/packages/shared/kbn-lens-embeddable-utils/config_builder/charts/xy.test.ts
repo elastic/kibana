@@ -9,7 +9,7 @@
 
 import { buildXY } from './xy';
 import { mockDataViewsService } from './mock_utils';
-import type { XYState } from '@kbn/lens-common';
+import type { XYVisualizationState } from '@kbn/lens-common';
 import { LegendValue } from '@elastic/charts';
 
 test('generates xy chart config', async () => {
@@ -41,6 +41,7 @@ test('generates xy chart config', async () => {
 
   expect(result).toMatchInlineSnapshot(`
     Object {
+      "description": undefined,
       "references": Array [],
       "state": Object {
         "adHocDataViews": Object {
@@ -256,7 +257,7 @@ test('it generates xy chart with multiple reference lines', async () => {
     }
   );
 
-  const xyState = result.state.visualization as XYState;
+  const xyState = result.state.visualization as XYVisualizationState;
 
   expect(xyState.layers).toHaveLength(3);
 
@@ -296,5 +297,236 @@ test('it generates xy chart with multiple reference lines', async () => {
         forAccessor: 'metric_formula_accessor2_0',
       },
     ],
+  });
+});
+
+describe('breakdown handling', () => {
+  it('should not include splitAccessors when breakdown is undefined', async () => {
+    const result = await buildXY(
+      {
+        chartType: 'xy',
+        title: 'test',
+        dataset: {
+          esql: 'from test | count=count() by @timestamp',
+        },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAxis: '@timestamp',
+            yAxis: [
+              {
+                label: 'test',
+                value: 'count',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const xyState = result.state.visualization as XYVisualizationState;
+    const dataLayer = xyState.layers[0] as any;
+
+    expect(dataLayer.splitAccessors).toBeUndefined();
+  });
+
+  it('should create single splitAccessor when breakdown is a string', async () => {
+    const result = await buildXY(
+      {
+        chartType: 'xy',
+        title: 'test',
+        dataset: {
+          esql: 'from test | count=count() by @timestamp, service.name',
+        },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAxis: '@timestamp',
+            breakdown: 'service.name',
+            yAxis: [
+              {
+                label: 'test',
+                value: 'count',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const xyState = result.state.visualization as XYVisualizationState;
+    const dataLayer = xyState.layers[0] as any;
+
+    expect(dataLayer.splitAccessors).toEqual(['metric_formula_accessor0_breakdown_0']);
+  });
+
+  it('should create single splitAccessor when breakdown is an array with one item', async () => {
+    const result = await buildXY(
+      {
+        chartType: 'xy',
+        title: 'test',
+        dataset: {
+          esql: 'from test | count=count() by @timestamp, host.name',
+        },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAxis: '@timestamp',
+            breakdown: ['host.name'],
+            yAxis: [
+              {
+                label: 'test',
+                value: 'count',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const xyState = result.state.visualization as XYVisualizationState;
+    const dataLayer = xyState.layers[0] as any;
+
+    expect(dataLayer.splitAccessors).toEqual(['metric_formula_accessor0_breakdown_0']);
+  });
+
+  it('should create multiple splitAccessors when breakdown is an array with multiple items', async () => {
+    const result = await buildXY(
+      {
+        chartType: 'xy',
+        title: 'test',
+        dataset: {
+          esql: 'from test | count=count() by @timestamp, host.name, service.name, container.id',
+        },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAxis: '@timestamp',
+            breakdown: ['host.name', 'service.name', 'container.id'],
+            yAxis: [
+              {
+                label: 'test',
+                value: 'count',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const xyState = result.state.visualization as XYVisualizationState;
+    const dataLayer = xyState.layers[0] as any;
+
+    expect(dataLayer.splitAccessors).toEqual([
+      'metric_formula_accessor0_breakdown_0',
+      'metric_formula_accessor0_breakdown_1',
+      'metric_formula_accessor0_breakdown_2',
+    ]);
+  });
+
+  it('should create correct splitAccessors for multiple layers with different breakdowns', async () => {
+    const result = await buildXY(
+      {
+        chartType: 'xy',
+        title: 'test',
+        dataset: {
+          esql: 'from test | count=count() by @timestamp',
+        },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAxis: '@timestamp',
+            breakdown: 'service.name',
+            yAxis: [
+              {
+                label: 'test',
+                value: 'count',
+              },
+            ],
+          },
+          {
+            type: 'series',
+            seriesType: 'bar',
+            xAxis: '@timestamp',
+            breakdown: ['host.name', 'container.id'],
+            yAxis: [
+              {
+                label: 'test2',
+                value: 'count',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const xyState = result.state.visualization as XYVisualizationState;
+    const layer0 = xyState.layers[0] as any;
+    const layer1 = xyState.layers[1] as any;
+
+    expect(layer0.splitAccessors).toEqual(['metric_formula_accessor0_breakdown_0']);
+    expect(layer1.splitAccessors).toEqual([
+      'metric_formula_accessor1_breakdown_0',
+      'metric_formula_accessor1_breakdown_1',
+    ]);
+  });
+});
+
+describe('annotation layer handling', () => {
+  it('does not create a datasource entry or spurious references for a manual annotation layer', async () => {
+    const result = await buildXY(
+      {
+        chartType: 'xy',
+        title: 'test',
+        dataset: { esql: 'from main_index | limit 10' },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAxis: '@timestamp',
+            yAxis: [{ label: 'count', value: 'count' }],
+          },
+          {
+            type: 'annotation',
+            yAxis: [],
+            events: [{ name: 'deploy', datetime: '2024-01-15T00:00:00.000Z' }],
+          },
+        ],
+      },
+      { dataViewsAPI: mockDataViewsService() as any }
+    );
+
+    const xyState = result.state.visualization as XYVisualizationState;
+    const annotationLayer = xyState.layers[1] as any;
+
+    // manual annotations do not require an index pattern
+    expect(annotationLayer.indexPatternId).toBeUndefined();
+
+    // no datasource entry is created for the annotation layer
+    expect(Object.keys(result.state.datasourceStates.textBased?.layers ?? {})).toEqual(['layer_0']);
+
+    // no spurious datasource-style reference for the annotation layer
+    const allRefs = [...result.references, ...(result.state.internalReferences ?? [])];
+    expect(allRefs.some((r) => r.name === 'indexpattern-datasource-layer-layer_1')).toBe(false);
   });
 });

@@ -169,7 +169,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               : [
                   <EuiButton
                     fill
-                    iconType="plusInCircleFilled"
+                    iconType="plusCircle"
                     data-test-subj="createRoleMappingButton"
                     {...reactRouterNavigate(this.props.history, EDIT_ROLE_MAPPING_PATH)}
                   >

@@ -12,6 +12,7 @@ import {
   RULE_MIGRATION_PROGRESS_BAR,
 } from '../../../../screens/siem_migrations';
 import { deleteConnectors } from '../../../../tasks/api_calls/common';
+import { suppressGlobalAnnouncements } from '../../../../tasks/api_calls/suppress_global_announcements';
 import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
 import { cleanMigrationData } from '../../../../tasks/api_calls/siem_migrations';
 import { visit } from '../../../../tasks/navigation';
@@ -93,7 +94,8 @@ describe(
 
       role.login();
       createBedrockConnector();
-      visit(GET_STARTED_URL);
+      suppressGlobalAnnouncements();
+      visit(`${GET_STARTED_URL}/siem_migrations`);
     });
 
     after(() => {

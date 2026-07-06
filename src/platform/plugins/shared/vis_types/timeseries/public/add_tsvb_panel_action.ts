@@ -13,7 +13,7 @@ import { apiHasAppContext, type EmbeddableApiContext } from '@kbn/presentation-p
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
 import { ADD_PANEL_LEGACY_GROUP } from '@kbn/embeddable-plugin/public';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import { TSVB_ICON, TSVB_DESCRIPTION, TSVB_TITLE } from './metrics_type';
 
 export const CREATE_TSVB_PANEL = 'CREATE_TSVB_PANEL';

@@ -22,9 +22,10 @@ export const Default = () => {
     <StoriesProvider>
       <FancySelect
         value={value}
+        ariaLabel="Choose an option"
         options={[
           { id: '1', title: 'Option 1', description: 'Description 1', icon: 'key' },
-          { id: '2', title: 'Option 2', description: 'Description 2', icon: 'search' },
+          { id: '2', title: 'Option 2', description: 'Description 2', icon: 'magnify' },
           { id: '3', title: 'Option 3', description: 'Description 3', icon: 'empty' },
         ]}
         onChange={(newValue) => setValue(newValue)}

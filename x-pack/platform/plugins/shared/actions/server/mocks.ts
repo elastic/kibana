@@ -40,9 +40,11 @@ const createSetupMock = () => {
     getActionsConfigurationUtilities: jest.fn().mockReturnValue({
       getAwsSesConfig: jest.fn(),
       getWebhookSettings: jest.fn(),
+      getEarsUrl: jest.fn(),
     }),
     setEnabledConnectorTypes: jest.fn(),
     isActionTypeEnabled: jest.fn(),
+    registerConnectorLifecycleListener: jest.fn(),
   });
   return mock;
 };
@@ -62,6 +64,8 @@ const createStartMock = () => {
     inMemoryConnectors: [],
     renderActionParameterTemplates: jest.fn(),
     isSystemActionConnector: jest.fn(),
+    registerDynamicConnector: jest.fn(),
+    unregisterDynamicConnector: jest.fn(),
   });
 
   return mock;

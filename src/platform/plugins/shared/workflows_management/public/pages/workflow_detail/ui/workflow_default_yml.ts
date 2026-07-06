@@ -12,11 +12,10 @@ enabled: false
 description: This is a new workflow
 triggers:
   - type: manual
-
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
 
 steps:
   - name: hello_world_step

@@ -27,7 +27,7 @@ export function buildBaseFilterCriteria(
   latestMs?: number | string,
   query?: Query['query'],
   timeFormat = 'epoch_millis'
-): estypes.QueryDslQueryContainer[] {
+): NonNullable<estypes.QueryDslQueryContainer>[] {
   const filterCriteria = [];
 
   if (timeFieldName && earliestMs && latestMs) {

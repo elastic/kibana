@@ -118,8 +118,8 @@ describe('EditFilterList', () => {
 
     expect(mockFilters).toHaveBeenCalledWith({ filterId: 'safe_domains' });
 
-    waitFor(() => {
-      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveValue(
+    await waitFor(() => {
+      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveTextContent(
         'List of known safe domains'
       );
     });
@@ -133,7 +133,7 @@ describe('EditFilterList', () => {
 
     const mlFilterListDescriptionInput = getByTestId('mlFilterListDescriptionInput');
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(mlFilterListDescriptionInput).toBeInTheDocument();
       expect(mlFilterListDescriptionInput).toHaveValue('List of known safe domains');
     });
@@ -142,8 +142,10 @@ describe('EditFilterList', () => {
     await userEvent.type(mlFilterListDescriptionInput, 'Known safe web domains');
     await userEvent.click(mlFilterListEditDescriptionButton);
 
-    waitFor(() => {
-      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveValue('Known safe web domains');
+    await waitFor(() => {
+      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveTextContent(
+        'Known safe web domains'
+      );
     });
   });
 
@@ -172,7 +174,7 @@ describe('EditFilterList', () => {
 
     // Next we want to click the '500 items' button.
     const mlItemsGridPaginationMenuPanel = getByTestId('mlItemsGridPaginationMenuPanel');
-    const buttons = within(mlItemsGridPaginationMenuPanel).getAllByRole('button');
+    const buttons = within(mlItemsGridPaginationMenuPanel).getAllByRole('menuitem');
     expect(buttons.length).toBe(4);
     await userEvent.click(buttons[2]);
 

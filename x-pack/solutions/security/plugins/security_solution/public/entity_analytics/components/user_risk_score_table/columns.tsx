@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
-import {
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-  CellActionsMode,
-} from '../../../common/components/cell_actions';
+import React, { type SyntheticEvent } from 'react';
+import { EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { SecurityCellActions, CellActionsMode } from '../../../common/components/cell_actions';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import type { UserRiskScoreColumns } from '.';
@@ -28,8 +25,10 @@ import { formatRiskScore } from '../../common';
 
 export const getUserRiskScoreColumns = ({
   dispatchSeverityUpdate,
+  openUserFlyout,
 }: {
   dispatchSeverityUpdate: (s: RiskSeverity) => void;
+  openUserFlyout: (userName: string) => void;
 }): UserRiskScoreColumns => [
   {
     field: 'user.name',
@@ -47,7 +46,7 @@ export const getUserRiskScoreColumns = ({
             mode={CellActionsMode.HOVER_DOWN}
             visibleCellActions={5}
             showActionTooltips
-            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
             data={{
               value: userName,
               field: 'user.name',
@@ -56,7 +55,14 @@ export const getUserRiskScoreColumns = ({
               telemetry: CELL_ACTIONS_TELEMETRY,
             }}
           >
-            <UserDetailsLink userName={userName} userTab={UsersTableType.risk} />
+            <UserDetailsLink
+              userName={userName}
+              userTab={UsersTableType.risk}
+              onClick={(e: SyntheticEvent) => {
+                e.preventDefault();
+                openUserFlyout(userName);
+              }}
+            />
           </SecurityCellActions>
         );
       }
@@ -85,9 +91,9 @@ export const getUserRiskScoreColumns = ({
     render: (riskScore) => {
       if (riskScore != null) {
         return (
-          <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
-            {formatRiskScore(riskScore)}
-          </span>
+          <EuiToolTip content={`${riskScore}`}>
+            <span data-test-subj="risk-score-truncate">{formatRiskScore(riskScore)}</span>
+          </EuiToolTip>
         );
       }
       return getEmptyTagValue();

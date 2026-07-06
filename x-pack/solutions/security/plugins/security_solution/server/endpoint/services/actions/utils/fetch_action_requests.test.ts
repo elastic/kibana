@@ -15,6 +15,8 @@ import { createMockEndpointAppContextService } from '../../../mocks';
 import { REF_DATA_KEY_INITIAL_VALUE, REF_DATA_KEYS } from '../../../lib/reference_data';
 import { set } from '@kbn/safer-lodash-set';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 describe('fetchActionRequests()', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -440,12 +442,12 @@ describe('fetchActionRequests()', () => {
     });
 
     it('should include search filter for deleted integration policy tag when ref. data has one defined', async () => {
+      const initialValue = await REF_DATA_KEY_INITIAL_VALUE[
+        REF_DATA_KEYS.orphanResponseActionsSpace
+      ]({} as SavedObjectsClientContract, {} as ExperimentalFeatures);
+
       (fetchOptions.endpointService.getReferenceDataClient().get as jest.Mock).mockResolvedValue(
-        set(
-          REF_DATA_KEY_INITIAL_VALUE[REF_DATA_KEYS.orphanResponseActionsSpace](),
-          'metadata.spaceId',
-          'bar'
-        )
+        set(initialValue, 'metadata.spaceId', 'bar')
       );
       fetchOptions.spaceId = 'bar';
 

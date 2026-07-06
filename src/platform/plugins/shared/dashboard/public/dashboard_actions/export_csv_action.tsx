@@ -38,7 +38,7 @@ export class ExportCSVAction implements Action<ExportContext> {
   public readonly order = 18;
 
   public getIconType() {
-    return 'exportAction';
+    return 'upload';
   }
 
   public readonly getDisplayName = (context: ExportContext): string =>

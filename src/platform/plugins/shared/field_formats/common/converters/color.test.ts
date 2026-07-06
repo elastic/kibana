@@ -7,12 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactElement } from 'react';
 import { ColorFormat } from './color';
-import { HTML_CONTEXT_TYPE } from '../content_types';
+import { expectReactElementWithNull, expectReactElementWithBlank } from '../test_utils';
+
+const expectColoredReactElement = (
+  element: React.ReactNode,
+  text: string | number,
+  color: string,
+  backgroundColor: string
+) => {
+  const el = element as ReactElement;
+  expect(el.type).toBe('span');
+  expect(el.props.style).toEqual({
+    color,
+    backgroundColor,
+    display: 'inline-block',
+    padding: '0 8px',
+    borderRadius: '3px',
+  });
+  expect(el.props.children).toBe(String(text));
+};
 
 describe('Color Format', () => {
-  const checkResult = (text: string | number, color: string, backgroundColor: string) =>
-    `<span style=\"color:${color};background-color:${backgroundColor};display:inline-block;padding:0 8px;border-radius:3px\">${text}</span>`;
+  const checkMissingValues = (colorer: ColorFormat) => {
+    expect(colorer.convertToText(null)).toBe('(null)');
+    expect(colorer.convertToText(undefined)).toBe('(null)');
+    expect(colorer.convertToText('')).toBe('(blank)');
+    expectReactElementWithNull(colorer.convertToReact(null));
+    expectReactElementWithNull(colorer.convertToReact(undefined));
+    expectReactElementWithBlank(colorer.convertToReact(''));
+  };
 
   describe('field is a number', () => {
     test('should add colors if the value is in range', () => {
@@ -30,10 +55,17 @@ describe('Color Format', () => {
         jest.fn()
       );
 
-      expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('99');
-      expect(colorer.convert(100, HTML_CONTEXT_TYPE)).toBe(checkResult(100, 'blue', 'yellow'));
-      expect(colorer.convert(150, HTML_CONTEXT_TYPE)).toBe(checkResult(150, 'blue', 'yellow'));
-      expect(colorer.convert(151, HTML_CONTEXT_TYPE)).toBe('151');
+      expect(colorer.convertToText(99)).toBe('99');
+      expect(colorer.convertToText(100)).toBe('100');
+      expect(colorer.convertToText(150)).toBe('150');
+      expect(colorer.convertToText(151)).toBe('151');
+
+      expect(colorer.convertToReact(99)).toBe('99');
+      expectColoredReactElement(colorer.convertToReact(100), 100, 'blue', 'yellow');
+      expectColoredReactElement(colorer.convertToReact(150), 150, 'blue', 'yellow');
+      expect(colorer.convertToReact(151)).toBe('151');
+
+      checkMissingValues(colorer);
     });
 
     test('should not convert invalid ranges', () => {
@@ -51,7 +83,8 @@ describe('Color Format', () => {
         jest.fn()
       );
 
-      expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('99');
+      expect(colorer.convertToText(99)).toBe('99');
+      expect(colorer.convertToReact(99)).toBe('99');
     });
   });
 
@@ -71,8 +104,13 @@ describe('Color Format', () => {
         jest.fn()
       );
 
-      expect(colorer.convert(true, HTML_CONTEXT_TYPE)).toBe(checkResult('true', 'blue', 'yellow'));
-      expect(colorer.convert(false, HTML_CONTEXT_TYPE)).toBe('false');
+      expect(colorer.convertToText(true)).toBe('true');
+      expect(colorer.convertToText(false)).toBe('false');
+
+      expectColoredReactElement(colorer.convertToReact(true), 'true', 'blue', 'yellow');
+      expect(colorer.convertToReact(false)).toBe('false');
+
+      checkMissingValues(colorer);
     });
   });
 
@@ -91,21 +129,23 @@ describe('Color Format', () => {
         },
         jest.fn()
       );
-      const converter = colorer.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
-      expect(converter('B', HTML_CONTEXT_TYPE)).toBe('B');
-      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(checkResult('AAA', 'white', 'red'));
-      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(checkResult('AB', 'white', 'red'));
-      expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
+      expect(colorer.convertToText('B')).toBe('B');
+      expect(colorer.convertToText('AAA')).toBe('AAA');
+      expect(colorer.convertToText('AB')).toBe('AB');
+      expect(colorer.convertToText('AB <')).toBe('AB <');
+      expect(colorer.convertToText('a')).toBe('a');
 
-      expect(converter('B', HTML_CONTEXT_TYPE)).toBe('B');
-      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(checkResult('AAA', 'white', 'red'));
-      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(checkResult('AB', 'white', 'red'));
-      expect(converter('AB <', HTML_CONTEXT_TYPE)).toBe(checkResult('AB &lt;', 'white', 'red'));
-      expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
+      expect(colorer.convertToReact('B')).toBe('B');
+      expectColoredReactElement(colorer.convertToReact('AAA'), 'AAA', 'white', 'red');
+      expectColoredReactElement(colorer.convertToReact('AB'), 'AB', 'white', 'red');
+      expectColoredReactElement(colorer.convertToReact('AB <'), 'AB <', 'white', 'red');
+      expect(colorer.convertToReact('a')).toBe('a');
+
+      checkMissingValues(colorer);
     });
 
-    test('returns original value (escaped) when regex is invalid', () => {
+    test('returns original value when regex is invalid', () => {
       const colorer = new ColorFormat(
         {
           fieldType: 'string',
@@ -119,12 +159,14 @@ describe('Color Format', () => {
         },
         jest.fn()
       );
-      const converter = colorer.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
-      expect(converter('<', HTML_CONTEXT_TYPE)).toBe('&lt;');
+      expect(colorer.convertToText('<')).toBe('<');
+      expect(colorer.convertToReact('<')).toBe('<');
+
+      checkMissingValues(colorer);
     });
 
-    test('returns original value (escaped) on regex with syntax error', () => {
+    test('returns original value on regex with syntax error', () => {
       const colorer = new ColorFormat(
         {
           fieldType: 'string',
@@ -138,9 +180,74 @@ describe('Color Format', () => {
         },
         jest.fn()
       );
-      const converter = colorer.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
-      expect(converter('<', HTML_CONTEXT_TYPE)).toBe('&lt;');
+      expect(colorer.convertToText('<')).toBe('<');
+      expect(colorer.convertToReact('<')).toBe('<');
     });
+  });
+
+  test('wraps a multi-value array with bracket notation', () => {
+    const colorer = new ColorFormat(
+      { fieldType: 'number', colors: [{ range: '0:200', text: 'blue', background: 'yellow' }] },
+      jest.fn()
+    );
+
+    expect(colorer.convertToText([100, 200])).toBe('["100","200"]');
+    expect(colorer.convertToReact([100, 200])).toMatchInlineSnapshot(`
+      <React.Fragment>
+        <span
+          className="ffArray__highlight"
+        >
+          [
+        </span>
+        <span
+          style={
+            Object {
+              "backgroundColor": "yellow",
+              "borderRadius": "3px",
+              "color": "blue",
+              "display": "inline-block",
+              "padding": "0 8px",
+            }
+          }
+        >
+          100
+        </span>
+        <span
+          className="ffArray__highlight"
+        >
+          ,
+        </span>
+         
+        <span
+          style={
+            Object {
+              "backgroundColor": "yellow",
+              "borderRadius": "3px",
+              "color": "blue",
+              "display": "inline-block",
+              "padding": "0 8px",
+            }
+          }
+        >
+          200
+        </span>
+        <span
+          className="ffArray__highlight"
+        >
+          ]
+        </span>
+      </React.Fragment>
+    `);
+  });
+
+  test('returns the single element without brackets for a one-element array', () => {
+    const colorer = new ColorFormat(
+      { fieldType: 'number', colors: [{ range: '0:200', text: 'blue', background: 'yellow' }] },
+      jest.fn()
+    );
+
+    expect(colorer.convertToText([100])).toBe('["100"]');
+    expectColoredReactElement(colorer.convertToReact([100]), 100, 'blue', 'yellow');
   });
 });

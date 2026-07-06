@@ -11,9 +11,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SloOverviewFlyout } from '.';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { mockTelemetryClient } from '../../../services/telemetry/__mocks__/telemetry_client_mock';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -25,6 +26,11 @@ jest.mock('../../../hooks/use_apm_router', () => ({
 
 jest.mock('../../../hooks/use_apm_params', () => ({
   useApmParams: jest.fn(),
+  useAnyOfApmParams: jest.fn(),
+}));
+
+jest.mock('../../../hooks/use_manage_slos_url', () => ({
+  useManageSlosUrl: () => '/app/slo',
 }));
 
 const mockUseFetcher = jest.fn();
@@ -50,6 +56,7 @@ jest.mock('@elastic/eui', () => {
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseApmRouter = useApmRouter as jest.Mock;
 const mockUseApmParams = useApmParams as jest.Mock;
+const mockUseAnyOfApmParams = useAnyOfApmParams as jest.Mock;
 
 const createMockSlo = (overrides: Partial<SLOWithSummaryResponse> = {}): SLOWithSummaryResponse =>
   ({
@@ -99,6 +106,7 @@ describe('SloOverviewFlyout', () => {
             },
           },
         },
+        telemetry: mockTelemetryClient,
       },
     });
 
@@ -107,6 +115,14 @@ describe('SloOverviewFlyout', () => {
     });
 
     mockUseApmParams.mockReturnValue({
+      query: {
+        environment: 'production',
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+      },
+    });
+
+    mockUseAnyOfApmParams.mockReturnValue({
       query: {
         environment: 'production',
         rangeFrom: 'now-15m',
@@ -205,7 +221,7 @@ describe('SloOverviewFlyout', () => {
     expect(screen.getByText('Error Rate SLO')).toBeInTheDocument();
   });
 
-  it('displays "No SLOs found" when no data', async () => {
+  it('displays empty state when no SLOs exist', async () => {
     mockUseFetcher.mockReturnValue({
       data: {
         results: [],
@@ -221,7 +237,9 @@ describe('SloOverviewFlyout', () => {
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    expect(screen.getByText('No SLOs found for this service')).toBeInTheDocument();
+    expect(screen.getByTestId('sloOverviewFlyoutEmptyState')).toBeInTheDocument();
+    expect(screen.getByText('No SLOs (APM)')).toBeInTheDocument();
+    expect(screen.getByTestId('sloOverviewFlyoutCreateSloButton')).toBeInTheDocument();
   });
 
   it('displays status stats panel', async () => {
@@ -395,13 +413,75 @@ describe('SloOverviewFlyout', () => {
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    expect(screen.getByTestId('apmSloNameLink')).toBeInTheDocument();
+    const nameCell = screen.getByTestId('apmSloNameCell');
+    expect(nameCell).toBeInTheDocument();
+    // Name cell is no longer an interactive link; clicking it should not open SLO details.
+    expect(nameCell.tagName).not.toBe('A');
+    expect(nameCell.tagName).not.toBe('BUTTON');
 
-    const sloLink = screen.getByTestId('apmSloNameLink');
-    fireEvent.mouseOver(sloLink);
+    fireEvent.mouseOver(nameCell);
 
     await waitFor(() => {
       expect(screen.getByRole('tooltip')).toHaveTextContent(sloName);
+    });
+  });
+
+  it('toggles the expand button between maximize and minimize when clicked', async () => {
+    const mockSlos = [createMockSlo({ id: 'slo-1', name: 'Test SLO', instanceId: '*' })];
+    const getSLODetailsFlyoutMock = jest.fn(() => null);
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        uiSettings: { get: jest.fn().mockReturnValue('0.00%') },
+        slo: { getSLODetailsFlyout: getSLODetailsFlyoutMock },
+        share: {
+          url: {
+            locators: {
+              get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }),
+            },
+          },
+        },
+        telemetry: mockTelemetryClient,
+      },
+    });
+
+    mockUseFetcher.mockReturnValue({
+      data: {
+        results: mockSlos,
+        total: 1,
+        page: 1,
+        perPage: 10,
+        activeAlerts: {},
+        statusCounts: { violated: 0, degrading: 0, healthy: 1, noData: 0 },
+      },
+      status: FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
+
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
+
+    const expandButton = screen.getByTestId('apmSloExpandButton');
+    expect(expandButton).toBeInTheDocument();
+    expect(expandButton).toHaveAttribute('aria-label', 'Open SLO details');
+    expect(getSLODetailsFlyoutMock).not.toHaveBeenCalled();
+
+    fireEvent.click(expandButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('apmSloExpandButton')).toHaveAttribute(
+        'aria-label',
+        'Close SLO details'
+      );
+    });
+    expect(getSLODetailsFlyoutMock).toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('apmSloExpandButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('apmSloExpandButton')).toHaveAttribute(
+        'aria-label',
+        'Open SLO details'
+      );
     });
   });
 
@@ -415,6 +495,6 @@ describe('SloOverviewFlyout', () => {
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    expect(screen.getByText('No SLOs found for this service')).toBeInTheDocument();
+    expect(screen.getByTestId('sloOverviewFlyoutEmptyState')).toBeInTheDocument();
   });
 });

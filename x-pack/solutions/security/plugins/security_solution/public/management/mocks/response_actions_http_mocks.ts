@@ -86,6 +86,7 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
 
   scan: () => ActionDetailsApiResponse<ResponseActionScanOutputContent>;
 
+  /** API call to the runscript custom scripts (not the scripts library API) */
   fetchScriptList: () => ResponseActionScriptsApiResponse;
 
   runscript: () => ActionDetailsApiResponse<ResponseActionRunScriptOutputContent>;

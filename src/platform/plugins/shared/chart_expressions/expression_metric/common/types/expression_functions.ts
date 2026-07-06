@@ -50,13 +50,13 @@ export interface MetricArguments {
   secondaryTrendVisuals?: string;
   secondaryTrendBaseline?: number | string;
   secondaryTrendPalette?: [string, string, string];
+  secondaryTrendTextPalette?: [string, string, string];
   progressDirection?: LayoutDirection;
   titlesTextAlign: MetricStyle['titlesTextAlign'];
   primaryAlign: MetricStyle['valueTextAlign'];
   secondaryAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
-  titleWeight: MetricStyle['titleWeight'];
   primaryPosition: MetricStyle['valuePosition'];
   color?: string;
   icon?: string;
@@ -65,7 +65,7 @@ export interface MetricArguments {
   minTiles?: number;
   inspectorTableId: string;
   secondaryLabelPosition: SecondaryMetricProps['labelPosition'];
-  applyColorTo: 'background' | 'value';
+  applyColorTo?: 'background' | 'value';
 }
 
 export type MetricInput = Datatable;

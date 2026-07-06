@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { first } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiToolTip } from '@elastic/eui';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useBoolean } from '@kbn/react-hooks';
@@ -65,11 +66,10 @@ export const Node = ({
 
   const nodeSquare = (
     <EuiToolTip
-      delay="regular"
       position="right"
       content={<ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />}
     >
-      <div role="listitem">
+      <div role="listitem" tabIndex={0}>
         <NodeSquare
           squareSize={squareSize}
           togglePopover={toggleAssetPopover}
@@ -83,22 +83,26 @@ export const Node = ({
     </EuiToolTip>
   );
 
-  return !isFlyoutMode ? (
+  return (
     <EuiPopover
       button={nodeSquare}
-      isOpen={isPopoverOpen}
+      isOpen={!isFlyoutMode && isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="downCenter"
       zIndex={0}
+      aria-label={i18n.translate('xpack.infra.waffle.nodePopover.ariaLabel', {
+        defaultMessage: 'Details for {nodeName}',
+        values: { nodeName: node.name },
+      })}
     >
-      <NodeContextMenu
-        node={node}
-        nodeType={nodeType}
-        options={options}
-        currentTime={currentTime}
-      />
+      {!isFlyoutMode && isPopoverOpen && (
+        <NodeContextMenu
+          node={node}
+          nodeType={nodeType}
+          options={options}
+          currentTime={currentTime}
+        />
+      )}
     </EuiPopover>
-  ) : (
-    nodeSquare
   );
 };

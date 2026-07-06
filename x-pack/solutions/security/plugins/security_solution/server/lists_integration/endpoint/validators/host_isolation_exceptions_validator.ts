@@ -13,6 +13,7 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -30,6 +31,7 @@ const EntrySchema = schema.object({
   operator: schema.literal('included'),
   type: schema.literal('match'),
   value: schema.string({
+    maxLength: 64,
     validate: validateIp,
   }),
 });
@@ -71,6 +73,20 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
 
   protected async validateHasReadPrivilege(): Promise<void> {
     return this.validateHasPrivilege('canReadHostIsolationExceptions');
+  }
+
+  async validatePreImport(items: PromiseFromStreams): Promise<void> {
+    await this.validateHasWritePrivilege();
+
+    await this.validatePreImportItems(items, async (item) => {
+      // import specific validations
+      await this.validateImportOwnerSpaceIds(item); // instead of validateCreateOwnerSpaceIds
+      await this.validateCanImportGlobalArtifacts(item); // instead of validateCanCreateGlobalArtifacts
+      await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
+
+      // usual validators from pre-create
+      await this.validateHostIsolationData(item);
+    });
   }
 
   async validatePreCreateItem(
@@ -124,12 +140,6 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
 
   async validatePreMultiListFind(): Promise<void> {
     await this.validateHasReadPrivilege();
-  }
-
-  async validatePreImport(): Promise<void> {
-    throw new EndpointArtifactExceptionValidationError(
-      'Import is not supported for Endpoint artifact exceptions'
-    );
   }
 
   private async validateHostIsolationData(item: ExceptionItemLikeOptions): Promise<void> {

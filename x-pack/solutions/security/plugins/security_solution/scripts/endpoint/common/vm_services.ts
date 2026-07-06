@@ -10,7 +10,7 @@ import execa from 'execa';
 import chalk from 'chalk';
 import path from 'path';
 import { userInfo } from 'os';
-import { unlink as deleteFile } from 'fs/promises';
+import { unlink as deleteFile, statfs } from 'fs/promises';
 import { dump } from './utils';
 import type { DownloadedAgentInfo } from './agent_downloads_service';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
@@ -230,6 +230,95 @@ ${chalk.red('NOTE:')} ${chalk.bold(
   return '';
 };
 
+const ensureVirtualBoxProvider = async (log: ToolingLog): Promise<void> => {
+  const isVboxKernelLoaded = async (): Promise<boolean> => {
+    try {
+      const result = await execa.command('VBoxManage --version', {
+        stdio: 'pipe',
+        all: true,
+      });
+      const combined = `${result.stdout}\n${result.stderr}`;
+      if (combined.toLowerCase().includes('kernel module is not loaded')) {
+        log.warning('VBoxManage reports kernel module not loaded');
+        return false;
+      }
+      log.info(`VirtualBox version: ${result.stdout.trim()}`);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  if (await isVboxKernelLoaded()) {
+    return;
+  }
+
+  const tryLoadModules = async (): Promise<boolean> => {
+    for (const cmd of [
+      'sudo modprobe vboxdrv',
+      'sudo /sbin/vboxconfig',
+      'sudo /sbin/rcvboxdrv setup',
+    ]) {
+      try {
+        await execa.command(cmd, { stdio: 'pipe' });
+        if (await isVboxKernelLoaded()) {
+          log.info(`VirtualBox kernel module loaded via: ${cmd}`);
+          return true;
+        }
+      } catch {
+        log.debug(`Recovery command failed: ${cmd}`);
+      }
+    }
+    return false;
+  };
+
+  const upgradeToVbox71 = async (): Promise<boolean> => {
+    log.info('Upgrading to VirtualBox 7.1 (supports newer kernels)...');
+    try {
+      await execa.command('sudo apt-get install -y --no-install-recommends virtualbox-7.1', {
+        stdio: 'pipe',
+      });
+      return (await tryLoadModules()) && (await isVboxKernelLoaded());
+    } catch {
+      log.debug('virtualbox-7.1 package not available or install failed');
+      return false;
+    }
+  };
+
+  log.warning('VirtualBox kernel module not loaded, attempting recovery...');
+
+  if (await tryLoadModules()) {
+    return;
+  }
+
+  log.warning('Kernel module build failed, upgrading to VirtualBox 7.1...');
+
+  if (await upgradeToVbox71()) {
+    log.info('VirtualBox 7.1 upgrade successful');
+    return;
+  }
+
+  const diagnostics: string[] = [];
+  for (const diagCmd of [
+    'VBoxManage --version 2>&1',
+    'lsmod | grep vbox || echo "no vbox modules"',
+    'uname -r',
+    'dpkg -l | grep -i virtualbox 2>/dev/null || echo "no vbox packages"',
+    'dkms status 2>/dev/null || echo "dkms not available"',
+  ]) {
+    try {
+      const { stdout } = await execa.command(diagCmd, { stdio: 'pipe', shell: true });
+      diagnostics.push(`${diagCmd}: ${stdout.trim()}`);
+    } catch {
+      diagnostics.push(`${diagCmd}: (failed)`);
+    }
+  }
+
+  throw new Error(
+    `VirtualBox kernel module could not be loaded.\nDiagnostics:\n${diagnostics.join('\n')}`
+  );
+};
+
 interface CreateVagrantVmOptions extends BaseVmCreateOptions {
   type: SupportedVmManager & 'vagrant';
 
@@ -263,44 +352,78 @@ const createVagrantVm = async ({
 
   const VAGRANT_CWD = path.dirname(vagrantFile);
 
-  // Destroy the VM running (if any) with the provided vagrant file before re-creating it
-  try {
-    await execa.command(`vagrant destroy -f`, {
-      env: {
-        VAGRANT_CWD,
-      },
-      // Only `pipe` STDERR to parent process
-      stdio: ['inherit', 'inherit', 'pipe'],
-    });
-    // eslint-disable-next-line no-empty
-  } catch (e) {}
-
   if (memory || cpus || disk) {
     log.warning(
       `cpu, memory and disk options ignored for creation of vm via Vagrant. These should be defined in the Vagrantfile`
     );
   }
 
-  try {
-    const vagrantUpResponse = (
-      await execa.command(`vagrant up`, {
-        env: {
-          VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
-          VAGRANT_CWD,
-          VMNAME: name,
-          CACHED_AGENT_SOURCE: agentFullFilePath,
-          CACHED_AGENT_FILENAME: agentFileName,
-          AGENT_DESTINATION_FOLDER: agentFileName.replace('.tar.gz', ''),
-        },
-        // Only `pipe` STDERR to parent process
-        stdio: ['inherit', 'inherit', 'pipe'],
-      })
-    ).stdout;
+  const vagrantEnv = {
+    ...(process.env.CI ? { VAGRANT_DEFAULT_PROVIDER: 'virtualbox' } : {}),
+    VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
+    VAGRANT_CWD,
+    VMNAME: name,
+    CACHED_AGENT_SOURCE: agentFullFilePath,
+    CACHED_AGENT_FILENAME: agentFileName,
+    AGENT_DESTINATION_FOLDER: agentFileName.replace('.tar.gz', ''),
+  };
 
-    log.debug(`Vagrant up command response: `, vagrantUpResponse);
+  const MIN_DISK_GB = 10;
+  try {
+    const stats = await statfs(VAGRANT_CWD);
+    const freeGB = (stats.bfree * stats.bsize) / 1024 / 1024 / 1024;
+    log.info(`Host disk free space: ${freeGB.toFixed(1)} GB`);
+
+    if (freeGB < MIN_DISK_GB) {
+      throw new Error(
+        `Insufficient disk space for vagrant VM: ${freeGB.toFixed(
+          1
+        )} GB free, need at least ${MIN_DISK_GB} GB`
+      );
+    }
   } catch (e) {
-    log.error(e);
-    throw e;
+    if ((e as Error).message?.includes('Insufficient disk space')) {
+      throw e;
+    }
+    log.debug(`Unable to check disk space: ${(e as Error).message}`);
+  }
+
+  if (process.env.CI) {
+    await ensureVirtualBoxProvider(log);
+  }
+
+  const MAX_ATTEMPTS = 2;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      await execa
+        .command('vagrant destroy -f', {
+          env: { VAGRANT_CWD },
+          stdio: ['inherit', 'pipe', 'pipe'],
+        })
+        .catch(() => {});
+
+      const vagrantUpResponse = (
+        await execa.command('vagrant up', {
+          env: vagrantEnv,
+          stdio: ['inherit', 'pipe', 'pipe'],
+        })
+      ).stdout;
+
+      log.debug('Vagrant up command response: ', vagrantUpResponse);
+      break;
+    } catch (e) {
+      const execError = e as execa.ExecaError;
+      log.error(
+        `vagrant up failed (attempt ${attempt}/${MAX_ATTEMPTS}):\nSTDOUT: ${execError.stdout}\nSTDERR: ${execError.stderr}`
+      );
+
+      if (attempt === MAX_ATTEMPTS) {
+        throw e;
+      }
+
+      log.info('Retrying vagrant up after cleanup...');
+    }
   }
 
   return createVagrantHostVmClient(name, undefined, log);

@@ -115,9 +115,9 @@ export const ruleRegistrySearchStrategyProvider = (
           }
 
           const filter = request.query?.bool?.filter
-            ? Array.isArray(request.query?.bool?.filter)
-              ? request.query?.bool?.filter
-              : [request.query?.bool?.filter]
+            ? Array.isArray(request.query.bool.filter)
+              ? request.query.bool.filter
+              : [request.query.bool.filter]
             : [];
 
           if (authzFilter) {
@@ -157,7 +157,7 @@ export const ruleRegistrySearchStrategyProvider = (
 
           const query = {
             ...(request.query?.ids != null
-              ? { ids: request.query?.ids }
+              ? { ids: request.query.ids }
               : {
                   bool: {
                     ...request.query?.bool,

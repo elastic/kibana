@@ -6,8 +6,9 @@
  */
 
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { Command } from '@langchain/langgraph';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { SelectIndexPatternAnnotation } from '../../state';
 import type { CreateLlmInstance } from '../../../../utils/common';
 
@@ -40,7 +41,7 @@ To generate the query you first need to identify which index pattern should be u
     });
 
     try {
-      const result = await llm
+      const result = await (llm as BaseChatModel)
         .withStructuredOutput(ShortlistedIndexPatterns, { name: 'shortlistedIndexPatterns' })
         .withRetry({
           stopAfterAttempt: 3,

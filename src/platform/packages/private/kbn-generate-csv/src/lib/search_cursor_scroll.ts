@@ -12,18 +12,23 @@ import { lastValueFrom } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { ES_SEARCH_STRATEGY, type ISearchSource } from '@kbn/data-plugin/common';
+import { INTERNAL_ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/server';
 import { SearchCursor, type SearchCursorClients, type SearchCursorSettings } from './search_cursor';
 import { i18nTexts } from './i18n_texts';
 
 export class SearchCursorScroll extends SearchCursor {
+  private useInternalUser: boolean;
+
   constructor(
     indexPatternTitle: string,
     settings: SearchCursorSettings,
     clients: SearchCursorClients,
     abortController: AbortController,
-    logger: Logger
+    logger: Logger,
+    useInternalUser: boolean = false
   ) {
     super(indexPatternTitle, settings, clients, abortController, logger);
+    this.useInternalUser = useInternalUser;
   }
 
   // The first search query begins the scroll context in ES
@@ -47,9 +52,13 @@ export class SearchCursorScroll extends SearchCursor {
       },
     };
 
+    const strategy = this.useInternalUser
+      ? INTERNAL_ENHANCED_ES_SEARCH_STRATEGY
+      : ES_SEARCH_STRATEGY;
+
     return await lastValueFrom(
       this.clients.data.search(searchParamsScan, {
-        strategy: ES_SEARCH_STRATEGY,
+        strategy,
         abortSignal: this.abortController.signal,
         transport: {
           maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
@@ -61,7 +70,10 @@ export class SearchCursorScroll extends SearchCursor {
 
   private async scroll() {
     const { scroll, taskInstanceFields } = this.settings;
-    return await this.clients.es.asCurrentUser.scroll(
+    const esClient = this.useInternalUser
+      ? this.clients.es.asInternalUser
+      : this.clients.es.asCurrentUser;
+    return await esClient.scroll(
       { scroll: scroll.duration(taskInstanceFields), scroll_id: this.cursorId },
       {
         signal: this.abortController.signal,
@@ -112,7 +124,10 @@ export class SearchCursorScroll extends SearchCursor {
   public async closeCursor() {
     if (this.cursorId) {
       this.logger.debug(`Executing clearScroll on ${this.formatCursorId(this.cursorId)}`);
-      await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [this.cursorId] });
+      const esClient = this.useInternalUser
+        ? this.clients.es.asInternalUser
+        : this.clients.es.asCurrentUser;
+      await esClient.clearScroll({ scroll_id: [this.cursorId] });
     } else {
       this.logger.warn(`No Scroll Id to clear!`);
     }

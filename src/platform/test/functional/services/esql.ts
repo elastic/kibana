@@ -18,7 +18,6 @@ export class ESQLService extends FtrService {
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly log = this.ctx.getService('log');
   private readonly browser = this.ctx.getService('browser');
-  private readonly common = this.ctx.getPageObject('common');
   private readonly findService = this.ctx.getService('find');
 
   /** Ensures that the ES|QL code editor is loaded with a given statement */
@@ -29,7 +28,7 @@ export class ESQLService extends FtrService {
 
   public async isQueryPresentInTable(query: string, items: string[][]) {
     const queryAdded = items.some((item) => {
-      return item[2] === query;
+      return item.some((cell) => cell === query);
     });
 
     expect(queryAdded).to.be(true);
@@ -41,7 +40,7 @@ export class ESQLService extends FtrService {
 
   public async toggleHistoryPanel() {
     const isHistoryOpen = await this.isHistoryPanelOpen();
-    await this.testSubjects.click('ESQLEditor-toggle-query-history-button');
+    await this.testSubjects.click('ESQLEditor-toggle-query-history-icon');
     await this.retry.waitFor('history queries to toggle', async () => {
       const isHistoryOpenAfterToggle = await this.isHistoryPanelOpen();
       return isHistoryOpen !== isHistoryOpenAfterToggle;
@@ -122,7 +121,7 @@ export class ESQLService extends FtrService {
   }
 
   public async openHelpMenu() {
-    await this.testSubjects.click('esql-menu-button');
+    await this.testSubjects.click('esql-help-popover-button');
     await this.retry.waitFor('popover to appear', async () => {
       return await this.testSubjects.exists('esql-quick-reference');
     });
@@ -166,8 +165,6 @@ export class ESQLService extends FtrService {
   public async openEsqlControlFlyout(query: string) {
     await this.retry.waitFor('control flyout to open', async () => {
       await this.typeEsqlEditorQuery(query);
-      // Wait until suggestions are loaded
-      await this.common.sleep(1000);
       await this.selectEsqlSuggestionByLabel('Create control');
 
       return await this.testSubjects.exists('create_esql_control_flyout');
@@ -178,9 +175,15 @@ export class ESQLService extends FtrService {
     await this.waitESQLEditorLoaded();
     await this.openEsqlControlFlyout(query);
 
-    // create the control
-    await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
-    await this.testSubjects.click('saveEsqlControlsFlyoutButton');
+    await this.retry.waitFor('ES|QL control flyout to close after saving the control', async () => {
+      await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
+      await this.testSubjects.click('saveEsqlControlsFlyoutButton');
+      const flyoutOpen = await this.testSubjects.exists('create_esql_control_flyout', {
+        timeout: 2000,
+      });
+      return !flyoutOpen;
+    });
+
     await this.waitESQLEditorLoaded();
   }
 
@@ -248,11 +251,26 @@ export class ESQLService extends FtrService {
     );
   }
 
-  public async selectEsqlBadgeHoverOption(badgeClassName: string, optionText: string) {
-    await this.retry.try(async () => {
+  public async getEsqlBadgeHoverText(badgeClassName: string): Promise<string> {
+    return this.retry.try(async () => {
+      await this.browser.moveMouseTo({ x: 0, y: 0 });
       const badge = await this.findService.byCssSelector(`.${badgeClassName}`);
       await badge.moveMouseTo();
 
+      await this.findService.byCssSelector(`.monaco-hover`);
+      const rows = await this.findService.allByCssSelector(`.monaco-hover .hover-row`);
+      const texts = await Promise.all(rows.map((row) => row.getVisibleText()));
+      return texts.join(' ').trim();
+    });
+  }
+
+  public async selectEsqlBadgeHoverOption(badgeClassName: string, optionText: string) {
+    await this.retry.try(async () => {
+      await this.browser.moveMouseTo({ x: 0, y: 0 });
+      const badge = await this.findService.byCssSelector(`.${badgeClassName}`);
+      await badge.moveMouseTo();
+
+      await this.findService.byCssSelector(`.monaco-hover`);
       const options = await this.findService.allByCssSelector(`.monaco-hover .hover-row`);
       let optionToSelect;
       for (const option of options) {
@@ -280,7 +298,17 @@ export class ESQLService extends FtrService {
 
   public async toggleDatasourceDropdown(open: boolean) {
     if (open) {
-      await this.testSubjects.click('visorSourcesDropdownButton');
+      await this.retry.try(async () => {
+        try {
+          await this.testSubjects.click('visorSourcesDropdownButton');
+        } catch (error) {
+          if (error instanceof Error && error.message.includes('ElementClickInterceptedError')) {
+            // Monaco suggestions can overlap the visor datasource button; dismiss and retry.
+            await this.browser.pressKeys(Key.ESCAPE);
+          }
+          throw error;
+        }
+      });
     } else {
       await this.browser.pressKeys(Key.ESCAPE);
     }

@@ -1,7 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "../../../../../typings/**/*",
@@ -17,6 +17,7 @@
     "@kbn/aiops-components",
     "@kbn/aiops-log-pattern-analysis",
     "@kbn/aiops-log-rate-analysis",
+    "@kbn/aiops-server-schemas",
     "@kbn/aiops-test-utils",
     "@kbn/analytics",
     "@kbn/cases-plugin",
@@ -29,7 +30,11 @@
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/data-service",
+    "@kbn/content-management-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/data-view-field-editor-plugin",
     "@kbn/data-views-plugin",
+    "@kbn/saved-objects-finder-plugin",
     "@kbn/datemath",
     "@kbn/ebt-tools",
     "@kbn/embeddable-plugin",
@@ -60,7 +65,6 @@
     "@kbn/ml-time-buckets",
     "@kbn/ml-ui-actions",
     "@kbn/ml-url-state",
-    "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/presentation-util-plugin",
     "@kbn/react-kibana-mount",
@@ -82,9 +86,8 @@
     "@kbn/presentation-util",
     "@kbn/licensing-types",
     "@kbn/unified-data-table",
-    "@kbn/presentation-publishing-schemas",
+    "@kbn/cps",
+    "@kbn/zod"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

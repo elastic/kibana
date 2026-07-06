@@ -12,10 +12,10 @@ import React, { useState } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import type { LinkType } from '../../../common/content_management';
 import { EXTERNAL_LINK_TYPE, DASHBOARD_LINK_TYPE } from '../../../common/content_management';
-import type { UnorderedLink } from '../../editor/open_link_editor_flyout';
 import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
 import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
 import { LinksStrings } from '../links_strings';
+import type { ResolvedLink } from '../../types';
 
 export const LinkDestination = ({
   link,
@@ -25,7 +25,7 @@ export const LinkDestination = ({
 }: {
   selectedLinkType: LinkType;
   parentDashboardId?: string;
-  link?: UnorderedLink;
+  link?: ResolvedLink;
   setDestination: (
     destination?: string,
     defaultLabel?: string,

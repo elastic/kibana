@@ -10,11 +10,13 @@
 import {
   filterDataErrors,
   filterOutWarningsOverlappingWithErrors,
+  getToggleCommentLines,
   parseErrors,
   parseWarning,
   filterDuplicatedWarnings,
+  shouldAutoTriggerSuggestions,
 } from './helpers';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import type { MonacoMessage } from '@kbn/code-editor';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
@@ -77,6 +79,34 @@ describe('helpers', function () {
       ]);
     });
 
+    it('should return one marker per problem when ES reports multiple problems with colon-containing index names', function () {
+      const error = new Error(
+        '[esql] > Unexpected error from Elasticsearch: verification_exception - Found 2 problems\nline 3:19: Cannot use field [fields.varnish_cache_hit_rate] due to ambiguities being mapped as [2] incompatible types: [float] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.03-000716] and [102] other indices, [long] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.04-000720] and [25] other indices\nline 3:64: Cannot use field [fields.varnish_cache_miss_rate] due to ambiguities being mapped as [2] incompatible types: [float] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.03-000716] and [106] other indices, [long] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.06-000730] and [21] other indices'
+      );
+      expect(parseErrors([error], 'FROM smops_tv_bmbg10:tv-poc_metrics_cdn-*')).toEqual([
+        {
+          message:
+            ' Cannot use field [fields.varnish_cache_hit_rate] due to ambiguities being mapped as [2] incompatible types: [float] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.03-000716] and [102] other indices, [long] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.04-000720] and [25] other indices',
+          startColumn: 19,
+          startLineNumber: 3,
+          endColumn: 19 + 'fields.varnish_cache_hit_rate'.length + 1,
+          endLineNumber: 3,
+          severity: 8,
+          code: 'errorFromES',
+        },
+        {
+          message:
+            ' Cannot use field [fields.varnish_cache_miss_rate] due to ambiguities being mapped as [2] incompatible types: [float] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.03-000716] and [106] other indices, [long] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.06-000730] and [21] other indices',
+          startColumn: 64,
+          startLineNumber: 3,
+          endColumn: 64 + 'fields.varnish_cache_miss_rate'.length + 1,
+          endLineNumber: 3,
+          severity: 8,
+          code: 'errorFromES',
+        },
+      ]);
+    });
+
     it('should return the generic error object for an error with unexpected format', function () {
       const error = new Error(
         '[esql] > Unexpected error from Elasticsearch: verification_exception - Found ambiguous reference to [user_id]; matches any of [line 3:15 [user_id], line 4:15 [user_id]]'
@@ -94,6 +124,18 @@ describe('helpers', function () {
         },
       ]);
     });
+
+    it('should return a string message when error.message is a non-string (e.g. DOMException from aborted fetch)', function () {
+      const domException = new DOMException('signal is aborted without reason', 'AbortError');
+      const error = new Error('placeholder');
+      (error as unknown as { message: unknown }).message = domException;
+
+      const result = parseErrors([error], 'FROM logs-*');
+
+      expect(result).toHaveLength(1);
+      expect(typeof result[0].message).toBe('string');
+      expect(result[0].code).toBe('unknownError');
+    });
   });
 
   describe('parseWarning', function () {
@@ -102,7 +144,7 @@ describe('helpers', function () {
         '299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:52: evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded."';
       expect(parseWarning(warning)).toEqual([
         {
-          endColumn: 138,
+          endColumn: 71,
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
@@ -119,7 +161,7 @@ describe('helpers', function () {
         '299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:52: evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.", 299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:84: evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded."';
       expect(parseWarning(warning)).toEqual([
         {
-          endColumn: 138,
+          endColumn: 71,
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
@@ -129,7 +171,7 @@ describe('helpers', function () {
           code: 'warningFromES',
         },
         {
-          endColumn: 169,
+          endColumn: 102,
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded.',
@@ -146,7 +188,7 @@ describe('helpers', function () {
         '299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:52: evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.", 299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:84: java.lang.IllegalArgumentException: evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded."';
       expect(parseWarning(warning)).toEqual([
         {
-          endColumn: 138,
+          endColumn: 71,
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
@@ -156,7 +198,7 @@ describe('helpers', function () {
           code: 'warningFromES',
         },
         {
-          endColumn: 169,
+          endColumn: 102,
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded.',
@@ -229,12 +271,28 @@ describe('helpers', function () {
           code: 'warningFromES',
         },
         {
-          endColumn: 138,
+          endColumn: 71,
           endLineNumber: 1,
           message:
             'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
           severity: 4,
           startColumn: 52,
+          startLineNumber: 1,
+          code: 'warningFromES',
+        },
+      ]);
+    });
+
+    it('should preserve the full message when it contains extra colons after the exception class', function () {
+      const warning =
+        '299 Elasticsearch-9.1.0 "Line 1:10: java.lang.IllegalArgumentException: reason: detail with colon"';
+      expect(parseWarning(warning)).toEqual([
+        {
+          endColumn: 19,
+          endLineNumber: 1,
+          message: 'reason: detail with colon',
+          severity: 4,
+          startColumn: 10,
           startLineNumber: 1,
           code: 'warningFromES',
         },
@@ -254,7 +312,7 @@ describe('helpers', function () {
           code: 'warningFromES',
         },
         {
-          endColumn: 40,
+          endColumn: 30,
           endLineNumber: 1,
           message: 'evaluation of [TO_LOWER(["FOO", "BAR"])] failed',
           severity: 4,
@@ -344,6 +402,56 @@ describe('helpers', function () {
         createMessage('unmappedColumnWarning', 'Field a is unmapped'),
         createMessage('unmappedColumnWarning', 'Field b is unmapped'),
       ]);
+    });
+  });
+
+  describe('getToggleCommentLines', function () {
+    it('should comment all lines when none are commented', function () {
+      const lines = ['FROM logs-*', '| WHERE host.name == "server1"', '| LIMIT 10'];
+      expect(getToggleCommentLines(lines)).toEqual([
+        '//FROM logs-*',
+        '//| WHERE host.name == "server1"',
+        '//| LIMIT 10',
+      ]);
+    });
+
+    it('should uncomment all lines when all are commented', function () {
+      const lines = ['//FROM logs-*', '//| WHERE host.name == "server1"', '//| LIMIT 10'];
+      expect(getToggleCommentLines(lines)).toEqual([
+        'FROM logs-*',
+        '| WHERE host.name == "server1"',
+        '| LIMIT 10',
+      ]);
+    });
+
+    it('should comment all lines when selection has a mix of commented and uncommented', function () {
+      const lines = ['//| WHERE host.name == "server1"', '| LIMIT 10'];
+      expect(getToggleCommentLines(lines)).toEqual([
+        '//| WHERE host.name == "server1"',
+        '//| LIMIT 10',
+      ]);
+    });
+
+    it('should comment the single uncommented line', function () {
+      expect(getToggleCommentLines(['| LIMIT 10'])).toEqual(['//| LIMIT 10']);
+    });
+
+    it('should uncomment the single commented line', function () {
+      expect(getToggleCommentLines(['//| LIMIT 10'])).toEqual(['| LIMIT 10']);
+    });
+  });
+
+  describe('shouldAutoTriggerSuggestions', function () {
+    it.each([
+      ['space', 'FROM ', true],
+      ['inline cast ::', 'field::', true],
+      ['dot', 'index.', true],
+      ['word character', 'FRO', true],
+      ['backtick', 'FROM `', true],
+      ['empty string', '', false],
+      ['comma', 'field1,', false],
+    ])('should return %s for %s', (_label, input, expected) => {
+      expect(shouldAutoTriggerSuggestions(input as string)).toBe(expected);
     });
   });
 });

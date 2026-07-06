@@ -65,7 +65,7 @@ const PreviewActionsComponent: React.FC<PreviewActionsComponentProps> = ({
             <EuiButtonIcon
               aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
               data-test-subj="expand-event"
-              iconType="expand"
+              iconType="maximize"
               onClick={onEventDetailsPanelOpened}
               size="s"
               color="text"

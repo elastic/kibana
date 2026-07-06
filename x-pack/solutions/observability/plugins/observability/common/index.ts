@@ -23,6 +23,7 @@ export { ElapsedTimestampTooltip } from './components/elapsed_timestamp_tooltip'
 
 export {
   enableInspectEsQueries,
+  searchExcludedDataTiers,
   maxSuggestions,
   enableComparisonByDefault,
   defaultApmServiceEnvironment,
@@ -43,6 +44,7 @@ export {
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
+  apmTraceLogsDefaultColumns,
   enableDiagnosticMode,
 } from './ui_settings_keys';
 
@@ -56,6 +58,7 @@ export const casesFeatureId = 'observabilityCases';
 export const casesFeatureIdV2 = 'observabilityCasesV2';
 export const casesFeatureIdV3 = 'observabilityCasesV3';
 export const sloFeatureId = 'slo';
+export const observabilityAlertsFeatureId = 'observabilityAlerts';
 // The ID of the observability app. Should more appropriately be called
 // 'observability' but it's used in telemetry by applicationUsage so we don't
 // want to change it.
@@ -87,3 +90,7 @@ export {
   OBSERVABILITY_TIERED_FEATURES,
   OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE,
 } from './product_features';
+
+// This label is used in multiple places across the observability plugins, so we export it from the common package
+// to avoid having to recreate it in multiple places and ensure consistency.
+export { NOT_AVAILABLE_LABEL } from './i18n';

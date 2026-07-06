@@ -340,8 +340,8 @@ export const getMachineLearningRule = (
 ): MachineLearningRuleCreateProps => ({
   type: 'machine_learning',
   machine_learning_job_id: [
-    'v3_linux_anomalous_network_activity',
-    'v3_linux_anomalous_process_all_hosts',
+    'v3_linux_anomalous_network_activity_ea',
+    'v3_linux_anomalous_process_all_hosts_ea',
   ],
   anomaly_threshold: 20,
   name: 'New ML Rule Test',
@@ -481,7 +481,7 @@ export const getEditedRule = (): QueryRuleCreateProps =>
 export const getEndpointRule = (): QueryRuleCreateProps => ({
   type: 'query',
   query: 'event.kind:alert and event.module:(endpoint and not endgame)',
-  index: ['endpoint.alerts-*'],
+  index: ['logs-endpoint.alerts-*'],
   name: 'Endpoint Rule',
   description: 'The new rule description.',
   severity: 'high',

@@ -32,6 +32,15 @@ describe('Status', () => {
         right: defaultRequest,
       });
     });
+
+    it('accepts syncedAlertCount when provided', () => {
+      const query = StatusUserActionPayloadRt.decode({ ...defaultRequest, syncedAlertCount: 3 });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, syncedAlertCount: 3 },
+      });
+    });
   });
 
   describe('StatusUserActionRt', () => {

@@ -14,6 +14,9 @@ import { ToolType, allToolsSelectionWildcard } from '@kbn/agent-builder-common';
 import {
   toggleToolSelection,
   isToolSelected,
+  getActiveTools,
+  getActiveSkills,
+  getActivePlugins,
   cleanInvalidToolReferences,
 } from './tool_selection_utils';
 import type { AgentEditState } from '../hooks/agents/use_agent_edit';
@@ -79,6 +82,143 @@ describe('tool_selection_utils', () => {
     });
   });
 
+  describe('getActiveTools', () => {
+    const defaultToolIds = new Set(['tool1', 'tool3']);
+
+    it('should return only explicitly selected tools when elastic capabilities are disabled', () => {
+      const selections: ToolSelection[] = [{ tool_ids: ['tool2'] }];
+      const result = getActiveTools(mockTools, selections, false, defaultToolIds);
+
+      expect(result.map((t) => t.id)).toEqual(['tool2']);
+    });
+
+    it('should include default tools when elastic capabilities are enabled', () => {
+      const selections: ToolSelection[] = [{ tool_ids: ['tool2'] }];
+      const result = getActiveTools(mockTools, selections, true, defaultToolIds);
+
+      expect(result.map((t) => t.id)).toEqual(['tool2', 'tool1', 'tool3']);
+    });
+
+    it('should not duplicate tools that are both explicit and default', () => {
+      const selections: ToolSelection[] = [{ tool_ids: ['tool1', 'tool2'] }];
+      const result = getActiveTools(mockTools, selections, true, defaultToolIds);
+
+      expect(result.map((t) => t.id)).toEqual(['tool1', 'tool2', 'tool3']);
+    });
+
+    it('should return empty array when no tools match selections', () => {
+      const selections: ToolSelection[] = [{ tool_ids: [] }];
+      const result = getActiveTools(mockTools, selections, false, defaultToolIds);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return only default tools when no explicit selections and elastic capabilities are enabled', () => {
+      const selections: ToolSelection[] = [{ tool_ids: [] }];
+      const result = getActiveTools(mockTools, selections, true, defaultToolIds);
+
+      expect(result.map((t) => t.id)).toEqual(['tool1', 'tool3']);
+    });
+
+    it('should handle wildcard selections with elastic capabilities', () => {
+      const selections: ToolSelection[] = [{ tool_ids: [allToolsSelectionWildcard] }];
+      const result = getActiveTools(mockTools, selections, true, defaultToolIds);
+
+      // All tools already selected via wildcard, no defaults to append
+      expect(result.map((t) => t.id)).toEqual(['tool1', 'tool2', 'tool3']);
+    });
+  });
+
+  describe('getActiveSkills', () => {
+    const mockSkills = [
+      { id: 'skill1', readonly: true },
+      { id: 'skill2', readonly: false },
+      { id: 'skill3', readonly: true },
+      { id: 'skill4', readonly: false },
+    ];
+
+    it('should return only explicitly selected skills when elastic capabilities are disabled', () => {
+      const result = getActiveSkills(mockSkills, ['skill2'], false);
+
+      expect(result.map((s) => s.id)).toEqual(['skill2']);
+    });
+
+    it('should include built-in (readonly) skills when elastic capabilities are enabled', () => {
+      const result = getActiveSkills(mockSkills, ['skill2'], true);
+
+      expect(result.map((s) => s.id)).toEqual(['skill2', 'skill1', 'skill3']);
+    });
+
+    it('should not duplicate skills that are both explicit and readonly', () => {
+      const result = getActiveSkills(mockSkills, ['skill1', 'skill2'], true);
+
+      expect(result.map((s) => s.id)).toEqual(['skill1', 'skill2', 'skill3']);
+    });
+
+    it('should return empty array when explicit ids is undefined and capabilities are disabled', () => {
+      const result = getActiveSkills(mockSkills, undefined, false);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return only built-in skills when explicit ids is undefined and capabilities are enabled', () => {
+      const result = getActiveSkills(mockSkills, undefined, true);
+
+      expect(result.map((s) => s.id)).toEqual(['skill1', 'skill3']);
+    });
+
+    it('should return empty array when explicit ids is empty and capabilities are disabled', () => {
+      const result = getActiveSkills(mockSkills, [], false);
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getActivePlugins', () => {
+    const mockPlugins = [
+      { id: 'plugin1', readonly: true },
+      { id: 'plugin2', readonly: false },
+      { id: 'plugin3', readonly: true },
+      { id: 'plugin4', readonly: false },
+    ];
+
+    it('should return only explicitly selected plugins when elastic capabilities are disabled', () => {
+      const result = getActivePlugins(mockPlugins, ['plugin2'], false);
+
+      expect(result.map((p) => p.id)).toEqual(['plugin2']);
+    });
+
+    it('should include built-in (readonly) plugins when elastic capabilities are enabled', () => {
+      const result = getActivePlugins(mockPlugins, ['plugin2'], true);
+
+      expect(result.map((p) => p.id)).toEqual(['plugin2', 'plugin1', 'plugin3']);
+    });
+
+    it('should not duplicate plugins that are both explicit and readonly', () => {
+      const result = getActivePlugins(mockPlugins, ['plugin1', 'plugin2'], true);
+
+      expect(result.map((p) => p.id)).toEqual(['plugin1', 'plugin2', 'plugin3']);
+    });
+
+    it('should return empty array when explicit ids is undefined and capabilities are disabled', () => {
+      const result = getActivePlugins(mockPlugins, undefined, false);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return only built-in plugins when explicit ids is undefined and capabilities are enabled', () => {
+      const result = getActivePlugins(mockPlugins, undefined, true);
+
+      expect(result.map((p) => p.id)).toEqual(['plugin1', 'plugin3']);
+    });
+
+    it('should return empty array when explicit ids is empty and capabilities are disabled', () => {
+      const result = getActivePlugins(mockPlugins, [], false);
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('cleanInvalidToolReferences', () => {
     const mockToolDefinitions: ToolDefinition[] = [
       {
@@ -86,6 +226,7 @@ describe('tool_selection_utils', () => {
         type: ToolType.esql,
         description: 'Tool 1',
         readonly: false,
+        experimental: false,
         tags: [],
         configuration: {},
       },
@@ -94,6 +235,7 @@ describe('tool_selection_utils', () => {
         type: ToolType.esql,
         description: 'Tool 2',
         readonly: false,
+        experimental: false,
         tags: [],
         configuration: {},
       },
@@ -102,6 +244,7 @@ describe('tool_selection_utils', () => {
         type: ToolType.esql,
         description: 'Tool 3',
         readonly: false,
+        experimental: false,
         tags: [],
         configuration: {},
       },

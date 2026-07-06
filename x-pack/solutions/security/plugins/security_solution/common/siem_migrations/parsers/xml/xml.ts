@@ -155,4 +155,35 @@ export class XmlParser {
   private isBaseXmlElement(obj: unknown): obj is BaseXmlElement {
     return Boolean(obj && typeof obj === 'object' && ('_' in obj || '$' in obj));
   }
+
+  /**
+   * Recursively transforms all properties named `elementName` in `source`.
+   * This method mutates the provided object tree in place.
+   */
+  protected transformAllDeep(
+    source: unknown,
+    elementName: string,
+    transform: (value: unknown) => unknown
+  ): void {
+    const walk = (node: unknown): void => {
+      if (Array.isArray(node)) {
+        node.forEach((item) => walk(item));
+        return;
+      }
+
+      if (node === null || typeof node !== 'object') {
+        return;
+      }
+
+      const nodeObject = node as Record<string, unknown>;
+      Object.entries(nodeObject).forEach(([key, value]) => {
+        if (key === elementName) {
+          nodeObject[key] = transform(value);
+        }
+        walk(nodeObject[key]);
+      });
+    };
+
+    walk(source);
+  }
 }

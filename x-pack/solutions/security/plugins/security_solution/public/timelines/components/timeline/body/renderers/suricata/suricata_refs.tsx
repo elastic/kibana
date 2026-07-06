@@ -7,15 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
 
 import { getLinksFromSignature } from './suricata_links';
-
-const LinkEuiFlexItem = styled(EuiFlexItem)`
-  display: inline;
-`;
-
-LinkEuiFlexItem.displayName = 'LinkEuiFlexItem';
 
 export const SuricataRefs = React.memo<{ signatureId: number }>(({ signatureId }) => {
   const [linksFromSignature, setLinksFromSignature] = useState<string[] | undefined>(undefined);
@@ -45,11 +38,11 @@ export const SuricataRefs = React.memo<{ signatureId: number }>(({ signatureId }
     <EuiFlexGroup data-test-subj="suricataRefs" gutterSize="none" justifyContent="center" wrap>
       {linksFromSignature &&
         linksFromSignature.map((link) => (
-          <LinkEuiFlexItem key={link} grow={false}>
+          <EuiFlexItem key={link} grow={false} css={{ display: 'inline' }}>
             <EuiLink href={link} color="subdued" target="_blank">
               {link}
             </EuiLink>
-          </LinkEuiFlexItem>
+          </EuiFlexItem>
         ))}
     </EuiFlexGroup>
   );

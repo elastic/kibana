@@ -36,7 +36,6 @@ export function registerActionStatusRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {

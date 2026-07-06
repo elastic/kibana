@@ -8,6 +8,7 @@
  */
 
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 /**
  * Simple region map generated from kibana
@@ -185,7 +186,7 @@ export const regionMapAttributesWithEms = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -271,7 +272,7 @@ export const regionMapAttributesWithFilterForRegion = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -380,7 +381,7 @@ export const regionMapESQLAttributes = {
       },
     },
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [],
 } satisfies LensAttributes;
 
@@ -415,7 +416,7 @@ export const regionmapESQLAttributesWithEms = {
             timeField: '@timestamp',
           },
           '5644872f-3b96-4074-a92d-dd613ceff2a2': {
-            index: 'e3465e67bdeced2befff9f9dca7ecf9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+            index: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
             query: {
               esql: 'FROM kibana_sample_data_logs | LIMIT 10',
             },
@@ -485,6 +486,6 @@ export const regionmapESQLAttributesWithEms = {
       },
     },
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [],
 } satisfies LensAttributes;

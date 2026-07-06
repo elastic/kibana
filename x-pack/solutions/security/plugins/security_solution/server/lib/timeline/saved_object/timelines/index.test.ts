@@ -11,16 +11,23 @@ import { mockTimeline } from '../../__mocks__/create_timelines';
 
 import {
   convertStringToBase64,
+  deleteTimeline,
   getExistingPrepackagedTimelines,
   getAllTimeline,
+  getAllTimelineByIds,
   getDraftTimeline,
   resolveTimelineOrNull,
   updatePartialSavedTimeline,
   copyTimeline,
 } from '.';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
-import { getNotesByTimelineId, persistNote } from '../notes/saved_object';
-import { getAllPinnedEventsByTimelineId, persistPinnedEventOnTimeline } from '../pinned_events';
+import { deleteSearchByTimelineId } from '../saved_search';
+import { deleteNotesByTimelineId, getNotesByTimelineId, persistNote } from '../notes/saved_object';
+import {
+  deleteAllPinnedEventsOnTimeline,
+  getAllPinnedEventsByTimelineId,
+  persistPinnedEventOnTimeline,
+} from '../pinned_events';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import type {
   GetTimelinesResponse,
@@ -41,13 +48,19 @@ jest.mock('./convert_saved_object_to_savedtimeline', () => ({
 }));
 
 jest.mock('../notes/saved_object', () => ({
+  deleteNotesByTimelineId: jest.fn().mockResolvedValue(undefined),
   getNotesByTimelineId: jest.fn().mockResolvedValue([]),
   persistNote: jest.fn(),
 }));
 
 jest.mock('../pinned_events', () => ({
+  deleteAllPinnedEventsOnTimeline: jest.fn().mockResolvedValue(undefined),
   getAllPinnedEventsByTimelineId: jest.fn().mockResolvedValue([]),
   persistPinnedEventOnTimeline: jest.fn(),
+}));
+
+jest.mock('../saved_search', () => ({
+  deleteSearchByTimelineId: jest.fn().mockResolvedValue(undefined),
 }));
 
 describe('saved_object', () => {
@@ -555,6 +568,278 @@ describe('saved_object', () => {
       );
 
       expect(res.timeline.savedObjectId).toBe(mockResolvedTimeline.savedObjectId);
+    });
+  });
+
+  describe('deleteTimeline', () => {
+    let mockDeleteSavedObject: jest.Mock;
+    let mockRequest: FrameworkRequest;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+      mockRequest = {
+        context: {
+          core: {
+            savedObjects: {
+              client: {
+                delete: mockDeleteSavedObject,
+              },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+    });
+
+    it('deduplicates timeline ids before deleting', async () => {
+      const duplicatedTimelineIds = ['timeline-1', 'timeline-1', 'timeline-2'];
+
+      await deleteTimeline(mockRequest, duplicatedTimelineIds, ['search-1']);
+
+      expect(mockDeleteSavedObject).toHaveBeenCalledTimes(2);
+      expect(mockDeleteSavedObject).toHaveBeenNthCalledWith(1, 'siem-ui-timeline', 'timeline-1');
+      expect(mockDeleteSavedObject).toHaveBeenNthCalledWith(2, 'siem-ui-timeline', 'timeline-2');
+      expect(deleteNotesByTimelineId).toHaveBeenCalledTimes(2);
+      expect(deleteAllPinnedEventsOnTimeline).toHaveBeenCalledTimes(2);
+      expect(deleteSearchByTimelineId).toHaveBeenCalledWith(mockRequest, ['search-1']);
+    });
+
+    it('processes timeline deletes in bounded batches', async () => {
+      const pendingDeletes: Array<() => void> = [];
+      const startedDeleteCalls: string[] = [];
+      mockDeleteSavedObject.mockImplementation(
+        (_type: string, id: string) =>
+          new Promise((resolve) => {
+            startedDeleteCalls.push(id);
+            pendingDeletes.push(() => resolve(undefined));
+          })
+      );
+      const timelineIds = Array.from({ length: 11 }, (_, index) => `timeline-${index}`);
+
+      const deletePromise = deleteTimeline(mockRequest, timelineIds);
+      await Promise.resolve();
+
+      expect(startedDeleteCalls).toHaveLength(10);
+
+      pendingDeletes.splice(0, 10).forEach((resolveDelete) => resolveDelete());
+      await new Promise(process.nextTick);
+
+      expect(startedDeleteCalls).toHaveLength(11);
+
+      pendingDeletes.forEach((resolveDelete) => resolveDelete());
+      await deletePromise;
+    });
+  });
+
+  describe('getAllTimelineByIds', () => {
+    let mockBulkGet: jest.Mock;
+    let mockFindSavedObject: jest.Mock;
+    let mockRequest: FrameworkRequest;
+
+    // Override type intentionally widened: tests need to set fields such as `status`,
+    // `timelineType`, and `favorite` that aren't on the legacy `mockGetTimelineValue` shape
+    // but exist on the runtime `TimelineResponse`.
+    const buildTimeline = (overrides: Record<string, unknown> = {}) => ({
+      ...mockGetTimelineValue,
+      ...overrides,
+    });
+
+    const buildSavedObject = (id: string) => ({
+      ...mockSavedObject,
+      id,
+    });
+
+    const defaultOptions = {
+      onlyUserFavorite: null,
+      pageInfo: { pageIndex: 1, pageSize: 10 },
+      search: null,
+      sort: null,
+      status: null,
+      timelineType: null,
+    };
+
+    beforeEach(() => {
+      // Reset (not just clear) so queued mockReturnValueOnce calls do not leak across tests.
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockReset();
+      (getNotesByTimelineId as jest.Mock).mockReset().mockResolvedValue([]);
+      (getAllPinnedEventsByTimelineId as jest.Mock).mockReset().mockResolvedValue([]);
+      mockFindSavedObject = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+      mockBulkGet = jest.fn();
+      mockRequest = {
+        user: { username: 'username' },
+        context: {
+          core: {
+            savedObjects: {
+              client: { find: mockFindSavedObject, bulkGet: mockBulkGet },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+    });
+
+    test('uses bulkGet and never calls find', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(buildTimeline());
+      mockBulkGet.mockResolvedValue({ saved_objects: [buildSavedObject('id-1')] });
+
+      await getAllTimelineByIds(mockRequest, ['id-1'], defaultOptions);
+
+      expect(mockBulkGet).toHaveBeenCalledWith([{ id: 'id-1', type: 'siem-ui-timeline' }]);
+      expect(mockFindSavedObject).not.toHaveBeenCalled();
+    });
+
+    test('deduplicates ids before bulkGet', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(buildTimeline());
+      mockBulkGet.mockResolvedValue({ saved_objects: [buildSavedObject('id-1')] });
+
+      await getAllTimelineByIds(mockRequest, ['id-1', 'id-1', 'id-2'], defaultOptions);
+
+      expect(mockBulkGet).toHaveBeenCalledWith([
+        { id: 'id-1', type: 'siem-ui-timeline' },
+        { id: 'id-2', type: 'siem-ui-timeline' },
+      ]);
+    });
+
+    test('excludes saved objects that returned an error', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(buildTimeline());
+      mockBulkGet.mockResolvedValue({
+        saved_objects: [
+          buildSavedObject('id-1'),
+          { ...buildSavedObject('id-2'), error: { statusCode: 404, error: 'Not Found' } },
+        ],
+      });
+
+      const result = await getAllTimelineByIds(mockRequest, ['id-1', 'id-2'], defaultOptions);
+
+      expect(result.timeline).toHaveLength(1);
+      expect(result.totalCount).toBe(1);
+    });
+
+    test('applies search filter against title and description', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock)
+        .mockReturnValueOnce(buildTimeline({ title: 'Phishing investigation' }))
+        .mockReturnValueOnce(buildTimeline({ title: 'Unrelated' }));
+      mockBulkGet.mockResolvedValue({
+        saved_objects: [buildSavedObject('id-1'), buildSavedObject('id-2')],
+      });
+
+      const result = await getAllTimelineByIds(mockRequest, ['id-1', 'id-2'], {
+        ...defaultOptions,
+        search: 'phishing',
+      });
+
+      expect(result.totalCount).toBe(1);
+      expect(result.timeline[0].title).toBe('Phishing investigation');
+    });
+
+    test('sorts by the requested field/order', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock)
+        .mockReturnValueOnce(buildTimeline({ updated: 1000 }))
+        .mockReturnValueOnce(buildTimeline({ updated: 3000 }))
+        .mockReturnValueOnce(buildTimeline({ updated: 2000 }));
+      mockBulkGet.mockResolvedValue({
+        saved_objects: [
+          buildSavedObject('id-1'),
+          buildSavedObject('id-2'),
+          buildSavedObject('id-3'),
+        ],
+      });
+
+      const result = await getAllTimelineByIds(mockRequest, ['id-1', 'id-2', 'id-3'], {
+        ...defaultOptions,
+        sort: { sortField: 'updated', sortOrder: 'desc' },
+      });
+
+      expect(result.timeline.map((t) => t.updated)).toEqual([3000, 2000, 1000]);
+    });
+
+    test('paginates the in-memory result set', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock)
+        .mockReturnValueOnce(buildTimeline({ savedObjectId: 'a' }))
+        .mockReturnValueOnce(buildTimeline({ savedObjectId: 'b' }))
+        .mockReturnValueOnce(buildTimeline({ savedObjectId: 'c' }));
+      mockBulkGet.mockResolvedValue({
+        saved_objects: [
+          buildSavedObject('id-1'),
+          buildSavedObject('id-2'),
+          buildSavedObject('id-3'),
+        ],
+      });
+
+      const result = await getAllTimelineByIds(mockRequest, ['id-1', 'id-2', 'id-3'], {
+        ...defaultOptions,
+        pageInfo: { pageIndex: 2, pageSize: 2 },
+      });
+
+      expect(result.timeline).toHaveLength(1);
+      expect(result.timeline[0].savedObjectId).toBe('c');
+      expect(result.totalCount).toBe(3);
+    });
+
+    test('returns empty page when pageIndex is beyond the result set', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(buildTimeline());
+      mockBulkGet.mockResolvedValue({ saved_objects: [buildSavedObject('id-1')] });
+
+      const result = await getAllTimelineByIds(mockRequest, ['id-1'], {
+        ...defaultOptions,
+        pageInfo: { pageIndex: 5, pageSize: 10 },
+      });
+
+      expect(result.timeline).toEqual([]);
+      expect(result.totalCount).toBe(1);
+    });
+
+    test('filters by timelineType', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock)
+        .mockReturnValueOnce(buildTimeline({ timelineType: 'template' }))
+        .mockReturnValueOnce(buildTimeline({ timelineType: 'default' }));
+      mockBulkGet.mockResolvedValue({
+        saved_objects: [buildSavedObject('id-1'), buildSavedObject('id-2')],
+      });
+
+      const result = await getAllTimelineByIds(mockRequest, ['id-1', 'id-2'], {
+        ...defaultOptions,
+        timelineType: 'template',
+      });
+
+      expect(result.timeline).toHaveLength(1);
+      expect(result.timeline[0].timelineType).toBe('template');
+    });
+
+    test('hides drafts unless status=draft is requested', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock)
+        .mockReturnValueOnce(buildTimeline({ status: 'active' }))
+        .mockReturnValueOnce(buildTimeline({ status: 'draft' }));
+      mockBulkGet.mockResolvedValue({
+        saved_objects: [buildSavedObject('id-1'), buildSavedObject('id-2')],
+      });
+
+      const result = await getAllTimelineByIds(mockRequest, ['id-1', 'id-2'], defaultOptions);
+
+      expect(result.timeline).toHaveLength(1);
+      expect(result.timeline[0].status).toBe('active');
+    });
+
+    test('filters by onlyUserFavorite using the current user', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock)
+        .mockReturnValueOnce(
+          buildTimeline({ favorite: [{ userName: 'username', favoriteDate: 1 }] })
+        )
+        .mockReturnValueOnce(
+          buildTimeline({ favorite: [{ userName: 'someone-else', favoriteDate: 1 }] })
+        );
+      mockBulkGet.mockResolvedValue({
+        saved_objects: [buildSavedObject('id-1'), buildSavedObject('id-2')],
+      });
+
+      const result = await getAllTimelineByIds(mockRequest, ['id-1', 'id-2'], {
+        ...defaultOptions,
+        onlyUserFavorite: true,
+      });
+
+      expect(result.timeline).toHaveLength(1);
+      expect(result.timeline[0].favorite).toEqual([
+        expect.objectContaining({ userName: 'username' }),
+      ]);
     });
   });
 });

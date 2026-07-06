@@ -18,6 +18,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useAuthz } from '../../../../../../../hooks';
 import type { InstallFailedAttempt } from '../../../../../../../../common/types';
@@ -32,7 +33,12 @@ const InstalledVersionStatus: React.FunctionComponent<{
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon size="m" type="checkInCircleFilled" color="success" />
+        <EuiIcon
+          size="m"
+          type="checkCircleFill"
+          color="success"
+          aria-label={item.installationInfo?.version ?? item.version}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{item.installationInfo?.version ?? item.version}</EuiFlexItem>
     </EuiFlexGroup>
@@ -173,7 +179,12 @@ const InstallUpgradeFailedVersionStatus: React.FunctionComponent<{
     >
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon size="m" type="error" color="danger" />
+          <EuiIcon
+            size="m"
+            type="error"
+            color="danger"
+            aria-label={isUpgradeFailed ? 'Upgrade failed' : 'Install failed'}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {isUpgradeFailed ? (
@@ -195,7 +206,14 @@ const InstallUpgradeFailedVersionStatus: React.FunctionComponent<{
   const latestAttempt = item.installationInfo?.latest_install_failed_attempts?.[0];
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={() => setIsPopoverOpen(false)}>
+    <EuiPopover
+      aria-label={i18n.translate('xpack.fleet.epmInstalledIntegrations.statusPopoverAriaLabel', {
+        defaultMessage: 'Installation status details',
+      })}
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+    >
       <EuiCallOut
         css={{ maxWidth: 400 }}
         color="danger"
@@ -236,7 +254,11 @@ export const InstallationVersionStatus: React.FunctionComponent<{
 }> = React.memo(({ item }) => {
   const status = item.ui.installation_status;
 
-  if (status === 'installed') {
+  if (
+    status === 'installed' ||
+    status === 'pending_upgrade_review' ||
+    status === 'declined_review'
+  ) {
     return <InstalledVersionStatus item={item} />;
   } else if (status === 'upgrade_available') {
     return <UpgradeAvailableVersionStatus item={item} />;

@@ -42,6 +42,10 @@ const match = (regex: RegExp, errorMsg: string) => (str: string) =>
 // The lower-case set of response headers which are forbidden within `customResponseHeaders`.
 const RESPONSE_HEADER_DENY_LIST = ['location', 'refresh'];
 
+// Auth schemes that may bypass kbn-xsrf (configured using `server.xsrf.allowedSchemes`).
+// Must be stateless; `basic` is excluded because browsers can cache and replay it cross-origin.
+const xsrfSchemeSchema = schema.oneOf([schema.literal('apikey'), schema.literal('bearer')]);
+
 const validHostName = () => {
   // see https://github.com/elastic/kibana/issues/139730
   return hostname().replace(/[^\x00-\x7F]/g, '');
@@ -98,7 +102,7 @@ const configSchema = schema.object(
         allowCredentials: schema.boolean({ defaultValue: false }),
         allowOrigin: schema.oneOf(
           [
-            schema.arrayOf(hostURISchema, { minSize: 1 }),
+            schema.arrayOf(hostURISchema, { minSize: 1, maxSize: 100 }),
             schema.arrayOf(schema.literal('*'), { minSize: 1, maxSize: 1 }),
           ],
           {
@@ -174,7 +178,7 @@ const configSchema = schema.object(
           schema.string({
             hostname: true,
           }),
-          { minSize: 1 }
+          { minSize: 1, maxSize: 100 }
         )
       ),
     }),
@@ -187,9 +191,24 @@ const configSchema = schema.object(
       disableProtection: schema.boolean({ defaultValue: false }),
       allowlist: schema.arrayOf(
         schema.string({ validate: match(/^\//, 'must start with a slash') }),
-        { defaultValue: [] }
+        { defaultValue: [], maxSize: 100 }
       ),
+      // `as const` prevents the defaultValue literal from widening TypeOf<> to `string[]`.
+      allowedSchemes: offeringBasedSchema({
+        serverless: schema.arrayOf(xsrfSchemeSchema, {
+          defaultValue: ['apikey', 'bearer'] as const,
+          maxSize: 2,
+        }),
+        traditional: schema.arrayOf(xsrfSchemeSchema, {
+          defaultValue: [] as const,
+          maxSize: 2,
+        }),
+      }),
     }),
+    excludeRoutes: schema.arrayOf(
+      schema.string({ validate: match(/^\//, 'must start with a slash') }),
+      { defaultValue: [], maxSize: 100 }
+    ),
     eluMonitor: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       logging: schema.object({
@@ -209,7 +228,7 @@ const configSchema = schema.object(
     requestId: schema.object(
       {
         allowFromAnyIp: schema.boolean({ defaultValue: false }),
-        ipAllowlist: schema.arrayOf(schema.ip(), { defaultValue: [] }),
+        ipAllowlist: schema.arrayOf(schema.ip(), { defaultValue: [], maxSize: 100 }),
       },
       {
         validate(value) {
@@ -252,10 +271,28 @@ const configSchema = schema.object(
 
       /** This should not be configurable in serverless */
       useVersionResolutionStrategyForInternalPaths: offeringBasedSchema({
-        traditional: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        traditional: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 100 }),
         serverless: schema.never(),
       }),
     }),
+
+    serverTiming: schema.conditional(
+      schema.contextRef('dev'),
+      true,
+      /** In dev mode: allow true/false, default to true */
+      schema.boolean({ defaultValue: true }),
+      /** In production: only allow false, default to false */
+      schema.oneOf([schema.literal(false)], { defaultValue: false })
+    ),
+
+    serverTimingElasticsearch: schema.conditional(
+      schema.contextRef('dev'),
+      true,
+      /** In dev mode: allow true/false, default to true */
+      schema.boolean({ defaultValue: true }),
+      /** In production: only allow false, default to false */
+      schema.oneOf([schema.literal(false)], { defaultValue: false })
+    ),
   },
   {
     validate: (rawConfig) => {
@@ -360,7 +397,13 @@ export class HttpConfig implements IHttpConfig {
   public csp: ICspConfig;
   public prototypeHardening: boolean;
   public externalUrl: IExternalUrlConfig;
-  public xsrf: { disableProtection: boolean; allowlist: string[] };
+  public xsrf: {
+    disableProtection: boolean;
+    allowlist: string[];
+    // Literal union, not `string[]`: adding a scheme without updating consumers is a compile error.
+    allowedSchemes: Array<'apikey' | 'bearer'>;
+  };
+  public excludeRoutes: string[];
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
   public versioned: {
     versionResolution: HandlerResolutionStrategy;
@@ -370,6 +413,8 @@ export class HttpConfig implements IHttpConfig {
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
   public rateLimiter: RateLimiterConfig;
+  public serverTiming: boolean;
+  public serverTimingElasticsearch: boolean;
 
   public eluMonitor: IHttpEluMonitorConfig;
 
@@ -416,9 +461,12 @@ export class HttpConfig implements IHttpConfig {
     this.prototypeHardening = rawHttpConfig.prototypeHardening;
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
+    this.excludeRoutes = rawHttpConfig.excludeRoutes;
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
     this.rateLimiter = rawHttpConfig.rateLimiter;
+    this.serverTiming = rawHttpConfig.serverTiming;
+    this.serverTimingElasticsearch = rawHttpConfig.serverTimingElasticsearch;
 
     // defaults to `true` if not set through config.
     this.restrictInternalApis = rawHttpConfig.restrictInternalApis;

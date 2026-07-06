@@ -37,13 +37,14 @@ describe('timelineKpiRequestOptionsSchema', () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"received\\": \\"someOtherType\\",
-          \\"code\\": \\"invalid_literal\\",
-          \\"expected\\": \\"eventsKpi\\",
+          \\"code\\": \\"invalid_value\\",
+          \\"values\\": [
+            \\"eventsKpi\\"
+          ],
           \\"path\\": [
             \\"factoryQueryType\\"
           ],
-          \\"message\\": \\"Invalid literal value, expected \\\\\\"eventsKpi\\\\\\"\\"
+          \\"message\\": \\"Invalid input: expected \\\\\\"eventsKpi\\\\\\"\\"
         }
       ]"
     `);

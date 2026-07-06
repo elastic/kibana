@@ -143,7 +143,7 @@ export const validatePipelineProcessors = (
   }
 
   const inferenceProcessor = processors?.find(
-    (processor) => processor.inference && processor.inference.model_id
+    (processor) => processor?.inference && processor.inference.model_id
   );
 
   if (inferenceProcessor === undefined) {

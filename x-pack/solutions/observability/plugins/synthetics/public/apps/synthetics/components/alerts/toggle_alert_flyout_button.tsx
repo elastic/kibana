@@ -69,7 +69,7 @@ export const ToggleAlertFlyoutButton = () => {
         {
           name: CREATE_STATUS_RULE,
           'data-test-subj': 'createNewStatusRule',
-          icon: 'plusInCircle',
+          icon: 'plusCircle',
           onClick: () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNewRuleFlyout: true }));
             setIsOpen(false);
@@ -100,7 +100,7 @@ export const ToggleAlertFlyoutButton = () => {
         {
           name: CREATE_TLS_RULE_NAME,
           'data-test-subj': 'createNewTLSRule',
-          icon: 'plusInCircle',
+          icon: 'plusCircle',
           onClick: () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNewRuleFlyout: true }));
             setIsOpen(false);
@@ -136,7 +136,7 @@ export const ToggleAlertFlyoutButton = () => {
             color="primary"
             aria-label={ToggleFlyoutTranslations.toggleButtonAriaLabel}
             data-test-subj="syntheticsAlertsRulesButton"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => setIsOpen(!isOpen)}
             disabled={!hasMonitors}
@@ -148,6 +148,9 @@ export const ToggleAlertFlyoutButton = () => {
         isOpen={isOpen}
         ownFocus
         panelPaddingSize="none"
+        aria-label={i18n.translate('xpack.synthetics.toggleAlertFlyoutButton.popoverAriaLabel', {
+          defaultMessage: 'Alerts and rules menu',
+        })}
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>

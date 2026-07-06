@@ -35,22 +35,22 @@ api/
 
 1. Start Elasticsearch and Kibana servers:
    ```bash
-   node scripts/scout run-servers --stateful
+   node scripts/scout run-servers --arch stateful --domain classic
    ```
 
 2. Run the API tests:
    ```bash
-   npx playwright test --config x-pack/platform/plugins/shared/streams/test/scout/api/playwright.config.ts
+   node scripts/playwright test --config x-pack/platform/plugins/shared/streams/test/scout/api/playwright.config.ts
    ```
 
 ### Running Specific Tests
 
 ```bash
 # Run only routing tests
-npx playwright test --config x-pack/platform/plugins/shared/streams/test/scout/api/playwright.config.ts -g "routing"
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams/test/scout/api/playwright.config.ts -g "routing"
 
 # Run only processing tests
-npx playwright test --config x-pack/platform/plugins/shared/streams/test/scout/api/playwright.config.ts -g "processing"
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams/test/scout/api/playwright.config.ts -g "processing"
 ```
 
 ## Test Coverage
@@ -142,7 +142,7 @@ When moving functionality from UI tests to API tests:
 
 Enable verbose logging:
 ```bash
-DEBUG=scout:* npx playwright test --config ...
+DEBUG=scout:* node scripts/playwright test --config ...
 ```
 
 View test artifacts:

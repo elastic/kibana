@@ -28,7 +28,7 @@ export async function ensureClonedRepo(context: WorkspaceGlobalContext): Promise
   if (!gitDirExists) {
     log.info(`Cloning base repo from ${repoRoot} to ${baseCloneDir}`);
 
-    await exec(`git clone ${repoRoot} ${baseCloneDir}`, {
+    await exec('git', ['clone', repoRoot, baseCloneDir], {
       log,
       cwd: process.cwd(),
     });
@@ -37,7 +37,7 @@ export async function ensureClonedRepo(context: WorkspaceGlobalContext): Promise
 
   log.debug(`Base clone already present at ${baseCloneDir}; fetching updates`);
 
-  await exec('git fetch --all --prune', {
+  await exec('git', ['fetch', '--all', '--prune'], {
     log,
     cwd: baseCloneDir,
   });

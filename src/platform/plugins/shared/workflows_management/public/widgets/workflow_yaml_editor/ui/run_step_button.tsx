@@ -8,19 +8,11 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { selectIsYamlSyntaxValid } from '../../../entities/workflows/store/workflow_detail/selectors';
-
-const Text = {
-  run: i18n.translate('workflows.workflowDetail.yamlEditor.stepActions.runStep.tooltip', {
-    defaultMessage: 'Run step',
-  }),
-  invalid: i18n.translate('workflows.workflowDetail.yamlEditor.stepActions.runStep.disabled', {
-    defaultMessage: 'Fix errors to run the step',
-  }),
-};
+import { getRunStepTooltipContent } from '../../../shared/ui/workflow_action_buttons/get_workflow_tooltip_content';
 
 export interface RunStepButtonProps {
   onClick: () => void;
@@ -28,16 +20,25 @@ export interface RunStepButtonProps {
 export const RunStepButton = React.memo<RunStepButtonProps>(({ onClick }) => {
   // To execute a single step, the yaml of the entire workflow must be parsable. Not just the step yaml.
   const isValidSyntax = useSelector(selectIsYamlSyntaxValid);
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+
+  const tooltipContent = useMemo(
+    () => getRunStepTooltipContent({ isValid: isValidSyntax, canExecuteWorkflow }),
+    [isValidSyntax, canExecuteWorkflow]
+  );
+
+  const isDisabled = !isValidSyntax || !canExecuteWorkflow;
+
   return (
-    <EuiToolTip content={isValidSyntax ? Text.run : Text.invalid} disableScreenReaderOutput>
+    <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="play"
         onClick={onClick}
         color="success"
-        data-test-subj="runStep"
+        data-test-subj="workflowRunStep"
         iconSize="s"
-        aria-label={isValidSyntax ? Text.run : Text.invalid}
-        disabled={!isValidSyntax}
+        aria-label={tooltipContent}
+        disabled={isDisabled}
       />
     </EuiToolTip>
   );

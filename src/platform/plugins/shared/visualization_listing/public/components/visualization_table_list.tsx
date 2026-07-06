@@ -60,6 +60,7 @@ export const VisualizationTableList = ({
   savedObjectsTagging,
   parentProps,
 }: VisualizationTableListProps) => {
+  const { getBreadcrumbs, onFetchSuccess, setPageDataTestSubject, showCreateButton } = parentProps;
   const euiThemeContext = useEuiTheme();
   const tableStyles = useMemo(
     () => getVisualizationListingTableStyles(euiThemeContext),
@@ -73,14 +74,25 @@ export const VisualizationTableList = ({
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
   const closeNewVisModal = useRef(() => {});
 
-  const createNewVis = useCallback(async () => {
-    const currentApp = await firstValueFrom(core.application.currentAppId$);
-    closeNewVisModal.current = visualizations.showNewVisModal({
-      originatingApp: currentApp,
-      originatingPath: window.location.hash,
-      outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
-    });
-  }, [visualizations, core.application]);
+  const createNewVis = useCallback(() => {
+    firstValueFrom(core.application.currentAppId$)
+      .then((currentApp) => {
+        const breadcrumbs = currentApp ? getBreadcrumbs?.(currentApp) : undefined;
+        closeNewVisModal.current = visualizations.showNewVisModal({
+          originatingApp: currentApp,
+          originatingPath: window.location.hash,
+          breadcrumbs,
+          outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
+        });
+      })
+      .catch((error) => {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('visualizationListing.visualizeListingCreateErrorTitle', {
+            defaultMessage: 'Error opening new visualization modal',
+          }),
+        });
+      });
+  }, [visualizations, core.application, core.notifications.toasts, getBreadcrumbs]);
 
   useEffect(() => {
     return () => {
@@ -110,6 +122,7 @@ export const VisualizationTableList = ({
           state: {
             originatingApp: currentApp,
             originatingPath: window.location.hash,
+            breadcrumbs: getBreadcrumbs?.(currentApp),
           },
         });
         return;
@@ -117,7 +130,7 @@ export const VisualizationTableList = ({
 
       core.application.navigateToApp(targetApp, { path });
     },
-    [core.application, embeddable]
+    [core.application, embeddable, getBreadcrumbs]
   );
 
   const fetchItems = useCallback(
@@ -240,7 +253,7 @@ export const VisualizationTableList = ({
           customValidators: contentEditorValidators,
         }}
         emptyPrompt={noItemsFragment}
-        createItem={createNewVis}
+        createItem={showCreateButton === false ? undefined : createNewVis}
         customTableColumn={getCustomColumn()}
         customSortingOptions={getCustomSortingOptions()}
         initialPageSize={initialPageSize}
@@ -273,7 +286,8 @@ export const VisualizationTableList = ({
               }
             : undefined
         }
-        {...parentProps}
+        onFetchSuccess={onFetchSuccess}
+        setPageDataTestSubject={setPageDataTestSubject}
       />
     </div>
   );

@@ -13,6 +13,15 @@ import type { InternalAuthenticationServiceStart } from './authentication_servic
 export const authenticationServiceMock = {
   createStart: (): DeeplyMockedKeys<InternalAuthenticationServiceStart> => ({
     apiKeys: apiKeysMock.create(),
+    oauth: {
+      createClient: jest.fn(),
+      listClients: jest.fn(),
+      updateClient: jest.fn(),
+      revokeClient: jest.fn(),
+      listConnections: jest.fn(),
+      updateConnection: jest.fn(),
+      revokeConnection: jest.fn(),
+    },
     login: jest.fn(),
     logout: jest.fn(),
     getCurrentUser: jest.fn(),

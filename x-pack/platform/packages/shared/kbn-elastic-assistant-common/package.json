@@ -7,6 +7,7 @@
   "scripts": {
     "openapi:generate": "node scripts/openapi/generate",
     "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate",
+    "openapi:validate": "node scripts/openapi/validate",
     "openapi:bundle": "node scripts/openapi/bundle && node scripts/openapi/bundle_attack_discovery"
   }
 }

@@ -12,6 +12,7 @@ import type {
   SearchRequest,
   AggregationsTopHitsAggregate,
   SearchHit,
+  OpenPointInTimeResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
@@ -109,14 +110,18 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
 export const getClusters = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
-  pitId: string,
+  pit: OpenPointInTimeResponse,
   runtimeMappings: MappingRuntimeFields,
   logger: Logger
 ): Promise<ClusterWithoutTrend[]> => {
   try {
     const queryResult = await esClient.search<unknown, ClustersQueryResult>(
-      getClustersQuery(query, pitId, runtimeMappings)
+      getClustersQuery(query, pit.id, runtimeMappings)
     );
+
+    if (queryResult.pit_id) {
+      pit.id = queryResult.pit_id;
+    }
 
     const clusters = queryResult.aggregations?.aggs_by_asset_identifier.buckets;
     if (!Array.isArray(clusters)) throw new Error('missing aggs by cluster id');

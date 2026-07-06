@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { assertNever } from '@kbn/std';
 import React, { useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { SLI_OPTIONS } from '../constants';
 import { useUnregisterFields } from '../hooks/use_unregister_fields';
 import type { CreateSLOForm, FormSettings } from '../types';
@@ -28,6 +29,7 @@ interface SloEditFormIndicatorSectionProps {
 
 export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicatorSectionProps) {
   const { isEditMode = false, allowedIndicatorTypes = [] } = formSettings;
+  const { isServerless } = usePluginContext();
   const { control, watch } = useFormContext<CreateSLOForm>();
   useUnregisterFields({ isEditMode });
 
@@ -69,6 +71,25 @@ export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicat
       style={{ maxWidth: MAX_WIDTH }}
       data-test-subj="sloEditFormIndicatorSection"
     >
+      {isServerless && (
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.slo.sloEdit.cpsReadiness.title', {
+              defaultMessage: 'Cross-project search for SLOs coming soon',
+            })}
+            iconType="iInCircle"
+            data-test-subj="sloEditFormCpsReadinessBanner"
+          >
+            <p>
+              {i18n.translate('xpack.slo.sloEdit.cpsReadiness.body', {
+                defaultMessage:
+                  'SLOs are currently scoped to data within this project. Cross-project search support is on the way.',
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {!isEditMode && (
         <>
           <EuiFormRow label={indicatorLabel}>

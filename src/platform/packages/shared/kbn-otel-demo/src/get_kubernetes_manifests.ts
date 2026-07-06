@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 
 const OTEL_DEMO_VERSION = '1.12.0';
 const NAMESPACE = 'otel-demo';
@@ -77,22 +77,27 @@ export function getKubernetesManifests(options: K8sManifestOptions): string {
     },
   });
 
-  // ClusterRole for k8sattributes
+  // ClusterRole for k8sattributes, k8s_cluster, kubeletstats, and k8s_events receivers
   manifests.push({
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRole',
     metadata: {
-      name: 'otel-collector',
+      name: `otel-collector-${NAMESPACE}`,
     },
     rules: [
       {
         apiGroups: [''],
-        resources: ['pods', 'namespaces'],
+        resources: ['pods', 'namespaces', 'nodes', 'nodes/stats', 'nodes/proxy', 'events'],
         verbs: ['get', 'watch', 'list'],
       },
       {
         apiGroups: ['apps'],
-        resources: ['replicasets'],
+        resources: ['replicasets', 'deployments', 'daemonsets', 'statefulsets'],
+        verbs: ['get', 'watch', 'list'],
+      },
+      {
+        apiGroups: ['events.k8s.io'],
+        resources: ['events'],
         verbs: ['get', 'watch', 'list'],
       },
     ],
@@ -103,12 +108,12 @@ export function getKubernetesManifests(options: K8sManifestOptions): string {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRoleBinding',
     metadata: {
-      name: 'otel-collector',
+      name: `otel-collector-${NAMESPACE}`,
     },
     roleRef: {
       apiGroup: 'rbac.authorization.k8s.io',
       kind: 'ClusterRole',
-      name: 'otel-collector',
+      name: `otel-collector-${NAMESPACE}`,
     },
     subjects: [
       {
@@ -182,9 +187,19 @@ export function getKubernetesManifests(options: K8sManifestOptions): string {
                   mountPath: '/var/lib/docker/containers',
                   readOnly: true,
                 },
+                {
+                  name: 'hostfs',
+                  mountPath: '/hostfs',
+                  readOnly: true,
+                  mountPropagation: 'HostToContainer',
+                },
               ],
               env: [
                 { name: 'K8S_NODE_NAME', valueFrom: { fieldRef: { fieldPath: 'spec.nodeName' } } },
+                {
+                  name: 'OTEL_K8S_NODE_NAME',
+                  valueFrom: { fieldRef: { fieldPath: 'spec.nodeName' } },
+                },
                 { name: 'K8S_POD_NAME', valueFrom: { fieldRef: { fieldPath: 'metadata.name' } } },
                 {
                   name: 'K8S_POD_NAMESPACE',
@@ -225,6 +240,12 @@ export function getKubernetesManifests(options: K8sManifestOptions): string {
               name: 'varlibdockercontainers',
               hostPath: {
                 path: '/var/lib/docker/containers',
+              },
+            },
+            {
+              name: 'hostfs',
+              hostPath: {
+                path: '/',
               },
             },
           ],
@@ -472,7 +493,7 @@ export function getKubernetesManifests(options: K8sManifestOptions): string {
     },
   });
 
-  return manifests.map((m) => yaml.dump(m)).join('---\n');
+  return manifests.map((m) => stringify(m)).join('---\n');
 }
 
 function createDeployment(opts: {

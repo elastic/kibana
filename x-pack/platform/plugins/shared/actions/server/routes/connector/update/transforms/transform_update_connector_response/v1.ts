@@ -15,6 +15,7 @@ export const transformUpdateConnectorResponse = ({
   isDeprecated,
   isSystemAction,
   isConnectorTypeDeprecated,
+  authMode,
   ...res
 }: Connector): ConnectorResponseV1 => ({
   ...res,
@@ -24,4 +25,5 @@ export const transformUpdateConnectorResponse = ({
   is_missing_secrets: isMissingSecrets,
   is_system_action: isSystemAction,
   is_connector_type_deprecated: isConnectorTypeDeprecated,
+  ...(authMode !== undefined ? { auth_mode: authMode } : {}),
 });

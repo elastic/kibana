@@ -29,7 +29,7 @@ interface PromptToMessageOptionsResult {
 export function promptToMessageOptions(
   prompt: Prompt,
   input: unknown,
-  model: Model
+  model: Partial<Model>
 ): PromptToMessageOptionsResult {
   const matches = prompt.versions.flatMap((version) => {
     if (!version.models) {

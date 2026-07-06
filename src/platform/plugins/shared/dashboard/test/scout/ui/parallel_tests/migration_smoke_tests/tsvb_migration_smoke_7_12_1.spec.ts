@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import {
   findImportedSavedObjectId,
   getDashboardPanels,
@@ -39,7 +40,7 @@ const getPanelDrilldownCounts = (
   return { panelsWithDrilldowns, drilldownCount };
 };
 
-spaceTest.describe('TSVB migration smoke (7.12.1)', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('TSVB migration smoke (7.12.1)', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);

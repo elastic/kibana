@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AggregationsMultiBucketAggregateBase as Aggregation,
+  OpenPointInTimeResponse,
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -127,14 +128,18 @@ export const getBenchmarksFromAggs = (benchmarks: BenchmarkBucket[]) => {
 export const getBenchmarks = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
-  pitId: string,
+  pit: OpenPointInTimeResponse,
   runtimeMappings: MappingRuntimeFields,
   logger: Logger
 ): Promise<BenchmarkWithoutTrend[]> => {
   try {
     const queryResult = await esClient.search<unknown, BenchmarkQueryResult>(
-      getBenchmarksQuery(query, pitId, runtimeMappings)
+      getBenchmarksQuery(query, pit.id, runtimeMappings)
     );
+
+    if (queryResult.pit_id) {
+      pit.id = queryResult.pit_id;
+    }
 
     const benchmarks = queryResult.aggregations?.aggs_by_benchmark.buckets;
     if (!Array.isArray(benchmarks)) throw new Error('missing aggs by benchmark id');

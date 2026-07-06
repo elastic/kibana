@@ -50,6 +50,7 @@ describe(`cases`, () => {
         ['settings', 'observability'],
         ['createComment', 'securitySolution'],
         ['reopenCase', 'observability'],
+        ['manageTemplates', 'securitySolution'],
       ])('grants %s privileges under feature with id %s', (operation, featureID) => {
         const actions = new Actions();
         const casesFeaturePrivilege = new FeaturePrivilegeCasesBuilder(actions);
@@ -93,6 +94,7 @@ describe(`cases`, () => {
             settings: ['security'],
             createComment: ['security'],
             reopenCase: ['security'],
+            manageTemplates: ['security'],
           },
           savedObject: {
             all: [],
@@ -122,6 +124,7 @@ describe(`cases`, () => {
             "cases:security/getReporters",
             "cases:security/getUserActions",
             "cases:security/findConfigurations",
+            "cases:security/getFieldDefinitions",
             "cases:security/updateCase",
             "cases:security/updateComment",
             "cases:security/deleteCase",
@@ -137,8 +140,10 @@ describe(`cases`, () => {
             "cases:obs/getReporters",
             "cases:obs/getUserActions",
             "cases:obs/findConfigurations",
+            "cases:obs/getFieldDefinitions",
             "cases:obs/updateCase",
             "cases:obs/updateComment",
+            "cases:security/manageTemplate",
           ]
         `);
       });
@@ -151,6 +156,7 @@ describe(`cases`, () => {
           cases: {
             all: ['security', 'other-security'],
             read: ['obs', 'other-obs'],
+            manageTemplates: ['security'],
           },
           savedObject: {
             all: [],
@@ -180,6 +186,7 @@ describe(`cases`, () => {
             "cases:security/getReporters",
             "cases:security/getUserActions",
             "cases:security/findConfigurations",
+            "cases:security/getFieldDefinitions",
             "cases:security/updateCase",
             "cases:security/updateComment",
             "cases:security/deleteCase",
@@ -197,6 +204,7 @@ describe(`cases`, () => {
             "cases:other-security/getReporters",
             "cases:other-security/getUserActions",
             "cases:other-security/findConfigurations",
+            "cases:other-security/getFieldDefinitions",
             "cases:other-security/updateCase",
             "cases:other-security/updateComment",
             "cases:other-security/deleteCase",
@@ -212,12 +220,15 @@ describe(`cases`, () => {
             "cases:obs/getReporters",
             "cases:obs/getUserActions",
             "cases:obs/findConfigurations",
+            "cases:obs/getFieldDefinitions",
             "cases:other-obs/getCase",
             "cases:other-obs/getComment",
             "cases:other-obs/getTags",
             "cases:other-obs/getReporters",
             "cases:other-obs/getUserActions",
             "cases:other-obs/findConfigurations",
+            "cases:other-obs/getFieldDefinitions",
+            "cases:security/manageTemplate",
           ]
         `);
       });

@@ -8,15 +8,15 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
-import type SuperTest from 'supertest';
-import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
+import type { Agent } from 'supertest';
 import { CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { ENTITY_STORE_ROUTES, API_VERSIONS } from '@kbn/entity-store/common';
 
 export interface EntityStoreHelpersDeps {
   es: Client;
   logger: ToolingLog;
   retry: RetryService;
-  supertest: SuperTest.Agent;
+  supertest: Pick<Agent, 'get' | 'post' | 'delete'>;
 }
 
 /**
@@ -36,7 +36,7 @@ export const cleanupEntityStore = async ({
     logger.debug(`Deleted entity store engine for space: ${spaceId || 'default'}`);
   } catch (e) {
     // Ignore 404 errors if the engine doesn't exist
-    if (e.status !== 404) {
+    if (e.response?.status !== 404) {
       logger.debug(
         `Error deleting entity store for space ${spaceId || 'default'}: ${
           e && e.message ? e.message : JSON.stringify(e)
@@ -71,93 +71,6 @@ export const waitForEntityDataIndexed = async ({
       return false;
     }
   });
-};
-
-/**
- * Helper to enable asset inventory for a given space
- */
-export const enableAssetInventory = async ({
-  supertest,
-  logger,
-  spaceId,
-}: Pick<EntityStoreHelpersDeps, 'supertest' | 'logger'> & { spaceId?: string }) => {
-  const spacePath = spaceId ? `/s/${spaceId}` : '';
-  logger.debug(`Enabling asset inventory for space: ${spaceId || 'default'}`);
-  await supertest
-    .post(`${spacePath}/api/asset_inventory/enable`)
-    .set('kbn-xsrf', 'xxxx')
-    .send({})
-    .expect(200);
-  logger.debug(`Asset inventory enabled for space: ${spaceId || 'default'}`);
-};
-
-/**
- * Helper to wait for enrich policy to be created
- */
-export const waitForEnrichPolicyCreated = async ({
-  es,
-  retry,
-  logger,
-  spaceId,
-}: Pick<EntityStoreHelpersDeps, 'es' | 'retry' | 'logger'> & { spaceId?: string }) => {
-  const policyId = getEnrichPolicyId(spaceId);
-  logger.debug(`Waiting for enrich policy to be created: ${policyId}`);
-  await retry.waitForWithTimeout('enrich policy to be created', 200000, async () => {
-    try {
-      const res = await es.enrich.getPolicy({ name: policyId });
-      const policy = res.policies?.[0];
-      if (policy) {
-        logger.debug(`Enrich policy found: ${JSON.stringify(res)}`);
-        return true;
-      } else {
-        logger.debug(`Enrich policy not found in response: ${JSON.stringify(res)}`);
-        return false;
-      }
-    } catch (e) {
-      logger.debug(`Error getting enrich policy: ${e.message || JSON.stringify(e)}`);
-      return false;
-    }
-  });
-};
-
-/**
- * Helper to execute enrich policy with retry logic
- */
-export const executeEnrichPolicy = async ({
-  es,
-  retry,
-  logger,
-  spaceId,
-}: Pick<EntityStoreHelpersDeps, 'es' | 'retry' | 'logger'> & { spaceId?: string }) => {
-  const spaceIdentifier = spaceId || 'default';
-  const policyId = getEnrichPolicyId(spaceId);
-  const enrichIndexName = `.enrich-${policyId}`;
-  logger.debug(`Executing enrich policy: ${policyId} for space: ${spaceIdentifier}`);
-  await retry.waitForWithTimeout(
-    `enrich policy to be executed for ${spaceIdentifier} space`,
-    20000,
-    async () => {
-      logger.debug(`Attempting to execute enrich policy: ${policyId}`);
-      try {
-        const data = await es.enrich.executePolicy({
-          name: policyId,
-          wait_for_completion: true,
-        });
-        logger.debug(`Enrich policy executed: ${JSON.stringify(data)}`);
-
-        // Check if the enrich index has documents
-        const countResponse = await es.count({
-          index: enrichIndexName,
-        });
-        logger.debug(`Enrich index [${enrichIndexName}] document count: ${countResponse.count}`);
-
-        return countResponse.count > 0;
-      } catch (e) {
-        logger.debug(`Error executing enrich policy: ${e.message || JSON.stringify(e)}`);
-        return false;
-      }
-    }
-  );
 };
 
 /**
@@ -364,4 +277,105 @@ export const installCloudAssetInventoryPackage = async ({
     })
     .expect(200);
   logger.debug(`Cloud asset inventory package installed for space: ${spaceId || 'default'}`);
+};
+
+// --- Entity Store V2 helpers ---
+
+const PUBLIC_HEADERS = {
+  'kbn-xsrf': 'true',
+  'elastic-api-version': API_VERSIONS.public.v1,
+  'x-elastic-internal-origin': 'kibana',
+};
+
+/**
+ * Helper to install Entity Store V2
+ */
+export const installEntityStoreV2 = async ({
+  supertest,
+  logger,
+  spaceId,
+}: Pick<EntityStoreHelpersDeps, 'supertest' | 'logger'> & { spaceId?: string }) => {
+  const spacePath = spaceId ? `/s/${spaceId}` : '';
+  const spaceLabel = spaceId || 'default';
+  logger.debug(`Installing Entity Store V2 for space: ${spaceLabel}`);
+
+  const response = await supertest
+    .post(`${spacePath}${ENTITY_STORE_ROUTES.public.INSTALL}`)
+    .set(PUBLIC_HEADERS)
+    .send({});
+
+  if (response.status !== 200 && response.status !== 201) {
+    logger.error(`Failed to install Entity Store V2: ${response.status}`);
+    logger.error(JSON.stringify(response.body));
+    throw new Error(`Failed to install Entity Store V2: ${response.status}`);
+  }
+
+  logger.debug(`Entity Store V2 installed for space: ${spaceLabel}`);
+  return response;
+};
+
+/**
+ * Helper to uninstall Entity Store V2
+ */
+export const uninstallEntityStoreV2 = async ({
+  supertest,
+  logger,
+  spaceId,
+}: Pick<EntityStoreHelpersDeps, 'supertest' | 'logger'> & { spaceId?: string }) => {
+  const spacePath = spaceId ? `/s/${spaceId}` : '';
+  const spaceLabel = spaceId || 'default';
+  logger.debug(`Uninstalling Entity Store V2 for space: ${spaceLabel}`);
+
+  try {
+    await supertest
+      .post(`${spacePath}${ENTITY_STORE_ROUTES.public.UNINSTALL}`)
+      .set(PUBLIC_HEADERS)
+      .send({})
+      .expect(200);
+    logger.debug(`Entity Store V2 uninstalled for space: ${spaceLabel}`);
+  } catch (e) {
+    if (e.response?.status !== 404) {
+      logger.debug(
+        `Error uninstalling Entity Store V2 for space ${spaceLabel}: ${
+          e && e.message ? e.message : JSON.stringify(e)
+        }`
+      );
+    }
+  }
+};
+
+/**
+ * Helper to wait for Entity Store V2 to reach 'running' status
+ */
+export const waitForEntityStoreV2Running = async ({
+  supertest,
+  retry,
+  logger,
+  spaceId,
+}: Pick<EntityStoreHelpersDeps, 'supertest' | 'retry' | 'logger'> & { spaceId?: string }) => {
+  const spacePath = spaceId ? `/s/${spaceId}` : '';
+  const spaceLabel = spaceId || 'default';
+  logger.debug(`Waiting for Entity Store V2 to be running in space: ${spaceLabel}`);
+
+  await retry.waitForWithTimeout('Entity Store V2 to be running', 60000, async () => {
+    const response = await supertest
+      .get(`${spacePath}${ENTITY_STORE_ROUTES.public.STATUS}`)
+      .set(PUBLIC_HEADERS);
+
+    if (response.status !== 200) {
+      logger.debug(`Entity Store V2 status check failed with status: ${response.status}`);
+      return false;
+    }
+
+    const { status } = response.body;
+    logger.debug(`Entity Store V2 status: ${status}`);
+
+    if (status === 'error') {
+      throw new Error(
+        `Entity Store V2 is in error state: ${response.body.error?.message || 'Unknown error'}`
+      );
+    }
+
+    return status === 'running';
+  });
 };

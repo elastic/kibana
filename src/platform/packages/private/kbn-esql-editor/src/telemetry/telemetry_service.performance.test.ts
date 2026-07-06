@@ -133,4 +133,37 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
       })
     );
   });
+
+  it('reports validation latency with callbacks duration', () => {
+    const analytics = {
+      reportEvent: jest.fn(),
+    } as Pick<AnalyticsServiceStart, 'reportEvent'> as AnalyticsServiceStart;
+    const service = new ESQLEditorTelemetryService(analytics);
+
+    service.trackValidationLatency({
+      duration: 50,
+      queryLength: 30,
+      queryLines: 2,
+      sessionId: 'session-2',
+      isInitialLoad: true,
+      callbacksDuration: 36,
+    });
+
+    expect(mockMetricEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventName: 'esql_editor_validation_latency',
+        duration: 50,
+        key1: 'query_length',
+        value1: 30,
+        key2: 'query_lines',
+        value2: 2,
+        key3: 'callbacks_duration',
+        value3: 36,
+        meta: expect.objectContaining({
+          session_id: 'session-2',
+          is_initial_load: true,
+        }),
+      })
+    );
+  });
 });

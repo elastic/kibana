@@ -49,6 +49,7 @@ jest.mock('../../../../../services', () => ({
   ExperimentalFeaturesService: {
     get: jest.fn().mockReturnValue({ enablePackageRollback: true }),
   },
+  doesPackageHaveIntegrations: (pkg: any) => (pkg.policy_templates || []).length > 1,
 }));
 
 import { useAuthz, useLicense } from '../../../../../../../hooks';

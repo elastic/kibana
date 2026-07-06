@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { EMPTY } from 'rxjs';
+import { BehaviorSubject, EMPTY } from 'rxjs';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  RendererServiceStartContract,
   ToolServiceStartContract,
 } from '@kbn/agent-builder-browser';
 import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
-  ConversationFlyoutRef,
+  ConversationSidebarRef,
 } from './types';
-import type { OpenConversationFlyoutOptions } from './flyout/types';
+import type { OpenConversationSidebarOptions } from './sidebar/types';
 
 const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
   return {};
@@ -24,17 +25,20 @@ const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
 
 export type AgentsServiceStartContractMock = jest.Mocked<AgentsServiceStartContract>;
 export type AttachmentServiceStartContractMock = jest.Mocked<AttachmentServiceStartContract>;
+export type RendererServiceStartContractMock = jest.Mocked<RendererServiceStartContract>;
 export type ToolServiceStartContractMock = jest.Mocked<ToolServiceStartContract>;
 
 export type AgentBuilderPluginStartMock = jest.Mocked<AgentBuilderPluginStart> & {
   agents: AgentsServiceStartContractMock;
   attachments: AttachmentServiceStartContractMock;
+  renderers: RendererServiceStartContractMock;
   tools: ToolServiceStartContractMock;
 };
 
 const createAgentStartMock = (): AgentsServiceStartContractMock => {
   return {
     list: jest.fn(),
+    addSkillToAgent: jest.fn(),
   };
 };
 
@@ -45,11 +49,20 @@ const createAttachmentStartMock = (): AttachmentServiceStartContractMock => {
   };
 };
 
+const createRendererStartMock = (): RendererServiceStartContractMock => {
+  return {
+    register: jest.fn(),
+    getRendererUiDefinition: jest.fn(),
+    hasRenderer: jest.fn(),
+  };
+};
+
 const createToolStartMock = (): ToolServiceStartContractMock => {
   return {
     get: jest.fn(),
     list: jest.fn(),
     execute: jest.fn(),
+    listWorkflows: jest.fn(),
   };
 };
 
@@ -57,23 +70,30 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
   return {
     agents: createAgentStartMock(),
     attachments: createAttachmentStartMock(),
+    renderers: createRendererStartMock(),
     tools: createToolStartMock(),
     events: {
       chat$: EMPTY,
+      getChatEvents$: jest.fn().mockReturnValue(EMPTY),
+      ui: {
+        activeConversation$: new BehaviorSubject(null),
+      },
     },
-    setConversationFlyoutActiveConfig: jest.fn(),
-    clearConversationFlyoutActiveConfig: jest.fn(),
-    toggleConversationFlyout: jest.fn(),
-    openConversationFlyout: jest
-      .fn()
-      .mockImplementation((options: OpenConversationFlyoutOptions) => {
-        const mockFlyoutRef: ConversationFlyoutRef = {
-          close: jest.fn(),
-        };
-        return {
-          flyoutRef: mockFlyoutRef,
-        };
-      }),
+    setChatConfig: jest.fn(),
+    clearChatConfig: jest.fn(),
+    toggleChat: jest.fn(),
+    openChat: jest.fn().mockImplementation((options: OpenConversationSidebarOptions) => {
+      const mockSidebarRef: ConversationSidebarRef = {
+        close: jest.fn(),
+      };
+      return {
+        chatRef: mockSidebarRef,
+      };
+    }),
+    addAttachment: jest.fn(),
+    updateAttachmentOrigin: jest.fn(),
+    EmbeddableConversation: () => null,
+    EmbeddableConversationInput: () => null,
   };
 };
 

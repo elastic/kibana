@@ -56,10 +56,9 @@ export interface LensAppProps {
 }
 
 export type RunSave = (
-  saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
+  saveProps: Omit<OnSaveProps, 'newDescription'> & {
     returnToOrigin: boolean;
     dashboardId?: string | null;
-    onTitleDuplicate: OnSaveProps['onTitleDuplicate'];
     newDescription?: string;
     newTags?: string[];
     panelTimeRange?: TimeRange;
@@ -86,7 +85,6 @@ export interface LensTopNavMenuProps {
   lensInspector: LensInspector;
   goBackToOriginatingApp?: () => void;
   contextOriginatingApp?: string;
-  initialContextIsEmbedded?: boolean;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: LensDocument | undefined;

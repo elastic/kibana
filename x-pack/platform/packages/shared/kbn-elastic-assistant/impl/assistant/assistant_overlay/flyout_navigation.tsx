@@ -62,7 +62,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
         <EuiButtonIcon
           disabled={isLoading || !isAssistantEnabled}
           onClick={onToggle}
-          iconType={isExpanded ? 'arrowEnd' : 'arrowStart'}
+          iconType={isExpanded ? 'chevronLimitRight' : 'chevronLimitLeft'}
           size="xs"
           data-test-subj="aiAssistantFlyoutNavigationToggle"
           aria-label={
@@ -113,7 +113,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
                     <EuiButtonEmpty
                       size="xs"
                       color="primary"
-                      iconType="newChat"
+                      iconType="plusCircle"
                       data-test-subj="newChatFromOverlay"
                       onClick={onConversationCreate}
                       disabled={isLoading || !isAssistantEnabled}

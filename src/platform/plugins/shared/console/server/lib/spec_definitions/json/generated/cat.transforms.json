@@ -54,6 +54,7 @@
         "pipeline",
         "processed_documents_exp_avg",
         "processing_time",
+        "project_routing",
         "reason",
         "search_failure",
         "search_time",
@@ -89,6 +90,7 @@
         "pipeline",
         "processed_documents_exp_avg",
         "processing_time",
+        "project_routing",
         "reason",
         "search_failure",
         "search_time",
@@ -111,6 +113,7 @@
       "_cat/transforms/{transform_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-transforms",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-cat-transforms",
     "availability": {
       "stack": true,
       "serverless": true

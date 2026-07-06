@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { HttpStart } from '@kbn/core/public';
+import type { HttpStart, IHttpFetchError } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 
@@ -71,7 +71,7 @@ export const useUpdateCloudConnector = (
 
         notifications?.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.cloudConnector.updateSuccess', {
-            defaultMessage: 'Cloud connector updated successfully',
+            defaultMessage: 'Federated identity updated successfully',
           }),
         });
 
@@ -79,10 +79,13 @@ export const useUpdateCloudConnector = (
           onSuccess(connector);
         }
       },
-      onError: (error: Error) => {
-        notifications?.toasts.addError(error, {
+      onError: (error: IHttpFetchError<{ message?: string }>) => {
+        const serverMessage = error?.body?.message;
+        const errorToDisplay = serverMessage ? new Error(serverMessage) : error;
+
+        notifications?.toasts.addError(errorToDisplay, {
           title: i18n.translate('xpack.fleet.cloudConnector.updateError', {
-            defaultMessage: 'Failed to update cloud connector',
+            defaultMessage: 'Failed to update federated identity',
           }),
         });
 

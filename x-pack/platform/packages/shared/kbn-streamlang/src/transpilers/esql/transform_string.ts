@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-language';
-import type { ESQLAstCommand } from '@kbn/esql-language';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstCommand } from '@elastic/esql/types';
 import { buildIgnoreMissingFilter } from './processors/common';
 import { conditionToESQLAst } from './condition_to_esql';
 import type { Condition } from '../../../types/conditions';
@@ -22,7 +22,7 @@ export const createTransformStringESQL = (esqlFunc: string) => {
     const commands: ESQLAstCommand[] = [];
 
     // Add missing field filter if needed (ignore_missing = false)
-    const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
+    const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, from);
     if (missingFieldFilter) {
       commands.push(missingFieldFilter);
     }

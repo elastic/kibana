@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/response-stream-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/response-stream-plugin'
+  title: '@kbn/response-stream-plugin'
   description: Moon project for @kbn/response-stream-plugin
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: examples/response_stream
+  sourceRoot: examples/response_stream
 dependsOn:
   - '@kbn/core'
   - '@kbn/developer-examples-plugin'

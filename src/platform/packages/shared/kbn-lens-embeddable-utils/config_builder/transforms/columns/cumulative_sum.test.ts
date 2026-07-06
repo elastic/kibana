@@ -10,12 +10,12 @@
 import { fromCumulativeSumAPItoLensState, fromCumulativeSumLensStateToAPI } from './cumulative_sum';
 import type { CumulativeSumIndexPatternColumn } from '@kbn/lens-common';
 import type {
+  LensApiCountMetricOperation,
   LensApiCumulativeSumOperation,
   LensApiSumMetricOperation,
 } from '../../schema/metric_ops';
 
 describe('Cumulative Sum Transforms', () => {
-  const testRef = { id: 'col1', field: 'sales' };
   const columnRef: LensApiSumMetricOperation = {
     operation: 'sum',
     field: 'sales',
@@ -32,7 +32,7 @@ describe('Cumulative Sum Transforms', () => {
 
       const expected: CumulativeSumIndexPatternColumn = {
         operationType: 'cumulative_sum',
-        references: ['col1'],
+        references: [],
         label: '',
         customLabel: false,
         isBucketed: false,
@@ -40,7 +40,7 @@ describe('Cumulative Sum Transforms', () => {
         params: {},
       };
 
-      expect(fromCumulativeSumAPItoLensState(input, testRef)).toEqual(expected);
+      expect(fromCumulativeSumAPItoLensState(input)).toEqual(expected);
     });
 
     it('should handle format configuration', () => {
@@ -54,7 +54,7 @@ describe('Cumulative Sum Transforms', () => {
         },
       };
 
-      const result = fromCumulativeSumAPItoLensState(input, testRef);
+      const result = fromCumulativeSumAPItoLensState(input);
       expect(result.params?.format).toEqual({
         id: 'number',
         params: {
@@ -71,20 +71,9 @@ describe('Cumulative Sum Transforms', () => {
         label: 'Running Total',
       };
 
-      const result = fromCumulativeSumAPItoLensState(input, testRef);
+      const result = fromCumulativeSumAPItoLensState(input);
       expect(result.label).toBe('Running Total');
       expect(result.customLabel).toBe(true);
-    });
-
-    it('should handle missing reference field', () => {
-      const input: LensApiCumulativeSumOperation = {
-        operation: 'cumulative_sum',
-        field: 'sales',
-      };
-
-      const emptyRef = { id: 'col1', field: '' };
-      const result = fromCumulativeSumAPItoLensState(input, emptyRef);
-      expect(result.label).toBe('');
     });
   });
 
@@ -146,6 +135,26 @@ describe('Cumulative Sum Transforms', () => {
 
       const result = fromCumulativeSumLensStateToAPI(input, columnRef);
       expect(result.label).toBe('Running Total');
+    });
+
+    it('should transform cumulative sum of count of records', () => {
+      const countRef: LensApiCountMetricOperation = {
+        operation: 'count',
+        empty_as_null: false,
+      };
+      const input: CumulativeSumIndexPatternColumn = {
+        operationType: 'cumulative_sum',
+        references: ['col1'],
+        label: 'Cumulative sum of count',
+        customLabel: false,
+        isBucketed: false,
+        dataType: 'number',
+        params: {},
+      };
+
+      expect(fromCumulativeSumLensStateToAPI(input, countRef)).toEqual({
+        operation: 'cumulative_sum',
+      });
     });
   });
 });

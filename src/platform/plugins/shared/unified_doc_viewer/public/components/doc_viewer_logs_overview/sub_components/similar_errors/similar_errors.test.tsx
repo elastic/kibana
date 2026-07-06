@@ -12,6 +12,7 @@ import { render, screen } from '@testing-library/react';
 import { SimilarErrors } from '.';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { fieldConstants } from '@kbn/discover-utils';
+import { OPEN_IN_DISCOVER_LABEL } from '../../../observability/traces/common/constants';
 import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 
 const mockGenerateDiscoverLink = jest.fn((query) => (query ? 'http://discover/link' : undefined));
@@ -62,7 +63,7 @@ describe('SimilarErrors', () => {
 
   const renderSimilarErrors = (hit: ReturnType<typeof buildHit>) => {
     return render(
-      <DataSourcesProvider indexes={indexes}>
+      <DataSourcesProvider indexes={indexes} profileId="test-profile">
         <SimilarErrors hit={hit} />
       </DataSourcesProvider>
     );
@@ -123,7 +124,7 @@ describe('SimilarErrors', () => {
       renderSimilarErrors(hit);
 
       expect(screen.getByTestId('docViewerSimilarErrorsOpenInDiscoverButton')).toBeInTheDocument();
-      expect(screen.getByText('Open in Discover')).toBeInTheDocument();
+      expect(screen.getByText(OPEN_IN_DISCOVER_LABEL)).toBeInTheDocument();
     });
 
     it('does not render Discover link when generateDiscoverLink returns undefined', () => {

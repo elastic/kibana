@@ -7,19 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getMeta } from '@kbn/as-code-shared-schemas';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './types';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardOut } from '../transforms';
-import { getDashboardMeta } from '../saved_object_utils';
+import type {
+  DashboardSearchRequestParams,
+  DashboardSearchResponseBody,
+  LegacyDashboardSearchRequestParams,
+  LegacyDashboardSearchResponseBody,
+} from './types';
 
 export async function search(
   requestCtx: RequestHandlerContext,
-  searchBody: DashboardSearchRequestBody
-): Promise<DashboardSearchResponseBody> {
+  searchParams: DashboardSearchRequestParams | LegacyDashboardSearchRequestParams,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
+  useAsCodeSearchSchemas: boolean
+): Promise<DashboardSearchResponseBody | LegacyDashboardSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
+  const normalizeToArray = (value?: string | string[]) => {
+    if (value === undefined) return undefined;
+    return Array.isArray(value) ? value : [value];
+  };
+
+  const includedTags = normalizeToArray(searchParams.tags);
+  const excludedTags = normalizeToArray(searchParams.excluded_tags);
+
   const soResponse = await core.savedObjects.client.find<DashboardSavedObjectAttributes>({
     type: DASHBOARD_SAVED_OBJECT_TYPE,
     searchFields: ['title^3', 'description'],
@@ -31,38 +48,40 @@ export async function search(
       'timeTo',
       'timeRestore',
     ],
-    search: searchBody.search,
-    perPage: searchBody.per_page,
-    page: searchBody.page ? +searchBody.page : undefined,
+    search: searchParams.query,
+    perPage: searchParams.per_page,
+    page: searchParams.page,
     defaultSearchOperator: 'AND',
-    ...tagsToFindOptions(searchBody.tags),
+    ...tagsToFindOptions({ included: includedTags, excluded: excludedTags }),
   });
 
-  return {
-    dashboards: soResponse.saved_objects.map((so) => {
-      const { description, tags, time_range, title } = transformDashboardOut(
-        so.attributes,
-        so.references
-      );
+  const dashboards = soResponse.saved_objects.map((so) => {
+    const {
+      dashboardState: { description, tags, time_range, title },
+    } = transformDashboardOut(so.attributes, so.references, undefined, strictValidationSchema);
 
-      return {
-        id: so.id,
-        data: {
-          ...(description && { description }),
-          ...(tags && { tags }),
-          ...(time_range && { time_range }),
-          ...(so?.accessControl && {
-            access_control: {
-              owner: so.accessControl.owner,
-              access_mode: so.accessControl.accessMode,
-            },
-          }),
-          title: title ?? '',
-        },
-        meta: getDashboardMeta(so, 'search'),
-      };
-    }),
-    page: soResponse.page,
-    total: soResponse.total,
-  };
+    return {
+      id: so.id,
+      data: {
+        ...(description && { description }),
+        ...(tags && { tags }),
+        ...(time_range && { time_range }),
+        ...(so?.accessControl && {
+          access_control: {
+            access_mode: so.accessControl.accessMode,
+          },
+        }),
+        title: title ?? '',
+      },
+      meta: getMeta(so),
+    };
+  });
+
+  const { total, page, per_page } = soResponse;
+
+  // The dashboard summaries are identical across schemas; only the response envelope differs.
+  // The legacy branch can be removed once the `asCode.useGASchemas` flag is gone.
+  return useAsCodeSearchSchemas
+    ? ({ data: dashboards, meta: { total, page, per_page } } as DashboardSearchResponseBody)
+    : ({ dashboards, page, total } as LegacyDashboardSearchResponseBody);
 }

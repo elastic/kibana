@@ -14,6 +14,7 @@ function createMockWiredStream(
   lifecycle: IngestStreamLifecycle
 ): Streams.WiredStream.Definition {
   return {
+    type: 'wired',
     name,
     description: name,
     updated_at: new Date().toISOString(),

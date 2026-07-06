@@ -12,17 +12,20 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
 export interface DevToolsSettingsModalProps {
+  id?: string;
   label: string;
   children: React.ReactNode;
 }
 
-export const SettingsFormRow = ({ label, children }: DevToolsSettingsModalProps) => {
+export const SettingsFormRow = ({ id, label, children }: DevToolsSettingsModalProps) => {
   return (
     <EuiFormRow fullWidth>
       <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+            <EuiFlexItem id={id} grow={false}>
+              {label}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
 

@@ -109,34 +109,38 @@ paths:
                 oneOf:
                   - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: '[request body].signal_ids: at least one alert id is required to update status'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
 
 components:
   schemas:
-    ReasonEnum:
-      type: string
-      enum:
-        [
-          'false_positive',
-          'duplicate',
-          'true_positive',
-          'benign_positive',
-          'automated_closure',
-          'other'
-        ]
-      description: 'The reason for closing the alerts'
-
     SetAlertsStatusByIdsBase:
       type: object
       properties:
@@ -167,7 +171,7 @@ components:
           type: string
           enum: [closed]
         reason:
-          $ref: '#/components/schemas/ReasonEnum'
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/Reason'
       required: [signal_ids, status]
 
     SetAlertsStatusByIds:
@@ -211,7 +215,7 @@ components:
             - proceed
           default: abort
         reason:
-          $ref: '#/components/schemas/ReasonEnum'
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/Reason'
       required: [query, status]
 
     SetAlertsStatusByQuery:

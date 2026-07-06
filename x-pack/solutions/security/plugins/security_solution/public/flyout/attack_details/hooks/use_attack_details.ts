@@ -7,6 +7,13 @@
 
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import {
+  type AttackDiscoveryAlert,
+  transformAttackDiscoveryAlertDocumentToApi,
+  transformAttackDiscoveryAlertFromApi,
+  type AttackDiscoveryAlertDocument,
+} from '@kbn/elastic-assistant-common';
+import { useMemo } from 'react';
 import type { SearchHit } from '../../../../common/search_strategy';
 
 import { PageScope } from '../../../data_view_manager/constants';
@@ -29,6 +36,10 @@ export interface UseAttackEventDetailsParams {
 
 export interface UseAttackEventDetailsResult {
   /**
+   * The attack discovery alert object constructed from the search hit
+   */
+  attack: AttackDiscoveryAlert | null;
+  /**
    * An object containing fields by type
    */
   browserFields: BrowserFields;
@@ -48,6 +59,10 @@ export interface UseAttackEventDetailsResult {
    * Whether the data is loading
    */
   loading: boolean;
+  /**
+   * Refetch the attack document from the server
+   */
+  refetch: () => Promise<void>;
 }
 
 export const useAttackDetails = ({
@@ -63,20 +78,43 @@ export const useAttackDetails = ({
 
   const runtimeMappings = dataView?.getRuntimeMappings() as RunTimeMappings;
 
-  const [loading, dataFormattedForFieldBrowser, searchHit] = useTimelineEventsDetails({
+  const [loading, dataFormattedForFieldBrowser, searchHit, , refetch] = useTimelineEventsDetails({
     indexName: indexName || '',
     eventId: attackId || '',
     runtimeMappings,
     skip: !attackId,
   });
 
+  // build AttackDiscoveryAlert from raw _source using shared document-API-internal transform
+  // returns null when source/attackId missing or transform throws
+  const attack = useMemo(() => {
+    const source = searchHit?._source;
+    if (!source || !attackId) {
+      return null;
+    }
+    try {
+      const apiAlert = transformAttackDiscoveryAlertDocumentToApi({
+        attackDiscoveryAlertDocument: source as AttackDiscoveryAlertDocument,
+        enableFieldRendering: true,
+        id: searchHit._id ?? attackId,
+        index: searchHit._index,
+        withReplacements: true,
+      });
+      return transformAttackDiscoveryAlertFromApi(apiAlert);
+    } catch {
+      return null;
+    }
+  }, [attackId, searchHit]);
+
   const { getFieldsData } = useGetFieldsData({ fieldsData: searchHit?.fields });
 
   return {
+    attack,
     browserFields,
     dataFormattedForFieldBrowser,
     searchHit,
     getFieldsData,
     loading,
+    refetch,
   };
 };

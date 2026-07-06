@@ -48,8 +48,14 @@ jest.mock('../../../lib/autocomplete/engine', () => {
   };
 });
 
+jest.mock('../../hooks', () => ({
+  sendRequest: jest.fn(),
+}));
+
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { monaco } from '@kbn/monaco';
+import { sendRequest } from '../../hooks';
+import { serviceContextMock } from '../../contexts/services_context.mock';
 
 describe('Editor actions provider', () => {
   let editorActionsProvider: MonacoEditorActionsProvider;
@@ -192,6 +198,111 @@ describe('Editor actions provider', () => {
         'POST',
         'PUT',
       ]);
+    });
+
+    it('orders method suggestions with GET first and DELETE last using sortText', async () => {
+      // Monaco sorts completion items by sortText, falling back to label. Without
+      // an explicit sortText, alphabetical sorting puts DELETE first (#259251).
+      mockGetParsedRequests.mockResolvedValue([]);
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        mockModel,
+        mockPosition,
+        mockContext
+      );
+      const sortedByMonaco = [...(completionItems?.suggestions ?? [])].sort((a, b) =>
+        String(a.sortText ?? a.label).localeCompare(String(b.sortText ?? b.label))
+      );
+      const orderedLabels = sortedByMonaco.map((s) => s.label);
+      expect(orderedLabels[0]).toBe('GET');
+      expect(orderedLabels[orderedLabels.length - 1]).toBe('DELETE');
+      expect(orderedLabels).toEqual(['GET', 'POST', 'PUT', 'PATCH', 'HEAD', 'DELETE']);
+    });
+
+    it('does not suggest methods when the line begins with a quote', async () => {
+      // A blank-ish line containing only a starting double quote is not a
+      // request line; method suggestions should not be offered there. The
+      // parser still emits a partial request (`startOffset` only) when it
+      // fails to match a method, so the autocomplete provider must guard
+      // both branches: with and without a parsed request on the line.
+      mockGetParsedRequests.mockResolvedValue([{ startOffset: 0 }]);
+      const quoteLineModel = {
+        ...mockModel,
+        getLineContent: () => '"',
+        getValueInRange: () => '"',
+      } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        quoteLineModel,
+        mockPosition,
+        mockContext
+      );
+      expect(completionItems?.suggestions).toEqual([]);
+    });
+
+    it('does not suggest methods when the cursor is before a quote-starting line', async () => {
+      mockGetParsedRequests.mockResolvedValue([{ startOffset: 0 }]);
+      const quoteLineModel = {
+        ...mockModel,
+        getLineContent: () => '"key": "value"',
+        getValueInRange: () => '',
+      } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        quoteLineModel,
+        mockPosition,
+        mockContext
+      );
+      expect(completionItems?.suggestions).toEqual([]);
+    });
+
+    it('does not suggest methods when there is no parsed request and the line begins with a quote', async () => {
+      // When the parser produces no request at all (e.g. on a totally fresh
+      // line), the no-request branch must also be guarded.
+      mockGetParsedRequests.mockResolvedValue([]);
+      const quoteLineModel = {
+        ...mockModel,
+        getLineContent: () => '"',
+        getValueInRange: () => '"',
+      } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        quoteLineModel,
+        mockPosition,
+        mockContext
+      );
+      expect(completionItems?.suggestions).toEqual([]);
+    });
+
+    it.each(['}', ']'])(
+      'does not suggest methods when the line contains only %s',
+      async (lineContent) => {
+        mockGetParsedRequests.mockResolvedValue([{ startOffset: 0 }]);
+        const bodyLineModel = {
+          ...mockModel,
+          getLineContent: () => lineContent,
+          getValueInRange: () => lineContent,
+        } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+        const completionItems = await editorActionsProvider.provideCompletionItems(
+          bodyLineModel,
+          mockPosition,
+          mockContext
+        );
+        expect(completionItems?.suggestions).toEqual([]);
+      }
+    );
+
+    it('still suggests methods when the line is empty (preserves empty-line behavior)', async () => {
+      mockGetParsedRequests.mockResolvedValue([]);
+      const emptyLineModel = {
+        ...mockModel,
+        getLineContent: () => '',
+        getValueInRange: () => '',
+      } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        emptyLineModel,
+        mockPosition,
+        mockContext
+      );
+      expect(completionItems?.suggestions.map((suggestion) => suggestion.label)).toEqual(
+        expect.arrayContaining(['GET', 'POST'])
+      );
     });
 
     it('returns completion items for url path if method already typed in', async () => {
@@ -642,6 +753,39 @@ describe('Editor actions provider', () => {
       } as monaco.Selection);
 
       expect(await editorActionsProvider.isKbnRequestSelected()).toEqual(true);
+    });
+  });
+
+  describe('sendRequests', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('falls back to server default and clears stale host when stored host is not in the allowlist', async () => {
+      (sendRequest as jest.Mock).mockResolvedValue([]);
+
+      const context = serviceContextMock.create();
+      jest
+        .spyOn(context.services.settings, 'getSelectedHost')
+        .mockReturnValue('http://localhost:9300/');
+      const setSelectedHostSpy = jest.spyOn(context.services.settings, 'setSelectedHost');
+      jest.spyOn(context.services.esHostService, 'waitForInitialization').mockResolvedValue();
+      jest
+        .spyOn(context.services.esHostService, 'getAllHosts')
+        .mockReturnValue(['https://localhost:9200/']);
+
+      // Use a custom provider that includes getErrors so sendRequests can proceed past validation
+      const provider = new MonacoEditorActionsProvider(editor, jest.fn(), '.className', {
+        getRequests: jest
+          .fn()
+          .mockResolvedValue([{ startOffset: 0, endOffset: 11, method: 'GET', url: '_search' }]),
+        getErrors: jest.fn().mockResolvedValue([]),
+      } as any);
+
+      await provider.sendRequests(jest.fn(), context);
+
+      expect(sendRequest).toHaveBeenCalledWith(expect.objectContaining({ host: undefined }));
+      expect(setSelectedHostSpy).toHaveBeenCalledWith(null);
     });
   });
 });

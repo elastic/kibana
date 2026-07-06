@@ -16,6 +16,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./comments/get_comment'));
     loadTestFile(require.resolve('./comments/patch_comment'));
     loadTestFile(require.resolve('./files/post_file'));
+    loadTestFile(require.resolve('./files/post_file_attachment'));
     loadTestFile(require.resolve('./alerts/get_cases'));
     loadTestFile(require.resolve('./alerts/get_alerts_attached_to_case'));
     loadTestFile(require.resolve('./cases/import_export'));
@@ -33,7 +34,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./configure/post_configure'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics_alerts'));
-    loadTestFile(require.resolve('./internal/metrics/get_case_metrics_actions'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics_connectors'));
     loadTestFile(require.resolve('./internal/metrics/get_cases_metrics'));
 
@@ -42,6 +42,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
      */
     loadTestFile(require.resolve('./internal/bulk_get_cases'));
     loadTestFile(require.resolve('./internal/bulk_get_attachments'));
+    loadTestFile(require.resolve('./internal/bulk_create_attachments'));
     loadTestFile(require.resolve('./internal/get_connectors'));
     loadTestFile(require.resolve('./internal/user_actions_get_users'));
     loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
@@ -55,6 +56,9 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
 
     loadTestFile(require.resolve('./attachments_framework/external_references.ts'));
     loadTestFile(require.resolve('./attachments_framework/persistable_state.ts'));
+    loadTestFile(require.resolve('./attachments_framework/osquery.ts'));
+    loadTestFile(require.resolve('./attachments_framework/endpoint.ts'));
+    loadTestFile(require.resolve('./attachments_framework/indicator.ts'));
 
     /**
      * Cases client

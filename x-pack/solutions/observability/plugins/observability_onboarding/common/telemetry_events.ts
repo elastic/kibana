@@ -162,6 +162,10 @@ interface OnboardingCloudForwarderEventContext {
   cloudServiceProvider?: string;
 }
 
+interface OnboardingKubernetesEventContext {
+  selectedCollectorMethod?: 'edot' | 'existing_collector';
+}
+
 /**
  * Additional flow-specific context that might
  * be attached to telemetry events.
@@ -170,6 +174,7 @@ export interface OnboardingFlowEventContext {
   autoDetect?: OnboardingAutoDetectEventContext;
   firehose?: OnboardingFirehoseFlowEventContext;
   cloudforwarder?: OnboardingCloudForwarderEventContext;
+  kubernetes?: OnboardingKubernetesEventContext;
 }
 
 const flowContextSchema: SchemaValue<OnboardingFlowEventContext | undefined> = {
@@ -231,6 +236,20 @@ const flowContextSchema: SchemaValue<OnboardingFlowEventContext | undefined> = {
           _meta: {
             description:
               "The cloud service provider where the cloud forwarder is deployed. Can be 'aws', 'gcp' or 'azure'",
+            optional: true,
+          },
+        },
+      },
+      _meta: {
+        optional: true,
+      },
+    },
+    kubernetes: {
+      properties: {
+        selectedCollectorMethod: {
+          type: 'keyword',
+          _meta: {
+            description: 'Which Kubernetes OTel collector setup method is selected in the UI.',
             optional: true,
           },
         },
@@ -335,5 +354,35 @@ export const OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT: Eve
       },
     },
     context: flowContextSchema,
+  },
+};
+
+export const OBSERVABILITY_ONBOARDING_WIRED_STREAMS_AUTO_ENABLED_EVENT: EventTypeOpts<{
+  flow_type: string;
+  success: boolean;
+  error_message?: string;
+}> = {
+  eventType: 'observability_onboarding_wired_streams_auto_enabled',
+  schema: {
+    flow_type: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The onboarding flow type where auto-enable was triggered (otel_host, otel_kubernetes, elastic_agent_kubernetes, auto_detect)',
+      },
+    },
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the auto-enable operation succeeded',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message if auto-enable failed',
+        optional: true,
+      },
+    },
   },
 };

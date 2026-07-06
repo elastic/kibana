@@ -47,8 +47,10 @@ describe('functions arg suggestions', () => {
                 {
                   name: 'unit',
                   type: 'keyword',
-                  constantOnly: true,
-                  suggestedValues: ['year', 'month', 'day', 'hour', 'minute'],
+                  hint: {
+                    kind: 'constant',
+                    allowedValues: ['year', 'month', 'day', 'hour', 'minute'],
+                  },
                 },
                 { name: 'left', type: 'date' },
                 { name: 'right', type: 'date' },
@@ -80,7 +82,7 @@ describe('functions arg suggestions', () => {
             {
               params: [
                 { name: 'field', type: 'double' },
-                { name: 'percent', type: 'double', constantOnly: true },
+                { name: 'percent', type: 'double', hint: { kind: 'constant' } },
               ],
               returnType: 'double',
             },
@@ -107,12 +109,11 @@ describe('functions arg suggestions', () => {
             {
               params: [
                 { name: 'field', type: 'keyword' },
-                { name: 'limit', type: 'integer', constantOnly: true },
+                { name: 'limit', type: 'integer', hint: { kind: 'constant' } },
                 {
                   name: 'order',
                   type: 'keyword',
-                  constantOnly: true,
-                  suggestedValues: ['asc', 'desc'],
+                  hint: { kind: 'constant', allowedValues: ['asc', 'desc'] },
                 },
               ],
               returnType: 'keyword',
@@ -139,9 +140,9 @@ describe('functions arg suggestions', () => {
             {
               params: [
                 { name: 'field', type: 'double', optional: false },
-                { name: 'buckets', type: 'integer', optional: false, constantOnly: true },
-                { name: 'from', type: 'double', optional: true, constantOnly: true },
-                { name: 'to', type: 'double', optional: true, constantOnly: true },
+                { name: 'buckets', type: 'integer', optional: false, hint: { kind: 'constant' } },
+                { name: 'from', type: 'double', optional: true, hint: { kind: 'constant' } },
+                { name: 'to', type: 'double', optional: true, hint: { kind: 'constant' } },
               ],
               returnType: 'double',
             },
@@ -447,6 +448,18 @@ describe('functions arg suggestions', () => {
       expect(texts).toContain('($0)');
     });
 
+    it.each([
+      ['IN', 'FROM index | EVAL integerField IN /'],
+      ['NOT IN', 'FROM index | EVAL integerField NOT IN /'],
+    ])('%s operator in EVAL expression: does not add a new-column suggestion', async (_, query) => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(query);
+      const texts = suggestions.map(({ text }) => text);
+
+      expect(texts).toContain('($0)');
+      expect(texts).not.toContain('col0 = ');
+    });
+
     it('NOT IN operator: suggests opening parenthesis for list', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = CASE(integerField NOT IN /)');
@@ -473,6 +486,17 @@ describe('functions arg suggestions', () => {
 
       expect(suggestions.length).toBeGreaterThan(0);
       expect(fieldSuggestions.length).toBeGreaterThan(0);
+    });
+
+    it('IN operator with a started list: keeps suggestions and does not leak marker text', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE integerField IN (1, /)');
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      suggestions.forEach(({ label, text }) => {
+        expect(label).not.toContain('marker_esql_editor');
+        expect(text).not.toContain('marker_esql_editor');
+      });
     });
 
     it('unary NOT operator in WHERE: suggests boolean fields and boolean-returning functions', async () => {
@@ -643,7 +667,7 @@ describe('functions arg suggestions', () => {
               {
                 name: 'arg',
                 type: 'keyword',
-                suggestedValues: ['value1', 'value2', 'value3'],
+                hint: { kind: 'constant', allowedValues: ['value1', 'value2', 'value3'] },
               },
             ],
             returnType: 'double',
@@ -674,12 +698,11 @@ describe('functions arg suggestions', () => {
               {
                 name: 'arg',
                 type: 'keyword',
-                constantOnly: true,
+                hint: { kind: 'constant' },
               },
               {
                 name: 'arg2',
                 type: 'keyword',
-                constantOnly: false,
               },
             ],
             returnType: 'double',

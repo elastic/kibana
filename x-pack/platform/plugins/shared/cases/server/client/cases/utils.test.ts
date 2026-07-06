@@ -23,6 +23,7 @@ import {
   createIncident,
   dedupAssignees,
   getClosedInfoForUpdate,
+  getCloseReasonIfValid,
   getDurationForUpdate,
   getEntity,
   getLatestPushInfo,
@@ -35,16 +36,22 @@ import {
   getTimingMetricsForUpdate,
   isObservable,
   processObservables,
+  enrichCasesWithFieldLabels,
 } from './utils';
+
 import type {
+  AttachmentV2,
   CaseCustomFields,
   CustomFieldsConfiguration,
   Observable,
+  CaseConnector,
+  JiraFieldsType,
 } from '../../../common/types/domain';
 import {
   CaseStatuses,
   CustomFieldTypes,
   UserActionActions,
+  UserActionTypes,
   CaseSeverity,
   ConnectorTypes,
 } from '../../../common/types/domain';
@@ -53,7 +60,7 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
 import { mappings, mockCases } from '../../mocks';
-import type { ObservablePost } from '../../../common/types/api';
+import type { ObservablePost, CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const allComments = [
@@ -85,6 +92,20 @@ describe('utils', () => {
 
     it('returns undefined when the assignees is undefined', () => {
       expect(dedupAssignees()).toBeUndefined();
+    });
+  });
+
+  describe('getCloseReasonIfValid', () => {
+    it('returns any non-empty close reason', () => {
+      expect(getCloseReasonIfValid('false_positive')).toBe('false_positive');
+      expect(getCloseReasonIfValid('automated_closure')).toBe('automated_closure');
+      expect(getCloseReasonIfValid('my custom reason')).toBe('my custom reason');
+    });
+
+    it('returns undefined for empty values', () => {
+      expect(getCloseReasonIfValid('')).toBeUndefined();
+      expect(getCloseReasonIfValid('   ')).toBeUndefined();
+      expect(getCloseReasonIfValid()).toBeUndefined();
     });
   });
 
@@ -122,6 +143,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
@@ -310,6 +332,52 @@ describe('utils', () => {
           labels: ['LOLBins'],
           issueType: 'Task',
           parent: null,
+          otherFields: null,
+          summary: 'Another bad one',
+          description: 'Oh no, a bad meanie going LOLBins all over the place!\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('includes Jira otherFields in the incident payload', async () => {
+      const caseWithOtherFields = {
+        ...flattenCaseSavedObject({
+          savedObject: {
+            ...mockCases[2],
+            attributes: {
+              ...mockCases[2].attributes,
+              connector: {
+                ...mockCases[2].attributes.connector,
+                fields: {
+                  ...(mockCases[2].attributes.connector.fields as JiraFieldsType),
+                  otherFields: '{"customfield_123456":"Blue team"}',
+                },
+              } as CaseConnector,
+            },
+          },
+        }),
+        comments: [],
+        totalComments: 0,
+      };
+
+      const res = await createIncident({
+        theCase: caseWithOtherFields,
+        userActions: [],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          priority: 'High',
+          labels: ['LOLBins'],
+          issueType: 'Task',
+          parent: null,
+          otherFields: '{"customfield_123456":"Blue team"}',
           summary: 'Another bad one',
           description: 'Oh no, a bad meanie going LOLBins all over the place!\n\nAdded by elastic.',
           externalId: null,
@@ -413,6 +481,66 @@ describe('utils', () => {
       ]);
     });
 
+    it('counts unified alert attachments toward the alerts total', async () => {
+      const unifiedAlertSingle = {
+        ...omit(commentAlert, ['alertId', 'index', 'rule']),
+        id: 'unified-alert-1',
+        type: 'security.alert',
+        attachmentId: 'alert-id-3',
+      } as unknown as AttachmentV2;
+      const unifiedAlertMulti = {
+        ...omit(commentAlert, ['alertId', 'index', 'rule']),
+        id: 'unified-alert-2',
+        type: 'security.alert',
+        attachmentId: ['alert-id-4', 'alert-id-5'],
+      } as unknown as AttachmentV2;
+
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          // 1 legacy alert (1 id) + 2 unified alerts (1 + 2 ids) = 4 alerts total
+          comments: [commentAlert, unifiedAlertSingle, unifiedAlertMulti],
+        },
+        userActions,
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Elastic Alerts attached to the case: 4',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('skips the alerts summary when every alert (legacy or unified) has been pushed', async () => {
+      const pushedAt = '2019-11-25T21:55:00.177Z';
+      const unifiedAlertPushed = {
+        ...omit(commentAlert, ['alertId', 'index', 'rule']),
+        id: 'unified-alert-1',
+        type: 'security.alert',
+        attachmentId: ['alert-id-3', 'alert-id-4'],
+        pushed_at: pushedAt,
+      } as unknown as AttachmentV2;
+
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          comments: [{ ...commentAlertMultipleIds, pushed_at: pushedAt }, unifiedAlertPushed],
+        },
+        userActions,
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([]);
+    });
+
     it('adds the backlink to cases correctly', async () => {
       const res = await createIncident({
         theCase,
@@ -430,6 +558,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/app/security/cases/mock-id-1',
@@ -456,6 +585,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/s/test-space/app/security/cases/mock-id-1',
@@ -486,6 +616,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.',
@@ -524,6 +655,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.',
@@ -677,21 +809,11 @@ describe('utils', () => {
           comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
           commentId: 'comment-user-1',
         },
-        {
-          comment:
-            'Isolated host windows-host-1 with comment: Isolating this for investigation\n\nAdded by elastic.',
-          commentId: 'mock-action-comment-1',
-        },
-        {
-          comment:
-            'Released host windows-host-1 with comment: Releasing this for investigation\n\nAdded by elastic.',
-          commentId: 'mock-action-comment-2',
-        },
-        {
-          comment:
-            'Isolated host windows-host-1 and 1 more with comment: Isolating this for investigation\n\nAdded by elastic.',
-          commentId: 'mock-action-comment-3',
-        },
+        // Legacy `actions` host-isolation comments are no longer pushed: they
+        // are folded into the unified `security.endpoint` shape on read and
+        // the registry-hook redesign tracked in
+        // https://github.com/elastic/kibana/issues/262574 will own per-type
+        // connector formatting.
         {
           comment: 'Elastic Alerts attached to the case: 3',
           commentId: 'mock-id-1-total-alerts',
@@ -726,27 +848,6 @@ describe('utils', () => {
         {
           comment: 'Wow, good luck catching that bad meanie!\n\nAdded by Damaged Raccoon.',
           commentId: 'comment-user-1',
-        },
-        {
-          comment:
-            'Isolated host windows-host-1 with comment: Isolating this for investigation\n' +
-            '\n' +
-            'Added by Damaged Raccoon.',
-          commentId: 'mock-action-comment-1',
-        },
-        {
-          comment:
-            'Released host windows-host-1 with comment: Releasing this for investigation\n' +
-            '\n' +
-            'Added by Damaged Raccoon.',
-          commentId: 'mock-action-comment-2',
-        },
-        {
-          comment:
-            'Isolated host windows-host-1 and 1 more with comment: Isolating this for investigation\n' +
-            '\n' +
-            'Added by Damaged Raccoon.',
-          commentId: 'mock-action-comment-3',
         },
         {
           comment: 'Elastic Alerts attached to the case: 3',
@@ -910,6 +1011,46 @@ describe('utils', () => {
           comment:
             'Elastic Alerts attached to the case: 1\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/s/test-space/app/security/cases/mock-id-1/?tabId=alerts',
           commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('formats unified `comment` attachments using data.content', () => {
+      const unifiedComment = {
+        ...omit(commentObj, ['comment']),
+        id: 'comment-unified-1',
+        type: 'comment',
+        data: { content: 'Unified comment body' },
+      } as unknown as AttachmentV2;
+
+      const userActionsWithUnified = [
+        ...userActions,
+        {
+          ...userActions.find((action) => action.type === UserActionTypes.comment)!,
+          comment_id: unifiedComment.id,
+        },
+      ] as CaseUserActionsDeprecatedResponse;
+
+      const theCase = {
+        ...flattenCaseSavedObject({ savedObject: mockCases[0] }),
+        comments: [unifiedComment],
+        totalComments: 1,
+      };
+
+      const latestPushInfo = getLatestPushInfo('not-exists', userActionsWithUnified);
+
+      expect(
+        formatComments({
+          userActions: userActionsWithUnified,
+          theCase,
+          latestPushInfo,
+          userProfiles: userProfilesMap,
+          spaceId: 'default',
+        })
+      ).toEqual([
+        {
+          comment: 'Unified comment body\n\nAdded by elastic.',
+          commentId: 'comment-unified-1',
         },
       ]);
     });
@@ -2079,5 +2220,148 @@ describe('processObservables', () => {
     expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
     expect(observablesMap.get('ip-127.0.0.1')).toEqual(mockObservable);
     expect(observablesMap.size).toBe(1);
+  });
+});
+
+describe('enrichCasesWithFieldLabels', () => {
+  const baseCase = flattenCaseSavedObject({ savedObject: mockCases[0], totalComment: 0 });
+
+  const caseWithTemplate = {
+    ...baseCase,
+    template: { id: 'template-id-1', version: 1 },
+    extended_fields: { priority_as_keyword: 'high', effort_as_integer: '3' },
+  };
+
+  const templateSO = {
+    id: 'so-id',
+    type: 'cases-template' as const,
+    references: [],
+    attributes: {
+      templateId: 'template-id-1',
+      name: 'My Template',
+      owner: 'cases',
+      definition: '',
+      templateVersion: 1,
+      deletedAt: null,
+      fieldNames: [
+        { name: 'priority', label: 'Priority Level', type: 'keyword', control: 'INPUT_TEXT' },
+        { name: 'effort', label: 'Effort Points', type: 'integer', control: 'INPUT_NUMBER' },
+      ],
+    },
+  };
+
+  it('populates extended_fields_labels from the matched template fieldNames', () => {
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO]);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+  });
+
+  it('returns case unchanged when it has no template reference', () => {
+    const result = enrichCasesWithFieldLabels([baseCase], [templateSO]);
+
+    expect(result[0]).toEqual(baseCase);
+  });
+
+  it('returns case unchanged when it has no extended_fields', () => {
+    const caseNoExtFields = { ...baseCase, template: { id: 'template-id-1', version: 1 } };
+
+    const result = enrichCasesWithFieldLabels([caseNoExtFields], [templateSO]);
+
+    expect(result[0]).toEqual(caseNoExtFields);
+  });
+
+  it('omits extended_fields_labels when the referenced template is not in the provided list', () => {
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], []);
+
+    expect(result[0].extended_fields_labels).toBeUndefined();
+  });
+
+  it('uses the same template SO for multiple cases with the same templateId+version', () => {
+    const secondCase = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+    };
+
+    const result = enrichCasesWithFieldLabels([caseWithTemplate, secondCase], [templateSO]);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+  });
+
+  it('resolves different template versions separately for the same templateId', () => {
+    const templateSOv2 = {
+      ...templateSO,
+      id: 'so-id-v2',
+      attributes: {
+        ...templateSO.attributes,
+        templateVersion: 2,
+        fieldNames: [
+          { name: 'priority', label: 'Priority Level v2', type: 'keyword', control: 'INPUT_TEXT' },
+        ],
+      },
+    };
+
+    const caseV2 = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+      template: { id: 'template-id-1', version: 2 },
+    };
+
+    const result = enrichCasesWithFieldLabels(
+      [caseWithTemplate, caseV2],
+      [templateSO, templateSOv2]
+    );
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level v2',
+    });
+  });
+
+  it('handles multiple cases with different templateIds independently', () => {
+    const templateSO2 = {
+      ...templateSO,
+      id: 'so-id-2',
+      attributes: {
+        ...templateSO.attributes,
+        templateId: 'template-id-2',
+        templateVersion: 1,
+        fieldNames: [
+          { name: 'severity', label: 'Severity Label', type: 'keyword', control: 'SELECT_BASIC' },
+        ],
+      },
+    };
+
+    const caseTwo = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+      template: { id: 'template-id-2', version: 1 },
+      extended_fields: { severity_as_keyword: 'critical' },
+    };
+
+    const result = enrichCasesWithFieldLabels(
+      [caseWithTemplate, caseTwo],
+      [templateSO, templateSO2]
+    );
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      severity_as_keyword: 'Severity Label',
+    });
   });
 });

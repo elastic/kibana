@@ -9,7 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   DeleteEntityEngineRequestQuery,
   type DeleteMonitoringEngineResponse,

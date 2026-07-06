@@ -8,17 +8,18 @@
 import React from 'react';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Query } from '@kbn/data-plugin/common';
+import { FilterStateStore } from '@kbn/es-query';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { act } from 'react-dom/test-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
-import Expressions from './custom_threshold_rule_expression';
+import Expressions, { getNoDataBehaviorValue } from './custom_threshold_rule_expression';
 import type { AlertParams, CustomThresholdPrefillOptions } from './types';
-import type { KqlPluginStart } from '@kbn/kql/public';
 
 jest.mock('../../utils/kibana_react');
 jest.mock('../rule_condition_chart/rule_condition_chart', () => ({
@@ -66,6 +67,7 @@ describe('Expression', () => {
     const wrapper = mountWithIntl(
       <QueryClientProvider client={queryClient}>
         <Expressions
+          kql={{} as KqlPluginStart}
           ruleInterval="1m"
           ruleThrottle="1m"
           alertNotifyWhen="onThrottleInterval"
@@ -76,7 +78,6 @@ describe('Expression', () => {
           metadata={metadata}
           dataViews={dataViewMock}
           onChangeMetaData={jest.fn()}
-          kql={{} as KqlPluginStart}
         />
       </QueryClientProvider>
     );
@@ -163,6 +164,15 @@ describe('Expression', () => {
     ]);
   });
 
+  it('should derive noDataBehavior from alertOnNoData when noDataBehavior is undefined', async () => {
+    const { ruleParams } = await setup(undefined, {
+      alertOnNoData: true,
+      noDataBehavior: undefined,
+    });
+
+    expect(ruleParams.noDataBehavior).toBe('alertOnNoData');
+  });
+
   it('should prefill the rule using the context metadata', async () => {
     const index = 'changedMockedIndex';
     const currentOptions: CustomThresholdPrefillOptions = {
@@ -194,8 +204,6 @@ describe('Expression', () => {
 
     const { ruleParams } = await setup(currentOptions, { searchConfiguration: undefined });
 
-    expect(ruleParams.alertOnGroupDisappear).toEqual(true);
-    expect(ruleParams.alertOnNoData).toEqual(true);
     expect(ruleParams.groupBy).toEqual(['host.hostname']);
     expect((ruleParams.searchConfiguration.query as Query).query).toBe('foo');
     expect(ruleParams.searchConfiguration.index).toBe(index);
@@ -213,68 +221,6 @@ describe('Expression', () => {
         timeUnit: 'h',
       },
     ]);
-  });
-
-  it('should only set alertOnGroupDisappear to true if there is a group by field', async () => {
-    const customRuleParams: Partial<RuleTypeParams & AlertParams> = {
-      groupBy: ['host.hostname'],
-    };
-
-    const { ruleParams, wrapper } = await setup({}, customRuleParams);
-
-    act(() => {
-      wrapper
-        .find('[data-test-subj="thresholdRuleAlertOnNoDataCheckbox"]')
-        .at(1)
-        .prop('onChange')?.({
-        target: { checked: true },
-      } as React.ChangeEvent<HTMLInputElement>);
-    });
-
-    expect(ruleParams.alertOnGroupDisappear).toEqual(true);
-    expect(ruleParams.alertOnNoData).toEqual(false);
-
-    // Uncheck
-    act(() => {
-      wrapper
-        .find('[data-test-subj="thresholdRuleAlertOnNoDataCheckbox"]')
-        .at(1)
-        .prop('onChange')?.({
-        target: { checked: false },
-      } as React.ChangeEvent<HTMLInputElement>);
-    });
-
-    expect(ruleParams.alertOnGroupDisappear).toEqual(false);
-    expect(ruleParams.alertOnNoData).toEqual(false);
-  });
-
-  it('should only set alertOnNoData to true if there is no group by', async () => {
-    const { ruleParams, wrapper } = await setup();
-
-    act(() => {
-      wrapper
-        .find('[data-test-subj="thresholdRuleAlertOnNoDataCheckbox"]')
-        .at(1)
-        .prop('onChange')?.({
-        target: { checked: true },
-      } as React.ChangeEvent<HTMLInputElement>);
-    });
-
-    expect(ruleParams.alertOnGroupDisappear).toEqual(false);
-    expect(ruleParams.alertOnNoData).toEqual(true);
-
-    // Uncheck
-    act(() => {
-      wrapper
-        .find('[data-test-subj="thresholdRuleAlertOnNoDataCheckbox"]')
-        .at(1)
-        .prop('onChange')?.({
-        target: { checked: false },
-      } as React.ChangeEvent<HTMLInputElement>);
-    });
-
-    expect(ruleParams.alertOnGroupDisappear).toEqual(false);
-    expect(ruleParams.alertOnNoData).toEqual(false);
   });
 
   it('should show an error message when searchSource throws an error', async () => {
@@ -327,6 +273,35 @@ describe('Expression', () => {
     );
   });
 
+  it('should re-add $state to saved filters before passing them to the SearchBar', async () => {
+    const kibanaMock = kibanaStartMock.startContract();
+    const searchBarMock = kibanaMock.services.unifiedSearch.ui.SearchBar as jest.Mock;
+    searchBarMock.mockClear();
+    useKibanaMock.mockReturnValue(kibanaMock);
+
+    const savedFilter = {
+      meta: { index: 'mockedIndex', key: 'host.name', type: 'phrase' },
+      query: { match_phrase: { 'host.name': 'host-1' } },
+    };
+
+    await setup(undefined, {
+      searchConfiguration: {
+        index: 'mockedIndex',
+        query: { query: '', language: 'kuery' },
+        filter: [savedFilter],
+      },
+    });
+
+    expect(searchBarMock).toHaveBeenCalled();
+    const { filters } = searchBarMock.mock.calls[searchBarMock.mock.calls.length - 1][0];
+    expect(filters).toEqual([
+      {
+        ...savedFilter,
+        $state: { store: FilterStateStore.APP_STATE },
+      },
+    ]);
+  });
+
   it('should use output of getSerializedFields() as searchConfiguration', async () => {
     const mockedIndex = {
       id: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
@@ -339,6 +314,212 @@ describe('Expression', () => {
     const { ruleParams } = await setup(undefined, { searchConfiguration: undefined });
     expect(ruleParams.searchConfiguration).toEqual({
       index: mockedIndex,
+    });
+  });
+});
+
+describe('getNoDataBehaviorValue', () => {
+  const baseRuleParams = {
+    criteria: [],
+    groupBy: undefined,
+    sourceId: 'default',
+    searchConfiguration: {
+      index: 'default',
+      query: { query: '', language: 'kuery' as const },
+    },
+  };
+
+  describe('when noDataBehavior is set', () => {
+    it('should return the noDataBehavior value', () => {
+      expect(
+        getNoDataBehaviorValue({ ...baseRuleParams, noDataBehavior: 'alertOnNoData' }, false)
+      ).toBe('alertOnNoData');
+      expect(getNoDataBehaviorValue({ ...baseRuleParams, noDataBehavior: 'recover' }, true)).toBe(
+        'recover'
+      );
+      expect(
+        getNoDataBehaviorValue({ ...baseRuleParams, noDataBehavior: 'remainActive' }, false)
+      ).toBe('remainActive');
+    });
+
+    it('should ignore legacy params when noDataBehavior is set', () => {
+      expect(
+        getNoDataBehaviorValue(
+          { ...baseRuleParams, noDataBehavior: 'recover', alertOnNoData: true },
+          false
+        )
+      ).toBe('recover');
+      expect(
+        getNoDataBehaviorValue(
+          { ...baseRuleParams, noDataBehavior: 'alertOnNoData', alertOnGroupDisappear: false },
+          true
+        )
+      ).toBe('alertOnNoData');
+      expect(
+        getNoDataBehaviorValue(
+          {
+            ...baseRuleParams,
+            noDataBehavior: 'remainActive',
+            alertOnNoData: true,
+            alertOnGroupDisappear: true,
+          },
+          true
+        )
+      ).toBe('remainActive');
+      expect(
+        getNoDataBehaviorValue(
+          {
+            ...baseRuleParams,
+            noDataBehavior: 'remainActive',
+            alertOnNoData: false,
+            alertOnGroupDisappear: false,
+          },
+          false
+        )
+      ).toBe('remainActive');
+      expect(
+        getNoDataBehaviorValue(
+          {
+            ...baseRuleParams,
+            noDataBehavior: 'recover',
+            alertOnNoData: true,
+            alertOnGroupDisappear: true,
+          },
+          true
+        )
+      ).toBe('recover');
+      expect(
+        getNoDataBehaviorValue(
+          {
+            ...baseRuleParams,
+            noDataBehavior: 'alertOnNoData',
+            alertOnNoData: false,
+            alertOnGroupDisappear: true,
+          },
+          false
+        )
+      ).toBe('alertOnNoData');
+      expect(
+        getNoDataBehaviorValue(
+          {
+            ...baseRuleParams,
+            noDataBehavior: 'alertOnNoData',
+            alertOnNoData: false,
+            alertOnGroupDisappear: false,
+          },
+          true
+        )
+      ).toBe('alertOnNoData');
+    });
+  });
+
+  describe('when noDataBehavior is not set (legacy params)', () => {
+    describe('with groupBy', () => {
+      it('should return alertOnNoData when alertOnGroupDisappear is true', () => {
+        expect(
+          getNoDataBehaviorValue({ ...baseRuleParams, alertOnGroupDisappear: true }, true)
+        ).toBe('alertOnNoData');
+      });
+
+      it('should return recover when alertOnGroupDisappear is false', () => {
+        expect(
+          getNoDataBehaviorValue({ ...baseRuleParams, alertOnGroupDisappear: false }, true)
+        ).toBe('recover');
+      });
+
+      it('should return recover when alertOnGroupDisappear is undefined', () => {
+        expect(getNoDataBehaviorValue({ ...baseRuleParams }, true)).toBe('recover');
+      });
+
+      it('should return alertOnNoData when alertOnGroupDisappear is true and alertOnNoData is true', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnGroupDisappear: true, alertOnNoData: true },
+            true
+          )
+        ).toBe('alertOnNoData');
+      });
+
+      it('should return alertOnNoData when alertOnGroupDisappear is true and alertOnNoData is false', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnGroupDisappear: true, alertOnNoData: false },
+            true
+          )
+        ).toBe('alertOnNoData');
+      });
+
+      it('should return recover when alertOnGroupDisappear is false and alertOnNoData is true', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnGroupDisappear: false, alertOnNoData: true },
+            true
+          )
+        ).toBe('recover');
+      });
+
+      it('should return recover when alertOnGroupDisappear and alertOnNoData are undefined', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnGroupDisappear: undefined, alertOnNoData: undefined },
+            true
+          )
+        ).toBe('recover');
+      });
+    });
+
+    describe('without groupBy', () => {
+      it('should return alertOnNoData when alertOnNoData is true', () => {
+        expect(getNoDataBehaviorValue({ ...baseRuleParams, alertOnNoData: true }, false)).toBe(
+          'alertOnNoData'
+        );
+      });
+
+      it('should return recover when alertOnNoData is false', () => {
+        expect(getNoDataBehaviorValue({ ...baseRuleParams, alertOnNoData: false }, false)).toBe(
+          'recover'
+        );
+      });
+
+      it('should return recover when alertOnNoData is undefined', () => {
+        expect(getNoDataBehaviorValue({ ...baseRuleParams }, false)).toBe('recover');
+      });
+
+      it('should return alertOnNoData when alertOnNoData is true and alertOnGroupDisappear is true', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnNoData: true, alertOnGroupDisappear: true },
+            false
+          )
+        ).toBe('alertOnNoData');
+      });
+
+      it('should return recover when alertOnNoData is false and alertOnGroupDisappear is true', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnNoData: false, alertOnGroupDisappear: true },
+            false
+          )
+        ).toBe('recover');
+      });
+
+      it('should return recover when alertOnNoData is true and alertOnGroupDisappear is false', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnNoData: true, alertOnGroupDisappear: false },
+            false
+          )
+        ).toBe('alertOnNoData');
+      });
+
+      it('should return recover when alertOnNoData and alertOnGroupDisappear are undefined', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnNoData: undefined, alertOnGroupDisappear: undefined },
+            false
+          )
+        ).toBe('recover');
+      });
     });
   });
 });

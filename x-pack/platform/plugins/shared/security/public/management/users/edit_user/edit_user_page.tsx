@@ -61,7 +61,13 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
   const [action, setAction] = useState<EditUserPageAction>('none');
   const readOnly = !useCapabilities('users').save;
 
-  const backToUsers = () => history.push('/');
+  const backToUsers = () => {
+    if (history.length > 1) {
+      history.goBack();
+    } else {
+      history.push('/');
+    }
+  };
 
   useEffect(() => {
     getUser();
@@ -82,7 +88,11 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
 
   const getReturnToUserListButton = () => {
     return (
-      <EuiButton iconType="arrowLeft" onClick={backToUsers} data-test-subj="editUserBackButton">
+      <EuiButton
+        iconType="chevronSingleLeft"
+        onClick={backToUsers}
+        data-test-subj="editUserBackButton"
+      >
         <FormattedMessage
           id="xpack.security.management.users.userForm.backToUsersButton"
           defaultMessage="Back to users"

@@ -385,6 +385,7 @@ describe('Use cases toast hook', () => {
 
       expect(successMock).toHaveBeenCalledWith({
         className: 'eui-textBreakWord',
+        text: undefined,
         title: 'my title',
       });
     });

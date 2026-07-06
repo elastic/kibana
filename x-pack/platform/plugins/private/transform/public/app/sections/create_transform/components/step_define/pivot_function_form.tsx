@@ -70,11 +70,13 @@ export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
                   <EuiCopy
                     beforeMessage={copyToClipboardPivotDescription}
                     textToCopy={copyToClipboardPivot}
+                    tooltipProps={{ disableScreenReaderOutput: true }}
                   >
                     {(copy: () => void) => (
+                      // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap -- `EuiCopy` already provides its own tooltip with `beforeMessage`
                       <EuiButtonIcon
                         onClick={copy}
-                        iconType="copyClipboard"
+                        iconType="copy"
                         aria-label={copyToClipboardPivotDescription}
                       />
                     )}

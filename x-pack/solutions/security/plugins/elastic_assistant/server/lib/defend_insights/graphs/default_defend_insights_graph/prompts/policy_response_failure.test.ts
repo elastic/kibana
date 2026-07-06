@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { promptDictionary, getPromptsByGroupId } from '../../../../prompt';
 import { getPolicyResponseFailurePrompt } from './policy_response_failure';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
@@ -23,7 +21,6 @@ jest.mock('../../../../prompt', () => {
 const mockGetPromptsByGroupId = getPromptsByGroupId as jest.Mock;
 
 describe('getPolicyResponseFailurePrompt', () => {
-  const actionsClient = {} as jest.Mocked<PublicMethodsOf<ActionsClient>>;
   const savedObjectsClient = {} as jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
@@ -78,7 +75,6 @@ describe('getPolicyResponseFailurePrompt', () => {
 
   it('should return all prompts', async () => {
     const result = await getPolicyResponseFailurePrompt({
-      actionsClient,
       connectorId: 'test-connector-id',
       savedObjectsClient,
       model: '4',
@@ -126,7 +122,6 @@ describe('getPolicyResponseFailurePrompt', () => {
     mockGetPromptsByGroupId.mockResolvedValue([]);
 
     const result = await getPolicyResponseFailurePrompt({
-      actionsClient,
       connectorId: 'test-connector-id',
       savedObjectsClient,
     });

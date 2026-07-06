@@ -11,7 +11,6 @@ import { Provider } from 'react-redux';
 import { KibanaRenderContextProvider } from '../shared_imports';
 import type { AppDependencies } from './app_context';
 import { AppContextProvider } from './app_context';
-// @ts-ignore
 import { licenseManagementStore } from './store';
 
 interface Props {

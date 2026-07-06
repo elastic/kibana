@@ -6,53 +6,46 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { readConfig } from 'jest-config';
-import { SearchSource } from 'jest';
-import Runtime from 'jest-runtime';
-import { resolve } from 'path';
-import { getKibanaDir, runBatchedPromises } from '#pipeline-utils';
+import { dirname, resolve } from 'path';
+import * as globby from 'globby';
+import { getKibanaDir } from '#pipeline-utils';
 
-export async function getTestsFromJestConfig(configPath: string): Promise<string[]> {
-  try {
-    const emptyArgv = {
-      $0: '',
-      _: [],
-    };
-    const config = await readConfig(emptyArgv, configPath);
-    const searchSource = new SearchSource(
-      await Runtime.createContext(config.projectConfig, {
-        maxWorkers: 1,
-        watchman: false,
-        watch: false,
-        console: {
-          ...console,
-          warn() {
-            // ignore haste-map warnings
-          },
-        },
-      })
-    );
+const TEST_FILE_PATTERNS = ['**/*.test.{ts,tsx,js,jsx,mjs}', '**/*.spec.{ts,tsx,js,jsx,mjs}'];
 
-    const results = await searchSource.getTestPaths(config.globalConfig, config.projectConfig);
-    return results.tests.map((t) => t.path);
-  } catch (error) {
-    console.error(
-      `Error while resolving test files from config: ${configPath} - validate your config.`
-    );
-    throw error;
+// Loaded lazily because getKibanaDir() isn't available at module-init time.
+let ignorePatterns: string[];
+function getIgnorePatterns(): string[] {
+  if (!ignorePatterns) {
+    // Integration test patterns loaded from the Jest integration preset so this
+    // stays in sync automatically if that preset ever changes.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const integrationPreset = require(resolve(
+      getKibanaDir(),
+      'src/platform/packages/shared/kbn-test/jest_integration_node/jest-preset.js'
+    ));
+    ignorePatterns = ['**/node_modules/**', ...integrationPreset.testMatch];
   }
+  return ignorePatterns;
 }
 
-export async function filterEmptyJestConfigs(
-  jestUnitConfigsWithEmpties: string[],
-  maxParallelism = 1
-): Promise<string[]> {
-  const promiseThunks = jestUnitConfigsWithEmpties.map((configPath) => async () => {
-    const kibanaRelativePath = resolve(getKibanaDir(), configPath);
-    const testFiles = await getTestsFromJestConfig(kibanaRelativePath);
-    return testFiles?.length > 0 ? [configPath] : [];
+/**
+ * Fast check for whether a jest config's directory contains any test files.
+ * Uses a simple glob instead of Jest's full resolver (readConfig + Runtime.createContext
+ * + SearchSource.getTestPaths) which is ~20x slower across 1000+ configs.
+ */
+function hasTestFiles(configAbsPath: string): boolean {
+  const dir = dirname(configAbsPath);
+  const matches = globby.sync(TEST_FILE_PATTERNS, {
+    cwd: dir,
+    ignore: getIgnorePatterns(),
+    onlyFiles: true,
   });
-  const nonEmptyConfigPaths = await runBatchedPromises(promiseThunks, maxParallelism);
-  // flat-mapping works better type-wise than filtering an Array<string | null>
-  return nonEmptyConfigPaths.flat();
+  return matches.length > 0;
+}
+
+export function filterEmptyJestConfigs(jestUnitConfigsWithEmpties: string[]): string[] {
+  const kibanaDir = getKibanaDir();
+  return jestUnitConfigsWithEmpties.filter((configPath) =>
+    hasTestFiles(resolve(kibanaDir, configPath))
+  );
 }

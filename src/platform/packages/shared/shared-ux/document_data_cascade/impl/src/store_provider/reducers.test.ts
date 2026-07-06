@@ -34,13 +34,14 @@ describe('createStoreReducers', () => {
   });
 
   it('should return the expected correct reducers', () => {
-    expect(Object.keys(reducers)).toHaveLength(7);
+    expect(Object.keys(reducers)).toHaveLength(8);
     expect(reducers).toMatchInlineSnapshot(`
       Object {
+        "_setStoreState": [Function],
         "resetActiveCascadeGroups": [Function],
         "setActiveCascadeGroups": [Function],
         "setExpandedRows": [Function],
-        "setInitialState": [Function],
+        "setInitialGroupNodes": [Function],
         "setRowGroupLeafData": [Function],
         "setRowGroupNodeData": [Function],
         "setSelectedRows": [Function],
@@ -48,13 +49,13 @@ describe('createStoreReducers', () => {
     `);
   });
 
-  describe('setInitialState', () => {
-    it('should set the initial state correctly', () => {
+  describe('setInitialGroupNodes', () => {
+    it('should set the initial group nodes correctly', () => {
       const groupNodes = Array.from<GroupNode>(
         new Array(3).fill(null).map((_, i) => ({ id: `group-${i}` }))
       );
 
-      const newState = reducers.setInitialState(initialState, groupNodes);
+      const newState = reducers.setInitialGroupNodes(initialState, groupNodes);
       expect(newState.groupNodes).toStrictEqual(groupNodes);
     });
   });

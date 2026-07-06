@@ -7,8 +7,7 @@
       "node",
       "react",
       "@testing-library/jest-dom",
-      "@emotion/react/types/css-prop",
-      "../../../../../typings/emotion.d.ts"
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [
@@ -17,13 +16,11 @@
     "**/*.tsx",
     "**/*.svg",
     "**/*.d.ts",
-    "../../../../../typings/emotion.d.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/charts-theme",
     "@kbn/code-editor",
     "@kbn/core",
     "@kbn/data-plugin",
@@ -39,17 +36,15 @@
     "@kbn/index-management-shared-types",
     "@kbn/kibana-react-plugin",
     "@kbn/ml-is-defined",
-    "@kbn/ml-time-buckets",
     "@kbn/react-field",
-    "@kbn/search-types",
     "@kbn/shared-ux-prompt-no-data-views",
     "@kbn/test-jest-helpers",
     "@kbn/react-kibana-context-render",
     "@kbn/field-formats-plugin",
     "@kbn/share-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/core-http-browser",
     "@kbn/react-kibana-mount",
+    "@kbn/core-http-browser",
   ]
 }
 

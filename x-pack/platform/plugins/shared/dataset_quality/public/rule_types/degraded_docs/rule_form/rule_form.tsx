@@ -71,7 +71,7 @@ export const RuleForm: React.FunctionComponent<
   );
 
   const updateProperty = useCallback(
-    (property: keyof DegradedDocsRuleParams, value?: any) => {
+    <K extends keyof DegradedDocsRuleParams>(property: K, value?: DegradedDocsRuleParams[K]) => {
       setRuleParams(property, value);
     },
     [setRuleParams]
@@ -192,6 +192,10 @@ export const RuleForm: React.FunctionComponent<
   };
 
   const selectedOptions = [...getPreSelectedOptions(), ...getUserSelectedOptions(groupBy)];
+  const normalizedThreshold = threshold ?? defaultRuleParams.threshold!;
+  const normalizedComparator = (comparator ?? defaultRuleParams.comparator) as COMPARATORS;
+  const normalizedTimeSize = timeSize || defaultRuleParams.timeSize!;
+  const normalizedTimeUnit = (timeUnit ?? defaultRuleParams.timeUnit) as TimeUnitChar;
 
   return (
     <>
@@ -247,8 +251,8 @@ export const RuleForm: React.FunctionComponent<
       />
 
       <ThresholdExpression
-        thresholdComparator={comparator ?? defaultRuleParams.comparator}
-        threshold={threshold}
+        thresholdComparator={normalizedComparator}
+        threshold={normalizedThreshold}
         onChangeSelectedThresholdComparator={(value) => updateProperty('comparator', value)}
         onChangeSelectedThreshold={(value) => updateProperty('threshold', value)}
         errors={errors}
@@ -257,20 +261,20 @@ export const RuleForm: React.FunctionComponent<
       />
 
       <RuleConditionChart
-        threshold={threshold}
-        comparator={comparator as COMPARATORS}
-        timeSize={timeSize}
-        timeUnit={timeUnit as TimeUnitChar}
+        threshold={normalizedThreshold}
+        comparator={normalizedComparator}
+        timeSize={normalizedTimeSize}
+        timeUnit={normalizedTimeUnit}
         dataView={dataView}
         groupBy={groupBy}
-        timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
+        timeRange={{ from: `now-${normalizedTimeSize * 20}${normalizedTimeUnit}`, to: 'now' }}
       />
 
       <EuiSpacer size="l" />
 
       <ForLastExpression
-        timeWindowSize={timeSize}
-        timeWindowUnit={timeUnit}
+        timeWindowSize={normalizedTimeSize}
+        timeWindowUnit={normalizedTimeUnit}
         errors={{
           timeSize: [],
           timeUnit: [],

@@ -62,27 +62,31 @@ describe('validateParams()', () => {
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"message\\": Required"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Invalid input: expected string, received undefined
+        → at message"
+    `);
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"message\\": Expected string, received number"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Invalid input: expected string, received number
+        → at message"
+    `);
 
     expect(() => {
       validateParams(connectorType, { message: 'x', level: 2 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"level\\": Expected 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal', received number"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Invalid option: expected one of \\"trace\\"|\\"debug\\"|\\"info\\"|\\"warn\\"|\\"error\\"|\\"fatal\\"
+        → at level"
+    `);
 
     expect(() => {
       validateParams(connectorType, { message: 'x', level: 'foo' }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"level\\": Invalid enum value. Expected 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal', received 'foo'"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Invalid option: expected one of \\"trace\\"|\\"debug\\"|\\"info\\"|\\"warn\\"|\\"error\\"|\\"fatal\\"
+        → at level"
+    `);
   });
 });
 

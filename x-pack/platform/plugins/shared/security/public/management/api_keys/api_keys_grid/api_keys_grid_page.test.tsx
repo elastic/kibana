@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
@@ -271,6 +271,144 @@ describe('APIKeysGridPage', () => {
       expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
       expect(await findByText('You do not have permission to create API keys')).toBeInTheDocument();
       expect(queryByText('Create API key')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Pagination', () => {
+    it('should show disabled Previous button on first page', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        api_keys: {
+          save: true,
+        },
+      };
+
+      const { findByTestId } = render(
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <APIKeysGridPage />
+          </Providers>
+        )
+      );
+
+      const previousButton = await findByTestId('apiKeysTablePreviousPageButton');
+      expect(previousButton).toBeDisabled();
+    });
+
+    it('should show disabled Next button when results are less than page size', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        api_keys: {
+          save: true,
+        },
+      };
+
+      // Mock returns 2 items which is less than page size (25)
+      const { findByTestId } = render(
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <APIKeysGridPage />
+          </Providers>
+        )
+      );
+
+      const nextButton = await findByTestId('apiKeysTableNextPageButton');
+      expect(nextButton).toBeDisabled();
+    });
+
+    it('should enable Next button when page is full and searchAfter cursor exists', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        api_keys: {
+          save: true,
+        },
+      };
+
+      // Create 25 API keys to fill the page
+      const apiKeys = Array.from({ length: 25 }, (_, i) => ({
+        type: 'rest',
+        creation: 1571322182082,
+        expiration: 1571408582082,
+        id: `key-${i}`,
+        invalidated: false,
+        name: `api-key-${i}`,
+        realm: 'reserved',
+        username: 'elastic',
+        metadata: {},
+        role_descriptors: {},
+      }));
+
+      coreStart.http.post.mockResolvedValue({
+        apiKeys,
+        canManageCrossClusterApiKeys: true,
+        canManageApiKeys: true,
+        canManageOwnApiKeys: true,
+        total: 100,
+        aggregationTotal: 100,
+        searchAfter: [1571322182082, 'key-24'],
+        aggregations: {
+          usernames: { buckets: [{ key: 'elastic', doc_count: 100 }] },
+          types: { buckets: [{ key: 'rest', doc_count: 100 }] },
+          expired: { doc_count: 0 },
+          managed: {
+            buckets: { metadataBased: { doc_count: 0 }, namePrefixBased: { doc_count: 0 } },
+          },
+        },
+      });
+
+      const { findByTestId } = render(
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <APIKeysGridPage />
+          </Providers>
+        )
+      );
+
+      const nextButton = await findByTestId('apiKeysTableNextPageButton');
+      expect(nextButton).not.toBeDisabled();
+    });
+
+    it('should refresh data when clicking Refresh button', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        api_keys: {
+          save: true,
+        },
+      };
+
+      const { findByTestId } = render(
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <APIKeysGridPage />
+          </Providers>
+        )
+      );
+
+      // Wait for initial load
+      await findByTestId('apiKeysTableRefreshButton');
+
+      // Clear mock call count
+      coreStart.http.post.mockClear();
+
+      // Click refresh button
+      const refreshButton = await findByTestId('apiKeysTableRefreshButton');
+      fireEvent.click(refreshButton);
+
+      // Verify that the API was called again
+      await waitFor(() => {
+        expect(coreStart.http.post).toHaveBeenCalledWith(
+          '/internal/security/api_key/_query',
+          expect.any(Object)
+        );
+      });
     });
   });
 });

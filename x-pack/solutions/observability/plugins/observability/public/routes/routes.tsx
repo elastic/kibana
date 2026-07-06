@@ -8,6 +8,7 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { AnnotationsPage } from '../pages/annotations/annotations';
+import { NightshiftPage } from '../pages/nightshift/nightshift';
 import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
 import { AlertsPage } from '../pages/alerts/alerts';
@@ -28,6 +29,7 @@ import {
   EDIT_RULE_PATH,
   EXPLORATORY_VIEW_PATH,
   LANDING_PATH,
+  NIGHTSHIFT_PATH,
   OLD_SLO_DETAIL_PATH,
   OLD_SLO_EDIT_PATH,
   OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
@@ -54,7 +56,7 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
       to = pathname.split('/slos')[1];
     }
     navigateToApp(redirectToApp, {
-      path: `/${to}${search ? `?${search}` : ''}${hash}`,
+      path: `/${to}${search}${hash}`,
       replace: true,
     });
   } else if (to) {
@@ -63,7 +65,15 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
   return null;
 }
 
-const completeRoutes = {
+type RoutePath = string;
+
+interface RouteDefinition {
+  handler: () => JSX.Element;
+  params: object;
+  exact: boolean;
+}
+
+const completeRoutes: Record<RoutePath, RouteDefinition> = {
   [ROOT_PATH]: {
     handler: () => {
       return <SimpleRedirect to={OVERVIEW_PATH} />;
@@ -107,7 +117,14 @@ const completeRoutes = {
   },
 };
 
-const routes = {
+const routes: Record<RoutePath, RouteDefinition> = {
+  [NIGHTSHIFT_PATH]: {
+    handler: () => {
+      return <NightshiftPage />;
+    },
+    params: {},
+    exact: true,
+  },
   [LANDING_PATH]: {
     handler: () => {
       return (

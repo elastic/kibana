@@ -35,5 +35,10 @@ export const mlAnomalyDetectionAlertParamsSchema = schema.object(
     validate: (params) => {
       return validateAnomalyDetectionCustomFilter(params.kqlQueryString, params.resultType);
     },
+    meta: {
+      title: 'Anomaly Detection Rule Params',
+      description:
+        'The parameters for the anomaly detection rule. These parameters are appropriate when `rule_type_id` is `xpack.ml.anomaly_detection_alert"`.',
+    },
   }
 );

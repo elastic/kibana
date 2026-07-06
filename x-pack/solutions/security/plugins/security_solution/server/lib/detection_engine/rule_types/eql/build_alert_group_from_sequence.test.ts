@@ -298,6 +298,69 @@ describe('buildAlert', () => {
         };
         expect(intersection).toEqual(expected);
       });
+
+      test('should treat dot and nested notation the same', () => {
+        const a = {
+          'user.email': 'marshall@elastic.co',
+        };
+        const b = {
+          user: {
+            email: 'marshall@elastic.co',
+          },
+        };
+        const intersection = objectPairIntersection(a, b);
+        const expected = {
+          user: {
+            email: 'marshall@elastic.co',
+          },
+        };
+        expect(intersection).toEqual(expected);
+      });
+
+      test('should return undefined when first argument is undefined', () => {
+        expect(objectPairIntersection(undefined, { a: 1 })).toEqual(undefined);
+      });
+
+      test('should return undefined when second argument is undefined', () => {
+        expect(objectPairIntersection({ a: 1 }, undefined)).toEqual(undefined);
+      });
+
+      test('should return undefined for two empty objects', () => {
+        expect(objectPairIntersection({}, {})).toEqual(undefined);
+      });
+
+      test('should return undefined when one object is empty', () => {
+        expect(objectPairIntersection({}, { a: 1 })).toEqual(undefined);
+        expect(objectPairIntersection({ a: 1 }, {})).toEqual(undefined);
+      });
+
+      test('should treat deep dot notation and nested notation the same', () => {
+        const a = { 'a.b.c': 42 };
+        const b = { a: { b: { c: 42 } } };
+        const intersection = objectPairIntersection(a, b);
+        expect(intersection).toEqual({ a: { b: { c: 42 } } });
+      });
+
+      test('should merge when both use dot notation for the same path and keep the dot notation', () => {
+        const a = { 'user.email': 'a@test.co' };
+        const b = { 'user.email': 'a@test.co' };
+        const intersection = objectPairIntersection(a, b);
+        expect(intersection).toEqual({ 'user.email': 'a@test.co' });
+      });
+
+      test('should merge when use dot notation and nested notation are arrays', () => {
+        const a = { 'user.emails': ['a@test.co'] };
+        const b = { user: { emails: ['a@test.co'] } };
+        const intersection = objectPairIntersection(a, b);
+        expect(intersection).toEqual({ user: { emails: ['a@test.co'] } });
+      });
+
+      test('should use last-wins when the same path appears via both notations in one object', () => {
+        const a = { 'user.email': 'dot@test.co', user: { email: 'nested@test.co' } };
+        const b = { user: { email: 'nested@test.co' } };
+        const intersection = objectPairIntersection(a, b);
+        expect(intersection).toEqual({ user: { email: 'nested@test.co' } });
+      });
     });
 
     test('should treat numbers and strings as unequal', () => {
@@ -637,6 +700,17 @@ describe('buildAlert', () => {
         field1: 1,
       };
       expect(intersection).toEqual(expected);
+    });
+
+    test('should merge objects when some use dot notation and others use nested', () => {
+      const a = { 'user.id': 'u1', event: { action: 'login' } };
+      const b = { user: { id: 'u1' }, event: { action: 'login' } };
+      const c = { 'user.id': 'u1', 'event.action': 'login' };
+      const intersection = objectArrayIntersection([a, b, c]);
+      expect(intersection).toEqual({
+        user: { id: 'u1' },
+        event: { action: 'login' },
+      });
     });
   });
 });

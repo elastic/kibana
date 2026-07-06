@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFormRow,
@@ -125,13 +124,4 @@ export const BorderForm: FunctionComponent<Props> = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-BorderForm.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
-  value: PropTypes.string,
-  // @ts-expect-error upgrade typescript v5.9.3
-  radius: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  onChange: PropTypes.func.isRequired,
-  colors: PropTypes.array.isRequired,
 };

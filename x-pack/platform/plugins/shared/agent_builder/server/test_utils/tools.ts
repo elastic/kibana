@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type {
   BuiltinToolDefinition,
@@ -73,6 +73,7 @@ export const createMockedBuiltinTool = (
     description: 'test description',
     schema: z.object({}),
     tags: ['tag-1', 'tag-2'],
+    experimental: false,
     handler: jest.fn(parts.handler),
     ...parts,
   };
@@ -85,6 +86,7 @@ export const createMockedTool = (parts: Partial<MockedTool> = {}): MockedTool =>
     description: 'test description',
     configuration: {},
     readonly: false,
+    experimental: false,
     tags: ['tag-1', 'tag-2'],
     getSchema: jest.fn(async () => z.object({})),
     getHandler: jest.fn(parts.getHandler),
@@ -101,6 +103,7 @@ export const createMockedExecutableTool = (
     type: ToolType.builtin,
     description: 'test description',
     readonly: false,
+    experimental: false,
     getSchema: () => z.object({}),
     configuration: {},
     tags: ['tag-1', 'tag-2'],

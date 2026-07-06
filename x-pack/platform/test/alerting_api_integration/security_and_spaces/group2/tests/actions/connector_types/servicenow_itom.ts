@@ -149,6 +149,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             userIdentifierValue: null,
           },
           is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 
@@ -205,6 +206,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             userIdentifierValue: mockServiceNowOAuth.config.userIdentifierValue,
           },
           is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 
@@ -222,7 +224,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"apiUrl\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -244,7 +246,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"apiUrl\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -442,7 +444,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subAction\": Invalid discriminator value. Expected 'addEvent' | 'getChoices'`,
+                message: `error validating action params: ✖ Invalid discriminator value. Expected 'addEvent' | 'getChoices'\n  → at subAction`,
               });
             });
         });
@@ -460,7 +462,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subAction\": Invalid discriminator value. Expected 'addEvent' | 'getChoices'`,
+                message: `error validating action params: ✖ Invalid discriminator value. Expected 'addEvent' | 'getChoices'\n  → at subAction`,
               });
             });
         });
@@ -482,7 +484,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                   status: 'error',
                   retry: false,
                   errorSource: TaskErrorSource.USER,
-                  message: `error validating action params: Field \"subActionParams.fields\": Required`,
+                  message: `error validating action params: ✖ Invalid input: expected array, received undefined\n  → at subActionParams.fields`,
                 });
               });
           });
@@ -510,13 +512,13 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 id: simulatedActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { equal: 1 }],
-                  ['execute', { equal: 1 }],
+                  ['execute-start', { equal: 5 }],
+                  ['execute', { equal: 5 }],
                 ]),
               });
             });
 
-            const executeEvent = events[1];
+            const executeEvent = events[events.length - 1];
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(317);
           });
         });
@@ -575,13 +577,13 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 id: simulatedActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { equal: 2 }],
-                  ['execute', { equal: 2 }],
+                  ['execute-start', { equal: 6 }],
+                  ['execute', { equal: 6 }],
                 ]),
               });
             });
 
-            const executeEvent = events[3];
+            const executeEvent = events[events.length - 1];
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
           });
         });

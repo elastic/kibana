@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/translations-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-localization'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/translations-plugin'
+  title: '@kbn/translations-plugin'
   description: Moon project for @kbn/translations-plugin
   channel: ''
   owner: '@elastic/kibana-localization'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/translations
+  sourceRoot: x-pack/platform/plugins/private/translations
 dependsOn: []
 tags:
   - plugin

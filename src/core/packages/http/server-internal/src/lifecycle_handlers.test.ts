@@ -14,15 +14,19 @@ import type {
   OnPreResponseToolkit,
   OnPostAuthToolkit,
   OnPreRoutingToolkit,
+  OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPreResponseInfo,
+  GetAuthState,
 } from '@kbn/core-http-server';
+import { AuthStatus } from '@kbn/core-http-server';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import {
   INTERNAL_API_RESTRICTED_LOGGER_NAME,
   createBuildNrMismatchLoggerPreResponseHandler,
   createCustomHeadersPreResponseHandler,
   createDeprecationWarningHeaderPreResponseHandler,
+  createExcludeRoutesPreAuthHandler,
   createRestrictInternalRoutesPostAuthHandler,
   createVersionCheckPostAuthHandler,
   createXsrfPostAuthHandler,
@@ -32,8 +36,20 @@ import type { HttpConfig } from './http_config';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/logging';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+
+const createGetAuthState = (user?: Partial<AuthenticatedUser>): GetAuthState => {
+  return jest
+    .fn()
+    .mockReturnValue(
+      user
+        ? { status: AuthStatus.authenticated, state: { http_authentication_scheme: null, ...user } }
+        : { status: AuthStatus.unauthenticated, state: null }
+    );
+};
 
 type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
+type PreAuthToolkitMock = jest.Mocked<OnPreAuthToolkit>;
 
 const createConfig = (partial: Partial<HttpConfig>): HttpConfig => partial as HttpConfig;
 
@@ -43,6 +59,12 @@ const createToolkit = (): ToolkitMock => {
     next: jest.fn(),
     rewriteUrl: jest.fn(),
     authzResultNext: jest.fn(),
+  };
+};
+
+const createPreAuthToolkit = (): PreAuthToolkitMock => {
+  return {
+    next: jest.fn(),
   };
 };
 
@@ -88,8 +110,10 @@ describe('xsrf post-auth handler', () => {
 
   describe('non destructive methods', () => {
     it('accepts requests without version or xsrf header', () => {
-      const config = createConfig({ xsrf: { allowlist: [], disableProtection: false } });
-      const handler = createXsrfPostAuthHandler(config);
+      const config = createConfig({
+        xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
+      });
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
       const request = forgeRequest({ method: 'get', headers: {} });
 
       toolkit.next.mockReturnValue('next' as any);
@@ -104,8 +128,10 @@ describe('xsrf post-auth handler', () => {
 
   describe('destructive methods', () => {
     it('accepts requests with xsrf header', () => {
-      const config = createConfig({ xsrf: { allowlist: [], disableProtection: false } });
-      const handler = createXsrfPostAuthHandler(config);
+      const config = createConfig({
+        xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
+      });
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
       const request = forgeRequest({ method: 'post', headers: { 'kbn-xsrf': 'xsrf' } });
 
       toolkit.next.mockReturnValue('next' as any);
@@ -118,8 +144,10 @@ describe('xsrf post-auth handler', () => {
     });
 
     it('accepts requests with version header', () => {
-      const config = createConfig({ xsrf: { allowlist: [], disableProtection: false } });
-      const handler = createXsrfPostAuthHandler(config);
+      const config = createConfig({
+        xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
+      });
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
       const request = forgeRequest({ method: 'post', headers: { 'kbn-version': 'some-version' } });
 
       toolkit.next.mockReturnValue('next' as any);
@@ -132,8 +160,10 @@ describe('xsrf post-auth handler', () => {
     });
 
     it('returns a bad request if called without xsrf or version header', () => {
-      const config = createConfig({ xsrf: { allowlist: [], disableProtection: false } });
-      const handler = createXsrfPostAuthHandler(config);
+      const config = createConfig({
+        xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
+      });
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
       const request = forgeRequest({ method: 'post' });
 
       responseFactory.badRequest.mockReturnValue('badRequest' as any);
@@ -151,8 +181,10 @@ describe('xsrf post-auth handler', () => {
     });
 
     it('accepts requests if protection is disabled', () => {
-      const config = createConfig({ xsrf: { allowlist: [], disableProtection: true } });
-      const handler = createXsrfPostAuthHandler(config);
+      const config = createConfig({
+        xsrf: { allowlist: [], disableProtection: true, allowedSchemes: [] },
+      });
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
       const request = forgeRequest({ method: 'post', headers: {} });
 
       toolkit.next.mockReturnValue('next' as any);
@@ -166,9 +198,13 @@ describe('xsrf post-auth handler', () => {
 
     it('accepts requests if path is allowlisted', () => {
       const config = createConfig({
-        xsrf: { allowlist: ['/some-path'], disableProtection: false },
+        xsrf: {
+          allowlist: ['/some-path'],
+          disableProtection: false,
+          allowedSchemes: [],
+        },
       });
-      const handler = createXsrfPostAuthHandler(config);
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
       const request = forgeRequest({ method: 'post', headers: {}, path: '/some-path' });
 
       toolkit.next.mockReturnValue('next' as any);
@@ -182,9 +218,9 @@ describe('xsrf post-auth handler', () => {
 
     it('accepts requests if xsrf protection on a route is disabled', () => {
       const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false },
+        xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
       });
-      const handler = createXsrfPostAuthHandler(config);
+      const handler = createXsrfPostAuthHandler(config, createGetAuthState());
       const request = forgeRequest({
         method: 'post',
         headers: {},
@@ -203,6 +239,181 @@ describe('xsrf post-auth handler', () => {
       expect(toolkit.next).toHaveBeenCalledTimes(1);
       expect(result).toEqual('next');
     });
+  });
+
+  describe('allowedSchemes', () => {
+    const apikeyBearerConfig = createConfig({
+      xsrf: { allowlist: [], disableProtection: false, allowedSchemes: ['apikey', 'bearer'] },
+    });
+    const apikeyOnlyConfig = createConfig({
+      xsrf: { allowlist: [], disableProtection: false, allowedSchemes: ['apikey'] },
+    });
+    const bearerOnlyConfig = createConfig({
+      xsrf: { allowlist: [], disableProtection: false, allowedSchemes: ['bearer'] },
+    });
+    const noSchemesConfig = createConfig({
+      xsrf: { allowlist: [], disableProtection: false, allowedSchemes: [] },
+    });
+
+    const acceptedRequestTestCases = [
+      {
+        label: 'apikey scheme, POST',
+        config: apikeyBearerConfig,
+        scheme: 'apikey',
+        method: 'post' as RouteMethod,
+      },
+      {
+        label: 'bearer scheme, POST',
+        config: apikeyBearerConfig,
+        scheme: 'bearer',
+        method: 'post' as RouteMethod,
+      },
+      {
+        label: 'apikey scheme, DELETE',
+        config: apikeyBearerConfig,
+        scheme: 'apikey',
+        method: 'delete' as RouteMethod,
+      },
+      {
+        label: 'apikey scheme, POST (kbn-xsrf also present)',
+        config: apikeyBearerConfig,
+        scheme: 'apikey',
+        method: 'post' as RouteMethod,
+        extraHeaders: { 'kbn-xsrf': 'xsrf' },
+      },
+      {
+        label: 'apikey scheme when only apikey is allowed',
+        config: apikeyOnlyConfig,
+        scheme: 'apikey',
+        method: 'post' as RouteMethod,
+      },
+      {
+        label: 'bearer scheme when only bearer is allowed',
+        config: bearerOnlyConfig,
+        scheme: 'bearer',
+        method: 'post' as RouteMethod,
+      },
+    ];
+    it.each(acceptedRequestTestCases)(
+      'accepts $label',
+      ({ config, scheme, method, extraHeaders }) => {
+        const handler = createXsrfPostAuthHandler(
+          config,
+          createGetAuthState({ http_authentication_scheme: scheme })
+        );
+        const request = forgeRequest({ method, headers: extraHeaders ?? {} });
+
+        toolkit.next.mockReturnValue('next' as any);
+
+        const result = handler(request, responseFactory, toolkit);
+
+        expect(responseFactory.badRequest).not.toHaveBeenCalled();
+        expect(toolkit.next).toHaveBeenCalledTimes(1);
+        expect(result).toEqual('next');
+      }
+    );
+
+    const rejectedRequestTestCases = [
+      {
+        label: 'basic scheme, apikey and bearer allowed',
+        config: apikeyBearerConfig,
+        getAuthState: () => createGetAuthState({ http_authentication_scheme: 'basic' }),
+      },
+      {
+        label: 'apikey scheme, no schemes allowed',
+        config: noSchemesConfig,
+        getAuthState: () => createGetAuthState({ http_authentication_scheme: 'apikey' }),
+      },
+      {
+        label: 'bearer scheme, only apikey allowed',
+        config: apikeyOnlyConfig,
+        getAuthState: () => createGetAuthState({ http_authentication_scheme: 'bearer' }),
+      },
+      {
+        label: 'apikey scheme, only bearer allowed',
+        config: bearerOnlyConfig,
+        getAuthState: () => createGetAuthState({ http_authentication_scheme: 'apikey' }),
+      },
+      {
+        label: 'unauthenticated request, apikey and bearer allowed',
+        config: apikeyBearerConfig,
+        getAuthState: () => createGetAuthState(), // unauthenticated
+      },
+      {
+        label: 'null scheme, apikey and bearer allowed',
+        config: apikeyBearerConfig,
+        getAuthState: () => createGetAuthState({ http_authentication_scheme: null }),
+      },
+      {
+        label: 'authenticated status but null state object',
+        config: apikeyBearerConfig,
+        getAuthState: (): GetAuthState =>
+          jest.fn().mockReturnValue({ status: AuthStatus.authenticated, state: null }),
+      },
+      {
+        label: 'http_authentication_scheme missing from state',
+        config: apikeyBearerConfig,
+        getAuthState: (): GetAuthState =>
+          jest.fn().mockReturnValue({
+            status: AuthStatus.authenticated,
+            // Simulates minimal-auth proxy where http_authentication_scheme is not present
+            state: { username: 'test' } as any,
+          }),
+      },
+    ];
+    it.each(rejectedRequestTestCases)('rejects POST when $label', ({ config, getAuthState }) => {
+      const handler = createXsrfPostAuthHandler(config, getAuthState());
+      const request = forgeRequest({ method: 'post', headers: {} });
+
+      responseFactory.badRequest.mockReturnValue('badRequest' as any);
+
+      const result = handler(request, responseFactory, toolkit);
+
+      expect(toolkit.next).not.toHaveBeenCalled();
+      expect(responseFactory.badRequest).toHaveBeenCalledTimes(1);
+      expect(result).toEqual('badRequest');
+    });
+  });
+});
+
+describe('excludeRoutes pre-auth handler', () => {
+  let toolkit: PreAuthToolkitMock;
+  let responseFactory: ReturnType<typeof mockRouter.createResponseFactory>;
+  let logger: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    toolkit = createPreAuthToolkit();
+    responseFactory = mockRouter.createResponseFactory();
+    logger = loggerMock.create();
+  });
+
+  it('forwards when no excluded routes are configured', () => {
+    const handler = createExcludeRoutesPreAuthHandler(createConfig({ excludeRoutes: [] }), logger);
+    const request = forgeRequest({ path: '/api/status' });
+
+    toolkit.next.mockReturnValue('next' as any);
+
+    const result = handler(request, responseFactory, toolkit);
+
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+    expect(responseFactory.notFound).not.toHaveBeenCalled();
+    expect(result).toBe('next');
+  });
+
+  it('returns notFound when a route is excluded', () => {
+    const handler = createExcludeRoutesPreAuthHandler(
+      createConfig({ excludeRoutes: ['/api/status'] }),
+      logger
+    );
+    const request = forgeRequest({ path: '/api/status' });
+
+    responseFactory.notFound.mockReturnValue('notFound' as any);
+
+    const result = handler(request, responseFactory, toolkit);
+
+    expect(toolkit.next).not.toHaveBeenCalled();
+    expect(responseFactory.notFound).toHaveBeenCalledTimes(1);
+    expect(result).toBe('notFound');
   });
 });
 
@@ -558,7 +769,7 @@ describe('deprecation header pre-response handler', () => {
   it('adds the deprecation warning header to the request going to a deprecated route', () => {
     const kibanaVersion = '19.73.41';
     const deprecationMessage = 'This is a deprecated endpoint message in the tests';
-    const warningHeader = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
+    const warningHeader = `299 Kibana-${kibanaVersion} "${encodeURIComponent(deprecationMessage)}"`;
     const handler = createDeprecationWarningHeaderPreResponseHandler(kibanaVersion);
 
     handler(
@@ -578,7 +789,7 @@ describe('deprecation header pre-response handler', () => {
   it('does not add the deprecation warning header to the request going to a non-deprecated route', () => {
     const kibanaVersion = '19.73.41';
     const deprecationMessage = 'This is a deprecated endpoint message in the tests';
-    const warningHeader = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
+    const warningHeader = `299 Kibana-${kibanaVersion} "${encodeURIComponent(deprecationMessage)}"`;
     const handler = createDeprecationWarningHeaderPreResponseHandler(kibanaVersion);
 
     handler({ route: { options: { deprecated: {} } } } as any, {} as any, toolkit);

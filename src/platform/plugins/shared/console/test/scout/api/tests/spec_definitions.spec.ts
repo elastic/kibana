@@ -8,17 +8,27 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'GET /api/console/api_server',
-  { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.search,
+    ],
+  },
   () => {
     let adminApiCredentials: RoleApiCredentials;
+
     apiTest.beforeAll(async ({ requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('viewer');
     });
+
     apiTest('returns autocomplete definitions', async ({ apiClient }) => {
       const { body, statusCode } = await apiClient.get('api/console/api_server', {
         headers: {
@@ -28,7 +38,7 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('es');
+      expect(body.es).toBeDefined();
       const {
         es: { name, globals, endpoints },
       } = body;

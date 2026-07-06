@@ -15,7 +15,9 @@ import type {
   EvaluatorDisplayOptions,
   EvaluatorDisplayGroup,
 } from './utils/reporting/report_table';
-import type { EvaluatorStats } from './utils/score_repository';
+import type { EvalsClient, EvaluatorStats } from './utils/evals_client';
+import type { EvaluatorApiClient } from './utils/evaluator_api_client';
+import type { AgentBuilderClient } from './utils/agent_builder_client';
 
 export interface EvaluationDataset<TExample extends Example = Example> {
   name: string;
@@ -36,7 +38,12 @@ export interface Example<
   TExpected = any,
   TMetadata extends Record<string, unknown> | null = Record<string, unknown> | null
 > {
-  input: TInput;
+  /**
+   * Stable identifier for this example, typically a content hash.
+   * Optional because inline datasets may not have persisted IDs.
+   */
+  id?: string;
+  input?: TInput;
   /**
    * Expected output/ground truth for the example.
    *
@@ -60,6 +67,10 @@ export interface EvaluatorParams<TExample extends Example, TTaskOutput extends T
 /**
  * Evaluation output returned by evaluators.
  *
+ * Follows the trace-first evaluator contract (vision Section 5.2.1): evaluators produce
+ * standardized score/label/explanation outputs. The `metadata` field can carry trace
+ * references and evaluator-specific details for explainability.
+ *
  * This shape is intentionally compatible with the existing evaluator implementations and
  * the Phoenix client types:
  * - `score` may be omitted or `null` for "unavailable"/"error" cases
@@ -78,12 +89,25 @@ type EvaluatorCallback<TExample extends Example, TTaskOutput extends TaskOutput>
   params: EvaluatorParams<TExample, TTaskOutput>
 ) => Promise<EvaluationResult>;
 
+/**
+ * Core evaluator interface.
+ *
+ * All evaluators — whether CODE-kind (deterministic) or LLM-kind (model-scored) — implement
+ * this interface. Per the @kbn/evals vision (Section 5.2.1), evaluators should progressively
+ * migrate to deriving signals from OTel traces stored in Elasticsearch rather than only
+ * operating on in-memory task output. Use {@link createTraceBasedEvaluator} for trace-native
+ * evaluators.
+ *
+ * @see TraceBasedEvaluatorConfig for the trace-first evaluator factory configuration
+ */
+export type EvaluatorKind = 'LLM' | 'CODE';
+
 export interface Evaluator<
   TExample extends Example = Example,
   TTaskOutput extends TaskOutput = TaskOutput
 > {
   name: string;
-  kind: 'LLM' | 'CODE';
+  kind: EvaluatorKind;
   evaluate: EvaluatorCallback<TExample, TTaskOutput>;
 }
 export interface DefaultEvaluators {
@@ -114,7 +138,16 @@ export interface EvalsExecutorClient {
     TTaskOutput extends TaskOutput = TaskOutput
   >(
     options: {
-      dataset: TEvaluationDataset;
+      /**
+       * Human-readable experiment name (e.g. the task name)
+       */
+      name?: string;
+      /**
+       * Datasets to run the experiment against.
+       * Each dataset is processed independently and a separate
+       * {@link DatasetRunResult} is returned per dataset.
+       */
+      datasets: TEvaluationDataset[];
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency?: number;
@@ -128,9 +161,9 @@ export interface EvalsExecutorClient {
       trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
-  ): Promise<RanExperiment>;
+  ): Promise<DatasetRunResult[]>;
 
-  getRanExperiments(): Promise<RanExperiment[]>;
+  getDatasetRunResults(): Promise<DatasetRunResult[]>;
 }
 
 export interface ExampleWithId extends Example {
@@ -155,8 +188,9 @@ export interface EvaluationRun {
   exampleId?: string;
 }
 
-export interface RanExperiment {
+export interface DatasetRunResult {
   id: string;
+  experimentName: string;
   datasetId: string;
   datasetName: string;
   datasetDescription?: string;
@@ -164,6 +198,33 @@ export interface RanExperiment {
   evaluationRuns: EvaluationRun[];
   experimentMetadata?: Record<string, unknown>;
 }
+
+/**
+ * Emitted by the executor client when an experiment starts.
+ */
+export interface ExperimentStartEvent {
+  experimentId: string;
+}
+
+export type OnExperimentStart = (event: ExperimentStartEvent) => Promise<void>;
+
+/**
+ * Emitted by the executor client after each evaluator completes for a single
+ * example+repetition. Consumers (e.g. the Playwright fixture) can use this to
+ * incrementally export score documents to Elasticsearch so that results survive
+ * worker crashes.
+ */
+export interface EvaluationCompleteEvent {
+  experimentId: string;
+  experimentName: string;
+  datasetId: string;
+  datasetName: string;
+  taskRun: TaskRun;
+  evaluationRun: EvaluationRun;
+  exampleId: string;
+}
+
+export type OnEvaluationComplete = (event: EvaluationCompleteEvent) => Promise<void>;
 
 export interface ReportDisplayOptions {
   /**
@@ -183,23 +244,40 @@ export interface EvaluationReport {
   model: Model;
   evaluatorModel: Model;
   repetitions: number;
-  runId: string;
+  experimentId: string;
+}
+
+export interface WorkerExperimentIdRef {
+  current: string | undefined;
+}
+
+export interface WorkerExecutionIdRef {
+  current: string | undefined;
 }
 
 export interface EvaluationSpecificWorkerFixtures {
   inferenceClient: BoundInferenceClient;
+  agentBuilderClient: AgentBuilderClient;
+  evalsClient: EvalsClient;
+  evaluatorClient: EvaluatorApiClient;
   /**
-   * Executor client used to run experiments (defaults to in-Kibana; Phoenix-backed via `KBN_EVALS_EXECUTOR=phoenix`).
+   * Executor client used to run experiments.
    */
   executorClient: EvalsExecutorClient;
-  /**
-   * @deprecated Use `executorClient`. Kept for backwards compatibility while suites migrate off Phoenix naming.
-   */
-  phoenixClient: EvalsExecutorClient;
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;
+  workerExperimentId: WorkerExperimentIdRef;
+  workerExecutionId: WorkerExecutionIdRef;
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
+  /**
+   * User-selected connector descriptors set per-project in the Playwright config.
+   * These are Playwright options (`{ option: true }`) consumed by the `connector` /
+   * `evaluationConnector` fixtures, which create/resolve the actual connectors.
+   * They default to `undefined` and must be set per-project (see createPlaywrightEvalsConfig).
+   */
+  connectorParam: AvailableConnectorWithId | undefined;
+  evaluationConnectorParam: AvailableConnectorWithId | undefined;
   repetitions: number;
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: EvaluationReporter;
@@ -208,14 +286,11 @@ export interface EvaluationSpecificWorkerFixtures {
 
 export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {
   inferenceClient: BoundInferenceClient;
+  agentBuilderClient: AgentBuilderClient;
   /**
-   * Executor client used to run experiments (defaults to in-Kibana; Phoenix-backed via `KBN_EVALS_EXECUTOR=phoenix`).
+   * Executor client used to run experiments.
    */
   executorClient: EvalsExecutorClient;
-  /**
-   * @deprecated Use `executorClient`. Kept for backwards compatibility while suites migrate off Phoenix naming.
-   */
-  phoenixClient: EvalsExecutorClient;
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;
   connector: AvailableConnectorWithId;

@@ -34,12 +34,9 @@ export const getValidateEsql: NodeHelperCreator<
     try {
       const sanitizedQuery = input.query ? sanitizeQuery(input.query) : '';
       if (!isEmpty(sanitizedQuery)) {
-        const { errors, isEsqlQueryAggregating, hasMetadataOperator } =
-          parseEsqlQuery(sanitizedQuery);
+        const { errors } = parseEsqlQuery(sanitizedQuery);
         if (!isEmpty(errors)) {
           error = JSON.stringify(errors);
-        } else if (!isEsqlQueryAggregating && !hasMetadataOperator) {
-          error = `Queries that do't use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.`;
         }
       }
     } catch (err) {

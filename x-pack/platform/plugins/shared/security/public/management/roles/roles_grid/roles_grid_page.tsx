@@ -448,7 +448,7 @@ export const RolesGridPage: FC<Props> = ({
                   data-test-subj="createRoleButton"
                   {...reactRouterNavigate(history, getRoleManagementHref('edit'))}
                   fill
-                  iconType="plusInCircleFilled"
+                  iconType="plusCircle"
                 >
                   <FormattedMessage
                     id="xpack.security.management.roles.createRoleButtonLabel"
@@ -460,7 +460,7 @@ export const RolesGridPage: FC<Props> = ({
                     href={cloudOrgUrl}
                     target="_blank"
                     iconSide="right"
-                    iconType="popout"
+                    iconType="external"
                   >
                     <FormattedMessage
                       id="xpack.security.management.roles.assignRolesLinkLabel"

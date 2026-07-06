@@ -67,6 +67,7 @@ export class DashboardPageLinks extends FtrService {
   public async clickPanelEditorCloseButton() {
     this.log.debug('click links panel editor close button');
     await this.testSubjects.click('links--panelEditor--closeBtn');
+    await this.testSubjects.waitForDeleted('links--panelEditor--flyout');
   }
 
   public async clickLinksEditorSaveButton() {
@@ -173,17 +174,13 @@ export class DashboardPageLinks extends FtrService {
     await editButton.click();
   }
 
-  public async reorderLinks(linkLabel: string, startIndex: number, steps: number, reverse = false) {
+  public async reorderLinks(startIndex: number, steps: number, reverse = false) {
     this.log.debug(
-      `move the ${linkLabel} link from ${startIndex} to ${
-        reverse ? startIndex - steps : startIndex + steps
-      }`
+      `move link at position ${startIndex} to ${reverse ? startIndex - steps : startIndex + steps}`
     );
     const linkToMove = await this.findDraggableLinkByIndex(startIndex);
     const draggableButton = await linkToMove.findByTestSubject(`panelEditorLink--dragHandle`);
-    expect(await draggableButton.getAttribute('data-rfd-drag-handle-draggable-id')).to.equal(
-      linkLabel
-    );
+
     await draggableButton.focus();
     await this.browser.pressKeys(this.browser.keys.SPACE);
 
@@ -210,9 +207,14 @@ export class DashboardPageLinks extends FtrService {
       await this.testSubjects.click('links--panelEditor--addLinkBtn');
       await this.expectLinkEditorFlyoutIsOpen();
     });
-    const option = await this.testSubjects.find('links--linkEditor--externalLink--radioBtn');
-    const label = await option.findByCssSelector('label[for="externalLink"]');
-    await label.click();
+    await this.retry.try(async () => {
+      const option = await this.testSubjects.find('links--linkEditor--externalLink--radioBtn');
+      const label = await option.findByCssSelector('label[for="externalLink"]');
+      await label.click();
+      if (!(await this.testSubjects.exists('links--linkEditor--externalLink--input'))) {
+        throw new Error('External link input did not render');
+      }
+    });
     await this.testSubjects.setValue('links--linkEditor--externalLink--input', destination);
   }
 

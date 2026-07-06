@@ -226,7 +226,7 @@ const Details: FC<{
       <EuiText size="xs">
         {isInterimResult === true && (
           <>
-            <EuiIcon type="warning" />
+            <EuiIcon type="warning" aria-hidden={true} />
             <span
               css={{
                 fontStyle: 'italic',

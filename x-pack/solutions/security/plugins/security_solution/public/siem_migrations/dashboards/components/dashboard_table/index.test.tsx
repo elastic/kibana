@@ -17,6 +17,7 @@ import type { DashboardMigrationStats } from '../../types';
 import { createSiemMigrationsMock, TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import * as useInstallMigrationDashboardsModule from '../../logic/use_install_migration_dashboards';
+import * as useInstallMigrationDashboardModule from '../../logic/use_install_migration_dashboard';
 import type { SiemMigrationsService } from '../../../service';
 
 const getTranslatedDashboard = () =>
@@ -167,12 +168,18 @@ jest
     isLoading: false,
   } as unknown as ReturnType<typeof useGetMigrationTranslationStatsModule.useGetMigrationTranslationStats>);
 
+const mockInstallMigrationDashboards = jest.fn();
 const mockInstallMigrationDashboard = jest.fn();
 
 jest.spyOn(useInstallMigrationDashboardsModule, 'useInstallMigrationDashboards').mockReturnValue({
-  mutateAsync: mockInstallMigrationDashboard,
+  mutateAsync: mockInstallMigrationDashboards,
   isLoading: false,
 } as unknown as ReturnType<typeof useInstallMigrationDashboardsModule.useInstallMigrationDashboards>);
+
+jest.spyOn(useInstallMigrationDashboardModule, 'useInstallMigrationDashboard').mockReturnValue({
+  mutateAsync: mockInstallMigrationDashboard,
+  isLoading: false,
+} as unknown as ReturnType<typeof useInstallMigrationDashboardModule.useInstallMigrationDashboard>);
 
 describe('MigrationDashboardsTable', () => {
   it('should render table and dashboards', () => {
@@ -192,7 +199,9 @@ describe('MigrationDashboardsTable', () => {
         fireEvent.click(installButton);
         expect(screen.getByTestId('installDashboard')).toBeDisabled();
         await waitFor(() => {
-          expect(mockInstallMigrationDashboard).toHaveBeenCalledWith({ ids: ['1'] });
+          expect(mockInstallMigrationDashboard).toHaveBeenCalledWith({
+            migrationDashboard: mockDashboards[0],
+          });
         });
       });
 

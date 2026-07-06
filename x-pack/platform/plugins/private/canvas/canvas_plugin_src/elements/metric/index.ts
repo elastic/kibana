@@ -18,7 +18,7 @@ export const metricElementInitializer: SetupInitializer<ElementFactory> = (core,
     help: 'A number with a label',
     width: 200,
     height: 100,
-    icon: 'visMetric',
+    icon: 'chartMetric',
     expression: `kibana
 | selectFilter
 | demodata

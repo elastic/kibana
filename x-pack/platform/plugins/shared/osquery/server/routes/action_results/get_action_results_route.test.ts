@@ -507,6 +507,35 @@ describe('getActionResultsRoute', () => {
     });
   });
 
+  describe('Edge cases', () => {
+    it('should return totalPages 0 when pageSize is 0 (prevent Infinity)', async () => {
+      const mockSearchFn = createMockSearchStrategy(
+        createMockActionResultsResponse(2, {
+          totalResponded: 2,
+          successCount: 2,
+          errorCount: 0,
+        })
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          agentIds: 'agent-1,agent-2',
+          pageSize: 0,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+
+      expect(responseBody.totalPages).toBe(0);
+      expect(Number.isFinite(responseBody.totalPages)).toBe(true);
+    });
+  });
+
   describe('Error Handling', () => {
     it('should return 500 error when search strategy throws error', async () => {
       const errorMessage = 'Elasticsearch connection failed';
@@ -561,6 +590,50 @@ describe('getActionResultsRoute', () => {
           },
         }),
       });
+    });
+  });
+
+  describe('space scoping', () => {
+    it('passes the active default space to the search strategy', async () => {
+      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({ actionId: 'test-action-id', query: {} });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'default' }),
+        expectedSearchOptions
+      );
+    });
+
+    it('passes a named active space to the search strategy', async () => {
+      // Re-register the route against a context whose active space is named.
+      const namedSpaceContext = createMockOsqueryContext();
+      (namedSpaceContext.service.getActiveSpace as jest.Mock).mockResolvedValue({
+        id: 'my-space',
+        name: 'My Space',
+      });
+      const namedRouter = createMockRouter();
+      getActionResultsRoute(namedRouter, namedSpaceContext);
+      const namedHandler = namedRouter.versioned.getRoute(
+        'get',
+        '/api/osquery/action_results/{actionId}'
+      ).versions['2023-10-31']!.handler;
+
+      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({ actionId: 'test-action-id', query: {} });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await namedHandler(mockContext, mockRequest, mockResponse);
+
+      expect(namedSpaceContext.service.getActiveSpace).toHaveBeenCalled();
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'my-space' }),
+        expectedSearchOptions
+      );
     });
   });
 });

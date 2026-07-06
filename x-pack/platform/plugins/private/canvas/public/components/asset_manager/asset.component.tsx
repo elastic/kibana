@@ -95,7 +95,7 @@ export const Asset: FC<Props> = ({ asset, onCreate, onDelete }) => {
     <EuiFlexItem className="asset-create-image" grow={false}>
       <EuiToolTip content={strings.getCreateImageTooltip()} disableScreenReaderOutput>
         <EuiButtonIcon
-          iconType="vector"
+          iconType="vectorSquare"
           aria-label={strings.getCreateImageTooltip()}
           onClick={() => onCreate(asset.id)}
         />
@@ -117,7 +117,7 @@ export const Asset: FC<Props> = ({ asset, onCreate, onDelete }) => {
     <EuiFlexItem grow={false}>
       <EuiToolTip content={strings.getCopyAssetTooltip()}>
         <Clipboard content={asset.id} onCopy={onCopy}>
-          <EuiButtonIcon iconType="copyClipboard" aria-label={strings.getCopyAssetTooltip()} />
+          <EuiButtonIcon iconType="copy" aria-label={strings.getCopyAssetTooltip()} />
         </Clipboard>
       </EuiToolTip>
     </EuiFlexItem>

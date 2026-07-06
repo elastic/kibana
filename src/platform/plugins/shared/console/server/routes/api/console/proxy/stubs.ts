@@ -10,10 +10,9 @@
 import type { IncomingMessage } from 'http';
 import { Readable } from 'stream';
 
-export function createResponseStub(response?: string) {
+function createResponseStub(response?: string, { statusCode = 200 }: { statusCode?: number } = {}) {
   const resp: Readable & {
     statusCode?: number;
-    statusMessage?: string;
     headers?: Record<string, unknown>;
   } = new Readable({
     read() {
@@ -24,12 +23,21 @@ export function createResponseStub(response?: string) {
     },
   });
 
-  resp.statusCode = 200;
-  resp.statusMessage = 'OK';
+  resp.statusCode = statusCode;
   resp.headers = {
     'content-type': 'text/plain',
     'content-length': String(response ? response.length : 0),
   };
 
   return resp as IncomingMessage;
+}
+
+export function createTransportResponseStub(response?: string, options?: { statusCode?: number }) {
+  const body = createResponseStub(response, options);
+
+  return {
+    body,
+    statusCode: body.statusCode!,
+    headers: body.headers!,
+  };
 }

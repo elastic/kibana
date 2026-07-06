@@ -7,12 +7,15 @@
 import type { ApplicationStart, IUiSettingsClient, NotificationsStart } from '@kbn/core/public';
 import { type CoreStart } from '@kbn/core/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type {
-  PublishesTitle,
-  PublishesWritableTitle,
-  SerializedTitles,
-} from '@kbn/presentation-publishing';
+import type { PublishesTitle, PublishesWritableTitle } from '@kbn/presentation-publishing';
 import type { Subject } from 'rxjs';
+import type { BurnRateEmbeddableState } from '../../../../common/embeddables/burn_rate/types';
+
+/** Re-exported from common (which re-exports from server schemas) */
+export type {
+  BurnRateCustomState,
+  BurnRateEmbeddableState,
+} from '../../../../common/embeddables/burn_rate/types';
 
 export interface EmbeddableProps {
   sloId: string;
@@ -21,14 +24,7 @@ export interface EmbeddableProps {
   reloadSubject?: Subject<boolean>;
 }
 
-export interface BurnRateCustomInput {
-  sloId: string;
-  sloInstanceId: string;
-  duration: string;
-}
-
-export type SloBurnRateEmbeddableState = SerializedTitles & BurnRateCustomInput;
-export type BurnRateApi = DefaultEmbeddableApi<SloBurnRateEmbeddableState> &
+export type BurnRateApi = DefaultEmbeddableApi<BurnRateEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle;
 

@@ -16,10 +16,24 @@ import { ThemeProvider } from '@emotion/react';
 import { ActionResultsSummary } from './action_results_summary';
 import * as useActionResultsHook from './use_action_results';
 import { useKibana } from '../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import type { estypes } from '@elastic/elasticsearch';
 
 jest.mock('./use_action_results');
 jest.mock('../common/lib/kibana');
+jest.mock('../common/experimental_features_context', () => ({
+  ...jest.requireActual('../common/experimental_features_context'),
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+jest.mock('./unified_action_results_summary', () => ({
+  UnifiedActionResultsSummary: () => (
+    <div data-test-subj="unifiedActionResultsSummary">Unified Table</div>
+  ),
+}));
+
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.MockedFunction<
+  typeof useIsExperimentalFeatureEnabled
+>;
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useActionResultsMock = useActionResultsHook.useActionResults as jest.MockedFunction<
@@ -113,7 +127,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents: 3,
+          total: 3,
           aggregations: {
             totalRowCount: 30,
             totalResponded: 3,
@@ -140,14 +154,14 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       expect(container.querySelector('.euiPagination')).toBeInTheDocument();
     });
 
-    it('should use server totalAgents for pagination count', () => {
+    it('should use server total for pagination count', () => {
       const mockAgents = ['agent-1', 'agent-2'];
       const mockEdges = mockAgents.map((id) => createMockEdge(id, true));
 
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents: 502,
+          total: 502,
           aggregations: {
             totalRowCount: 30,
             totalResponded: 2,
@@ -167,21 +181,23 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
         <ActionResultsSummary actionId="test-action" agentIds={mockAgents} />
       );
 
-      // Verify pagination uses server totalAgents (502) not agentIds.length (2)
+      // Verify pagination uses server total (502) not agentIds.length (2)
       expect(container.querySelector('.euiPagination')).toBeInTheDocument();
     });
 
-    it('should fallback to agentIds.length when totalAgents is undefined', () => {
-      const mockAgents = ['agent-1', 'agent-2', 'agent-3'];
-      const mockEdges = mockAgents.map((id) => createMockEdge(id, true));
+    it('disables Next on a scheduled-query single-page result set', async () => {
+      // Regression coverage for #269670: scheduled queries don't pass agentIds.
+      // `data.total` must drive pageCount so Next is disabled when total ≤ pageSize.
+      const scheduledEdges = [createMockEdge('agent-1', true)];
 
       useActionResultsMock.mockReturnValue({
         data: {
-          edges: mockEdges,
+          edges: scheduledEdges,
+          total: 1,
           aggregations: {
-            totalRowCount: 30,
-            totalResponded: 3,
-            successful: 3,
+            totalRowCount: 1,
+            totalResponded: 1,
+            successful: 1,
             failed: 0,
             pending: 0,
           },
@@ -191,14 +207,30 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
         isFetching: false,
       } as never);
 
-      mockHttpPost.mockResolvedValue({ agents: [] });
+      mockHttpPost.mockResolvedValue({
+        agents: [{ id: 'agent-1', local_metadata: { host: { name: 'h1' } } }],
+      });
 
       const { container } = renderWithContext(
-        <ActionResultsSummary actionId="test-action" agentIds={mockAgents} />
+        <ActionResultsSummary
+          actionId="test-schedule"
+          scheduleId="test-schedule"
+          executionCount={1}
+        />
       );
 
-      // Verify pagination fallback works
-      expect(container.querySelector('.euiPagination')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(container.querySelector('.euiBasicTable')).toBeInTheDocument();
+      });
+
+      const nextButton = container.querySelector(
+        '[data-test-subj="pagination-button-next"]'
+      ) as HTMLButtonElement | null;
+      // Either the Next button is omitted (no pagination needed) or it's disabled.
+      // What must NOT happen is an enabled Next that opens an empty page.
+      if (nextButton) {
+        expect(nextButton.disabled).toBe(true);
+      }
     });
 
     it('should initialize with default page index 0 and page size 20', () => {
@@ -208,7 +240,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents: 100,
+          total: 100,
           aggregations: {
             totalRowCount: 200,
             totalResponded: 20,
@@ -243,7 +275,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdgesPage0,
-          totalAgents: 100,
+          total: 100,
           aggregations: {
             totalRowCount: 1000,
             totalResponded: 20,
@@ -268,7 +300,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdgesPage2,
-          totalAgents: 100,
+          total: 100,
           aggregations: {
             totalRowCount: 1000,
             totalResponded: 20,
@@ -323,7 +355,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
         useActionResultsMock.mockReturnValue({
           data: {
             edges: mockEdges,
-            totalAgents: 500,
+            total: 500,
             aggregations: {
               totalRowCount: pageSize * 10,
               totalResponded: pageSize,
@@ -362,7 +394,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents: 100,
+          total: 100,
           aggregations: {
             totalRowCount: 1000,
             totalResponded: 20,
@@ -406,7 +438,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: [],
-          totalAgents: 0,
+          total: 0,
           aggregations: {
             totalRowCount: 0,
             totalResponded: 0,
@@ -695,7 +727,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents,
+          total: totalAgents,
           aggregations: {
             totalRowCount: 0,
             totalResponded: 0,
@@ -750,7 +782,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents: 15000,
+          total: 15000,
           aggregations: {
             totalRowCount: 10000,
             totalResponded: 7500,
@@ -799,7 +831,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents,
+          total: totalAgents,
           aggregations: {
             totalRowCount: 0,
             totalResponded: 0,
@@ -1014,6 +1046,86 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       await waitFor(() => {
         expect(screen.getByText('error')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Switch component pattern', () => {
+    const setupMockData = () => {
+      const mockAgents = ['agent-1'];
+      const mockEdges = mockAgents.map((id) => createMockEdge(id, true));
+
+      useActionResultsMock.mockReturnValue({
+        data: {
+          edges: mockEdges,
+          aggregations: {
+            totalRowCount: 10,
+            totalResponded: 1,
+            successful: 1,
+            failed: 0,
+            pending: 0,
+          },
+          inspect: { dsl: [] },
+        },
+        isLoading: false,
+        isFetching: false,
+      } as never);
+
+      mockHttpPost.mockResolvedValue({ agents: [] });
+
+      return mockAgents;
+    };
+
+    it('should render legacy table when feature flag is disabled', () => {
+      const mockAgents = setupMockData();
+
+      const { container } = renderWithContext(
+        <ActionResultsSummary actionId="test-action" agentIds={mockAgents} />
+      );
+
+      expect(container.querySelector('.euiBasicTable')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedActionResultsSummary')).not.toBeInTheDocument();
+    });
+
+    it('should render unified table when feature flag is enabled and uiActions available', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+
+      // Provide uiActions in the Kibana services mock
+      useKibanaMock.mockReturnValue({
+        services: {
+          http: { post: mockHttpPost },
+          application: mockApplication,
+          notifications: mockNotifications,
+          uiActions: { getTriggerCompatibleActions: jest.fn() },
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+
+      const mockAgents = setupMockData();
+
+      renderWithContext(<ActionResultsSummary actionId="test-action" agentIds={mockAgents} />);
+
+      expect(screen.getByTestId('unifiedActionResultsSummary')).toBeInTheDocument();
+    });
+
+    it('should fall back to legacy table when feature flag is enabled but uiActions is unavailable', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+
+      // uiActions not provided
+      useKibanaMock.mockReturnValue({
+        services: {
+          http: { post: mockHttpPost },
+          application: mockApplication,
+          notifications: mockNotifications,
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+
+      const mockAgents = setupMockData();
+
+      const { container } = renderWithContext(
+        <ActionResultsSummary actionId="test-action" agentIds={mockAgents} />
+      );
+
+      expect(container.querySelector('.euiBasicTable')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedActionResultsSummary')).not.toBeInTheDocument();
     });
   });
 });

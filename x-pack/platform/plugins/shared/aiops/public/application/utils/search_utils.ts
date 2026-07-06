@@ -20,7 +20,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDefaultDSLQuery, type SearchQueryLanguage } from '@kbn/ml-query-utils';
 
-function getSavedSearchSource(savedSearch: SavedSearch) {
+function getSavedSearchSource(savedSearch: Pick<SavedSearch, 'searchSource'>) {
   return savedSearch &&
     'searchSource' in savedSearch &&
     savedSearch?.searchSource instanceof SearchSource
@@ -42,7 +42,7 @@ export function getEsQueryFromSavedSearch({
 }: {
   dataView: DataView;
   uiSettings: IUiSettingsClient;
-  savedSearch: SavedSearch | null | undefined;
+  savedSearch: Pick<SavedSearch, 'searchSource'> | null | undefined;
   query?: Query;
   filters?: Filter[];
   filterManager?: FilterManager;
@@ -65,10 +65,10 @@ export function getEsQueryFromSavedSearch({
       cloneDeep(savedSearch.searchSource.getSearchRequestBody()?.query) ?? getDefaultDSLQuery();
     const timeField = savedSearch.searchSource.getField('index')?.timeFieldName;
 
-    if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
+    if (savedQuery?.bool && Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
       savedQuery.bool.filter = savedQuery.bool.filter.filter(
         (c: QueryDslQueryContainer) =>
-          !(Object.hasOwn(c, 'range') && Object.hasOwn(c.range ?? {}, timeField))
+          c != null && !(Object.hasOwn(c, 'range') && Object.hasOwn(c.range ?? {}, timeField))
       );
     }
     return {
@@ -82,18 +82,25 @@ export function getEsQueryFromSavedSearch({
   if (!savedSearch && userQuery) {
     if (filterManager && userFilters) filterManager.addFilters(userFilters);
 
-    const combinedQuery = buildEsQuery(
-      dataView,
-      userQuery,
-      Array.isArray(userFilters) ? userFilters : [],
-      uiSettings ? getEsQueryConfig(uiSettings) : undefined
-    );
+    try {
+      // buildEsQuery throws an exception for a fallible operation (anti-pattern).
+      // We MUST always wrap it in a try block to prevent a failed parse from being unhandled &
+      // bubbling up to the error boundary.
+      const combinedQuery = buildEsQuery(
+        dataView,
+        userQuery,
+        Array.isArray(userFilters) ? userFilters : [],
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      );
 
-    return {
-      searchQuery: combinedQuery,
-      searchString: userQuery.query,
-      queryLanguage: userQuery.language as SearchQueryLanguage,
-    };
+      return {
+        searchQuery: combinedQuery,
+        searchString: userQuery.query,
+        queryLanguage: userQuery.language as SearchQueryLanguage,
+      };
+    } catch (e) {
+      return undefined;
+    }
   }
 
   // If saved search available, merge saved search with the latest user query or filters
@@ -107,17 +114,24 @@ export function getEsQueryFromSavedSearch({
     if (filterManager) filterManager.setFilters(currentFilters);
     if (globalFilters) filterManager?.addFilters(globalFilters);
 
-    const combinedQuery = buildEsQuery(
-      dataView,
-      currentQuery,
-      filterManager ? filterManager?.getFilters() : currentFilters,
-      uiSettings ? getEsQueryConfig(uiSettings) : undefined
-    );
+    try {
+      // buildEsQuery throws an exception for a fallible operation (anti-pattern).
+      // We MUST always wrap it in a try block to prevent a failed parse from being unhandled &
+      // bubbling up to the error boundary.
+      const combinedQuery = buildEsQuery(
+        dataView,
+        currentQuery,
+        filterManager ? filterManager?.getFilters() : currentFilters,
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      );
 
-    return {
-      searchQuery: combinedQuery,
-      searchString: currentQuery.query,
-      queryLanguage: currentQuery.language as SearchQueryLanguage,
-    };
+      return {
+        searchQuery: combinedQuery,
+        searchString: currentQuery.query,
+        queryLanguage: currentQuery.language as SearchQueryLanguage,
+      };
+    } catch (e) {
+      return undefined;
+    }
   }
 }

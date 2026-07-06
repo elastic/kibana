@@ -11,30 +11,32 @@ import { ReplaySubject } from 'rxjs';
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type {
-  DefendInsight,
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
 } from '@kbn/elastic-assistant-common';
+import { CallbackIds } from '@kbn/elastic-assistant-plugin/server/types';
 import type { SearchHit, UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { kibanaPackageJson } from '@kbn/repo-info';
-import { loggerMock } from '@kbn/logging-mocks';
-
 import type {
+  DefendInsight,
   SearchParams,
   SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
+import {
+  WorkflowInsightType,
+  WorkflowInsightCategory,
+  WorkflowInsightSourceType,
+  WorkflowInsightTargetType,
+  WorkflowInsightActionType,
+} from '../../../../common/endpoint/types/workflow_insights';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { kibanaPackageJson } from '@kbn/repo-info';
+import { loggerMock } from '@kbn/logging-mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
-import {
-  Category,
-  SourceType,
-  TargetType,
-  ActionType,
-} from '../../../../common/endpoint/types/workflow_insights';
 import { createMockEndpointAppContext } from '../../mocks';
 import {
   checkIfRemediationExists,
@@ -68,20 +70,20 @@ function getDefaultInsight(overrides?: Partial<SecurityWorkflowInsight>): Securi
   const defaultInsight = {
     '@timestamp': moment(),
     message: 'This is a test message',
-    category: Category.Endpoint,
-    type: DefendInsightType.Enum.incompatible_antivirus,
+    category: WorkflowInsightCategory.enum.endpoint,
+    type: WorkflowInsightType.enum.incompatible_antivirus,
     source: {
-      type: SourceType.LlmConnector,
+      type: WorkflowInsightSourceType.enum['llm-connector'],
       id: 'openai-connector-id',
       data_range_start: moment(),
       data_range_end: moment(),
     },
     target: {
-      type: TargetType.Endpoint,
+      type: WorkflowInsightTargetType.enum.endpoint,
       ids: ['endpoint-1', 'endpoint-2'],
     },
     action: {
-      type: ActionType.Refreshed,
+      type: WorkflowInsightActionType.enum.refreshed,
       timestamp: moment(),
     },
     value: 'unique-key',
@@ -231,9 +233,109 @@ describe('SecurityWorkflowInsightsService', () => {
       expect(logger.warn).toHaveBeenCalledTimes(2);
       expect(logger.warn).toHaveBeenNthCalledWith(1, expect.stringContaining('test error'));
     });
+
+    it('should register a post-create callback that passes the active space to createFromDefendInsights', async () => {
+      const registerCallbackMock = jest.fn();
+      mockEndpointAppContextService.getActiveSpaceId.mockReturnValue('space-1');
+
+      securityWorkflowInsightsService.setup({
+        kibanaVersion: kibanaPackageJson.version,
+        logger,
+        endpointContext: mockEndpointAppContextService,
+      });
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: registerCallbackMock,
+      });
+
+      const postCreateCallback = registerCallbackMock.mock.calls.find(
+        ([callbackId]) => callbackId === CallbackIds.DefendInsightsPostCreate
+      )?.[1];
+      expect(postCreateCallback).toBeDefined();
+
+      const createFromDefendInsightsSpy = jest
+        .spyOn(securityWorkflowInsightsService, 'createFromDefendInsights')
+        .mockResolvedValueOnce([]);
+
+      const request = {
+        body: {
+          endpointIds: ['endpoint-1'],
+          insightType: WorkflowInsightType.enum.incompatible_antivirus,
+          apiConfig: { connectorId: 'connector-id', model: 'model-name' },
+        },
+      } as unknown as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
+
+      await postCreateCallback([], request);
+
+      expect(mockEndpointAppContextService.getActiveSpaceId).toHaveBeenCalledWith(request);
+      expect(createFromDefendInsightsSpy).toHaveBeenCalledWith(
+        [],
+        ['endpoint-1'],
+        WorkflowInsightType.enum.incompatible_antivirus,
+        'connector-id',
+        'model-name',
+        'space-1'
+      );
+
+      createFromDefendInsightsSpy.mockRestore();
+    });
   });
 
   describe('createFromDefendInsights', () => {
+    it('should report insight_created telemetry event', async () => {
+      const reportEventMock = jest.fn();
+      mockEndpointAppContextService.getTelemetryService = jest.fn().mockReturnValue({
+        reportEvent: reportEventMock,
+      });
+
+      const insight: DefendInsight = {
+        group: 'TestAV',
+        events: [
+          {
+            id: 'event-1',
+            endpointId: 'endpoint-1',
+            value: '/path/to/process',
+          },
+        ],
+      };
+
+      const workflowInsights: SecurityWorkflowInsight[] = [getDefaultInsight()];
+      (buildWorkflowInsights as jest.Mock).mockResolvedValueOnce(workflowInsights);
+
+      const esClientIndexResp = {
+        _index: DATA_STREAM_NAME,
+        _id: '1',
+        result: 'created' as const,
+        _shards: { total: 1, successful: 1, failed: 0 },
+        _version: 1,
+      };
+      jest.spyOn(esClient, 'index').mockResolvedValue(esClientIndexResp);
+
+      securityWorkflowInsightsService.setup({
+        kibanaVersion: kibanaPackageJson.version,
+        logger,
+        endpointContext: mockEndpointAppContextService,
+      });
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: jest.fn(),
+      });
+
+      await securityWorkflowInsightsService.createFromDefendInsights(
+        [insight],
+        ['endpoint-1'],
+        WorkflowInsightType.enum.incompatible_antivirus,
+        'connector-id',
+        'model-name',
+        DEFAULT_SPACE_ID
+      );
+
+      expect(reportEventMock).toHaveBeenCalledWith('endpoint_workflow_insights_created_event', {
+        insightType: 'incompatible_antivirus',
+        count: 1,
+      });
+    });
+
     it('should create workflow insights from defend insights', async () => {
       const insight = {
         group: 'AVGAntivirus',
@@ -251,12 +353,6 @@ describe('SecurityWorkflowInsightsService', () => {
       ];
 
       const workflowInsights: SecurityWorkflowInsight[] = [getDefaultInsight()];
-      const request = { body: { insightType: workflowInsights[0].type } } as KibanaRequest<
-        unknown,
-        unknown,
-        DefendInsightsPostRequestBody
-      >;
-
       const buildWorkflowInsightsMock = buildWorkflowInsights as jest.Mock;
       buildWorkflowInsightsMock.mockResolvedValueOnce(workflowInsights);
 
@@ -272,23 +368,119 @@ describe('SecurityWorkflowInsightsService', () => {
         _version: 1,
       };
       jest.spyOn(esClient, 'index').mockResolvedValue(esClientIndexResp);
+      securityWorkflowInsightsService.setup({
+        kibanaVersion: kibanaPackageJson.version,
+        logger,
+        endpointContext: mockEndpointAppContextService,
+      });
       await securityWorkflowInsightsService.start({
         esClient,
         registerDefendInsightsCallback: jest.fn(),
       });
       const result = await securityWorkflowInsightsService.createFromDefendInsights(
         defendInsights,
-        request
+        insight.events.map((e) => e.endpointId),
+        workflowInsights[0].type,
+        workflowInsights[0].source.id,
+        workflowInsights[0].source.type,
+        DEFAULT_SPACE_ID
       );
 
       // four since it calls fetch + update + fetch + create
       expect(isInitializedSpy).toHaveBeenCalledTimes(4);
       expect(buildWorkflowInsightsMock).toHaveBeenCalledWith({
         defendInsights,
-        request,
         endpointMetadataService: expect.any(Object),
         esClient,
+        options: {
+          insightType: workflowInsights[0].type,
+          endpointIds: insight.events.map((e) => e.endpointId),
+          connectorId: workflowInsights[0].source.id,
+          model: workflowInsights[0].source.type,
+        },
       });
+      expect(mockEndpointAppContextService.getEndpointMetadataService).toHaveBeenNthCalledWith(
+        1,
+        DEFAULT_SPACE_ID
+      );
+      expect(mockEndpointAppContextService.getEndpointMetadataService).toHaveBeenNthCalledWith(
+        2,
+        DEFAULT_SPACE_ID
+      );
+      expect(result).toEqual(workflowInsights.map(() => esClientIndexResp));
+    });
+
+    it('should use the provided space ID for workflow insight metadata enrichment', async () => {
+      const insight = {
+        group: 'AVGAntivirus',
+        events: [
+          {
+            id: 'lqw5opMB9Ke6SNgnxRSZ',
+            endpointId: 'f6e2f338-6fb7-4c85-9c23-d20e9f96a051',
+            value: '/Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity',
+          },
+        ],
+      };
+      const defendInsights: DefendInsight[] = [insight];
+      const workflowInsights: SecurityWorkflowInsight[] = [getDefaultInsight()];
+      const endpointMetadataService = {} as ReturnType<
+        EndpointAppContextService['getEndpointMetadataService']
+      >;
+      const buildWorkflowInsightsMock = buildWorkflowInsights as jest.Mock;
+      buildWorkflowInsightsMock.mockResolvedValueOnce(workflowInsights);
+      mockEndpointAppContextService.getEndpointMetadataService.mockReturnValue(
+        endpointMetadataService
+      );
+
+      const esClientIndexResp = {
+        _index: DATA_STREAM_NAME,
+        _id: '1',
+        result: 'created' as const,
+        _shards: {
+          total: 1,
+          successful: 1,
+          failed: 0,
+        },
+        _version: 1,
+      };
+      jest.spyOn(esClient, 'index').mockResolvedValue(esClientIndexResp);
+      securityWorkflowInsightsService.setup({
+        kibanaVersion: kibanaPackageJson.version,
+        logger,
+        endpointContext: mockEndpointAppContextService,
+      });
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: jest.fn(),
+      });
+
+      const result = await securityWorkflowInsightsService.createFromDefendInsights(
+        defendInsights,
+        insight.events.map((e) => e.endpointId),
+        workflowInsights[0].type,
+        workflowInsights[0].source.id,
+        workflowInsights[0].source.type,
+        'space-1'
+      );
+
+      expect(mockEndpointAppContextService.getEndpointMetadataService).toHaveBeenNthCalledWith(
+        1,
+        'space-1'
+      );
+      expect(mockEndpointAppContextService.getEndpointMetadataService).toHaveBeenNthCalledWith(
+        2,
+        'space-1'
+      );
+      expect(buildWorkflowInsightsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpointMetadataService,
+        })
+      );
+      expect(checkIfRemediationExists).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpointMetadataClient: endpointMetadataService,
+        })
+      );
       expect(result).toEqual(workflowInsights.map(() => esClientIndexResp));
     });
   });
@@ -300,7 +492,7 @@ describe('SecurityWorkflowInsightsService', () => {
         registerDefendInsightsCallback: jest.fn(),
       });
       const insight = getDefaultInsight();
-      await securityWorkflowInsightsService.create(insight);
+      await securityWorkflowInsightsService.create(insight, DEFAULT_SPACE_ID);
 
       // two since it calls fetch as well
       expect(isInitializedSpy).toHaveBeenCalledTimes(2);
@@ -325,7 +517,7 @@ describe('SecurityWorkflowInsightsService', () => {
       const remediationExistsMock = checkIfRemediationExists as jest.Mock;
       remediationExistsMock.mockResolvedValueOnce(true);
 
-      await securityWorkflowInsightsService.create(insight);
+      await securityWorkflowInsightsService.create(insight, DEFAULT_SPACE_ID);
 
       expect(remediationExistsMock).toHaveBeenCalledTimes(1);
 
@@ -336,7 +528,7 @@ describe('SecurityWorkflowInsightsService', () => {
         expect.objectContaining({
           document: expect.objectContaining({
             action: expect.objectContaining({
-              type: ActionType.Remediated,
+              type: WorkflowInsightActionType.enum.remediated,
             }),
           }),
         })
@@ -358,7 +550,7 @@ describe('SecurityWorkflowInsightsService', () => {
         registerDefendInsightsCallback: jest.fn(),
       });
       const insight = getDefaultInsight();
-      await securityWorkflowInsightsService.create(insight);
+      await securityWorkflowInsightsService.create(insight, DEFAULT_SPACE_ID);
 
       const expectedInsight = cloneDeep(insight);
       expectedInsight['@timestamp'] = expect.any(moment);
@@ -412,13 +604,16 @@ describe('SecurityWorkflowInsightsService', () => {
         size: 50,
         from: 50,
         ids: ['id1', 'id2'],
-        categories: [Category.Endpoint],
-        types: [DefendInsightType.Enum.incompatible_antivirus],
-        sourceTypes: [SourceType.LlmConnector],
+        categories: [WorkflowInsightCategory.enum.endpoint],
+        types: [WorkflowInsightType.enum.incompatible_antivirus],
+        sourceTypes: [WorkflowInsightSourceType.enum['llm-connector']],
         sourceIds: ['source-id1', 'source-id2'],
-        targetTypes: [TargetType.Endpoint],
+        targetTypes: [WorkflowInsightTargetType.enum.endpoint],
         targetIds: ['target-id1', 'target-id2'],
-        actionTypes: [ActionType.Refreshed, ActionType.Remediated],
+        actionTypes: [
+          WorkflowInsightActionType.enum.refreshed,
+          WorkflowInsightActionType.enum.remediated,
+        ],
       };
       await securityWorkflowInsightsService.fetch(searchParams);
 

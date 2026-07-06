@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback, useMemo, useEffect, useContext } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,18 +23,12 @@ import {
   EuiText,
   EuiSpacer,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Moment } from 'moment';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import {
-  FeatureFeedbackButton,
-  useKibanaQuerySettings,
-  useUiTracker,
-} from '@kbn/observability-shared-plugin/public';
-import { css } from '@emotion/react';
+import { useKibanaQuerySettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { Query } from '@kbn/es-query';
 import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
@@ -44,8 +38,7 @@ import { useMetricHostsModuleContext } from '../../../containers/ml/modules/metr
 import { useMetricK8sModuleContext } from '../../../containers/ml/modules/metrics_k8s/module';
 import { FixedDatePicker } from '../../fixed_datepicker';
 import { DEFAULT_K8S_PARTITION_FIELD } from '../../../containers/ml/modules/metrics_k8s/module_descriptor';
-import { INFRA_ML_FLYOUT_FEEDBACK_LINK } from './flyout_home';
-import { KibanaEnvironmentContext, useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { UnifiedSearchBar } from '../../shared/unified_search_bar';
 
 interface Props {
@@ -64,8 +57,6 @@ export const JobSetupScreen = (props: Props) => {
   const { metricsView } = useMetricsDataViewContext();
   const [filter, setFilter] = useState<string>('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
-  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
-  const { euiTheme } = useEuiTheme();
   const { telemetry } = useKibanaContextForPlugin().services;
   const kibanaQuerySettings = useKibanaQuerySettings();
 
@@ -258,35 +249,15 @@ export const JobSetupScreen = (props: Props) => {
   return (
     <>
       <EuiFlyoutHeader>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h2>
-                <FormattedMessage
-                  defaultMessage="Enable machine learning for {nodeType}"
-                  id="xpack.infra.ml.aomalyFlyout.jobSetup.flyoutHeader"
-                  values={{ nodeType: props.jobType }}
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              margin-right: ${euiTheme.size.l};
-            `}
-          >
-            <FeatureFeedbackButton
-              data-test-subj={`infraML${props.jobType}FlyoutFeedbackLink`}
-              formUrl={INFRA_ML_FLYOUT_FEEDBACK_LINK}
-              sanitizedPath={document.location.pathname}
-              kibanaVersion={kibanaVersion}
-              isCloudEnv={isCloudEnv}
-              isServerlessEnv={isServerlessEnv}
-              nodeType={props.jobType === 'kubernetes' ? 'pod' : 'host'}
+        <EuiTitle size="m">
+          <h2>
+            <FormattedMessage
+              defaultMessage="Enable machine learning for {nodeType}"
+              id="xpack.infra.ml.aomalyFlyout.jobSetup.flyoutHeader"
+              values={{ nodeType: props.jobType }}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </h2>
+        </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {setupStatus.type === 'pending' ? (

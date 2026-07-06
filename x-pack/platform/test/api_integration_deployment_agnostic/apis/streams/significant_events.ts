@@ -13,10 +13,11 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
+  bulkQueries,
   deleteStream,
   disableStreams,
   enableStreams,
-  getStream,
+  getQueries,
   putStream,
 } from './helpers/requests';
 import type { RoleCredentials } from '../../services';
@@ -38,6 +39,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     after(async () => {
@@ -45,11 +47,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('Wired streams update', () => {
-      const STREAM_NAME = 'logs.queries-test';
+      const STREAM_NAME = 'logs.otel.queries-test';
       const stream: Streams.WiredStream.UpsertRequest['stream'] = {
+        type: 'wired',
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
@@ -75,19 +79,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('updates the queries', async () => {
-        const response = await putStream(apiClient, STREAM_NAME, {
-          stream,
-          ...emptyAssets,
-          queries: [{ id: 'aaa', title: 'OOM Error', kql: { query: "message: 'OOM Error'" } }],
-        });
+        const esqlQuery = `FROM ${STREAM_NAME}, ${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message: 'OOM Error'")`;
+        const response = await bulkQueries(apiClient, STREAM_NAME, [
+          {
+            index: {
+              id: 'aaa',
+              title: 'OOM Error',
+              description: '',
+              esql: { query: esqlQuery },
+            },
+          },
+        ]);
         expect(response).to.have.property('acknowledged', true);
 
-        const streamDefinition = await getStream(apiClient, STREAM_NAME);
-        expect(streamDefinition.queries.length).to.eql(1);
-        expect(streamDefinition.queries[0]).to.eql({
+        const { queries } = await getQueries(apiClient, STREAM_NAME);
+        expect(queries.length).to.eql(1);
+        expect(queries[0]).to.eql({
           id: 'aaa',
+          type: 'match',
           title: 'OOM Error',
-          kql: { query: "message: 'OOM Error'" },
+          description: '',
+          esql: { query: esqlQuery },
         });
       });
 
@@ -101,7 +113,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ...stream.ingest.wired,
                 routing: [
                   {
-                    destination: 'logs.queries-test.child',
+                    destination: 'logs.otel.queries-test.child',
                     where: {
                       always: {},
                     },
@@ -112,17 +124,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
           ...emptyAssets,
-          queries: [
-            {
-              id: 'logs.queries-test.query1',
-              title: 'should not be deleted',
-              kql: { query: 'message:"irrelevant"' },
-            },
-          ],
         });
         expect(response).to.have.property('acknowledged', true);
+        await bulkQueries(apiClient, STREAM_NAME, [
+          {
+            index: {
+              id: 'logs.otel.queries-test.query1',
+              title: 'should not be deleted',
+              description: '',
+              esql: {
+                query:
+                  'FROM logs.otel.queries-test,logs.otel.queries-test.* METADATA _id, _source | WHERE KQL("message:\\"irrelevant\\"")',
+              },
+            },
+          },
+        ]);
 
-        response = await putStream(apiClient, 'logs.queries-test.child', {
+        response = await putStream(apiClient, 'logs.otel.queries-test.child', {
           stream: {
             ...stream,
             ingest: {
@@ -131,7 +149,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ...stream.ingest.wired,
                 routing: [
                   {
-                    destination: 'logs.queries-test.child.first',
+                    destination: 'logs.otel.queries-test.child.first',
                     where: {
                       field: 'attributes.field',
                       lt: 15,
@@ -139,7 +157,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     status: 'enabled',
                   },
                   {
-                    destination: 'logs.queries-test.child.second',
+                    destination: 'logs.otel.queries-test.child.second',
                     where: {
                       field: 'attributes.field',
                       gt: 15,
@@ -151,35 +169,58 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
           ...emptyAssets,
-          queries: [
-            {
-              id: 'logs.queries-test.child.query1',
-              title: 'must be deleted',
-              kql: { query: 'message:"irrelevant"' },
-            },
-          ],
         });
         expect(response).to.have.property('acknowledged', true);
+        await bulkQueries(apiClient, 'logs.otel.queries-test.child', [
+          {
+            index: {
+              id: 'logs.otel.queries-test.child.query1',
+              title: 'must be deleted',
+              description: '',
+              esql: {
+                query:
+                  'FROM logs.otel.queries-test.child,logs.otel.queries-test.child.* METADATA _id, _source | WHERE KQL("message:\\"irrelevant\\"")',
+              },
+            },
+          },
+        ]);
 
-        response = await putStream(apiClient, 'logs.queries-test.child.first', {
+        response = await putStream(apiClient, 'logs.otel.queries-test.child.first', {
           stream,
           ...emptyAssets,
-          queries: [
-            {
-              id: 'logs.queries-test.child.first.query1',
-              title: 'must be deleted',
-              kql: { query: 'message:"irrelevant"' },
-            },
-            {
-              id: 'logs.queries-test.child.first.query2',
-              title: 'must be deleted',
-              kql: { query: 'message:"irrelevant"' },
-            },
-          ],
         });
         expect(response).to.have.property('acknowledged', true);
+        await bulkQueries(apiClient, 'logs.otel.queries-test.child.first', [
+          {
+            index: {
+              id: 'logs.otel.queries-test.child.first.query1',
+              title: 'must be deleted',
+              description: '',
+              esql: {
+                query:
+                  'FROM logs.otel.queries-test.child.first,logs.otel.queries-test.child.first.* METADATA _id, _source | WHERE KQL("message:\\"irrelevant\\"")',
+              },
+            },
+          },
+          {
+            index: {
+              id: 'logs.otel.queries-test.child.first.query2',
+              title: 'must be deleted',
+              description: '',
+              esql: {
+                query:
+                  'FROM logs.otel.queries-test.child.first,logs.otel.queries-test.child.first.* METADATA _id, _source | WHERE KQL("message:\\"irrelevant\\"")',
+              },
+            },
+          },
+        ]);
 
-        await deleteStream(apiClient, 'logs.queries-test.child');
+        await deleteStream(apiClient, 'logs.otel.queries-test.child');
+
+        // the parent stream keeps its query while the deleted child subtree's queries are gone
+        const { queries: parentQueries } = await getQueries(apiClient, STREAM_NAME);
+        expect(parentQueries).to.have.length(1);
+        expect(parentQueries[0].id).to.eql('logs.otel.queries-test.query1');
 
         const rules = await alertingApi.searchRules(roleAuthc, '');
         expect(rules.body.data).to.have.length(1);
@@ -190,6 +231,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Classic streams update', () => {
       const classicPutBody: Streams.ClassicStream.UpsertRequest = {
         stream: {
+          type: 'classic',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -235,24 +277,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('updates the queries', async () => {
         const indexName = 'classic-stream-queries';
+        const esqlQuery = `FROM ${indexName} METADATA _id, _source | WHERE KQL("message: 'OOM Error'")`;
         const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
         await putStream(apiClient, indexName, classicPutBody);
 
-        let streamDefinition = await getStream(apiClient, indexName);
-        expect(streamDefinition.queries.length).to.eql(0);
+        const initialQueries = await getQueries(apiClient, indexName);
+        expect(initialQueries.queries.length).to.eql(0);
 
-        await putStream(apiClient, indexName, {
-          ...classicPutBody,
-          queries: [{ id: 'aaa', title: 'OOM Error', kql: { query: "message: 'OOM Error'" } }],
-        });
+        await bulkQueries(apiClient, indexName, [
+          {
+            index: {
+              id: 'aaa',
+              title: 'OOM Error',
+              description: '',
+              esql: { query: esqlQuery },
+            },
+          },
+        ]);
 
-        streamDefinition = await getStream(apiClient, indexName);
-
-        expect(streamDefinition.queries.length).to.eql(1);
-        expect(streamDefinition.queries[0]).to.eql({
+        const { queries } = await getQueries(apiClient, indexName);
+        expect(queries.length).to.eql(1);
+        expect(queries[0]).to.eql({
           id: 'aaa',
+          type: 'match',
           title: 'OOM Error',
-          kql: { query: "message: 'OOM Error'" },
+          description: '',
+          esql: { query: esqlQuery },
         });
 
         await clean();

@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import { BlockListFlyout } from '../../../block_list/containers/flyout';
 import { AddToBlockListContextMenu } from '../../../block_list/components/add_to_block_list';
-import { AddToNewCase } from '../../../cases/components/add_to_new_case';
-import { AddToExistingCase } from '../../../cases/components/add_to_existing_case';
+import { AddToNewCase } from '../../../../../cases/attachments/indicator/components/add_to_new_case';
+import { AddToExistingCase } from '../../../../../cases/attachments/indicator/components/add_to_existing_case';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { canAddToBlockList } from '../../../block_list/utils/can_add_to_block_list';
 import {
@@ -82,7 +82,7 @@ export const MoreActions = memo(({ indicator }: TakeActionProps) => {
           aria-label={MORE_ACTIONS_BUTTON_LABEL}
           color="text"
           data-test-subj={MORE_ACTIONS_TEST_ID}
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
           size="s"
         />
@@ -100,8 +100,9 @@ export const MoreActions = memo(({ indicator }: TakeActionProps) => {
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={MORE_ACTIONS_BUTTON_LABEL}
       >
-        <EuiContextMenuPanel size="s" items={items} />
+        <EuiContextMenuPanel items={items} />
       </EuiPopover>
 
       {blockListIndicatorValue && (

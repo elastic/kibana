@@ -27,6 +27,11 @@ import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/i
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Moment } from 'moment';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  InferenceClient,
+  InferenceConnector,
+  InferenceConnectorType,
+} from '@kbn/inference-common';
 import moment from 'moment';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
@@ -55,7 +60,7 @@ import { getLlmType } from '../utils';
 import { MAX_GENERATION_ATTEMPTS, MAX_HALLUCINATION_FAILURES } from './translations';
 
 const KB_REQUIRED_TYPES: Set<DefendInsightType> = new Set([
-  DefendInsightType.Enum.policy_response_failure,
+  DefendInsightType.enum.policy_response_failure,
 ]);
 
 function addGenerationInterval(
@@ -106,6 +111,7 @@ export function getAssistantToolParams({
   apiConfig,
   esClient,
   connectorTimeout,
+  inferenceClient,
   langChainTimeout,
   langSmithProject,
   langSmithApiKey,
@@ -122,6 +128,7 @@ export function getAssistantToolParams({
   apiConfig: ApiConfig;
   esClient: ElasticsearchClient;
   connectorTimeout: number;
+  inferenceClient?: InferenceClient;
   langChainTimeout: number;
   langSmithProject?: string;
   langSmithApiKey?: string;
@@ -156,9 +163,15 @@ export function getAssistantToolParams({
     ],
   };
 
+  const isInferenceEndpoint =
+    apiConfig.actionTypeId === ('.inference' as InferenceConnectorType.Inference) &&
+    inferenceClient != null;
+
   const llm = new ActionsClientLlm({
     actionsClient,
     connectorId: apiConfig.connectorId,
+    inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
+    isInferenceEndpoint,
     llmType: getLlmType(apiConfig.actionTypeId),
     logger,
     temperature: 0, // zero temperature because we want structured JSON output
@@ -213,13 +226,13 @@ export async function handleToolError({
       authenticatedUser,
     });
 
-    if (currentInsight === null || currentInsight?.status === DefendInsightStatus.Enum.canceled) {
+    if (currentInsight === null || currentInsight?.status === DefendInsightStatus.enum.canceled) {
       return;
     }
     await dataClient.updateDefendInsight({
       defendInsightUpdateProps: {
         insights: [],
-        status: DefendInsightStatus.Enum.failed,
+        status: DefendInsightStatus.enum.failed,
         id: defendInsightId,
         replacements: latestReplacements,
         backingIndex: currentInsight.backingIndex,
@@ -260,7 +273,7 @@ export async function createDefendInsight(
       insightType,
       apiConfig,
       insights: [],
-      status: DefendInsightStatus.Enum.running,
+      status: DefendInsightStatus.enum.running,
     },
     authenticatedUser,
   });
@@ -280,9 +293,9 @@ const extractInsightsForTelemetryReporting = (
   insights: DefendInsights
 ): string[] => {
   switch (insightType) {
-    case DefendInsightType.Enum.incompatible_antivirus:
+    case DefendInsightType.enum.incompatible_antivirus:
       return insights.map((insight) => insight.group);
-    case DefendInsightType.Enum.policy_response_failure:
+    case DefendInsightType.enum.policy_response_failure:
       return insights.map((insight) => insight.group);
     default:
       return [];
@@ -319,7 +332,7 @@ export async function updateDefendInsights({
       id: defendInsightId,
       authenticatedUser,
     });
-    if (currentInsight === null || currentInsight?.status === DefendInsightStatus.Enum.canceled) {
+    if (currentInsight === null || currentInsight?.status === DefendInsightStatus.enum.canceled) {
       return;
     }
     const endTime = moment();
@@ -328,7 +341,7 @@ export async function updateDefendInsights({
     const updateProps = {
       eventsContextCount,
       insights: insights ?? undefined,
-      status: DefendInsightStatus.Enum.succeeded,
+      status: DefendInsightStatus.enum.succeeded,
       ...(!eventsContextCount || !insights
         ? {}
         : {
@@ -421,10 +434,12 @@ export const invokeDefendInsightsGraph = async ({
   insightType,
   endpointIds,
   actionsClient,
+  getInferenceConnectorById,
   anonymizationFields,
   apiConfig,
   connectorTimeout,
   esClient,
+  inferenceClient,
   langSmithProject,
   langSmithApiKey,
   latestReplacements,
@@ -439,10 +454,12 @@ export const invokeDefendInsightsGraph = async ({
   insightType: DefendInsightType;
   endpointIds: string[];
   actionsClient: PublicMethodsOf<ActionsClient>;
+  getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
   anonymizationFields: AnonymizationFieldResponse[];
   apiConfig: ApiConfig;
   connectorTimeout: number;
   esClient: ElasticsearchClient;
+  inferenceClient?: InferenceClient;
   langSmithProject?: string;
   langSmithApiKey?: string;
   latestReplacements: Replacements;
@@ -462,6 +479,9 @@ export const invokeDefendInsightsGraph = async ({
   }
 
   const llmType = getLlmType(apiConfig.actionTypeId);
+  const isInferenceEndpoint =
+    apiConfig.actionTypeId === ('.inference' as InferenceConnectorType.Inference) &&
+    inferenceClient != null;
   const model = apiConfig.model;
   const tags = [DEFEND_INSIGHTS_ID, llmType, model].flatMap((tag) => tag ?? []);
 
@@ -479,6 +499,8 @@ export const invokeDefendInsightsGraph = async ({
   const llm = new ActionsClientLlm({
     actionsClient,
     connectorId: apiConfig.connectorId,
+    inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
+    isInferenceEndpoint,
     llmType,
     logger,
     temperature: 0,
@@ -495,7 +517,7 @@ export const invokeDefendInsightsGraph = async ({
 
   const defendInsightsPrompts = await getDefendInsightsPrompt({
     type: insightType,
-    actionsClient,
+    getInferenceConnectorById,
     connectorId: apiConfig.connectorId,
     model,
     provider: llmType,
@@ -584,7 +606,7 @@ export const handleGraphError = async ({
     await dataClient.updateDefendInsight({
       defendInsightUpdateProps: {
         insights: [],
-        status: DefendInsightStatus.Enum.failed,
+        status: DefendInsightStatus.enum.failed,
         id: defendInsightId,
         replacements: latestReplacements,
         backingIndex: currentInsight.backingIndex,

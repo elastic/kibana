@@ -113,6 +113,17 @@ export interface SourcererModel {
   sourcererScopes: SourcererScopeById;
 }
 
+/**
+ * The shape of the sourcerer data views returned by the initialization
+ * endpoint and dispatched via setSourcererDataViews.
+ */
+export interface SecurityDataView {
+  defaultDataView: KibanaDataView;
+  alertDataView: KibanaDataView;
+  attackDataView?: KibanaDataView;
+  kibanaDataViews: Array<Omit<KibanaDataView, 'fields'>>;
+}
+
 export type SourcererUrlState = Partial<{
   [id in PageScope]: {
     id: string;

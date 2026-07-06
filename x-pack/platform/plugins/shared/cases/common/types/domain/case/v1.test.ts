@@ -7,6 +7,12 @@
 
 import { AttachmentType } from '../attachment/v1';
 import { ConnectorTypes } from '../connector/v1';
+import { CASE_EXTENDED_FIELDS } from '../../../constants';
+import {
+  CaseAttributesSchema,
+  CaseSettingsSchema,
+  RelatedCaseSchema,
+} from '../../domain_zod/case/v1';
 import {
   CaseAttributesRt,
   CaseSettingsRt,
@@ -144,6 +150,18 @@ describe('RelatedCaseRt', () => {
       right: defaultRequest,
     });
   });
+
+  it('zod: has expected attributes in request', () => {
+    const result = RelatedCaseSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = RelatedCaseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
 });
 
 describe('SettingsRt', () => {
@@ -167,6 +185,22 @@ describe('SettingsRt', () => {
       _tag: 'Right',
       right: { syncAlerts: false, extractObservables: false },
     });
+  });
+
+  it('zod: has expected attributes in request', () => {
+    const result = CaseSettingsSchema.safeParse({ syncAlerts: true, extractObservables: true });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ syncAlerts: true, extractObservables: true });
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = CaseSettingsSchema.safeParse({
+      syncAlerts: false,
+      extractObservables: false,
+      foo: 'bar',
+    });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ syncAlerts: false, extractObservables: false });
   });
 });
 
@@ -267,6 +301,159 @@ describe('CaseAttributesRt', () => {
       _tag: 'Right',
       right: defaultRequest,
     });
+  });
+
+  it('accepts optional template and extended_fields', () => {
+    const request = {
+      ...defaultRequest,
+      template: { id: 'template-id', version: 1 },
+      [CASE_EXTENDED_FIELDS]: { field1: 'foo' },
+    };
+
+    const query = CaseAttributesRt.decode(request);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: request,
+    });
+  });
+
+  it('removes unknown attributes from template', () => {
+    const request = {
+      ...defaultRequest,
+      template: { id: 'template-id', version: 1, foo: 'bar' },
+    };
+
+    const query = CaseAttributesRt.decode(request);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: {
+        ...defaultRequest,
+        template: { id: 'template-id', version: 1 },
+      },
+    });
+  });
+
+  it('zod: has expected attributes in request', () => {
+    const zodRequest = {
+      description: defaultRequest.description,
+      status: defaultRequest.status,
+      tags: defaultRequest.tags,
+      title: defaultRequest.title,
+      connector: defaultRequest.connector,
+      settings: defaultRequest.settings,
+      owner: defaultRequest.owner,
+      severity: defaultRequest.severity,
+      assignees: defaultRequest.assignees,
+      duration: defaultRequest.duration,
+      closed_at: defaultRequest.closed_at,
+      closed_by: defaultRequest.closed_by,
+      created_at: defaultRequest.created_at,
+      created_by: defaultRequest.created_by,
+      external_service: defaultRequest.external_service,
+      updated_at: defaultRequest.updated_at,
+      updated_by: defaultRequest.updated_by,
+      category: defaultRequest.category,
+      customFields: defaultRequest.customFields,
+      observables: defaultRequest.observables,
+      total_observables: defaultRequest.total_observables,
+    };
+    const result = CaseAttributesSchema.safeParse(zodRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(zodRequest);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const zodRequest = {
+      description: defaultRequest.description,
+      status: defaultRequest.status,
+      tags: defaultRequest.tags,
+      title: defaultRequest.title,
+      connector: defaultRequest.connector,
+      settings: defaultRequest.settings,
+      owner: defaultRequest.owner,
+      severity: defaultRequest.severity,
+      assignees: defaultRequest.assignees,
+      duration: defaultRequest.duration,
+      closed_at: defaultRequest.closed_at,
+      closed_by: defaultRequest.closed_by,
+      created_at: defaultRequest.created_at,
+      created_by: defaultRequest.created_by,
+      external_service: defaultRequest.external_service,
+      updated_at: defaultRequest.updated_at,
+      updated_by: defaultRequest.updated_by,
+      category: defaultRequest.category,
+      customFields: defaultRequest.customFields,
+      observables: defaultRequest.observables,
+      total_observables: defaultRequest.total_observables,
+    };
+    const result = CaseAttributesSchema.safeParse({ ...zodRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(zodRequest);
+  });
+
+  it('zod: strips unknown fields from connector', () => {
+    const zodRequest = {
+      description: defaultRequest.description,
+      status: defaultRequest.status,
+      tags: defaultRequest.tags,
+      title: defaultRequest.title,
+      connector: defaultRequest.connector,
+      settings: defaultRequest.settings,
+      owner: defaultRequest.owner,
+      severity: defaultRequest.severity,
+      assignees: defaultRequest.assignees,
+      duration: defaultRequest.duration,
+      closed_at: defaultRequest.closed_at,
+      closed_by: defaultRequest.closed_by,
+      created_at: defaultRequest.created_at,
+      created_by: defaultRequest.created_by,
+      external_service: defaultRequest.external_service,
+      updated_at: defaultRequest.updated_at,
+      updated_by: defaultRequest.updated_by,
+      category: defaultRequest.category,
+      customFields: defaultRequest.customFields,
+      observables: defaultRequest.observables,
+      total_observables: defaultRequest.total_observables,
+    };
+    const result = CaseAttributesSchema.safeParse({
+      ...zodRequest,
+      connector: { ...zodRequest.connector, foo: 'bar' },
+    });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(zodRequest);
+  });
+
+  it('zod: accepts optional template and extended_fields', () => {
+    const zodRequest = {
+      description: defaultRequest.description,
+      status: defaultRequest.status,
+      tags: defaultRequest.tags,
+      title: defaultRequest.title,
+      connector: defaultRequest.connector,
+      settings: defaultRequest.settings,
+      owner: defaultRequest.owner,
+      severity: defaultRequest.severity,
+      assignees: defaultRequest.assignees,
+      duration: defaultRequest.duration,
+      closed_at: defaultRequest.closed_at,
+      closed_by: defaultRequest.closed_by,
+      created_at: defaultRequest.created_at,
+      created_by: defaultRequest.created_by,
+      external_service: defaultRequest.external_service,
+      updated_at: defaultRequest.updated_at,
+      updated_by: defaultRequest.updated_by,
+      category: defaultRequest.category,
+      customFields: defaultRequest.customFields,
+      observables: defaultRequest.observables,
+      total_observables: defaultRequest.total_observables,
+      template: { id: 'template-id', version: 1 },
+      [CASE_EXTENDED_FIELDS]: { field1: 'foo' },
+    };
+    const result = CaseAttributesSchema.safeParse(zodRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(zodRequest);
   });
 });
 

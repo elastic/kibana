@@ -101,3 +101,10 @@ export const isTermsWithAggregation = (
   const aggContainer = agg as estypes.AggregationsAggregationContainer;
   return !!(aggContainer.aggregations && aggContainer.terms);
 };
+
+export const isFilterWithAggregations = (
+  agg: unknown
+): agg is Pick<estypes.AggregationsAggregationContainer, 'filter' | 'aggs'> => {
+  const aggContainer = agg as estypes.AggregationsAggregationContainer;
+  return !!(aggContainer.filter && aggContainer.aggs);
+};

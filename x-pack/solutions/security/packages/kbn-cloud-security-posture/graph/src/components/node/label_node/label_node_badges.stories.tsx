@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { ThemeProvider, css } from '@emotion/react';
+import { css } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { LabelNodeViewModel } from '../..';
 import { Graph } from '../..';
@@ -117,7 +117,7 @@ const Template = () => {
   );
 
   return (
-    <ThemeProvider theme={{ darkMode: false }}>
+    <>
       <Graph
         css={css`
           height: 100%;
@@ -130,7 +130,7 @@ const Template = () => {
       {Object.values(popovers).map((popover, index) => (
         <popover.PopoverComponent key={index} />
       ))}
-    </ThemeProvider>
+    </>
   );
 };
 

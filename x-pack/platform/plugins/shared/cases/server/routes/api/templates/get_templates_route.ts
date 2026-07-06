@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
+import { castArray } from 'lodash';
+import type { TemplatesFindRequest } from '../../../../common/types/api';
 import { INTERNAL_TEMPLATES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mockTemplates } from './mock_data';
 import { parseTemplate } from './parse_template';
 
 /**
  * GET /internal/cases/templates
  * List all templates (excluding soft-deleted ones by default)
  */
-export const getTemplatesRoute = createCasesRoute({
+export const getTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest, {}>({
   method: 'get',
   path: INTERNAL_TEMPLATES_URL,
   security: DEFAULT_CASES_ROUTE_SECURITY,
@@ -26,23 +25,57 @@ export const getTemplatesRoute = createCasesRoute({
     access: 'internal',
     summary: 'Get all case templates',
   },
-  handler: async ({ context, request, response }) => {
+  handler: async ({ context, request, response, logger }) => {
     try {
       const caseContext = await context.cases;
-      await caseContext.getCasesClient();
+      const casesClient = await caseContext.getCasesClient();
 
-      const { includeDeleted } = request.query as { includeDeleted: boolean };
+      const {
+        page,
+        perPage,
+        sortField,
+        sortOrder,
+        search,
+        tags,
+        author,
+        owner,
+        isDeleted,
+        isEnabled,
+      } = request.query;
+      const { templates, ...pagination } = await casesClient.templates.getAllTemplates({
+        page: Number(page),
+        perPage: Number(perPage),
+        sortField,
+        sortOrder,
+        search,
+        tags: tags ? castArray(tags).filter(Boolean) : [],
+        author: author ? castArray(author).filter(Boolean) : [],
+        owner: owner ? castArray(owner).filter(Boolean) : [],
+        isDeleted: String(isDeleted) === 'true',
+        isEnabled: isEnabled !== undefined ? String(isEnabled) === 'true' : undefined,
+      });
 
-      const filteredTemplates = includeDeleted
-        ? mockTemplates
-        : mockTemplates.filter((t) => t.deletedAt === null);
-
-      const parsedTemplates: ParsedTemplate[] = filteredTemplates.map((template) =>
-        parseTemplate(template)
-      );
+      const parsedTemplates = templates
+        .map((template) => {
+          try {
+            return {
+              ...parseTemplate(template),
+              fieldSearchMatches: template.fieldSearchMatches,
+            };
+          } catch (parseError) {
+            logger.warn(
+              `Skipping invalid template "${template.name}" (ID: ${template.templateId}): ${parseError}`
+            );
+            return null;
+          }
+        })
+        .filter((template): template is NonNullable<typeof template> => template !== null);
 
       return response.ok({
-        body: parsedTemplates,
+        body: {
+          ...pagination,
+          templates: parsedTemplates,
+        },
       });
     } catch (error) {
       throw createCaseError({

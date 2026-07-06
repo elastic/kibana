@@ -9,24 +9,33 @@
 
 import type {
   OnPostAuthHandler,
+  OnPreAuthHandler,
   OnPreResponseHandler,
   OnPreResponseInfo,
   KibanaRequest,
 } from '@kbn/core-http-server';
+import type { GetAuthState } from '@kbn/core-http-server';
 import {
   getWarningHeaderMessageFromRouteDeprecation,
   isSafeMethod,
 } from '@kbn/core-http-router-server-internal';
 import type { Logger } from '@kbn/logging';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { HttpConfig } from './http_config';
 
 const VERSION_HEADER = 'kbn-version';
 const XSRF_HEADER = 'kbn-xsrf';
 const KIBANA_NAME_HEADER = 'kbn-name';
 
-export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler => {
-  const { allowlist, disableProtection } = config.xsrf;
+export const createXsrfPostAuthHandler = (
+  config: HttpConfig,
+  getAuthState: GetAuthState
+): OnPostAuthHandler => {
+  const { allowlist, disableProtection, allowedSchemes } = config.xsrf;
+  // Scheme values are arbitrary strings at runtime. `Set<string>` prevents
+  // inferring a narrow literal union from allowedSchemes.
+  const exemptSchemes: Set<string> = new Set(allowedSchemes);
 
   return (request, response, toolkit) => {
     if (
@@ -37,11 +46,41 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
       return toolkit.next();
     }
 
+    if (exemptSchemes.size > 0 && !isSafeMethod(request.route.method)) {
+      const authState = getAuthState<AuthenticatedUser>(request);
+      const scheme = authState.state?.http_authentication_scheme;
+      if (scheme != null && exemptSchemes.has(scheme)) {
+        return toolkit.next();
+      }
+    }
+
     const hasVersionHeader = VERSION_HEADER in request.headers;
     const hasXsrfHeader = XSRF_HEADER in request.headers;
 
     if (!isSafeMethod(request.route.method) && !hasVersionHeader && !hasXsrfHeader) {
       return response.badRequest({ body: `Request must contain a ${XSRF_HEADER} header.` });
+    }
+
+    return toolkit.next();
+  };
+};
+
+export const createExcludeRoutesPreAuthHandler = (
+  config: HttpConfig,
+  log: Logger
+): OnPreAuthHandler => {
+  const excludedRoutes = new Set(config.excludeRoutes);
+  log = log.get('server', 'exclude_routes');
+
+  return (request, response, toolkit) => {
+    if (excludedRoutes.size === 0) {
+      return toolkit.next();
+    }
+
+    const routePath = request.route.routePath ?? request.route.path;
+    if (excludedRoutes.has(routePath)) {
+      log.warn(`Access to route [${routePath}] is blocked by server.excludeRoutes`);
+      return response.notFound();
     }
 
     return toolkit.next();

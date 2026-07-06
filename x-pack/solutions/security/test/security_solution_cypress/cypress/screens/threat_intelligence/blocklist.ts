@@ -17,7 +17,7 @@ export const BLOCK_LIST_NAME = getDataTestSubjectSelector('blocklist-form-name-i
 export const BLOCK_LIST_DESCRIPTION = getDataTestSubjectSelector(
   'blocklist-form-description-input'
 );
-export const BLOCK_LIST_ADD_BUTTON = `[class="eui-textTruncate"]`;
+export const BLOCK_LIST_ADD_BUTTON = `.euiFlyoutFooter .euiButton`;
 export const BLOCK_LIST_TOAST_LIST = getDataTestSubjectSelector('globalToastList');
 export const BLOCK_LIST_VALUE_INPUT = (iocId: string) =>
   getDataTestSubjectSelector(`blocklist-form-values-input-${iocId}`);

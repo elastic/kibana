@@ -20,7 +20,6 @@
     "optionalPlugins": [
       "security",
       "screenshotMode",
-      "embeddableEnhanced"
     ],
     "requiredBundles": [],
     "extraPublicDirs": ["common"]

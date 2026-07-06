@@ -12,9 +12,11 @@
       "xpack",
       "searchNavigation"
     ],
-    "requiredPlugins": [],
+    "requiredPlugins": ["share"],
     "optionalPlugins": [
-      "serverless"
+      "serverless",
+      "spaces",
+      "indexManagement"
     ],
     "requiredBundles": []
   }

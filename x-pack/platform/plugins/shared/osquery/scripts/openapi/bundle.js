@@ -9,15 +9,17 @@ require('@kbn/setup-node-env');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { bundle } = require('@kbn/openapi-bundler');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { resolve } = require('path');
+const { join, resolve } = require('path');
 
-const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
+const OSQUERY_ROOT = resolve(__dirname, '../..');
 
 (async () => {
   await bundle({
-    rootDir: ELASTIC_ASSISTANT_ROOT,
-    sourceGlob: 'common/api/**/*.schema.yaml',
-    outputFilePath: 'docs/openapi/serverless/osquery_api_{version}.bundled.schema.yaml',
+    sourceGlob: join(OSQUERY_ROOT, 'common/api/**/*.schema.yaml'),
+    outputFilePath: join(
+      OSQUERY_ROOT,
+      'docs/openapi/serverless/osquery_api_{version}.bundled.schema.yaml'
+    ),
     options: {
       includeLabels: ['serverless'],
       prototypeDocument: {
@@ -37,9 +39,11 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
   });
 
   await bundle({
-    rootDir: ELASTIC_ASSISTANT_ROOT,
-    sourceGlob: 'common/api/**/*.schema.yaml',
-    outputFilePath: 'docs/openapi/ess/osquery_api_{version}.bundled.schema.yaml',
+    sourceGlob: join(OSQUERY_ROOT, 'common/api/**/*.schema.yaml'),
+    outputFilePath: join(
+      OSQUERY_ROOT,
+      'docs/openapi/ess/osquery_api_{version}.bundled.schema.yaml'
+    ),
     options: {
       includeLabels: ['ess'],
       prototypeDocument: {

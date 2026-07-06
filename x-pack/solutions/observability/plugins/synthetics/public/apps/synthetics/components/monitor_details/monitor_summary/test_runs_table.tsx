@@ -51,6 +51,8 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorPings } from '../hooks/use_monitor_pings';
 import { JourneyLastScreenshot } from '../../common/screenshot/journey_last_screenshot';
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
+import { useGetUrlParams } from '../../../hooks';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
@@ -93,6 +95,8 @@ export const TestRunsTable = ({
   const pingsError = useSelector(selectPingsError);
   const { monitor } = useSelectedMonitor();
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
+  const { remoteName } = useGetUrlParams();
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
@@ -162,6 +166,8 @@ export const TestRunsTable = ({
             isBrowserMonitor={isBrowserMonitor}
             basePath={basePath}
             locationId={selectedLocation?.id}
+            spaceId={spaceId}
+            remoteName={remoteName}
           />
         ),
       },
@@ -279,6 +285,8 @@ export const TestRunsTable = ({
               monitorId,
               checkGroup: item.monitor.check_group,
               locationId: selectedLocation?.id,
+              spaceId,
+              remoteName,
             })
           );
         }
@@ -316,6 +324,9 @@ export const TestRunsTable = ({
               }
             : undefined
         }
+        tableCaption={i18n.translate('xpack.synthetics.monitorDetails.summary.testRunsCaption', {
+          defaultMessage: 'Recent test runs',
+        })}
       />
     </EuiPanel>
   );
@@ -326,11 +337,15 @@ export const MobileRowDetails = ({
   isBrowserMonitor,
   basePath,
   locationId,
+  spaceId,
+  remoteName,
 }: {
   ping: Ping;
   isBrowserMonitor: boolean;
   basePath: string;
   locationId?: string;
+  spaceId?: string;
+  remoteName?: string;
 }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -361,6 +376,8 @@ export const MobileRowDetails = ({
                 configId: ping.config_id,
                 locationId,
                 stateId: ping?.state?.id!,
+                spaceId,
+                remoteName,
               })}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {

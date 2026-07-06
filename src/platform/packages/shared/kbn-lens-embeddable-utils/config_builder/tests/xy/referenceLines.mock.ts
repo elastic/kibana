@@ -98,6 +98,7 @@ export const referenceLineXY: LensAttributes = {
             {
               axisMode: 'left',
               color: '#e5281e',
+              iconPosition: 'left',
               forAccessor: 'd661ac91-a1bc-45cc-bd62-b01cdf81199f',
             },
           ],

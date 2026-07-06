@@ -15,12 +15,14 @@ import type { Entity } from './use_asset_criticality';
 import { useAssetCriticalityPrivileges, useAssetCriticalityData } from './use_asset_criticality';
 
 const mockFetchAssetCriticalityPrivileges = jest.fn().mockResolvedValue({});
+const mockFetchEntityStoreV2Privileges = jest.fn().mockResolvedValue({});
 const mockFetchAssetCriticality = jest.fn().mockResolvedValue({});
 const mockDeleteAssetCriticality = jest.fn().mockResolvedValue({});
 const mockCreateAssetCriticality = jest.fn().mockResolvedValue({});
 jest.mock('../../api/api', () => ({
   useEntityAnalyticsRoutes: () => ({
     fetchAssetCriticalityPrivileges: mockFetchAssetCriticalityPrivileges,
+    fetchEntityStoreV2Privileges: mockFetchEntityStoreV2Privileges,
     fetchAssetCriticality: mockFetchAssetCriticality,
     deleteAssetCriticality: mockDeleteAssetCriticality,
     createAssetCriticality: mockCreateAssetCriticality,
@@ -48,22 +50,34 @@ describe('useAssetCriticality', () => {
   });
 
   describe('useAssetCriticalityPrivileges', () => {
-    it('does not call privileges API when hasEntityAnalyticsCapability is false', async () => {
+    it('does not call any privileges API when hasEntityAnalyticsCapability is false', async () => {
       mockUseHasSecurityCapability.mockReturnValue(false);
       mockUseUiSettings.mockReturnValue([true]);
 
       await renderQuery(() => useAssetCriticalityPrivileges('test_entity_name'), 'isSuccess');
 
+      expect(mockFetchEntityStoreV2Privileges).not.toHaveBeenCalled();
       expect(mockFetchAssetCriticalityPrivileges).not.toHaveBeenCalled();
     });
 
-    it('calls privileges API when hasEntityAnalyticsCapability and UiSettings are enabled', async () => {
+    it('calls entity store v2 privileges API when entityStoreV2Enabled is true', async () => {
       mockUseHasSecurityCapability.mockReturnValue(true);
       mockUseUiSettings.mockReturnValue([true]);
 
       await renderQuery(() => useAssetCriticalityPrivileges('test_entity_name'), 'isSuccess');
 
+      expect(mockFetchEntityStoreV2Privileges).toHaveBeenCalled();
+      expect(mockFetchAssetCriticalityPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('calls asset criticality privileges API when entityStoreV2Enabled is false', async () => {
+      mockUseHasSecurityCapability.mockReturnValue(true);
+      mockUseUiSettings.mockReturnValue([false]);
+
+      await renderQuery(() => useAssetCriticalityPrivileges('test_entity_name'), 'isSuccess');
+
       expect(mockFetchAssetCriticalityPrivileges).toHaveBeenCalled();
+      expect(mockFetchEntityStoreV2Privileges).not.toHaveBeenCalled();
     });
   });
 

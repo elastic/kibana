@@ -433,8 +433,12 @@ export const addOsqueryToAgentPolicy = (
     },
   });
 
-export const cleanupAgentPolicy = (agentPolicyId: string) =>
-  request({
+export const cleanupAgentPolicy = (agentPolicyId: string | undefined) => {
+  if (!agentPolicyId) {
+    return;
+  }
+
+  return request({
     method: 'POST',
     body: { agentPolicyId },
     headers: {
@@ -442,3 +446,4 @@ export const cleanupAgentPolicy = (agentPolicyId: string) =>
     },
     url: '/api/fleet/agent_policies/delete',
   });
+};

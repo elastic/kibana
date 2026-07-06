@@ -17,8 +17,20 @@ describe('config validation', () => {
               "enabled": false,
             },
           },
+          "analyticsV2": Object {
+            "enableAdminRoutes": false,
+            "enabled": false,
+            "reconciliationIntervalMinutes": 30,
+            "resetPageDelayMs": 0,
+            "resetTaskTimeoutMinutes": 60,
+          },
           "attachments": Object {
             "enabled": false,
+          },
+          "casesRedesign": Object {
+            "details": false,
+            "list": false,
+            "settings": false,
           },
           "enabled": true,
           "files": Object {
@@ -104,6 +116,7 @@ describe('config validation', () => {
               "text/json",
               "application/json",
               "application/zip",
+              "application/x-zip-compressed",
               "application/gzip",
               "application/x-bzip",
               "application/x-bzip2",

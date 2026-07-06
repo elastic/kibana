@@ -66,7 +66,7 @@ export const PrivilegedUserMonitoringValidationStep: React.FC<PrivilegedUserMoni
               <EuiFlexItem grow>
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={'checkInCircleFilled'} color="success" />
+                    <EuiIcon type={'checkCircleFill'} color="success" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <span data-test-subj="privileged-user-monitoring-validLinesMessage">

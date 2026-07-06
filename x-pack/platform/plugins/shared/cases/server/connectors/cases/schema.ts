@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import dateMath from '@kbn/datemath';
 import {
   CASES_CONNECTOR_TIME_WINDOW_REGEX,
@@ -14,7 +14,7 @@ import {
   MAX_DOCS_PER_PAGE,
   MAX_TITLE_LENGTH,
   DEFAULT_MAX_OPEN_CASES,
-  MAX_OPEN_CASES,
+  ABSOLUTE_MAX_CASES_PER_RUN,
 } from '../../../common/constants';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
@@ -93,7 +93,6 @@ export const CasesConnectorRunParamsSchema = schema.object({
     schema.arrayOf(CasesGroupedAlertsSchema, {
       defaultValue: [],
       minSize: 0,
-      maxSize: MAX_OPEN_CASES,
     })
   ),
   groupingBy: GroupingSchema,
@@ -104,7 +103,7 @@ export const CasesConnectorRunParamsSchema = schema.object({
   maximumCasesToOpen: schema.number({
     defaultValue: DEFAULT_MAX_OPEN_CASES,
     min: 1,
-    max: MAX_OPEN_CASES,
+    max: ABSOLUTE_MAX_CASES_PER_RUN,
   }),
   templateId: schema.nullable(schema.string()),
   internallyManagedAlerts: schema.nullable(schema.boolean({ defaultValue: false })),
@@ -189,12 +188,7 @@ export const ZCasesConnectorRunParamsSchema = z
   .object({
     alerts: z.array(ZAlertSchema),
     autoPushCase: z.boolean().nullable().default(false),
-    groupedAlerts: z
-      .array(ZCasesGroupedAlertsSchema)
-      .min(0)
-      .max(MAX_OPEN_CASES)
-      .default([])
-      .nullable(),
+    groupedAlerts: z.array(ZCasesGroupedAlertsSchema).min(0).default([]).nullable(),
     groupingBy: ZGroupingSchema,
     owner: z.string(),
     rule: ZRuleSchema,
@@ -203,7 +197,7 @@ export const ZCasesConnectorRunParamsSchema = z
     maximumCasesToOpen: z.coerce
       .number()
       .min(1)
-      .max(MAX_OPEN_CASES)
+      .max(ABSOLUTE_MAX_CASES_PER_RUN)
       .default(DEFAULT_MAX_OPEN_CASES),
     templateId: z.string().nullable().default(null),
     internallyManagedAlerts: z.boolean().default(false).nullable(),
@@ -219,7 +213,11 @@ export const CasesConnectorRuleActionParamsSchema = schema.object({
     timeWindow: TimeWindowSchema,
     templateId: schema.nullable(schema.string()),
     maximumCasesToOpen: schema.nullable(
-      schema.number({ min: 1, max: MAX_OPEN_CASES, defaultValue: DEFAULT_MAX_OPEN_CASES })
+      schema.number({
+        min: 1,
+        max: ABSOLUTE_MAX_CASES_PER_RUN,
+        defaultValue: DEFAULT_MAX_OPEN_CASES,
+      })
     ),
   }),
 });

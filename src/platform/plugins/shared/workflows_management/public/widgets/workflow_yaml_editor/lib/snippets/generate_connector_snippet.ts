@@ -10,8 +10,9 @@
 import { stringify, type ToStringOptions } from 'yaml';
 import { isMac } from '@kbn/shared-ux-utility';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import { isBuiltInStepType } from '@kbn/workflows';
+import { getZodTypeName } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
-import { getZodTypeName } from '../../../../../common/lib/zod';
 import { getConnectorInstancesForType } from '../autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
 import { getCachedAllConnectors } from '../connectors_cache';
 import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
@@ -37,9 +38,9 @@ export function generateConnectorSnippet(
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, unknown>;
 
-  const isConnectorIdRequired = getCachedAllConnectors(dynamicConnectorTypes).find(
-    (c) => c.type === connectorType
-  )?.connectorIdRequired;
+  const isConnectorIdRequired =
+    getCachedAllConnectors(dynamicConnectorTypes).find((c) => c.type === connectorType)
+      ?.hasConnectorId === 'required';
 
   // Generate smart connector-id value based on available instances
   let connectorIdValue: string | undefined;
@@ -133,8 +134,7 @@ export function connectorTypeRequiresConnectorId(
   dynamicConnectorTypes?: Record<string, unknown>
 ): boolean {
   // Built-in step types don't need connector-id
-  const builtInStepTypes = ['foreach', 'if', 'parallel', 'merge', 'http', 'wait'];
-  if (builtInStepTypes.includes(connectorType)) {
+  if (isBuiltInStepType(connectorType)) {
     return false;
   }
 

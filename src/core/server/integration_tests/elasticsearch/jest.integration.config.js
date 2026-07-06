@@ -8,13 +8,12 @@
  */
 
 module.exports = {
-  // TODO replace the line below with
-  // preset: '@kbn/test/jest_integration_node
-  // to do so, we must fix all integration tests first
-  // see https://github.com/elastic/kibana/pull/130255/
-  preset: '@kbn/test/jest_integration',
+  preset: '@kbn/test/jest_integration_node',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/core/server/integration_tests/elasticsearch'],
   // must override to match all test given there is no `integration_tests` subfolder
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
+  // Force exit after tests complete - necessary for Docker-based integration tests
+  // to avoid hanging on lingering async operations from Docker containers
+  forceExit: true,
 };

@@ -16,5 +16,3 @@ export type {
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
 } from '../server';
-
-export { CONTEXT_MENU_TRIGGER, SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from './constants';

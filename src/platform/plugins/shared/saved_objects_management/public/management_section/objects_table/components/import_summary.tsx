@@ -21,6 +21,7 @@ import {
   EuiHorizontalRule,
   EuiTitle,
   EuiSpacer,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -153,7 +154,7 @@ const StatusIndicator: FC<{ item: ImportItem }> = ({ item }) => {
     case 'created':
       return (
         <EuiIconTip
-          type={'checkInCircleFilled'}
+          type={'checkCircleFill'}
           color={'success'}
           content={i18n.translate('savedObjectsManagement.importSummary.createdOutcomeLabel', {
             defaultMessage: 'Created',
@@ -214,15 +215,18 @@ const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePat
     [kibana.services.application]
   );
 
+  const isRulesWarning =
+    'actionPath' in providedWarning && providedWarning.actionPath.endsWith('triggersActions/rules');
+
   const warning = useMemo(
     () =>
-      isUnifiedRulesPageEnabled && 'actionPath' in providedWarning
+      isUnifiedRulesPageEnabled && isRulesWarning
         ? {
             ...providedWarning,
             actionPath: '/app/rules',
           }
         : providedWarning,
-    [isUnifiedRulesPageEnabled, providedWarning]
+    [isUnifiedRulesPageEnabled, isRulesWarning, providedWarning]
   );
 
   const warningContent = useMemo(() => {
@@ -321,9 +325,7 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
             </EuiFlexItem>
             <EuiFlexItem css={styles.title} data-test-subj="importSavedObjectsTitle">
               <EuiText size="s">
-                <p className="eui-textTruncate" title={title}>
-                  {title}
-                </p>
+                <EuiTextTruncate text={title} />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

@@ -23,12 +23,13 @@ import type {
   PublishesWritableDescription,
   PublishesWritableTitle,
   PublishesUnsavedChanges,
+  SerializedTitles,
+  SerializedTimeRange,
 } from '@kbn/presentation-publishing';
-import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
+import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
 import type { Simplify } from '@kbn/chart-expressions-common';
 import type {
   LensByValueBase,
-  LensSerializedSharedState,
   LensByRefSerializedState,
   LensInspectorAdapters,
   LensRequestHandlersProps,
@@ -38,15 +39,28 @@ import type {
 } from '@kbn/lens-common';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 
-type LensByValueAPIConfigBase = Omit<LensByValueBase, 'attributes'> & {
-  // Temporarily allow both old and new attributes until all are new types are supported and feature flag removed
-  attributes: LensApiSchemaType | LensByValueBase['attributes'];
+/**
+ * Panel-level connfigurations that should be persisted for by-value Lens panels.
+ * Excludes runtime/inherited state from unified search and dashboard contexts.
+ */
+export type LensByValuePanelConfigs = SerializedTitles & // title, description, hide_title
+  SerializedDrilldowns &
+  SerializedTimeRange;
+
+export type LensByValueSerializedAPIConfig = LensByValuePanelConfigs & {
+  // Temporarily allow both old and new attributes until all chart types are supported and feature flag removed
+  attributes: LensApiConfig | LensByValueBase['attributes'];
+  ref_id?: string; // really should be never but creates type issues
 };
 
-export type LensByValueSerializedAPIConfig = Simplify<
-  LensSerializedSharedState & LensByValueAPIConfigBase
->;
+/**
+ * By-value Lens panel config in flattened wire shape (dashboard app API with `lens.apiFormat`).
+ * Chart API fields from {@link LensApiConfig} sit at the root next to panel metadata.
+ */
+export type LensByValueFlattenedSerializedAPIConfig = LensByValuePanelConfigs & LensApiConfig;
+
 export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
 
 /**
@@ -59,6 +73,13 @@ export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
  */
 export type LensSerializedAPIConfig = LensByRefSerializedAPIConfig | LensByValueSerializedAPIConfig;
 
+/**
+ * The full wire-level serialized type that includes the flattened lens by value variant.
+ * Used at serialization/deserialization boundaries where the panel config
+ * may arrive in the flat wire shape (with `lens.apiFormat` enabled).
+ */
+export type LensWireAPIConfig = LensSerializedAPIConfig | LensByValueFlattenedSerializedAPIConfig;
+
 export interface LegacyLensStateApi {
   /**
    * Returns legacy serialized state to avoid duplicate transformations
@@ -69,7 +90,7 @@ export interface LegacyLensStateApi {
 }
 
 export type LensApi = Simplify<
-  DefaultEmbeddableApi<LensSerializedAPIConfig> &
+  DefaultEmbeddableApi<LensWireAPIConfig> &
     // This is used by actions to operate the edit action
     HasEditCapabilities &
     // for blocking errors leverage the embeddable panel UI
@@ -91,7 +112,7 @@ export type LensApi = Simplify<
     HasSupportedTriggers &
     PublishesDisabledActionIds &
     // Offers methods to operate from/on the linked saved object
-    HasLibraryTransforms<LensSerializedAPIConfig, LensSerializedAPIConfig> &
+    HasLibraryTransforms<LensWireAPIConfig, LensWireAPIConfig> &
     // Let the container know the view mode
     PublishesViewMode &
     // Let the container know the saved object id

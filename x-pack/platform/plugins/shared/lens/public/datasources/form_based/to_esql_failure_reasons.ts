@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 export type EsqlConversionFailureReason =
   | 'multi_layer_not_supported'
   | 'trend_line_not_supported'
-  | 'non_utc_timezone'
   | 'formula_not_supported'
   | 'time_shift_not_supported'
   | 'runtime_field_not_supported'
@@ -23,6 +22,7 @@ export type EsqlConversionFailureReason =
   | 'drop_partials_not_supported'
   | 'include_empty_rows_not_supported'
   | 'terms_not_supported'
+  | 'saved_to_library_not_supported'
   | 'unsupported_settings'
   | 'unknown';
 
@@ -41,10 +41,6 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
         'Cannot convert to ES|QL: Metric visualizations with trend lines will be supported in an upcoming update.',
     }
   ),
-  non_utc_timezone: i18n.translate('xpack.lens.config.cannotConvertToEsqlNonUtcTimezoneTooltip', {
-    defaultMessage:
-      'Cannot convert to ES|QL: Non-UTC timezones will be supported in an upcoming update.',
-  }),
   formula_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlFormulaTooltip', {
     defaultMessage:
       'Cannot convert to ES|QL: Formula operations will be supported in an upcoming update.',
@@ -92,6 +88,13 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     defaultMessage:
       'Cannot convert to ES|QL: Top values (terms) aggregation will be supported in an upcoming update.',
   }),
+  saved_to_library_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertSavedToLibraryTooltip',
+    {
+      defaultMessage:
+        'Cannot convert to ES|QL: Charts saved to library will be supported in an upcoming update.',
+    }
+  ),
   unsupported_settings: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip',
     {

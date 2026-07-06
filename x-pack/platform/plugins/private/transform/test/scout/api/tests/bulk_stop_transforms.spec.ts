@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { CookieHeader } from '@kbn/scout';
 import type { estypes } from '@elastic/elasticsearch';
 import type { StopTransformsRequestSchema, StopTransformsResponseSchema } from '../../../../common';
@@ -17,7 +18,7 @@ import { COMMON_HEADERS } from '../constants';
 
 const transformIds = ['bulk_stop_test_1', 'bulk_stop_test_2'];
 
-apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('/internal/transform/stop_transforms', { tag: tags.stateful.all }, () => {
   let transformManagerCookieHeader: CookieHeader;
 
   apiTest.beforeAll(async ({ samlAuth }) => {

@@ -18,6 +18,7 @@ interface VarGroupSelectorProps {
   onSelectionChange: (groupName: string, optionName: string) => void;
   isAgentlessEnabled: boolean;
   hideInVarGroupOptions?: Record<string, string[]>;
+  disabled?: boolean;
 }
 
 /**
@@ -30,6 +31,7 @@ export const VarGroupSelector: React.FC<VarGroupSelectorProps> = ({
   onSelectionChange,
   isAgentlessEnabled,
   hideInVarGroupOptions,
+  disabled = false,
 }) => {
   const visibleOptions = useMemo(
     () => getVisibleOptions(varGroup, isAgentlessEnabled, hideInVarGroupOptions),
@@ -106,6 +108,7 @@ export const VarGroupSelector: React.FC<VarGroupSelectorProps> = ({
           options={selectOptions}
           value={selectedOptionName || ''}
           onChange={handleChange}
+          disabled={disabled}
           fullWidth
         />
       </EuiFormRow>

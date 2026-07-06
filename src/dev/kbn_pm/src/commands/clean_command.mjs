@@ -40,6 +40,8 @@ export const command = {
       ...collectBazelPaths(),
       Path.resolve(REPO_ROOT, '.moon', 'cache'),
       Path.resolve(REPO_ROOT, '.es', 'cache'),
+      Path.resolve(REPO_ROOT, 'target'),
+      Path.resolve(REPO_ROOT, 'node_modules', '.cache', '.rspack-cache'),
     ]);
   },
 };

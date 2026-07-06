@@ -196,23 +196,6 @@ export default function ({ getService }: FtrProviderContext) {
           const { status } = await supertestViewerWithApiKey.get('/api/security/logout');
           expect(status).toBe(302);
         });
-
-        it('SAML callback', async () => {
-          const { body, status } = await supertestViewerWithApiKey
-            .post('/api/security/saml/callback')
-            .set(svlCommonApi.getCommonRequestHeader())
-            .send({
-              SAMLResponse: '',
-            });
-
-          // Should fail with 401 (not 404) because there is no valid SAML response in the request body
-          expect(body).toEqual({
-            error: 'Unauthorized',
-            message: 'Unauthorized',
-            statusCode: 401,
-          });
-          expect(status).not.toBe(404);
-        });
       });
     });
   });

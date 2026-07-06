@@ -39,6 +39,7 @@ const connector: ActionConnector = createMockActionConnector({
   actionTypeId: '.test',
   config: { testTextField: 'My text field' },
   secrets: { secretTextField: 'super secret' },
+  authMode: 'shared',
 });
 
 describe('EditConnectorFlyout', () => {
@@ -65,6 +66,19 @@ describe('EditConnectorFlyout', () => {
       ...appMockRenderer.coreStart.application.capabilities,
       actions: { save: true, show: true, execute: true },
     };
+    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue([
+      {
+        id: '.test',
+        name: 'Test',
+        enabled: true,
+        enabled_in_config: true,
+        enabled_in_license: true,
+        supported_feature_ids: [],
+        minimum_license_required: 'basic',
+        is_system_action_type: false,
+        is_deprecated: false,
+      },
+    ]);
     appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
   });
@@ -93,7 +107,7 @@ describe('EditConnectorFlyout', () => {
         onConnectorUpdated={onConnectorUpdated}
       />
     );
-    expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
+    expect(await screen.findByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
 
     await act(async () => {
       await userEvent.clear(getByTestId('nameInput'));
@@ -114,7 +128,7 @@ describe('EditConnectorFlyout', () => {
         onConnectorUpdated={onConnectorUpdated}
       />
     );
-    expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
+    expect(await screen.findByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
 
     await userEvent.clear(getByTestId('nameInput'));
     await userEvent.type(getByTestId('nameInput'), 'My new name', {
@@ -136,10 +150,8 @@ describe('EditConnectorFlyout', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(getByTestId('nameInput')).toBeInTheDocument();
-      expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
 
     await waitFor(() => {
       expect(queryByText('This connector is read-only.')).not.toBeInTheDocument();
@@ -158,9 +170,7 @@ describe('EditConnectorFlyout', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(getByTestId('test-connector-secret-text-field')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('test-connector-secret-text-field')).toBeInTheDocument();
 
     expect(getByTestId('test-connector-secret-text-field')).toHaveValue('');
   });
@@ -179,7 +189,7 @@ describe('EditConnectorFlyout', () => {
   });
 
   it('shows the buttons', async () => {
-    const { getByTestId } = appMockRenderer.render(
+    appMockRenderer.render(
       <EditConnectorFlyout
         actionTypeRegistry={actionTypeRegistry}
         onClose={onClose}
@@ -188,8 +198,8 @@ describe('EditConnectorFlyout', () => {
       />
     );
 
-    expect(getByTestId('edit-connector-flyout-save-btn')).toBeInTheDocument();
-    expect(getByTestId('edit-connector-flyout-close-btn')).toBeInTheDocument();
+    expect(await screen.findByTestId('edit-connector-flyout-save-btn')).toBeInTheDocument();
+    expect(await screen.findByTestId('edit-connector-flyout-close-btn')).toBeInTheDocument();
   });
 
   it('does not show the save button if the use does not have permissions to update connector', async () => {
@@ -233,9 +243,7 @@ describe('EditConnectorFlyout', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
 
     /**
      * Clear the name so the form can be invalid
@@ -251,7 +259,7 @@ describe('EditConnectorFlyout', () => {
 
   describe('Header', () => {
     it('shows the icon', async () => {
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer.render(
         <EditConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
@@ -260,7 +268,7 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
-      expect(getByTestId('edit-connector-flyout-header-icon')).toBeInTheDocument();
+      expect(await screen.findByTestId('edit-connector-flyout-header-icon')).toBeInTheDocument();
     });
 
     it('does not shows the icon when is not defined', async () => {
@@ -372,7 +380,7 @@ describe('EditConnectorFlyout', () => {
       );
 
       expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
-      expect(getByTestId('testConnectorTab')).toBeInTheDocument();
+      expect(await screen.findByTestId('testConnectorTab')).toBeInTheDocument();
     });
 
     it('navigates to the test form', async () => {
@@ -386,17 +394,15 @@ describe('EditConnectorFlyout', () => {
       );
 
       expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
-      expect(getByTestId('testConnectorTab')).toBeInTheDocument();
+      expect(await screen.findByTestId('testConnectorTab')).toBeInTheDocument();
 
       await userEvent.click(getByTestId('testConnectorTab'));
 
-      await waitFor(() => {
-        expect(getByTestId('test-connector-form')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('test-connector-form')).toBeInTheDocument();
     });
 
     it('opens the provided tab', async () => {
-      const { getByTestId } = appMockRenderer.render(
+      appMockRenderer.render(
         <EditConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
@@ -406,9 +412,7 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
-      await waitFor(() => {
-        expect(getByTestId('test-connector-form')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('test-connector-form')).toBeInTheDocument();
     });
   });
 
@@ -423,9 +427,7 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
-      await waitFor(() => {
-        expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
 
       await userEvent.clear(getByTestId('nameInput'));
       await userEvent.type(getByTestId('nameInput'), 'My new name');
@@ -473,7 +475,7 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
-      expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
+      expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
 
       await user.clear(getByTestId('test-connector-text-field'));
       await user.type(getByTestId('test-connector-text-field'), 'My updated text field');
@@ -514,9 +516,7 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
-      await waitFor(() => {
-        expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
 
       await userEvent.clear(getByTestId('nameInput'));
       await userEvent.type(getByTestId('nameInput'), 'My new name');
@@ -581,6 +581,8 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
+      expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
+
       await userEvent.clear(screen.getByTestId('nameInput'));
       await userEvent.type(screen.getByTestId('nameInput'), 'My new name');
       await userEvent.type(screen.getByTestId('test-connector-secret-text-field'), 'password');
@@ -603,9 +605,7 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
-      await waitFor(() => {
-        expect(getByTestId('test-connector-error-text-field')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('test-connector-error-text-field')).toBeInTheDocument();
 
       await userEvent.clear(getByTestId('nameInput'));
       await userEvent.type(getByTestId('nameInput'), 'My new name');
@@ -634,9 +634,7 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
-      await waitFor(() => {
-        expect(getByTestId('test-connector-form')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('test-connector-form')).toBeInTheDocument();
 
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
 
@@ -663,29 +661,21 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
-      await waitFor(() => {
-        expect(getByTestId('test-connector-form')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('test-connector-form')).toBeInTheDocument();
 
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
 
       await userEvent.click(getByTestId('executeActionButton'));
 
-      await waitFor(() => {
-        expect(getByTestId('executionSuccessfulResult')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('executionSuccessfulResult')).toBeInTheDocument();
 
       await userEvent.click(getByTestId('configureConnectorTab'));
 
-      await waitFor(() => {
-        expect(getByTestId('nameInput')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
 
       await userEvent.click(getByTestId('testConnectorTab'));
 
-      await waitFor(() => {
-        expect(getByTestId('test-connector-form')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('test-connector-form')).toBeInTheDocument();
 
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
     });
@@ -705,15 +695,11 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
-      await waitFor(() => {
-        expect(getByTestId('test-connector-form')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('test-connector-form')).toBeInTheDocument();
 
       await userEvent.click(getByTestId('executeActionButton'));
 
-      await waitFor(() => {
-        expect(getByTestId('executionFailureResult')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('executionFailureResult')).toBeInTheDocument();
     });
 
     it('resets the results when modifying the form', async () => {
@@ -727,21 +713,15 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
-      await waitFor(() => {
-        expect(getByTestId('test-connector-form')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('test-connector-form')).toBeInTheDocument();
 
       await userEvent.click(getByTestId('executeActionButton'));
 
-      await waitFor(() => {
-        expect(getByTestId('executionSuccessfulResult')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('executionSuccessfulResult')).toBeInTheDocument();
 
       await userEvent.click(getByTestId('configureConnectorTab'));
 
-      await waitFor(() => {
-        expect(getByTestId('nameInput')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
 
       await userEvent.clear(getByTestId('nameInput'));
       await userEvent.type(getByTestId('nameInput'), 'My new name', {
@@ -750,9 +730,7 @@ describe('EditConnectorFlyout', () => {
 
       await userEvent.click(getByTestId('testConnectorTab'));
 
-      await waitFor(() => {
-        expect(getByTestId('test-connector-form')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('test-connector-form')).toBeInTheDocument();
 
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
       expect(getByTestId('executeActionButton')).toBeDisabled();
@@ -769,7 +747,7 @@ describe('EditConnectorFlyout', () => {
       );
 
       expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
-      expect(screen.queryByTestId('testConnectorTab')).toBeEnabled();
+      expect(await screen.findByTestId('testConnectorTab')).toBeEnabled();
     });
   });
 });
@@ -781,7 +759,6 @@ describe('is spec connector', () => {
 
   const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
     actionConnectorFields: lazy(() => import('../connector_mock')),
-    source: 'spec',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);
@@ -792,7 +769,9 @@ describe('is spec connector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    actionTypeRegistry.has.mockReturnValue(true);
+    // Spec connectors are not registered client-side; the spec fetch path is irrelevant
+    // for this test since it only asserts tab rendering, which is gated on registry lookup.
+    actionTypeRegistry.has.mockReturnValue(false);
     actionTypeRegistry.get.mockReturnValue(actionTypeModel);
     appMockRenderer = createAppMockRenderer();
     appMockRenderer.coreStart.application.capabilities = {

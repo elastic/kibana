@@ -6,7 +6,11 @@
  */
 
 import type { Conversation } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  ConversationAccessControlMode,
+  ConversationRoundStatus,
+  ToolOrigin,
+} from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
   ConversationRoundStepType,
@@ -20,7 +24,7 @@ import {
   createRequestToEs,
   type Document as ConversationDocument,
 } from './converters';
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 jest.mock('@kbn/agent-builder-server/tools/utils');
 
@@ -30,7 +34,7 @@ const createTestState = () => ({
   prompt: {
     responses: {
       'tools.my-tool.confirmation': {
-        type: AgentPromptType.confirmation,
+        type: AgentPromptType.confirmation as const,
         response: { allow: true },
       },
     },
@@ -103,6 +107,9 @@ describe('conversation model converters', () => {
           id: 'user_id',
           username: 'user_name',
         },
+        access_control: {
+          access_mode: ConversationAccessControlMode.Private,
+        },
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
         rounds: [
@@ -168,6 +175,9 @@ describe('conversation model converters', () => {
           id: 'user_id',
           username: 'user_name',
         },
+        access_control: {
+          access_mode: ConversationAccessControlMode.Private,
+        },
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
         rounds: [
@@ -232,6 +242,7 @@ describe('conversation model converters', () => {
               data: { someData: 'someValue' },
             },
           ],
+          tool_origin: undefined,
         },
         {
           type: ConversationRoundStepType.reasoning,
@@ -266,6 +277,126 @@ describe('conversation model converters', () => {
         .flatMap((step) => step.results);
 
       expect(results.map((result) => result.tool_result_id)).toEqual(['foo', 'some-result-id']);
+    });
+
+    it('migrates legacy tabular_data type to esqlResults', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'tool_call_id',
+          tool_id: 'tool_id',
+          params: {},
+          results: JSON.stringify([
+            {
+              tool_result_id: 'result-1',
+              type: 'tabular_data',
+              data: {
+                source: 'esql',
+                query: 'FROM logs | LIMIT 10',
+                columns: [{ name: 'message', type: 'keyword' }],
+                values: [['test message']],
+              },
+            },
+            {
+              tool_result_id: 'result-2',
+              type: 'query',
+              data: { esql: 'FROM logs | LIMIT 10' },
+            },
+          ]),
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const results = deserialized.rounds[0].steps
+        .filter(isToolCallStep)
+        .flatMap((step) => step.results);
+
+      expect(results).toHaveLength(2);
+      // tabular_data should be migrated to esqlResults
+      expect(results[0].type).toBe(ToolResultType.esqlResults);
+      expect(results[0].data).toEqual({
+        source: 'esql',
+        query: 'FROM logs | LIMIT 10',
+        columns: [{ name: 'message', type: 'keyword' }],
+        values: [['test message']],
+      });
+      // other types should remain unchanged
+      expect(results[1].type).toBe(ToolResultType.query);
+    });
+
+    it('infers tool_origin as internal for attachment tools missing the field', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'attachments.read',
+          params: {},
+          results: '[]',
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBe(ToolOrigin.internal);
+    });
+
+    it('infers tool_origin as internal for filestore tools missing the field', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'filestore.read',
+          params: {},
+          results: '[]',
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBe(ToolOrigin.internal);
+    });
+
+    it('leaves tool_origin undefined for unknown tools missing the field', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'some.custom.tool',
+          params: {},
+          results: '[]',
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBeUndefined();
+    });
+
+    it('preserves existing tool_origin when already set', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'my.registry.tool',
+          params: {},
+          results: '[]',
+          tool_origin: ToolOrigin.registry,
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBe(ToolOrigin.registry);
     });
 
     it('deserializes conversation with attachments', () => {
@@ -334,6 +465,29 @@ describe('conversation model converters', () => {
       const deserialized = fromEs(serialized);
 
       expect(deserialized.state).toBeUndefined();
+    });
+
+    it('defaults access control to private for legacy conversations', () => {
+      const serialized = documentBase();
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Private,
+      });
+    });
+
+    it('deserializes conversation access control', () => {
+      const serialized = documentBase();
+      serialized._source!.access_control = {
+        access_mode: ConversationAccessControlMode.Public,
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Public,
+      });
     });
   });
 
@@ -409,6 +563,9 @@ describe('conversation model converters', () => {
         attachments: [],
         // Legacy field explicitly set to undefined
         rounds: undefined,
+        access_control: {
+          access_mode: ConversationAccessControlMode.Private,
+        },
       });
       // Verify rounds is not present
       expect(serialized.rounds).toBeUndefined();
@@ -505,6 +662,19 @@ describe('conversation model converters', () => {
 
       expect(serialized.state).toBeUndefined();
     });
+
+    it('serializes conversation access control', () => {
+      const conversation = conversationBase();
+      conversation.access_control = {
+        access_mode: ConversationAccessControlMode.Public,
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Public,
+      });
+    });
   });
 
   describe('createRequestToEs', () => {
@@ -541,6 +711,47 @@ describe('conversation model converters', () => {
       });
 
       expect(serialized.state).toBeUndefined();
+    });
+
+    it('defaults access control to private when creating a conversation', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Private,
+      });
+    });
+
+    it('serializes explicit access control when creating a conversation', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+        access_control: {
+          access_mode: ConversationAccessControlMode.Public,
+        },
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Public,
+      });
     });
   });
 });

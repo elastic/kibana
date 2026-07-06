@@ -10,7 +10,7 @@ import { testData } from '../fixtures';
 
 lighthouseTest.describe(
   'Discover App - Lighthouse Performance Audit',
-  { tag: [...tags.DEPLOYMENT_AGNOSTIC, ...tags.PERFORMANCE] },
+  { tag: [...tags.deploymentAgnostic, ...tags.performance] },
   () => {
     lighthouseTest.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
       await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
@@ -30,7 +30,7 @@ lighthouseTest.describe(
       'runs audit on Discover Page',
       async ({ browserAuth, lighthouse, page, pageObjects }) => {
         await browserAuth.loginAsAdmin();
-        await pageObjects.discover.goto();
+        await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.waitForHistogramRendered();
         const currentUrl = page.url();
 

@@ -24,7 +24,9 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { RulesClientContext } from '../../rules_client';
 import { AlertingAuthorizationEntity } from '../../authorization/types';
 
-type EnsureAuthorized = (opts: { ruleTypeId: string; consumer: string }) => Promise<unknown>;
+export type BulkEnsureAuthorizedForUntrack = (opts: {
+  ruleTypeIdConsumersPairs: Array<{ ruleTypeId: string; consumers: string[] }>;
+}) => Promise<unknown>;
 
 export interface SetAlertsToUntrackedParams {
   indices?: string[];
@@ -36,7 +38,7 @@ export interface SetAlertsToUntrackedParams {
   isUsingQuery?: boolean;
   getAllAuthorizedRuleTypesFindOperation?: RulesClientContext['authorization']['getAllAuthorizedRuleTypesFindOperation'];
   getAlertIndicesAlias?: RulesClientContext['getAlertIndicesAlias'];
-  ensureAuthorized?: EnsureAuthorized;
+  bulkEnsureAuthorized?: BulkEnsureAuthorizedForUntrack;
 }
 
 interface SetAlertsToUntrackedParamsWithDep extends SetAlertsToUntrackedParams {
@@ -115,13 +117,13 @@ const getUntrackQuery = (
   }
 };
 
-const ensureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsWithDep) => {
-  const { esClient, indices, ensureAuthorized } = params;
+const bulkEnsureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsWithDep) => {
+  const { esClient, indices, bulkEnsureAuthorized } = params;
 
-  if (!ensureAuthorized) {
+  if (!bulkEnsureAuthorized) {
     return;
   }
-  // Fetch all rule type IDs and rule consumers, then run the provided ensureAuthorized check for each of them
+  // Fetch all rule type IDs and rule consumers, then run the provided bulkEnsureAuthorized check once
   const response = await esClient.search<never, ConsumersAndRuleTypesAggregation>({
     index: indices,
     allow_no_indices: true,
@@ -139,18 +141,21 @@ const ensureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsWithD
   if (!ruleTypeIdBuckets) {
     throw new Error('Unable to fetch ruleTypeIds for authorization');
   }
-  for (const {
-    key: ruleTypeId,
-    consumers: { buckets: consumerBuckets },
-  } of ruleTypeIdBuckets) {
-    const consumers = consumerBuckets.map((b) => b.key);
-    for (const consumer of consumers) {
-      if (consumer === 'siem') {
-        throw new Error('Untracking Security alerts is not permitted');
-      }
-      await ensureAuthorized({ ruleTypeId, consumer });
+
+  const ruleTypeIdConsumersPairs = ruleTypeIdBuckets.map(
+    ({ key: ruleTypeId, consumers: { buckets: consumerBuckets } }) => ({
+      ruleTypeId,
+      consumers: consumerBuckets.map((b) => b.key),
+    })
+  );
+
+  for (const pair of ruleTypeIdConsumersPairs) {
+    if (pair.consumers.includes('siem')) {
+      throw new Error('Untracking Security alerts is not permitted');
     }
   }
+
+  await bulkEnsureAuthorized({ ruleTypeIdConsumersPairs });
 };
 
 const getAuthorizedAlertsIndices = async ({
@@ -189,7 +194,7 @@ export async function setAlertsToUntracked(
     esClient,
     ruleIds = [],
     alertUuids = [], // OPTIONAL - If no alertUuids are passed, untrack ALL ids by default,
-    ensureAuthorized,
+    bulkEnsureAuthorized,
     isUsingQuery,
   } = params;
 
@@ -204,8 +209,8 @@ export async function setAlertsToUntracked(
     indices = params.indices || [];
   }
 
-  if (ensureAuthorized) {
-    await ensureAuthorizedToUntrack(params);
+  if (bulkEnsureAuthorized) {
+    await bulkEnsureAuthorizedToUntrack(params);
   }
 
   try {

@@ -26,9 +26,10 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    it('limit set of available connectors', async () => {
+    it('limit set of available connectors for rules', async () => {
       const resp = await supertestAdminWithCookieCredentials
         .get('/api/actions/connector_types')
+        .query({ feature_id: 'alerting' })
         .set(svlCommonApi.getInternalRequestHeader())
         .expect(200);
       const listIds = resp.body
@@ -45,7 +46,6 @@ export default function ({ getService }: FtrProviderContext) {
         '.teams',
         '.torq',
         '.opsgenie',
-        '.tines',
         '.resilient',
       ]);
     });

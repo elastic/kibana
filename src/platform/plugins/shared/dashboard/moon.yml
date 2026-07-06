@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dashboard-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-presentation'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/dashboard-plugin'
+  title: '@kbn/dashboard-plugin'
   description: Moon project for @kbn/dashboard-plugin
   channel: ''
   owner: '@elastic/kibana-presentation'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/dashboard
+  sourceRoot: src/platform/plugins/shared/dashboard
 dependsOn:
   - '@kbn/core'
   - '@kbn/inspector-plugin'
@@ -69,8 +68,6 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/logging'
   - '@kbn/presentation-publishing'
-  - '@kbn/presentation-containers'
-  - '@kbn/presentation-panel-plugin'
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/shared-ux-utility'
   - '@kbn/core-test-helpers-model-versions'
@@ -110,12 +107,29 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/core-chrome-layout-utils'
   - '@kbn/cps'
+  - '@kbn/as-code-filters-schema'
+  - '@kbn/as-code-filters-transforms'
   - '@kbn/scout'
   - '@kbn/test'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/test-jest-helpers'
-  - '@kbn/image-embeddable-plugin'
+  - '@kbn/scout'
+  - '@kbn/cps-utils'
+  - '@kbn/code-editor-mock'
+  - '@kbn/monaco'
+  - '@kbn/code-editor'
+  - '@kbn/as-code-shared-schemas'
+  - '@kbn/as-code-shared-transforms'
+  - '@kbn/core-http-browser'
+  - '@kbn/lens-common'
+  - '@kbn/dashboard-navigation-options-common'
+  - '@kbn/dashboard-navigation-options-components'
+  - '@kbn/dashboard-navigation-options-schema'
+  - '@kbn/as-code-shared-telemetry'
+  - '@kbn/core-user-activity-server'
+  - '@kbn/core-test-helpers-test-utils'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod
@@ -125,22 +139,14 @@ tags:
 fileGroups:
   src:
     - '*.ts'
-    - .storybook/**/*.ts
     - common/**/*
     - public/**/*
     - server/**/*
     - test/scout/**/*
+    - test/scout_oas_schema/**/*
+    - test/scout_oas_schema/**/*.json
+    - test/scout_anonymous_authc/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

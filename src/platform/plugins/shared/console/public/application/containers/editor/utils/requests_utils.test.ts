@@ -111,6 +111,75 @@ describe('requests_utils', () => {
           test2: { match_all: {} },
         });
       });
+
+      it('replaces a variable with a prefix', () => {
+        const result = replaceRequestVariables(
+          { ...request, data: [JSON.stringify({ key: 'frozen_${variable1}' }, null, 2)] },
+          variables
+        );
+        expect(JSON.parse(result.data[0])).toMatchObject({ key: 'frozen_test1' });
+      });
+
+      it('replaces a variable with a suffix', () => {
+        const result = replaceRequestVariables(
+          { ...request, data: [JSON.stringify({ key: '${variable1}_suffix' }, null, 2)] },
+          variables
+        );
+        expect(JSON.parse(result.data[0])).toMatchObject({ key: 'test1_suffix' });
+      });
+
+      it('replaces whole-value and inline occurrences of the same variable', () => {
+        const result = replaceRequestVariables(
+          {
+            ...request,
+            data: [
+              JSON.stringify(
+                { index: '${variable1}', renamed_index: 'frozen_${variable1}' },
+                null,
+                2
+              ),
+            ],
+          },
+          variables
+        );
+        expect(JSON.parse(result.data[0])).toMatchObject({
+          index: 'test1',
+          renamed_index: 'frozen_test1',
+        });
+      });
+
+      it('preserves JSON type coercion when variable is the whole value', () => {
+        const result = replaceRequestVariables(
+          { ...request, data: [JSON.stringify({ query: '${variable3}' }, null, 2)] },
+          variables
+        );
+        expect(JSON.parse(result.data[0])).toMatchObject({ query: { match_all: {} } });
+      });
+
+      it('replaces a variable inline inside a JSON key', () => {
+        const result = replaceRequestVariables(
+          { ...request, data: [`{\n  "match_\${variable1}": {}\n}`] },
+          variables
+        );
+        expect(JSON.parse(result.data[0])).toMatchObject({ match_test1: {} });
+      });
+
+      it('replaces an empty-string variable value with an empty JSON string', () => {
+        const emptyVar = [{ id: '4', name: 'empty', value: '' }];
+        const result = replaceRequestVariables(
+          { ...request, data: [JSON.stringify({ key: '${empty}' }, null, 2)] },
+          emptyVar
+        );
+        expect(JSON.parse(result.data[0])).toMatchObject({ key: '' });
+      });
+
+      it('leaves the placeholder when the variable is not defined', () => {
+        const result = replaceRequestVariables(
+          { ...request, data: [JSON.stringify({ key: '${undefined_var}' }, null, 2)] },
+          variables
+        );
+        expect(result.data[0]).toContain('${undefined_var}');
+      });
     });
   });
 

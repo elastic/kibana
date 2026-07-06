@@ -27,7 +27,9 @@ const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
-const REGISTRY_SPEC_MAX_VERSION = '3.5';
+const REGISTRY_SPEC_MAX_VERSION = '3.6';
+
+export const DEFAULT_PRODUCT_VERSIONS_TIMEOUT_MS = 60 * 1000;
 
 export const config: PluginConfigDescriptor = {
   dynamicConfig: {
@@ -55,10 +57,14 @@ export const config: PluginConfigDescriptor = {
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
       excludeDataStreamTypes: true,
+      privateFleetServerHost: true,
+      privateElasticsearchHost: true,
     },
     integrationsHomeOverride: true,
     prereleaseEnabledByDefault: true,
     hideDashboards: true,
+    isAirGapped: true,
+    installIntegrationsKnowledge: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -177,6 +183,10 @@ export const config: PluginConfigDescriptor = {
   schema: schema.object(
     {
       isAirGapped: schema.maybe(schema.boolean({ defaultValue: false })),
+      productVersionsApiTimeoutMs: schema.number({
+        defaultValue: DEFAULT_PRODUCT_VERSIONS_TIMEOUT_MS,
+        min: 1000,
+      }),
       enableDeleteUnenrolledAgents: schema.maybe(schema.boolean({ defaultValue: false })),
       enableManagedLogsAndMetricsDataviews: schema.boolean({ defaultValue: true }),
       registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
@@ -223,9 +233,9 @@ export const config: PluginConfigDescriptor = {
           ),
           backgroundSync: schema.maybe(
             schema.object({
-              enabled: schema.boolean({ defaultValue: false }),
+              enabled: schema.boolean({ defaultValue: true }),
               dryRun: schema.boolean({ defaultValue: false }),
-              interval: schema.maybe(schema.string({ defaultValue: '1h' })),
+              interval: schema.maybe(schema.string({ defaultValue: '10m' })),
             })
           ),
         })
@@ -255,6 +265,15 @@ export const config: PluginConfigDescriptor = {
           maxConcurrentPackageOperations: schema.number({ defaultValue: 10, min: 1, max: 20 }),
           /** Batch size for package upgrade operations */
           packageUpgradeBatchSize: schema.number({ defaultValue: 50, min: 10, max: 200 }),
+        })
+      ),
+      /**
+       * Package installation settings to tune ES operation concurrency and error handling.
+       */
+      packageInstallation: schema.maybe(
+        schema.object({
+          /** Maximum data stream operations to run concurrently per Kibana node during package installation */
+          maxConcurrentDatastreamOperations: schema.number({ defaultValue: 50, min: 1, max: 50 }),
         })
       ),
       developer: schema.object({
@@ -314,6 +333,9 @@ export const config: PluginConfigDescriptor = {
           })
         ),
         retrySetupOnBoot: schema.boolean({ defaultValue: true }),
+        // Injected by project-controller/kibana-controller when PrivateLink is enabled for this project.
+        privateFleetServerHost: schema.maybe(schema.uri({ scheme: ['https'] })),
+        privateElasticsearchHost: schema.maybe(schema.uri({ scheme: ['https'] })),
         registry: schema.object(
           {
             kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
@@ -421,9 +443,16 @@ export const config: PluginConfigDescriptor = {
           taskInterval: schema.maybe(schema.string()),
         })
       ),
+      unenrollInactiveAgents: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+          gracePeriodMs: schema.maybe(schema.number()),
+        })
+      ),
       integrationsHomeOverride: schema.maybe(schema.string()),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
       hideDashboards: schema.boolean({ defaultValue: false }),
+      installIntegrationsKnowledge: schema.maybe(schema.boolean()),
       integrationRollbackTTL: schema.maybe(schema.string()),
     },
     {

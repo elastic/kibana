@@ -11,7 +11,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { AppMountParameters } from '@kbn/core/public';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import {
+  OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+} from '../../common/cps_feature_flag';
 import type { InfraPublicConfig } from '../../common/plugin_config_types';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
@@ -80,6 +85,10 @@ const MetricsApp: React.FC<{
   kibanaEnvironment,
 }) => {
   const uiCapabilities = core.application.capabilities;
+  const infraCPSEnabled = core.featureFlags.getBooleanValue(
+    OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+    OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
+  );
 
   return (
     <CoreProviders
@@ -88,6 +97,7 @@ const MetricsApp: React.FC<{
       plugins={plugins}
       theme$={theme$}
       kibanaEnvironment={kibanaEnvironment}
+      infraCPSEnabled={infraCPSEnabled}
     >
       <CommonInfraProviders
         appName="Metrics UI"
@@ -101,12 +111,14 @@ const MetricsApp: React.FC<{
             <PluginConfigProvider value={pluginConfig}>
               <Router history={history}>
                 <PerformanceContextProvider>
-                  <Routes>
-                    <Route path="/link-to" component={LinkToMetricsPage} />
-                    {uiCapabilities?.infrastructure?.show && (
-                      <Route path="/" component={InfrastructurePage} />
-                    )}
-                  </Routes>
+                  <InspectorContextProvider>
+                    <Routes>
+                      <Route path="/link-to" component={LinkToMetricsPage} />
+                      {uiCapabilities?.infrastructure?.show && (
+                        <Route path="/" component={InfrastructurePage} />
+                      )}
+                    </Routes>
+                  </InspectorContextProvider>
                 </PerformanceContextProvider>
               </Router>
             </PluginConfigProvider>

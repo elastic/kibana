@@ -9,12 +9,20 @@
 
 import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import { isEqual, uniq, uniqWith } from 'lodash';
-import { matchesSpecialFunction } from '../utils';
+import { matchesSpecialFunction, normalizePreferredExpressionTypes } from '../utils';
 import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
+import {
+  hasArbitraryExpressionSignature,
+  hasVariadicSignature,
+  hasRepeatingSignature,
+  getAcceptedParamTypes,
+  isAtRepeatingValuePosition,
+  isAmbiguousPosition,
+  pairKeywordAndTextTypes,
+  isConstantParameter,
+} from '../../../signatures';
 import type { ExpressionContext } from '../types';
-import { ensureKeywordAndText } from '../../functions';
 import { SuggestionBuilder } from '../suggestion_builder';
-import { SignatureAnalyzer } from '../signature_analyzer';
 import { getControlSuggestion, getVariablePrefix } from '../../helpers';
 import { buildValueDefinitions } from '../../../values';
 import type {
@@ -23,6 +31,7 @@ import type {
   FunctionParameterType,
   ParameterHint,
 } from '../../../../types';
+import { FunctionDefinitionTypes } from '../../../../types';
 import { type ISuggestionItem } from '../../../../../registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
 import {
@@ -57,20 +66,18 @@ async function handleFunctionParameterContext(
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
   const { paramDefinitions } = functionParamContext;
-  const analyzer = SignatureAnalyzer.from(functionParamContext);
 
-  // Early validation
-  if (!analyzer) {
+  if (!functionParamContext.functionDefinition) {
     return [];
   }
 
   // Empty paramDefinitions = no valid signature for this position → return []
-  // Example: FUNC(double, double, /) with only 1-2 param signatures → suggest nothing
-  //
-  // Exception (continue suggesting) for:
-  // - variadic functions (CONCAT, COALESCE): minParams defined, accepts unlimited params
-  // - repeating signatures (CASE): accepts unlimited condition/value pairs
-  if (paramDefinitions.length === 0 && !analyzer.isVariadic && !analyzer.hasRepeatingSignature) {
+  // Exception for variadic and repeating signature functions
+  if (
+    paramDefinitions.length === 0 &&
+    !hasVariadicSignature(functionParamContext.signatures) &&
+    !hasRepeatingSignature(functionParamContext.signatures)
+  ) {
     return [];
   }
 
@@ -82,7 +89,7 @@ async function handleFunctionParameterContext(
   }
 
   // Build composite suggestions (literals + fields + functions)
-  return buildCompositeSuggestions(functionParamContext, ctx, analyzer);
+  return buildCompositeSuggestions(functionParamContext, ctx);
 }
 
 /** Try suggestions that are exclusive (if present, return only these) */
@@ -97,7 +104,7 @@ function tryExclusiveSuggestions(
   const enumItems = buildEnumValueSuggestions(
     paramDefinitions,
     functionDefinition!,
-    Boolean(functionParamContext.hasMoreMandatoryArgs),
+    functionParamContext.hasMoreMandatoryArgs,
     options.isCursorFollowedByComma ?? false
   );
   if (enumItems.length > 0) {
@@ -105,7 +112,7 @@ function tryExclusiveSuggestions(
   }
 
   // Some parameters suggests special values that are deduced from the hints object provided by ES.
-  const itemsFromHints = buildSuggestionsFromHints(paramDefinitions, ctx);
+  const itemsFromHints = buildSuggestionsFromHints(functionParamContext, ctx);
   if (itemsFromHints.length > 0) {
     return itemsFromHints;
   }
@@ -116,8 +123,7 @@ function tryExclusiveSuggestions(
 /** Build composite suggestions: literals + fields + functions */
 async function buildCompositeSuggestions(
   functionParamContext: FunctionParamContext,
-  ctx: ExpressionContext,
-  analyzer: SignatureAnalyzer
+  ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
   const { functionDefinition } = functionParamContext;
   const { options } = ctx;
@@ -125,8 +131,7 @@ async function buildCompositeSuggestions(
   // Determine configuration
   const config = getParamSuggestionConfig(
     functionParamContext,
-    options.isCursorFollowedByComma ?? false,
-    analyzer
+    options.isCursorFollowedByComma ?? false
   );
 
   const suggestions: ISuggestionItem[] = [];
@@ -160,9 +165,9 @@ function buildLiteralSuggestions(
   const { paramDefinitions, functionDefinition } = functionParamContext;
   const { command } = ctx;
 
-  const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
+  const { hasMoreMandatoryArgs } = functionParamContext;
   const suggestions: ISuggestionItem[] = [];
-  const hasConstantOnlyParams = paramDefinitions.some(({ constantOnly }) => constantOnly);
+  const hasConstantOnlyParams = paramDefinitions.some(isConstantParameter);
 
   // Constant-only literals (true, false, null, string/number literals)
   const constantOnlySuggestions = buildConstantOnlyLiteralSuggestions(
@@ -182,7 +187,7 @@ function buildLiteralSuggestions(
   const isBucketFirstParam =
     matchesSpecialFunction(functionDefinition!.name, 'bucket') &&
     command.name === 'stats' &&
-    (functionParamContext.currentParameterIndex ?? 0) === 0;
+    functionParamContext.currentParameterIndex === 0;
 
   if (!isFtsFunction && !isBucketFirstParam && !hasConstantOnlyParams) {
     const builder = new SuggestionBuilder(ctx);
@@ -217,7 +222,7 @@ async function buildFieldAndFunctionSuggestions(
   // - there is at least one non-constant parameter, OR
   // - param definitions are empty (variadic/unknown position, e.g., CONCAT third+ arg)
 
-  const hasConstantOnlyParam = paramDefinitions.some(({ constantOnly }) => constantOnly);
+  const hasConstantOnlyParam = paramDefinitions.some(isConstantParameter);
   const hasFieldsOnlyParam = paramDefinitions.some(({ fieldsOnly }) => fieldsOnly);
 
   // constantOnly params require literal values, not fields
@@ -231,7 +236,6 @@ async function buildFieldAndFunctionSuggestions(
       types: config.acceptedTypes,
       ignoredColumns,
       addComma: config.shouldAddComma,
-      promoteToTop: true,
       canBeMultiValue,
     });
   }
@@ -256,9 +260,16 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
   const suggestFields = options.suggestFields ?? true;
   const suggestFunctions = options.suggestFunctions ?? true;
   const controlType = options.controlType ?? ESQLVariableType.FIELDS;
+  const preferredTypes = normalizePreferredExpressionTypes(options.preferredExpressionType);
 
   const suggestions: ISuggestionItem[] = [];
-  const acceptedTypes: FunctionParameterType[] = ['any'];
+  // Keep boolean/any contexts permissive at expression start:
+  // boolean expressions are often built from non-boolean operands (e.g. field > 10).
+  const isStrictPreferredType =
+    preferredTypes.length > 0 &&
+    !preferredTypes.includes('boolean') &&
+    !preferredTypes.includes('any');
+  const acceptedTypes: FunctionParameterType[] = isStrictPreferredType ? preferredTypes : ['any'];
 
   // Suggest fields/columns and functions using SuggestionBuilder
   if (suggestFields || suggestFunctions) {
@@ -269,7 +280,6 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
         types: acceptedTypes,
         ignoredColumns,
         addSpaceAfterField,
-        promoteToTop: true,
         ...(options.openSuggestions !== undefined && { openSuggestions: options.openSuggestions }),
       });
     }
@@ -311,7 +321,7 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
 function collectSuggestedValues(paramDefinitions: FunctionParameter[]): string[] {
   return uniq(
     paramDefinitions
-      .map(({ suggestedValues }) => suggestedValues)
+      .map(({ hint }) => hint?.allowedValues)
       .filter((values): values is string[] => Boolean(values))
       .flat()
   );
@@ -320,27 +330,24 @@ function collectSuggestedValues(paramDefinitions: FunctionParameter[]): string[]
 /** Filters parameters that only accept constant values (literals or duration types) */
 function getConstantOnlyParams(paramDefinitions: FunctionParameter[]): FunctionParameter[] {
   return paramDefinitions.filter(
-    ({ constantOnly, type }) => constantOnly || /_duration/.test(String(type))
+    (param) => isConstantParameter(param) || /_duration/.test(String(param.type))
   );
 }
 
 /** Derives suggestion configuration for next function parameter */
 function getParamSuggestionConfig(
   functionParamContext: FunctionParamContext,
-  isCursorFollowedByComma: boolean,
-  analyzer: SignatureAnalyzer
+  isCursorFollowedByComma: boolean
 ) {
-  const { functionDefinition } = functionParamContext;
-  const acceptedTypes = analyzer.getAcceptedTypes() as FunctionParameterType[];
-
-  const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
+  const { functionDefinition, hasMoreMandatoryArgs } = functionParamContext;
+  const acceptedTypes = getAcceptedParamTypes(functionParamContext) as FunctionParameterType[];
 
   const commaContext: CommaContext = {
     position: 'empty_expression',
     hasMoreMandatoryArgs,
     functionType: functionDefinition!.type,
     isCursorFollowedByComma,
-    functionSignatures: functionDefinition!.signatures,
+    isExpressionHeavy: hasArbitraryExpressionSignature(functionDefinition!.signatures),
   };
 
   const shouldAddComma = shouldSuggestComma(commaContext);
@@ -348,8 +355,8 @@ function getParamSuggestionConfig(
   return {
     acceptedTypes,
     shouldAddComma,
-    isRepeatingValuePosition: analyzer.isRepeatingValuePosition,
-    isAmbiguousPosition: analyzer.isAmbiguousPosition,
+    isRepeatingValuePosition: isAtRepeatingValuePosition(functionParamContext),
+    isAmbiguousPosition: isAmbiguousPosition(functionParamContext),
   };
 }
 
@@ -371,7 +378,7 @@ function buildEnumValueSuggestions(
     hasMoreMandatoryArgs,
     functionType: functionDefinition.type,
     isCursorFollowedByComma,
-    functionSignatures: functionDefinition.signatures,
+    isExpressionHeavy: hasArbitraryExpressionSignature(functionDefinition.signatures),
   };
 
   const shouldAddComma = shouldSuggestComma(commaContext);
@@ -383,19 +390,41 @@ function buildEnumValueSuggestions(
 }
 
 function buildSuggestionsFromHints(
-  paramDefinitions: FunctionParameter[],
+  functionParamContext: FunctionParamContext,
   ctx: ExpressionContext
 ): ISuggestionItem[] {
-  // Keep the hints that are unique by entityType + constraints
+  const { paramDefinitions } = functionParamContext;
+  const { options } = ctx;
+
+  // Hints carrying `kind: 'aggregation'`
+  const expectsAggregation = paramDefinitions.some(({ hint }) => hint?.kind === 'aggregation');
+  if (expectsAggregation) {
+    const config = getParamSuggestionConfig(
+      functionParamContext,
+      options.isCursorFollowedByComma ?? false
+    );
+    return new SuggestionBuilder(ctx)
+      .addFunctions({
+        types: config.acceptedTypes,
+        addComma: config.shouldAddComma,
+        excludeParentFunctions: true,
+        functionTypes: [FunctionDefinitionTypes.AGG],
+      })
+      .build();
+  }
+
+  // Keep the hints that are unique by entityType + constraints; ignore hints without an entityType.
   const hints: ParameterHint[] = uniqWith(
-    paramDefinitions.flatMap(({ hint }) => hint ?? []),
+    paramDefinitions.flatMap(({ hint }) => (hint?.entityType ? [hint] : [])),
     (a, b) => a.entityType === b.entityType && isEqual(a.constraints, b.constraints)
   );
 
-  const results = hints.map(
-    (hint) =>
+  const results = hints.map((hint) => {
+    if (!hint.entityType) return [];
+    return (
       parametersFromHintsResolvers[hint.entityType]?.suggestionResolver?.(hint, ctx.context) ?? []
-  );
+    );
+  });
 
   return results.flat();
 }
@@ -412,7 +441,7 @@ function buildConstantOnlyLiteralSuggestions(
     return [];
   }
 
-  const types = ensureKeywordAndText(constantOnlyParams.map(({ type }) => type));
+  const types = pairKeywordAndTextTypes(constantOnlyParams.map(({ type }) => type));
 
   const builder = new SuggestionBuilder(ctx);
 
@@ -432,8 +461,8 @@ function buildConstantOnlyLiteralSuggestions(
 
   const suggestions = builder.build();
 
-  // Add placeholder hint ONLY for explicit constantOnly parameters
-  const hasExplicitConstantOnly = paramDefinitions.some(({ constantOnly }) => constantOnly);
+  // Add placeholder hint ONLY for explicit constant parameters (not duration-derived ones)
+  const hasExplicitConstantOnly = paramDefinitions.some(isConstantParameter);
 
   if (hasExplicitConstantOnly) {
     const placeholderType = findConstantPlaceholderType(types);

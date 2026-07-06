@@ -21,11 +21,10 @@ import {
 } from '../../services/kibana_services';
 import type { DashboardState } from '../../../common';
 import { SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
-import { extractTitleAndCount } from '../../utils/extract_title_and_count';
 import { DashboardSaveModal } from './save_modal';
-import { checkForDuplicateDashboardTitle } from '../../dashboard_client';
 import { saveDashboard } from './save_dashboard';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { getSaveAsTitle } from './get_save_as_title';
 
 /**
  * @description exclusively for user directed dashboard save actions, also
@@ -69,9 +68,9 @@ export async function openSaveModal({
      */
     const getShouldAddAccessControl = async () => {
       try {
-        const currentUser = await coreServices.userProfile.getCurrent();
+        const currentProfileUid = (await coreServices.security.authc.getCurrentUser()).profile_uid;
         const isCreatingNewDashboard = Boolean(!lastSavedId);
-        return isCreatingNewDashboard && Boolean(currentUser);
+        return isCreatingNewDashboard && Boolean(currentProfileUid);
       } catch {
         return false;
       }
@@ -90,29 +89,13 @@ export async function openSaveModal({
           newTimeRestore,
           newAccessMode,
           newProjectRoutingRestore,
-          onTitleDuplicate,
-          isTitleDuplicateConfirmed,
         }: DashboardSaveOptions): Promise<SaveDashboardReturn> => {
           const saveOptions = {
             confirmOverwrite: false,
-            isTitleDuplicateConfirmed,
-            onTitleDuplicate,
             saveAsCopy: lastSavedId ? true : newCopyOnSave,
           };
 
           try {
-            if (
-              !(await checkForDuplicateDashboardTitle({
-                title: newTitle,
-                onTitleDuplicate,
-                lastSavedTitle: title,
-                copyOnSave: saveOptions.saveAsCopy,
-                isTitleDuplicateConfirmed,
-              }))
-            ) {
-              return {};
-            }
-
             setTimeRestore(newTimeRestore);
             setProjectRoutingRestore(newProjectRoutingRestore);
             const dashboardState = serializeState();
@@ -159,6 +142,7 @@ export async function openSaveModal({
         showSaveModal(
           <DashboardSaveModal
             tags={tags}
+            lastSavedTitle={lastSavedId ? title : ''}
             title={saveAsTitle}
             onClose={() => resolve(undefined)}
             timeRestore={timeRestore}
@@ -169,7 +153,7 @@ export async function openSaveModal({
             showCopyOnSave={false}
             onSave={onSaveAttempt}
             accessControl={accessControl}
-            customModalTitle={getCustomModalTitle(viewMode)}
+            customModalTitle={getCustomModalTitle(viewMode, lastSavedId)}
             showAccessContainer={shouldAddAccessControl}
           />
         );
@@ -183,8 +167,8 @@ export async function openSaveModal({
   }
 }
 
-function getCustomModalTitle(viewMode: ViewMode) {
-  if (viewMode === 'edit')
+function getCustomModalTitle(viewMode: ViewMode, lastSavedId: string | undefined) {
+  if (!lastSavedId || viewMode === 'edit')
     return i18n.translate('dashboard.topNav.editModeInteractiveSave.modalTitle', {
       defaultMessage: 'Save as new dashboard',
     });
@@ -207,20 +191,4 @@ function generateDashboardNotSavedToast(title: string, errorMessage: any) {
     }),
     'data-test-subj': 'saveDashboardFailure',
   };
-}
-
-async function getSaveAsTitle(title: string) {
-  const [baseTitle, baseCount] = extractTitleAndCount(title);
-  let saveAsTitle = `${baseTitle} (${baseCount + 1})`;
-  await checkForDuplicateDashboardTitle({
-    title: saveAsTitle,
-    lastSavedTitle: title,
-    copyOnSave: true,
-    isTitleDuplicateConfirmed: false,
-    onTitleDuplicate(speculativeSuggestion) {
-      saveAsTitle = speculativeSuggestion;
-    },
-  });
-
-  return saveAsTitle;
 }

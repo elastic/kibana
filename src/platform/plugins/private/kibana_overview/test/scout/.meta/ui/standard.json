@@ -1,0 +1,145 @@
+{
+  "sha1": "e7d3e26fe3c05d052c800c1491a3eaaa11e534af",
+  "tests": [
+    {
+      "id": "44990549d751d28-a9d1a7757c95551",
+      "title": "Kibana Overview - Analytics Apps displays analytics app cards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/analytics.spec.ts",
+        "line": 24,
+        "column": 7
+      }
+    },
+    {
+      "id": "44990549d751d28-5a7a5ab12d4b287",
+      "title": "Kibana Overview - Analytics Apps click on a card navigates to the appropriate app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/analytics.spec.ts",
+        "line": 32,
+        "column": 7
+      }
+    },
+    {
+      "id": "9f0d002b5c659d2-30084877a8a86bb",
+      "title": "Kibana Overview - Footer clicking footer updates landing page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/footer.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "ab9076bc511fec2-a4bace676347930",
+      "title": "Kibana Overview - Accessibility (with data) overview page has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/overview_a11y.spec.ts",
+        "line": 24,
+        "column": 7
+      }
+    },
+    {
+      "id": "4b41bd13abdf1e2-716cb413f608d88",
+      "title": "Kibana Overview - Page Header click on integrations leads to integrations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/page_header.spec.ts",
+        "line": 24,
+        "column": 7
+      }
+    },
+    {
+      "id": "4b41bd13abdf1e2-9dda33b05be9c75",
+      "title": "Kibana Overview - Page Header click on management leads to management",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/page_header.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "4b41bd13abdf1e2-9b0a4a8d7f9f00d",
+      "title": "Kibana Overview - Page Header click on dev tools leads to dev tools",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/page_header.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "1afe75916660ea1-a4bc69ee8c52cc8",
+      "title": "Kibana Overview - Solutions contains Security and Observability solutions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/solutions.spec.ts",
+        "line": 24,
+        "column": 7
+      }
+    },
+    {
+      "id": "1afe75916660ea1-554979e98c13bf3",
+      "title": "Kibana Overview - Solutions click on Observability card leads to Observability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/solutions.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "1afe75916660ea1-95d09143f39fb6e",
+      "title": "Kibana Overview - Solutions click on Security card leads to Security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/solutions.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    }
+  ]
+}

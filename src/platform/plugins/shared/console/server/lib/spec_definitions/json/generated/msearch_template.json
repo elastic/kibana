@@ -24,6 +24,7 @@
       "{index}/_msearch/template"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch-template",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-msearch-template",
     "availability": {
       "stack": true,
       "serverless": true

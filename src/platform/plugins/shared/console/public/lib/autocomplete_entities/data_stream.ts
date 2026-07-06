@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
+interface DataStreamResponse {
+  data_streams?: Array<{ name: string; indices: Array<{ index_name: string }> }>;
+}
 
 export class DataStream {
   private dataStreams: string[] = [];
@@ -18,7 +20,7 @@ export class DataStream {
     return [...this.dataStreams];
   };
 
-  loadDataStreams = (dataStreams: IndicesGetDataStreamResponse) => {
+  loadDataStreams = (dataStreams: DataStreamResponse) => {
     this.dataStreams = (dataStreams.data_streams ?? []).map(({ name }) => name).sort();
 
     this.perDataStreamIndices = (dataStreams.data_streams ?? []).reduce(

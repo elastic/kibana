@@ -8,8 +8,12 @@
 import { getNormalizedDataStreams } from '../../../../../../common/services';
 
 import { installIndexTemplatesAndPipelines } from '../../install_index_template_pipeline';
+import { optimisticallyAddEsAssetReferences } from '../../es_assets_reference';
+import { generateESIndexPatterns } from '../../../elasticsearch/template/template';
 
 import type { InstallContext } from '../_state_machine_package_install';
+import type { InstallablePackage, RegistryDataStream } from '../../../../../../common/types';
+import type { EsAssetReference, Installation } from '../../../../../types';
 import { withPackageSpan } from '../../utils';
 import { deletePrerequisiteAssets, splitESAssets, cleanupComponentTemplate } from '../../remove';
 import { INSTALL_STATES } from '../../../../../../common/types';
@@ -35,8 +39,22 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
           esReferences,
         })
     );
+
+    let finalEsReferences = templateEsReferences;
+    if (installedPkg) {
+      finalEsReferences = await reinstallCustomDatasetTemplates({
+        packageInfo,
+        packageInstallContext,
+        installedPkg: installedPkg.attributes,
+        savedObjectsClient,
+        esClient,
+        logger,
+        esReferences: templateEsReferences,
+      });
+    }
+
     return {
-      esReferences: templateEsReferences,
+      esReferences: finalEsReferences,
       indexTemplates: installedTemplates,
     };
   }
@@ -46,14 +64,21 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
     // we must use installed_es to infer which streams exist first then
     // we can install the new index templates
     logger.debug(`Package install - packageInfo.type: ${packageInfo.type}`);
-    const dataStreamNames = installedPkg.attributes.installed_es
-      .filter((ref) => ref.type === 'index_template')
-      // index templates are named {type}-{dataset}, remove everything before first hyphen
-      .map((ref) => ref.id.replace(/^[^-]+-/, ''));
-
-    const dataStreams = dataStreamNames.flatMap((dataStreamName) =>
-      getNormalizedDataStreams(packageInfo, dataStreamName)
+    const indexTemplateRefs = installedPkg.attributes.installed_es.filter(
+      (ref) => ref.type === 'index_template'
     );
+
+    const dataStreams = indexTemplateRefs
+      .flatMap((ref) => {
+        // Index templates are named {type}-{dataset}; split on the first hyphen only
+        // so dataset segments may contain hyphens. Pass encoded type into synthesis so
+        // dynamic_signal_types packages (no manifest type) still get a concrete type here.
+        const i = ref.id.indexOf('-');
+        const dataStreamType = i >= 0 ? ref.id.slice(0, i) : undefined;
+        const dataset = i >= 0 ? ref.id.slice(i + 1) : ref.id;
+        return getNormalizedDataStreams(packageInfo, dataset, dataStreamType);
+      })
+      .filter((ds): ds is RegistryDataStream => !!ds.type);
 
     if (dataStreams.length) {
       const { installedTemplates, esReferences: templateEsReferences } = await withPackageSpan(
@@ -72,6 +97,85 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
       return { esReferences: templateEsReferences, indexTemplates: installedTemplates };
     }
   }
+}
+
+async function reinstallCustomDatasetTemplates({
+  packageInfo,
+  packageInstallContext,
+  installedPkg,
+  savedObjectsClient,
+  esClient,
+  logger,
+  esReferences,
+}: {
+  packageInfo: InstallablePackage;
+  packageInstallContext: InstallContext['packageInstallContext'];
+  installedPkg: Installation;
+  savedObjectsClient: InstallContext['savedObjectsClient'];
+  esClient: InstallContext['esClient'];
+  logger: InstallContext['logger'];
+  esReferences: EsAssetReference[];
+}): Promise<EsAssetReference[]> {
+  const customDataStreamRefs = installedPkg.installed_es.filter(
+    (ref) => ref.type === 'index_template' && ref.customDataStreamOriginDataset
+  );
+
+  if (customDataStreamRefs.length === 0) return esReferences;
+
+  const toReinstall: Array<{
+    dataStream: RegistryDataStream;
+    originInfo: { dataset: string; type: string };
+  }> = [];
+
+  for (const ref of customDataStreamRefs) {
+    const i = ref.id.indexOf('-');
+    const dataset = i >= 0 ? ref.id.slice(i + 1) : ref.id;
+
+    const templateDs = (packageInfo.data_streams || []).find(
+      (ds) =>
+        ds.dataset === ref.customDataStreamOriginDataset &&
+        ds.type === ref.customDataStreamOriginType
+    );
+    if (templateDs) {
+      toReinstall.push({
+        dataStream: { ...templateDs, dataset },
+        originInfo: { dataset: templateDs.dataset, type: templateDs.type },
+      });
+    }
+  }
+
+  if (toReinstall.length === 0) return esReferences;
+
+  let currentRefs = esReferences;
+
+  for (const { dataStream, originInfo } of toReinstall) {
+    try {
+      await installIndexTemplatesAndPipelines({
+        installedPkg,
+        packageInstallContext,
+        esClient,
+        savedObjectsClient,
+        logger,
+        esReferences: currentRefs,
+        onlyForDataStreams: [dataStream],
+        customDataStreamOriginDataset: originInfo.dataset,
+        customDataStreamOriginType: originInfo.type,
+      });
+
+      currentRefs = await optimisticallyAddEsAssetReferences(
+        savedObjectsClient,
+        packageInfo.name,
+        [],
+        generateESIndexPatterns([{ ...dataStream, path: dataStream.dataset }])
+      );
+    } catch (error) {
+      logger.warn(
+        `Failed to reinstall custom dataset template ${dataStream.dataset} for ${packageInfo.name}: ${error.message}`
+      );
+    }
+  }
+
+  return currentRefs;
 }
 
 export async function cleanupIndexTemplatePipelinesStep(context: InstallContext) {

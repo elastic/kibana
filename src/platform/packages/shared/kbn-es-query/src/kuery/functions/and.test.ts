@@ -49,11 +49,11 @@ describe('kuery functions', () => {
         const result = and.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
-        expect(Object.keys(result).length).toBe(1);
-        expect(result.bool).toHaveProperty('filter');
-        expect(Object.keys(result.bool!).length).toBe(1);
+        expect(Object.keys(result!).length).toBe(1);
+        expect(result!.bool).toHaveProperty('filter');
+        expect(Object.keys(result!.bool!).length).toBe(1);
 
-        expect(result.bool!.filter).toEqual(
+        expect(result!.bool!.filter).toEqual(
           [childNode1, childNode2].map((childNode) =>
             ast.toElasticsearchQuery(childNode, indexPattern)
           )
@@ -70,11 +70,11 @@ describe('kuery functions', () => {
         });
 
         expect(result).toHaveProperty('bool');
-        expect(Object.keys(result).length).toBe(1);
-        expect(result.bool).toHaveProperty('must');
-        expect(Object.keys(result.bool!).length).toBe(1);
+        expect(Object.keys(result!).length).toBe(1);
+        expect(result!.bool).toHaveProperty('must');
+        expect(Object.keys(result!.bool!).length).toBe(1);
 
-        expect(result.bool!.must).toEqual(
+        expect(result!.bool!.must).toEqual(
           [childNode1, childNode2].map((childNode) =>
             ast.toElasticsearchQuery(childNode, indexPattern)
           )

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { DeleteSingleEntityResponse } from '../../../../../../common/api/entity_analytics/entity_store/entities/delete_entity.gen';
 import {
@@ -36,7 +36,7 @@ export const deleteEntity = (
       options: {
         availability: {
           since: '9.3.0',
-          stability: 'beta',
+          stability: 'tech_preview',
         },
       },
       security: {

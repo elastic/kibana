@@ -43,10 +43,15 @@ import {
 
 import { fetchServiceLocationsEffect } from './service_locations';
 import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journey';
-import { fetchOverviewStatusEffect } from './overview_status';
+import {
+  augmentStaleStatusEffect,
+  fetchOverviewStatusEffect,
+  fetchStaleStatusEffect,
+} from './overview_status';
 import { fetchMonitorStatusHeatmap, quietFetchMonitorStatusHeatmap } from './status_heatmap';
 import { fetchOverviewTrendStats, refreshOverviewTrendStats } from './overview/effects';
 import { fetchAgentPoliciesEffect } from './agent_policies';
+import { fetchMonitorHealthEffect } from './monitor_health';
 
 export const rootEffect = function* root(): Generator {
   yield all([
@@ -58,6 +63,8 @@ export const rootEffect = function* root(): Generator {
     fork(fetchSyntheticsMonitorEffect),
     fork(browserJourneyEffects),
     fork(fetchOverviewStatusEffect),
+    fork(fetchStaleStatusEffect),
+    fork(augmentStaleStatusEffect),
     fork(fetchNetworkEventsEffect),
     fork(fetchAgentPoliciesEffect),
     fork(fetchDynamicSettingsEffect),
@@ -85,5 +92,6 @@ export const rootEffect = function* root(): Generator {
     fork(inspectTLSRuleEffect),
     fork(getMaintenanceWindowsEffect),
     ...privateLocationsEffects.map((effect) => fork(effect)),
+    fork(fetchMonitorHealthEffect),
   ]);
 };

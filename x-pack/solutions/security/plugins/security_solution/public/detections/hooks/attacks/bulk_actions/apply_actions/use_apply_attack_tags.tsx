@@ -7,6 +7,8 @@
 
 import { useCallback } from 'react';
 
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { useSetUnifiedAlertsTags } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_tags';
 
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
@@ -28,9 +30,19 @@ interface ApplyAttackTagsReturn {
 export const useApplyAttackTags = (): ApplyAttackTagsReturn => {
   const { mutateAsync: setUnifiedAlertsTags } = useSetUnifiedAlertsTags();
   const showModalIfNeeded = useUpdateAttacksModal();
+  const {
+    services: { telemetry },
+  } = useKibana();
 
   const applyTags = useCallback(
-    async ({ tags, attackIds, relatedAlertIds, setIsLoading, onSuccess }: ApplyAttackTagsProps) => {
+    async ({
+      tags,
+      attackIds,
+      relatedAlertIds,
+      setIsLoading,
+      onSuccess,
+      telemetrySource,
+    }: ApplyAttackTagsProps) => {
       // Show modal (if needed) and wait for user decision
       const result = await showModalIfNeeded({
         alertsCount: relatedAlertIds.length,
@@ -40,6 +52,14 @@ export const useApplyAttackTags = (): ApplyAttackTagsReturn => {
         // User cancelled, don't proceed with update
         return;
       }
+
+      if (telemetrySource) {
+        telemetry.reportEvent(AttacksEventTypes.ActionTagsUpdated, {
+          source: telemetrySource,
+          scope: result.updateAlerts ? 'attack_and_related_alerts' : 'attack_only',
+        });
+      }
+
       setIsLoading?.(true);
       try {
         // Combine IDs based on user choice
@@ -54,7 +74,7 @@ export const useApplyAttackTags = (): ApplyAttackTagsReturn => {
         setIsLoading?.(false);
       }
     },
-    [setUnifiedAlertsTags, showModalIfNeeded]
+    [setUnifiedAlertsTags, showModalIfNeeded, telemetry]
   );
 
   return { applyTags };

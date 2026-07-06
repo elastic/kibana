@@ -30,4 +30,4 @@ export type {
   IHttpInterceptController,
 } from './src/types';
 
-export { isHttpFetchError } from './src/utils';
+export { buildPath, isHttpFetchError } from './src/utils';

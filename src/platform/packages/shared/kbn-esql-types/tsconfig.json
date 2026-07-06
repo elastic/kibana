@@ -7,6 +7,8 @@
   "kbn_references": [
     "@kbn/licensing-types",
     "@kbn/core-pricing-common",
+    "@kbn/projects-solutions-groups",
+    "@kbn/controls-schemas",
   ],
   "exclude": ["target/**/*"]
 }

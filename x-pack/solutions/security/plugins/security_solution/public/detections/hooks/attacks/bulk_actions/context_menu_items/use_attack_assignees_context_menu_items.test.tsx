@@ -48,6 +48,7 @@ describe('useAttackAssigneesContextMenuItems', () => {
     closePopover: mockClosePopover,
     setIsLoading: mockSetIsLoading,
     onSuccess: mockOnSuccess,
+    telemetrySource: 'attacks_page_group_take_action' as const,
   };
 
   beforeEach(() => {
@@ -103,6 +104,7 @@ describe('useAttackAssigneesContextMenuItems', () => {
     expect(mockUseBulkAttackAssigneesItems).toHaveBeenCalledWith({
       onAssigneesUpdate: mockOnSuccess,
       alertAssignments: ['user1', 'user2'],
+      telemetrySource: 'attacks_page_group_take_action',
     });
   });
 
@@ -128,6 +130,7 @@ describe('useAttackAssigneesContextMenuItems', () => {
     expect(mockUseBulkAttackAssigneesItems).toHaveBeenCalledWith({
       onAssigneesUpdate: mockOnSuccess,
       alertAssignments: ['user1', 'user2', 'user3'],
+      telemetrySource: 'attacks_page_group_take_action',
     });
   });
 

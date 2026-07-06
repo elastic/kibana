@@ -16,7 +16,7 @@ export const memory: SchemaBasedAggregations = {
     },
   },
   semconv: {
-    memory_utiilzation_used: {
+    memory_utilization_used: {
       terms: {
         field: 'state',
         include: ['used'],
@@ -29,75 +29,19 @@ export const memory: SchemaBasedAggregations = {
         },
       },
     },
-    memory_utilization_buffered: {
-      terms: {
-        field: 'state',
-        include: ['buffered'],
-      },
-      aggs: {
-        avg: {
-          avg: {
-            field: 'system.memory.utilization',
-          },
-        },
-      },
-    },
-    memory_utilization_slab_unreclaimable: {
-      terms: {
-        field: 'state',
-        include: ['slab_unreclaimable'],
-      },
-      aggs: {
-        avg: {
-          avg: {
-            field: 'system.memory.utilization',
-          },
-        },
-      },
-    },
-    memory_utilization_slab_reclaimable: {
-      terms: {
-        field: 'state',
-        include: ['slab_reclaimable'],
-      },
-      aggs: {
-        avg: {
-          avg: {
-            field: 'system.memory.utilization',
-          },
-        },
-      },
-    },
     memory_utilization_used_total: {
       sum_bucket: {
-        buckets_path: 'memory_utiilzation_used.avg',
-      },
-    },
-    memory_utilization_buffered_total: {
-      sum_bucket: {
-        buckets_path: 'memory_utilization_buffered.avg',
-      },
-    },
-    memory_utilization_slab_unreclaimable_total: {
-      sum_bucket: {
-        buckets_path: 'memory_utilization_slab_unreclaimable.avg',
-      },
-    },
-    memory_utilization_slab_reclaimable_total: {
-      sum_bucket: {
-        buckets_path: 'memory_utilization_slab_reclaimable.avg',
+        buckets_path: 'memory_utilization_used.avg',
       },
     },
     memory: {
       bucket_script: {
         buckets_path: {
           memoryUsedTotal: 'memory_utilization_used_total',
-          memoryBufferedTotal: 'memory_utilization_buffered_total',
-          memorySlabUnreclaimableTotal: 'memory_utilization_slab_unreclaimable_total',
-          memorySlabReclaimableTotal: 'memory_utilization_slab_reclaimable_total',
         },
-        script:
-          'params.memoryUsedTotal + params.memoryBufferedTotal + params.memorySlabUnreclaimableTotal + params.memorySlabReclaimableTotal',
+        // Align with semconv Lens formula and avoid nulling memory usage when
+        // optional buffered/slab states are not reported.
+        script: 'params.memoryUsedTotal',
         gap_policy: 'skip',
       },
     },

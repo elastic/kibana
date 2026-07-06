@@ -290,8 +290,11 @@ export default ({ getService }: FtrProviderContext): void => {
             expectedHttpCode: 403,
           });
         });
-
-        it(`should create a comment but not delete a comment`, async () => {
+        // TODO: Enable this test when read path is implemented
+        // https://github.com/elastic/security-team/issues/16051
+        // comment id is not returned when creating an unified comment with createComment
+        // because find does not include the attachment SO
+        it.skip(`should create a comment but not delete a comment`, async () => {
           const caseInfo = await createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'securitySolutionFixture' }),

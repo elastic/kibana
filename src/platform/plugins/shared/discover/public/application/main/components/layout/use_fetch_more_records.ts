@@ -11,14 +11,7 @@ import { useMemo } from 'react';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
-
-/**
- * Params for the hook
- */
-export interface UseFetchMoreRecordsParams {
-  stateContainer: DiscoverStateContainer;
-}
+import { useCurrentTabDataStateContainer } from '../../state_management/redux';
 
 /**
  * Return type for the hook
@@ -31,13 +24,11 @@ export interface UseFetchMoreRecordsResult {
 
 /**
  * Checks if more records can be loaded and returns a handler for it
- * @param stateContainer
  */
-export const useFetchMoreRecords = ({
-  stateContainer,
-}: UseFetchMoreRecordsParams): UseFetchMoreRecordsResult => {
-  const documents$ = stateContainer.dataState.data$.documents$;
-  const totalHits$ = stateContainer.dataState.data$.totalHits$;
+export const useFetchMoreRecords = (): UseFetchMoreRecordsResult => {
+  const dataStateContainer = useCurrentTabDataStateContainer();
+  const documents$ = dataStateContainer.data$.documents$;
+  const totalHits$ = dataStateContainer.data$.totalHits$;
   const documentState = useDataState(documents$);
   const totalHitsState = useDataState(totalHits$);
   const isEsqlMode = useIsEsqlMode();
@@ -56,10 +47,10 @@ export const useFetchMoreRecords = ({
     () =>
       canFetchMoreRecords
         ? () => {
-            stateContainer.dataState.fetchMore();
+            dataStateContainer.fetchMore();
           }
         : undefined,
-    [canFetchMoreRecords, stateContainer.dataState]
+    [canFetchMoreRecords, dataStateContainer]
   );
 
   return {

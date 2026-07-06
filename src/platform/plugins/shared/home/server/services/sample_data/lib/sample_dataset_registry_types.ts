@@ -21,13 +21,8 @@ export interface SampleDatasetDashboardPanel {
   dashboardId: string;
   oldEmbeddableId: string;
   embeddableId: string;
-  embeddableType: EmbeddableTypes;
+  embeddableType: string;
   embeddableConfig: object;
-}
-export enum EmbeddableTypes {
-  MAP_SAVED_OBJECT_TYPE = 'map',
-  SEARCH_EMBEDDABLE_TYPE = 'search',
-  VISUALIZE_EMBEDDABLE_TYPE = 'visualization',
 }
 
 export interface SampleDatasetProviderContext {

@@ -133,6 +133,14 @@ export const LIQUID_FILTERS = [
     example: '{{ "HELLO" | downcase }} => hello',
   },
   {
+    name: 'entries',
+    description:
+      'Converts an object into an array of {key, value} pairs, enabling iteration over object keys with foreach',
+    insertText: 'entries',
+    example:
+      '{{ {"a": 1, "b": 2} | entries }} => [{"key": "a", "value": 1}, {"key": "b", "value": 2}]',
+  },
+  {
     name: 'escape',
     description: 'Escapes a string by replacing characters with escape sequences',
     insertText: 'escape',
@@ -184,6 +192,13 @@ export const LIQUID_FILTERS = [
     insertText: 'has_exp: "${1:itemName}", "${2:expression}"',
     example:
       '{{ products | has_exp: "item", "item.price > 100" }} => true if any product has price > 100',
+  },
+  {
+    name: 'hmac_sha256',
+    description: 'Returns the HMAC-SHA256 hex digest of a string using the given secret key',
+    insertText: 'hmac_sha256: "${1:secret}"',
+    example:
+      '{{ "Polyjuice" | hmac_sha256: "Polina" }} => "8e0d5d65cff1242a4af66c8f4a32854fd5fb80edcc8aabe9b302b29c7c71dc20"',
   },
   {
     name: 'join',
@@ -338,6 +353,13 @@ export const LIQUID_FILTERS = [
     description: 'Removes all whitespace from the end of a string',
     insertText: 'rstrip',
     example: '{{ "hello   " | rstrip }} => "hello"',
+  },
+  {
+    name: 'sha256',
+    description: 'Returns the SHA-256 hex digest of a string',
+    insertText: 'sha256',
+    example:
+      '{{ "Polyjuice" | sha256 }} => "44ac1d7a2936e30a5de07082fd65d6fe9b1fb658a1a98bfe65bc5959beac5dd0"',
   },
   {
     name: 'shift',

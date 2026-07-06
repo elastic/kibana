@@ -9,7 +9,6 @@
 
 import { setImmediate } from 'timers/promises';
 import { join } from 'path';
-import loadJsonFile from 'load-json-file';
 
 import {
   clientProviderInstanceMock,
@@ -21,6 +20,7 @@ import {
 import { BehaviorSubject, firstValueFrom, EMPTY } from 'rxjs';
 import { skip } from 'rxjs';
 import { type RawPackageInfo, Env } from '@kbn/config';
+import { loadJsonFile } from '@kbn/utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
@@ -162,7 +162,7 @@ describe('SavedObjectsService', () => {
     });
 
     it('registers the deprecation provider with the correct kibanaVersion', async () => {
-      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+      const pkg = loadJsonFile<RawPackageInfo>(join(REPO_ROOT, 'package.json'));
       const kibanaVersion = pkg.version;
 
       const coreContext = createCoreContext({
@@ -181,7 +181,7 @@ describe('SavedObjectsService', () => {
     });
 
     it('calls registerRoutes with the correct kibanaVersion', async () => {
-      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+      const pkg = loadJsonFile<RawPackageInfo>(join(REPO_ROOT, 'package.json'));
       const kibanaVersion = pkg.version;
 
       const coreContext = createCoreContext({
@@ -482,7 +482,7 @@ describe('SavedObjectsService', () => {
       });
 
       it('calls KibanaMigrator with correct version', async () => {
-        const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+        const pkg = loadJsonFile<RawPackageInfo>(join(REPO_ROOT, 'package.json'));
         const kibanaVersion = pkg.version;
 
         const coreContext = createCoreContext({
@@ -500,7 +500,7 @@ describe('SavedObjectsService', () => {
       });
 
       it('calls KibanaMigrator with waitForMigrationCompletion=false for the default ui+background tasks role', async () => {
-        const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+        const pkg = loadJsonFile<RawPackageInfo>(join(REPO_ROOT, 'package.json'));
         const kibanaVersion = pkg.version;
 
         const coreContext = createCoreContext({
@@ -526,7 +526,7 @@ describe('SavedObjectsService', () => {
       });
 
       it('calls KibanaMigrator with waitForMigrationCompletion=false for the ui only role', async () => {
-        const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+        const pkg = loadJsonFile<RawPackageInfo>(join(REPO_ROOT, 'package.json'));
         const kibanaVersion = pkg.version;
 
         const coreContext = createCoreContext({
@@ -552,7 +552,7 @@ describe('SavedObjectsService', () => {
       });
 
       it('calls KibanaMigrator with waitForMigrationCompletion=true for the background tasks only role', async () => {
-        const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+        const pkg = loadJsonFile<RawPackageInfo>(join(REPO_ROOT, 'package.json'));
         const kibanaVersion = pkg.version;
 
         const coreContext = createCoreContext({

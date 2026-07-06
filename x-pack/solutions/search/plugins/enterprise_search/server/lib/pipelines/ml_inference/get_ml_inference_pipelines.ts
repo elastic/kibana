@@ -72,7 +72,7 @@ function redactModelIdIfInaccessible(
   processor: IngestProcessorContainer,
   accessibleModelIds: string[]
 ): IngestProcessorContainer {
-  if (!processor.inference || accessibleModelIds.includes(processor.inference.model_id)) {
+  if (!processor?.inference || accessibleModelIds.includes(processor.inference.model_id)) {
     return processor;
   }
 

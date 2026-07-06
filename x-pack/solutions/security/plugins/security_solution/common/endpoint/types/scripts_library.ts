@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { SCRIPT_TAGS } from '../service/scripts_library/constants';
+import type {
+  ScriptLibraryAllowedFileType,
+  ScriptTagKey,
+} from '../service/script_library/constants';
 import type { SupportedHostOsType } from '../constants';
 
-/**
- * A script stored in the Endpoint (Elastic Defend) Scripts Library
- */
-export interface EndpointScript {
+export interface EndpointScript<
+  TFileType extends ScriptLibraryAllowedFileType | undefined = ScriptLibraryAllowedFileType
+> {
   id: string;
   name: string;
   platform: Array<SupportedHostOsType>;
@@ -22,17 +24,18 @@ export interface EndpointScript {
   fileHash: string;
   /** Id of the internally stored file for this script */
   fileId: string;
+  fileType: TFileType;
+  /** The file path inside the archive to be executed. Only applicable if `fileType` is `'archive'`. */
+  pathToExecutable: TFileType extends 'archive' ? string : undefined;
   /** If `true`, then the script, when invoked, requires input arguments to be provided */
   requiresInput: boolean;
   /**
    * The URI relative to Kibana's base path + space if any) to download the script associated with this script entry */
   downloadUri: string;
-  tags: Array<keyof typeof SCRIPT_TAGS>;
+  tags: Array<ScriptTagKey>;
   description?: string;
   instructions?: string;
   example?: string;
-  /** If the file is an archive, this property would hold the file path in that archive to be executed */
-  pathToExecutable?: string;
   createdBy: string;
   createdAt: string;
   updatedBy: string;
@@ -59,3 +62,18 @@ export type SortableScriptLibraryFields = keyof Pick<
 >;
 
 export type SortDirection = EndpointScriptListApiResponse['sortDirection'];
+
+export type EditableScriptFields = Partial<
+  Pick<
+    EndpointScript,
+    | 'name'
+    | 'platform'
+    | 'fileType'
+    | 'tags'
+    | 'description'
+    | 'instructions'
+    | 'example'
+    | 'pathToExecutable'
+    | 'requiresInput'
+  >
+>;

@@ -163,7 +163,7 @@ export const BulkGetAttachmentsResponseRt = rt.strict({
       error: rt.string,
       message: rt.string,
       status: rt.union([rt.undefined, rt.number]),
-      attachmentId: rt.string,
+      savedObjectId: rt.string,
     })
   ),
 });

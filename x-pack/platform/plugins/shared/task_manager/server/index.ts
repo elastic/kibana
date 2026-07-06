@@ -31,11 +31,12 @@ export {
 } from './saved_objects';
 
 export type { RruleSchedule } from './task';
-export { TaskStatus, TaskPriority, TaskCost } from './task';
+export { TaskStatus, TaskPriority, TaskCost, InstanceTaskCost } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
 export { asInterval } from './lib/intervals';
+export { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 export {
   isUnrecoverableError,
   throwUnrecoverableError,
@@ -60,6 +61,10 @@ export type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from './plugin';
+
+export { TaskAlreadyRunningError } from './lib/errors';
+
+export { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants';
 
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,

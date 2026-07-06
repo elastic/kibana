@@ -47,6 +47,20 @@ const searchConfigSchema = schema.object({
 const customCriterion = schema.object({
   threshold: schema.arrayOf(schema.number()),
   comparator: oneOfLiterals(comparators),
+  warningThreshold: schema.maybe(
+    schema.arrayOf(
+      schema.number({
+        meta: {
+          description:
+            'The threshold value that is used with the `warningComparator`. If the `warningComparator` is `between`, you must specify the boundary values.',
+        },
+      }),
+      // At most two values are ever meaningful: a single threshold, or the
+      // [lower, upper] pair for the `between`/`notBetween` comparators.
+      { maxSize: 2 }
+    )
+  ),
+  warningComparator: schema.maybe(oneOfLiterals(comparators)),
   timeUnit: schema.string(),
   timeSize: schema.number(),
   aggType: schema.maybe(schema.literal('custom')),
@@ -85,9 +99,23 @@ export const customThresholdParamsSchema = schema.object(
     groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
     alertOnNoData: schema.maybe(schema.boolean()),
     alertOnGroupDisappear: schema.maybe(schema.boolean()),
+    noDataBehavior: schema.maybe(
+      schema.oneOf([
+        schema.literal('recover'),
+        schema.literal('remainActive'),
+        schema.literal('alertOnNoData'),
+      ])
+    ),
     searchConfiguration: searchConfigSchema,
   },
-  { unknowns: 'allow' }
+  {
+    unknowns: 'allow',
+    meta: {
+      title: 'Custom Threshold Rule Params',
+      description:
+        'The parameters for the custom threshold rule. These parameters are appropriate when `rule_type_id` is `observability.rules.custom_threshold`.',
+    },
+  }
 );
 
 export type CustomThresholdParams = TypeOf<typeof customThresholdParamsSchema>;

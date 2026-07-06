@@ -18,5 +18,3 @@ export const SAVED_QUERY_BASE_URL = '/internal/saved_query';
 
 export const KQL_TELEMETRY_ROUTE_LATEST_VERSION = '1';
 export const SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION = '1';
-
-export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';

@@ -114,7 +114,7 @@ const SourceArrow = React.memo<{
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <ArrowHead direction="arrowRight" />
+        <ArrowHead direction="chevronSingleRight" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -150,7 +150,7 @@ const DestinationArrow = React.memo<{
     return (
       <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
         <EuiFlexItem grow={false}>
-          <ArrowHead direction="arrowLeft" />
+          <ArrowHead direction="chevronSingleLeft" />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

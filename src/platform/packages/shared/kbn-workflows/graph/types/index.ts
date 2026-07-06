@@ -12,14 +12,20 @@ export type {
   AtomicGraphNodeSchema,
   DataSetGraphNode,
   DataSetGraphNodeSchema,
-  HttpGraphNode,
-  HttpGraphNodeSchema,
   WaitGraphNode,
   WaitGraphNodeSchema,
+  WaitForInputGraphNode,
+  WaitForInputGraphNodeSchema,
   ElasticsearchGraphNode,
   ElasticsearchGraphNodeSchema,
   KibanaGraphNode,
   KibanaGraphNodeSchema,
+  WorkflowExecuteGraphNode,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowOutputGraphNode,
+  WorkflowOutputGraphNodeSchema,
 } from './nodes/base';
 export type {
   EnterConditionBranchNode,
@@ -37,7 +43,27 @@ export type {
   ExitForeachNodeSchema,
   EnterForeachNodeConfiguration,
   EnterForeachNodeConfigurationSchema,
+  EnterWhileNode,
+  EnterWhileNodeSchema,
+  ExitWhileNode,
+  ExitWhileNodeSchema,
+  EnterWhileNodeConfiguration,
+  EnterWhileNodeConfigurationSchema,
 } from './nodes/loop_nodes';
+export type {
+  LoopBreakNode,
+  LoopBreakNodeSchema,
+  LoopContinueNode,
+  LoopContinueNodeSchema,
+} from './nodes/flow_control_nodes';
+export type {
+  EnterParallelNode,
+  EnterParallelNodeSchema,
+  ExitParallelNode,
+  ExitParallelNodeSchema,
+  EnterParallelNodeConfiguration,
+  EnterParallelNodeConfigurationSchema,
+} from './nodes/parallel_nodes';
 export type {
   EnterRetryNode,
   EnterRetryNodeSchema,
@@ -63,6 +89,23 @@ export type {
   ExitTimeoutZoneNode,
 } from './nodes/on_failure_nodes';
 
+export type {
+  EnterSwitchNode,
+  EnterSwitchNodeSchema,
+  EnterSwitchNodeConfiguration,
+  EnterSwitchNodeConfigurationSchema,
+  EnterCaseBranchNode,
+  EnterCaseBranchNodeSchema,
+  ExitCaseBranchNode,
+  ExitCaseBranchNodeSchema,
+  EnterDefaultBranchNode,
+  EnterDefaultBranchNodeSchema,
+  ExitDefaultBranchNode,
+  ExitDefaultBranchNodeSchema,
+  ExitSwitchNode,
+  ExitSwitchNodeSchema,
+} from './nodes/switch_nodes';
+
 export type { GraphNodeUnion } from './nodes/union';
 export type { WorkflowGraphType } from './graph';
 
@@ -71,14 +114,19 @@ export {
   isDataSet,
   isElasticsearch,
   isKibana,
-  isHttp,
   isWait,
+  isWaitForInput,
+  isWorkflowOutput,
   isEnterForeach,
+  isEnterWhile,
   isEnterIf,
   isEnterRetry,
   isEnterTryBlock,
   isEnterNormalPath,
   isExitForeach,
+  isExitWhile,
+  isEnterParallel,
+  isExitParallel,
   isExitIf,
   isExitRetry,
   isExitTryBlock,
@@ -89,4 +137,15 @@ export {
   isExitStepTimeoutZone,
   isEnterWorkflowTimeoutZone,
   isExitWorkflowTimeoutZone,
+  isEnterSwitch,
+  isExitSwitch,
+  isEnterCaseBranch,
+  isExitCaseBranch,
+  isEnterDefaultBranch,
+  isExitDefaultBranch,
+  isLoopBreak,
+  isLoopContinue,
+  isLoopEnterNode,
+  shouldSuggestInnerSteps,
 } from './guards';
+export type { LoopEnterNode } from './guards';

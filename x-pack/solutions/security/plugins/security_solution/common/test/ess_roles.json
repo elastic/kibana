@@ -351,7 +351,7 @@
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
-          "securitySolutionRulesV2": ["read", "security_solution_exceptions_all"],
+          "securitySolutionRulesV4": ["read", "security_solution_exceptions_all"],
           "securitySolutionTimeline": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
@@ -414,10 +414,310 @@
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
-          "securitySolutionRulesV2": ["read", "securitySolutionExceptionsRead"],
+          "securitySolutionRulesV4": ["read", "securitySolutionExceptionsRead"],
           "securitySolutionTimeline": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "rules_read_investigation_guide_all": {
+    "name": "rules_read_investigation_guide_all",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [
+        {
+          "names": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*",
+            ".lists*",
+            ".items*"
+          ],
+          "privileges": ["read"]
+        },
+        {
+          "names": [".alerts-security*", ".siem-signals-*"],
+          "privileges": ["read"]
+        }
+      ],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "securitySolutionRulesV4": ["read", "security_solution_investigation_guide_edit"],
+          "builtInAlerts": ["read"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "rules_read_custom_highlighted_fields_all": {
+    "name": "rules_read_custom_highlighted_fields_all",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [
+        {
+          "names": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*",
+            ".lists*",
+            ".items*"
+          ],
+          "privileges": ["read"]
+        },
+        {
+          "names": [".alerts-security*", ".siem-signals-*"],
+          "privileges": ["read"]
+        }
+      ],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "securitySolutionRulesV4": ["read", "security_solution_custom_highlighted_fields_edit"],
+          "builtInAlerts": ["read"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "rules_read_enable_disable_all": {
+    "name": "rules_read_enable_disable_all",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "securitySolutionRulesV4": ["read", "security_solution_enable_disable_rules"],
+          "builtInAlerts": ["read"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "rules_all_rules_management_settings_none": {
+    "name": "rules_all_rules_management_settings_none",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "securitySolutionRulesV4": [
+            "minimal_all",
+            "security_solution_exceptions_all",
+            "security_solution_investigation_guide_edit",
+            "security_solution_custom_highlighted_fields_edit",
+            "security_solution_enable_disable_rules",
+            "security_solution_manual_run_rules"
+          ],
+          "builtInAlerts": ["all"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "rules_read_manual_run_all": {
+    "name": "rules_read_manual_run_all",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "securitySolutionRulesV4": ["read", "security_solution_manual_run_rules"],
+          "builtInAlerts": ["read"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "rules_read_rules_management_settings_all": {
+    "name": "rules_read_rules_management_settings_all",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "securitySolutionRulesV4": ["read", "security_solution_rules_management_settings"],
+          "builtInAlerts": ["read"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "rules_all_enable_disable_none": {
+    "name": "rules_all_enable_disable_none",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "securitySolutionRulesV4": [
+            "minimal_all",
+            "security_solution_exceptions_all",
+            "security_solution_investigation_guide_edit",
+            "security_solution_custom_highlighted_fields_edit",
+            "security_solution_manual_run_rules",
+            "security_solution_rules_management_settings"
+          ],
+          "builtInAlerts": ["all"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "rules_all_manual_run_none": {
+    "name": "rules_all_manual_run_none",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "securitySolutionRulesV4": [
+            "minimal_all",
+            "security_solution_exceptions_all",
+            "security_solution_investigation_guide_edit",
+            "security_solution_custom_highlighted_fields_edit",
+            "security_solution_enable_disable_rules",
+            "security_solution_rules_management_settings"
+          ],
+          "builtInAlerts": ["all"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "rules_read_subfeatures_all": {
+    "name": "rules_read_subfeatures_all",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [
+        {
+          "names": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*",
+            ".lists*",
+            ".items*"
+          ],
+          "privileges": ["read"]
+        },
+        {
+          "names": [".alerts-security*", ".siem-signals-*"],
+          "privileges": ["read"]
+        }
+      ],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "securitySolutionRulesV4": [
+            "read",
+            "security_solution_investigation_guide_edit",
+            "security_solution_custom_highlighted_fields_edit",
+            "security_solution_enable_disable_rules",
+            "security_solution_manual_run_rules",
+            "security_solution_rules_management_settings"
+          ],
+          "builtInAlerts": ["read"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "rules_all_preview_index": {
+    "name": "rules_all_preview_index",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [
+        {
+          "names": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*",
+            ".lists*",
+            ".items*",
+            ".preview.alerts-security.alerts-*",
+            ".internal.preview.alerts-security.alerts-*"
+          ],
+          "privileges": ["read"]
+        },
+        {
+          "names": [".alerts-security*", ".siem-signals-*"],
+          "privileges": ["read"]
+        }
+      ],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "securitySolutionRulesV4": ["all"],
+          "builtInAlerts": ["read"]
         },
         "spaces": ["*"],
         "base": []

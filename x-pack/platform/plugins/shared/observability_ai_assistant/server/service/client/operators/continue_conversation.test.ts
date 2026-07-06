@@ -7,12 +7,12 @@
 
 import { firstValueFrom } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
-import type { Connector } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { MessageRole, type Message } from '../../../../common';
 import { toolCallEventType } from '../../../analytics/tool_call';
 import { executeFunctionAndCatchError } from './continue_conversation';
-import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const testMessages: Message[] = [
   {
@@ -21,12 +21,15 @@ const testMessages: Message[] = [
   },
 ];
 
-const mockConnector: Connector = createMockConnector({
-  id: 'test-connector-id',
+const mockConnector: InferenceConnector = {
+  connectorId: 'test-connector-id',
   name: 'Test GenAI Connector',
-  actionTypeId: '.gen-ai',
+  type: InferenceConnectorType.OpenAI,
   config: { apiProvider: 'OpenAI' },
-});
+  capabilities: {},
+  isInferenceEndpoint: false,
+  isPreconfigured: false,
+};
 
 describe('executeFunctionAndCatchError', () => {
   const mockLogger = { error: jest.fn(), debug: jest.fn(), trace: jest.fn() } as unknown as Logger;

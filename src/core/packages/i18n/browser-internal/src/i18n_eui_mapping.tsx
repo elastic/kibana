@@ -213,6 +213,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Alpha channel (opacity) value',
       description: 'Label describing color alpha channel',
     }),
+    'euiColorPicker.ariaLabel': i18n.translate('core.euiColorPicker.ariaLabel', {
+      defaultMessage: 'Select a color',
+      description: 'ARIA label for the color picker button',
+    }),
     'euiColorPicker.colorLabel': i18n.translate('core.euiColorPicker.colorLabel', {
       defaultMessage: 'Color value',
     }),
@@ -776,10 +780,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage:
         'You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.',
     }),
-    'euiFlyout.screenReaderNonModalDialog': i18n.translate(
-      'core.euiFlyout.screenReaderNonModalDialog',
+    'euiFlyout.screenReaderNoOverlayMaskDialog': i18n.translate(
+      'core.euiFlyout.screenReaderNoOverlayMaskDialog',
       {
-        defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
+        defaultMessage: 'You are in a modal dialog. To close the dialog, press Escape.',
       }
     ),
     'euiFlyout.screenReaderFocusTrapShards': i18n.translate(
@@ -1801,10 +1805,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiToast.newNotification': i18n.translate('core.euiToast.newNotification', {
       defaultMessage: 'A new notification appears',
     }),
-    'euiToast.notification': i18n.translate('core.euiToast.notification', {
-      defaultMessage: 'Notification',
-      description: 'ARIA label on an element containing a notification',
-    }),
     'euiTourFooter.endTour': i18n.translate('core.euiTourFooter.endTour', {
       defaultMessage: 'End tour',
     }),
@@ -1894,5 +1894,29 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColorPicker.selectedColorLabel': i18n.translate('core.euiColorPicker.selectedColorLabel', {
       defaultMessage: 'Selected color',
     }),
+    'euiContextMenuPanelTitle.ariaLabel': i18n.translate(
+      'core.euiContextMenuPanelTitle.ariaLabel',
+      {
+        defaultMessage: 'Close current panel:',
+      }
+    ),
+    'euiBanner.dismissAriaLabel': ({ title }: EuiValues) =>
+      i18n.translate('core.euiBanner.dismissAriaLabel', {
+        defaultMessage: 'Dismiss "{title}" announcement',
+        values: {
+          title,
+        },
+      }),
+    'euiFlyoutMenu.pagination.previous': i18n.translate('core.euiFlyoutMenu.pagination.previous', {
+      defaultMessage: 'Previous',
+    }),
+    'euiFlyoutMenu.pagination.next': i18n.translate('core.euiFlyoutMenu.pagination.next', {
+      defaultMessage: 'Next',
+    }),
+    'euiFlyoutMenu.pagination.counter': ({ position, total }: EuiValues) =>
+      i18n.translate('core.euiFlyoutMenu.pagination.counter', {
+        defaultMessage: '{position} of {total}',
+        values: { position, total },
+      }),
   };
 };

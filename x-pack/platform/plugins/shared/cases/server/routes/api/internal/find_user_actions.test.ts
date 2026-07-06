@@ -181,19 +181,20 @@ describe('findUserActionsRoute', () => {
       params: {
         case_id: 'my_fake_case_id',
       },
-      query: '',
+      query: {},
     };
 
     // @ts-expect-error: mocking necessary properties for handler logic only, no Kibana platform
     await findUserActionsRoute.handler({ context, request, response });
 
     expect(casesClientMock.attachments.bulkGet).toHaveBeenCalledWith({
-      attachmentIDs: [
+      savedObjectIds: [
         userActionsMockData.userActions[1].comment_id,
         userActionsMockData.userActions[2].comment_id,
         userActionsMockData.userActions[3].comment_id,
       ],
       caseID: 'my_fake_case_id',
+      mode: 'unified',
     });
     expect(response.ok).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -243,7 +244,7 @@ describe('findUserActionsRoute', () => {
       params: {
         case_id: 'my_fake_case_id',
       },
-      query: '',
+      query: {},
     };
 
     // @ts-expect-error: Kibana platform types are mocked for testing, only implementing necessary properties for handler logic
@@ -273,18 +274,19 @@ describe('findUserActionsRoute', () => {
       params: {
         case_id: 'my_fake_case_id',
       },
-      query: '',
+      query: {},
     };
 
     // @ts-expect-error: mocking necessary properties for handler logic only, no Kibana platform
     await findUserActionsRoute.handler({ context, request, response });
 
     expect(casesClientMock.attachments.bulkGet).toHaveBeenCalledWith({
-      attachmentIDs: [
+      savedObjectIds: [
         userActionsMockData.userActions[1].comment_id,
         userActionsMockData.userActions[3].comment_id,
       ],
       caseID: 'my_fake_case_id',
+      mode: 'unified',
     });
     expect(response.ok).toHaveBeenCalledWith(
       expect.objectContaining({

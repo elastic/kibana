@@ -17,19 +17,6 @@ export function extractDataStreamName(backingIndexName: string): string | null {
   return match ? match[1] : null;
 }
 
-export function validateFileSnapshotUrl(snapshotUrl: string): void {
-  let url: URL;
-  try {
-    url = new URL(snapshotUrl);
-  } catch {
-    throw new Error(`Invalid snapshot URL: ${snapshotUrl}`);
-  }
-
-  if (url.protocol !== 'file:') {
-    throw new Error(`Only file:// snapshot URLs are supported (received: ${url.protocol})`);
-  }
-}
-
 export async function getMissingDataStreams({
   esClient,
   dataStreamNames,

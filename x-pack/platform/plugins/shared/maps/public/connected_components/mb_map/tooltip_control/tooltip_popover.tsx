@@ -8,6 +8,7 @@
 import type { RefObject } from 'react';
 import React, { Component } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { GeoJsonProperties, Geometry } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -163,6 +164,9 @@ export class TooltipPopover extends Component<Props, State> {
         }}
         repositionOnScroll
         hasArrow={true}
+        aria-label={i18n.translate('xpack.maps.tooltipPopover.popoverAriaLabel', {
+          defaultMessage: 'Feature tooltip',
+        })}
       >
         {this._renderTooltipContent()}
       </EuiPopover>

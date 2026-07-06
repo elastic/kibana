@@ -97,17 +97,10 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
                 statusCode: 403,
               });
               break;
-            case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: `Unauthorized to execute actions`,
-                statusCode: 403,
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 schedule: {

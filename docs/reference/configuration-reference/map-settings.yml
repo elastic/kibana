@@ -1,0 +1,150 @@
+---
+# This file is used to generate "Map settings" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Map settings in Kibana
+id: map-settings-kb
+
+groups:
+  - group: General map settings
+    id: general-map-settings
+    settings:
+
+      - setting: map.regionmap
+        description: |
+          Specifies additional vector layers for use in [Region Map](docs-content://explore-analyze/visualize/maps/maps-getting-started.md) visualizations. Each layer object points to an external vector file that contains a geojson FeatureCollection. The file must use the [WGS84 coordinate reference system](https://en.wikipedia.org/wiki/World_Geodetic_System) and only include polygons. If the file is hosted on a separate domain from Kibana, the server needs to be CORS-enabled so Kibana can download the file.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+        example: |
+          The following example shows a valid regionmap configuration.
+
+          ```yaml
+          map.regionmap:
+            includeElasticMapsService: false
+            layers:
+              - name: "Departments of France"
+                url: "<MY_CORS_ENABLED_SERVER_URL>/france_departements.geojson"
+                attribution: "INRAP"
+                fields:
+                  - name: "department"
+                    description: "Full department name"
+                  - name: "INSEE"
+                    description: "INSEE numeric identifier"
+          ```
+
+      - setting: map.regionmap.includeElasticMapsService
+        description: |
+          Turns on or off whether layers from the Elastic Maps Service should be included in the vector layer option list. Supported on Elastic Cloud Enterprise. By turning this off, only the layers that are configured here will be included.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: map.regionmap.layers[].attribution
+        description: |
+          Optional. References the originating source of the geojson file.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: map.regionmap.layers[].fields[]
+        description: |
+          Mandatory. Each layer can contain multiple fields to indicate what properties from the geojson features you wish to expose. The previous example shows how to define multiple properties.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: map.regionmap.layers[].fields[].description
+        description: |
+          Mandatory. The human readable text that is shown under the Options tab when building the Region Map visualization.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: map.regionmap.layers[].fields[].name
+        description: |
+          Mandatory. This value is used to do an inner-join between the document stored in Elasticsearch and the geojson file. For example, if the field in the geojson is called `Location` and has city names, there must be a field in Elasticsearch that holds the same values that Kibana can then use to lookup for the geoshape data.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: map.regionmap.layers[].name
+        description: |
+          Mandatory. A description of the map being provided.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: map.regionmap.layers[].url
+        description: |
+          Mandatory. The location of the geojson file as provided by a webserver.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: map.tilemap.options.attribution
+        description: |
+          Sets the map attribution string. Attribution must be a list of links, delimited by `\|`. For example: `"[attribution 1](https://www.attribution1)\|[attribution 2](https://www.attribution2)"`
+        datatype: string
+        default: ""
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: map.tilemap.options.maxZoom
+        description: |
+          Sets the maximum zoom level.
+        datatype: int
+        default: 10
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: map.tilemap.options.minZoom
+        description: |
+          Sets the minimum zoom level.
+        datatype: int
+        default: 0
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: map.tilemap.options.subdomains
+        description: |
+          Provides an array of subdomains used by the tile service. Specify the position of the subdomain the URL with the token `{s}`.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: map.tilemap.url
+        description: |
+          Sets the URL to the tileservice that Kibana uses to display map tiles in tilemap visualizations.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga

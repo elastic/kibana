@@ -9,6 +9,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import expect from '@kbn/expect';
 import type { Agent } from 'supertest';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
@@ -35,16 +36,19 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   describe('POST /internal/cloud_security_posture/graph', () => {
-    // TODO: fix once feature flag is enabled for the API
-    describe.skip('Feature flag', () => {
-      it('should return 404 when feature flag is not toggled', async () => {
-        await postGraph(supertest, {
+    describe('License gating', () => {
+      it('should return 200 with an empty graph when license is Platinum or above', async () => {
+        const response = await postGraph(supertest, {
           query: {
             originEventIds: [],
             start: 'now-1d/d',
             end: 'now/d',
           },
-        }).expect(result(404, logger));
+        }).expect(result(200, logger));
+
+        expect(response.body).to.have.property('nodes').length(0);
+        expect(response.body).to.have.property('edges').length(0);
+        expect(response.body).not.to.have.property('messages');
       });
     });
   });

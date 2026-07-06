@@ -27,6 +27,7 @@ describe('ConcurrencyManager', () => {
 
     mockWorkflowExecutionRepository = {
       getRunningExecutionsByConcurrencyGroup: jest.fn(),
+      countExecutionsByConcurrencyGroupAndStatuses: jest.fn(),
       bulkUpdateWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
       updateWorkflowExecution: jest.fn(),
     } as unknown as jest.Mocked<WorkflowExecutionRepository>;
@@ -164,34 +165,32 @@ describe('ConcurrencyManager', () => {
         expect(result).toBeNull();
       });
 
-      it('should return key as-is when template evaluates to null', () => {
+      it('should return null when template evaluates to null', () => {
         const contextWithNull: WorkflowContext = {
           ...mockContext,
           inputs: {
-            serverName: null as any, // Testing null evaluation - inputs schema doesn't allow null, but template engine may return it
+            serverName: null as any,
           },
         };
         const settings: ConcurrencySettings = {
           key: '{{ inputs.serverName }}',
         };
         const result = concurrencyManager.evaluateConcurrencyKey(settings, contextWithNull);
-        // If template evaluates to null, treat as static string (user may have intended literal text)
-        expect(result).toBe('{{ inputs.serverName }}');
+        expect(result).toBeNull();
       });
 
-      it('should return key as-is when template evaluates to undefined', () => {
+      it('should return null when template evaluates to undefined', () => {
         const contextWithUndefined: WorkflowContext = {
           ...mockContext,
           inputs: {
-            serverName: undefined as any, // Testing undefined evaluation - inputs schema doesn't allow undefined, but template engine may return it
+            serverName: undefined as any,
           },
         };
         const settings: ConcurrencySettings = {
           key: '{{ inputs.serverName }}',
         };
         const result = concurrencyManager.evaluateConcurrencyKey(settings, contextWithUndefined);
-        // If template evaluates to undefined, treat as static string (user may have intended literal text)
-        expect(result).toBe('{{ inputs.serverName }}');
+        expect(result).toBeNull();
       });
 
       it('should return null when template evaluates to empty string', () => {
@@ -210,22 +209,20 @@ describe('ConcurrencyManager', () => {
     });
 
     describe('error handling', () => {
-      it('should return key as-is when template expression references non-existent field', () => {
+      it('should return null when template expression references non-existent field', () => {
         const settings: ConcurrencySettings = {
           key: '{{ inputs.nonexistent.field }}',
         };
         const result = concurrencyManager.evaluateConcurrencyKey(settings, mockContext);
-        // If template evaluates to null/undefined, treat as static string (user may have intended literal text)
-        expect(result).toBe('{{ inputs.nonexistent.field }}');
+        expect(result).toBeNull();
       });
 
-      it('should return key as-is when template syntax is malformed', () => {
+      it('should return null when template syntax is malformed', () => {
         const settings: ConcurrencySettings = {
           key: '{{ invalid syntax }}',
         };
         const result = concurrencyManager.evaluateConcurrencyKey(settings, mockContext);
-        // If template evaluation fails, treat as static string (user may have intended literal text)
-        expect(result).toBe('{{ invalid syntax }}');
+        expect(result).toBeNull();
       });
     });
 
@@ -266,7 +263,7 @@ describe('ConcurrencyManager', () => {
         expect(result).toBe('true');
       });
 
-      it('should trim template result', () => {
+      it('should preserve whitespace in template result', () => {
         const contextWithSpaces = {
           ...mockContext,
           inputs: {
@@ -277,7 +274,7 @@ describe('ConcurrencyManager', () => {
           key: '{{ inputs.serverName }}',
         };
         const result = concurrencyManager.evaluateConcurrencyKey(settings, contextWithSpaces);
-        expect(result).toBe('mamba');
+        expect(result).toBe('  mamba  ');
       });
     });
   });
@@ -604,6 +601,78 @@ describe('ConcurrencyManager', () => {
         'default'
       );
       expect(result2).toBe(true); // Should proceed (within limit for group2)
+    });
+
+    describe('queue strategy', () => {
+      it('allows execution when concurrency slots below max', async () => {
+        const settings: ConcurrencySettings = { key: 'g1', strategy: 'queue', max: 2 };
+        mockWorkflowExecutionRepository.countExecutionsByConcurrencyGroupAndStatuses.mockResolvedValueOnce(
+          1
+        );
+        const result = await concurrencyManager.checkConcurrency(
+          settings,
+          'g1',
+          'exec-new',
+          'default'
+        );
+        expect(result).toBe(true);
+        expect(
+          mockWorkflowExecutionRepository.countExecutionsByConcurrencyGroupAndStatuses
+        ).toHaveBeenCalled();
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+      });
+
+      it('queues new execution when all concurrency slots are taken', async () => {
+        const settings: ConcurrencySettings = { key: 'g1', strategy: 'queue', max: 1 };
+        mockWorkflowExecutionRepository.countExecutionsByConcurrencyGroupAndStatuses
+          .mockResolvedValueOnce(1)
+          .mockResolvedValueOnce(3);
+
+        const result = await concurrencyManager.checkConcurrency(
+          settings,
+          'g1',
+          'exec-new',
+          'default'
+        );
+
+        expect(result).toBe(false);
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+          {
+            id: 'exec-new',
+            status: ExecutionStatus.QUEUED,
+          },
+          { refresh: 'wait_for' }
+        );
+      });
+
+      it('marks SKIPPED when queue backlog is full (explicit queue-size)', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'g1',
+          strategy: 'queue',
+          max: 1,
+          'queue-size': 2,
+        };
+        mockWorkflowExecutionRepository.countExecutionsByConcurrencyGroupAndStatuses
+          .mockResolvedValueOnce(1)
+          .mockResolvedValueOnce(2);
+
+        const result = await concurrencyManager.checkConcurrency(
+          settings,
+          'g1',
+          'exec-new',
+          'default'
+        );
+
+        expect(result).toBe(false);
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+          id: 'exec-new',
+          status: ExecutionStatus.SKIPPED,
+          cancelRequested: true,
+          cancellationReason: 'Queue full (queue-size: 2)',
+          cancelledAt: expect.any(String),
+          cancelledBy: 'system',
+        });
+      });
     });
 
     describe('error handling', () => {

@@ -24,7 +24,7 @@ const mockedModulesData = [
     id: 'security_auth',
     jobs: [
       {
-        id: 'auth_high_count_logon_events',
+        id: 'auth_high_count_logon_events_ea',
         config: {
           groups: [],
           custom_settings: {
@@ -57,7 +57,7 @@ function MockMlData({ children }: { children: React.ReactNode }) {
 export const Default = () => (
   <ThreeWayDiffStorybookProviders>
     <MockMlData>
-      <MachineLearningJobIdReadOnly machineLearningJobId="auth_high_count_logon_events" />
+      <MachineLearningJobIdReadOnly machineLearningJobId="auth_high_count_logon_events_ea" />
     </MockMlData>
   </ThreeWayDiffStorybookProviders>
 );

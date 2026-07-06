@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useCurrentEuiBreakpoint } from '@elastic/eui';
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { isSupportedConnectorType } from '@kbn/inference-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+
+const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { Disclaimer } from './disclaimer';
@@ -49,32 +48,9 @@ export function WelcomeMessage({
 }) {
   const breakpoint = useCurrentEuiBreakpoint();
 
-  const { application, triggersActionsUi } = useKibana().services;
+  const { http, notifications } = useKibana().services;
 
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
-
-  const handleConnectorClick = () => {
-    if (application?.capabilities.management?.insightsAndAlerting?.triggersActions) {
-      setConnectorFlyoutOpen(true);
-    } else {
-      application?.navigateToApp('management', {
-        path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
-      });
-    }
-  };
-
-  const onConnectorCreated = (createdConnector: ActionConnector) => {
-    setConnectorFlyoutOpen(false);
-
-    if (isSupportedConnectorType(createdConnector.actionTypeId)) {
-      connectors.reloadConnectors();
-    }
-  };
-
-  const ConnectorFlyout = useMemo(
-    () => triggersActionsUi.getAddConnectorFlyout,
-    [triggersActionsUi]
-  );
 
   return (
     <>
@@ -109,7 +85,7 @@ export function WelcomeMessage({
           <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'm' : 's'} />
           <WelcomeMessageConnectors
             connectors={connectors}
-            onSetupConnectorClick={handleConnectorClick}
+            onSetupConnectorClick={() => setConnectorFlyoutOpen(true)}
           />
           {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
             <WelcomeMessageKnowledgeBase
@@ -127,11 +103,14 @@ export function WelcomeMessage({
       </EuiFlexGroup>
 
       {connectorFlyoutOpen ? (
-        <ConnectorFlyout
-          featureId={GenerativeAIForObservabilityConnectorFeatureId}
-          onConnectorCreated={onConnectorCreated}
-          onClose={() => setConnectorFlyoutOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <InferenceFlyoutWrapper
+            http={http!}
+            toasts={notifications!.toasts}
+            onFlyoutClose={() => setConnectorFlyoutOpen(false)}
+            onSubmitSuccess={() => connectors.reloadConnectors()}
+          />
+        </Suspense>
       ) : null}
     </>
   );

@@ -55,7 +55,7 @@ export const BackToEndpointDetailsFlyoutSubHeader = memo<{ endpointId: string }>
         <EuiButtonEmpty
           flush="both"
           data-test-subj="flyoutSubHeaderBackButton"
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           size="xs"
           href={backButtonProps?.href ?? ''}
           onClick={backButtonProps?.onClick}

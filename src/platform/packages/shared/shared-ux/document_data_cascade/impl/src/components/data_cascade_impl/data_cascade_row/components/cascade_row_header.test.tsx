@@ -20,6 +20,7 @@ const initialGroupColumn = [cascadeGroups[0]];
 
 const defaultProps: CascadeRowHeaderPrimitiveProps = {
   isGroupNode: true,
+  isMobile: false,
   onCascadeGroupNodeExpanded: jest.fn(),
   onCascadeGroupNodeCollapsed: jest.fn(),
   rowInstance: {
@@ -40,7 +41,11 @@ describe('CascadeRowHeaderPrimitive', () => {
     ...overrides
   }: Partial<ComponentProps<typeof CascadeRowHeaderPrimitive>> = {}) => {
     return render(
-      <DataCascadeProvider cascadeGroups={cascadeGroups} initialGroupColumn={initialGroupColumn}>
+      <DataCascadeProvider
+        data={[]}
+        cascadeGroups={cascadeGroups}
+        initialGroupColumn={initialGroupColumn}
+      >
         <CascadeRowHeaderPrimitive {...defaultProps} {...overrides} />
       </DataCascadeProvider>
     );

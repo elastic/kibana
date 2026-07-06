@@ -31,7 +31,11 @@ import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_da
 import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
 import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/validators/messages';
-import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
+import {
+  DEFAULT_TRANSFORM_FREQUENCY,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST,
+} from '../../../../../../common/constants';
 import type { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
@@ -81,7 +85,10 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const toastNotifications = useToastNotifications();
     const { esIndicesCreateIndex } = useDocumentationLinks();
 
-    const defaults = { ...getDefaultStepDetailsState(), ...overrides };
+    const defaults = {
+      ...getDefaultStepDetailsState(stepDefineState.transformFunction),
+      ...overrides,
+    };
 
     const [transformId, setTransformId] = useState<TransformId>(defaults.transformId);
     const [transformDescription, setTransformDescription] = useState<string>(
@@ -326,6 +333,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [transformSettingsNumFailureRetries, setTransformSettingsNumFailureRetries] = useState<
       string | number | undefined
     >(defaults.transformSettingsNumFailureRetries);
+    const [deferValidation, setDeferValidation] = useState(defaults.deferValidation);
     const isTransformSettingsNumFailureRetriesValid =
       transformSettingsNumFailureRetries === undefined ||
       transformSettingsNumFailureRetries === '-' ||
@@ -354,6 +362,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         continuousModeDateField,
         continuousModeDelay,
         createDataView,
+        deferValidation,
         isContinuousModeEnabled,
         isRetentionPolicyEnabled,
         retentionPolicyDateField,
@@ -383,6 +392,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       continuousModeDateField,
       continuousModeDelay,
       createDataView,
+      deferValidation,
       isContinuousModeEnabled,
       isRetentionPolicyEnabled,
       retentionPolicyDateField,
@@ -804,7 +814,12 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                   'xpack.transform.stepDetailsForm.editFlyoutFormMaxPageSearchSizePlaceholderText',
                   {
                     defaultMessage: 'Default: {defaultValue}',
-                    values: { defaultValue: 500 },
+                    values: {
+                      defaultValue:
+                        stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST
+                          ? DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
+                          : DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+                    },
                   }
                 )}
                 value={
@@ -880,6 +895,22 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
                 isInvalid={!isTransformSettingsNumFailureRetriesValid}
                 data-test-subj="transformNumFailureRetriesInput"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              helpText={i18n.translate('xpack.transform.stepDetailsForm.deferValidationHelpText', {
+                defaultMessage:
+                  'Skips validation of the source index and the destination pipeline when creating the transform. Use this option when the source index is very large and validation would time out.',
+              })}
+            >
+              <EuiSwitch
+                name="transformDeferValidation"
+                label={i18n.translate('xpack.transform.stepDetailsForm.deferValidationLabel', {
+                  defaultMessage: 'Skip validation',
+                })}
+                checked={deferValidation}
+                onChange={() => setDeferValidation(!deferValidation)}
+                data-test-subj="transformDeferValidationSwitch"
               />
             </EuiFormRow>
           </EuiAccordion>

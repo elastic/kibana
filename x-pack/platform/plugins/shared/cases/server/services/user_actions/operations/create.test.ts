@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
-import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import { createSavedObjectsSerializerMock } from '../../../client/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -44,15 +44,29 @@ import {
   patchExtractObservablesCasesRequest,
   patchBothSettingsCasesRequest,
   getBothSettingsUserActions,
+  patchExtendedFieldsCasesRequest,
+  patchUpdateExtendedFieldsCasesRequest,
+  getExtendedFieldsUserActions,
+  patchTemplateCasesRequest,
+  patchRemoveTemplateCasesRequest,
+  getTemplateUserActions,
 } from '../mocks';
-import { AttachmentType } from '../../../../common/types/domain';
+import { AttachmentType, UserActionTypes } from '../../../../common/types/domain';
 
 describe('UserActionPersister', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
   const auditMockLocker = auditLoggerMock.create();
-  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   const savedObjectsSerializer = createSavedObjectsSerializerMock();
+  // Spy-able activity writer so the `.cases-activity` mirror assertions
+  // below can inspect the fire-and-forget dispatches. `jest.resetAllMocks`
+  // in `beforeEach` clears call state between tests.
+  const analyticsV2ActivityWriter = {
+    upsertAction: jest.fn(),
+    bulkUpsertActions: jest.fn(),
+    bulkDeleteActionsByCaseIds: jest.fn(),
+    bulkUpsertActionsAwait: jest.fn().mockResolvedValue(undefined),
+  };
 
   let persister: UserActionPersister;
 
@@ -66,9 +80,9 @@ describe('UserActionPersister', () => {
     persister = new UserActionPersister({
       log: mockLogger,
       unsecuredSavedObjectsClient,
-      persistableStateAttachmentTypeRegistry,
       savedObjectsSerializer,
       auditLogger: auditMockLocker,
+      analyticsV2ActivityWriter,
     });
   });
 
@@ -103,6 +117,71 @@ describe('UserActionPersister', () => {
   });
 
   const testUser = { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' };
+
+  describe('cases-analytics v2 activity mirror', () => {
+    it('mirrors a single created user action to the activity writer', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        attributes: createUserActionSO(),
+        id: 'ua-1',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+        references: [],
+      });
+
+      await persister.createUserAction(getRequest());
+
+      expect(analyticsV2ActivityWriter.upsertAction).toHaveBeenCalledTimes(1);
+      expect(analyticsV2ActivityWriter.upsertAction).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'ua-1' })
+      );
+    });
+
+    it('mirrors only the successfully-persisted entries on bulk create', async () => {
+      // One success, one per-item failure (409). The failed entry must be
+      // excluded so we never mirror a doc that wasn't actually persisted —
+      // reconciliation can't repair that (a never-persisted user action has
+      // no SO to walk).
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: createUserActionSO(),
+            id: 'ua-ok',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            references: [],
+          },
+          // A per-item failure has `error` and no `attributes`/`references`;
+          // cast to the response element type since the SO API's typed
+          // shape doesn't model the error variant inline.
+          {
+            id: 'ua-bad',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          } as unknown as SavedObject<UserActionPersistedAttributes>,
+        ],
+      });
+
+      await persister.bulkCreateUserAction({ userActions: [getRequest().userAction] });
+
+      expect(analyticsV2ActivityWriter.bulkUpsertActions).toHaveBeenCalledTimes(1);
+      const mirrored = analyticsV2ActivityWriter.bulkUpsertActions.mock.calls[0][0];
+      expect(mirrored.map((so: { id: string }) => so.id)).toEqual(['ua-ok']);
+    });
+
+    it('does not dispatch to the activity writer when every bulk entry errored', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'ua-bad',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          } as unknown as SavedObject<UserActionPersistedAttributes>,
+        ],
+      });
+
+      await persister.bulkCreateUserAction({ userActions: [getRequest().userAction] });
+
+      expect(analyticsV2ActivityWriter.bulkUpsertActions).not.toHaveBeenCalled();
+    });
+  });
 
   describe('Decoding requests', () => {
     describe('createUserAction', () => {
@@ -313,6 +392,125 @@ describe('UserActionPersister', () => {
           user: testUser,
         })
       ).toEqual(getBothSettingsUserActions({ isMock: false }));
+    });
+
+    describe('extendedFields', () => {
+      it('creates a user action when extended_fields are set for the first time', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchExtendedFieldsCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getExtendedFieldsUserActions({ isMock: false, payload: { risk_score: 'high' } }));
+      });
+
+      it('creates a user action only for the fields that changed', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchUpdateExtendedFieldsCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getExtendedFieldsUserActions({ isMock: false, payload: { risk_score: 'high' } }));
+      });
+
+      it('creates no user action when extended_fields have not changed', () => {
+        const noDiffRequest = {
+          cases: [
+            {
+              ...patchUpdateExtendedFieldsCasesRequest.cases[0],
+              updatedAttributes: { extended_fields: { risk_score: 'low', severity: 'medium' } },
+            },
+          ],
+        };
+        expect(
+          persister.buildUserActions({
+            updatedCases: noDiffRequest,
+            user: testUser,
+          })
+        ).toEqual({ '1': [] });
+      });
+    });
+
+    describe('template', () => {
+      it('creates a user action when a template is applied', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchTemplateCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getTemplateUserActions({ isMock: false, payload: { id: 'tmpl-1', version: 3 } }));
+      });
+
+      it('creates a user action when a template is removed (null)', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchRemoveTemplateCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getTemplateUserActions({ isMock: false, payload: null }));
+      });
+    });
+
+    it('adds synced alerts count only to status user actions', () => {
+      const userActionsDict = persister.buildUserActions({
+        updatedCases: patchCasesRequest,
+        user: testUser,
+      });
+
+      const updatedUserActionsDict = persister.addSyncedAlertsCountToUserActions({
+        userActionsDict,
+        syncedAlertCountCountByCaseId: new Map([['1', 3]]),
+      });
+
+      const statusAction = updatedUserActionsDict['1'].find(
+        ({ parameters }) => parameters.attributes.type === UserActionTypes.status
+      );
+
+      expect(statusAction?.parameters.attributes.payload).toEqual({
+        status: 'closed',
+        syncedAlertCount: 3,
+      });
+      expect(updatedUserActionsDict['2']).toEqual(userActionsDict['2']);
+    });
+
+    it('adds close reason details to the status audit message when alerts are synced', () => {
+      const updatedCases = {
+        ...patchCasesRequest,
+        cases: patchCasesRequest.cases.map((theCase) => {
+          if (theCase.caseId !== '1') {
+            return theCase;
+          }
+
+          return {
+            ...theCase,
+            closeReason: 'false_positive',
+            updatedAttributes: {
+              ...theCase.updatedAttributes,
+              settings: {
+                syncAlerts: true,
+                extractObservables: false,
+              },
+            },
+          };
+        }),
+      };
+
+      const builtUserActions = persister.buildUserActions({
+        updatedCases,
+        user: testUser,
+      });
+
+      const statusAction = builtUserActions['1'].find(
+        ({ parameters }) => parameters.attributes.type === UserActionTypes.status
+      );
+
+      expect(statusAction?.eventDetails.getMessage('status-user-action-id')).toBe(
+        'User closed case id: 1 and synced alerts with a close reason - user action id: status-user-action-id'
+      );
+      expect(statusAction?.parameters.attributes.payload).toEqual({
+        status: 'closed',
+        closeReason: 'false_positive',
+      });
     });
 
     describe('customFields', () => {

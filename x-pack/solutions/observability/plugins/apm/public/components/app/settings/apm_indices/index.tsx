@@ -189,7 +189,7 @@ export function ApmIndices() {
         <EuiFlexItem grow={false}>
           <EuiForm>
             {APM_INDEX_LABELS.map(({ configurationName, label }) => {
-              const matchedConfiguration = data.apmIndexSettings.find(
+              const matchedConfiguration = data.apmIndexSettings?.find(
                 ({ configurationName: configName }) => configName === configurationName
               );
               const defaultValue = matchedConfiguration ? matchedConfiguration.defaultValue : '';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { ServiceSlosResponse, StatusCounts } from '@kbn/apm-api-shared';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { ApmSloClient } from '../../../lib/helpers/get_apm_slo_client';
@@ -14,28 +14,12 @@ import { APM_SLO_INDICATOR_TYPES } from '../../../../common/slo_indicator_types'
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../common/es_fields/apm';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
-export interface StatusCounts {
-  violated: number;
-  degrading: number;
-  healthy: number;
-  noData: number;
-}
-
-export interface ServiceSlosResponse {
-  results: SLOWithSummaryResponse[];
-  total: number;
-  page: number;
-  perPage: number;
-  activeAlerts: Record<string, number>;
-  statusCounts: StatusCounts;
-}
-
 export async function getServiceSlos({
   sloClient,
   sloAlertsClient,
   serviceName,
   environment,
-  statusFilters,
+  statusFilters = [],
   kqlQuery,
   page,
   perPage,
@@ -77,7 +61,16 @@ export async function getServiceSlos({
   ];
 
   if (environment && environment !== ENVIRONMENT_ALL.value) {
-    filters.push({ term: { [SERVICE_ENVIRONMENT]: environment } });
+    filters.push({
+      bool: {
+        should: [
+          { term: { [SERVICE_ENVIRONMENT]: environment } },
+          { term: { [SERVICE_ENVIRONMENT]: ALL_VALUE } },
+          { bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
   }
 
   if (statusFilters && statusFilters.length > 0) {
@@ -105,6 +98,8 @@ export async function getServiceSlos({
       type: 'apm',
       serviceNames: [serviceName],
       ...(environment && environment !== ENVIRONMENT_ALL.value && { environment }),
+      ...(kqlQuery && { kqlQuery }),
+      ...(statusFilters.length > 0 && { statusFilters }),
     }),
   ]);
 

@@ -14,6 +14,7 @@ import type {
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
   PersistableStateAttachmentPayload,
+  UnifiedReferenceAttachmentPayload,
   Attachment,
 } from '@kbn/cases-plugin/common/types/domain';
 import {
@@ -26,12 +27,20 @@ import type {
   CasePostRequest,
   PostFileAttachmentRequest,
 } from '@kbn/cases-plugin/common/types/api';
-import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
+import {
+  LEGACY_FILE_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import type { AttachmentRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 
-export const defaultUser = { email: null, full_name: null, username: 'elastic' };
+export const defaultUser = {
+  email: null,
+  full_name: null,
+  username: 'elastic',
+  profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+};
 /**
  * A null filled user will occur when the security plugin is disabled
  */
@@ -89,6 +98,16 @@ export const postCommentAlertMultipleIdsReq: AlertAttachmentPayload = {
   rule: { id: 'test-rule-id', name: 'test-index-id' },
   type: AttachmentType.alert,
   owner: 'securitySolutionFixture',
+};
+
+export const postCommentEntityReq: UnifiedReferenceAttachmentPayload = {
+  type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+  owner: 'securitySolutionFixture',
+  attachmentId: 'entity-1',
+  metadata: {
+    entityName: 'alice',
+    entityType: 'user',
+  },
 };
 
 export const postCommentActionsReq: ActionsAttachmentPayload = {
@@ -155,7 +174,7 @@ export const getFilesAttachmentReq = (
       type: ExternalReferenceStorageType.savedObject,
       soType: FILE_SO_TYPE,
     },
-    externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+    externalReferenceAttachmentTypeId: LEGACY_FILE_ATTACHMENT_TYPE,
     externalReferenceMetadata: { ...fileAttachmentMetadata },
     ...req,
   };
@@ -165,7 +184,7 @@ export const persistableStateAttachment: PersistableStateAttachmentPayload = {
   type: AttachmentType.persistableState,
   owner: 'securitySolutionFixture',
   persistableStateAttachmentTypeId: '.test',
-  persistableStateAttachmentState: { foo: 'foo', injectedId: 'testRef' },
+  persistableStateAttachmentState: { foo: 'foo' },
 };
 
 export const postCaseResp = (

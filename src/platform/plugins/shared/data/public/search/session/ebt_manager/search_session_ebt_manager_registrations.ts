@@ -10,14 +10,16 @@
 import type { CoreSetup, SchemaValue } from '@kbn/core/public';
 import {
   BG_SEARCH_CANCEL,
-  BG_SEARCH_COMPLETE,
-  BG_SEARCH_ERROR,
   BG_SEARCH_LIST_VIEW,
   BG_SEARCH_OPEN,
   BG_SEARCH_START,
 } from './constants';
 
 const COMMON_SCHEMA: Record<string, SchemaValue<unknown>> = {
+  app_id: {
+    type: 'keyword',
+    _meta: { description: 'The app ID where the search session was created.' },
+  },
   query_lang: {
     type: 'keyword',
     _meta: { description: 'The query language used in the search (e.g., KQL, Lucene, DSL).' },
@@ -32,6 +34,7 @@ export const registerSearchSessionEBTManagerAnalytics = (core: CoreSetup) => {
   core.analytics.registerEventType({
     eventType: BG_SEARCH_START,
     schema: {
+      app_id: COMMON_SCHEMA.app_id,
       query_lang: COMMON_SCHEMA.query_lang,
       session_id: COMMON_SCHEMA.session_id,
       entry_point: {
@@ -56,56 +59,9 @@ export const registerSearchSessionEBTManagerAnalytics = (core: CoreSetup) => {
   });
 
   core.analytics.registerEventType({
-    eventType: BG_SEARCH_COMPLETE,
-    schema: {
-      query_lang: COMMON_SCHEMA.query_lang,
-      session_id: COMMON_SCHEMA.session_id,
-      runtime_ms: {
-        type: 'integer',
-        _meta: {
-          description: 'The total time taken to complete the background search in milliseconds.',
-        },
-      },
-      result_rows_bucket: {
-        type: 'integer',
-        _meta: {
-          description:
-            'A bucketed representation of the number of rows returned by the search (e.g., 0-100, 101-500).',
-        },
-      },
-      result_bytes_bucket: {
-        type: 'integer',
-        _meta: {
-          description:
-            'A bucketed representation of the size of the search results in bytes (e.g., 0-1KB, 1KB-10KB).',
-        },
-      },
-    },
-  });
-
-  core.analytics.registerEventType({
-    eventType: BG_SEARCH_ERROR,
-    schema: {
-      query_lang: COMMON_SCHEMA.query_lang,
-      session_id: COMMON_SCHEMA.session_id,
-      error_type: {
-        type: 'keyword',
-        _meta: {
-          description: 'The type of error that occurred during the background search.',
-        },
-      },
-      http_status: {
-        type: 'integer',
-        _meta: {
-          description: 'The HTTP status code returned by the search request.',
-        },
-      },
-    },
-  });
-
-  core.analytics.registerEventType({
     eventType: BG_SEARCH_CANCEL,
     schema: {
+      app_id: COMMON_SCHEMA.app_id,
       query_lang: COMMON_SCHEMA.query_lang,
       session_id: COMMON_SCHEMA.session_id,
       cancel_source: {

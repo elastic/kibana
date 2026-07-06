@@ -21,9 +21,14 @@ export interface AlertingAuthorizationFilterOpts {
   fieldNames: AlertingAuthorizationFilterFieldNames;
 }
 
+export interface AlertingAuthorizationFilterOptsBySpaceId {
+  type: AlertingAuthorizationFilterType;
+  fieldNames: Pick<AlertingAuthorizationFilterFieldNames, 'spaceIds'>;
+}
+
 interface AlertingAuthorizationFilterFieldNames {
   ruleTypeId: string;
-  consumer: string;
+  consumer?: string;
   spaceIds?: string;
 }
 
@@ -46,16 +51,20 @@ export function asFiltersByRuleTypeAndConsumer(
 
         const andNodes: KueryNode[] = [nodeBuilder.is(opts.fieldNames.ruleTypeId, id)];
 
-        const authorizedConsumersKeys = Object.keys(authorizedConsumers);
-        if (authorizedConsumersKeys.length) {
-          andNodes.push(
-            nodeBuilder.or(
-              authorizedConsumersKeys.map((consumer) => {
-                ensureFieldIsSafeForQuery('consumer', consumer);
-                return nodeBuilder.is(opts.fieldNames.consumer, consumer);
-              })
-            )
-          );
+        const consumerFieldName = opts.fieldNames.consumer;
+
+        if (consumerFieldName != null) {
+          const authorizedConsumersKeys = Object.keys(authorizedConsumers);
+          if (authorizedConsumersKeys.length) {
+            andNodes.push(
+              nodeBuilder.or(
+                authorizedConsumersKeys.map((consumer) => {
+                  ensureFieldIsSafeForQuery('consumer', consumer);
+                  return nodeBuilder.is(consumerFieldName, consumer);
+                })
+              )
+            );
+          }
         }
 
         if (opts.fieldNames.spaceIds != null && spaceId != null) {
@@ -81,7 +90,7 @@ export function asFiltersByRuleTypeAndConsumer(
 // Space ids are stored in the alerts documents and even if security is disabled
 // still need to consider the users space privileges
 export function asFiltersBySpaceId(
-  opts: AlertingAuthorizationFilterOpts,
+  opts: AlertingAuthorizationFilterOptsBySpaceId,
   spaceId: string | undefined
 ): KueryNode | estypes.QueryDslQueryContainer | undefined {
   if (opts.fieldNames.spaceIds != null && spaceId != null) {

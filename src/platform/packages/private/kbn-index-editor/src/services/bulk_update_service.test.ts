@@ -21,7 +21,13 @@ describe('Bulk update', () => {
   let http: HttpStart;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     http = httpServiceMock.createStartContract();
+    (http.post as jest.Mock).mockResolvedValue({
+      errors: false,
+      items: [],
+      took: 0,
+    } satisfies BulkResponse);
   });
   it('builds bulk update operations correctly and posts to the correct endpoint', async () => {
     const updates = [
@@ -39,13 +45,6 @@ describe('Bulk update', () => {
       },
     ];
 
-    // mock success response
-    (http.post as jest.Mock).mockResolvedValue({
-      errors: false,
-      items: [],
-      took: 0,
-    } satisfies BulkResponse);
-
     await bulkUpdate(INDEX_NAME, updates, http);
 
     expect(http.post).toHaveBeenCalledTimes(1);
@@ -61,15 +60,95 @@ describe('Bulk update', () => {
     expect(operations.length).toBe(4);
 
     // Validate presence of delete operations for non-placeholder ids only
-    const deletes = operations.filter((op) => op.delete);
-    const deleteIds = deletes.map((d) => d.delete?._id).sort();
+    const deletes = operations.filter((op) => op!.delete);
+    const deleteIds = deletes.map((d) => d!.delete!._id).sort();
     expect(deleteIds).toEqual(['abc123', 'to-del']);
 
     // Validate there is an index operation and that the document merges values
-    const indexIdx = operations.findIndex((op) => op.index);
+    const indexIdx = operations.findIndex((op) => op!.index);
     expect(indexIdx).toBeGreaterThanOrEqual(0);
-    const doc = operations[indexIdx + 1];
+    const doc = operations[indexIdx + 1]!;
     expect(doc).toEqual({ b: 2, c: 3 });
+  });
+
+  it('un-flattens dotted field names into nested objects', async () => {
+    const updates = [
+      {
+        type: 'add-doc' as const,
+        payload: { id: '1', value: { 'parent.child': 'test' } },
+      },
+      {
+        type: 'add-doc' as const,
+        payload: {
+          id: '2',
+          value: {
+            'parent.child.grandchild': 'test-grandchild',
+            'parent.child.grandchild2': 'test-grandchild2',
+            'parent.child2': 'test-child-2',
+          },
+        },
+      },
+    ];
+
+    await bulkUpdate(INDEX_NAME, updates, http);
+
+    const [, options] = (http.post as jest.Mock).mock.calls[0];
+    const { operations } = JSON.parse(options.body);
+
+    expect(operations).toEqual([
+      { update: { _id: '1' } },
+      { doc: { parent: { child: 'test' } } },
+      { update: { _id: '2' } },
+      {
+        doc: {
+          parent: {
+            child: {
+              grandchild: 'test-grandchild',
+              grandchild2: 'test-grandchild2',
+            },
+            child2: 'test-child-2',
+          },
+        },
+      },
+    ]);
+  });
+
+  it('un-flattens dotted field names when creatiing new docs', async () => {
+    const updates = [
+      {
+        type: 'add-doc' as const,
+        payload: {
+          id: `${ROW_PLACEHOLDER_PREFIX}xyz`,
+          value: { 'parent.child': 'test' },
+        },
+      },
+    ];
+
+    await bulkUpdate(INDEX_NAME, updates, http);
+
+    const [, options] = (http.post as jest.Mock).mock.calls[0];
+    const { operations } = JSON.parse(options.body);
+
+    expect(operations).toEqual([{ index: {} }, { parent: { child: 'test' } }]);
+  });
+
+  it('un-flattens correctly when keys are numeric', async () => {
+    const updates = [
+      {
+        type: 'add-doc' as const,
+        payload: { id: 'sensor-a', value: { 'measurements.0': 3.14 } },
+      },
+    ];
+
+    await bulkUpdate(INDEX_NAME, updates, http);
+
+    const [, options] = (http.post as jest.Mock).mock.calls[0];
+    const { operations } = JSON.parse(options.body);
+
+    expect(operations).toEqual([
+      { update: { _id: 'sensor-a' } },
+      { doc: { measurements: { '0': 3.14 } } },
+    ]);
   });
 
   it('should split operations into chunks of 500 update items', async () => {
@@ -78,12 +157,6 @@ describe('Bulk update', () => {
       type: 'add-doc' as const,
       payload: { id: `doc-${i}`, value: { field: 'value' } },
     }));
-
-    (http.post as jest.Mock).mockResolvedValue({
-      errors: false,
-      items: [],
-      took: 10,
-    });
 
     await bulkUpdate(INDEX_NAME, updates, http);
 

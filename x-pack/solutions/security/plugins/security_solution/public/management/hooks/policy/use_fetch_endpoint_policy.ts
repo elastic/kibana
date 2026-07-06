@@ -13,6 +13,7 @@ import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
 } from '../../../../common/endpoint/models/policy_config';
+import { ProtectionModes } from '../../../../common/endpoint/types';
 import type { GetPolicyResponse } from '../../pages/policy/types';
 import { useHttp } from '../../../common/lib/kibana';
 import type { PolicyData, PolicyConfig } from '../../../../common/endpoint/types';
@@ -72,6 +73,9 @@ const applyDefaultsToPolicyIfNeeded = (policyItem: PolicyData): void => {
   if (settings.windows.popup.ransomware.message === '') {
     settings.windows.popup.ransomware.message = DefaultPolicyNotificationMessage;
   }
+  if (settings.mac.popup.ransomware.message === '') {
+    settings.mac.popup.ransomware.message = DefaultPolicyNotificationMessage;
+  }
   if (settings.windows.popup.memory_protection.message === '') {
     settings.windows.popup.memory_protection.message = DefaultPolicyRuleNotificationMessage;
   }
@@ -89,5 +93,11 @@ const applyDefaultsToPolicyIfNeeded = (policyItem: PolicyData): void => {
   }
   if (settings.linux.popup.behavior_protection.message === '') {
     settings.linux.popup.behavior_protection.message = DefaultPolicyRuleNotificationMessage;
+  }
+
+  // The advanced settings UI may delete mac.ransomware.mode when the user
+  // clears the field. Restore the default so the typed field is never missing.
+  if (!settings.mac.ransomware?.mode) {
+    settings.mac.ransomware = { ...settings.mac.ransomware, mode: ProtectionModes.off };
   }
 };

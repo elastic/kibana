@@ -8,8 +8,7 @@
  */
 
 export { timeRangeSchema } from './src/time_range';
-export { querySchema } from './src/query';
-export { asCodeFilterSchema } from './src/filter';
+export { querySchema, aggregateQuerySchema } from './src/query';
 export { storedFilterSchema } from './src/stored_filter';
 
 export type {
@@ -18,5 +17,4 @@ export type {
   RelativeTimeRange,
   AggregateQuery,
   Query,
-  AsCodeFilter,
 } from './src/types';
