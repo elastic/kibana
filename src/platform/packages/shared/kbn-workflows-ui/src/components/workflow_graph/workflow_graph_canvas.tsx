@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiCallOut, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut, EuiToolTip, transparentize, useEuiTheme } from '@elastic/eui';
 import {
   Background,
   type ColorMode,
@@ -28,6 +28,7 @@ import type {
   WorkflowStepExecutionDto,
   WorkflowYaml,
 } from '@kbn/workflows';
+import { TRIGGER_STEP_TYPES } from '@kbn/workflows';
 import '@xyflow/react/dist/style.css';
 import { findGraphFocusNode } from './find_graph_focus_node';
 import { useWorkflowLayout } from './use_workflow_layout';
@@ -281,7 +282,13 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     }),
     [onStepRun, canRunSteps, renderStepIcon, onStepSelect]
   );
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode: euiColorMode } = useEuiTheme();
+  // Background dots: `borderBasePlain` in light; softened to 50% opacity in dark
+  // so the grid reads as subtle texture rather than active dots on the dark canvas.
+  const backgroundDotColor =
+    euiColorMode === 'DARK'
+      ? transparentize(euiTheme.colors.borderBasePlain, 0.5)
+      : euiTheme.colors.borderBasePlain;
 
   const { nodes, edges } = useWorkflowLayout({
     workflow,
@@ -485,11 +492,19 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       // Placeholder nodes for empty `if` branches are invisible — hide them in
       // the minimap too so they don't appear as spurious coloured dots.
       if (n.type === 'bypassLane') return 'transparent';
-      const status = (n.data as { stepExecution?: { status?: string } } | undefined)?.stepExecution
-        ?.status;
-      return status === 'failed' ? euiTheme.colors.danger : '#0b64dd';
+      const data = n.data as
+        | { stepExecution?: { status?: string }; isTrigger?: boolean; stepType?: string }
+        | undefined;
+      const status = data?.stepExecution?.status;
+      if (status === 'failed') return euiTheme.colors.danger;
+      // Figma (node 10808:19179): the trigger node reads as pink (accent) in the
+      // minimap, matching its icon accent; all other steps are blue (primary).
+      // Tokens keep the light look (#0b64dd / #ee72a6) and adapt in dark mode.
+      const isTriggerNode =
+        data?.isTrigger || (data?.stepType ? TRIGGER_STEP_TYPES.has(data.stepType) : false);
+      return isTriggerNode ? euiTheme.colors.accent : euiTheme.colors.primary;
     },
-    [euiTheme.colors.danger]
+    [euiTheme.colors.danger, euiTheme.colors.accent, euiTheme.colors.primary]
   );
 
   const dimmed = !isYamlValid;
@@ -583,7 +598,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               {showBackground && (
                 <Background
                   bgColor={euiTheme.colors.backgroundBaseSubdued}
-                  color={euiTheme.colors.textSubdued}
+                  color={backgroundDotColor}
                 />
               )}
               {toolbar}
@@ -593,8 +608,8 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
                   pannable
                   zoomable
                   position="bottom-left"
-                  bgColor="#f6f9fc"
-                  maskColor="rgba(246, 249, 252, 0.7)"
+                  bgColor={euiTheme.colors.backgroundBaseSubdued}
+                  maskColor={transparentize(euiTheme.colors.backgroundBaseSubdued, 0.7)}
                   nodeColor={minimapNodeColor}
                   nodeStrokeWidth={0}
                   nodeBorderRadius={2}

@@ -73,10 +73,12 @@ import type {
 } from './workflows_management_service';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
 import { formatWorkflowDiagnostic } from '../../common/lib/format_workflow_diagnostic';
+import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
+import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
 import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
@@ -336,10 +338,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest,
     options?: { overwrite?: boolean }
-  ): Promise<{
-    created: WorkflowDetailDto[];
-    failed: Array<{ index: number; id: string; error: string }>;
-  }> {
+  ): Promise<BulkCreateWorkflowsResult> {
     const result = await this.workflowsService.bulkCreateWorkflows(
       workflows,
       spaceId,
@@ -347,7 +346,13 @@ export class WorkflowsManagementApi {
       options
     );
     for (const created of result.created) {
-      this.notifySml(created.id, options?.overwrite ? 'update' : 'create', request);
+      const historyAction =
+        result.historyActionsById[created.id] ?? WorkflowChangeHistoryAction.workflowCreate;
+      this.notifySml(
+        created.id,
+        historyAction === WorkflowChangeHistoryAction.workflowUpdate ? 'update' : 'create',
+        request
+      );
     }
     return result;
   }
@@ -457,12 +462,15 @@ export class WorkflowsManagementApi {
     return result;
   }
 
-  public async disableAllWorkflows(spaceId?: string): Promise<{
+  public async disableAllWorkflows(
+    spaceId?: string,
+    request?: KibanaRequest
+  ): Promise<{
     total: number;
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
-    return this.workflowsService.disableAllWorkflows(spaceId);
+    return this.workflowsService.disableAllWorkflows(spaceId, request);
   }
 
   public async runWorkflow(
