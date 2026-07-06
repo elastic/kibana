@@ -288,7 +288,7 @@ export function ESQLEditor({
           dataGridAttrs={dataGridAttrs}
           isAccordionOpen={isESQLResultsAccordionOpen}
           isTableView={visualization.activeId !== 'lnsDatatable'}
-          isApproximate={isApproximate ?? undefined}
+          isApproximate={isApproximate}
           setIsAccordionOpen={setIsESQLResultsAccordionOpen}
           query={query}
           onAccordionToggleCb={(status) => {
