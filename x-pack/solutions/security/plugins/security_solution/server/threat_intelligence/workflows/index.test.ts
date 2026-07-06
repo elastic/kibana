@@ -41,8 +41,6 @@ describe('BUILTIN_WORKFLOWS', () => {
 });
 
 describe('installBuiltinWorkflows', () => {
-  const noDelay = () => Promise.resolve();
-
   const makeLogger = (): jest.Mocked<Logger> => {
     const child = {
       debug: jest.fn(),
@@ -66,85 +64,62 @@ describe('installBuiltinWorkflows', () => {
     failed: [],
   });
 
-  it('succeeds immediately when all workflows register on the first attempt', async () => {
+  it('calls bulkCreateWorkflows once and logs no errors when all workflows register', async () => {
     const bulkCreate = jest.fn().mockResolvedValue(allCreated());
     const workflowsManagement = {
       management: { bulkCreateWorkflows: bulkCreate },
     } as unknown as WorkflowsServerPluginSetup;
     const logger = makeLogger();
 
-    await installBuiltinWorkflows({ workflowsManagement, logger, _delayFn: noDelay });
+    await installBuiltinWorkflows({ workflowsManagement, logger });
 
     expect(bulkCreate).toHaveBeenCalledTimes(1);
     expect(logger.error).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('retries when the first N calls partially fail, then succeeds', async () => {
-    // First 2 calls: only the first workflow registers; attempts 3+ succeed.
-    const partial = {
-      created: [
-        {
-          id: BUILTIN_WORKFLOWS[0].id,
-          name: BUILTIN_WORKFLOWS[0].id,
-        } as unknown as WorkflowDetailDto,
-      ],
-      failed: BUILTIN_WORKFLOWS.slice(1).map((wf, i) => ({
-        index: i + 1,
-        id: wf.id,
-        error: 'transient: not ready',
-      })),
-    };
-    const bulkCreate = jest
-      .fn()
-      .mockResolvedValueOnce(partial)
-      .mockResolvedValueOnce(partial)
-      .mockResolvedValue(allCreated());
-
+  it('logs a loud error naming the failed workflow when failed[] is non-empty', async () => {
+    const failedId = BUILTIN_WORKFLOWS[1].id;
+    const bulkCreate = jest.fn().mockResolvedValue({
+      created: BUILTIN_WORKFLOWS.filter((wf) => wf.id !== failedId).map(
+        (wf) => ({ id: wf.id, name: wf.id } as unknown as WorkflowDetailDto)
+      ),
+      failed: [{ index: 1, id: failedId, error: 'validation error' }],
+    });
     const workflowsManagement = {
       management: { bulkCreateWorkflows: bulkCreate },
     } as unknown as WorkflowsServerPluginSetup;
     const logger = makeLogger();
 
-    await installBuiltinWorkflows({ workflowsManagement, logger, _delayFn: noDelay });
+    await installBuiltinWorkflows({ workflowsManagement, logger });
 
-    // Should have retried until success (3 calls total).
-    expect(bulkCreate).toHaveBeenCalledTimes(3);
-    // Partial-failure attempts surface as error + warn per attempt.
-    expect(logger.error).toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalled();
-    // But no terminal error after eventual success.
-    const terminalErrorCalls = (logger.error as jest.Mock).mock.calls.filter((args: string[]) =>
-      String(args[0]).includes('failed after')
-    );
-    expect(terminalErrorCalls).toHaveLength(0);
+    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    const errorMsg = String((logger.error as jest.Mock).mock.calls[0]?.[0] ?? '');
+    expect(errorMsg).toContain(failedId);
+    expect(errorMsg).toContain('validation error');
+    expect(errorMsg).toContain('will not run autonomously');
   });
 
-  it('logs a terminal error (not just warn) when all attempts are exhausted', async () => {
-    const partial = {
-      created: [],
-      failed: BUILTIN_WORKFLOWS.map((wf, i) => ({
-        index: i,
-        id: wf.id,
-        error: 'persistent error',
-      })),
-    };
-    const bulkCreate = jest.fn().mockResolvedValue(partial);
-
+  it('logs a loud error when created count is short of BUILTIN_WORKFLOWS length', async () => {
+    // created is short but failed[] is also empty (e.g. silent partial write)
+    const bulkCreate = jest.fn().mockResolvedValue({
+      created: [{ id: BUILTIN_WORKFLOWS[0].id, name: BUILTIN_WORKFLOWS[0].id }],
+      failed: [],
+    });
     const workflowsManagement = {
       management: { bulkCreateWorkflows: bulkCreate },
     } as unknown as WorkflowsServerPluginSetup;
     const logger = makeLogger();
 
-    await installBuiltinWorkflows({ workflowsManagement, logger, _delayFn: noDelay });
+    await installBuiltinWorkflows({ workflowsManagement, logger });
 
-    // Should have tried INSTALL_MAX_ATTEMPTS times (imported indirectly via behaviour).
-    expect(bulkCreate.mock.calls.length).toBeGreaterThanOrEqual(2);
-    // Terminal log.error must mention "failed after".
-    const terminalError = (logger.error as jest.Mock).mock.calls.find((args: string[]) =>
-      String(args[0]).includes('failed after')
-    );
-    expect(terminalError).toBeDefined();
+    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    const errorMsg = String((logger.error as jest.Mock).mock.calls[0]?.[0] ?? '');
+    // Should name the missing IDs
+    for (const wf of BUILTIN_WORKFLOWS.slice(1)) {
+      expect(errorMsg).toContain(wf.id);
+    }
+    expect(errorMsg).toContain('will not run autonomously');
   });
 });
 

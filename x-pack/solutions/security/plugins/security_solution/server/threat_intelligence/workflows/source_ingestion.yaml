@@ -95,22 +95,35 @@ steps:
         on-failure:
           continue: true
 
-      # Cheap pre-filter — skip the dedup-and-write block when the
-      # adapter ran cleanly but produced nothing (empty feed, unknown
-      # vendor handler, etc.). `total_fetched > 0` covers the happy
-      # path; the more permissive shape also tolerates the field being
-      # missing if an adapter ever forgets to set it.
+      # Cheap pre-filter — skip the dedup-and-write block when:
+      #   (a) total_fetched is absent/zero (null output sentinel or empty
+      #       feed), OR
+      #   (b) reports is absent/null even though total_fetched is truthy —
+      #       i.e. the adapter returned a malformed output shape.
+      # The `reports:*` KQL term fires only when the field exists and is
+      # non-null; `NOT reports:*` catches both "field missing" and "null".
+      # Empirically verified: cases A (null output), B (total_fetched=0),
+      # C (total_fetched=2, reports missing → NEW guard catches this),
+      # D (happy path, reports present → skip does NOT fire).
       - name: skip_empty_source
         type: loop.continue
-        if: "NOT steps.fetch_source.output.total_fetched > 0"
+        if: "NOT steps.fetch_source.output.total_fetched > 0 OR NOT steps.fetch_source.output.reports:*"
 
       # Per-item dedup-and-write loop. Iterates over the adapter's
       # normalized reports — each is a complete `.kibana-threat-reports`
       # document, so this branch only does the bookkeeping the data
       # stream's `op_type: create` semantics require.
+      #
+      # `| default: '[]'` is a belt-and-suspenders guard: if reports is
+      # missing or null AND skip_empty_source somehow did not fire, the
+      # Liquid filter returns the string "[]" which the engine parses as
+      # an empty array (zero iterations) rather than crashing with
+      # "Foreach expression must evaluate to an array … resolved to null".
+      # Empirically verified: missing/null reports → total=0, no crash;
+      # real array → iterates normally (filter is a no-op on non-nil).
       - name: emit_reports
         type: foreach
-        foreach: "{{ steps.fetch_source.output.reports }}"
+        foreach: "{{ steps.fetch_source.output.reports | default: '[]' }}"
         steps:
           # Pre-write dedup gate. The data stream target rejects
           # `op_type: create` with a caller-supplied `_id`, so we
