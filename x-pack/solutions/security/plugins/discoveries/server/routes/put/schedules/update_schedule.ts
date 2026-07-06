@@ -11,6 +11,7 @@ import {
   ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
 } from '@kbn/security-solution-features/actions';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   UpdateAttackDiscoveryScheduleRequestBody,
@@ -21,6 +22,8 @@ import {
   transformUpdatePropsFromApi,
 } from '@kbn/discoveries/impl/lib/schedules/transforms';
 import { reportScheduleAction } from '@kbn/discoveries/impl/lib/telemetry/report_schedule_action';
+import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
+import { assertAlertsIndexPatternInSpace } from '../../../lib/assert_alerts_index_pattern_in_space';
 import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 import { SCHEDULES_BY_ID_PATH } from '../../../lib/schedules/constants';
 import { createScheduleDataClient } from '../../../lib/schedules/create_schedule_data_client';
@@ -47,9 +50,11 @@ export const registerUpdateScheduleRoute = (
       security: {
         authz: {
           requiredPrivileges: [
-            ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
             ATTACK_DISCOVERY_API_ACTION_ALL,
+            ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
             ALERTS_API_READ,
+            WorkflowsManagementApiActions.read,
+            WorkflowsManagementApiActions.execute,
           ],
         },
       },
@@ -74,6 +79,15 @@ export const registerUpdateScheduleRoute = (
 
         try {
           const { pluginsStart } = await getStartServices();
+
+          const spaceId = getSpaceId({ request, spaces: pluginsStart.spaces?.spacesService });
+          // Reject a client-supplied alerts index that targets another space or
+          // a cross-space wildcard so the updated schedule stays space-correct.
+          assertAlertsIndexPatternInSpace({
+            alertsIndexPattern: request.body.params.alerts_index_pattern,
+            spaceId,
+          });
+
           const alertingContext = await (context as unknown as DiscoveriesRequestHandlerContext)
             .alerting;
 

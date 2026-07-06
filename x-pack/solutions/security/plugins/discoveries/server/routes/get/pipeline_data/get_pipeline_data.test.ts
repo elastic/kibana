@@ -97,6 +97,8 @@ describe('registerGetPipelineDataRoute', () => {
 
   const mockGetWorkflowExecution = jest.fn();
 
+  const mockGetCurrentUser = jest.fn();
+
   const mockWorkflowsManagementApi = {
     getWorkflow: jest.fn(),
     getWorkflowExecution: mockGetWorkflowExecution,
@@ -112,6 +114,11 @@ describe('registerGetPipelineDataRoute', () => {
           }),
         },
       },
+      security: {
+        authc: {
+          getCurrentUser: mockGetCurrentUser,
+        },
+      },
     },
     pluginsStart: {
       spaces: { spacesService: null },
@@ -123,6 +130,7 @@ describe('registerGetPipelineDataRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetSpaceId.mockReturnValue('default');
+    mockGetCurrentUser.mockReturnValue({ username: 'test-user' });
   });
 
   const registerAndGetHandler = (workflowsManagement: unknown = mockWorkflowsManagementApi) => {
@@ -286,6 +294,47 @@ describe('registerGetPipelineDataRoute', () => {
     expect(responseMock.notFound).toHaveBeenCalledWith({
       body: { message: 'Execution test-execution-uuid not found in event log' },
     });
+  });
+
+  it('scopes tracking retrieval to the requesting principal (object-level authz)', async () => {
+    const handler = registerAndGetHandler();
+
+    mockGetWorkflowExecutionsTracking.mockResolvedValue(null);
+
+    const responseMock = httpServerMock.createResponseFactory();
+    await handler(
+      {
+        core: Promise.resolve({
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        }),
+      },
+      createRequest(),
+      responseMock
+    );
+
+    expect(mockGetWorkflowExecutionsTracking).toHaveBeenCalledWith(
+      expect.objectContaining({ username: 'test-user' })
+    );
+  });
+
+  it('returns 403 when the requesting principal cannot be determined', async () => {
+    mockGetCurrentUser.mockReturnValue(null);
+
+    const handler = registerAndGetHandler();
+
+    const responseMock = httpServerMock.createResponseFactory();
+    await handler(
+      {
+        core: Promise.resolve({
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        }),
+      },
+      createRequest(),
+      responseMock
+    );
+
+    expect(responseMock.forbidden).toHaveBeenCalled();
+    expect(mockGetWorkflowExecutionsTracking).not.toHaveBeenCalled();
   });
 
   it('returns 503 when workflowsManagementApi is not available', async () => {
@@ -733,9 +782,39 @@ describe('registerGetPipelineDataRoute', () => {
         path: '/internal/attack_discovery/workflow/{workflow_id}/execution/{execution_id}',
         security: {
           authz: {
-            requiredPrivileges: ['securitySolution-attackDiscoveryAll', 'alerts-read'],
+            requiredPrivileges: [
+              'securitySolution-attackDiscoveryAll',
+              'alerts-read',
+              'workflowsManagement:read',
+            ],
           },
         },
+      })
+    );
+  });
+
+  it('registers the route with the workflows read privilege in requiredPrivileges', () => {
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.get as jest.Mock).mockReturnValue({
+      addVersion: addVersionMock,
+    });
+
+    registerGetPipelineDataRoute(router, logger, {
+      getEventLogIndex,
+      getStartServices,
+      workflowsManagementApi: mockWorkflowsManagementApi as unknown as Parameters<
+        typeof registerGetPipelineDataRoute
+      >[2]['workflowsManagementApi'],
+    });
+
+    expect(router.versioned.get).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining(['workflowsManagement:read']),
+          }),
+        }),
       })
     );
   });

@@ -18,7 +18,7 @@ import {
 } from '@kbn/discoveries/impl/attack_discovery/alert_fields';
 
 describe('transformToAlertDocuments', () => {
-  it('returns the max extracted kibana.alert.risk_score from anonymized alerts', () => {
+  it('returns the risk score of only the anonymized alert matching the discovery alert_ids', () => {
     const authenticatedUser = {
       profile_uid: 'profile-1',
       username: 'user-1',
@@ -27,8 +27,8 @@ describe('transformToAlertDocuments', () => {
     const validateRequestBody: PostValidateRequestBody = {
       alerts_context_count: 1,
       anonymized_alerts: [
-        { metadata: {}, page_content: 'kibana.alert.risk_score,13' },
-        { metadata: {}, page_content: 'kibana.alert.risk_score,42' },
+        { metadata: {}, page_content: '_id,a1\nkibana.alert.risk_score,10' },
+        { metadata: {}, page_content: '_id,a2\nkibana.alert.risk_score,90' },
       ],
       api_config: { action_type_id: '.gen', connector_id: 'connector-1' },
       attack_discoveries: [
@@ -55,10 +55,10 @@ describe('transformToAlertDocuments', () => {
       spaceId: 'default',
     });
 
-    expect(doc[ALERT_RISK_SCORE]).toBe(42);
+    expect(doc[ALERT_RISK_SCORE]).toBe(10);
   });
 
-  it('returns 0 risk score when anonymized alerts contain no risk score values', () => {
+  it('returns the sum of risk scores of all anonymized alerts matching the discovery alert_ids', () => {
     const authenticatedUser = {
       profile_uid: 'profile-1',
       username: 'user-1',
@@ -66,11 +66,15 @@ describe('transformToAlertDocuments', () => {
 
     const validateRequestBody: PostValidateRequestBody = {
       alerts_context_count: 1,
-      anonymized_alerts: [{ metadata: {}, page_content: 'no risk score here' }],
+      anonymized_alerts: [
+        { metadata: {}, page_content: '_id,a1\nkibana.alert.risk_score,10' },
+        { metadata: {}, page_content: '_id,a2\nkibana.alert.risk_score,20' },
+        { metadata: {}, page_content: '_id,a3\nkibana.alert.risk_score,90' },
+      ],
       api_config: { action_type_id: '.gen', connector_id: 'connector-1' },
       attack_discoveries: [
         {
-          alert_ids: ['a1'],
+          alert_ids: ['a1', 'a2'],
           details_markdown: 'details',
           entity_summary_markdown: 'entity',
           mitre_attack_tactics: ['Execution'],
@@ -92,10 +96,10 @@ describe('transformToAlertDocuments', () => {
       spaceId: 'default',
     });
 
-    expect(doc[ALERT_RISK_SCORE]).toBe(0);
+    expect(doc[ALERT_RISK_SCORE]).toBe(30);
   });
 
-  it('returns 0 risk score when all extracted risk scores are NaN', () => {
+  it('returns an undefined risk score when no anonymized alert matches the discovery alert_ids', () => {
     const authenticatedUser = {
       profile_uid: 'profile-1',
       username: 'user-1',
@@ -103,7 +107,7 @@ describe('transformToAlertDocuments', () => {
 
     const validateRequestBody: PostValidateRequestBody = {
       alerts_context_count: 1,
-      anonymized_alerts: [{ metadata: {}, page_content: 'kibana.alert.risk_score,42' }],
+      anonymized_alerts: [{ metadata: {}, page_content: '_id,a2\nkibana.alert.risk_score,42' }],
       api_config: { action_type_id: '.gen', connector_id: 'connector-1' },
       attack_discoveries: [
         {
@@ -122,8 +126,42 @@ describe('transformToAlertDocuments', () => {
       with_replacements: false,
     };
 
-    const originalParseInt = global.parseInt;
-    global.parseInt = (() => Number.NaN) as unknown as typeof parseInt;
+    const [doc] = transformToAlertDocuments({
+      authenticatedUser,
+      now: new Date('2025-12-15T18:39:20.762Z'),
+      validateRequestBody,
+      spaceId: 'default',
+    });
+
+    expect(doc[ALERT_RISK_SCORE]).toBeUndefined();
+  });
+
+  it('returns an undefined risk score when the matching anonymized alert has no risk score value', () => {
+    const authenticatedUser = {
+      profile_uid: 'profile-1',
+      username: 'user-1',
+    } as unknown as AuthenticatedUser;
+
+    const validateRequestBody: PostValidateRequestBody = {
+      alerts_context_count: 1,
+      anonymized_alerts: [{ metadata: {}, page_content: '_id,a1\nhost.name,test-host' }],
+      api_config: { action_type_id: '.gen', connector_id: 'connector-1' },
+      attack_discoveries: [
+        {
+          alert_ids: ['a1'],
+          details_markdown: 'details',
+          entity_summary_markdown: 'entity',
+          mitre_attack_tactics: ['Execution'],
+          summary_markdown: 'summary',
+          timestamp: '2025-12-15T18:39:20.762Z',
+          title: 'title',
+        },
+      ],
+      connector_name: 'Connector 1',
+      enable_field_rendering: true,
+      generation_uuid: 'generation-1',
+      with_replacements: false,
+    };
 
     const [doc] = transformToAlertDocuments({
       authenticatedUser,
@@ -132,9 +170,7 @@ describe('transformToAlertDocuments', () => {
       spaceId: 'default',
     });
 
-    global.parseInt = originalParseInt;
-
-    expect(doc[ALERT_RISK_SCORE]).toBe(0);
+    expect(doc[ALERT_RISK_SCORE]).toBeUndefined();
   });
 
   it('returns the replacements array when replacements are provided', () => {

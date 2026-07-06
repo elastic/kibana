@@ -40,10 +40,19 @@ export const getWorkflowExecutionsTracking = async ({
   esClient,
   eventLogIndex,
   executionId,
+  spaceId,
+  username,
 }: {
   esClient: ElasticsearchClient;
   eventLogIndex: string;
   executionId: string;
+  spaceId: string;
+  /**
+   * The requesting principal's username. Reads are bound to this user so a
+   * caller cannot read another user's execution by supplying/guessing its id
+   * within the same space (object-level authorization).
+   */
+  username: string;
 }): Promise<EventLogData | null> => {
   const searchResult = await esClient.search({
     index: eventLogIndex,
@@ -52,6 +61,16 @@ export const getWorkflowExecutionsTracking = async ({
         filter: [
           { term: { 'event.provider': ATTACK_DISCOVERY_EVENT_PROVIDER } },
           { term: { 'kibana.alert.rule.execution.uuid': executionId } },
+          // The event log index is shared across all spaces, so bound reads to
+          // the caller's space. Without this, a caller-supplied `execution_uuid`
+          // is a direct object reference that could surface another space's
+          // tracking (run ids, diagnostics, provided alerts).
+          { term: { 'kibana.space_ids': spaceId } },
+          // Bound reads to the requesting principal. Space scoping alone lets any
+          // authorized user in the space read another user's execution by id;
+          // matching the event author's `user.name` enforces object-level
+          // ownership so a cross-user id lookup finds no events (safe 404).
+          { term: { 'user.name': username } },
           { exists: { field: 'event.reference' } },
         ],
       },

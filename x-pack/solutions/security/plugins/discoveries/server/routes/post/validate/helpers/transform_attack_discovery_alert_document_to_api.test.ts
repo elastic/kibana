@@ -155,6 +155,34 @@ describe('transformAttackDiscoveryAlertDocumentToApi', () => {
     expect(result.connector_id).toBe('');
   });
 
+  it('returns an empty string for connector_id when api_config is entirely missing', () => {
+    const { ['kibana.alert.attack_discovery.api_config']: _ignored, ...docWithoutApiConfig } =
+      baseDoc;
+
+    const result = transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: docWithoutApiConfig,
+      enableFieldRendering: true,
+      id: 'id-1',
+      withReplacements: false,
+    });
+
+    expect(result.connector_id).toBe('');
+  });
+
+  it('returns undefined for replacements when replacements is a non-array object', () => {
+    const result = transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: {
+        ...baseDoc,
+        'kibana.alert.attack_discovery.replacements': { u1: 'v1' },
+      },
+      enableFieldRendering: true,
+      id: 'id-1',
+      withReplacements: false,
+    });
+
+    expect(result.replacements).toBeUndefined();
+  });
+
   it('returns an empty string for generation_uuid when it is missing', () => {
     const { [ALERT_RULE_EXECUTION_UUID]: _ignored, ...docWithoutExecutionUuid } = baseDoc;
 

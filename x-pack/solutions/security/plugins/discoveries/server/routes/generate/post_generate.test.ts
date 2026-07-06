@@ -158,7 +158,12 @@ describe('registerGenerateRoute', () => {
       path: '/internal/attack_discovery/_generate',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution-attackDiscoveryAll', 'alerts-read'],
+          requiredPrivileges: [
+            'securitySolution-attackDiscoveryAll',
+            'alerts-read',
+            'workflowsManagement:read',
+            'workflowsManagement:execute',
+          ],
         },
       },
       options: {
@@ -182,6 +187,28 @@ describe('registerGenerateRoute', () => {
         security: expect.objectContaining({
           authz: expect.objectContaining({
             requiredPrivileges: expect.arrayContaining(['securitySolution-attackDiscoveryAll']),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('registers the route with the workflows read + execute privileges in requiredPrivileges', () => {
+    registerGenerateRoute(mockRouter, mockLogger, {
+      analytics: mockAnalytics,
+      getEventLogIndex: mockGetEventLogIndex,
+      getEventLogger: mockGetEventLogger,
+      getStartServices: mockGetStartServices,
+    });
+
+    expect(mockRouter.versioned.post).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining([
+              'workflowsManagement:read',
+              'workflowsManagement:execute',
+            ]),
           }),
         }),
       })
@@ -368,7 +395,7 @@ describe('registerGenerateRoute', () => {
   });
 
   describe('workflow_config validation', () => {
-    it('returns bad request when neither default retrieval nor workflow IDs are provided', async () => {
+    it('returns bad request when no alert retrieval toggle is enabled', async () => {
       mockRequest.body = {
         alerts_index_pattern: '.alerts-security.alerts-default',
         api_config: {
@@ -378,7 +405,9 @@ describe('registerGenerateRoute', () => {
         type: 'attack_discovery',
         workflow_config: {
           alert_retrieval_workflow_ids: [],
-          alert_retrieval_mode: 'custom_only' as const,
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: false,
+          skill_enabled: false,
           validation_workflow_id: 'default',
         },
       };
@@ -416,7 +445,7 @@ describe('registerGenerateRoute', () => {
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: {
           message:
-            'At least one alert retrieval method must be specified: either set alert_retrieval_mode to a value other than "custom_only", or provide alert_retrieval_workflow_ids',
+            'At least one alert retrieval method must be enabled: set skill_enabled, default_retrieval_enabled, or alert_retrieval_workflows_enabled to true',
         },
       });
     });
@@ -483,7 +512,7 @@ describe('registerGenerateRoute', () => {
         type: 'attack_discovery',
         workflow_config: {
           alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2'],
-          alert_retrieval_mode: 'custom_only' as const,
+          alert_retrieval_workflows_enabled: true,
           validation_workflow_id: 'custom-validation',
         },
       };
@@ -860,8 +889,11 @@ describe('registerGenerateRoute', () => {
           executionUuid: 'test-execution-uuid',
           type: 'attack_discovery',
           workflowConfig: {
-            alert_retrieval_workflow_ids: [],
             alert_retrieval_mode: 'custom_query' as const,
+            alert_retrieval_workflow_ids: [],
+            alert_retrieval_workflows_enabled: false,
+            default_retrieval_enabled: false,
+            skill_enabled: true,
             validation_workflow_id: 'default',
           },
         })

@@ -118,12 +118,16 @@ describe('getExecutionTracking response transformation', () => {
       esClient: {} as never,
       eventLogIndex: '.kibana-event-log-test',
       executionId: 'test-execution-id',
+      spaceId: 'default',
+      username: 'test-user',
     });
 
     expect(mockGetWorkflowExecutionsTracking).toHaveBeenCalledWith({
       esClient: expect.anything(),
       eventLogIndex: '.kibana-event-log-test',
       executionId: 'test-execution-id',
+      spaceId: 'default',
+      username: 'test-user',
     });
     expect(result).toEqual(validTracking);
   });
@@ -135,9 +139,88 @@ describe('getExecutionTracking response transformation', () => {
       esClient: {} as never,
       eventLogIndex: '.kibana-event-log-test',
       executionId: 'nonexistent-execution-id',
+      spaceId: 'default',
+      username: 'test-user',
     });
 
     expect(result).toBeNull();
+  });
+});
+
+describe('registerGetExecutionTrackingRoute principal scoping', () => {
+  const mockGetCurrentUser = jest.fn();
+  const mockEsClient = { search: jest.fn() };
+
+  const getStartServices = jest.fn().mockResolvedValue({
+    coreStart: {
+      elasticsearch: {
+        client: {
+          asScoped: () => ({
+            asCurrentUser: mockEsClient,
+          }),
+        },
+      },
+      security: {
+        authc: {
+          getCurrentUser: mockGetCurrentUser,
+        },
+      },
+    },
+    pluginsStart: {
+      spaces: { spacesService: null },
+    },
+  });
+
+  const registerAndGetHandler = async () => {
+    const { registerGetExecutionTrackingRoute } = await import('./get_execution_tracking');
+
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerGetExecutionTrackingRoute(router, {} as never, {
+      getEventLogIndex: jest.fn().mockResolvedValue('.kibana-event-log-test'),
+      getStartServices,
+    });
+
+    return addVersionMock.mock.calls[0][1] as (
+      ctx: unknown,
+      req: unknown,
+      res: unknown
+    ) => Promise<unknown>;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (assertWorkflowsEnabled as jest.Mock).mockResolvedValue(null);
+    mockGetCurrentUser.mockReturnValue({ username: 'test-user' });
+  });
+
+  it('scopes tracking retrieval to the requesting principal (object-level authz)', async () => {
+    mockGetWorkflowExecutionsTracking.mockResolvedValue(null);
+
+    const handler = await registerAndGetHandler();
+    const request = httpServerMock.createKibanaRequest({ params: { execution_id: 'test-id' } });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler({}, request, response);
+
+    expect(mockGetWorkflowExecutionsTracking).toHaveBeenCalledWith(
+      expect.objectContaining({ username: 'test-user' })
+    );
+  });
+
+  it('returns 403 when the requesting principal cannot be determined', async () => {
+    mockGetCurrentUser.mockReturnValue(null);
+
+    const handler = await registerAndGetHandler();
+    const request = httpServerMock.createKibanaRequest({ params: { execution_id: 'test-id' } });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler({}, request, response);
+
+    expect(response.forbidden).toHaveBeenCalled();
+    expect(mockGetWorkflowExecutionsTracking).not.toHaveBeenCalled();
   });
 });
 
@@ -182,6 +265,29 @@ describe('registerGetExecutionTrackingRoute feature flag', () => {
         security: expect.objectContaining({
           authz: expect.objectContaining({
             requiredPrivileges: expect.arrayContaining(['alerts-read']),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('registers the route with the workflows read privilege in requiredPrivileges', async () => {
+    const { registerGetExecutionTrackingRoute } = await import('./get_execution_tracking');
+
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerGetExecutionTrackingRoute(router, {} as never, {
+      getEventLogIndex: jest.fn().mockResolvedValue('.kibana-event-log-test'),
+      getStartServices: jest.fn().mockResolvedValue({ coreStart: {}, pluginsStart: {} }),
+    });
+
+    expect(router.versioned.get).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining(['workflowsManagement:read']),
           }),
         }),
       })

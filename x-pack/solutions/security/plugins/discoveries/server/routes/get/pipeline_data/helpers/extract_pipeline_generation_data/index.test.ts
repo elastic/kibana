@@ -255,6 +255,27 @@ describe('extractPipelineGenerationData', () => {
     expect(result?.attack_discoveries).toEqual([]);
   });
 
+  it('returns an empty attack_discoveries array when attack_discoveries is not an array', () => {
+    const result = extractPipelineGenerationData({
+      generationExecution: {
+        ...baseExecution,
+        stepExecutions: [
+          {
+            output: {
+              attack_discoveries: { not: 'an-array' },
+              execution_uuid: 'test-uuid',
+              replacements: {},
+            },
+            stepId: 'generate',
+            stepType: 'security.attack-discovery.generate',
+          },
+        ],
+      } as unknown as WorkflowExecutionDto,
+    });
+
+    expect(result?.attack_discoveries).toEqual([]);
+  });
+
   it('returns empty execution_uuid when the output has no execution_uuid', () => {
     const result = extractPipelineGenerationData({
       generationExecution: {

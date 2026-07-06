@@ -5,33 +5,50 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { PostValidateRequestBody, PostValidateResponse } from '@kbn/discoveries-schemas';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  backfillAttackIdsBestEffort,
+  buildAlertIdToAttackIdsMap,
+} from '@kbn/attack-discovery-schedules-common';
 import { isEmpty } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
-import { getIndexedDocumentIds, hasNonIdempotentBulkIndexErrors } from './bulk_response_helpers';
+import {
+  getCreatedDocumentIds,
+  getVersionConflictDocumentIds,
+  hasNonIdempotentBulkErrors,
+} from './bulk_response_helpers';
+import { extractCreatedAttacks } from './extract_created_attacks';
 import { getIdsQuery } from './get_ids_query';
 import { transformToAlertDocuments } from './transform_to_alert_documents';
 import { transformSearchResponseToAlerts } from './transform_search_response_to_alerts';
 
 /**
  * Helper function to validate attack discoveries by persisting them as alerts.
- * This replicates the logic from elastic_assistant's dataClient.createAttackDiscoveryAlerts()
- * but is implemented as a standalone function that can be used by the validation workflow step.
+ *
+ * Discoveries are written with bulk `create` semantics, keyed by a hash of the
+ * discovery's alert-id set (see `generateAttackDiscoveryAlertHash`). Because
+ * `create` fails with a version conflict when a document already exists,
+ * pre-existing discoveries are never overwritten: they are dropped from the
+ * write (hard de-duplication) and excluded from the returned set. Only the
+ * genuinely-new discoveries created this run are queried back and returned, and
+ * `duplicates_dropped_count` reflects the number actually dropped.
  */
 export const validateAttackDiscoveries = async ({
   adhocAttackDiscoveryDataClient,
   authenticatedUser,
+  esClient,
   logger,
   spaceId,
   validateRequestBody,
 }: {
   adhocAttackDiscoveryDataClient: IRuleDataClient;
   authenticatedUser: AuthenticatedUser;
+  esClient: ElasticsearchClient;
   logger: Logger;
   spaceId: string;
   validateRequestBody: PostValidateRequestBody;
@@ -65,12 +82,6 @@ export const validateAttackDiscoveries = async ({
     (alertDocument) => (alertDocument[ALERT_UUID] as string) ?? '(uuid will be generated)'
   );
 
-  const desiredDocumentIds = Array.from(
-    new Set(
-      alertDocuments.flatMap((d) => (typeof d[ALERT_UUID] === 'string' ? [d[ALERT_UUID]] : []))
-    )
-  );
-
   try {
     logger.debug(
       () =>
@@ -79,87 +90,72 @@ export const validateAttackDiscoveries = async ({
         )}`
     );
 
-    // Step 2: Count pre-existing documents (for duplicates_dropped_count reporting).
-    const existingIds = new Set<string>();
-    if (!isEmpty(desiredDocumentIds)) {
-      const existingResponse = await readDataClient.search({
-        size: desiredDocumentIds.length,
-        ...getIdsQuery(desiredDocumentIds),
-      });
-
-      existingResponse.hits.hits.forEach((hit) => {
-        if (hit._id != null) {
-          existingIds.add(hit._id);
-        }
-      });
-    }
-
-    const duplicatesDroppedCount = existingIds.size;
-
-    // Step 3: Upsert all documents using index semantics so that custom validation
-    // workflow transformations (e.g. field enrichment via data.map) always overwrite
-    // previously-persisted discoveries with the latest transformed content.
-    let bulkResponse: BulkResponse | undefined;
-    if (!isEmpty(alertDocuments)) {
-      const body = alertDocuments.flatMap((alertDocument) => [
-        {
-          index: {
-            _id: (alertDocument[ALERT_UUID] as string) ?? uuidv4(),
-          },
+    // Step 2: Bulk CREATE every candidate. `create` fails with a version
+    // conflict (409) for any `_id` that already exists, so pre-existing
+    // discoveries are never overwritten — they are dropped (hard de-duplication).
+    const body = alertDocuments.flatMap((alertDocument) => [
+      {
+        create: {
+          _id: (alertDocument[ALERT_UUID] as string) ?? uuidv4(),
         },
-        alertDocument,
-      ]);
+      },
+      alertDocument,
+    ]);
 
-      const resp = await writeDataClient.bulk({
-        body,
-        refresh: true,
-      });
+    const resp = await writeDataClient.bulk({
+      body,
+      refresh: true,
+    });
 
-      bulkResponse = resp?.body;
+    const bulkResponse: BulkResponse | undefined = resp?.body;
 
-      if (!bulkResponse) {
-        logger.info(`Rule data client returned undefined as a result of the bulk operation.`);
-        return {
-          duplicates_dropped_count: duplicatesDroppedCount,
-          validated_discoveries: [],
-        };
-      }
+    if (!bulkResponse) {
+      logger.info(`Rule data client returned undefined as a result of the bulk operation.`);
+      return {
+        duplicates_dropped_count: 0,
+        validated_discoveries: [],
+      };
     }
 
-    // Step 4: Check for bulk errors
-    if (bulkResponse && bulkResponse.errors && hasNonIdempotentBulkIndexErrors(bulkResponse)) {
+    // Step 3: Throw only on NON-idempotent errors. Version conflicts are the
+    // expected signal that a discovery already exists and was dropped.
+    if (bulkResponse.errors && hasNonIdempotentBulkErrors(bulkResponse)) {
       const errorDetails = bulkResponse.items.flatMap((item) => {
-        const error = item.index?.error;
+        const error = item.create?.error;
 
-        if (error == null) {
+        if (error == null || error.type === 'version_conflict_engine_exception') {
           return [];
         }
 
-        const id = item.index?._id != null ? ` id: ${item.index._id}` : '';
-        const details = `\nError bulk indexing attack discovery alert${id} ${error.reason}`;
+        const id = item.create?._id != null ? ` id: ${item.create._id}` : '';
+        const details = `\nError bulk creating attack discovery alert${id} ${error.reason}`;
         return [details];
       });
 
       const allErrorDetails = errorDetails.join(', ');
-      throw new Error(`Failed to bulk index Attack discovery alerts ${allErrorDetails}`);
+      throw new Error(`Failed to bulk create Attack discovery alerts ${allErrorDetails}`);
     }
 
-    const indexedDocumentIds = bulkResponse ? getIndexedDocumentIds(bulkResponse) : [];
-
-    const idsToFetch = Array.from(new Set([...existingIds, ...indexedDocumentIds]));
+    // The documents actually written this run (result === 'created'), and the
+    // count dropped because they already existed (version conflicts). Pre-existing
+    // discoveries are never overwritten, so the dropped count reflects discoveries
+    // actually skipped from writes.
+    const createdDocumentIds = getCreatedDocumentIds(bulkResponse);
+    const duplicatesDroppedCount = getVersionConflictDocumentIds(bulkResponse).length;
 
     logger.debug(
       () =>
-        `Returning Attack discovery alerts from index ${attackDiscoveryAlertsIndex} with document ids: ${idsToFetch.join(
+        `Returning newly-created Attack discovery alerts from index ${attackDiscoveryAlertsIndex} with document ids: ${createdDocumentIds.join(
           ', '
         )}`
     );
 
-    // Step 5: Query back the existing + created documents
-    if (isEmpty(idsToFetch)) {
+    // Step 4: Query back ONLY the net-new documents. Pre-existing duplicates are
+    // never re-fetched or surfaced.
+    if (isEmpty(createdDocumentIds)) {
       logger.debug(
         () =>
-          `No Attack discovery alerts to query in index ${attackDiscoveryAlertsIndex} (validateAttackDiscoveries)`
+          `No new Attack discovery alerts to query in index ${attackDiscoveryAlertsIndex} (validateAttackDiscoveries)`
       );
       return {
         duplicates_dropped_count: duplicatesDroppedCount,
@@ -167,12 +163,25 @@ export const validateAttackDiscoveries = async ({
       };
     }
 
-    const response = await readDataClient.search({
-      size: idsToFetch.length,
-      ...getIdsQuery(idsToFetch),
+    // Back-fill the underlying detection alerts with the ids of the attacks
+    // created this run, so the Attacks page can group them under the ad-hoc
+    // attack (mirrors the scheduled and legacy persistence paths). Best-effort:
+    // a back-fill failure must not fail an otherwise-successful generation.
+    await backfillAttackIdsBestEffort({
+      alertIdToAttackIdsMap: buildAlertIdToAttackIdsMap({
+        attacks: extractCreatedAttacks({ alertDocuments, createdDocumentIds }),
+      }),
+      esClient,
+      logger,
+      spaceId,
     });
 
-    // Step 6: Transform results back to API format
+    const response = await readDataClient.search({
+      size: createdDocumentIds.length,
+      ...getIdsQuery(createdDocumentIds),
+    });
+
+    // Step 5: Transform results back to API format
     const { enableFieldRendering, withReplacements } = {
       enableFieldRendering: validateRequestBody.enable_field_rendering ?? true,
       withReplacements: validateRequestBody.with_replacements ?? false,

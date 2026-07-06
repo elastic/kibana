@@ -82,6 +82,8 @@ describe('registerFindSchedulesRoute', () => {
 
     await handler(context, request, response);
 
+    // The `page` query param is 0-based and passed through unchanged to the
+    // data client's 0-based `findSchedules`.
     expect(mockFindSchedules).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
@@ -94,6 +96,36 @@ describe('registerFindSchedulesRoute', () => {
         per_page: 10,
         total: 1,
       },
+    });
+  });
+
+  it('passes the 0-based first page (0) through without producing a negative page', async () => {
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerFindSchedulesRoute(router, logger, { getStartServices });
+
+    const handler = addVersionMock.mock.calls[0][1];
+    mockFindSchedules.mockResolvedValue({ data: [], total: 0 });
+
+    const request = httpServerMock.createKibanaRequest({
+      query: { page: 0, per_page: 10, sort_field: 'name', sort_direction: 'asc' },
+    });
+    const response = httpServerMock.createResponseFactory();
+    const context = {
+      alerting: Promise.resolve({ getRulesClient: jest.fn() }),
+      core: Promise.resolve({
+        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+      }),
+    };
+
+    await handler(context, request, response);
+
+    expect(mockFindSchedules).toHaveBeenCalledWith({
+      page: 0,
+      perPage: 10,
+      sort: { sortDirection: 'asc', sortField: 'name' },
     });
   });
 

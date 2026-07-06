@@ -69,6 +69,11 @@ export const registerFindSchedulesRoute = (
           });
 
           const findOpts = {
+            // The `page` query param is 0-based, matching both the UI (EUI's
+            // 0-based `pageIndex`) and the schedule data client's `findSchedules`
+            // (which adds 1 before delegating to the 1-based `rulesClient`), so it
+            // is passed through unchanged. Subtracting 1 here would send page 0 as
+            // -1, producing a negative Elasticsearch `from` and a 400 error.
             page: request.query.page,
             perPage: request.query.per_page,
             sort: {

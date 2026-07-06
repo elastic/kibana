@@ -132,7 +132,15 @@ export const generateAttackDiscoveryAlertHash = ({
 };
 
 /**
- * Calculate risk score based on the max risk score from anonymized alerts
+ * Calculate the risk score for a single attack discovery as the sum of the
+ * `kibana.alert.risk_score` values of the anonymized alerts that belong to it.
+ *
+ * Each anonymized alert's `pageContent` is a CSV-formatted string that may
+ * contain an `_id` line and a `kibana.alert.risk_score` line. Only the alerts
+ * whose `_id` is present in `alertIds` (the discovery's alerts) contribute to
+ * the score, so per-discovery scores are not conflated across discoveries.
+ *
+ * Returns `undefined` when no matching alert has a positive risk score.
  */
 const getAlertRiskScore = ({
   alertIds,
@@ -140,15 +148,36 @@ const getAlertRiskScore = ({
 }: {
   alertIds: string[];
   anonymizedAlerts: Array<{ pageContent: string; metadata: unknown }>;
-}): number => {
-  const riskScores = anonymizedAlerts
-    .map((alert) => {
-      const match = alert.pageContent.match(/kibana\.alert\.risk_score,(\d+)/);
-      return match ? parseInt(match[1], 10) : 0;
-    })
-    .filter((score) => !isNaN(score));
+}): number | undefined => {
+  const idRegex = /^\w*_id,\s*(.*)\w*\n?/m; // extracts the alert ID
+  const riskScoreRegex = /^\w*kibana\.alert\.risk_score,\s*(\d+)\w*\n?/m; // extracts the risk score
 
-  return riskScores.length > 0 ? Math.max(...riskScores) : 0;
+  const alertIdRiskScoreMap = anonymizedAlerts.reduce<Record<string, number>>((acc, alert) => {
+    const idMatch = idRegex.exec(alert.pageContent);
+    const riskScoreMatch = riskScoreRegex.exec(alert.pageContent);
+
+    if (idMatch != null && riskScoreMatch != null) {
+      const id = idMatch[1];
+      const riskScore = parseFloat(riskScoreMatch[1]);
+
+      return id != null && !isNaN(riskScore)
+        ? {
+            ...acc,
+            [id]: riskScore,
+          }
+        : acc;
+    }
+
+    return acc;
+  }, {});
+
+  const riskScore = alertIds.reduce((acc, alertId) => {
+    const score = alertIdRiskScoreMap[alertId];
+
+    return score != null ? acc + score : acc;
+  }, 0);
+
+  return riskScore > 0 ? riskScore : undefined;
 };
 
 /**

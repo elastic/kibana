@@ -9,6 +9,7 @@ import type { AnalyticsServiceSetup, CoreStart, IRouter, Logger } from '@kbn/cor
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import type { SourceMetadata } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
 import { PostGenerateRequestBody } from '@kbn/discoveries-schemas';
 import type { PostGenerateResponse } from '@kbn/discoveries-schemas';
@@ -24,6 +25,7 @@ import {
 import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 import type { DiscoveriesPluginStartDeps } from '../../types';
 import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../constants';
+import { assertAlertsIndexPatternInSpace } from '../../lib/assert_alerts_index_pattern_in_space';
 import { assertWorkflowsEnabled } from '../../lib/assert_workflows_enabled';
 import { checkManagedWorkflowIntegrity } from '../../managed_workflows/check_managed_workflow_integrity';
 import {
@@ -60,7 +62,12 @@ export const registerGenerateRoute = (
       path: ROUTE_PATH,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
+          requiredPrivileges: [
+            ATTACK_DISCOVERY_API_ACTION_ALL,
+            ALERTS_API_READ,
+            WorkflowsManagementApiActions.read,
+            WorkflowsManagementApiActions.execute,
+          ],
         },
       },
       options: {
@@ -131,6 +138,10 @@ export const registerGenerateRoute = (
           const { pluginsStart } = await getStartServices();
           const { authz } = pluginsStart.security;
           const spaceId = getSpaceId({ request, spaces: pluginsStart.spaces?.spacesService });
+
+          // Reject a client-supplied alerts index that targets another space or
+          // a cross-space wildcard before dispatching the pipeline.
+          assertAlertsIndexPatternInSpace({ alertsIndexPattern, spaceId });
 
           // This route-level authorization check is intentionally REDUNDANT for
           // security: the authoritative guard lives inside executeGenerationWorkflow

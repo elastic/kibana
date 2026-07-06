@@ -103,13 +103,11 @@ export const transformAttackDiscoveryAlertDocumentToApi = ({
       })
     ) as T;
 
-  const apiConfig = doc[ALERT_ATTACK_DISCOVERY_API_CONFIG] as Record<string, unknown>;
-  const replacements = doc[ALERT_ATTACK_DISCOVERY_REPLACEMENTS] as
-    | Array<{
-        uuid: string;
-        value: string;
-      }>
-    | undefined;
+  const apiConfig = (doc[ALERT_ATTACK_DISCOVERY_API_CONFIG] as Record<string, unknown>) ?? {};
+  const replacementsRaw = doc[ALERT_ATTACK_DISCOVERY_REPLACEMENTS];
+  const replacements = Array.isArray(replacementsRaw)
+    ? (replacementsRaw as Array<{ uuid: string; value: string }>)
+    : undefined;
 
   return {
     alert_ids: (doc[ALERT_ATTACK_DISCOVERY_ALERT_IDS] as string[]) ?? [],

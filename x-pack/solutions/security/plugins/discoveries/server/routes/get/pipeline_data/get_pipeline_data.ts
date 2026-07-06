@@ -10,6 +10,7 @@ import type { CoreStart, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import type { AttackDiscoveryApiAlert } from '@kbn/discoveries-schemas';
 import type {
   DiagnosticsContext,
@@ -36,15 +37,15 @@ const ROUTE_PATH = '/internal/attack_discovery/workflow/{workflow_id}/execution/
 
 /** Zod schema for validating path parameters */
 export const GetPipelineDataRequestParams = z.object({
-  execution_id: z.string(),
-  workflow_id: z.string(),
+  execution_id: z.string().max(1024),
+  workflow_id: z.string().max(1024),
 });
 
 /** Zod schema for validating optional query parameters */
 export const GetPipelineDataRequestQuery = z.object({
   /** Fallback generation workflow run ID — used by the client when the event
    *  log hasn't been indexed yet (provided mode / early polling). */
-  generation_workflow_run_id: z.string().optional(),
+  generation_workflow_run_id: z.string().max(1024).optional(),
 });
 
 /** snake_case response shape for a single workflow execution tracking entry */
@@ -132,7 +133,11 @@ export const registerGetPipelineDataRoute = (
       path: ROUTE_PATH,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
+          requiredPrivileges: [
+            ATTACK_DISCOVERY_API_ACTION_ALL,
+            ALERTS_API_READ,
+            WorkflowsManagementApiActions.read,
+          ],
         },
       },
     })
@@ -160,6 +165,17 @@ export const registerGetPipelineDataRoute = (
           const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
           const eventLogIndex = await getEventLogIndex();
 
+          // Object-level authorization: reads are bound to the requesting
+          // principal so a caller cannot read another user's execution by id
+          // within the same space. Without a principal we cannot enforce
+          // ownership, so reject.
+          const username = coreStart.security.authc.getCurrentUser(request)?.username;
+          if (username == null) {
+            return response.forbidden({
+              body: { message: 'Unable to determine the requesting user' },
+            });
+          }
+
           const spaceId = getSpaceId({
             request,
             spaces: pluginsStart.spaces?.spacesService,
@@ -170,6 +186,8 @@ export const registerGetPipelineDataRoute = (
             esClient,
             eventLogIndex,
             executionId,
+            spaceId,
+            username,
           });
 
           if (tracking == null) {

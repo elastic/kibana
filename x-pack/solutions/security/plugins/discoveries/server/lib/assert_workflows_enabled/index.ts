@@ -6,9 +6,9 @@
  */
 
 import type { KibanaResponseFactory, RequestHandlerContext } from '@kbn/core/server';
+import { ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 
-export const ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG =
-  'securitySolution.attackDiscoveryWorkflowsEnabled' as const;
+export { ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG };
 
 /**
  * Checks the `attackDiscoveryWorkflowsEnabled` feature flag via the request

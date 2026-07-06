@@ -18,6 +18,16 @@ import { PersistDiscoveriesStepTypeId } from '../../../../../../../../common/ste
  * any `duplicates_dropped_count` recorded in the persist step output so
  * the returned length reflects the number of truly new discoveries.
  *
+ * NOTE: This is a count-accurate, best-effort fallback. Duplicates are
+ * dropped by hard de-duplication in the persist step (bulk `create` version
+ * conflicts keyed by discovery hash), so the dropped discoveries are NOT
+ * guaranteed to be the trailing elements of `validated_discoveries`, and the
+ * persist step only records the dropped *count* (not which ids were dropped)
+ * on this path. The exact non-duplicate subset is therefore unrecoverable
+ * here — only the count is. Current executions never hit this fallback: they
+ * return the actually-persisted, deduplicated set via `persisted_discoveries`
+ * (see `getPersistedOutputDiscoveries`) or the scheduled input path.
+ *
  * @returns The validated discoveries sliced to the non-duplicate count, or
  * `null` if the validation step is absent or its output lacks a valid
  * `validated_discoveries` array.

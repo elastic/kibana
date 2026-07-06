@@ -31,6 +31,16 @@ const mockDataClient = { getSchedule: mockGetSchedule, updateSchedule: mockUpdat
 
 const logger = { debug: jest.fn(), error: jest.fn(), info: jest.fn() } as unknown as Logger;
 
+const validUpdateBody = {
+  name: 'Test',
+  params: {
+    alerts_index_pattern: '.alerts-security.alerts-default',
+    api_config: { connector_id: 'c1', action_type_id: '.gen-ai' },
+    size: 100,
+  },
+  schedule: { interval: '10m' },
+};
+
 const getStartServices = jest.fn().mockResolvedValue({
   coreStart: {},
   pluginsStart: { actions: { getActionsClientWithRequest: jest.fn() } },
@@ -77,7 +87,7 @@ describe('registerUpdateScheduleRoute', () => {
     const handler = addVersionMock.mock.calls[0][1];
 
     const request = httpServerMock.createKibanaRequest({
-      body: {},
+      body: validUpdateBody,
       params: { id: 's1' },
     });
     const response = httpServerMock.createResponseFactory();
@@ -104,7 +114,7 @@ describe('registerUpdateScheduleRoute', () => {
     const handler = addVersionMock.mock.calls[0][1];
 
     const request = httpServerMock.createKibanaRequest({
-      body: {},
+      body: validUpdateBody,
       params: { id: 's1' },
     });
     const response = httpServerMock.createResponseFactory();
@@ -142,7 +152,7 @@ describe('registerUpdateScheduleRoute', () => {
     const handler = addVersionMock.mock.calls[0][1];
 
     const request = httpServerMock.createKibanaRequest({
-      body: {},
+      body: validUpdateBody,
       params: { id: 's1' },
     });
     const response = httpServerMock.createResponseFactory();
@@ -173,7 +183,7 @@ describe('registerUpdateScheduleRoute', () => {
     const handler = addVersionMock.mock.calls[0][1];
 
     const request = httpServerMock.createKibanaRequest({
-      body: {},
+      body: validUpdateBody,
       params: { id: 's1' },
     });
     const response = httpServerMock.createResponseFactory();
@@ -207,7 +217,7 @@ describe('registerUpdateScheduleRoute', () => {
     const handler = addVersionMock.mock.calls[0][1];
 
     const request = httpServerMock.createKibanaRequest({
-      body: {},
+      body: validUpdateBody,
       params: { id: 's1' },
     });
     const response = httpServerMock.createResponseFactory();
@@ -303,6 +313,56 @@ describe('registerUpdateScheduleRoute', () => {
     );
   });
 
+  it('registers the route with the workflows read + execute privileges in requiredPrivileges', () => {
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
+
+    expect(router.versioned.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining([
+              'workflowsManagement:read',
+              'workflowsManagement:execute',
+            ]),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('returns a 400 error and does not update when the alerts index targets another space', async () => {
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
+
+    const handler = addVersionMock.mock.calls[0][1];
+
+    const request = httpServerMock.createKibanaRequest({
+      body: {
+        ...validUpdateBody,
+        params: { ...validUpdateBody.params, alerts_index_pattern: '.alerts-security.alerts-*' },
+      },
+      params: { id: 's1' },
+    });
+    const response = httpServerMock.createResponseFactory();
+    const context = {
+      alerting: Promise.resolve({ getRulesClient: jest.fn() }),
+      core: Promise.resolve({
+        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+      }),
+    };
+
+    await handler(context, request, response);
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 400 }));
+  });
+
   it('returns a custom error when the update fails', async () => {
     const router = httpServiceMock.createRouter();
     const addVersionMock = jest.fn();
@@ -314,7 +374,7 @@ describe('registerUpdateScheduleRoute', () => {
     mockUpdateSchedule.mockRejectedValue(new Error('update failed'));
 
     const request = httpServerMock.createKibanaRequest({
-      body: {},
+      body: validUpdateBody,
       params: { id: 's1' },
     });
     const response = httpServerMock.createResponseFactory();

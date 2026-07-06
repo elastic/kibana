@@ -26,6 +26,9 @@ export type ValidateRequestResult = ValidateRequestSuccess | ValidateRequestFail
 const getDefaultWorkflowConfig = (): WorkflowConfig => ({
   alert_retrieval_mode: 'custom_query',
   alert_retrieval_workflow_ids: [],
+  alert_retrieval_workflows_enabled: false,
+  default_retrieval_enabled: false,
+  skill_enabled: true,
   validation_workflow_id: 'default',
 });
 
@@ -64,19 +67,36 @@ export const validateRequest = ({
       ? {
           alert_retrieval_mode: parsedWorkflowConfig.alert_retrieval_mode,
           alert_retrieval_workflow_ids: parsedWorkflowConfig.alert_retrieval_workflow_ids,
+          alert_retrieval_workflows_enabled: parsedWorkflowConfig.alert_retrieval_workflows_enabled,
+          default_retrieval_enabled: parsedWorkflowConfig.default_retrieval_enabled,
           esql_query: parsedWorkflowConfig.esql_query,
+          skill_enabled: parsedWorkflowConfig.skill_enabled,
           validation_workflow_id: parsedWorkflowConfig.validation_workflow_id,
         }
       : getDefaultWorkflowConfig();
 
   if (
-    workflowConfig.alert_retrieval_mode === 'custom_only' &&
+    workflowConfig.skill_enabled !== true &&
+    workflowConfig.default_retrieval_enabled !== true &&
+    workflowConfig.alert_retrieval_workflows_enabled !== true
+  ) {
+    return {
+      body: {
+        message:
+          'At least one alert retrieval method must be enabled: set skill_enabled, default_retrieval_enabled, or alert_retrieval_workflows_enabled to true',
+      },
+      ok: false,
+    };
+  }
+
+  if (
+    workflowConfig.alert_retrieval_workflows_enabled === true &&
     workflowConfig.alert_retrieval_workflow_ids.length === 0
   ) {
     return {
       body: {
         message:
-          'At least one alert retrieval method must be specified: either set alert_retrieval_mode to a value other than "custom_only", or provide alert_retrieval_workflow_ids',
+          'alert_retrieval_workflow_ids must include at least one workflow ID when alert_retrieval_workflows_enabled is true',
       },
       ok: false,
     };

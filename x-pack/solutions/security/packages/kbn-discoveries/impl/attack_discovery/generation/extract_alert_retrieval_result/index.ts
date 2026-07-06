@@ -32,7 +32,7 @@ const parseApiConfig = ({
     }
   }
 
-  if (apiConfigOutput && typeof apiConfigOutput === 'object') {
+  if (apiConfigOutput && typeof apiConfigOutput === 'object' && !Array.isArray(apiConfigOutput)) {
     return apiConfigOutput as ParsedApiConfig;
   }
 

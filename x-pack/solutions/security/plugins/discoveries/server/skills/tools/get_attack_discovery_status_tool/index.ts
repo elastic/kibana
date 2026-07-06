@@ -11,7 +11,7 @@
 // at runtime when the feature flag is OFF.
 
 import { ToolType } from '@kbn/agent-builder-common';
-import type { SkillBoundedTool } from '@kbn/agent-builder-server';
+import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
 
 export const GET_ATTACK_DISCOVERY_STATUS_TOOL_ID = 'security.attack-discovery.get_status' as const;
 

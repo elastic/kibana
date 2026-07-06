@@ -21,6 +21,8 @@ const esClient = {
 
 const eventLogIndex = '.kibana-event-log-test';
 const executionId = 'test-execution-uuid-123';
+const spaceId = 'default';
+const username = 'test-user';
 
 const validTracking: WorkflowExecutionsTracking = {
   alertRetrieval: [
@@ -64,6 +66,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result).toEqual(validTracking);
@@ -81,6 +85,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result).toBeNull();
@@ -106,6 +112,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result).toBeNull();
@@ -131,6 +139,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result).toBeNull();
@@ -148,6 +158,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(mockSearch).toHaveBeenCalledWith(
@@ -195,6 +207,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result).toEqual(trackingWithNullAlertRetrieval);
@@ -241,6 +255,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result).toEqual(trackingWithMultipleRetrieval);
@@ -276,6 +292,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result).not.toBeNull();
@@ -324,6 +342,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result?.alertRetrieval).toHaveLength(1);
@@ -351,6 +371,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result).not.toBeNull();
@@ -406,6 +428,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result).not.toBeNull();
@@ -472,6 +496,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result?.diagnosticsContext).toEqual(newerDiagnosticsContext);
@@ -504,6 +530,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result).not.toBeNull();
@@ -549,6 +577,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result?.providedAlerts).toEqual(newerProvidedAlerts);
@@ -574,6 +604,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result).not.toBeNull();
@@ -600,6 +632,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result).not.toBeNull();
@@ -621,6 +655,8 @@ describe('getWorkflowExecutionsTracking', () => {
       esClient,
       eventLogIndex,
       executionId,
+      spaceId,
+      username,
     });
 
     expect(result).toBeNull();

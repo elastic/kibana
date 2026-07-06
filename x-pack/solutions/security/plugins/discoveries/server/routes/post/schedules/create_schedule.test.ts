@@ -83,7 +83,7 @@ describe('registerCreateScheduleRoute', () => {
       body: {
         name: 'Test',
         params: {
-          alerts_index_pattern: '.alerts-*',
+          alerts_index_pattern: '.alerts-security.alerts-default',
           api_config: { connector_id: 'c1', action_type_id: '.gen-ai' },
           size: 100,
         },
@@ -127,6 +127,72 @@ describe('registerCreateScheduleRoute', () => {
 
     expect(result).toEqual(mockNotFoundResponse);
     expect(response.ok).not.toHaveBeenCalled();
+  });
+
+  it('returns a 400 error when the alerts index targets another space', async () => {
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerCreateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
+
+    const handler = addVersionMock.mock.calls[0][1];
+
+    const request = httpServerMock.createKibanaRequest({
+      body: {
+        name: 'Test',
+        params: {
+          alerts_index_pattern: '.alerts-security.alerts-other-space',
+          api_config: { connector_id: 'c1', action_type_id: '.gen-ai' },
+          size: 100,
+        },
+        schedule: { interval: '10m' },
+      },
+    });
+    const response = httpServerMock.createResponseFactory();
+    const context = {
+      alerting: Promise.resolve({ getRulesClient: jest.fn() }),
+      core: Promise.resolve({
+        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+      }),
+    };
+
+    await handler(context, request, response);
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 400 }));
+  });
+
+  it('does not create a schedule when the alerts index targets another space', async () => {
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerCreateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
+
+    const handler = addVersionMock.mock.calls[0][1];
+
+    const request = httpServerMock.createKibanaRequest({
+      body: {
+        name: 'Test',
+        params: {
+          alerts_index_pattern: '.alerts-security.alerts-*',
+          api_config: { connector_id: 'c1', action_type_id: '.gen-ai' },
+          size: 100,
+        },
+        schedule: { interval: '10m' },
+      },
+    });
+    const response = httpServerMock.createResponseFactory();
+    const context = {
+      alerting: Promise.resolve({ getRulesClient: jest.fn() }),
+      core: Promise.resolve({
+        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+      }),
+    };
+
+    await handler(context, request, response);
+
+    expect(mockCreateSchedule).not.toHaveBeenCalled();
   });
 
   it('registers the route with ATTACK_DISCOVERY_API_ACTION_ALL in requiredPrivileges', () => {
@@ -185,6 +251,27 @@ describe('registerCreateScheduleRoute', () => {
     );
   });
 
+  it('registers the route with the workflows read + execute privileges in requiredPrivileges', () => {
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerCreateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
+
+    expect(router.versioned.post).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining([
+              'workflowsManagement:read',
+              'workflowsManagement:execute',
+            ]),
+          }),
+        }),
+      })
+    );
+  });
+
   it('returns a custom error when the data client throws', async () => {
     const router = httpServiceMock.createRouter();
     const addVersionMock = jest.fn();
@@ -195,7 +282,17 @@ describe('registerCreateScheduleRoute', () => {
     const handler = addVersionMock.mock.calls[0][1];
     mockCreateSchedule.mockRejectedValue(new Error('boom'));
 
-    const request = httpServerMock.createKibanaRequest({ body: {} });
+    const request = httpServerMock.createKibanaRequest({
+      body: {
+        name: 'Test',
+        params: {
+          alerts_index_pattern: '.alerts-security.alerts-default',
+          api_config: { connector_id: 'c1', action_type_id: '.gen-ai' },
+          size: 100,
+        },
+        schedule: { interval: '10m' },
+      },
+    });
     const response = httpServerMock.createResponseFactory();
     const context = {
       alerting: Promise.resolve({ getRulesClient: jest.fn() }),

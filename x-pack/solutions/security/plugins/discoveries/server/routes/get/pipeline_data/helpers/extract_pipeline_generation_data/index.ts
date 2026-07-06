@@ -112,7 +112,7 @@ export const extractPipelineGenerationData = ({
   const output = generateStep.output as GenerateStepRawOutput;
 
   return {
-    attack_discoveries: output.attack_discoveries ?? [],
+    attack_discoveries: Array.isArray(output.attack_discoveries) ? output.attack_discoveries : [],
     execution_uuid: output.execution_uuid ?? '',
     replacements: parseReplacements(output.replacements),
   };

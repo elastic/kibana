@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { PostValidateRequestBody } from '@kbn/discoveries-schemas';
+import { backfillAttackIdsBestEffort } from '@kbn/attack-discovery-schedules-common';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '@kbn/discoveries/impl/attack_discovery/alert_fields';
 import { validateAttackDiscoveries } from './validate_attack_discoveries';
 import { transformSearchResponseToAlerts } from './transform_search_response_to_alerts';
 import { transformToAlertDocuments } from './transform_to_alert_documents';
@@ -24,6 +27,11 @@ jest.mock('./transform_to_alert_documents', () => ({
   transformToAlertDocuments: jest.fn(),
 }));
 
+jest.mock('@kbn/attack-discovery-schedules-common', () => ({
+  ...jest.requireActual('@kbn/attack-discovery-schedules-common'),
+  backfillAttackIdsBestEffort: jest.fn(),
+}));
+
 describe('validateAttackDiscoveries', () => {
   const authenticatedUser = {
     profile_uid: 'profile-1',
@@ -35,6 +43,8 @@ describe('validateAttackDiscoveries', () => {
     error: jest.fn(),
     info: jest.fn(),
   } as unknown as Logger;
+
+  const esClient = {} as unknown as ElasticsearchClient;
 
   const validateRequestBody = {
     alerts_context_count: 1,
@@ -89,6 +99,7 @@ describe('validateAttackDiscoveries', () => {
     const result = await validateAttackDiscoveries({
       adhocAttackDiscoveryDataClient: dataClient,
       authenticatedUser,
+      esClient,
       logger,
       validateRequestBody,
       spaceId: 'default',
@@ -111,6 +122,7 @@ describe('validateAttackDiscoveries', () => {
     await validateAttackDiscoveries({
       adhocAttackDiscoveryDataClient: dataClient,
       authenticatedUser,
+      esClient,
       logger,
       validateRequestBody,
       spaceId: 'default',
@@ -149,6 +161,7 @@ describe('validateAttackDiscoveries', () => {
     const result = await validateAttackDiscoveries({
       adhocAttackDiscoveryDataClient: dataClient,
       authenticatedUser,
+      esClient,
       logger,
       validateRequestBody,
       spaceId: 'default',
@@ -174,6 +187,7 @@ describe('validateAttackDiscoveries', () => {
     const result = await validateAttackDiscoveries({
       adhocAttackDiscoveryDataClient: dataClient,
       authenticatedUser,
+      esClient,
       logger,
       validateRequestBody,
       spaceId: 'default',
@@ -199,6 +213,7 @@ describe('validateAttackDiscoveries', () => {
     const result = await validateAttackDiscoveries({
       adhocAttackDiscoveryDataClient: dataClient,
       authenticatedUser,
+      esClient,
       logger,
       validateRequestBody,
       spaceId: 'default',
@@ -229,6 +244,7 @@ describe('validateAttackDiscoveries', () => {
       validateAttackDiscoveries({
         adhocAttackDiscoveryDataClient: dataClient,
         authenticatedUser,
+        esClient,
         logger,
         validateRequestBody,
         spaceId: 'default',
@@ -251,6 +267,7 @@ describe('validateAttackDiscoveries', () => {
       validateAttackDiscoveries({
         adhocAttackDiscoveryDataClient: dataClient,
         authenticatedUser,
+        esClient,
         logger,
         validateRequestBody,
         spaceId: 'default',
@@ -280,6 +297,7 @@ describe('validateAttackDiscoveries', () => {
     const result = await validateAttackDiscoveries({
       adhocAttackDiscoveryDataClient: dataClient,
       authenticatedUser,
+      esClient,
       logger,
       validateRequestBody,
       spaceId: 'default',
@@ -306,6 +324,7 @@ describe('validateAttackDiscoveries', () => {
     const result = await validateAttackDiscoveries({
       adhocAttackDiscoveryDataClient: dataClient,
       authenticatedUser,
+      esClient,
       logger,
       validateRequestBody,
       spaceId: 'default',
@@ -328,6 +347,7 @@ describe('validateAttackDiscoveries', () => {
     const result = await validateAttackDiscoveries({
       adhocAttackDiscoveryDataClient: dataClient,
       authenticatedUser,
+      esClient,
       logger,
       validateRequestBody,
       spaceId: 'default',
@@ -359,6 +379,7 @@ describe('validateAttackDiscoveries', () => {
     const result = await validateAttackDiscoveries({
       adhocAttackDiscoveryDataClient: dataClient,
       authenticatedUser,
+      esClient,
       logger,
       validateRequestBody,
       spaceId: 'default',
@@ -371,5 +392,64 @@ describe('validateAttackDiscoveries', () => {
       })
     );
     expect(result.validated_discoveries).toHaveLength(1);
+  });
+
+  it('back-fills the underlying detection alerts with the created attack id', async () => {
+    (transformToAlertDocuments as jest.Mock).mockReturnValue([
+      {
+        [ALERT_UUID]: 'attack-1',
+        [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: ['detection-a', 'detection-b'],
+      },
+    ]);
+    (transformSearchResponseToAlerts as jest.Mock).mockReturnValue([]);
+
+    const { dataClient, writeDataClient } = createAdhocAttackDiscoveryDataClient();
+    writeDataClient.bulk = jest.fn().mockResolvedValue({
+      body: { errors: false, items: [{ create: { _id: 'attack-1', result: 'created' } }] },
+    });
+
+    await validateAttackDiscoveries({
+      adhocAttackDiscoveryDataClient: dataClient,
+      authenticatedUser,
+      esClient,
+      logger,
+      validateRequestBody,
+      spaceId: 'default',
+    });
+
+    expect(backfillAttackIdsBestEffort).toHaveBeenCalledWith({
+      alertIdToAttackIdsMap: {
+        'detection-a': ['attack-1'],
+        'detection-b': ['attack-1'],
+      },
+      esClient,
+      logger,
+      spaceId: 'default',
+    });
+  });
+
+  it('does not back-fill detection alerts when no documents were created', async () => {
+    (transformToAlertDocuments as jest.Mock).mockReturnValue([
+      {
+        [ALERT_UUID]: 'attack-1',
+        [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: ['detection-a'],
+      },
+    ]);
+
+    const { dataClient } = createAdhocAttackDiscoveryDataClient();
+    (await dataClient.getWriter({ namespace: 'default' })).bulk = jest.fn().mockResolvedValue({
+      body: { errors: false, items: [{ create: { _id: 'attack-1', result: 'noop' } }] },
+    });
+
+    await validateAttackDiscoveries({
+      adhocAttackDiscoveryDataClient: dataClient,
+      authenticatedUser,
+      esClient,
+      logger,
+      validateRequestBody,
+      spaceId: 'default',
+    });
+
+    expect(backfillAttackIdsBestEffort).not.toHaveBeenCalled();
   });
 });

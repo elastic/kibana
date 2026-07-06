@@ -8,7 +8,7 @@
 // Stub: real implementation lands in PR8 (Skills). FF-off safe — never
 // registered when the feature flag is OFF.
 
-import type { SkillDefinition } from '@kbn/agent-builder-server';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 
 export const createWorkflowTroubleshootingSkill = (_deps: unknown): SkillDefinition =>
   ({

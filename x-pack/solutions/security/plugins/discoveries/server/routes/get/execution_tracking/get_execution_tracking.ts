@@ -10,6 +10,9 @@ import type { CoreStart, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
+
+import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 
 import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
@@ -18,7 +21,7 @@ import { getWorkflowExecutionsTracking } from '../pipeline_data/helpers/get_work
 const ROUTE_PATH = '/internal/attack_discovery/executions/{execution_id}/tracking';
 
 const GetExecutionTrackingRequestParams = z.object({
-  execution_id: z.string(),
+  execution_id: z.string().max(1024),
 });
 
 export interface ExecutionTrackingWorkflow {
@@ -52,7 +55,11 @@ export const registerGetExecutionTrackingRoute = (
       path: ROUTE_PATH,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
+          requiredPrivileges: [
+            ATTACK_DISCOVERY_API_ACTION_ALL,
+            ALERTS_API_READ,
+            WorkflowsManagementApiActions.read,
+          ],
         },
       },
     })
@@ -74,14 +81,32 @@ export const registerGetExecutionTrackingRoute = (
         try {
           const { execution_id: executionId } = request.params;
 
-          const { coreStart } = await getStartServices();
+          const { coreStart, pluginsStart } = await getStartServices();
           const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
           const eventLogIndex = await getEventLogIndex();
+
+          // Object-level authorization: reads are bound to the requesting
+          // principal so a caller cannot read another user's execution by id
+          // within the same space. Without a principal we cannot enforce
+          // ownership, so reject.
+          const username = coreStart.security.authc.getCurrentUser(request)?.username;
+          if (username == null) {
+            return response.forbidden({
+              body: { message: 'Unable to determine the requesting user' },
+            });
+          }
+
+          const spaceId = getSpaceId({
+            request,
+            spaces: pluginsStart.spaces?.spacesService,
+          });
 
           const tracking = await getWorkflowExecutionsTracking({
             esClient,
             eventLogIndex,
             executionId,
+            spaceId,
+            username,
           });
 
           if (tracking == null) {
