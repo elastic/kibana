@@ -94629,6 +94629,9 @@ components:
         description:
           description: A short description of the dashboard.
           type: string
+        esql_approximation:
+          description: When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.
+          type: boolean
         filters:
           description: Filters applied across all panels, including pinned panels.
           items:
@@ -94640,9 +94643,6 @@ components:
             description: A filter applied to query results. Can be a field condition (`condition`), a logical group of conditions (`group`), a raw Elasticsearch DSL query (`dsl`), or a geo spatial query (`spatial`).
           maxItems: 500
           type: array
-        is_approximate:
-          description: When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.
-          type: boolean
         options:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-options'
         panels:
