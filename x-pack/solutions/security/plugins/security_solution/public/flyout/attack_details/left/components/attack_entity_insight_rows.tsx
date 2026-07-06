@@ -18,7 +18,7 @@ import {
   resolveUserNameForEntityInsightsWithFallback,
   type IdentityFields,
 } from '../../../document_details/shared/utils';
-import type { AttackEntityListEntry } from '../../hooks/use_attack_entities_lists';
+import type { AttackEntityListEntry } from '../../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists';
 
 const resolveUserDisplayForEntities = (
   identityFields: IdentityFields | undefined,

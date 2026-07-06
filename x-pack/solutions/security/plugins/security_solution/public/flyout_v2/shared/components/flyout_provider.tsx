@@ -29,6 +29,7 @@ import { MlCapabilitiesProvider } from '../../../common/components/ml/permission
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { ConsoleManager } from '../../../management/components/console/components/console_manager';
+import { NewFlyoutContext } from '../context/new_flyout_context';
 
 /**
  * Syncs Kibana's global time filter to the Security Solution Redux store on mount.
@@ -87,7 +88,9 @@ export const flyoutProviders = ({
     <FlyoutRouter history={history}>
       <ConsoleManager>
         <AssistantProvider>
-          <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
+          <ExpandableFlyoutProvider>
+            <NewFlyoutContext.Provider value={true}>{children}</NewFlyoutContext.Provider>
+          </ExpandableFlyoutProvider>
         </AssistantProvider>
       </ConsoleManager>
     </FlyoutRouter>

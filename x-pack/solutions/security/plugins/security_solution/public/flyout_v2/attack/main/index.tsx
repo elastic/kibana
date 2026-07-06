@@ -20,13 +20,18 @@ import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
+import {
+  defaultToolsFlyoutProperties,
+  useDefaultDocumentFlyoutProperties,
+} from '../../shared/hooks/use_default_flyout_properties';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
 import { cellActionRenderer } from '../../shared/components/cell_actions';
 import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { NotesDetails } from '../../shared/tools/notes';
+import { noopCellActionRenderer } from '../../shared/components/cell_actions';
+import { DocumentFlyoutWrapper } from '../../document/main/document_flyout_wrapper';
 import { useKibana } from '../../../common/lib/kibana';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
@@ -84,9 +89,39 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
   const history = useHistory();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const alertIds = useAttackAlertIds(hit);
 
   const [selectedTabId, setSelectedTabId] = useState<AttackFlyoutTabId>('overview');
+
+  const onShowAlert = useCallback(
+    (id: string, indexName: string) =>
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: (
+            <DocumentFlyoutWrapper
+              documentId={id}
+              indexName={indexName}
+              renderCellActions={noopCellActionRenderer}
+              onAlertUpdated={onAttackUpdated}
+            />
+          ),
+        }),
+        { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' }
+      ),
+    [
+      defaultDocumentFlyoutProperties,
+      history,
+      historyKey,
+      onAttackUpdated,
+      overlays,
+      services,
+      store,
+    ]
+  );
 
   const onShowNotes = useCallback(() => {
     overlays.openSystemFlyout(
@@ -106,11 +141,13 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
         services,
         store,
         history,
-        children: <AttackCorrelationsTool hit={hit} alertIds={alertIds} />,
+        children: (
+          <AttackCorrelationsTool hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />
+        ),
       }),
       { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
     );
-  }, [alertIds, history, historyKey, hit, overlays, services, store]);
+  }, [alertIds, history, historyKey, hit, onShowAlert, overlays, services, store]);
 
   const onShowEntities = useCallback(() => {
     overlays.openSystemFlyout(

@@ -33,9 +33,8 @@ export interface AttackCorrelationsToolProps {
    */
   alertIds: string[];
   /**
-   * Optional callback to open an alert preview flyout when the user clicks the
-   * preview icon on a row in the correlated-alerts table.
-   * Defaults to a no-op; wired up in T-004 when the tool is connected to the overview.
+   * Optional callback to open the alert flyout as a child when the user clicks the
+   * preview icon on a row in the correlated-alerts table. Defaults to a no-op.
    */
   onShowAlert?: (id: string, indexName: string) => void;
 }

@@ -12,6 +12,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import { FLYOUT_LINK_TEST_ID } from './test_ids';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { PreviewLink } from './preview_link';
+import { useIsInNewFlyout } from '../../../flyout_v2/shared/context/new_flyout_context';
+import { OpenFlyoutLink } from '../../../flyout_v2/shared/components/open_flyout_link';
 import { getRightPanelParams } from '../utils/link_utils';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
 import type { IdentityFields } from '../../document_details/shared/utils';
@@ -78,6 +80,7 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   const { openFlyout } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
   const whichFlyout = useWhichFlyout();
+  const isInNewFlyout = useIsInNewFlyout();
   const renderPreview = isFlyoutOpen || whichFlyout !== null;
   const resolutionIdentifiers: IdentityFields = useMemo(
     () => identityFields ?? { [field]: value },
@@ -128,6 +131,17 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
       });
     }
   }, [rightPanelParams, scopeId, telemetry, openFlyout]);
+
+  // When reused inside the new flyout system (e.g. the attack Entities tool), the legacy
+  // expandable-flyout API has no rendered flyout to open into, so delegate to the new
+  // system's link which opens supported fields (IP, rule, host) as a child flyout.
+  if (isInNewFlyout) {
+    return (
+      <OpenFlyoutLink field={field} value={value} data-test-subj={dataTestSubj}>
+        {children ?? value}
+      </OpenFlyoutLink>
+    );
+  }
 
   // If the flyout is open, render the preview link
   if (renderPreview) {
