@@ -127,7 +127,8 @@ const useMessageEditorInstance = ({
           if (leftoverLength > 0 && leftover instanceof Text) {
             placeCursorInText(leftover, leftoverLength, sel);
           } else {
-            placeCursorAfter(badge, sel);
+            const space = insertSpaceAfter(badge, ref.current);
+            placeCursorAfter(space, sel);
           }
         } else {
           const space = insertSpaceAfter(badge, ref.current);
