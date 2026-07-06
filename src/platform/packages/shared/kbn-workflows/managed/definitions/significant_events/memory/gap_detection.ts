@@ -8,12 +8,13 @@
  */
 
 import GAP_DETECTION_YAML from './gap_detection.yaml';
-import type { ManagedWorkflowDefinition } from '../../types';
+import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID = 'system-streams-memory-gap-detection';
+export const SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID =
+  'system-streams-memory-gap-detection';
 
-export const STREAMS_MEMORY_GAP_DETECTION_WORKFLOW = {
-  id: STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+export const SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
   pluginId: 'streams',
   version: 1,
   billable: false,

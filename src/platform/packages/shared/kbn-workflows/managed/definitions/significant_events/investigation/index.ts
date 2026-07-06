@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import MEMORY_SYNTHESIS_YAML from './memory_synthesis.yaml';
-import type { ManagedWorkflowDefinition } from '../../types';
+import INVESTIGATION_WORKFLOW_YAML from './investigation_workflow.yaml';
+import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID = 'system-streams-memory-synthesis';
+export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID =
+  'system-significant-events-investigation';
 
-export const STREAMS_MEMORY_SYNTHESIS_WORKFLOW = {
-  id: STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-  pluginId: 'streams',
-  version: 1,
+export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+  pluginId: 'streams', // todo: update to significant_events once https://github.com/elastic/kibana/pull/275522 and follow ups merge
+  version: 2,
   billable: false,
-  yaml: MEMORY_SYNTHESIS_YAML,
+  yaml: INVESTIGATION_WORKFLOW_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
