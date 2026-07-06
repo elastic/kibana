@@ -28,29 +28,29 @@ function parseCodeowners(repoRoot) {
         .replace(/\/$/, '');
       return {
         prefix: cleaned,
-        owner: teams
+        owners: teams
           .flatMap((t) => t.replace('@', '').split(','))
-          .filter((t) => t.startsWith('elastic'))[0],
+          .filter((t) => t.startsWith('elastic')),
       };
     })
-    .filter((e) => e.owner);
+    .filter((e) => e.owners.length > 0);
 }
 
 function createOwnerResolver(repoRoot) {
   const entries = parseCodeowners(repoRoot);
   const cache = new Map();
 
-  return function getOwnerForFile(filePath) {
+  return function getOwnersForFile(filePath) {
     if (cache.has(filePath)) return cache.get(filePath);
 
-    let owner = 'unknown';
+    let owners = [];
     for (const e of entries) {
       if (filePath === e.prefix || filePath.startsWith(e.prefix + '/')) {
-        owner = e.owner;
+        owners = e.owners;
       }
     }
-    cache.set(filePath, owner);
-    return owner;
+    cache.set(filePath, owners);
+    return owners;
   };
 }
 
@@ -124,23 +124,24 @@ if (!jsonPath) {
 }
 
 const data = JSON.parse(readFileSync(jsonPath, 'utf8'));
-const getOwnerForFile = createOwnerResolver(process.cwd());
+const getOwnersForFile = createOwnerResolver(process.cwd());
 const targetSet = new Set(targetOwners);
 
 // Group findings by owner (only keep target owners to save memory)
 const ownerData = new Map();
 
 function addFinding(filePath, category, item) {
-  const owner = getOwnerForFile(filePath);
-  if (targetSet.size > 0 && !targetSet.has(owner)) return;
-  if (!ownerData.has(owner)) {
-    ownerData.set(owner, {
-      complexityFindings: [],
-      fileScores: [],
-      hotspots: [],
-    });
+  for (const owner of getOwnersForFile(filePath)) {
+    if (targetSet.size > 0 && !targetSet.has(owner)) continue;
+    if (!ownerData.has(owner)) {
+      ownerData.set(owner, {
+        complexityFindings: [],
+        fileScores: [],
+        hotspots: [],
+      });
+    }
+    ownerData.get(owner)[category].push(item);
   }
-  ownerData.get(owner)[category].push(item);
 }
 
 // Complexity (fallow health --format json — top-level, no 'health' wrapper)
