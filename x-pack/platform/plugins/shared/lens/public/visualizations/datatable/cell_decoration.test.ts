@@ -139,6 +139,11 @@ describe('cell decoration capabilities', () => {
       expect(parseCellDecorationFillConfig('{not json')).toBeUndefined();
     });
 
+    it('degrades shape-invalid values to undefined', () => {
+      expect(parseCellDecorationFillConfig({ fillMode: 'nope' })).toBeUndefined();
+      expect(parseCellDecorationFillConfig(JSON.stringify({ fillMode: 'nope' }))).toBeUndefined();
+    });
+
     it('returns undefined for null/undefined and non-string primitives', () => {
       expect(parseCellDecorationFillConfig(null)).toBeUndefined();
       expect(parseCellDecorationFillConfig(undefined)).toBeUndefined();

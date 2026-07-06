@@ -205,18 +205,68 @@ export function getDecorationDefaultColor(mode: ColumnCellDecorationMode): strin
   return getCellDecorationCapabilities(mode).defaultColor;
 }
 
+function isCellDecorationValueRange(raw: unknown): boolean {
+  if (typeof raw !== 'object' || raw === null || !('mode' in raw)) {
+    return false;
+  }
+
+  if (raw.mode !== 'auto' && raw.mode !== 'custom') {
+    return false;
+  }
+
+  if ('min' in raw && raw.min !== undefined && typeof raw.min !== 'number') {
+    return false;
+  }
+
+  if ('max' in raw && raw.max !== undefined && typeof raw.max !== 'number') {
+    return false;
+  }
+
+  return true;
+}
+
+function isCellDecorationFillConfig(raw: unknown): raw is CellDecorationFillConfig {
+  if (typeof raw !== 'object' || raw === null || !('fillMode' in raw)) {
+    return false;
+  }
+
+  if (raw.fillMode !== 'single' && raw.fillMode !== 'solid' && raw.fillMode !== 'gradient') {
+    return false;
+  }
+
+  if ('color' in raw && raw.color !== undefined && typeof raw.color !== 'string') {
+    return false;
+  }
+
+  if ('baseline' in raw && raw.baseline !== undefined && typeof raw.baseline !== 'number') {
+    return false;
+  }
+
+  if (
+    'valueRange' in raw &&
+    raw.valueRange !== undefined &&
+    !isCellDecorationValueRange(raw.valueRange)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * Reads the decoration fill config carried on the expression args. The value is
- * either an already-deserialized object or the JSON string it is serialized to
- * by the expression builder; malformed JSON degrades to `undefined` so the cell
- * falls back to plain formatting.
+ * the JSON string it is serialized to by the expression builder, plus a
+ * permissive object fallback for legacy/test-time callers. Malformed or
+ * shape-invalid values degrade to `undefined` so the cell falls back to plain
+ * formatting.
  */
 export function parseCellDecorationFillConfig(raw: unknown): CellDecorationFillConfig | undefined {
   if (raw == null) return undefined;
-  if (typeof raw === 'object') return raw as CellDecorationFillConfig;
+  if (isCellDecorationFillConfig(raw)) return raw;
   if (typeof raw !== 'string') return undefined;
   try {
-    return JSON.parse(raw) as CellDecorationFillConfig;
+    const parsed: unknown = JSON.parse(raw);
+    return isCellDecorationFillConfig(parsed) ? parsed : undefined;
   } catch {
     return undefined;
   }

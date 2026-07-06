@@ -59,9 +59,11 @@ export interface DatatableColumnConfig {
   sortingDirection: LensGridDirection;
 }
 
-export type DatatableColumnArgs = Omit<ColumnState, 'palette' | 'colorMapping'> & {
+export type DatatableColumnArgs = Omit<ColumnState, 'palette' | 'colorMapping' | 'fillStyle'> & {
   palette?: PaletteOutput<CustomPaletteState>;
   colorMapping?: string;
+  /** JSON-serialized {@link CellDecorationFillConfig}, mirroring how `colorMapping` is passed. */
+  fillStyle?: string;
   summaryRowValue?: unknown;
   sortingHint?: SortingHint;
 };
