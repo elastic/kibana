@@ -7,8 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useAttackEntitiesLists } from './use_attack_entities_lists';
-import { useOriginalAlertIds } from './use_original_alert_ids';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
 
 jest.mock('@kbn/entity-store/public', () => {
   const actual = jest.requireActual('@kbn/entity-store/public');
@@ -19,21 +18,15 @@ jest.mock('@kbn/entity-store/public', () => {
   };
 });
 
-jest.mock('./use_original_alert_ids', () => ({
-  useOriginalAlertIds: jest.fn(),
-}));
-
-jest.mock('../../../detections/containers/detection_engine/alerts/use_query', () => ({
+jest.mock('../../../../../detections/containers/detection_engine/alerts/use_query', () => ({
   useQueryAlerts: jest.fn(),
 }));
 
 describe('useAttackEntitiesLists', () => {
-  const mockUseOriginalAlertIds = jest.mocked(useOriginalAlertIds);
   const mockUseQueryAlerts = jest.mocked(useQueryAlerts);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseOriginalAlertIds.mockReturnValue([]);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: null,
@@ -44,10 +37,8 @@ describe('useAttackEntitiesLists', () => {
     });
   });
 
-  it('returns empty lists and skips query when alertIds is empty', () => {
-    mockUseOriginalAlertIds.mockReturnValue([]);
-
-    const { result } = renderHook(() => useAttackEntitiesLists());
+  it('returns empty lists and skips query when originalAlertIds is empty', () => {
+    const { result } = renderHook(() => useAttackEntitiesLists([]));
 
     expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -59,10 +50,8 @@ describe('useAttackEntitiesLists', () => {
     expect(result.current.loading).toBe(false);
   });
 
-  it('passes query with ids filter, EUID runtime_mappings and terms aggs when alertIds exist', () => {
-    mockUseOriginalAlertIds.mockReturnValue(['id1', 'id2']);
-
-    renderHook(() => useAttackEntitiesLists());
+  it('passes query with ids filter, EUID runtime_mappings and terms aggs when originalAlertIds exist', () => {
+    renderHook(() => useAttackEntitiesLists(['id1', 'id2']));
 
     expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -104,7 +93,6 @@ describe('useAttackEntitiesLists', () => {
   });
 
   it('parses userEntityEntries and hostEntityEntries (with sample _source) from EUID aggregation buckets', () => {
-    mockUseOriginalAlertIds.mockReturnValue(['id1']);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: {
@@ -179,7 +167,7 @@ describe('useAttackEntitiesLists', () => {
       refetch: null,
     });
 
-    const { result } = renderHook(() => useAttackEntitiesLists());
+    const { result } = renderHook(() => useAttackEntitiesLists(['id1']));
 
     expect(result.current.userEntityEntries).toEqual([
       {
@@ -220,7 +208,6 @@ describe('useAttackEntitiesLists', () => {
   });
 
   it('returns empty arrays when aggregations are missing', () => {
-    mockUseOriginalAlertIds.mockReturnValue(['id1']);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: {
@@ -236,14 +223,13 @@ describe('useAttackEntitiesLists', () => {
       refetch: null,
     });
 
-    const { result } = renderHook(() => useAttackEntitiesLists());
+    const { result } = renderHook(() => useAttackEntitiesLists(['id1']));
 
     expect(result.current.userEntityEntries).toEqual([]);
     expect(result.current.hostEntityEntries).toEqual([]);
   });
 
   it('skips buckets with missing or invalid sample _source', () => {
-    mockUseOriginalAlertIds.mockReturnValue(['id1']);
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: {
@@ -294,7 +280,7 @@ describe('useAttackEntitiesLists', () => {
       refetch: null,
     });
 
-    const { result } = renderHook(() => useAttackEntitiesLists());
+    const { result } = renderHook(() => useAttackEntitiesLists(['id1']));
 
     expect(result.current.userEntityEntries).toEqual([
       {

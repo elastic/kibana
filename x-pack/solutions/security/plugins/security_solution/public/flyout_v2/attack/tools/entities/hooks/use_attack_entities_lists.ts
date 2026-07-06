@@ -8,11 +8,10 @@
 import { useMemo, useEffect } from 'react';
 import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useOriginalAlertIds } from './use_original_alert_ids';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { fetchQueryAlerts } from '../../../detections/containers/detection_engine/alerts/api';
-import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
-import type { IdentityFields } from '../../document_details/shared/utils';
+import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
+import { fetchQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/api';
+import { ALERTS_QUERY_NAMES } from '../../../../../detections/containers/detection_engine/alerts/constants';
+import type { IdentityFields } from '../../../../../flyout/document_details/shared/utils';
 
 const TERMS_AGG_SIZE = 200;
 
@@ -63,6 +62,7 @@ function extractEntityEntriesFromBuckets(
   }
   return result;
 }
+
 export interface UseAttackEntitiesListsResult {
   userEntityEntries: AttackEntityListEntry[];
   hostEntityEntries: AttackEntityListEntry[];
@@ -71,13 +71,14 @@ export interface UseAttackEntitiesListsResult {
 }
 
 /**
- * Hook that returns distinct user and host entity identifiers across all alerts that belong to the current attack.
- * Uses EUID (entity unique ID) runtime fields so the same logical user/host is deduplicated (e.g. same user
- * by user.name vs user.entity.id). Queries the detection alerts index filtered by the attack's alert IDs,
- * with terms aggregations on the EUID runtime fields and top_hits to get a sample document per entity for identifier extraction.
+ * Hook that returns distinct user and host entity identifiers across all alerts that belong to an attack.
+ * Accepts `originalAlertIds` explicitly (de-obfuscated via getOriginalAlertIds) so it can be used in
+ * contexts outside the legacy `useAttackDetailsContext()` (e.g. flyout_v2 tool panels).
+ * Uses EUID runtime fields so the same logical user/host is deduplicated across alerts.
  */
-export const useAttackEntitiesLists = (): UseAttackEntitiesListsResult => {
-  const originalAlertIds = useOriginalAlertIds();
+export const useAttackEntitiesLists = (
+  originalAlertIds: string[]
+): UseAttackEntitiesListsResult => {
   const euidApi = useEntityStoreEuidApi();
 
   const query = useMemo(() => {

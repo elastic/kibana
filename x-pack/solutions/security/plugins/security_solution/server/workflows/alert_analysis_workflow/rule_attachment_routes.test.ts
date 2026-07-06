@@ -182,15 +182,15 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
       createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
       createRule({ id: 'rule-2' }),
     ]);
-    const handler = router.versioned.getRoute('post', ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE)
+    const handler = router.versioned.getRoute('get', ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE)
       .versions['1'].handler;
 
     await handler(
       context,
       createRequest({
-        method: 'post',
+        method: 'get',
         path: ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
-        body: { search: '' },
+        query: { search: '' },
       }),
       mockResponse
     );
@@ -208,15 +208,15 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
       createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
       createRule({ id: 'rule-2' }),
     ]);
-    const handler = router.versioned.getRoute('post', ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE)
+    const handler = router.versioned.getRoute('get', ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE)
       .versions['1'].handler;
 
     await handler(
       context,
       createRequest({
-        method: 'post',
+        method: 'get',
         path: ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,
-        body: { search: '' },
+        query: { search: '' },
       }),
       mockResponse
     );
