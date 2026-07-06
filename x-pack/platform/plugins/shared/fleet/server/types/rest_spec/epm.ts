@@ -778,7 +778,12 @@ const NamespaceCustomizationSettingsSchema = schema.recordOf(
   // can be accepted without breaking older clients/nodes.
   schema.object(
     {
-      ilm_policy: schema.maybe(schema.string({ maxLength: 1024 })),
+      // minLength enforces the "{} clears" convention: omit the key, or send an empty
+      // settings object, to clear rather than an empty string. Without this, an empty
+      // string would reach the same "clearing" code path as an absent value (skipping the
+      // manage_ilm privilege and policy-existence checks in updatePackageHandler) while
+      // still being stored as a literal `{ ilm_policy: '' }` instead of clearing the key.
+      ilm_policy: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
     },
     { unknowns: 'allow' }
   ),
@@ -796,7 +801,7 @@ export const UpdatePackageRequestSchema = {
     {
       keepPoliciesUpToDate: schema.maybe(schema.boolean()),
       namespace_customization_enabled_for: schema.maybe(
-        schema.arrayOf(schema.string({ validate: namespaceNameValidator }), {
+        schema.arrayOf(schema.string({ maxLength: 100, validate: namespaceNameValidator }), {
           maxSize: 100,
           meta: {
             description:

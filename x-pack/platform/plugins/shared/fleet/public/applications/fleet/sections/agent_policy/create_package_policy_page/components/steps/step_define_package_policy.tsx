@@ -779,6 +779,13 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                                 { defaultMessage: 'None (use default)' }
                               ),
                             },
+                            // Keep the currently assigned policy selectable even if it's since
+                            // been deleted in ES or excluded from the fetched list, so the
+                            // control doesn't silently fall back to the first option.
+                            ...(selectedIlmPolicy &&
+                            !ilmPoliciesData?.items?.includes(selectedIlmPolicy)
+                              ? [{ value: selectedIlmPolicy, text: selectedIlmPolicy }]
+                              : []),
                             ...(ilmPoliciesData?.items ?? []).map((policyName) => ({
                               value: policyName,
                               text: policyName,

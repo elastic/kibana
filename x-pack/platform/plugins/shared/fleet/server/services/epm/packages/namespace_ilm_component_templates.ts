@@ -98,6 +98,155 @@ function removeIlmComponentTemplate(composedOf: string[], nsTemplateName: string
 }
 
 /**
+ * Creates or updates the Fleet-managed ILM component template for a single
+ * `(dataStream, namespace)` pair and patches the namespace index template's `composed_of` to
+ * reference it. Does NOT touch `installed_es` — callers must track the returned
+ * `nsTemplateName` (and, if present, `indexTemplateEntry`) themselves via
+ * `trackAndRolloverIlmComponentTemplates`, batching across every namespace processed in the
+ * same call so `installed_es` is read and written exactly once per batch.
+ */
+async function applySetIlmPolicyForDataStreamNamespace({
+  esClient,
+  packageName,
+  packageInfo,
+  dataStream,
+  namespace,
+  ilmPolicy,
+  abortController,
+}: {
+  esClient: ElasticsearchClient;
+  packageName: string;
+  packageInfo: Pick<PackageInfo, 'policy_templates'>;
+  dataStream: RegistryDataStream;
+  namespace: string;
+  ilmPolicy: string;
+  abortController?: AbortController;
+}): Promise<{ nsTemplateName: string; indexTemplateEntry?: IndexTemplateEntry }> {
+  const logger = appContextService.getLogger();
+  const isOtelInputType = isOtelDataStream(dataStream, packageInfo);
+  const templateName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
+  const nsTemplateName = generateNamespaceTemplateName(templateName, namespace);
+
+  // Create or update the ILM component template. Tag it with Fleet metadata so it can be
+  // safely identified as Fleet-owned during auditing and cleanup.
+  await retryTransientEsErrors(
+    () =>
+      esClient.cluster.putComponentTemplate(
+        {
+          name: nsTemplateName,
+          _meta: getESAssetMetadata({ packageName }),
+          template: {
+            settings: {
+              'index.lifecycle.name': ilmPolicy,
+            },
+          },
+        },
+        { signal: abortController?.signal }
+      ),
+    { logger }
+  );
+  logger.debug(`[syncIlmPolicy] Created/updated ILM component template ${nsTemplateName}`);
+
+  // Patch the namespace index template's composed_of to reference the component template
+  const nsIndexTemplate = await fetchIndexTemplate(
+    esClient,
+    nsTemplateName,
+    'syncIlmPolicy',
+    abortController
+  );
+  if (!nsIndexTemplate) {
+    logger.debug(
+      `[syncIlmPolicy] Namespace index template ${nsTemplateName} not found, component template created but composed_of not patched`
+    );
+    return { nsTemplateName };
+  }
+
+  const patchedComposedOf = insertIlmComponentTemplate(
+    nsIndexTemplate.composed_of ?? [],
+    namespace,
+    templateName,
+    nsTemplateName
+  );
+  if (patchedComposedOf !== nsIndexTemplate.composed_of) {
+    await persistPatchedComposedOf({
+      esClient,
+      nsTemplateName,
+      nsIndexTemplate,
+      patchedComposedOf,
+      abortController,
+    });
+  }
+
+  return {
+    nsTemplateName,
+    indexTemplateEntry: {
+      templateName: nsTemplateName,
+      indexTemplate: { ...nsIndexTemplate, composed_of: patchedComposedOf },
+    },
+  };
+}
+
+/**
+ * Tracks `createdComponentTemplates` in `installed_es` with a single read + write, then rolls
+ * over `updatedIndexTemplates`. Must be called once per batch with the combined results from
+ * every namespace processed in that batch: `updateEsAssetReferences` has no optimistic
+ * concurrency, so two concurrent calls each computing their own patch from an independently
+ * fetched `installed_es` snapshot can silently overwrite each other's tracked ids.
+ */
+async function trackAndRolloverIlmComponentTemplates({
+  soClient,
+  esClient,
+  packageName,
+  createdComponentTemplates,
+  updatedIndexTemplates,
+  abortController,
+}: {
+  soClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  packageName: string;
+  createdComponentTemplates: string[];
+  updatedIndexTemplates: IndexTemplateEntry[];
+  abortController?: AbortController;
+}): Promise<string[]> {
+  if (createdComponentTemplates.length === 0) {
+    return [];
+  }
+
+  if (abortController) throwIfAborted(abortController);
+  const logger = appContextService.getLogger();
+
+  // Track the new component templates in installed_es BEFORE rollover so a rollover
+  // failure doesn't prevent tracking (r3518806806). Uses createdComponentTemplates rather
+  // than updatedIndexTemplates so templates created when the namespace index template was
+  // absent are also recorded (r3518659890).
+  const freshInstallation = await getInstallation({
+    savedObjectsClient: soClient,
+    pkgName: packageName,
+  });
+  const assetsToAdd = createdComponentTemplates.map((id) => ({
+    id,
+    type: ElasticsearchAssetType.componentTemplate,
+  }));
+  await updateEsAssetReferences(soClient, packageName, freshInstallation?.installed_es ?? [], {
+    assetsToAdd,
+  });
+
+  // Rollover existing data streams so new backing indices pick up the ILM policy
+  if (updatedIndexTemplates.length > 0) {
+    try {
+      await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates);
+    } catch (err: unknown) {
+      if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {
+        throw err;
+      }
+      logger.debug(`[syncIlmPolicy] No existing data streams to roll over for ${packageName}`);
+    }
+  }
+
+  return updatedIndexTemplates.map(({ templateName }) => templateName);
+}
+
+/**
  * Creates or updates the Fleet-managed ILM component template for each `(dataStream, namespace)`
  * pair and patches the namespace index template's `composed_of` to reference it. Called from
  * `syncIlmPolicy` when `ilmPolicy` is a non-empty string.
@@ -123,7 +272,6 @@ export async function syncSetIlmPolicy({
   summary: SyncIlmPolicySummary;
   abortController?: AbortController;
 }): Promise<void> {
-  const logger = appContextService.getLogger();
   const updatedIndexTemplates: IndexTemplateEntry[] = [];
   const createdComponentTemplates: string[] = [];
 
@@ -132,106 +280,105 @@ export async function syncSetIlmPolicy({
     async (dataStream) => {
       if (abortController) throwIfAborted(abortController);
 
-      const isOtelInputType = isOtelDataStream(dataStream, packageInfo);
-      const templateName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
-      const nsTemplateName = generateNamespaceTemplateName(templateName, namespace);
-
-      // Create or update the ILM component template. Tag it with Fleet metadata so it can be
-      // safely identified as Fleet-owned during auditing and cleanup.
-      await retryTransientEsErrors(
-        () =>
-          esClient.cluster.putComponentTemplate(
-            {
-              name: nsTemplateName,
-              _meta: getESAssetMetadata({ packageName }),
-              template: {
-                settings: {
-                  'index.lifecycle.name': ilmPolicy,
-                },
-              },
-            },
-            { signal: abortController?.signal }
-          ),
-        { logger }
-      );
-      logger.debug(`[syncIlmPolicy] Created/updated ILM component template ${nsTemplateName}`);
+      const { nsTemplateName, indexTemplateEntry } = await applySetIlmPolicyForDataStreamNamespace({
+        esClient,
+        packageName,
+        packageInfo,
+        dataStream,
+        namespace,
+        ilmPolicy,
+        abortController,
+      });
       // Track here (before the index-template check) so templates created when the namespace
       // index template is absent are still recorded in installed_es (r3518659890).
       createdComponentTemplates.push(nsTemplateName);
-
-      // Patch the namespace index template's composed_of to reference the component template
-      const nsIndexTemplate = await fetchIndexTemplate(
-        esClient,
-        nsTemplateName,
-        'syncIlmPolicy',
-        abortController
-      );
-      if (!nsIndexTemplate) {
-        logger.debug(
-          `[syncIlmPolicy] Namespace index template ${nsTemplateName} not found, component template created but composed_of not patched`
-        );
-        return;
+      if (indexTemplateEntry) {
+        updatedIndexTemplates.push(indexTemplateEntry);
       }
-
-      const patchedComposedOf = insertIlmComponentTemplate(
-        nsIndexTemplate.composed_of ?? [],
-        namespace,
-        templateName,
-        nsTemplateName
-      );
-      if (patchedComposedOf !== nsIndexTemplate.composed_of) {
-        await persistPatchedComposedOf({
-          esClient,
-          nsTemplateName,
-          nsIndexTemplate,
-          patchedComposedOf,
-          abortController,
-        });
-      }
-
-      updatedIndexTemplates.push({
-        templateName: nsTemplateName,
-        indexTemplate: { ...nsIndexTemplate, composed_of: patchedComposedOf },
-      });
     },
     { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
   );
 
-  if (createdComponentTemplates.length === 0) {
+  summary.updatedTemplates = await trackAndRolloverIlmComponentTemplates({
+    soClient,
+    esClient,
+    packageName,
+    createdComponentTemplates,
+    updatedIndexTemplates,
+    abortController,
+  });
+}
+
+/**
+ * Same as `syncSetIlmPolicy`, but for every `(namespace, ilmPolicy)` pair on the package in one
+ * batch — e.g. restoring ILM settings for every configured namespace after a package
+ * (re)install. Namespaces are applied sequentially within each data stream (rather than via a
+ * concurrent `pMap` per namespace) so `installed_es` is read and written exactly once for the
+ * whole batch: running `syncSetIlmPolicy` concurrently per namespace would race on
+ * `installed_es` (no optimistic concurrency there — see `trackAndRolloverIlmComponentTemplates`)
+ * and can silently drop a concurrently-tracked component template, leaving it as an orphaned,
+ * un-cleanable ES resource on a later opt-out. Mirrors the batching pattern already used by
+ * `createNamespaceTemplatesForPackage` in `namespace_datastream_templates.ts`.
+ */
+export async function syncSetIlmPolicyForNamespaces({
+  soClient,
+  esClient,
+  packageName,
+  packageInfo,
+  dataStreams,
+  namespaceIlmPolicies,
+  abortController,
+}: {
+  soClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  packageName: string;
+  packageInfo: Pick<PackageInfo, 'policy_templates' | 'data_streams'>;
+  dataStreams: RegistryDataStream[];
+  namespaceIlmPolicies: Array<{ namespace: string; ilmPolicy: string }>;
+  abortController?: AbortController;
+}): Promise<void> {
+  if (namespaceIlmPolicies.length === 0) {
     return;
   }
 
-  if (abortController) throwIfAborted(abortController);
+  const updatedIndexTemplates: IndexTemplateEntry[] = [];
+  const createdComponentTemplates: string[] = [];
 
-  // Track the new component templates in installed_es BEFORE rollover so a rollover
-  // failure doesn't prevent tracking (r3518806806). Uses createdComponentTemplates rather
-  // than updatedIndexTemplates so templates created when the namespace index template was
-  // absent are also recorded (r3518659890).
-  const freshInstallation = await getInstallation({
-    savedObjectsClient: soClient,
-    pkgName: packageName,
-  });
-  const assetsToAdd = createdComponentTemplates.map((id) => ({
-    id,
-    type: ElasticsearchAssetType.componentTemplate,
-  }));
-  await updateEsAssetReferences(soClient, packageName, freshInstallation?.installed_es ?? [], {
-    assetsToAdd,
-  });
+  await pMap(
+    dataStreams,
+    async (dataStream) => {
+      if (abortController) throwIfAborted(abortController);
 
-  summary.updatedTemplates = updatedIndexTemplates.map(({ templateName }) => templateName);
-
-  // Rollover existing data streams so new backing indices pick up the ILM policy
-  if (updatedIndexTemplates.length > 0) {
-    try {
-      await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates);
-    } catch (err: unknown) {
-      if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {
-        throw err;
+      // Sequential per data stream so overall ES concurrency stays bounded by
+      // MAX_CONCURRENT_COMPONENT_TEMPLATES regardless of namespace count.
+      for (const { namespace, ilmPolicy } of namespaceIlmPolicies) {
+        const { nsTemplateName, indexTemplateEntry } =
+          await applySetIlmPolicyForDataStreamNamespace({
+            esClient,
+            packageName,
+            packageInfo,
+            dataStream,
+            namespace,
+            ilmPolicy,
+            abortController,
+          });
+        createdComponentTemplates.push(nsTemplateName);
+        if (indexTemplateEntry) {
+          updatedIndexTemplates.push(indexTemplateEntry);
+        }
       }
-      logger.debug(`[syncIlmPolicy] No existing data streams to roll over for ${packageName}`);
-    }
-  }
+    },
+    { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
+  );
+
+  await trackAndRolloverIlmComponentTemplates({
+    soClient,
+    esClient,
+    packageName,
+    createdComponentTemplates,
+    updatedIndexTemplates,
+    abortController,
+  });
 }
 
 /**

@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import { appContextService } from '../../app_context';
-import { MAX_CONCURRENT_COMPONENT_TEMPLATES } from '../../../constants';
 
 import { getInstalledPackageWithAssets, getInstallation } from './get';
-import { syncSetIlmPolicy, syncClearIlmPolicy } from './namespace_ilm_component_templates';
+import {
+  syncSetIlmPolicy,
+  syncClearIlmPolicy,
+  syncSetIlmPolicyForNamespaces,
+} from './namespace_ilm_component_templates';
 
 export { insertIlmComponentTemplate } from './namespace_ilm_component_templates';
 
@@ -109,6 +111,11 @@ export async function syncIlmPolicy({
  * namespace that has an `ilm_policy` set in `Installation.namespace_customization_settings`.
  * Called alongside `handleNamespaceTemplateRestoreAfterPackageInstall` so ILM settings
  * survive reinstalls and upgrades.
+ *
+ * Restores every configured namespace in a single `syncSetIlmPolicyForNamespaces` batch rather
+ * than one `syncIlmPolicy` call per namespace: each call tracks its component templates in
+ * `installed_es` with its own read-then-write, and `installed_es` updates aren't optimistically
+ * concurrent, so concurrent per-namespace calls can silently overwrite each other's tracked ids.
  */
 export async function handleIlmSettingsRestoreAfterPackageInstall({
   soClient,
@@ -124,23 +131,36 @@ export async function handleIlmSettingsRestoreAfterPackageInstall({
     pkgName: packageName,
   });
   const settings = installation?.namespace_customization_settings ?? {};
-  const namespacesWithIlm = Object.entries(settings).filter(([, s]) => !!s.ilm_policy);
-  if (namespacesWithIlm.length === 0) {
+  const namespaceIlmPolicies = Object.entries(settings)
+    .filter((entry): entry is [string, { ilm_policy: string }] => !!entry[1].ilm_policy)
+    .map(([namespace, { ilm_policy: ilmPolicy }]) => ({ namespace, ilmPolicy }));
+  if (namespaceIlmPolicies.length === 0) {
     return;
   }
 
-  // Restore each namespace's ILM policy with bounded concurrency so packages with many
-  // configured namespaces don't serialize install/upgrade time.
-  await pMap(
-    namespacesWithIlm,
-    ([namespace, { ilm_policy: ilmPolicy }]) =>
-      syncIlmPolicy({
-        soClient,
-        esClient,
-        packageName,
-        namespace,
-        ilmPolicy,
-      }),
-    { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
-  );
+  const installedPkg = await getInstalledPackageWithAssets({
+    savedObjectsClient: soClient,
+    pkgName: packageName,
+  });
+  if (!installedPkg) {
+    appContextService
+      .getLogger()
+      .debug(`[syncIlmPolicy] Package ${packageName} not installed, skipping ILM restore`);
+    return;
+  }
+
+  const { packageInfo } = installedPkg;
+  const dataStreams = packageInfo.data_streams ?? [];
+  if (dataStreams.length === 0) {
+    return;
+  }
+
+  await syncSetIlmPolicyForNamespaces({
+    soClient,
+    esClient,
+    packageName,
+    packageInfo,
+    dataStreams,
+    namespaceIlmPolicies,
+  });
 }

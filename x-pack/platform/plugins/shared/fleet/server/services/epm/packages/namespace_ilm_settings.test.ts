@@ -550,4 +550,35 @@ describe('handleIlmSettingsRestoreAfterPackageInstall', () => {
       'logs-nginx.access@namespace.staging',
     ]);
   });
+
+  it('tracks every restored namespace in a single installed_es update (no per-namespace race)', async () => {
+    mockedGetInstallation
+      .mockResolvedValueOnce({
+        namespace_customization_settings: {
+          production: { ilm_policy: 'my-policy' },
+          staging: { ilm_policy: 'hot-warm' },
+        },
+        installed_es: [],
+      } as any)
+      .mockResolvedValue({ installed_es: [] } as any);
+
+    mockInstalledPackage();
+    const esClient = makeEsClientWithNamespaceTemplate();
+
+    await handleIlmSettingsRestoreAfterPackageInstall({
+      soClient,
+      esClient,
+      packageName: 'nginx',
+    });
+
+    // A single combined installed_es write covering both namespaces' component templates.
+    // Two independent per-namespace writes (each computed from its own installed_es read) would
+    // race and silently drop one namespace's tracked id — see r3520760829 discussion.
+    expect(mockedUpdateEsAssetReferences).toHaveBeenCalledTimes(1);
+    const [, , , { assetsToAdd }] = mockedUpdateEsAssetReferences.mock.calls[0];
+    expect((assetsToAdd as Array<{ id: string }>).map(({ id }) => id).sort()).toEqual([
+      'logs-nginx.access@namespace.production',
+      'logs-nginx.access@namespace.staging',
+    ]);
+  });
 });
