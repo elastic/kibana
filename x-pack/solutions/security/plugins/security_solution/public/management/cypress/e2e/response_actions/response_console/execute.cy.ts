@@ -27,7 +27,8 @@ describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
     login();
   });
 
-  describe('Execute operations:', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/276334
+  describe.skip('Execute operations:', () => {
     const homeFilePath = process.env.CI || true ? '/home/vagrant' : `/home/ubuntu`;
 
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
