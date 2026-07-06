@@ -32895,13 +32895,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33796,13 +33804,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33905,13 +33921,21 @@ paths:
                   value:
                     actionId: actionId
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -34009,13 +34033,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -34111,13 +34143,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -34220,13 +34260,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -34324,16 +34372,24 @@ paths:
                       - actionId1
                       - actionId2
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionIds:
-                    items:
-                      type: string
-                    maxItems: 10000
-                    type: array
-                required:
-                  - actionIds
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionIds:
+                        items:
+                          type: string
+                        maxItems: 10000
+                        type: array
+                    required:
+                      - actionIds
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -34436,13 +34492,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -34552,13 +34616,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -34670,13 +34742,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
