@@ -64,12 +64,10 @@ describe('get_workflow_change_history', () => {
 
   const createDeps = ({
     initialized = true,
-    versioningEnabled = true,
     historyResult = { total: 0, items: [] as ChangeHistoryDocument[] },
     workflowResult = workflow,
   }: {
     initialized?: boolean;
-    versioningEnabled?: boolean;
     historyResult?: { total: number; items: ChangeHistoryDocument[] };
     workflowResult?: typeof workflow | null;
   } = {}) => {
@@ -82,7 +80,6 @@ describe('get_workflow_change_history', () => {
       deps: {
         changeHistoryService,
         getWorkflowSource: jest.fn().mockResolvedValue(workflowResult),
-        workflowVersioningEnabled: versioningEnabled,
       },
       changeHistoryService,
     };
@@ -92,27 +89,20 @@ describe('get_workflow_change_history', () => {
     it('throws when change history is not initialized', () => {
       const { deps } = createDeps({ initialized: false });
 
-      expect(() =>
-        assertWorkflowChangeHistoryEnabled(
-          deps.changeHistoryService,
-          deps.workflowVersioningEnabled
-        )
-      ).toThrow(WorkflowChangeHistoryDisabledError);
-    });
-
-    it('throws when versioning uiSetting is disabled', () => {
-      const { deps } = createDeps({ versioningEnabled: false });
-
-      expect(() =>
-        assertWorkflowChangeHistoryEnabled(
-          deps.changeHistoryService,
-          deps.workflowVersioningEnabled
-        )
-      ).toThrow(WorkflowChangeHistoryDisabledError);
+      expect(() => assertWorkflowChangeHistoryEnabled(deps.changeHistoryService)).toThrow(
+        new WorkflowChangeHistoryDisabledError()
+      );
     });
   });
 
   describe('getHistoryForWorkflow', () => {
+    it('throws when change history is not initialized', async () => {
+      const { deps } = createDeps({ initialized: false });
+
+      await expect(
+        getHistoryForWorkflow(deps, { workflowId: 'wf-1', spaceId: 'default' })
+      ).rejects.toThrow(new WorkflowChangeHistoryDisabledError());
+    });
     it('returns mapped history entries with page/perPage and matching version', async () => {
       const historyDocument = createHistoryDocument('event-1', 2);
       const { deps, changeHistoryService } = createDeps({
@@ -187,14 +177,6 @@ describe('get_workflow_change_history', () => {
       await expect(
         getHistoryForWorkflow(deps, { workflowId: 'missing', spaceId: 'default' })
       ).rejects.toBeInstanceOf(WorkflowNotFoundError);
-    });
-
-    it('throws WorkflowChangeHistoryDisabledError when versioning is disabled', async () => {
-      const { deps } = createDeps({ versioningEnabled: false });
-
-      await expect(
-        getHistoryForWorkflow(deps, { workflowId: 'wf-1', spaceId: 'default' })
-      ).rejects.toBeInstanceOf(WorkflowChangeHistoryDisabledError);
     });
 
     it('returns empty list when no history exists', async () => {
