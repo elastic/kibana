@@ -612,7 +612,7 @@ export interface InitializationOptions {
 export type VisualizeEditorContext<T extends LensConfiguration = LensConfiguration> = {
   savedObjectId?: string;
   embeddableId?: string;
-  vizEditorOriginatingAppUrl?: string;
+  visEditorOriginatingAppUrl?: string;
   legacyEditorOriginatingApp?: string;
   originatingApp?: string;
   originatingPath?: string;
@@ -1004,6 +1004,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   >;
   dateRange: DateRange;
   esqlVariables?: ESQLControlVariable[] | undefined;
+  isApproximate?: boolean | undefined;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;
