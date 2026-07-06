@@ -11,7 +11,7 @@ jest.mock('dompurify', () => ({
   default: { sanitize: (html: string) => html },
 }));
 
-import { fillTemplate, stripMarkdownFences, isValidTemplate } from './template_fill';
+import { fillTemplate, stripMarkdownFences, isValidTemplate, injectCsp } from './template_fill';
 
 const cols = [
   { name: 'category.keyword', type: 'keyword' },
@@ -67,11 +67,15 @@ describe('fillTemplate', () => {
 
   describe('empty state', () => {
     it('renders {% if rows.size == 0 %} block when there are no rows', () => {
-      expect(fillTemplate(wrap('{% if rows.size == 0 %}<p>No data</p>{% endif %}'), cols, [])).toContain('No data');
+      expect(
+        fillTemplate(wrap('{% if rows.size == 0 %}<p>No data</p>{% endif %}'), cols, [])
+      ).toContain('No data');
     });
 
     it('does not render the empty block when rows are present', () => {
-      expect(fillTemplate(wrap('{% if rows.size == 0 %}<p>No data</p>{% endif %}'), cols, rows)).not.toContain('No data');
+      expect(
+        fillTemplate(wrap('{% if rows.size == 0 %}<p>No data</p>{% endif %}'), cols, rows)
+      ).not.toContain('No data');
     });
   });
 
@@ -89,7 +93,11 @@ describe('fillTemplate', () => {
     });
 
     it('clamps _pct to 100 maximum', () => {
-      const result = fillTemplate(wrap('{{ rows[0].val_pct }}'), [{ name: 'val', type: 'double' }], [[999999]]);
+      const result = fillTemplate(
+        wrap('{{ rows[0].val_pct }}'),
+        [{ name: 'val', type: 'double' }],
+        [[999999]]
+      );
       expect(result).toContain('100');
     });
   });
@@ -120,10 +128,56 @@ describe('fillTemplate', () => {
     });
   });
 
+  describe('_pct edge cases', () => {
+    it('returns 0 for _pct when all values are zero', () => {
+      const result = fillTemplate(
+        wrap('{{ rows[0].val_pct }}'),
+        [{ name: 'val', type: 'double' }],
+        [[0], [0]]
+      );
+      expect(result).toContain('0');
+    });
+
+    it('ignores non-numeric values when computing _pct', () => {
+      const result = fillTemplate(
+        wrap('{{ rows[0].val_pct }}'),
+        [{ name: 'val', type: 'keyword' }],
+        [['text']]
+      );
+      expect(result).not.toContain('NaN');
+      expect(result).not.toContain('Infinity');
+    });
+  });
+
+  describe('max object', () => {
+    it('exposes max values via {{ max.col_name }}', () => {
+      const result = fillTemplate(wrap('{{ max.total_revenue }}'), cols, rows);
+      expect(result).toContain('8000');
+    });
+  });
+
   describe('error recovery', () => {
     it('throws on invalid Liquid syntax', () => {
       expect(() => fillTemplate(wrap('{% invalid_tag %}'), cols, rows)).toThrow();
     });
+  });
+});
+
+describe('injectCsp', () => {
+  it('injects CSP into an existing <head>', () => {
+    const result = injectCsp('<html><head></head><body></body></html>');
+    expect(result).toContain('<head><meta http-equiv="Content-Security-Policy"');
+  });
+
+  it('prepends CSP when there is no <head>', () => {
+    const result = injectCsp('<p>hello</p>');
+    expect(result.startsWith('<meta http-equiv="Content-Security-Policy"')).toBe(true);
+  });
+
+  it('is idempotent — does not double-inject', () => {
+    const once = injectCsp('<p>hello</p>');
+    const twice = injectCsp(once);
+    expect(twice.split('Content-Security-Policy').length).toBe(2);
   });
 });
 
