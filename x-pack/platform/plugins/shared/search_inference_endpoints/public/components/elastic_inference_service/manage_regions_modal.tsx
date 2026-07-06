@@ -128,7 +128,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
               <p>
                 {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.body', {
                   defaultMessage:
-                    "Some models are only hosted in specific regions. Restricting your selection may make those models unavailable for inference routing. Check each model's details to see its supported regions.",
+                    "Some models are only available in specific regions. Restricting regions might make those models unavailable. Check each model's details to verify its supported regions.",
                 })}
               </p>
             </EuiCallOut>
