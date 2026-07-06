@@ -362,6 +362,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(404);
     });
 
+    it('deletes an already-expired query instead of reporting it as not found', async () => {
+      // Regression: the existence check used to exclude expired queries entirely.
+      const queryId = v4();
+      await apiClient
+        .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+          params: {
+            path: { name: STREAM_NAME, queryId },
+            body: {
+              title: 'already expired',
+              esql: {
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'expired'")`,
+              },
+              expires_at: '2020-01-01T00:00:00.000Z',
+            },
+          },
+        })
+        .expect(200);
+      expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([]);
+
+      const deleteQueryResponse = await apiClient
+        .fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
+          params: { path: { name: STREAM_NAME, queryId } },
+        })
+        .expect(200)
+        .then((res) => res.body);
+      expect(deleteQueryResponse.acknowledged).to.be(true);
+
+      // A genuinely unknown id must still 404 — the fix must not blanket-succeed.
+      await apiClient
+        .fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
+          params: { path: { name: STREAM_NAME, queryId } },
+        })
+        .expect(404);
+    });
+
     it('bulks insert and remove queries', async () => {
       const firstQuery = {
         id: 'first',

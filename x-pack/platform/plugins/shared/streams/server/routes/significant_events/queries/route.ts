@@ -254,7 +254,10 @@ const deleteQueryRoute = createServerRoute({
     const definition = await streamsClient.getStream(streamName);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const queryLink = await kiClient.bulkGetQueriesByIds(streamName, [queryId]);
+    // includeExpired: explicit-id action, so an expired query must stay reachable.
+    const queryLink = await kiClient.bulkGetQueriesByIds(streamName, [queryId], {
+      includeExpired: true,
+    });
     if (queryLink.length === 0) {
       throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
     }

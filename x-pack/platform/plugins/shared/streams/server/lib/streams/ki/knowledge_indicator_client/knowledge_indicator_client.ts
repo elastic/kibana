@@ -140,8 +140,12 @@ export class KnowledgeIndicatorClient {
     return this.reader.getStreamToQueryLinksMap(streamNames, options);
   }
 
-  bulkGetQueriesByIds(stream: string, ids: string[]): Promise<QueryLink[]> {
-    return this.reader.bulkGetQueriesByIds(stream, ids);
+  bulkGetQueriesByIds(
+    stream: string,
+    ids: string[],
+    options?: { includeExpired?: boolean }
+  ): Promise<QueryLink[]> {
+    return this.reader.bulkGetQueriesByIds(stream, ids, options);
   }
 
   getPromotableUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<QueryLink[]> {

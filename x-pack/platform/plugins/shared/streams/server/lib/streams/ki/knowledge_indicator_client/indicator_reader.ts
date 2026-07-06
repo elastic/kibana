@@ -211,9 +211,17 @@ export class IndicatorReader {
     return result;
   }
 
-  async bulkGetQueriesByIds(stream: string, ids: string[]): Promise<QueryLink[]> {
+  async bulkGetQueriesByIds(
+    stream: string,
+    ids: string[],
+    options: { includeExpired?: boolean } = {}
+  ): Promise<QueryLink[]> {
     if (ids.length === 0) return [];
-    return this.getQueryLinks([stream], { queryIds: ids, ruleUnbacked: 'include' });
+    return this.getQueryLinks([stream], {
+      queryIds: ids,
+      ruleUnbacked: 'include',
+      includeExpired: options.includeExpired,
+    });
   }
 
   async getRuleBackedQueryLinks(): Promise<QueryLink[]> {
