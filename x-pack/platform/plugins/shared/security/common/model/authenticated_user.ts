@@ -6,7 +6,7 @@
  */
 
 import type { Capabilities } from '@kbn/core/types';
-import { isUserAnonymous, canUserHaveProfile } from '@kbn/core-security-common';
+import { canUserHaveProfile, isUserAnonymous } from '@kbn/core-security-common';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 const REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE = ['reserved', 'native'];

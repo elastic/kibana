@@ -11,7 +11,6 @@ import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { useCurrentUser } from '@kbn/core-user-profile-browser';
-import { currentUserMock } from '@kbn/core-user-profile-browser-mocks';
 
 import type { ChangePasswordFormValues } from './change_password_modal';
 import { ChangePasswordModal, validateChangePasswordForm } from './change_password_modal';
