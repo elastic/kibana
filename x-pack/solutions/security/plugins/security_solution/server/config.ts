@@ -151,7 +151,7 @@ export const configSchema = schema.object({
    * The Max number of Bytes allowed for the `upload` endpoint response action
    */
   maxUploadResponseActionFileBytes: schema.number({
-    defaultValue: Number.MAX_SAFE_INTEGER,
+    defaultValue: 5e8, // 500MB
     max: Number.MAX_SAFE_INTEGER,
   }),
 
