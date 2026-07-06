@@ -81,6 +81,24 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       }
       return getBreachQuery(query).trim().length > 0;
     },
+    getSandboxConfig: (state) => {
+      /*
+       * create/edit/clone default to a single unified editor — no base/alert tabs — and
+       * derive the split heuristically on Apply. Manual split opts out of both: separate
+       * tabs, verbatim commit. (state.mode is remapped 'clone' -> 'edit' before it reaches
+       * state, so this is always true today; kept explicit to match the pre-refactor check.)
+       */
+      const usesUnifiedEditorByDefault =
+        state.mode === 'create' || state.mode === 'edit' || state.mode === 'clone';
+      return {
+        tabs: usesUnifiedEditorByDefault
+          ? state.manualSplitEnabled
+            ? ['base', 'alert']
+            : undefined
+          : ['base', 'alert'],
+        autoSplitOnApply: !state.manualSplitEnabled,
+      };
+    },
   },
   builderCondition: {
     id: 'builderCondition',
@@ -89,6 +107,9 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     }),
     render: () => null,
     validate: (_methods, s) => s.queryCommitted,
+    // Every builder sandbox is read-only (isEditable: false, computed by the caller) — no
+    // tabs or auto-split concept applies since there's no independent draft to split.
+    getSandboxConfig: () => ({ tabs: undefined, autoSplitOnApply: false }),
   },
   recoveryCondition: {
     id: 'recoveryCondition',
@@ -103,6 +124,10 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         renderCustomRecovery={props.renderCustomRecovery}
       />
     ),
+    getSandboxConfig: (state) => ({
+      tabs: state.recoveryType === 'custom' ? ['recovery'] : undefined,
+      autoSplitOnApply: false,
+    }),
   },
   details: {
     id: 'details',

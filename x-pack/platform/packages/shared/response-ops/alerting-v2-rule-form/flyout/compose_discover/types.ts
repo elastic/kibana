@@ -46,18 +46,6 @@ export interface StepRenderProps {
   onManualSplit?: () => void;
 }
 
-export interface StepDefinition {
-  id: StepId;
-  title: string;
-  render: (props: StepRenderProps) => React.ReactNode;
-  validate?: (
-    methods: UseFormReturn<FormValues>,
-    state: ComposeDiscoverState,
-    services?: RuleFormServices,
-    builderState?: BuilderState
-  ) => Promise<boolean> | boolean;
-}
-
 /**
  * Three independent, intrinsically-named facts about the active sandbox editing surface —
  * replaces checking a mode's name (currentStep.id, isBuilderMode, manualSplitEnabled, ...)
@@ -73,6 +61,27 @@ export interface SandboxConfig {
   autoSplitOnApply: boolean;
   /** Whether the sandbox owns an independent, losable draft, or mirrors an external source of truth. */
   isEditable: boolean;
+}
+
+/**
+ * The two SandboxConfig fields a step/source genuinely varies by identity — isEditable is
+ * deliberately excluded: it's uniform across every builder step (confirmed with Jason), so
+ * it's computed once by the caller assembling the final SandboxConfig, not per-step.
+ */
+export type StepSandboxConfig = Pick<SandboxConfig, 'tabs' | 'autoSplitOnApply'>;
+
+export interface StepDefinition {
+  id: StepId;
+  title: string;
+  render: (props: StepRenderProps) => React.ReactNode;
+  validate?: (
+    methods: UseFormReturn<FormValues>,
+    state: ComposeDiscoverState,
+    services?: RuleFormServices,
+    builderState?: BuilderState
+  ) => Promise<boolean> | boolean;
+  /** Omitted steps default to `{ tabs: undefined, autoSplitOnApply: false }` (single unified editor, no auto-split). */
+  getSandboxConfig?: (state: ComposeDiscoverState) => StepSandboxConfig;
 }
 
 /**

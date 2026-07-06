@@ -354,6 +354,53 @@ describe('step validation', () => {
       'notifications',
     ]);
   });
+
+  describe('getSandboxConfig', () => {
+    const alertStep = getSteps(true).steps.find((s) => s.id === 'alertCondition')!;
+    // getStepIds (no builderType) never includes 'builderCondition' — use the builder step list.
+    const builderStep = getSteps(true, 'threshold').steps.find((s) => s.id === 'builderCondition')!;
+    const recoveryStep = getSteps(true).steps.find((s) => s.id === 'recoveryCondition')!;
+    const detailsStep = getSteps(true).steps.find((s) => s.id === 'details')!;
+
+    it('alertCondition: single editor by default, auto-splits on Apply', () => {
+      const state = createState({ manualSplitEnabled: false });
+      expect(alertStep.getSandboxConfig!(state)).toEqual({
+        tabs: undefined,
+        autoSplitOnApply: true,
+      });
+    });
+
+    it('alertCondition: split tabs and no auto-split once manual split is enabled', () => {
+      const state = createState({ manualSplitEnabled: true });
+      expect(alertStep.getSandboxConfig!(state)).toEqual({
+        tabs: ['base', 'alert'],
+        autoSplitOnApply: false,
+      });
+    });
+
+    it('builderCondition: never has tabs or auto-split — every builder sandbox is read-only', () => {
+      const state = createState({ manualSplitEnabled: false });
+      expect(builderStep.getSandboxConfig!(state)).toEqual({
+        tabs: undefined,
+        autoSplitOnApply: false,
+      });
+    });
+
+    it('recoveryCondition: shows the recovery tab only when recoveryType is custom', () => {
+      expect(recoveryStep.getSandboxConfig!(createState({ recoveryType: 'custom' }))).toEqual({
+        tabs: ['recovery'],
+        autoSplitOnApply: false,
+      });
+      expect(recoveryStep.getSandboxConfig!(createState({ recoveryType: 'default' }))).toEqual({
+        tabs: undefined,
+        autoSplitOnApply: false,
+      });
+    });
+
+    it('details: no getSandboxConfig defined — caller defaults to a single editor, no auto-split', () => {
+      expect(detailsStep.getSandboxConfig).toBeUndefined();
+    });
+  });
 });
 
 describe('shell shared fields', () => {

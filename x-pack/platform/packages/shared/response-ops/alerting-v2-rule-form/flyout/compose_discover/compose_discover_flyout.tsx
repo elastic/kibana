@@ -58,12 +58,14 @@ import {
 import type {
   ComposeDiscoverAction,
   ComposeDiscoverMode,
+  ComposeDiscoverState,
   QueryTab,
   RecoveryType,
   SandboxConfig,
+  StepSandboxConfig,
 } from './types';
 import { isBuilderConditionStepId } from './types';
-import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
+import { useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import {
   guessRecoveryBlock,
@@ -618,59 +620,50 @@ export function ComposeDiscoverFlyout({
   const isLastStep = uiState.step === steps.length - 1;
 
   /*
-   * TODO: recoveryType drives whether the recovery tab appears in YAML mode.
-   * Follow schema decisions in #268984 — if recoveryType is superseded by a
-   * field on RuleQuery itself, gate this on query shape instead.
+   * YAML isn't a step, so it can't get its config from STEP_REGISTRY the same way — a
+   * standalone object with the same shape, selected by a plain ternary right below. Captures
+   * sandboxQuery.format via closure rather than adding it as a function param, keeping
+   * getSandboxConfig's (state) => StepSandboxConfig shape uniform between steps and this source.
    */
-  const sandboxTabs = useMemo<QueryTab[] | undefined>(() => {
-    if (!uiState.yamlMode) {
-      return getSandboxTabs(isAlert, {
-        step: uiState.step,
-        recoveryType: uiState.recoveryType,
-        mode: uiState.mode,
-        manualSplitEnabled: uiState.manualSplitEnabled,
-      });
-    }
-    /*
-     * In YAML mode the sandbox stays open (and is forced open for non-representable
-     * rules). A standalone query can't be represented as base/alert tabs, so it uses
-     * the single unified editor; composed queries keep the split tabs.
-     */
-    if (sandboxQuery.format === 'standalone') return undefined;
-    return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
-  }, [
-    uiState.yamlMode,
-    uiState.recoveryType,
-    uiState.step,
-    uiState.mode,
-    uiState.manualSplitEnabled,
-    sandboxQuery.format,
-    isAlert,
-  ]);
+  const yamlSandboxConfig = useMemo<{
+    getSandboxConfig: (state: ComposeDiscoverState) => StepSandboxConfig;
+  }>(
+    () => ({
+      getSandboxConfig: (state) => {
+        /*
+         * In YAML mode the sandbox stays open (and is forced open for non-representable
+         * rules). A standalone query can't be represented as base/alert tabs, so it uses
+         * the single unified editor; composed queries keep the split tabs.
+         * TODO: recoveryType drives whether the recovery tab appears here. Follow schema
+         * decisions in #268984 — if recoveryType is superseded by a field on RuleQuery
+         * itself, gate this on query shape instead.
+         */
+        if (sandboxQuery.format === 'standalone') {
+          return { tabs: undefined, autoSplitOnApply: false };
+        }
+        return {
+          tabs: state.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'],
+          autoSplitOnApply: false,
+        };
+      },
+    }),
+    [sandboxQuery.format]
+  );
+
+  const stepSandboxConfig: StepSandboxConfig = uiState.yamlMode
+    ? yamlSandboxConfig.getSandboxConfig(uiState)
+    : currentStep?.getSandboxConfig?.(uiState) ?? { tabs: undefined, autoSplitOnApply: false };
 
   /*
-   * Create/edit/clone default to a single unified editor on the Alert Condition step — no
-   * base/alert tabs. On Apply, derive the base query and alert condition from that unified
-   * text via the heuristic split. When the user has opted in to manual split, Apply commits
-   * the already-separated base/alert verbatim without running the heuristic.
-   */
-  const autoSplitOnApply =
-    currentStep?.id === 'alertCondition' &&
-    !uiState.yamlMode &&
-    isAlert &&
-    !uiState.manualSplitEnabled;
-
-  /*
-   * One derived fact for "how should the sandbox behave right now," replacing the scattered
-   * isBuilderMode/currentStep.id checks this used to require at each consumer. tabs and
-   * autoSplitOnApply are still computed the same way as before this commit (via
-   * getSandboxTabs()/the inline check above) — only isEditable is genuinely new here. The
-   * next commit replaces how tabs/autoSplitOnApply are computed without touching any of
-   * their consumers, since they already read from this object.
+   * tabs/autoSplitOnApply only apply to alert-condition-shaped editing (isAlert, or YAML
+   * mode, which represents either kind) — a signal rule's alertCondition step never has an
+   * independent base/alert split to show or auto-split on Apply. isEditable is uniform
+   * across every builder step (confirmed with Jason), so it's computed once here rather
+   * than per-step.
    */
   const sandboxConfig: SandboxConfig = {
-    tabs: sandboxTabs,
-    autoSplitOnApply,
+    tabs: uiState.yamlMode || isAlert ? stepSandboxConfig.tabs : undefined,
+    autoSplitOnApply: uiState.yamlMode || isAlert ? stepSandboxConfig.autoSplitOnApply : false,
     isEditable,
   };
 
