@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { Capabilities } from '@kbn/core/types';
+import { isEqual } from 'lodash';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import { AiIcon } from '@kbn/shared-ux-ai-components';
@@ -35,7 +35,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
-import { extractRulesCapabilities } from '../../../../common/utils/rules_capabilities';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   fetchAlertAnalysisWorkflowSettings,
   saveAlertAnalysisWorkflowSettings,
@@ -51,47 +51,19 @@ const ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY = [
 
 type AlertAnalysisWorkflowSettingsError = Error & { body?: { message?: string } };
 
-const areSettingsEqual = (
-  left: AlertAnalysisWorkflowSettingsWithConnector | undefined,
-  right: AlertAnalysisWorkflowSettingsWithConnector | undefined
-): boolean => {
-  return (
-    left?.workflowEnabled === right?.workflowEnabled &&
-    left?.autoCloseEnabled === right?.autoCloseEnabled &&
-    left?.autoCloseConfidenceScoreMinThreshold === right?.autoCloseConfidenceScoreMinThreshold &&
-    left?.autoCloseConfidenceScoreMaxThreshold === right?.autoCloseConfidenceScoreMaxThreshold &&
-    left?.connectorId === right?.connectorId &&
-    left?.createConversation === right?.createConversation
-  );
-};
-
-const getAlertAnalysisWorkflowAccess = (
-  capabilities: Capabilities,
-  isEnterprise: boolean
-): { canAccessPage: boolean; canEditAdvancedSettings: boolean } => {
-  const rulesCapabilities = extractRulesCapabilities(capabilities);
-  const canEditWorkflow =
-    capabilities.workflowsManagement?.[WorkflowsManagementUiActions.update] === true;
-  const canEditAdvancedSettings = Boolean(
-    capabilities.advancedSettings?.save && rulesCapabilities.rules.edit && canEditWorkflow
-  );
-
-  return {
-    canEditAdvancedSettings,
-    canAccessPage: isEnterprise && canEditAdvancedSettings,
-  };
-};
-
 export const AlertAnalysisWorkflowPage: React.FC = () => {
   const {
     services: { application, http, notifications, settings },
   } = useKibana();
   const queryClient = useQueryClient();
   const isEnterprise = useLicense().isEnterprise();
-  const { canAccessPage, canEditAdvancedSettings } = getAlertAnalysisWorkflowAccess(
-    application.capabilities,
-    isEnterprise
+  const { edit: canEditRules } = useUserPrivileges().rulesPrivileges.rules;
+  const canEditWorkflow =
+    application.capabilities.workflowsManagement?.[WorkflowsManagementUiActions.update] === true;
+  const canEditAdvancedSettings = Boolean(
+    application.capabilities.advancedSettings?.save && canEditRules && canEditWorkflow
   );
+  const canAccessPage = isEnterprise && canEditAdvancedSettings;
   const { aiConnectors, isLoading: isLoadingConnectors } = useAIConnectors();
   const { data: savedSettingsResponse, isLoading } = useQuery({
     queryKey: ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY,
@@ -107,7 +79,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
   const [pageSettings, setPageSettings] = useState<
     AlertAnalysisWorkflowSettingsWithConnector | undefined
   >();
-  const isDirty = !areSettingsEqual(pageSettings, savedSettings);
+  const isDirty = !isEqual(pageSettings, savedSettings);
   const isWorkflowEnabled = pageSettings?.workflowEnabled ?? true;
   const isThresholdRangeInvalid =
     pageSettings !== undefined &&
