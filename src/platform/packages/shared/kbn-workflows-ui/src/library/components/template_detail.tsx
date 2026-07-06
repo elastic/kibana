@@ -12,6 +12,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFocusTrap,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -19,9 +20,14 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { stringify } from 'yaml';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowYaml } from '@kbn/workflows';
+import {
+  getStepByNameFromNestedSteps,
+  transformWorkflowToGraph,
+  type WorkflowYaml,
+} from '@kbn/workflows';
 import { renderTemplate } from '@kbn/workflows-library';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { CatalogTemplateIcons } from './catalog_template_icons';
@@ -33,6 +39,8 @@ import {
   WorkflowDetailBottomBar,
   type WorkflowDetailBottomBarView,
   WorkflowGraphCanvasWithoutProvider,
+  WorkflowVisualEditorFlyout,
+  type WorkflowVisualEditorFlyoutTarget,
 } from '../../components';
 import { useTemplate } from '../hooks/use_template';
 import { getWorkflowTypes } from '../lib/get_workflow_types';
@@ -55,6 +63,12 @@ const SOLUTION_ICONS: Record<string, IconType> = {
   search: 'logoElasticsearch',
 };
 
+const TRIGGER_LABEL: Record<string, string> = {
+  manual: 'Manual',
+  alert: 'Alert',
+  scheduled: 'Scheduled',
+};
+
 const capitalize = (value: string): string =>
   value.length > 0 ? value[0].toUpperCase() + value.slice(1) : value;
 
@@ -73,14 +87,55 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   const { euiTheme } = useEuiTheme();
   const [previewView, setPreviewView] = useState<WorkflowDetailBottomBarView>('graph');
   const [selectedGraphStepId, setSelectedGraphStepId] = useState<string | undefined>();
+  const flyoutPanelRef = useRef<HTMLDivElement | null>(null);
 
   const previewYaml = useMemo(() => (data ? renderTemplate({ template: data }) : ''), [data]);
   const workflow = useMemo(() => data?.body as WorkflowYaml | undefined, [data]);
+  const transformed = useMemo(
+    () => (workflow ? transformWorkflowToGraph(workflow) : undefined),
+    [workflow]
+  );
   const { stepTypes, triggerTypes } = useMemo(
     () => (data ? getWorkflowTypes(data.body) : { stepTypes: [], triggerTypes: [] }),
     [data]
   );
   const activePreviewView = showGraphPreview ? previewView : 'yaml';
+  const selectedPreviewTarget = useMemo<WorkflowVisualEditorFlyoutTarget | undefined>(() => {
+    if (!selectedGraphStepId || !workflow || !transformed) {
+      return undefined;
+    }
+
+    const ref = transformed.nodeRefs[selectedGraphStepId];
+    if (!ref) {
+      return undefined;
+    }
+
+    if (ref.kind === 'trigger') {
+      const trigger = workflow.triggers?.[ref.triggerIndex];
+      if (!trigger) {
+        return undefined;
+      }
+
+      return {
+        kind: 'trigger',
+        triggerType: ref.triggerType,
+        triggerLabel: TRIGGER_LABEL[ref.triggerType] ?? ref.triggerType,
+        yamlSnippet: stringify({ triggers: [trigger] }).trimEnd(),
+      };
+    }
+
+    const step = getStepByNameFromNestedSteps(workflow.steps, ref.stepName);
+    if (!step) {
+      return undefined;
+    }
+
+    return {
+      kind: 'step',
+      stepName: ref.stepName,
+      stepType: step.type,
+      yamlSnippet: stringify([step]).trimEnd(),
+    };
+  }, [selectedGraphStepId, transformed, workflow]);
 
   const renderStepIcon = useCallback<RenderStepIcon>(({ stepType, isTrigger, size, color }) => {
     return (
@@ -88,11 +143,28 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     );
   }, []);
 
+  const closeGraphPreviewTarget = useCallback(() => setSelectedGraphStepId(undefined), []);
+  const handleFlyoutKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        closeGraphPreviewTarget();
+      }
+    },
+    [closeGraphPreviewTarget]
+  );
+
   useEffect(() => {
     if (data) {
       onLoaded?.(data);
     }
   }, [data, onLoaded]);
+
+  useEffect(() => {
+    if (selectedPreviewTarget) {
+      flyoutPanelRef.current?.focus();
+    }
+  }, [selectedPreviewTarget]);
 
   if (isLoading) {
     return <EuiLoadingSpinner size="xl" data-test-subj="workflowLibraryTemplateDetail-loading" />;
@@ -250,6 +322,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
               <ReactFlowProvider>
                 <WorkflowGraphCanvasWithoutProvider
                   workflow={workflow}
+                  transformed={transformed}
                   isYamlValid={true}
                   selectedStepId={selectedGraphStepId}
                   onStepSelect={setSelectedGraphStepId}
@@ -273,6 +346,38 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                 onEditorViewChange={setPreviewView}
                 disableAutoCollapse={true}
               />
+            ) : null}
+            {activePreviewView === 'graph' && selectedPreviewTarget ? (
+              <EuiFocusTrap returnFocus>
+                <div
+                  ref={flyoutPanelRef}
+                  tabIndex={-1}
+                  onKeyDown={handleFlyoutKeyDown}
+                  css={{
+                    position: 'absolute',
+                    top: euiTheme.size.s,
+                    right: euiTheme.size.s,
+                    bottom: euiTheme.size.s,
+                    width: 420,
+                    zIndex: euiTheme.levels.flyout,
+                    boxShadow:
+                      '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 4px 13px 0 rgba(43, 57, 79, 0.12), 0 8px 17px 0 rgba(43, 57, 79, 0.07)',
+                    borderRadius: euiTheme.border.radius.medium,
+                    overflow: 'hidden',
+                    outline: 'none',
+                  }}
+                  data-test-subj="workflowLibraryTemplateDetailGraphFlyout"
+                >
+                  <WorkflowVisualEditorFlyout
+                    target={selectedPreviewTarget}
+                    editorYaml={previewYaml}
+                    canExecuteWorkflow={false}
+                    isYamlValid={true}
+                    onClose={closeGraphPreviewTarget}
+                    renderStepIcon={renderStepIcon}
+                  />
+                </div>
+              </EuiFocusTrap>
             ) : null}
           </EuiFlexItem>
         </EuiFlexGroup>

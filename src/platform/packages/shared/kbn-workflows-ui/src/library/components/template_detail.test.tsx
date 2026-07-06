@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { TemplateDetail } from './template_detail';
@@ -15,9 +15,70 @@ import { WorkflowsUiServicesProvider } from '../../context';
 import { createMockWorkflowsUiServices } from '../../context/__mocks__/mocks';
 
 const mockUseTemplate = jest.fn();
+
 jest.mock('../hooks/use_template', () => ({
   useTemplate: (slug: string) => mockUseTemplate(slug),
 }));
+
+jest.mock('../../components', () => {
+  const actual = jest.requireActual('../../components');
+
+  return {
+    ...actual,
+    ReactFlowProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    TypeIcon: () => <span data-test-subj="mockTypeIcon" />,
+    WorkflowDetailBottomBar: () => <div data-test-subj="mockWorkflowDetailBottomBar" />,
+    WorkflowVisualEditorFlyout: ({
+      target,
+      onOpenInYaml,
+      onRunStep,
+      renderMoreMenuItems,
+    }: {
+      target: { yamlSnippet?: string };
+      onOpenInYaml?: () => void;
+      onRunStep?: () => void;
+      renderMoreMenuItems?: () => JSX.Element[];
+    }) => (
+      <div data-test-subj="workflowVisualEditorFlyout">
+        {target.yamlSnippet}
+        {onRunStep ? (
+          <button type="button" data-test-subj="workflowVisualEditorFlyoutRunStep" />
+        ) : null}
+        {renderMoreMenuItems ? (
+          <button type="button" data-test-subj="workflowVisualEditorFlyoutMore" />
+        ) : null}
+        {onOpenInYaml ? (
+          <button type="button" data-test-subj="workflowVisualEditorFlyoutOpenInYaml" />
+        ) : null}
+      </div>
+    ),
+    WorkflowGraphCanvasWithoutProvider: ({
+      onStepSelect,
+      transformed,
+    }: {
+      transformed: { nodeRefs: Record<string, { kind: string }> };
+      onStepSelect: (stepId: string) => void;
+    }) => {
+      const stepNodeId = Object.entries(transformed.nodeRefs).find(
+        ([, ref]) => ref.kind === 'step'
+      )?.[0];
+
+      return (
+        <button
+          type="button"
+          data-test-subj="mockWorkflowGraphCanvas"
+          onClick={() => {
+            if (stepNodeId) {
+              onStepSelect(stepNodeId);
+            }
+          }}
+        >
+          {'Select step'}
+        </button>
+      );
+    },
+  };
+});
 
 // Stub the Monaco-backed preview so the test does not depend on the editor.
 jest.mock('./template_yaml_preview', () => ({
@@ -72,6 +133,13 @@ const renderDetail = () =>
     </WorkflowsUiServicesProvider>
   );
 
+const renderGraphDetail = () =>
+  render(
+    <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
+      <TemplateDetail slug="my-template" showGraphPreview={true} />
+    </WorkflowsUiServicesProvider>
+  );
+
 describe('TemplateDetail', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -122,6 +190,21 @@ describe('TemplateDetail', () => {
     expect(preview).not.toHaveTextContent('template-metadata');
     expect(preview.textContent).toContain('maxAge: 7');
     expect(preview.textContent).not.toContain('__install__');
+  });
+
+  it('should show the selected step YAML in a read-only graph flyover', () => {
+    renderGraphDetail();
+
+    fireEvent.click(screen.getByTestId('mockWorkflowGraphCanvas'));
+
+    expect(screen.getByTestId('workflowLibraryTemplateDetailGraphFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowVisualEditorFlyout')).toHaveTextContent('name: notify');
+    expect(screen.getByTestId('workflowVisualEditorFlyout')).toHaveTextContent(
+      'type: slack.sendMessage'
+    );
+    expect(screen.queryByTestId('workflowVisualEditorFlyoutRunStep')).toBeNull();
+    expect(screen.queryByTestId('workflowVisualEditorFlyoutMore')).toBeNull();
+    expect(screen.queryByTestId('workflowVisualEditorFlyoutOpenInYaml')).toBeNull();
   });
 
   it('should render a loading spinner while loading', () => {
