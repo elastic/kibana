@@ -58,4 +58,5 @@ export const useApplicationCapabilities = jest.fn().mockReturnValue({
 export const useCasesConfig = jest.fn().mockReturnValue({
   attachmentsEnabled: false,
   templatesEnabled: false,
+  detailsRedesignEnabled: false,
 });

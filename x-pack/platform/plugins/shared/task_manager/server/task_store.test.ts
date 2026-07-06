@@ -381,7 +381,7 @@ describe('TaskStore', () => {
         }
       );
 
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith([task], request, coreStart.security);
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith([task], request, coreStart.security, {});
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
@@ -1837,7 +1837,8 @@ describe('TaskStore', () => {
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
         [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
         mockRequest,
-        coreStart.security
+        coreStart.security,
+        {}
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -1937,7 +1938,8 @@ describe('TaskStore', () => {
           },
         ],
         mockRequest,
-        coreStart.security
+        coreStart.security,
+        {}
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -2044,7 +2046,8 @@ describe('TaskStore', () => {
           },
         ],
         mockRequest,
-        coreStart.security
+        coreStart.security,
+        {}
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -3760,7 +3763,8 @@ describe('TaskStore', () => {
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
         [task1, task2],
         request,
-        coreStart.security
+        coreStart.security,
+        {}
       );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();

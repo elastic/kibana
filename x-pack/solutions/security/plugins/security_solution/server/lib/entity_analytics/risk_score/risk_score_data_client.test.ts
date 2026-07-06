@@ -369,6 +369,99 @@ describe('RiskScoreDataClient', () => {
 
       expect(result).toEqual([]);
     });
+
+    describe('includeContributions', () => {
+      const contributionRisk = {
+        calculated_score_norm: 42,
+        calculated_level: 'Low',
+        inputs: [
+          {
+            id: 'alert-1',
+            index: '.alerts-security.alerts-default',
+            category: 'category_1',
+            description: 'Rule: test',
+          },
+        ],
+        modifiers: [{ type: 'asset_criticality', contribution: 5 }],
+        category_2_score: 5,
+        category_2_count: 1,
+        criticality_level: 'high_impact',
+      };
+
+      it('excludes contribution fields by default', async () => {
+        esClient.search.mockResolvedValueOnce(
+          mockSearchHits([
+            {
+              timestamp: '2026-01-01T00:00:00.000Z',
+              entityType: 'host',
+              risk: contributionRisk,
+            },
+          ]) as never
+        );
+
+        const result = await riskScoreDataClient.getRiskScoreHistory(defaultParams);
+
+        expect(result).toEqual([
+          {
+            '@timestamp': '2026-01-01T00:00:00.000Z',
+            calculated_score_norm: 42,
+            calculated_level: 'Low',
+          },
+        ]);
+      });
+
+      it('includes contribution fields when includeContributions is true', async () => {
+        esClient.search.mockResolvedValueOnce(
+          mockSearchHits([
+            {
+              timestamp: '2026-01-01T00:00:00.000Z',
+              entityType: 'host',
+              risk: contributionRisk,
+            },
+          ]) as never
+        );
+
+        const result = await riskScoreDataClient.getRiskScoreHistory({
+          ...defaultParams,
+          includeContributions: true,
+        });
+
+        expect(result).toEqual([
+          {
+            '@timestamp': '2026-01-01T00:00:00.000Z',
+            ...contributionRisk,
+          },
+        ]);
+      });
+
+      it('omits contribution fields absent on the document', async () => {
+        esClient.search.mockResolvedValueOnce(
+          mockSearchHits([
+            {
+              timestamp: '2026-01-01T00:00:00.000Z',
+              entityType: 'host',
+              risk: {
+                calculated_score_norm: 42,
+                calculated_level: 'Low',
+              },
+            },
+          ]) as never
+        );
+
+        const result = await riskScoreDataClient.getRiskScoreHistory({
+          ...defaultParams,
+          includeContributions: true,
+        });
+
+        expect(result).toEqual([
+          {
+            '@timestamp': '2026-01-01T00:00:00.000Z',
+            calculated_score_norm: 42,
+            calculated_level: 'Low',
+          },
+        ]);
+      });
+    });
   });
 
   describe('getDailyAverageRiskScoreNormSeries', () => {

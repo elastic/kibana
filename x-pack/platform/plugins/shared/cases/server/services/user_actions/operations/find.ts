@@ -7,7 +7,10 @@
 
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
-import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
 import type { UserActionFindRequestTypes } from '../../../../common/types/api';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
@@ -46,11 +49,16 @@ export class UserActionFinder {
     page,
     perPage,
     filter,
+    author,
   }: FindOptions): Promise<SavedObjectsFindResponse<UserActionTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to find user actions for case id: ${caseId}`);
 
-      const finalFilter = combineFilters([filter, UserActionFinder.buildFilter(types)]);
+      const finalFilter = combineFilters([
+        filter,
+        UserActionFinder.buildFilter(types),
+        UserActionFinder.buildAuthorFilter(author),
+      ]);
 
       const userActions =
         await this.context.unsecuredSavedObjectsClient.find<UserActionPersistedAttributes>({
@@ -81,6 +89,76 @@ export class UserActionFinder {
       this.context.log.error(`Error finding user actions for case id: ${caseId}: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * Fetches all user actions for a case using a point-in-time finder.
+   * The `search` field from FindOptions is intentionally excluded — text search
+   * is handled via in-memory filtering at the client layer.
+   *
+   * `limit` bounds how many user actions are collected before the PIT is closed,
+   * to avoid unbounded memory/CPU usage for cases with very large activity logs
+   * (see `MAX_USER_ACTIONS_FOR_SEARCH`). Callers that pass a `limit` should be
+   * aware that any user actions beyond it will not be considered; a warning is
+   * logged whenever the cap is actually hit so truncation isn't silent.
+   *
+   * `decode` (defaults to `true`) controls whether each attribute is validated
+   * with `decodeOrThrow` as it's collected. Callers that only need a subset of
+   * the results (e.g. after filtering + pagination) can pass `decode: false` and
+   * call `decodeUserActions` themselves on just that subset, avoiding paying the
+   * io-ts decode cost for records that end up discarded.
+   */
+  public async findAll({
+    caseId,
+    sortOrder,
+    types,
+    filter,
+    author,
+    limit,
+    decode,
+  }: Omit<FindOptions, 'page' | 'perPage' | 'search'> & {
+    limit?: number;
+    decode?: boolean;
+  }): Promise<UserActionSavedObjectTransformed[]> {
+    try {
+      this.context.log.debug(`Attempting to find all user actions for case id: ${caseId}`);
+
+      const finalFilter = combineFilters([
+        filter,
+        UserActionFinder.buildFilter(types),
+        UserActionFinder.buildAuthorFilter(author),
+      ]);
+
+      return await this.collectFromPIT(
+        {
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          sortField: defaultSortField,
+          sortOrder: sortOrder ?? 'asc',
+          filter: finalFilter,
+          perPage: MAX_DOCS_PER_PAGE,
+        },
+        { limit, decode, caseId }
+      );
+    } catch (error) {
+      this.context.log.error(`Error finding all user actions for case id: ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Validates the attributes of user actions that were previously collected with
+   * `decode: false`. Kept separate from `findAll` so callers can filter/paginate
+   * an undecoded result set first and only pay the decode cost for what they
+   * actually return.
+   */
+  public decodeUserActions(
+    userActions: UserActionSavedObjectTransformed[]
+  ): UserActionSavedObjectTransformed[] {
+    return userActions.map((so) => ({
+      ...so,
+      attributes: decodeOrThrow(UserActionTransformedAttributesRt)(so.attributes),
+    }));
   }
 
   private static buildFilter(types: FindOptions['types'] = []) {
@@ -177,6 +255,19 @@ export class UserActionFinder {
     );
   }
 
+  private static buildAuthorFilter(author?: string): KueryNode | undefined {
+    if (!author) {
+      return undefined;
+    }
+
+    return buildFilter({
+      filters: [author],
+      field: 'created_by.username',
+      operator: 'or',
+      type: CASE_USER_ACTION_SAVED_OBJECT,
+    });
+  }
+
   private static buildGenericTypeFilter(type: UserActionType): KueryNode | undefined {
     return buildFilter({
       filters: [type],
@@ -212,39 +303,63 @@ export class UserActionFinder {
 
       const combinedFilters = combineFilters([updateActionFilter, statusChangeFilter, filter]);
 
-      const finder =
-        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<UserActionPersistedAttributes>(
-          {
-            type: CASE_USER_ACTION_SAVED_OBJECT,
-            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-            sortField: defaultSortField,
-            sortOrder: 'asc',
-            filter: combinedFilters,
-            perPage: MAX_DOCS_PER_PAGE,
-          }
-        );
-
-      let userActions: UserActionSavedObjectTransformed[] = [];
-
-      for await (const findResults of finder.find()) {
-        userActions = userActions.concat(
-          findResults.saved_objects.map((so) => {
-            const res = transformToExternalModel(so);
-
-            const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
-
-            return {
-              ...res,
-              attributes: decodeRes,
-            };
-          })
-        );
-      }
-
-      return userActions;
+      return await this.collectFromPIT({
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        sortField: defaultSortField,
+        sortOrder: 'asc',
+        filter: combinedFilters,
+        perPage: MAX_DOCS_PER_PAGE,
+      });
     } catch (error) {
       this.context.log.error(`Error finding status changes: ${error}`);
       throw error;
     }
+  }
+
+  private async collectFromPIT(
+    options: SavedObjectsCreatePointInTimeFinderOptions,
+    { limit, decode = true, caseId }: { limit?: number; decode?: boolean; caseId?: string } = {}
+  ): Promise<UserActionSavedObjectTransformed[]> {
+    const finder =
+      this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<UserActionPersistedAttributes>(
+        options
+      );
+
+    let results: UserActionSavedObjectTransformed[] = [];
+    let hitLimit = false;
+
+    for await (const batch of finder.find()) {
+      results = results.concat(
+        batch.saved_objects.map((so) => {
+          const res = transformToExternalModel(so);
+          return {
+            ...res,
+            attributes: decode
+              ? decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes)
+              : (res.attributes as UserActionTransformedAttributes),
+          };
+        })
+      );
+
+      if (limit != null && results.length >= limit) {
+        // Stop pulling further pages once we've hit the cap. The PIT must be
+        // explicitly closed here since we're breaking out before the finder's
+        // generator naturally drains and auto-closes it.
+        hitLimit = true;
+        await finder.close();
+        break;
+      }
+    }
+
+    if (hitLimit) {
+      this.context.log.warn(
+        `Reached the limit of ${limit} user actions while collecting user actions${
+          caseId ? ` for case id: ${caseId}` : ''
+        }. Results were truncated and may not reflect the case's full activity log.`
+      );
+    }
+
+    return limit != null ? results.slice(0, limit) : results;
   }
 }
