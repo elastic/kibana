@@ -493,7 +493,7 @@ Delete the asset criticality record for a specific entity.
     return supertest
       .get(getRouteUrlForSpace('/api/risk_score/history', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },

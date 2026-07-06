@@ -42,6 +42,7 @@ export const EntityInsight = <T,>({
   openDetailsPanel,
   entityType,
   entityRecord,
+  hideHeaderIcons,
 }: {
   identityFields: IdentityFields;
   isPreviewMode: boolean;
@@ -49,6 +50,8 @@ export const EntityInsight = <T,>({
   /** Host or user when the flyout represents that entity; enables v2 alerts resolution by `entity.id`. */
   entityType?: string;
   entityRecord?: EntityStoreRecord | null;
+  /** When true, hides the chevron icons in the section headers. Used by the v2 flyout. */
+  hideHeaderIcons?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const euidApi = useEntityStoreEuidApi();
@@ -92,6 +95,7 @@ export const EntityInsight = <T,>({
           alertsData={filteredAlertsData}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
+          hideHeaderIcons={hideHeaderIcons}
         />
         <EuiSpacer size="s" />
       </>
@@ -105,6 +109,7 @@ export const EntityInsight = <T,>({
           passedFindings={passedFindings}
           failedFindings={failedFindings}
           openDetailsPanel={openDetailsPanel}
+          hideHeaderIcons={hideHeaderIcons}
         />
         <EuiSpacer size="s" />
       </>
