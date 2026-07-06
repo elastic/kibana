@@ -18,8 +18,8 @@ fi
 git fetch origin "$effective_branch"
 git checkout -B "$effective_branch" "origin/$effective_branch"
 
-echo "Updating branch property in package.json to '$effective_branch'"
-jq --arg branch "$effective_branch" '.branch = $branch' package.json > package.json.tmp && mv package.json.tmp package.json
+echo "Updating branch property in package.json to '$BRANCH'"
+jq --arg branch "$BRANCH" '.branch = $branch' package.json > package.json.tmp && mv package.json.tmp package.json
 
 # See https://github.com/elastic/kibana/pull/199404
 # Prevent backport assignments
