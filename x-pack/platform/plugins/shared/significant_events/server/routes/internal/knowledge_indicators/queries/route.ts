@@ -13,7 +13,7 @@ import type {
 } from '@kbn/significant-events-schema';
 import { generatedSignificantEventQuerySchema } from '@kbn/significant-events-schema';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
-import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -66,7 +66,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -111,7 +111,7 @@ export const demoteBackedQueriesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -180,7 +180,7 @@ export const bulkDeleteQueriesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -302,7 +302,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   handler: async ({ params, request, getScopedClients, server }): Promise<QueriesGetResponse> => {
@@ -373,7 +373,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   handler: async ({
@@ -448,7 +448,7 @@ const generateQueriesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   handler: async ({
@@ -520,7 +520,7 @@ const persistQueriesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   handler: async ({ params, request, getScopedClients, server }): Promise<PersistQueriesResult> => {

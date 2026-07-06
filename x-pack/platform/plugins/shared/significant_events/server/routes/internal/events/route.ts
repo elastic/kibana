@@ -18,7 +18,7 @@ import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
-import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
@@ -55,7 +55,7 @@ const eventsSearchRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -99,7 +99,7 @@ const eventsHistoryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -130,7 +130,7 @@ const eventsBulkCreateRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -155,7 +155,7 @@ const eventsLifecycleRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -233,7 +233,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -265,7 +265,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({

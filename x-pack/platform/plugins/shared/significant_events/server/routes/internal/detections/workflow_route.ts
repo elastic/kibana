@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
@@ -20,7 +20,7 @@ const countAlertsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -56,7 +56,7 @@ const changePointScanRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -114,7 +114,7 @@ const ruleChangePointRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -151,7 +151,7 @@ const ruleActivityRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -189,7 +189,7 @@ const ruleAlertWindowsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({

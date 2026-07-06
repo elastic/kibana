@@ -29,11 +29,11 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.streamsTest.enableMemory();
+      await apiServices.significantEventsTest.enableMemory();
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.streamsTest.disableMemory();
+      await apiServices.significantEventsTest.disableMemory();
     });
 
     for (const workflowId of MEMORY_WORKFLOW_IDS) {

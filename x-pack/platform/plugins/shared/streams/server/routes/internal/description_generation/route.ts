@@ -46,9 +46,8 @@ export const descriptionGenerationStatusRoute = createServerRoute({
     params,
     request,
     getScopedClients,
-    server,
   }): Promise<DescriptionGenerationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+    const { streamsClient, taskClient } = await getScopedClients({
       request,
     });
 
@@ -95,10 +94,9 @@ export const descriptionGenerationTaskRoute = createServerRoute({
     params,
     request,
     getScopedClients,
-    server,
     logger,
   }): Promise<DescriptionGenerationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+    const { streamsClient, uiSettingsClient, taskClient } = await getScopedClients({
       request,
     });
 

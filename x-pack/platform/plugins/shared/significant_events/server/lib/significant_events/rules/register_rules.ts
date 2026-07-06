@@ -9,11 +9,9 @@ import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import type { Logger } from '@kbn/core/server';
 import { Dataset, createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
-import {
-  STREAMS_FEATURE_ID,
-  STREAMS_RULE_REGISTRATION_CONTEXT,
-} from '../../../../common/constants';
-import type { StreamsPluginSetupDependencies } from '../../../types';
+import type { StreamsPluginSetupDependencies } from '@kbn/streams-plugin/server/types';
+import { STREAMS_FEATURE_ID } from '@kbn/streams-plugin/common/constants';
+import { STREAMS_RULE_REGISTRATION_CONTEXT } from '../../../../common/constants';
 import { esqlRuleType } from './esql/register';
 
 interface Props {

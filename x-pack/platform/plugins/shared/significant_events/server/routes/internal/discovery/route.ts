@@ -7,7 +7,7 @@
 import type { SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
-import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { resolveConnectorForSignificantEventsDiscovery } from '../../utils/resolve_connector_for_feature';
@@ -28,7 +28,7 @@ const discoveryExecuteRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   handler: async ({
@@ -89,7 +89,7 @@ const discoveryStatusRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   handler: async ({

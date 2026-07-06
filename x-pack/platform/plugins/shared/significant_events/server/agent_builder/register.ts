@@ -7,7 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { StreamsServer } from '../types';
+import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';

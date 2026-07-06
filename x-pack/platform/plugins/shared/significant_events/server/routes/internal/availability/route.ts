@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { SignificantEventsAvailabilityResponse } from '../../../../common';
-import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { getSignificantEventsAvailability } from '../../utils/assert_significant_events_access';
 
@@ -21,7 +21,7 @@ const availabilityRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({}),

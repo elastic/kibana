@@ -19,11 +19,11 @@ apiTest.describe(
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
       await apiServices.streamsTest.enable();
-      await apiServices.streamsTest.enableSignificantEvents();
+      await apiServices.significantEventsTest.enableSignificantEvents();
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.streamsTest.disableSignificantEvents();
+      await apiServices.significantEventsTest.disableSignificantEvents();
     });
 
     apiTest(
@@ -69,7 +69,7 @@ apiTest.describe(
       async ({ apiClient, samlAuth, apiServices }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-        await apiServices.streamsTest.disableSignificantEvents();
+        await apiServices.significantEventsTest.disableSignificantEvents();
 
         try {
           const response = await apiClient.post(BULK_STATUS_ENDPOINT, {
@@ -80,7 +80,7 @@ apiTest.describe(
 
           expect(response.statusCode).toBe(403);
         } finally {
-          await apiServices.streamsTest.enableSignificantEvents();
+          await apiServices.significantEventsTest.enableSignificantEvents();
         }
       }
     );
