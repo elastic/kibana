@@ -62431,7 +62431,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Resume a paused waitForApproval step (approved query param) or waitForInput step (schema fields as query params). Returns an HTML confirmation page.
+        Resume a paused `waitForApproval` step (pauses the workflow and waits for a human to approve/decline before execution continues) or `waitForInput` step (passes the expected input values as query parameters in the URL). Returns an HTML confirmation page.
       operationId: get-workflows-executions-executionid-resume-external
       parameters:
         - description: Workflow execution ID
@@ -62440,14 +62440,14 @@ paths:
           required: true
           schema:
             type: string
-        - description: External resume API key credential.
+        - description: The API key created when the workflow execution was paused. Authenticates the request to resume execution.
           in: query
           name: apiKey
           required: true
           schema:
             maxLength: 1024
             type: string
-        - description: Required for waitForApproval. Whether the external actor approved the workflow pause.
+        - description: Indicates whether a human reviewer approved the paused step. Required for `waitForApproval` when resuming an approval step.
           in: query
           name: approved
           required: false
@@ -62470,7 +62470,7 @@ paths:
                   value: <!DOCTYPE html><html><body><h1>Thank you</h1><p>Your response was received. You can close this window.</p></body></html>
               schema:
                 type: string
-          description: HTML confirmation page when the workflow response was accepted
+          description: An HTML confirmation page confirming that the response was received and the workflow execution was resumed.
       summary: Resume a workflow execution from an external link
       tags:
         - workflows
@@ -62494,7 +62494,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Resume a paused waitForInput step using an external resume API key and submitted form data. Authenticate with an Authorization: ApiKey header or an apiKey query parameter (header takes precedence). Returns an HTML confirmation page.
+        Resume a workflow execution that is paused and waiting for external input. Submit input values as a JSON request body, authenticated with either an Authorization: ApiKey header or an apiKey query parameter. Returns an HTML confirmation page.
       operationId: post-workflows-executions-executionid-resume-external
       parameters:
         - description: Workflow execution ID
@@ -62530,7 +62530,7 @@ paths:
                   value: <!DOCTYPE html><html><body><h1>Thank you</h1><p>Your response was received. You can close this window.</p></body></html>
               schema:
                 type: string
-          description: HTML confirmation page when the external input was accepted
+          description: An HTML confirmation page confirming that the input was received and the workflow execution was resumed.
       summary: Submit external input for a paused workflow execution
       tags:
         - workflows
@@ -62567,7 +62567,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Render an HTML form for submitting external input to a paused waitForInput step. Does not resume the execution.
+        Returns an HTML form for submitting external input to a paused waitForInput step. Does not resume the execution.
       operationId: get-workflows-executions-executionid-resume-external-form
       parameters:
         - description: Workflow execution ID
@@ -62594,7 +62594,7 @@ paths:
               schema:
                 type: string
           description: HTML form page for submitting external input to a paused waitForInput step
-      summary: Show the external input form for a paused workflow execution
+      summary: Get the external input form for a paused workflow execution
       tags:
         - workflows
       x-codeSamples:
