@@ -40,6 +40,6 @@ export const alertingAdvancedSettings = {
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
-    technicalPreview: true,
+    experimental: true,
   },
 } satisfies AlertingV2AdvancedSettingsRegistration;

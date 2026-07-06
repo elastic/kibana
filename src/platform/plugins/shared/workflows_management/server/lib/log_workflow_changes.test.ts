@@ -69,19 +69,12 @@ describe('logWorkflowChanges', () => {
       workflows: [{ id: 'wf-1', document: makeDocument() }],
       changeHistoryService: { isInitialized: () => true },
       scopedChangeHistory,
-      workflowVersioningEnabled: true,
       action: WorkflowChangeHistoryAction.workflowUpdate,
       spaceId: 'default',
       timestamp: new Date(REFERENCE_TIMESTAMP_MS),
       logger,
       ...overrides,
     });
-
-  it('does not call logBulk when workflow versioning is disabled', async () => {
-    await logChanges({ workflowVersioningEnabled: false });
-
-    expect(scopedChangeHistory.logBulk).not.toHaveBeenCalled();
-  });
 
   it('does not call logBulk when change history is not initialized', async () => {
     await logChanges({

@@ -51,7 +51,7 @@ export interface SeedScenario {
 /**
  * The resolved, post-promotion query identity passed between seed steps.
  * Carries severityScore and description from SeedQuery so downstream steps
- * (seed_tasks, etc.) can use them without re-accessing the scenario definition.
+ * (seed_alerts, etc.) can use them without re-accessing the scenario definition.
  */
 export interface SeededQuery {
   queryId: string;

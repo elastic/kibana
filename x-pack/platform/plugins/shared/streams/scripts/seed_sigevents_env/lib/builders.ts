@@ -18,8 +18,7 @@ const INFRA_DEP_SUBTYPE: Record<string, string> = {
 
 /**
  * Builds the canonical feature payload objects from the manifest.
- * Used by both seedFeatures (which adds index-only fields status/last_seen) and
- * buildTaskDocs in seed_tasks.ts.
+ * Used by seedFeatures (which adds index-only fields status/last_seen).
  */
 export function buildFeaturePayloads(
   ctx: SeedContext,
