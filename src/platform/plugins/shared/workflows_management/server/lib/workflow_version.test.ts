@@ -11,7 +11,6 @@ import {
   applyWorkflowVersion,
   getNextWorkflowVersion,
   INITIAL_WORKFLOW_VERSION,
-  maybeApplyWorkflowVersion,
 } from './workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
@@ -64,35 +63,5 @@ describe('applyWorkflowVersion', () => {
 
     expect(applyWorkflowVersion(document, staleExisting).version).toBe(6);
     expect(applyWorkflowVersion(document, freshExisting).version).toBe(7);
-  });
-});
-
-describe('maybeApplyWorkflowVersion', () => {
-  it('bumps version when versioning is enabled', () => {
-    const existing = { ...baseDocument(), version: 3 };
-    expect(maybeApplyWorkflowVersion({ ...existing, name: 'Updated' }, existing, true)).toEqual(
-      expect.objectContaining({ name: 'Updated', version: 4 })
-    );
-  });
-
-  it('preserves existing version when versioning is disabled', () => {
-    const existing = { ...baseDocument(), version: 3 };
-    expect(maybeApplyWorkflowVersion({ ...existing, name: 'Updated' }, existing, false)).toEqual(
-      expect.objectContaining({ name: 'Updated', version: 3 })
-    );
-  });
-
-  it('preserves existing version when document omits it and versioning is disabled', () => {
-    const existing = { ...baseDocument(), version: 3 };
-    const { version: _version, ...documentWithoutVersion } = existing;
-    expect(
-      maybeApplyWorkflowVersion(documentWithoutVersion as WorkflowProperties, existing, false)
-    ).toEqual(expect.objectContaining({ version: 3 }));
-  });
-
-  it('omits version on create when versioning is disabled', () => {
-    expect(maybeApplyWorkflowVersion(baseDocument(), undefined, false)).not.toHaveProperty(
-      'version'
-    );
   });
 });
