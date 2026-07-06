@@ -299,6 +299,7 @@ export const AgentlessPackagePoliciesTable = ({
                     'xpack.fleet.epm.packageDetails.integrationList.throughput24h',
                     { defaultMessage: 'Throughput last 24h' }
                   ),
+                  width: '190px',
                   align: 'left' as HorizontalAlignment,
                   render({ packagePolicy }: { packagePolicy: InMemoryPackagePolicy }) {
                     return (
