@@ -57,6 +57,17 @@ export const getStepIconType = (nodeType: string): IconType => {
       break;
     // `workflow` (bare base type) is handled in StepIcon's BASE_TYPE_AGGREGATE_ICONS.
 
+    // trigger nodes
+    case 'manual':
+      iconType = HardcodedIcons.manual;
+      break;
+    case 'alert':
+      iconType = HardcodedIcons.alert;
+      break;
+    case 'scheduled':
+      iconType = HardcodedIcons.scheduled;
+      break;
+
     // flow control nodes
     case 'wait':
       iconType = 'clock';
@@ -83,6 +94,14 @@ export const getStepIconType = (nodeType: string): IconType => {
     case 'foreach-iteration':
     case 'while-iteration':
       iconType = 'tokenNumber';
+      break;
+    case 'parallel':
+    case 'enter-parallel':
+    case 'exit-parallel':
+      iconType = 'branch';
+      break;
+    case 'parallel-branch':
+      iconType = 'branch';
       break;
     case 'loop.break':
     case 'loop.continue':

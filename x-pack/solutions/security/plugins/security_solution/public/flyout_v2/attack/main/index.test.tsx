@@ -8,9 +8,21 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { AttackFlyout } from '.';
 import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+
+jest.mock('./footer', () => ({
+  Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
+    <button
+      type="button"
+      data-test-subj="mock-footer"
+      data-has-on-attack-updated={String(onAttackUpdated != null)}
+      onClick={onAttackUpdated}
+    />
+  ),
+}));
 
 jest.mock('./header', () => ({
   Header: ({
@@ -51,6 +63,8 @@ const createAttackHit = (extra: DataTableRecord['flattened'] = {}): DataTableRec
     isAnchor: false,
   } as DataTableRecord);
 
+const mockAttack = {} as AttackDiscoveryAlert;
+
 describe('<AttackFlyout />', () => {
   const startServices = createStartServicesMock();
 
@@ -61,7 +75,7 @@ describe('<AttackFlyout />', () => {
   it('renders the header, body, and footer', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={createAttackHit()} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
       </TestProviders>
     );
 
@@ -80,7 +94,7 @@ describe('<AttackFlyout />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={minimalHit} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={minimalHit} attack={mockAttack} onAttackUpdated={jest.fn()} />
       </TestProviders>
     );
 
@@ -98,7 +112,7 @@ describe('<AttackFlyout />', () => {
 
     const { getByTestId } = render(
       <TestProviders startServices={startServices}>
-        <AttackFlyout hit={createAttackHit()} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
       </TestProviders>
     );
 
@@ -115,14 +129,35 @@ describe('<AttackFlyout />', () => {
     );
   });
 
-  it('passes onAttackUpdated callback to the header', () => {
+  it('passes onAttackUpdated callback to the header and footer', () => {
     const onAttackUpdated = jest.fn();
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={createAttackHit()} onAttackUpdated={onAttackUpdated} />
+        <AttackFlyout
+          hit={createAttackHit()}
+          attack={mockAttack}
+          onAttackUpdated={onAttackUpdated}
+        />
       </TestProviders>
     );
 
     expect(getByTestId('mock-header')).toHaveAttribute('data-has-on-attack-updated', 'true');
+    expect(getByTestId('mock-footer')).toHaveAttribute('data-has-on-attack-updated', 'true');
+  });
+
+  it('forwards onAttackUpdated unchanged so the wrapper-supplied refetch fires', () => {
+    const onAttackUpdated = jest.fn();
+    const { getByTestId } = render(
+      <TestProviders>
+        <AttackFlyout
+          hit={createAttackHit()}
+          attack={mockAttack}
+          onAttackUpdated={onAttackUpdated}
+        />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('mock-footer'));
+    expect(onAttackUpdated).toHaveBeenCalledTimes(1);
   });
 });

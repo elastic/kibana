@@ -38,10 +38,17 @@ interface StepIconProps extends Omit<EuiIconProps, 'type'> {
   stepType: string;
   executionStatus: ExecutionStatus | null | undefined;
   onClick?: React.MouseEventHandler;
+  /**
+   * Explicit tint for mask-based (data-URI) icons, e.g. the graph node paints
+   * the trigger icon accent/pink to match its border. Only affects masked icons;
+   * multi-color logos are untouched. When omitted, masked icons use the neutral
+   * text tone so the shared default stays consistent across all consumers.
+   */
+  iconColor?: string;
 }
 
 export const StepIcon = React.memo(
-  ({ stepType, executionStatus, onClick, title, ...rest }: StepIconProps) => {
+  ({ stepType, executionStatus, onClick, title, iconColor, ...rest }: StepIconProps) => {
     const { euiTheme } = useEuiTheme();
     const { triggersActionsUi, workflowsExtensions } = useKibana().services;
     const { actionTypeRegistry } = triggersActionsUi;
@@ -124,7 +131,11 @@ export const StepIcon = React.memo(
             mask-size: contain;
             mask-repeat: no-repeat;
             mask-position: center;
-            background-color: ${statusColor ?? euiTheme.colors.textParagraph};
+            // Tint precedence: execution-status color, then an explicit
+            // caller-provided tint (e.g. the graph node's accent/pink), then a
+            // neutral text tone so the shared default is consistent everywhere
+            // StepIcon is used.
+            background-color: ${statusColor ?? iconColor ?? euiTheme.colors.textParagraph};
           `}
           onClick={onClick}
           aria-hidden={true}
