@@ -100,7 +100,7 @@ describe('initUiSettings', () => {
     expect(registeredSettings).toHaveProperty(ENABLE_RULE_CHANGES_HISTORY_SETTING);
     expect(registeredSettings[ENABLE_RULE_CHANGES_HISTORY_SETTING]).toEqual(
       expect.objectContaining({
-        name: 'Enable rule changes history',
+        name: 'Enable detection rule changes history',
         value: false,
         type: 'boolean',
         requiresPageReload: true,
