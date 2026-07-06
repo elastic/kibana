@@ -43,6 +43,7 @@ export function transformDashboardOut(
     timeTo,
     title,
     projectRouting,
+    isApproximate,
   } = attributes;
 
   const { tags } = toAsCodeTags(references);
@@ -136,6 +137,7 @@ export function transformDashboardOut(
       ...(validatedState as DashboardState), // defaults have been injected at this point, so casting is safe
       /** These keys were validated seperately, since they each have unique error handling */
       ...(filters && { filters }),
+      ...(isApproximate !== undefined && { esql_approximation: isApproximate }),
       panels,
       pinned_panels: pinnedPanels,
       ...(query && { query }),
