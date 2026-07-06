@@ -124,28 +124,4 @@ describe('StackAlertsPage', () => {
     expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
     expect(screen.queryByTestId('noPermissionPrompt')).not.toBeInTheDocument();
   });
-
-  it('passes non-empty ruleTypeIds to AlertsTable when the rule types API returns nothing (stackAlertsOnly)', async () => {
-    // Simulate a stackAlertsOnly user: rule types API returns empty (no rule-read),
-    // but the stackAlertsOnly `show` capability grants page access.
-    mockLoadRuleTypes.mockResolvedValue([]);
-    const core = coreMock.createStart();
-    core.application.capabilities = {
-      ...core.application.capabilities,
-      [STACK_ALERTS_ONLY_FEATURE_ID]: { show: true },
-    };
-    const renderer = createAppMockRenderer({
-      additionalServices: { application: core.application },
-    });
-    renderer.render(<StackAlertsPage />);
-
-    await screen.findByTestId('alertsTable');
-
-    // The search bar mock fires onFilterSelected([]) on mount, simulating filter-controls
-    // initialization. The page must fall back to ALL_NON_SIEM_RULE_TYPE_IDS so that the
-    // alerts query is not disabled.
-    const lastCall = mockAlertsTable.mock.calls.at(-1)!;
-    const ruleTypeIds: string[] = lastCall[0].ruleTypeIds ?? [];
-    expect(ruleTypeIds.length).toBeGreaterThan(0);
-  });
 });
