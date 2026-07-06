@@ -107,6 +107,10 @@ apiTest.describe(
       async ({ apiClient, esClient }) => {
         const seedId = 'user:seed@example.com@entra_id';
         const adId = 'user:T03KX1Z@active_directory';
+        const disabledSeedId = 'user:disabled@example.com@entra_id';
+        const disabledAdId = 'user:T04KX2Z@active_directory';
+
+        await expectBridgeEnabled(apiClient, defaultHeaders, true);
 
         await seedUserEntity(esClient, {
           entityId: seedId,
@@ -140,11 +144,40 @@ apiTest.describe(
           }
         );
         expect(disable.statusCode).toBe(200);
+        await expectBridgeEnabled(apiClient, defaultHeaders, false);
+
+        const group = await apiClient.get(
+          `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${seedId}&apiVersion=2`,
+          {
+            headers: defaultHeaders,
+            responseType: 'json',
+          }
+        );
+        expect(group.statusCode).toBe(200);
+        expect(group.body.target.entity.id).toBe(adId);
+        expect(group.body.group_size).toBe(2);
+
+        await seedUserEntity(esClient, {
+          entityId: disabledSeedId,
+          namespace: 'entra_id',
+          email: 'disabled@example.com',
+          userName: 'disabled@example.com',
+        });
+        await seedUserEntity(esClient, {
+          entityId: disabledAdId,
+          namespace: 'active_directory',
+          email: 'disabled-ad@example.com',
+          userName: 'T04KX2Z',
+        });
+        await seedEntityAnalyticsSource(esClient, {
+          email: 'disabled@example.com',
+          relatedUsers: ['T04KX2Z'],
+        });
 
         await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
           sync: true,
         });
-        await waitForResolution(esClient, seedId, adId);
+        await assertNotResolved(esClient, disabledSeedId);
       }
     );
 
@@ -237,3 +270,26 @@ apiTest.describe(
     );
   }
 );
+
+const expectBridgeEnabled = async (
+  apiClient: {
+    get: Function;
+  },
+  headers: Record<string, string>,
+  enabled: boolean
+) => {
+  const list = await apiClient.get(ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_LIST, {
+    headers,
+    responseType: 'json',
+  });
+
+  expect(list.statusCode).toBe(200);
+  expect(list.body.rules).toStrictEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: RESOLUTION_RULE_IDS.RELATED_USER_BRIDGE,
+        enabled,
+      }),
+    ])
+  );
+};
