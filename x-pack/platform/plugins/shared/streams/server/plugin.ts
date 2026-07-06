@@ -24,6 +24,7 @@ import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-s
 import { isNotFoundError } from '@kbn/es-errors';
 import type { Subscription } from 'rxjs';
 import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
+import type { StreamsClient } from './lib/streams/client';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
@@ -56,6 +57,7 @@ import { registerFieldsMetadataExtractors } from './register_fields_metadata_ext
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import type { AttachmentClient } from './lib/streams/attachments/attachment_client';
+import { getStreamsPromptsSavedObject } from './lib/prompts/prompts_config';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -67,6 +69,10 @@ export interface StreamsPluginSetup {
     request: KibanaRequest;
     rulesClientOptions?: RulesClientCreateOptions;
   }): Promise<AttachmentClient>;
+  getStreamsClient(params: {
+    request: KibanaRequest;
+    rulesClientOptions?: RulesClientCreateOptions;
+  }): Promise<StreamsClient>;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginStart {}
@@ -89,6 +95,7 @@ export class StreamsPlugin
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
   private attachmentService?: AttachmentService;
+  private streamsService?: StreamsService;
   private streamsGetScopedClients?: GetScopedClients;
   private subscriptions: Subscription[] = [];
   private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClientContract>;
@@ -115,6 +122,8 @@ export class StreamsPlugin
       this.logger.get('patternExtraction')
     );
 
+    core.savedObjects.registerType(getStreamsPromptsSavedObject());
+
     this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(
       core,
@@ -135,6 +144,7 @@ export class StreamsPlugin
     const attachmentService = new AttachmentService(core, this.logger);
     this.attachmentService = attachmentService;
     const streamsService = new StreamsService(core, this.logger, this.isDev);
+    this.streamsService = streamsService;
     const contentService = new ContentService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
 
@@ -460,6 +470,33 @@ export class StreamsPlugin
         return this.attachmentService!.getClient({
           soClient,
           rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
+        });
+      },
+      getStreamsClient: async ({ request, rulesClientOptions }) => {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        const soClient = coreStart.savedObjects.getScopedClient(request);
+        const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+        const attachmentClient = await this.attachmentService!.getClient({
+          soClient,
+          rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
+        });
+        const getKnowledgeIndicatorClient = (): Promise<KnowledgeIndicatorClientContract> => {
+          if (!this.kiProvider) {
+            throw new Error(
+              'No KnowledgeIndicatorClient provider registered. Is the significant_events plugin enabled?'
+            );
+          }
+          return this.kiProvider(request);
+        };
+        const license = await pluginsStart.licensing.getLicense();
+        return this.streamsService!.getClient({
+          attachmentClient,
+          getKnowledgeIndicatorClient,
+          esClient: scopedClusterClient.asCurrentUser,
+          esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
+          uiSettingsClient,
+          isSecurityEnabled: license.getFeature('security').isEnabled,
         });
       },
     };

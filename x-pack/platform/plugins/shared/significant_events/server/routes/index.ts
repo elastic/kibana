@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import { internalMemoryRoutes } from './internal/memory/route';
-import { significantEventsRoutes } from './significant_events/route';
-import { keepAliveRoutes } from './internal/knowledge_indicators/keep_alive/route';
-import { queryRoutes } from './queries/route';
 import { internalAvailabilityRoutes } from './internal/availability/route';
 import { internalDetectionsRoutes } from './internal/detections/route';
 import { internalDetectionsWorkflowRoutes } from './internal/detections/workflow_route';
 import { internalDiscoveriesRoutes } from './internal/discoveries/route';
 import { internalDiscoveryRoutes } from './internal/discovery/route';
 import { internalEligibleStreamsRoutes } from './internal/extraction/eligible_streams_route';
+import { internalEventsRoutes } from './internal/events/route';
+import { internalIdentifyKIFeaturesRoutes } from './internal/knowledge_indicators/features/identify_route';
 import { internalKIContinuousKIExtractionRoutes } from './internal/knowledge_indicators/continuous_ki_extraction/route';
 import { internalKIFeatureRoutes } from './internal/knowledge_indicators/features/route';
-import { identifyKIFeaturesRoutes } from './internal/knowledge_indicators/features/identify_route';
-import { internalEventsRoutes } from './internal/events/route';
+import { internalKIKeepAliveRoutes } from './internal/knowledge_indicators/keep_alive/route';
 import { internalKIOnboardingRoutes } from './internal/knowledge_indicators/onboarding/route';
-import { internalPromptsRoutes } from './internal/prompts/route';
 import { internalKIQueriesRoutes } from './internal/knowledge_indicators/queries/route';
 import { internalKIQueryOccurrencesRoutes } from './internal/knowledge_indicators/query_occurrences/route';
+import { internalMemoryRoutes } from './internal/memory/route';
+import { internalPromptsRoutes } from './internal/prompts/route';
+import { queryRoutes } from './queries/route';
+import { significantEventsRoutes } from './significant_events/route';
 
-export const streamsRouteRepository = {
+export const significantEventsRouteRepository = {
   // internal APIs
   ...internalAvailabilityRoutes,
   ...internalDetectionsRoutes,
   ...internalDetectionsWorkflowRoutes,
-  ...internalDiscoveryRoutes,
   ...internalDiscoveriesRoutes,
+  ...internalDiscoveryRoutes,
   ...internalEligibleStreamsRoutes,
   ...internalEventsRoutes,
+  ...internalIdentifyKIFeaturesRoutes,
   ...internalKIContinuousKIExtractionRoutes,
-  ...identifyKIFeaturesRoutes,
   ...internalKIFeatureRoutes,
   ...internalKIOnboardingRoutes,
   ...internalKIQueriesRoutes,
@@ -42,9 +42,9 @@ export const streamsRouteRepository = {
   ...internalMemoryRoutes,
   ...internalPromptsRoutes,
   // public APIs
-  ...keepAliveRoutes,
+  ...internalKIKeepAliveRoutes,
   ...queryRoutes,
   ...significantEventsRoutes,
 };
 
-export type StreamsRouteRepository = typeof streamsRouteRepository;
+export type SignificantEventsRouteRepository = typeof significantEventsRouteRepository;

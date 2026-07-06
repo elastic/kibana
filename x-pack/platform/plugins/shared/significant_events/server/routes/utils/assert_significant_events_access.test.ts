@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FeatureNotEnabledError } from '../../lib/streams/errors/feature_not_enabled_error';
-import { MissingDependencyError } from '../../lib/streams/errors/missing_dependency_error';
+import { FeatureNotEnabledError } from '../../lib/errors/feature_not_enabled_error';
+import { MissingDependencyError } from '../../lib/errors/missing_dependency_error';
 import {
   assertSignificantEventsAccess,
   getSignificantEventsAvailability,

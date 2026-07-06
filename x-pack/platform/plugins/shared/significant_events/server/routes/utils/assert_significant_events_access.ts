@@ -7,6 +7,7 @@
 
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { SignificantEventsAvailabilityResponse } from '../../../common';
 import {
@@ -15,9 +16,8 @@ import {
   type SignificantEventsRequiredPlugin,
   type SignificantEventsUnavailableReason,
 } from '../../../common';
-import { FeatureNotEnabledError } from '../../lib/streams/errors/feature_not_enabled_error';
-import { MissingDependencyError } from '../../lib/streams/errors/missing_dependency_error';
-import type { StreamsServer } from '../../types';
+import { FeatureNotEnabledError } from '../../lib/errors/feature_not_enabled_error';
+import { MissingDependencyError } from '../../lib/errors/missing_dependency_error';
 
 interface SignificantEventsAccessContext {
   server: StreamsServer;

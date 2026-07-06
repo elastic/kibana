@@ -31,7 +31,7 @@ import {
 } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../../ki';
 import { fetchSampleDocuments } from './fetch_sample_documents';
-import { PromptsConfigService } from '../saved_objects/prompts_config_service';
+import { PromptsConfigService } from '@kbn/streams-plugin/server';
 
 import {
   reconcileInferredFeatures,

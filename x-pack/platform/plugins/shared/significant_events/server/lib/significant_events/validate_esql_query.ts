@@ -8,7 +8,7 @@
 import { Parser, Walker } from '@elastic/esql';
 import { Streams, hasStatsCommand } from '@kbn/streams-schema';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
-import { StatusError } from '../streams/errors/status_error';
+import { StatusError } from '../errors/status_error';
 
 export class EsqlQueryValidationError extends StatusError {
   constructor(message: string, data?: unknown) {

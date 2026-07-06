@@ -18,9 +18,9 @@ import pLimit from 'p-limit';
 import type { QueryLink, SearchMode } from '../../../common/queries';
 import type { KnowledgeIndicatorClient } from '../ki';
 import type { RuleUnbackedFilter } from '../ki';
-import { parseError } from '../streams/errors/parse_error';
-import { SecurityError } from '../streams/errors/security_error';
-import { getColumnIndex } from '../streams/helpers/esql';
+import { parseError } from '../streams/parse_error';
+import { SecurityError } from '../errors/security_error';
+import { getColumnIndex } from '../streams/esql';
 import { type ISignificantEventsAlertsReader, ALERTS_READER_V1 } from './alerting/alerts_reader';
 import { ESQL_UNITS, MAX_FILL_BUCKETS, parseBucketSize } from './helpers/fill_bucket_gaps';
 

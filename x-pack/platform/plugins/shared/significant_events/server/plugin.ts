@@ -30,7 +30,7 @@ import { getSignificantEventsTuningConfig } from './lib/significant_events/helpe
 import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
 import { EbtTelemetryService } from './lib/telemetry';
-import { streamsRouteRepository } from './routes';
+import { significantEventsRouteRepository } from './routes';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
 import type {
   SignificantEventsPluginSetupDependencies,
@@ -41,7 +41,6 @@ import {
   KnowledgeIndicatorService,
   initializeKnowledgeIndicatorsTemplate,
 } from './lib/ki';
-import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import {
   createSignificantEventsClients,
   createSignificantEventsServices,
@@ -109,7 +108,6 @@ export class SignificantEventsPlugin
     this.ebtTelemetryService.setup(core.analytics);
 
     registerRules({ plugins, logger: this.logger.get('rules') });
-    registerStreamsSavedObjects(core.savedObjects);
     registerSignificantEventsInferenceFeatures(
       plugins.searchInferenceEndpoints,
       this.logger.get('inference-features')
@@ -142,6 +140,8 @@ export class SignificantEventsPlugin
         streamsSetup.getAttachmentClient({ request }),
         getSignificantEventsTuningConfig(globalUiSettingsClient, this.logger),
       ]);
+
+      const streamsClient = await streamsSetup.getStreamsClient({ request, rulesClientOptions });
 
       const space = pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
@@ -200,6 +200,7 @@ export class SignificantEventsPlugin
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,
+        streamsClient,
         licensing,
         uiSettingsClient,
         globalUiSettingsClient,
@@ -265,7 +266,7 @@ export class SignificantEventsPlugin
     });
 
     registerRoutes({
-      repository: streamsRouteRepository,
+      repository: significantEventsRouteRepository,
       dependencies: {
         server: this.server,
         telemetry: telemetryClient,

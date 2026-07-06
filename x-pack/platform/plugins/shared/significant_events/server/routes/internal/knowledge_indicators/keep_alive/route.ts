@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 
 export const keepAlivePersistentIndicatorsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/knowledge_indicators/_keep_alive',
@@ -19,7 +19,7 @@ export const keepAlivePersistentIndicatorsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -41,6 +41,6 @@ export const keepAlivePersistentIndicatorsRoute = createServerRoute({
   },
 });
 
-export const keepAliveRoutes = {
+export const internalKIKeepAliveRoutes = {
   ...keepAlivePersistentIndicatorsRoute,
 };

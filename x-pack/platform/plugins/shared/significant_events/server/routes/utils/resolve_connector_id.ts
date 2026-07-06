@@ -7,7 +7,7 @@
 
 import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-import { StatusError } from '../../lib/streams/errors/status_error';
+import { StatusError } from '../../lib/errors/status_error';
 
 /**
  * Resolves the connector ID to use for AI operations.

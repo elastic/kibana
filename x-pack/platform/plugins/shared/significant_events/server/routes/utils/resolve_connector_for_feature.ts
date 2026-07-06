@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
-import { StatusError } from '../../lib/streams/errors/status_error';
+import { StatusError } from '../../lib/errors/status_error';
 
 /**
  * Resolves the connector ID for a registered inference feature via the Inference Feature Registry.

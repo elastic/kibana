@@ -9,7 +9,7 @@ import { esql, type ComposerQuery, type ComposerSortShorthand } from '@elastic/e
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { getSourceColumnIndex, toEsqlRequest } from '../streams/helpers/esql';
+import { getSourceColumnIndex, toEsqlRequest } from '../streams/esql';
 import {
   type CommonSearchOptions,
   type PaginatedResponse,

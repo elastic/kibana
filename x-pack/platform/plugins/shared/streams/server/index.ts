@@ -12,6 +12,8 @@ import type { StreamsRouteRepository } from './routes';
 import type { AttachmentClient } from './lib/streams/attachments/attachment_client';
 import type { StreamsClient } from './lib/streams/client';
 import { config } from './config';
+import { PromptsConfigService } from './lib/prompts/prompts_config_service';
+import type { PromptsConfigAttributes } from './lib/prompts/prompts_config';
 
 export type {
   StreamsConfig,
@@ -20,13 +22,18 @@ export type {
   StreamsRouteRepository,
   AttachmentClient,
   StreamsClient,
+  PromptsConfigAttributes,
 };
+
+export { PromptsConfigService };
+
 export { config };
 
 export const plugin = async (context: PluginInitializerContext<StreamsConfig>) => {
   const { StreamsPlugin } = await import('./plugin');
   return new StreamsPlugin(context);
 };
+
 export {
   STREAMS_READ_TOOL_IDS,
   STREAMS_WRITE_TOOL_IDS,
