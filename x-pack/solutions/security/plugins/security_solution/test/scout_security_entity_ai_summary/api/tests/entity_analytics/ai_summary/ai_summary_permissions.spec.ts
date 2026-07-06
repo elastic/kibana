@@ -82,6 +82,21 @@ apiTest.describe(
       expect(seed.body).toMatchObject({ created: true });
     });
 
+    // Append-only datastream: clean up this entity's docs so state doesn't leak
+    // across runs. Use `esClient` to sidestep per-user privileges on teardown.
+    apiTest.afterAll(async ({ esClient }) => {
+      await esClient
+        .deleteByQuery({
+          index: METADATA_ALIAS_INDEX,
+          query: { term: { 'entity.id': TEST_ENTITY_ID } },
+          refresh: true,
+          conflicts: 'proceed',
+        })
+        .catch(() => {
+          // Datastream may not exist yet on a clean box; safe to ignore.
+        });
+    });
+
     apiTest(
       'admin can generate and read back the persisted summary (canRead: true)',
       async ({ apiClient }) => {
