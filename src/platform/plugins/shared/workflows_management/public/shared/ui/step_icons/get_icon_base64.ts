@@ -10,9 +10,8 @@
 import { type IconType } from '@elastic/eui';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { getConnectorSpecIcon, HardcodedIcons } from '@kbn/workflows-ui';
 
-import { getConnectorSpecIcon } from './get_connector_spec_icon';
-import { HardcodedIcons } from './hardcoded_icons';
 import { ElasticsearchLogo } from './icons/elasticsearch.svg';
 import { KibanaLogo } from './icons/kibana.svg';
 
