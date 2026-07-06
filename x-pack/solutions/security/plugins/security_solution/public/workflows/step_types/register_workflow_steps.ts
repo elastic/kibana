@@ -6,45 +6,22 @@
  */
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import type { CoreSetup } from '@kbn/core/public';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import {
-  REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-  REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
-} from '../../../common/constants';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
- * Registration is synchronous; each step uses an async loader to perform the
- * feature-flag check at resolution time.
  */
 export const registerWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
-  core: CoreSetup,
   experimentalFeatures: ExperimentalFeatures
 ): void => {
-  const isEnabled = core
-    .getStartServices()
-    .then(([coreStart]) =>
-      coreStart.featureFlags.getBooleanValue(
-        REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-        REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
-      )
-    );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./render_alert_narrative_step').then((m) => m.renderAlertNarrativeStepDefinition)
+  );
 
-  workflowsExtensions.registerStepDefinition(async () => {
-    if (!(await isEnabled)) return undefined;
-    return import('./render_alert_narrative_step').then(
-      (m) => m.renderAlertNarrativeStepDefinition
-    );
-  });
-
-  workflowsExtensions.registerStepDefinition(async () => {
-    if (!(await isEnabled)) return undefined;
-    return import('./build_alert_entity_graph_step').then(
-      (m) => m.buildAlertEntityGraphStepDefinition
-    );
-  });
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./build_alert_entity_graph_step').then((m) => m.buildAlertEntityGraphStepDefinition)
+  );
 
   workflowsExtensions.registerStepDefinition(() =>
     import('./assign_alert_step/assign_alert_step').then((m) => m.assignAlertStepDefinition)
