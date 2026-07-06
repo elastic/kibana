@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
+import type { AppHeaderBadge, AppHeaderMenu, AppHeaderMetadataItems } from '@kbn/app-header';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
@@ -27,7 +27,7 @@ import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyou
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { paths } from '../../constants';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
-import { RuleHeaderDescription, RuleKindBadge } from './rule_header_description';
+import { RuleKindBadge } from './rule_header_description';
 import { RuleOverviewSection } from './overview';
 import { RuleSidebar } from './sidebar/rule_sidebar';
 import { useRule } from './rule_context';
@@ -120,7 +120,6 @@ const getRuleDetailMenu = ({
       run: onDelete,
       testId: 'ruleDetailsDeleteButton',
       overflow: true,
-      separator: 'above',
     },
   ],
 });
@@ -185,6 +184,12 @@ export const RuleDetailPage: React.FunctionComponent = () => {
     [rule, onEdit, handleToggleEnabled, isToggling, onClone, showDeleteConfirmationModal]
   );
 
+  const metadata = rule.metadata?.description
+    ? ([
+        { type: 'text', label: rule.metadata.description, 'data-test-subj': 'ruleDescription' },
+      ] as AppHeaderMetadataItems)
+    : undefined;
+
   return (
     <KibanaPageTemplate
       paddingSize="none"
@@ -210,6 +215,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         menu={menu}
         padding="none"
         sticky={false}
+        metadata={metadata}
       />
       <KibanaPageTemplate.Section
         paddingSize="none"
@@ -225,8 +231,6 @@ export const RuleDetailPage: React.FunctionComponent = () => {
           `,
         }}
       >
-        {/* Tags render as header badges above (see getRuleDetailBadges), so skip them here. */}
-        <RuleHeaderDescription showTags={false} />
         <EuiSplitPanel.Outer
           direction="row"
           hasBorder={false}
