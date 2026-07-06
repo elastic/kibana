@@ -14,7 +14,7 @@
  * in the save dialog depending on whether any tab uses a time-based source.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../../fixtures/common';
 import { createDataViewFromSearchBar, waitForTabStateToPersist } from '../../fixtures/tabs/helpers';
@@ -24,10 +24,6 @@ const AD_HOC_WITHOUT_TIME_RANGE = 'logs';
 const PERSISTED_WITHOUT_TIME_RANGE = 'without-timefield';
 
 spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-classic' }, () => {
-  // Each case builds three tabs and reloads between assertions, which exceeds
-  // the default per-test timeout.
-  spaceTest.setTimeout(180_000);
-
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
     await discoverScoutSpace.savedObjects.load(testData.INDEX_PATTERN_WITHOUT_TIMEFIELD_ARCHIVE);
@@ -44,170 +40,171 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
   });
 
   spaceTest(
-    'should show time range switch when saving if any tab is time based',
+    'shows the store-time switch when the persisted data view tab is time based',
     async ({ pageObjects, page }) => {
       const { discover, unifiedTabs } = pageObjects;
 
-      const expectTimeSwitchVisible = async () => {
-        await discover.openSaveSearchModal();
-        await expect(page.testSubj.locator('storeTimeWithSearch')).toBeVisible();
+      // Tab 0 keeps the default time-based `logstash-*` data view.
+      await addNonTimeBasedAdHocTab(pageObjects, page);
+      await addNonTimeBasedEsqlTab(pageObjects, page);
+
+      await spaceTest.step('switch is shown while the time-based tab is active', async () => {
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await (await openSaveModalTimeSwitch(pageObjects, page)).waitFor({ state: 'visible' });
         await closeSaveModal(page);
-      };
-
-      await spaceTest.step('case A: persisted DV is time-based, others are not', async () => {
-        // Tab 2: ad hoc data view without time field
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await createDataViewFromSearchBar(page, discover, {
-          name: AD_HOC_WITHOUT_TIME_RANGE,
-          adHoc: true,
-          hasTimeField: false,
-        });
-        await discover.waitUntilTabIsLoaded();
-
-        // Tab 3: ES|QL non-time-based
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await discover.selectTextBaseLang();
-        await discover.codeEditor.setCodeEditorValue('FROM without-timefield');
-        await page.testSubj.click('querySubmitButton');
-        await discover.waitUntilTabIsLoaded();
-
-        // Visit the time-based tab and check
-        await unifiedTabs.selectTab(0);
-        await discover.waitUntilTabIsLoaded();
-        await expectTimeSwitchVisible();
-
-        // Switch away, refresh so time-based tab is unvisited, then check
-        await unifiedTabs.selectTab(1);
-        await waitForTabStateToPersist(page);
-        await page.reload();
-        await discover.waitUntilTabIsLoaded();
-        await expectTimeSwitchVisible();
       });
 
-      await spaceTest.step('case B: ad hoc DV is time-based, others are not', async () => {
-        await discover.clickNewSearch();
-        await discover.waitUntilTabIsLoaded();
-        await discover.selectDataView(PERSISTED_WITHOUT_TIME_RANGE);
-        await discover.waitUntilTabIsLoaded();
-
-        // Tab 2: ad hoc data view with time field
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await createDataViewFromSearchBar(page, discover, {
-          name: AD_HOC_WITH_TIME_RANGE,
-          adHoc: true,
-          hasTimeField: true,
-        });
-        await discover.waitUntilTabIsLoaded();
-
-        // Tab 3: ES|QL non-time-based
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await discover.selectTextBaseLang();
-        await discover.codeEditor.setCodeEditorValue('FROM without-timefield');
-        await page.testSubj.click('querySubmitButton');
-        await discover.waitUntilTabIsLoaded();
-
-        // Visit the time-based tab and check
-        await unifiedTabs.selectTab(1);
-        await discover.waitUntilTabIsLoaded();
-        await expectTimeSwitchVisible();
-
-        // Switch away, refresh, then check
-        await unifiedTabs.selectTab(0);
-        await waitForTabStateToPersist(page);
-        await page.reload();
-        await discover.waitUntilTabIsLoaded();
-        await expectTimeSwitchVisible();
-      });
-
-      await spaceTest.step('case C: ES|QL tab is time-based, DV tabs are not', async () => {
-        await discover.clickNewSearch();
-        await discover.waitUntilTabIsLoaded();
-        await discover.selectDataView(PERSISTED_WITHOUT_TIME_RANGE);
-        await discover.waitUntilTabIsLoaded();
-
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await createDataViewFromSearchBar(page, discover, {
-          name: AD_HOC_WITHOUT_TIME_RANGE,
-          adHoc: true,
-          hasTimeField: false,
-        });
-        await discover.waitUntilTabIsLoaded();
-
-        // Tab 3: ES|QL time-based
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await discover.selectTextBaseLang();
-        await discover.codeEditor.setCodeEditorValue(
-          'FROM logstash-* | SORT @timestamp DESC | LIMIT 10'
-        );
-        await page.testSubj.click('querySubmitButton');
-        await discover.waitUntilTabIsLoaded();
-
-        // Visit ES|QL time-based tab and check
-        await unifiedTabs.selectTab(2);
-        await discover.waitUntilTabIsLoaded();
-        await expectTimeSwitchVisible();
-
-        // Switch away, refresh, then check
+      await spaceTest.step('switch is shown when the time-based tab is unvisited', async () => {
         await unifiedTabs.selectTab(1);
         await waitForTabStateToPersist(page);
         await page.reload();
         await discover.waitUntilTabIsLoaded();
-        await expectTimeSwitchVisible();
+        await expect(await openSaveModalTimeSwitch(pageObjects, page)).toBeVisible();
+        await closeSaveModal(page);
       });
     }
   );
 
   spaceTest(
-    'should not show time range switch when no tab is time based',
+    'shows the store-time switch when an ad hoc data view tab is time based',
     async ({ pageObjects, page }) => {
       const { discover, unifiedTabs } = pageObjects;
 
-      const expectTimeSwitchMissing = async () => {
-        await discover.openSaveSearchModal();
-        await expect(page.testSubj.locator('storeTimeWithSearch')).toBeHidden();
-        await closeSaveModal(page);
-      };
-
-      // Tab 1: persisted data view without time field
+      // Tab 0: persisted data view without a time field.
       await discover.selectDataView(PERSISTED_WITHOUT_TIME_RANGE);
       await discover.waitUntilTabIsLoaded();
 
-      // Tab 2: ad hoc data view without time field
+      // Tab 1: ad hoc data view with a time field (the only time-based tab).
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await createDataViewFromSearchBar(page, discover, {
-        name: AD_HOC_WITHOUT_TIME_RANGE,
+        name: AD_HOC_WITH_TIME_RANGE,
         adHoc: true,
-        hasTimeField: false,
+        hasTimeField: true,
       });
       await discover.waitUntilTabIsLoaded();
 
-      // Tab 3: ES|QL non-time-based
+      await addNonTimeBasedEsqlTab(pageObjects, page);
+
+      await spaceTest.step('switch is shown while the time-based tab is active', async () => {
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await (await openSaveModalTimeSwitch(pageObjects, page)).waitFor({ state: 'visible' });
+        await closeSaveModal(page);
+      });
+
+      await spaceTest.step('switch is shown when the time-based tab is unvisited', async () => {
+        await unifiedTabs.selectTab(0);
+        await waitForTabStateToPersist(page);
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+        await expect(await openSaveModalTimeSwitch(pageObjects, page)).toBeVisible();
+        await closeSaveModal(page);
+      });
+    }
+  );
+
+  spaceTest(
+    'shows the store-time switch when the ES|QL tab is time based',
+    async ({ pageObjects, page }) => {
+      const { discover, unifiedTabs } = pageObjects;
+
+      // Tab 0: persisted data view without a time field.
+      await discover.selectDataView(PERSISTED_WITHOUT_TIME_RANGE);
+      await discover.waitUntilTabIsLoaded();
+
+      await addNonTimeBasedAdHocTab(pageObjects, page);
+
+      // Tab 2: time-based ES|QL query (the only time-based tab).
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await discover.selectTextBaseLang();
-      await discover.codeEditor.setCodeEditorValue('FROM without-timefield');
+      await discover.codeEditor.setCodeEditorValue(
+        'FROM logstash-* | SORT @timestamp DESC | LIMIT 10'
+      );
       await page.testSubj.click('querySubmitButton');
       await discover.waitUntilTabIsLoaded();
 
-      await expectTimeSwitchMissing();
+      await spaceTest.step('switch is shown while the time-based tab is active', async () => {
+        await unifiedTabs.selectTab(2);
+        await discover.waitUntilTabIsLoaded();
+        await (await openSaveModalTimeSwitch(pageObjects, page)).waitFor({ state: 'visible' });
+        await closeSaveModal(page);
+      });
 
-      // Refresh, then check again
-      await waitForTabStateToPersist(page);
-      await page.reload();
+      await spaceTest.step('switch is shown when the time-based tab is unvisited', async () => {
+        await unifiedTabs.selectTab(1);
+        await waitForTabStateToPersist(page);
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+        await expect(await openSaveModalTimeSwitch(pageObjects, page)).toBeVisible();
+        await closeSaveModal(page);
+      });
+    }
+  );
+
+  spaceTest(
+    'hides the store-time switch when no tab is time based',
+    async ({ pageObjects, page }) => {
+      const { discover } = pageObjects;
+
+      // Tab 0: persisted data view without a time field.
+      await discover.selectDataView(PERSISTED_WITHOUT_TIME_RANGE);
       await discover.waitUntilTabIsLoaded();
-      await expectTimeSwitchMissing();
+
+      await addNonTimeBasedAdHocTab(pageObjects, page);
+      await addNonTimeBasedEsqlTab(pageObjects, page);
+
+      await (await openSaveModalTimeSwitch(pageObjects, page)).waitFor({ state: 'hidden' });
+      await closeSaveModal(page);
+
+      await spaceTest.step('switch stays hidden after a reload', async () => {
+        await waitForTabStateToPersist(page);
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+        await expect(await openSaveModalTimeSwitch(pageObjects, page)).toBeHidden();
+        await closeSaveModal(page);
+      });
     }
   );
 });
 
+/**
+ * Opens the Save modal and returns the "Store time with saved search" switch
+ * locator so the test can assert its visibility. Assertions stay in the test
+ * body (per Scout best practices and the `playwright/expect-expect` rule).
+ */
+const openSaveModalTimeSwitch = async (pageObjects: PageObjects, page: ScoutPage) => {
+  await pageObjects.discover.openSaveSearchModal();
+  return page.testSubj.locator('storeTimeWithSearch');
+};
+
 const closeSaveModal = async (page: ScoutPage) => {
   await page.testSubj.click('saveCancelButton');
-  await expect(page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+  await page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'hidden' });
+};
+
+/** Adds a new tab backed by an ad hoc data view without a time field. */
+const addNonTimeBasedAdHocTab = async (pageObjects: PageObjects, page: ScoutPage) => {
+  const { discover, unifiedTabs } = pageObjects;
+  await unifiedTabs.createNewTab();
+  await discover.waitUntilTabIsLoaded();
+  await createDataViewFromSearchBar(page, discover, {
+    name: AD_HOC_WITHOUT_TIME_RANGE,
+    adHoc: true,
+    hasTimeField: false,
+  });
+  await discover.waitUntilTabIsLoaded();
+};
+
+/** Adds a new tab running a non-time-based ES|QL query. */
+const addNonTimeBasedEsqlTab = async (pageObjects: PageObjects, page: ScoutPage) => {
+  const { discover, unifiedTabs } = pageObjects;
+  await unifiedTabs.createNewTab();
+  await discover.waitUntilTabIsLoaded();
+  await discover.selectTextBaseLang();
+  await discover.codeEditor.setCodeEditorValue('FROM without-timefield');
+  await page.testSubj.click('querySubmitButton');
+  await discover.waitUntilTabIsLoaded();
 };

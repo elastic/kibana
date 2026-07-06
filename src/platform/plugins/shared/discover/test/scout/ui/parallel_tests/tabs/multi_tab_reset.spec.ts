@@ -24,10 +24,6 @@ spaceTest.describe(
   'tabs - multi-tab Discover session reset behavior',
   { tag: '@local-stateful-classic' },
   () => {
-    // Builds up to six tabs and reloads to assert per-tab restoration, which
-    // exceeds the default per-test timeout.
-    spaceTest.setTimeout(180_000);
-
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
       await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
     });
@@ -78,7 +74,7 @@ spaceTest.describe(
         await spaceTest.step('clear loaded session', async () => {
           await discover.clickNewSearch();
           await discover.waitUntilTabIsLoaded();
-          await expect(page.testSubj.locator('breadcrumb last')).toBeHidden();
+          await page.testSubj.locator('breadcrumb last').waitFor({ state: 'hidden' });
           expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled']);
         });
 
@@ -99,6 +95,11 @@ spaceTest.describe(
     spaceTest(
       'should restore correct data view or ES|QL query for uninitialized tabs',
       async ({ pageObjects, page }) => {
+        // This test alone builds six tabs (two ad-hoc data-view creations, two
+        // ES|QL queries, a persisted switch) and reloads twice, which does not
+        // fit the default 60s. The sibling "clear all tabs" test stays at default.
+        spaceTest.setTimeout(120_000);
+
         const { discover, unifiedTabs } = pageObjects;
         const sessionName = 'Uninitialized tabs session';
         const persistedDataView1 = 'logstash-*';
@@ -193,7 +194,7 @@ spaceTest.describe(
         await spaceTest.step('clear session and reload from saved', async () => {
           await discover.clickNewSearch();
           await discover.waitUntilTabIsLoaded();
-          await expect(page.testSubj.locator('breadcrumb last')).toBeHidden();
+          await page.testSubj.locator('breadcrumb last').waitFor({ state: 'hidden' });
           await discover.loadSavedSearch(sessionName);
           await discover.waitUntilTabIsLoaded();
           await expect(page.testSubj.locator('breadcrumb last')).toHaveText(sessionName);

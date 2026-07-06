@@ -36,9 +36,10 @@ const LOADED_SESSION_NAME = 'Loaded multi-tab Discover session';
 const UNSAVED_CHANGES_SESSION_NAME = 'Unsaved changes Discover session';
 
 spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful-classic' }, () => {
-  // Each test builds three tabs (persisted, ad-hoc, ES|QL) and reloads several
-  // times to assert persistence, which exceeds the default per-test timeout.
-  spaceTest.setTimeout(180_000);
+  // Every test here builds three tabs (persisted, ad-hoc + ad-hoc data-view
+  // creation, and ES|QL + Lens vis) and reloads to assert persistence, which
+  // does not fit the default 60s
+  spaceTest.setTimeout(120_000);
 
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
@@ -146,56 +147,14 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
     });
 
     await spaceTest.step('save the session with time range', async () => {
-      await unifiedTabs.selectTab(0);
-      await waitForTabStateToPersist(page);
-      await page.reload();
-      await discover.waitUntilTabIsLoaded();
-      expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-        PERSISTED_TAB.label,
-        AD_HOC_TAB.label,
-        ESQL_TAB.label,
-      ]);
-      expect(await discover.getSelectedDataViewName()).toBe(PERSISTED_TAB.dataView);
       await discover.saveSearch(SAVED_SESSION_NAME, { storeTimeRange: true });
       await expect(page.testSubj.locator('breadcrumb last')).toHaveText(SAVED_SESSION_NAME);
-      await expect(page.testSubj.locator('split-button-notification-indicator')).toBeHidden();
-    });
-
-    await spaceTest.step('validate persisted tab after save', async () => {
-      expect(await discover.getHitCountInt()).toBe(PERSISTED_TAB.hitCount);
-      expect(await queryBar.getQuery()).toBe(PERSISTED_TAB.query);
-      expect(await discover.getChartInterval()).toBe(PERSISTED_TAB.chartIntervalValue);
-      expect(await getSelectedSidebarFields(page)).toStrictEqual([PERSISTED_TAB.column1]);
-      expect(await discover.getSelectedDataViewName()).toBe(PERSISTED_TAB.dataView);
-      expect(await datePicker.getTimeConfig()).toStrictEqual({
-        start: PERSISTED_TAB.timeISO.start,
-        end: PERSISTED_TAB.timeISO.end,
-      });
-    });
-
-    await spaceTest.step('validate ad hoc tab after save', async () => {
-      await unifiedTabs.selectTab(1);
-      await discover.waitUntilTabIsLoaded();
-      expect(await discover.getHitCountInt()).toBe(AD_HOC_TAB.hitCount);
-      expect(await queryBar.getQuery()).toBe(AD_HOC_TAB.query);
-      expect(await getSelectedSidebarFields(page)).toStrictEqual([AD_HOC_TAB.column1]);
-      expect(await discover.getSelectedDataViewName()).toBe(AD_HOC_TAB.dataView);
-      expect(await datePicker.getTimeConfig()).toStrictEqual({
-        start: AD_HOC_TAB.timeISO.start,
-        end: AD_HOC_TAB.timeISO.end,
-      });
-    });
-
-    await spaceTest.step('validate ES|QL tab after save', async () => {
-      await unifiedTabs.selectTab(2);
-      await discover.waitUntilTabIsLoaded();
-      expect(await discover.getHitCountInt()).toBe(ESQL_TAB.hitCount);
-      expect(await discover.getEsqlQueryValue()).toBe(ESQL_TAB.query);
-      expect(await getCurrentVisTitle(page)).toBe(ESQL_TAB.visShape);
-      expect(await datePicker.getTimeConfig()).toStrictEqual({
-        start: ESQL_TAB.timeISO.start,
-        end: ESQL_TAB.timeISO.end,
-      });
+      // Saving clears the unsaved-changes diff; full restoration of the saved
+      // session is covered by the "loading" test, so we don't re-validate every
+      // tab here.
+      await page.testSubj
+        .locator('split-button-notification-indicator')
+        .waitFor({ state: 'hidden' });
     });
   });
 
@@ -216,7 +175,9 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
         AD_HOC_TAB.label,
         ESQL_TAB.label,
       ]);
-      await expect(page.testSubj.locator('split-button-notification-indicator')).toBeHidden();
+      await page.testSubj
+        .locator('split-button-notification-indicator')
+        .waitFor({ state: 'hidden' });
 
       await spaceTest.step('validate persisted tab', async () => {
         expect(await discover.getHitCountInt()).toBe(PERSISTED_TAB.hitCount);
@@ -332,7 +293,9 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
         }
       );
 
-      await expect(page.testSubj.locator('split-button-notification-indicator')).toBeVisible();
+      await page.testSubj
+        .locator('split-button-notification-indicator')
+        .waitFor({ state: 'visible' });
 
       await spaceTest.step('refresh and validate unsaved changes persist', async () => {
         await waitForTabStateToPersist(page);
@@ -378,7 +341,9 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
         expect(await discover.getHitCountInt()).toBe(esqlUnsavedCount);
       });
 
-      await expect(page.testSubj.locator('split-button-notification-indicator')).toBeVisible();
+      await page.testSubj
+        .locator('split-button-notification-indicator')
+        .waitFor({ state: 'visible' });
     }
   );
 });

@@ -31,7 +31,7 @@ export const createDataViewFromSearchBar = async (
   await page.testSubj.click('dataview-create-new');
 
   const flyout = page.testSubj.locator('indexPatternEditorFlyout');
-  await expect(flyout).toBeVisible();
+  await flyout.waitFor({ state: 'visible' });
 
   const titleInput = page.testSubj.locator('createIndexPatternTitleInput');
 
@@ -68,7 +68,7 @@ export const createDataViewFromSearchBar = async (
   }
 
   // Wait for the flyout to close before continuing
-  await expect(flyout).toBeHidden({ timeout: 30_000 });
+  await flyout.waitFor({ state: 'hidden', timeout: 30_000 });
 };
 
 /**
@@ -82,13 +82,13 @@ export const selectDataViewMode = async (page: ScoutPage, options?: { discardMod
   });
   await activeTabContainer.locator('[data-test-subj^="unifiedTabs_tabMenuBtn_"]').click();
   const switchToClassicMenuItem = page.testSubj.locator('unifiedTabs_tabMenuItem_switchToClassic');
-  await expect(switchToClassicMenuItem).toBeVisible();
+  await switchToClassicMenuItem.waitFor({ state: 'visible' });
   await switchToClassicMenuItem.click();
 
   if (options?.discardModal) {
-    await expect(page.testSubj.locator('discover-esql-to-dataview-modal')).toBeVisible();
+    await page.testSubj.locator('discover-esql-to-dataview-modal').waitFor({ state: 'visible' });
     await page.testSubj.click('discover-esql-to-dataview-no-save-btn');
-    await expect(page.testSubj.locator('discover-esql-to-dataview-modal')).toBeHidden();
+    await page.testSubj.locator('discover-esql-to-dataview-modal').waitFor({ state: 'hidden' });
   }
 
   // Move mouse away from the tab bar to dismiss any tab preview popup
@@ -112,7 +112,7 @@ export const changeVisShape = async (page: ScoutPage, seriesType: string) => {
   await dismissAllToasts(page);
 
   await page.testSubj.click('unifiedHistogramEditFlyoutVisualization');
-  await expect(page.testSubj.locator('lnsChartSwitchPopover')).toBeVisible();
+  await page.testSubj.locator('lnsChartSwitchPopover').waitFor({ state: 'visible' });
   await page.testSubj.click('lnsChartSwitchPopover');
   await page.testSubj.fill('lnsChartSwitchSearch', seriesType);
   await page.testSubj.click(`lnsChartSwitchPopover_${seriesType.toLowerCase()}`);
@@ -122,8 +122,12 @@ export const changeVisShape = async (page: ScoutPage, seriesType: string) => {
 
   await page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
   await page.testSubj.click('applyFlyoutButton');
-  await expect(page.testSubj.locator('lnsConfigPanelWrapper')).toBeHidden({ timeout: 30_000 });
-  await expect(page.testSubj.locator('lnsChartSwitchPopover')).toBeHidden({ timeout: 30_000 });
+  await page.testSubj
+    .locator('lnsConfigPanelWrapper')
+    .waitFor({ state: 'hidden', timeout: 30_000 });
+  await page.testSubj
+    .locator('lnsChartSwitchPopover')
+    .waitFor({ state: 'hidden', timeout: 30_000 });
 };
 
 /**
@@ -133,7 +137,7 @@ export const getCurrentVisTitle = async (page: ScoutPage): Promise<string> => {
   await dismissAllToasts(page);
 
   await page.testSubj.click('unifiedHistogramEditFlyoutVisualization');
-  await expect(page.testSubj.locator('lnsChartSwitchPopover')).toBeVisible();
+  await page.testSubj.locator('lnsChartSwitchPopover').waitFor({ state: 'visible' });
   const seriesType = await page.testSubj.innerText('lnsChartSwitchPopover');
   await page.testSubj.click('cancelFlyoutButton');
   return seriesType;
