@@ -63,7 +63,7 @@ test.describe(
       });
 
       await test.step('set time range to last 24 hours so synth data stays in range vs globalSetup', async () => {
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24 hours');
         await expect(page.getByTestId('dateRangePickerControlButton')).toContainText(
           'Last 24 hours'
         );
@@ -263,7 +263,7 @@ test.describe(
 
       await test.step('open a new dashboard with a 24h time range', async () => {
         await pageObjects.dashboard.openNewDashboard({ timeout: EXTENDED_TIMEOUT * 2 });
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24 hours');
         await page.getByTestId('dateRangePickerControlButton').blur();
       });
 
@@ -374,7 +374,7 @@ test.describe(
       await test.step('the panel reflects dashboard global time range changes', async () => {
         // The dashboard's global time isn't stored with the saved object, so pin it to a
         // window that covers the synth data before the panel starts inheriting it.
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24 hours');
         await page.getByTestId('dateRangePickerControlButton').blur();
 
         // Drop the panel-level custom time range so the panel inherits the dashboard's

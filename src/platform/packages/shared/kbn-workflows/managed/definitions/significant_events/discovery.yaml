@@ -28,7 +28,7 @@ triggers:
         description: 'Lookback window for active discoveries, events, and groups. Should match .significant_events-discoveries retention.'
       - name: detectionBatchMax
         type: number
-        default: 3
+        default: 10
         required: false
         description: 'Max rules per investigator invocation. Caps agent message size; remaining detections are picked up on the next cycle.'
       - name: discoveryDedupWindow
@@ -36,6 +36,24 @@ triggers:
         default: 'now-1h'
         required: false
         description: 'ES date math expression controlling the minimum time between discovery re-writes for the same slug. Longer windows reduce LLM cost for stable incidents; shorter windows surface escalations faster. Must be a valid ES date math value (e.g. now-30m, now-2h, now-24h). Default 1h.'
+      - name: agentConnectorId
+        type: string
+        default: '.openai-gpt-5.2-chat_completion'
+        required: false
+        description: 'Connector ID for the investigator agent.'
+outputs:
+  - name: candidateCount
+    type: number
+  - name: processedCount
+    type: number
+  - name: remainingCount
+    type: number
+  - name: hasRemaining
+    type: boolean
+  - name: queueEmpty
+    type: boolean
+  - name: noWork
+    type: boolean
 consts:
   CONTINUATION_BATCH_MAX: 20
   DETECTIONS_INDEX: '.significant_events-detections'
@@ -184,14 +202,41 @@ steps:
     on-failure:
       continue: true
 
-  - name: compute_active_batch
+  - name: compute_unhandled_detection_candidates
     # Scan with SCAN_BATCH_SIZE to avoid handled rules (newer timestamps) crowding out
-    # unprocessed ones in the size cap, then reject rules whose latest doc is kind:handled,
-    # then cap at inputs.. inputs.* is available in ${{ }} as a native type
-    # (integer, not string) so it works correctly as a | first: filter argument.
+    # unprocessed ones in the size cap, then reject rules whose latest doc is kind:handled.
     type: data.set
     with:
-      hits: "${{ steps.get_detected_window.output.hits.hits | reject: '_source.kind', 'handled' | default: [] | slice: 0, inputs.detectionBatchMax  }}"
+      hits: "${{ steps.get_detected_window.output.hits.hits | reject: '_source.kind', 'handled' | default: [] }}"
+
+  - name: compute_active_batch
+    # inputs.* is available in ${{ }} as a native type (integer, not string) so it
+    # works correctly as a | slice argument.
+    type: data.set
+    with:
+      hits: '${{ steps.compute_unhandled_detection_candidates.output.hits | slice: 0, inputs.detectionBatchMax }}'
+
+  # NOTE: cross-step references chaining a `.size` property accessor (e.g.
+  # `steps.x.output.hits.size`) resolve to undefined once referenced from the
+  # 3rd+ step of the workflow — an engine quirk with the dot-notation size
+  # getter. The `| size` filter does not have this issue, but filter chains
+  # cannot be followed by comparison operators in the same expression, so raw
+  # sizes are computed here and derived stats are computed from those (plain
+  # number) outputs in a separate step below.
+  - name: compute_queue_sizes
+    type: data.set
+    with:
+      candidateCount: '${{ steps.compute_unhandled_detection_candidates.output.hits | size | default: 0 }}'
+      processedCount: '${{ steps.compute_active_batch.output.hits | size | default: 0 }}'
+
+  - name: compute_queue_stats
+    type: data.set
+    with:
+      candidateCount: '${{ steps.compute_queue_sizes.output.candidateCount }}'
+      processedCount: '${{ steps.compute_queue_sizes.output.processedCount }}'
+      remainingCount: '${{ steps.compute_queue_sizes.output.candidateCount | minus: steps.compute_queue_sizes.output.processedCount | at_least: 0 }}'
+      hasRemaining: '${{ steps.compute_queue_sizes.output.candidateCount > steps.compute_queue_sizes.output.processedCount }}'
+      queueEmpty: '${{ steps.compute_queue_sizes.output.candidateCount <= steps.compute_queue_sizes.output.processedCount }}'
 
   - name: compute_stamp_rule_uuids
     # Rules to mark handled this cycle: all rules in the investigated batch (active + quiet).
@@ -200,24 +245,24 @@ steps:
     with:
       stamp_rule_uuids: "${{ steps.compute_active_batch.output.hits | map: '_source' | map: 'rule_uuid' | compact | uniq | default: [] }}"
 
-  - name: exit_no_detections
+  - name: output_no_detections
     type: workflow.output
-    if: >-
-      ${{ steps.compute_active_batch.output.hits.size == 0 }}
-    status: cancelled
+    if: '${{ steps.compute_queue_sizes.output.processedCount == 0 }}'
     with:
-      reason: 'No unhandled detections in window — nothing to discover'
+      candidateCount: '${{ steps.compute_queue_stats.output.candidateCount }}'
+      processedCount: '${{ steps.compute_queue_stats.output.processedCount }}'
+      remainingCount: '${{ steps.compute_queue_stats.output.remainingCount }}'
+      hasRemaining: '${{ steps.compute_queue_stats.output.hasRemaining }}'
+      queueEmpty: '${{ steps.compute_queue_stats.output.queueEmpty }}'
+      noWork: true
 
   # -----------------------------------------------------------------------
   # Step 4: Correlate detections into discoveries.
   # -----------------------------------------------------------------------
   - name: run_investigator_agent
-    # TODO: agent-id and connector-id are config fields and are NOT rendered through Liquid by the
-    # workflow engine (CustomStepImpl passes context.config raw). Use static values until the engine
-    # supports template rendering for config fields.
     type: ai.agent
-    agent-id: 'platform.streams.significant-events.discovery.investigator'
-    connector-id: '.openai-gpt-5.2-chat_completion'
+    agent-id: "platform.streams.significant-events.discovery.investigator"
+    connector-id: "${{ inputs.agentConnectorId }}"
     # Keep plugin-id/aggregate-by in sync with @kbn/streams-schema inference_feature_ids.ts
     # (STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID / SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
     plugin-id: 'streams_significant_events_discovery'
@@ -586,3 +631,13 @@ steps:
             workflow_execution_id: '{{ execution.id }}'
         on-failure:
           continue: true
+
+  - name: output_result
+    type: workflow.output
+    with:
+      candidateCount: '${{ steps.compute_queue_stats.output.candidateCount }}'
+      processedCount: '${{ steps.compute_queue_stats.output.processedCount }}'
+      remainingCount: '${{ steps.compute_queue_stats.output.remainingCount }}'
+      hasRemaining: '${{ steps.compute_queue_stats.output.hasRemaining }}'
+      queueEmpty: '${{ steps.compute_queue_stats.output.queueEmpty }}'
+      noWork: false
