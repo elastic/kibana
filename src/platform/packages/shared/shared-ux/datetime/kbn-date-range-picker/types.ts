@@ -90,6 +90,14 @@ export interface TimeRangeTransformOptions {
    * @default 's'
    */
   timePrecision?: TimePrecision;
+  /**
+   * Locale used to recognise and generate named ranges, natural-language
+   * durations/instants, and delimiters. English is always recognised
+   * alongside the active locale. Shorthand datemath, unix timestamps, and
+   * absolute dates are unaffected (locale-invariant).
+   * @default `i18n.getLocale()`
+   */
+  locale?: string;
 }
 
 /** Time unit for the auto-refresh interval. */

@@ -40,11 +40,12 @@ import type {
   TemplateDeserialized,
   TemplateListItem,
   DataStream,
+  EsDataRetention,
   Index,
   IndexSettingsResponse,
   MappingsResponse,
-  SnapshotRepositoriesInfo,
 } from '../../../common';
+import type { SnapshotRepositoriesInfo } from '../../../common/types/snapshot_repositories';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import type { UiMetricService } from './ui_metric';
@@ -128,12 +129,50 @@ export async function updateDataRetention(
   });
 }
 
+export async function updateDataLifecycle(
+  dataStreams: string[],
+  data: {
+    enabled?: boolean;
+    dataRetention?: string;
+    frozenAfter?: string;
+  }
+) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/data_streams/data_lifecycle`,
+    method: 'put',
+    body: {
+      dataStreams,
+      enabled: data.enabled,
+      dataRetention: data.dataRetention,
+      frozenAfter: data.frozenAfter,
+    },
+  });
+}
+
+export async function updateDataStreamSettings(
+  dataStreams: string[],
+  settings: {
+    'index.lifecycle.name'?: string | null;
+    'index.lifecycle.prefer_ilm'?: boolean | null;
+  }
+) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/data_streams/settings`,
+    method: 'put',
+    body: {
+      dataStreams,
+      settings,
+    },
+  });
+}
+
 export async function updateDSFailureStore(
   dataStreams: string[],
   data: {
     dsFailureStore: boolean;
-    customRetentionPeriod?: string;
+    customRetentionPeriod?: EsDataRetention;
     retentionDisabled?: boolean;
+    inheritFailureStore?: boolean;
   }
 ) {
   const body = {
@@ -141,6 +180,7 @@ export async function updateDSFailureStore(
     dataStreams,
     customRetentionPeriod: data.customRetentionPeriod,
     retentionDisabled: data.retentionDisabled,
+    inheritFailureStore: data.inheritFailureStore,
   };
 
   return sendRequest({
