@@ -68931,7 +68931,7 @@ paths:
             type: string
         - description: Sort direction.
           in: query
-          name: sortDirection
+          name: sortOrder
           required: false
           schema:
             enum:
@@ -68989,11 +68989,11 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "${KIBANA_URL}/api/workflows?size=20&page=1" \
+              -X GET "${KIBANA_URL}/api/workflows?size=20&page=1&sortField=name&sortOrder=asc" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
-            GET kbn://api/workflows?size=20&page=1
+            GET kbn://api/workflows?size=20&page=1&sortField=name&sortOrder=asc
       x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
