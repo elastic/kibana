@@ -97,7 +97,7 @@ export async function requestOAuthToken<T>(
     validateStatus: () => true,
   });
 
-  if (res.status === 200) {
+  if (res.status >= 200 && res.status < 300) {
     const accessTokenField = tokenResponseOptions?.accessTokenPath ?? 'access_token';
     const tokenTypeField = tokenResponseOptions?.tokenTypePath ?? 'token_type';
 
