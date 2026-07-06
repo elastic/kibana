@@ -224,7 +224,7 @@ const eventsLifecycleRoute = createServerRoute({
  * `attach_pending_to_significant_event` / `attach_to_significant_event` `kibana.request` steps.
  */
 const eventsAttachInvestigationRoute = createServerRoute({
-  endpoint: 'POST /internal/sig_events/events/{id}/investigations',
+  endpoint: 'POST /internal/significant_events/events/{id}/investigations',
   options: {
     access: 'internal',
     summary: 'Attach investigation to event',
@@ -256,7 +256,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
 });
 
 const eventsTriggerInvestigationRoute = createServerRoute({
-  endpoint: 'POST /internal/sig_events/events/{id}/investigate',
+  endpoint: 'POST /internal/significant_events/events/{id}/investigate',
   options: {
     access: 'internal',
     summary: 'Trigger investigation workflow for a significant event',
@@ -307,7 +307,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
   },
 });
 
-export const internalSigEventsEventsRoutes = {
+export const internalSignificantEventsEventsRoutes = {
   ...eventsSearchRoute,
   ...eventsHistoryRoute,
   ...eventsLifecycleRoute,

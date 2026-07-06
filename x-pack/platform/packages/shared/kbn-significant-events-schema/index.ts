@@ -28,10 +28,9 @@ export type {
   EventLifecycleResponse,
   GeneratedSignificantEventQuery,
   LifecycleDetection,
-  SignificantEventsGetResponse,
+  QueryWithOccurrences,
+  QueryOccurrencesResponse,
   SignificantEventsQueriesGenerationResult,
-  SignificantEventsQueriesGenerationTaskResult,
-  SignificantEventsResponse,
 } from './src/api/significant_events';
 
 export { generatedSignificantEventQuerySchema } from './src/api/significant_events';
@@ -78,6 +77,10 @@ export {
   type KnowledgeIndicator,
   type SignificantEvent,
   type SignificantEventStatus,
+  type SignificantEventsTuningConfig,
+  type TuningConfigFieldBounds,
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
   type SignificantEventInvestigation,
   type SignificantEventInvestigationStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
@@ -86,6 +89,8 @@ export {
   discoverySchema,
   significantEventSchema,
   significantEventStatusSchema,
+  significantEventsTuningConfigSchema,
+  validateSignificantEventsTuningConfig,
   significantEventInvestigationSchema,
   significantEventInvestigationStatusSchema,
 } from './src/significant_events';

@@ -82,6 +82,7 @@ describe('ServiceFlyoutTransactionsSection', () => {
     expect(link).toBeInTheDocument();
     expect(link.getAttribute('href')).toContain('TransactionDetailsByNameLocator');
     expect(link.getAttribute('href')).toContain('frontend-node');
+    expect(link.getAttribute('href')).toContain('production');
   });
 
   it('renders the Open in APM header link when locators are provided', () => {

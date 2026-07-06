@@ -32,6 +32,8 @@ import {
   CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
   CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES,
 } from '../../components/app/service_map/contextual_map/constants';
+import { SERVICE_FLYOUT_SOURCES } from '../../components/shared/service_flyout/constants';
+import type { ServiceFlyoutOptions } from '../../components/shared/service_flyout/types';
 import { ServiceMapSloFlyoutProvider } from '../../components/shared/service_map/service_map_slo_flyout_context';
 import {
   SloOverviewFlyout,
@@ -88,6 +90,8 @@ export interface ServiceMapEmbeddableProps {
   onContextualMapCollapse?: (nodeId: string) => void;
   /** Override default min-height (400px) for compact inline embeds. */
   embeddableMinHeight?: number;
+  /** Optional overrides for the service flyout opened from this map. */
+  flyoutOptions?: ServiceFlyoutOptions;
 }
 
 function LoadingSpinner() {
@@ -134,6 +138,7 @@ export function ServiceMapEmbeddable({
   onContextualMapExpand,
   onContextualMapCollapse,
   embeddableMinHeight = EMBEDDABLE_MIN_HEIGHT,
+  flyoutOptions,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -279,6 +284,14 @@ export function ServiceMapEmbeddable({
       anomalySeverityFilter: [],
     };
   }, [viewFilters, badgesStatus]);
+
+  const flyoutOptionsForGraph = useMemo<ServiceFlyoutOptions>(
+    () => ({
+      source: SERVICE_FLYOUT_SOURCES.dashboardEmbeddable,
+      ...flyoutOptions,
+    }),
+    [flyoutOptions]
+  );
 
   const badgeDependentFiltersActive =
     (viewFilters?.alertStatusFilter?.length ?? 0) > 0 ||
@@ -448,6 +461,29 @@ export function ServiceMapEmbeddable({
             onViewFiltersChange={onViewFiltersChange}
           />
         )}
+        <ServiceMapGraph
+          height="100%"
+          nodes={isLoading ? [] : nodesForGraph}
+          edges={isLoading ? [] : data.edges}
+          serviceName={serviceName}
+          highlightedServiceName={serviceName}
+          environment={environment}
+          kuery={kuery}
+          start={start}
+          end={end}
+          isFullscreen={false}
+          fullMapHref={fullMapHref}
+          isEmbedded
+          showEmbeddedControls={showEmbeddedControls}
+          showFocusMap={showFocusMapInPopover}
+          alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
+          clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
+          mapOrientation={mapOrientation}
+          onMapOrientationChange={onMapOrientationChange}
+          viewFilters={viewFiltersForGraph}
+          onViewFiltersChange={onViewFiltersChange}
+          flyoutOptions={flyoutOptionsForGraph}
+        />
       </div>
       {sloOverviewFlyout && (
         <SloOverviewFlyout
