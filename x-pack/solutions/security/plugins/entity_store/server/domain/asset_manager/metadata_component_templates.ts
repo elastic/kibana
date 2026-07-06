@@ -44,10 +44,6 @@ const getMetadataIndexMappings = (): MappingTypeMapping => ({
     'entity.type': { type: 'keyword' },
     'ai_summary.generated_by': { type: 'keyword' },
     'ai_summary.generated_at': { type: 'date', format: 'epoch_millis' },
-    // highlights + recommendedActions are display-only free-form text (stored + retrieved, never
-    // queried), so keep them in _source without indexing to avoid needless index cost. The scalar
-    // fields below stay indexed: they're cheap and plausibly queryable later (age-based regen,
-    // per-user audit, server-side staleness).
     'ai_summary.highlights': { type: 'object', enabled: false },
     'ai_summary.recommendedActions': { type: 'keyword', index: false, doc_values: false },
     'ai_summary.anomaly_job_ids': { type: 'keyword' },
