@@ -19,8 +19,8 @@ export type Notification = z.infer<typeof notificationReadSchema>;
 export type NotificationInput = z.input<typeof notificationWriteSchema>;
 
 /**
- * The exact doc NC indexes: validated write payload (`severity` resolved) plus
- * the `@timestamp` NC stamps — ES does not synthesise it for a data stream.
+ * The exact document shape in the NC index: validated write payload (`severity` resolved) plus
+ * the `@timestamp` generated during write by the NC plugin.
  */
 export type NotificationDocument = z.output<typeof notificationWriteSchema> & {
   '@timestamp': string;
