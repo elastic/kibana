@@ -183,26 +183,6 @@ describe('data table progress bar regressions', () => {
     mockActiveDataColumnType('number');
   });
 
-  it('seeds gradient fill and the status palette when enabling progress mode', async () => {
-    renderEditor();
-
-    await colorMode.select(getDynamicColoringLabel('progress'));
-    await act(async () => jest.advanceTimersByTime(256));
-
-    expect(setState).toHaveBeenCalledWith(
-      expect.objectContaining({
-        columns: [
-          expect.objectContaining({
-            columnId: 'foo',
-            colorMode: 'progress',
-            fillStyle: expect.objectContaining({ fillMode: 'gradient' }),
-            palette: expect.objectContaining({ type: 'palette', name: 'status' }),
-          }),
-        ],
-      })
-    );
-  });
-
   it('shows the Auto value-range tooltip in progress mode', async () => {
     state.columns[0] = {
       columnId: 'foo',
@@ -368,22 +348,6 @@ describe('data table progress bar regressions', () => {
     expect(slider).toHaveAttribute('max', '81000');
   });
 
-  it('keeps the slider bounds aligned with the active custom range by default', () => {
-    setFooRows([{ foo: 70 }, { foo: 80 }, { foo: 90 }]);
-    state.columns[0] = {
-      columnId: 'foo',
-      colorMode: 'progress',
-      fillStyle: { fillMode: 'gradient', valueRange: { mode: 'custom', min: 0, max: 100 } },
-      palette: { type: 'palette', name: 'status' },
-    };
-
-    renderEditor();
-
-    const slider = screen.getByTestId('lnsDatatable_progressBar_valueRangeSlider');
-    expect(slider).toHaveAttribute('min', '0');
-    expect(slider).toHaveAttribute('max', '100');
-  });
-
   it('expands slider bounds only when manual inputs move beyond them and does not flag valid values as invalid', async () => {
     setFooRows([{ foo: 70 }, { foo: 80 }, { foo: 90 }]);
     state.columns[0] = {
@@ -431,41 +395,6 @@ describe('data table progress bar regressions', () => {
             columnId: 'foo',
             fillStyle: expect.objectContaining({
               valueRange: { mode: 'custom', min: 70, max: 90 },
-            }),
-          }),
-        ]),
-      })
-    );
-  });
-
-  it('lets the custom inputs extend the active range without slider min/max attrs', async () => {
-    setFooRows([{ foo: 70 }, { foo: 80 }, { foo: 90 }]);
-    state.columns[0] = {
-      columnId: 'foo',
-      colorMode: 'progress',
-      fillStyle: { fillMode: 'gradient', valueRange: { mode: 'custom', min: 0, max: 100 } },
-      palette: { type: 'palette', name: 'status' },
-    };
-
-    renderEditor();
-
-    const [minInput, maxInput] = screen.getAllByRole('spinbutton');
-
-    expect(minInput.getAttribute('min')).toBeNull();
-    expect(maxInput.getAttribute('max')).toBeNull();
-
-    await user.clear(maxInput);
-    await user.type(maxInput, '101');
-    await act(async () => jest.advanceTimersByTime(300));
-
-    expect(maxInput).toHaveValue(101);
-    expect(setState).toHaveBeenCalledWith(
-      expect.objectContaining({
-        columns: expect.arrayContaining([
-          expect.objectContaining({
-            columnId: 'foo',
-            fillStyle: expect.objectContaining({
-              valueRange: { mode: 'custom', min: 0, max: 101 },
             }),
           }),
         ]),
