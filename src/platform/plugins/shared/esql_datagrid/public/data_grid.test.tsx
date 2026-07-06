@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import DataGrid from './data_grid';
@@ -30,7 +30,7 @@ describe('DataGrid', () => {
   const data = dataPluginMock.createStartContract();
   const dataView = { toSpec: jest.fn() } as unknown as DataView;
   const core = coreMock.createStart();
-  const fieldFormats = {} as unknown as FieldFormatsStart;
+  const fieldFormats = fieldFormatsServiceMock.createStartContract();
   const query = { esql: 'from foo' };
 
   const column = (name: string): DatatableColumn => ({

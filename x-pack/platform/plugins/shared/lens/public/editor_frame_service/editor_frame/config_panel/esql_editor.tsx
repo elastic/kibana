@@ -240,7 +240,7 @@ export function ESQLEditor({
       esqlVariables,
       false,
       currentAttributesRef.current,
-      isApproximate ?? undefined
+      isApproximate
     ).catch(() => {
       // The chart itself will surface query errors via its own error handling path
     });
