@@ -82651,6 +82651,16 @@ components:
                                   - auto
                                 type: string
                             description: Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
+                          rows_per_page:
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+                            maximum: 10000
+                            minimum: 1
+                            type: number
+                          sample_size:
+                            description: The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
+                            maximum: 10000
+                            minimum: 10
+                            type: number
                           sort:
                             default: []
                             description: Sort configuration for the data table (field and direction).
