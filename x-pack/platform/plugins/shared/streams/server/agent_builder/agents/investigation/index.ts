@@ -7,7 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
-import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common/tools';
+import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import instructions from './instructions/investigator.md.text';
 import {
   OBSERVABILITY_GET_LOGS_TOOL_ID,
@@ -20,15 +20,15 @@ import {
   OBSERVABILITY_GET_TRACES_TOOL_ID,
 } from '../discovery/constants';
 
-export const STREAMS_INVESTIGATION_AGENT_ID = 'platform.streams.investigation';
+export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID = 'platform.sig_events.investigation';
 
 const investigationAgent = {
-  id: STREAMS_INVESTIGATION_AGENT_ID,
+  id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
   name: 'Streams Investigator',
   description:
     'Investigates an observability issue by querying available signals (logs, traces, metrics), ' +
     'reasoning about causality direction, and producing a contributing-factors conclusion with supporting evidence.',
-  labels: ['observability', 'streams', 'investigation', 'root-cause'],
+  labels: ['observability', 'streams', 'significant-events', 'investigation', 'root-cause'],
   avatar_icon: 'logoElastic',
   configuration: {
     instructions,
@@ -36,7 +36,7 @@ const investigationAgent = {
     tools: [
       {
         tool_ids: [
-          platformStreamsSigEventsTools.searchKnowledgeIndicators,
+          platformSignificantEventsTools.searchKnowledgeIndicators,
           platformCoreTools.executeEsql,
           platformCoreTools.generateEsql,
           platformCoreTools.executeWorkflow,

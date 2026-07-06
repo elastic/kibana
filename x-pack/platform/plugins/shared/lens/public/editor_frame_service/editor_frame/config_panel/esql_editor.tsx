@@ -134,7 +134,7 @@ export function ESQLEditor({
   const submittedQueryRef = useRef(submittedQuery);
   submittedQueryRef.current = submittedQuery;
 
-  const { esqlVariables } = useFetchContext({ uuid: panelId, parentApi });
+  const { esqlVariables, isApproximate } = useFetchContext({ uuid: panelId, parentApi });
   const esqlQueryStats = useESQLQueryStats(isTextBasedLanguage, lensAdapters?.requests);
 
   // Update column limit indicator when chart data finishes loading
@@ -164,7 +164,8 @@ export function ESQLEditor({
         setDataGridAttrs,
         esqlVariables,
         shouldUpdateAttrs,
-        currentAttributesRef.current
+        currentAttributesRef.current,
+        isApproximate ?? undefined
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -183,6 +184,7 @@ export function ESQLEditor({
       visualizationMap,
       adHocDataViews,
       esqlVariables,
+      isApproximate,
       setCurrentAttributes,
       updateSuggestion,
     ]
@@ -237,7 +239,8 @@ export function ESQLEditor({
       setDataGridAttrs,
       esqlVariables,
       false,
-      currentAttributesRef.current
+      currentAttributesRef.current,
+      isApproximate
     ).catch(() => {
       // The chart itself will surface query errors via its own error handling path
     });
@@ -248,6 +251,7 @@ export function ESQLEditor({
   }, [
     searchSessionId,
     esqlVariables,
+    isApproximate,
     data,
     http,
     uiSettings,
@@ -284,6 +288,7 @@ export function ESQLEditor({
           dataGridAttrs={dataGridAttrs}
           isAccordionOpen={isESQLResultsAccordionOpen}
           isTableView={visualization.activeId !== 'lnsDatatable'}
+          isApproximate={isApproximate}
           setIsAccordionOpen={setIsESQLResultsAccordionOpen}
           query={query}
           onAccordionToggleCb={(status) => {
