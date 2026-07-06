@@ -836,12 +836,12 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
               {
                 bool: {
                   should: [
-                    { match: { 'elastic_dashboard.title': 'test' } },
+                    { match_phrase: { 'elastic_dashboard.title': 'test' } },
                     {
                       bool: {
                         must: [
                           { term: { status: 'failed' } },
-                          { match: { 'original_dashboard.title': 'test' } },
+                          { match_phrase: { 'original_dashboard.title': 'test' } },
                         ],
                       },
                     },
@@ -851,6 +851,23 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
             ],
           },
         });
+      });
+
+      // Regression for #276409: the title search must use `match_phrase` so that
+      // searching a dashboard's displayed name returns only dashboards whose
+      // title contains that phrase. The previous `match` query used default OR
+      // token semantics, which returned every dashboard sharing a common token.
+      test('should use match_phrase (not match) for searchTerm title matching', () => {
+        const result = getFilterQuery({ searchTerm: 'Spike in Network Traffic' });
+        const titleClause = result.bool.filter[1].bool.should;
+        expect(titleClause[0]).toEqual({
+          match_phrase: { 'elastic_dashboard.title': 'Spike in Network Traffic' },
+        });
+        expect(titleClause[0]).not.toHaveProperty('match');
+        expect(titleClause[1].bool.must[1]).toEqual({
+          match_phrase: { 'original_dashboard.title': 'Spike in Network Traffic' },
+        });
+        expect(titleClause[1].bool.must[1]).not.toHaveProperty('match');
       });
 
       test('should build filter query with multiple statuses', () => {
@@ -1011,12 +1028,12 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
               {
                 bool: {
                   should: [
-                    { match: { 'elastic_dashboard.title': 'test' } },
+                    { match_phrase: { 'elastic_dashboard.title': 'test' } },
                     {
                       bool: {
                         must: [
                           { term: { status: 'failed' } },
-                          { match: { 'original_dashboard.title': 'test' } },
+                          { match_phrase: { 'original_dashboard.title': 'test' } },
                         ],
                       },
                     },

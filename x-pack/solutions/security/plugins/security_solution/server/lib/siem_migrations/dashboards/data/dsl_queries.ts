@@ -10,10 +10,10 @@ import { dsl as genericDsl } from '../../common/data/dsl_queries';
 
 export const dsl = {
   matchElasticTitle(title: string): QueryDslQueryContainer {
-    return { match: { 'elastic_dashboard.title': title } };
+    return { match_phrase: { 'elastic_dashboard.title': title } };
   },
   matchOriginalTitle(title: string): QueryDslQueryContainer {
-    return { match: { 'original_dashboard.title': title } };
+    return { match_phrase: { 'original_dashboard.title': title } };
   },
   matchTitle(title: string): QueryDslQueryContainer {
     return {
