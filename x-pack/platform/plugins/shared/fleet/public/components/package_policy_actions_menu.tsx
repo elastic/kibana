@@ -72,11 +72,15 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const isAgentlessPolicy = packagePolicy.supports_agentless;
 
   // For agentless policies the agentPolicies prop may be empty (the parent hook doesn't always
-  // fetch them). Fetch the agent policy directly so we can include cluster_id in the support bundle.
+  // fetch them) or a minimal synthesized policy without `agentless` details (the agentless
+  // deployments table). Fetch the agent policy directly so we can include cluster_id in the
+  // support bundle.
   const agentlessPolicyId =
-    isAgentlessPolicy && !agentPolicy ? packagePolicy.policy_ids[0] : undefined;
+    isAgentlessPolicy && !agentPolicy?.agentless ? packagePolicy.policy_ids[0] : undefined;
   const { data: agentlessPolicyData } = useGetOneAgentPolicy(agentlessPolicyId);
-  const effectiveAgentPolicy = agentPolicy ?? agentlessPolicyData?.item;
+  const effectiveAgentPolicy = agentPolicy?.agentless
+    ? agentPolicy
+    : agentlessPolicyData?.item ?? agentPolicy;
 
   const supportBundleText = useMemo(() => {
     if (!isAgentlessPolicy) return '';

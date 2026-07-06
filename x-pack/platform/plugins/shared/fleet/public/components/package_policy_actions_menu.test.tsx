@@ -492,6 +492,33 @@ describe('PackagePolicyActionsMenu', () => {
       });
     });
 
+    it('should fall back to useGetOneAgentPolicy for cluster_id when the agent policy is a minimal synthesized one', async () => {
+      useGetOneAgentPolicyMock.mockReturnValue({
+        data: {
+          item: {
+            id: 'policy-uuid',
+            agentless: { cluster_id: 'fetched-cluster' },
+          },
+        },
+        isLoading: false,
+      } as any);
+      // The agentless deployments table synthesizes agent policies without `agentless` details.
+      const agentPolicies = [
+        { id: 'policy-uuid', name: 'Test Policy', supports_agentless: true },
+      ] as AgentPolicy[];
+      const packagePolicy = createMockPackagePolicy({
+        supports_agentless: true,
+        policy_ids: ['policy-uuid'],
+        package: { name: 'cloud_security_posture', version: '1.0.0', title: 'CSPM' },
+      });
+      renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(capturedCopyText).toEqual(
+          'elastic-support-bundle\ndeployment_id=abc123def456\ncluster_id=fetched-cluster\npolicy_id=policy-uuid\nintegration=cloud_security_posture'
+        );
+      });
+    });
+
     it('should use project_id instead of deployment_id on serverless', async () => {
       const { useStartServices } = jest.requireMock('../hooks');
       const serverlessReturnValue = {

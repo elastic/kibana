@@ -28,8 +28,11 @@ export interface AgentlessPolicyTableItem {
  *   the identifiers/timestamps the table renders (`id`, `updated_at`, `updated_by`).
  * - `policy_ids` is set to `[agentlessPolicy.id]`: the agentless agent-policy id equals the
  *   policy id by server design, and the enrollment flyout keys the agent lookup off it.
- * - `agentPolicies` is a minimal `{ id, name }`: the table only reads the id (status lookup,
- *   agents kuery, upgrade href) and the flyout uses it only for optional error-state details.
+ * - `agentPolicies` is a minimal `{ id, name, supports_agentless }`: the table reads the id
+ *   (status lookup, agents kuery, upgrade href), the flyout uses it only for optional
+ *   error-state details, and shared row consumers (actions menu, delete modal) branch on
+ *   `supports_agentless` — without it they'd offer "Add agent" and show the agent-based
+ *   delete wording on agentless rows.
  */
 export const agentlessPolicyToTableItem = (
   agentlessPolicy: AgentlessPolicy,
@@ -47,7 +50,11 @@ export const agentlessPolicyToTableItem = (
   };
 
   const agentPolicies = [
-    { id: agentlessPolicy.id, name: agentlessPolicy.name } as GetAgentPoliciesResponseItem,
+    {
+      id: agentlessPolicy.id,
+      name: agentlessPolicy.name,
+      supports_agentless: true,
+    } as GetAgentPoliciesResponseItem,
   ];
 
   let packagePolicy: PackagePolicy;

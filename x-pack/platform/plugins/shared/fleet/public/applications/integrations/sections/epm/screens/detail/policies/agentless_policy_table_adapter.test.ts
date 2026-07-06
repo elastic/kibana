@@ -71,10 +71,14 @@ describe('agentlessPolicyToTableItem', () => {
     expect(packagePolicy.policy_ids).toEqual(['agentless-1']);
   });
 
-  it('synthesizes a minimal agent policy keyed by the agentless id', () => {
+  it('synthesizes a minimal agentless agent policy keyed by the agentless id', () => {
     const { agentPolicies } = agentlessPolicyToTableItem(agentlessPolicy, packageInfo);
 
-    expect(agentPolicies).toEqual([{ id: 'agentless-1', name: 'Nginx agentless' }]);
+    // supports_agentless drives shared row consumers: without it the actions menu offers
+    // "Add agent" and the delete modal shows the agent-based wording on agentless rows.
+    expect(agentPolicies).toEqual([
+      { id: 'agentless-1', name: 'Nginx agentless', supports_agentless: true },
+    ]);
   });
 
   it('degrades to a minimal row (no throw) when input expansion fails', () => {
@@ -95,6 +99,8 @@ describe('agentlessPolicyToTableItem', () => {
     expect(packagePolicy.inputs).toEqual([]);
     expect(packagePolicy.policy_ids).toEqual(['agentless-1']);
     expect(packagePolicy.updated_at).toBe('2026-02-02T00:00:00.000Z');
-    expect(agentPolicies).toEqual([{ id: 'agentless-1', name: 'Nginx agentless' }]);
+    expect(agentPolicies).toEqual([
+      { id: 'agentless-1', name: 'Nginx agentless', supports_agentless: true },
+    ]);
   });
 });
