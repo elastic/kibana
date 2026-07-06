@@ -19,7 +19,7 @@ import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
-const RESOURCE = 'https://test-project.kb.us-central1.gcp.elastic.cloud';
+const RESOURCE = 'https://test-project.kb.us-central1.gcp.elastic.cloud/api/agent_builder/mcp';
 const PROJECT_ID = 'mock-project-id';
 
 const mcpConfig = {
