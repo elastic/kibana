@@ -1,6 +1,6 @@
 responses:
   200:
-    description: 'HTML confirmation page when the workflow response was accepted'
+    description: 'An HTML confirmation page confirming that the response was received and the workflow execution was resumed.'
     content:
       text/html:
         schema:

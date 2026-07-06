@@ -34,7 +34,7 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
       security: EXTERNAL_RESUME_SECURITY,
       summary: 'Submit external input for a paused workflow execution',
       description:
-        'Resume a paused waitForInput step using an external resume API key and submitted form data. Authenticate with an Authorization: ApiKey header or an apiKey query parameter (header takes precedence). Returns an HTML confirmation page.',
+        'Resume a workflow execution that is paused and waiting for external input. Submit input values as a JSON request body, authenticated with either an Authorization: ApiKey header or an apiKey query parameter. Returns an HTML confirmation page.',
       options: EXTERNAL_RESUME_POST_ROUTE_OPTIONS,
     })
     .addVersion(
@@ -104,7 +104,7 @@ export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies)
       security: EXTERNAL_RESUME_SECURITY,
       summary: 'Resume a workflow execution from an external link',
       description:
-        'Resume a paused waitForApproval step (approved query param) or waitForInput step (schema fields as query params). Returns an HTML confirmation page.',
+        'Resume a paused `waitForApproval` step (pauses the workflow and waits for a human to approve/decline before execution continues) or `waitForInput` step (passes the expected input values as query parameters in the URL). Returns an HTML confirmation page.',
       options: EXTERNAL_RESUME_ROUTE_OPTIONS,
     })
     .addVersion(
@@ -121,7 +121,10 @@ export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies)
               {
                 apiKey: schema.string({
                   maxLength: MAX_HITL_EXTERNAL_RESUME_API_KEY_LENGTH,
-                  meta: { description: 'External resume API key credential.' },
+                  meta: {
+                    description:
+                      'The API key created when the workflow execution was paused. Authenticates the request to resume execution.',
+                  },
                 }),
                 approved: schema.maybe(
                   schema.oneOf(
@@ -129,7 +132,7 @@ export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies)
                     {
                       meta: {
                         description:
-                          'Required for waitForApproval. Whether the external actor approved the workflow pause.',
+                          'Indicates whether a human reviewer approved the paused step. Required for `waitForApproval` when resuming an approval step.',
                       },
                     }
                   )

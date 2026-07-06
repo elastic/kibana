@@ -9,7 +9,7 @@ requestBody:
             description: Escalated from Slack triage
 responses:
   200:
-    description: 'HTML confirmation page when the external input was accepted'
+    description: 'An HTML confirmation page confirming that the input was received and the workflow execution was resumed.'
     content:
       text/html:
         schema:

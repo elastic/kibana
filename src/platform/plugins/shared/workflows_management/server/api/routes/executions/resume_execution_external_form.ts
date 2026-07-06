@@ -30,9 +30,9 @@ export function registerExternalResumeFormRoute(deps: RouteDependencies) {
       path: EXTERNAL_RESUME_FORM_API_PATH,
       access: 'public',
       security: EXTERNAL_RESUME_SECURITY,
-      summary: 'Show the external input form for a paused workflow execution',
+      summary: 'Get the external input form for a paused workflow execution',
       description:
-        'Render an HTML form for submitting external input to a paused waitForInput step. Does not resume the execution.',
+        'Returns an HTML form for submitting external input to a paused waitForInput step. Does not resume the execution.',
       options: EXTERNAL_RESUME_ROUTE_OPTIONS,
     })
     .addVersion(
