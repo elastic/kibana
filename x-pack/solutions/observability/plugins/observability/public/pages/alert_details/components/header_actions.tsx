@@ -90,8 +90,8 @@ export function HeaderActions({
   const canAddToCase = Boolean(casesPermissions?.read && casesPermissions?.createComment);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
-  const [showSnoozeForm, setShowSnoozeForm] = useState<boolean>(false);
+  const [isRuleSnoozeModalOpen, setRuleSnoozeModalOpen] = useState<boolean>(false);
+  const [isAlertSnoozeFormOpen, setIsAlertSnoozeFormOpen] = useState<boolean>(false);
 
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
 
@@ -118,7 +118,7 @@ export function HeaderActions({
     async (payload: AlertSnoozePayload) => {
       const applied = await snoozeAlert(payload);
       if (applied) {
-        setShowSnoozeForm(false);
+        setIsAlertSnoozeFormOpen(false);
         setIsPopoverOpen(false);
       }
     },
@@ -149,12 +149,12 @@ export function HeaderActions({
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const handleClosePopover = () => {
     setIsPopoverOpen(false);
-    setShowSnoozeForm(false);
+    setIsAlertSnoozeFormOpen(false);
   };
 
   const handleOpenSnoozeModal = () => {
     setIsPopoverOpen(false);
-    setSnoozeModalOpen(true);
+    setRuleSnoozeModalOpen(true);
   };
 
   return (
@@ -208,7 +208,9 @@ export function HeaderActions({
             panelPaddingSize="none"
             isOpen={isPopoverOpen}
             closePopover={handleClosePopover}
-            panelStyle={showSnoozeForm ? { maxHeight: '50vh', overflowY: 'auto' } : undefined}
+            panelStyle={
+              isAlertSnoozeFormOpen ? { maxHeight: '50vh', overflowY: 'auto' } : undefined
+            }
             aria-label={i18n.translate('xpack.observability.alertDetails.actionsButtonLabel', {
               defaultMessage: 'Actions',
             })}
@@ -235,11 +237,11 @@ export function HeaderActions({
               </EuiToolTip>
             }
           >
-            {showSnoozeForm ? (
+            {isAlertSnoozeFormOpen ? (
               <EuiContextMenuPanel>
                 <AlertSnoozePanelInline
                   onApply={handleSnoozeAlertApply}
-                  onBack={() => setShowSnoozeForm(false)}
+                  onBack={() => setIsAlertSnoozeFormOpen(false)}
                 />
               </EuiContextMenuPanel>
             ) : (
@@ -263,37 +265,14 @@ export function HeaderActions({
                       </EuiText>
                     </EuiButtonEmpty>
 
-                    {ruleId && instanceId ? (
-                      isMuted || isSnoozed ? (
-                        <EuiButtonEmpty
-                          size="s"
-                          color="text"
-                          iconType="bell"
-                          onClick={handleUnsnoozeAlert}
-                          data-test-subj="unsnooze-alert-button"
-                        >
-                          <EuiText size="s">
-                            {i18n.translate('xpack.observability.alertDetails.unsnoozeAlert', {
-                              defaultMessage: 'Unsnooze the alert',
-                            })}
-                          </EuiText>
-                        </EuiButtonEmpty>
-                      ) : (
-                        <EuiButtonEmpty
-                          size="s"
-                          color="text"
-                          iconType="bellSlash"
-                          onClick={() => setShowSnoozeForm(true)}
-                          data-test-subj="snooze-alert-button"
-                        >
-                          <EuiText size="s">
-                            {i18n.translate('xpack.observability.alertDetails.snoozeAlert', {
-                              defaultMessage: 'Snooze the alert',
-                            })}
-                          </EuiText>
-                        </EuiButtonEmpty>
-                      )
-                    ) : null}
+                    <SnoozeAlertAction
+                      ruleId={ruleId}
+                      instanceId={instanceId}
+                      isMuted={isMuted}
+                      isSnoozed={isSnoozed}
+                      onUnsnooze={handleUnsnoozeAlert}
+                      onSnooze={() => setIsAlertSnoozeFormOpen(true)}
+                    />
 
                     <EuiButtonEmpty
                       size="s"
@@ -372,10 +351,10 @@ export function HeaderActions({
         />
       )}
 
-      {rule && snoozeModalOpen ? (
+      {rule && isRuleSnoozeModalOpen ? (
         <RuleSnoozeModal
           rule={rule}
-          onClose={() => setSnoozeModalOpen(false)}
+          onClose={() => setRuleSnoozeModalOpen(false)}
           onRuleChanged={async () => {
             refetch();
           }}
@@ -383,5 +362,57 @@ export function HeaderActions({
         />
       ) : null}
     </>
+  );
+}
+
+function SnoozeAlertAction({
+  ruleId,
+  instanceId,
+  isMuted,
+  isSnoozed,
+  onUnsnooze,
+  onSnooze,
+}: {
+  ruleId?: string;
+  instanceId?: string;
+  isMuted: boolean;
+  isSnoozed: boolean;
+  onUnsnooze: () => void;
+  onSnooze: () => void;
+}) {
+  if (!ruleId || !instanceId) return null;
+
+  if (isMuted || isSnoozed) {
+    return (
+      <EuiButtonEmpty
+        size="s"
+        color="text"
+        iconType="bell"
+        onClick={onUnsnooze}
+        data-test-subj="unsnooze-alert-button"
+      >
+        <EuiText size="s">
+          {i18n.translate('xpack.observability.alertDetails.unsnoozeAlert', {
+            defaultMessage: 'Unsnooze the alert',
+          })}
+        </EuiText>
+      </EuiButtonEmpty>
+    );
+  }
+
+  return (
+    <EuiButtonEmpty
+      size="s"
+      color="text"
+      iconType="bellSlash"
+      onClick={onSnooze}
+      data-test-subj="snooze-alert-button"
+    >
+      <EuiText size="s">
+        {i18n.translate('xpack.observability.alertDetails.snoozeAlert', {
+          defaultMessage: 'Snooze the alert',
+        })}
+      </EuiText>
+    </EuiButtonEmpty>
   );
 }

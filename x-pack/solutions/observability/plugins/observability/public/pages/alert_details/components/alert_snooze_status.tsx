@@ -16,9 +16,9 @@ export interface AlertSnoozeStatusProps {
 
 /**
  * Shows the same snooze/mute badge used in the alerts table next to the alert
- * status on the alert details header. The per-alert snooze state lives on the
- * rule saved object, so it is fetched here rather than read from the alert doc
- * (which only carries the boolean muted/snoozed flags).
+ * status. The per-alert snooze state lives on the rule saved object, so it is
+ * fetched here rather than read from the alert doc (which only carries the
+ * boolean muted/snoozed flags).
  */
 export function AlertSnoozeStatus({ alert }: AlertSnoozeStatusProps) {
   const { isMuted, snoozedInstance } = useAlertSnoozeState(alert);
