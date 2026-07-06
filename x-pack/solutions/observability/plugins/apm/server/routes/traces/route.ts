@@ -359,6 +359,9 @@ const transactionByNameRoute = createApmServerRoute({
         transactionName: t.string,
         serviceName: t.string,
       }),
+      t.partial({
+        environment: t.string,
+      }),
     ]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
@@ -369,7 +372,7 @@ const transactionByNameRoute = createApmServerRoute({
   }> => {
     const {
       params: {
-        query: { start, end, transactionName, serviceName },
+        query: { start, end, transactionName, serviceName, environment },
       },
     } = resources;
 
@@ -381,6 +384,7 @@ const transactionByNameRoute = createApmServerRoute({
         start,
         end,
         serviceName,
+        environment,
       }),
     };
   },
