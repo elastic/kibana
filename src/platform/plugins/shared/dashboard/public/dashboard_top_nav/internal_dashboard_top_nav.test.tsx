@@ -26,6 +26,11 @@ import {
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 
+// The top nav reads chrome via context hooks (`useChromeStyle`/`useIsNextChrome`), so render inside
+// the chrome provider just like production. The mock defaults to classic chrome (legacy header mode).
+const renderWithChrome = (ui: React.ReactElement) =>
+  renderWithI18n(coreServices.chrome.withProvider(ui));
+
 describe('Internal dashboard top nav', () => {
   beforeEach(() => {
     setMockedPresentationUtilServices();
@@ -36,7 +41,7 @@ describe('Internal dashboard top nav', () => {
 
   it('should not render the managed badge by default', async () => {
     const { api, internalApi } = buildMockDashboardApi();
-    renderWithI18n(
+    renderWithChrome(
       <DashboardContext.Provider value={api}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav redirectTo={jest.fn()} />
@@ -56,7 +61,7 @@ describe('Internal dashboard top nav', () => {
       ...api,
       isManaged: true,
     };
-    renderWithI18n(
+    renderWithChrome(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav redirectTo={jest.fn()} />
@@ -82,7 +87,7 @@ describe('Internal dashboard top nav', () => {
         viewMode$: new BehaviorSubject<ViewMode>('view'),
       };
 
-      renderWithI18n(
+      renderWithChrome(
         <DashboardContext.Provider value={dashboardApi}>
           <DashboardInternalContext.Provider value={internalApi}>
             <InternalDashboardTopNav
@@ -117,7 +122,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    renderWithI18n(
+    renderWithChrome(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -144,7 +149,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    renderWithI18n(
+    renderWithChrome(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -178,7 +183,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    renderWithI18n(
+    renderWithChrome(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -212,7 +217,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    renderWithI18n(
+    renderWithChrome(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
