@@ -8,11 +8,11 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import type { CeHttpItem } from '../../common/http_api/ce';
-import type { CeDocument } from '../services/ce/types';
+import type { ContextEngineHttpItem } from '../../common/http_api/context_engine';
+import type { ContextEngineDocument } from '../services/context_engine/types';
 import { apiPrivileges } from '../../common/features';
 
-export const toCeHttpItem = (doc: CeDocument): CeHttpItem => ({
+export const toContextEngineHttpItem = (doc: ContextEngineDocument): ContextEngineHttpItem => ({
   id: doc.id,
   type: doc.type,
   title: doc.title,
@@ -34,7 +34,7 @@ export const WRITE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] },
 };
 
-export const withCeFeatureFlag =
+export const withContextEngineFeatureFlag =
   <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> =>
   async (ctx, request, response) => {
     const { uiSettings } = await ctx.core;

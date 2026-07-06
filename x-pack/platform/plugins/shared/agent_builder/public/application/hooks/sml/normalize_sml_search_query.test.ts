@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CE_HTTP_SEARCH_QUERY_MAX_LENGTH } from '@kbn/context-engine-plugin/public';
+import { CONTEXT_ENGINE_HTTP_SEARCH_QUERY_MAX_LENGTH } from '@kbn/context-engine-plugin/public';
 import { normalizeSmlSearchQuery } from './normalize_sml_search_query';
 
 describe('normalizeSmlSearchQuery', () => {
@@ -22,8 +22,8 @@ describe('normalizeSmlSearchQuery', () => {
   });
 
   it('truncates queries longer than the HTTP max length', () => {
-    const long = 'a'.repeat(CE_HTTP_SEARCH_QUERY_MAX_LENGTH + 10);
+    const long = 'a'.repeat(CONTEXT_ENGINE_HTTP_SEARCH_QUERY_MAX_LENGTH + 10);
     const normalized = normalizeSmlSearchQuery(long);
-    expect(normalized.length).toBe(CE_HTTP_SEARCH_QUERY_MAX_LENGTH);
+    expect(normalized.length).toBe(CONTEXT_ENGINE_HTTP_SEARCH_QUERY_MAX_LENGTH);
   });
 });

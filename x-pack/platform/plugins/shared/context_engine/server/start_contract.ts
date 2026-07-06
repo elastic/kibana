@@ -10,13 +10,13 @@ import type { Logger } from '@kbn/logging';
 import type {
   ContextEnginePluginStart,
   ContextEngineStartDependencies,
-  CeIndexAttachmentParams,
-  CeDeleteAttachmentParams,
+  ContextEngineIndexAttachmentParams,
+  ContextEngineDeleteAttachmentParams,
 } from './types';
-import type { CeService } from './services/ce/types';
+import type { ContextEngineService } from './services/context_engine/types';
 
 interface StartContractDeps {
-  ceService: CeService;
+  contextEngineService: ContextEngineService;
   elasticsearch: CoreStart['elasticsearch'];
   savedObjects: CoreStart['savedObjects'];
   spaces: ContextEngineStartDependencies['spaces'];
@@ -25,16 +25,16 @@ interface StartContractDeps {
 
 /**
  * Builds `ContextEnginePluginStart.indexAttachment`, translating public
- * request-scoped params into the internal `CeIndexerParams` shape.
+ * request-scoped params into the internal `ContextEngineIndexerParams` shape.
  *
  * `createdAt`/`permissions` are folded in after `base` rather than included
  * in it because they're content-mode-only; hoisting them into `base` would
  * make them reachable from the origin-mode branch too.
  */
 export const buildIndexAttachment =
-  ({ ceService, elasticsearch, savedObjects, spaces, logger }: StartContractDeps) =>
+  ({ contextEngineService, elasticsearch, savedObjects, spaces, logger }: StartContractDeps) =>
   async (
-    params: CeIndexAttachmentParams
+    params: ContextEngineIndexAttachmentParams
   ): ReturnType<ContextEnginePluginStart['indexAttachment']> => {
     const soClient = savedObjects.getScopedClient(params.request, {
       ...(params.includedHiddenTypes?.length
@@ -53,14 +53,14 @@ export const buildIndexAttachment =
       logger,
     };
     if (params.content !== undefined) {
-      return ceService.indexAttachment({
+      return contextEngineService.indexAttachment({
         ...base,
         content: params.content,
         ...(params.createdAt !== undefined ? { createdAt: params.createdAt } : {}),
         ...(params.permissions !== undefined ? { permissions: params.permissions } : {}),
       });
     }
-    return ceService.indexAttachment({ ...base, force: params.force });
+    return contextEngineService.indexAttachment({ ...base, force: params.force });
   };
 
 /**
@@ -70,9 +70,9 @@ export const buildIndexAttachment =
  * `ingestionMethod` scope to wipe.
  */
 export const buildDeleteAttachment =
-  ({ ceService, elasticsearch, savedObjects, spaces, logger }: StartContractDeps) =>
+  ({ contextEngineService, elasticsearch, savedObjects, spaces, logger }: StartContractDeps) =>
   async (
-    params: CeDeleteAttachmentParams
+    params: ContextEngineDeleteAttachmentParams
   ): ReturnType<ContextEnginePluginStart['deleteAttachment']> => {
     const soClient = savedObjects.getScopedClient(params.request, {
       ...(params.includedHiddenTypes?.length
@@ -81,7 +81,7 @@ export const buildDeleteAttachment =
     });
     const spaceId =
       params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-    return ceService.deleteAttachment({
+    return contextEngineService.deleteAttachment({
       originId: params.originId,
       attachmentType: params.attachmentType,
       spaces: [spaceId],

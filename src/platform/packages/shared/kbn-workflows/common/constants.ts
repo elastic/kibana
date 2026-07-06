@@ -51,11 +51,11 @@ export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library
 export const SystemConnectorsMap = new Map<string, string>([['.http', '.http-system']]);
 
 /**
- * Workflow attachment and CE types used by the agent builder integration.
+ * Workflow attachment and SML types used by the agent builder integration.
  */
 export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
-export const WORKFLOW_CE_TYPE = 'workflow';
+export const WORKFLOW_SML_TYPE = 'workflow';
 
 /**
  * UI event broadcast on the agent builder events bus when a workflow YAML

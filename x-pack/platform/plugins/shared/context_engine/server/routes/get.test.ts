@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   buildMockContext,
-  createMockCeService,
+  createMockContextEngineService,
   createTestCoreSetup,
   createTestCoreSetupNoSpaces,
   httpServerMock,
@@ -22,18 +22,18 @@ const validParams = { type: 'visualization', originId: 'viz-1' };
 describe('registerGetRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let handler: Function;
-  let mockCeService: ReturnType<typeof createMockCeService>;
+  let mockContextEngineService: ReturnType<typeof createMockContextEngineService>;
   const logger = loggingSystemMock.create().get();
 
   beforeEach(() => {
     router = httpServiceMock.createRouter();
-    mockCeService = createMockCeService();
+    mockContextEngineService = createMockContextEngineService();
 
     registerGetRoute({
       router: router as any,
       coreSetup: createTestCoreSetup() as any,
       logger,
-      getCeService: () => mockCeService as any,
+      getContextEngineService: () => mockContextEngineService as any,
     });
 
     const [, registeredHandler] = router.get.mock.calls[0];
@@ -50,31 +50,33 @@ describe('registerGetRoute', () => {
   it('returns 404 when feature flag is disabled', async () => {
     const response = await callHandler(validParams, false);
     expect(response.notFound).toHaveBeenCalled();
-    expect(mockCeService.findByOrigin).not.toHaveBeenCalled();
+    expect(mockContextEngineService.findByOrigin).not.toHaveBeenCalled();
   });
 
   it('returns 404 when no entries exist for the origin', async () => {
-    mockCeService.findByOrigin.mockResolvedValue([]);
+    mockContextEngineService.findByOrigin.mockResolvedValue([]);
     const response = await callHandler({ type: 'visualization', originId: 'missing' });
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "CE origin 'visualization/missing' not found" },
+      body: { message: "Context Engine origin 'visualization/missing' not found" },
     });
-    expect(mockCeService.checkItemsAccess).not.toHaveBeenCalled();
+    expect(mockContextEngineService.checkItemsAccess).not.toHaveBeenCalled();
   });
 
   it('returns 404 when every entry is unauthorized', async () => {
-    mockCeService.findByOrigin.mockResolvedValue([sampleDocument]);
-    mockCeService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, false]]));
+    mockContextEngineService.findByOrigin.mockResolvedValue([sampleDocument]);
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(
+      new Map([[sampleDocument.id, false]])
+    );
     const response = await callHandler(validParams);
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "CE origin 'visualization/viz-1' not found" },
+      body: { message: "Context Engine origin 'visualization/viz-1' not found" },
     });
   });
 
   it('returns 200 with every authorized entry for the origin', async () => {
     const secondEntry = { ...sampleDocument, id: 'entry-2' };
-    mockCeService.findByOrigin.mockResolvedValue([sampleDocument, secondEntry]);
-    mockCeService.checkItemsAccess.mockResolvedValue(
+    mockContextEngineService.findByOrigin.mockResolvedValue([sampleDocument, secondEntry]);
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(
       new Map([
         [sampleDocument.id, true],
         [secondEntry.id, true],
@@ -85,7 +87,7 @@ describe('registerGetRoute', () => {
 
     // Both `type` and `originId` flow from the URL into the lookup —
     // the service hashes them into the canonical `origin.uri`.
-    expect(mockCeService.findByOrigin).toHaveBeenCalledWith({
+    expect(mockContextEngineService.findByOrigin).toHaveBeenCalledWith({
       type: 'visualization',
       originId: 'viz-1',
       spaceId: 'test-space',
@@ -103,8 +105,8 @@ describe('registerGetRoute', () => {
 
   it('drops entries the caller is not authorized to see', async () => {
     const secondEntry = { ...sampleDocument, id: 'entry-2' };
-    mockCeService.findByOrigin.mockResolvedValue([sampleDocument, secondEntry]);
-    mockCeService.checkItemsAccess.mockResolvedValue(
+    mockContextEngineService.findByOrigin.mockResolvedValue([sampleDocument, secondEntry]);
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(
       new Map([
         [sampleDocument.id, true],
         [secondEntry.id, false],
@@ -124,25 +126,27 @@ describe('registerGetRoute', () => {
       router: localRouter as any,
       coreSetup: createTestCoreSetupNoSpaces() as any,
       logger,
-      getCeService: () => mockCeService as any,
+      getContextEngineService: () => mockContextEngineService as any,
     });
 
     const [, localHandler] = localRouter.get.mock.calls[0];
     const request = httpServerMock.createKibanaRequest({ params: validParams });
     const response = httpServerMock.createResponseFactory();
 
-    mockCeService.findByOrigin.mockResolvedValue([sampleDocument]);
-    mockCeService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
+    mockContextEngineService.findByOrigin.mockResolvedValue([sampleDocument]);
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(
+      new Map([[sampleDocument.id, true]])
+    );
 
     await localHandler(buildMockContext(true), request, response);
 
-    expect(mockCeService.findByOrigin).toHaveBeenCalledWith(
+    expect(mockContextEngineService.findByOrigin).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'default' })
     );
   });
 
-  it('propagates errors from ce.findByOrigin', async () => {
-    mockCeService.findByOrigin.mockRejectedValue(new Error('ES connection failed'));
+  it('propagates errors from contextEngine.findByOrigin', async () => {
+    mockContextEngineService.findByOrigin.mockRejectedValue(new Error('ES connection failed'));
     await expect(callHandler(validParams)).rejects.toThrow('ES connection failed');
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('ES connection failed'));
   });

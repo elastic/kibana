@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   buildMockContext,
-  createMockCeService,
+  createMockContextEngineService,
   createTestCoreSetup,
   createTestCoreSetupNoSpaces,
   httpServerMock,
@@ -22,18 +22,18 @@ const validParams = { type: 'visualization', originId: 'viz-1' };
 describe('registerDeleteRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let handler: Function;
-  let mockCeService: ReturnType<typeof createMockCeService>;
+  let mockContextEngineService: ReturnType<typeof createMockContextEngineService>;
   const logger = loggingSystemMock.create().get();
 
   beforeEach(() => {
     router = httpServiceMock.createRouter();
-    mockCeService = createMockCeService();
+    mockContextEngineService = createMockContextEngineService();
 
     registerDeleteRoute({
       router: router as any,
       coreSetup: createTestCoreSetup() as any,
       logger,
-      getCeService: () => mockCeService as any,
+      getContextEngineService: () => mockContextEngineService as any,
     });
 
     const [, registeredHandler] = router.delete.mock.calls[0];
@@ -50,51 +50,55 @@ describe('registerDeleteRoute', () => {
   it('returns 404 when feature flag is disabled', async () => {
     const response = await callHandler(validParams, false);
     expect(response.notFound).toHaveBeenCalled();
-    expect(mockCeService.deleteAttachment).not.toHaveBeenCalled();
+    expect(mockContextEngineService.deleteAttachment).not.toHaveBeenCalled();
   });
 
   it('returns 404 when origin has no entries anywhere', async () => {
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([]);
     const response = await callHandler({ type: 'visualization', originId: 'missing' });
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "CE origin 'visualization/missing' not found" },
+      body: { message: "Context Engine origin 'visualization/missing' not found" },
     });
-    expect(mockCeService.deleteAttachment).not.toHaveBeenCalled();
+    expect(mockContextEngineService.deleteAttachment).not.toHaveBeenCalled();
   });
 
   it('returns 404 when origin is owned by another space', async () => {
     const otherSpaceDoc = { ...sampleDocument, spaces: ['other-space'] };
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([otherSpaceDoc]);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([otherSpaceDoc]);
 
     const response = await callHandler(validParams);
 
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "CE origin 'visualization/viz-1' not found" },
+      body: { message: "Context Engine origin 'visualization/viz-1' not found" },
     });
-    expect(mockCeService.deleteAttachment).not.toHaveBeenCalled();
+    expect(mockContextEngineService.deleteAttachment).not.toHaveBeenCalled();
   });
 
   it('returns 404 when caller cannot access every entry', async () => {
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
-    mockCeService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, false]]));
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(
+      new Map([[sampleDocument.id, false]])
+    );
 
     const response = await callHandler(validParams);
 
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "CE origin 'visualization/viz-1' not found" },
+      body: { message: "Context Engine origin 'visualization/viz-1' not found" },
     });
-    expect(mockCeService.deleteAttachment).not.toHaveBeenCalled();
+    expect(mockContextEngineService.deleteAttachment).not.toHaveBeenCalled();
   });
 
   it('deletes every entry for the origin with ingestionMethod=all', async () => {
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
-    mockCeService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
-    mockCeService.deleteAttachment.mockResolvedValue(undefined);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(
+      new Map([[sampleDocument.id, true]])
+    );
+    mockContextEngineService.deleteAttachment.mockResolvedValue(undefined);
 
     const response = await callHandler(validParams);
 
-    expect(mockCeService.deleteAttachment).toHaveBeenCalledTimes(1);
-    expect(mockCeService.deleteAttachment).toHaveBeenCalledWith(
+    expect(mockContextEngineService.deleteAttachment).toHaveBeenCalledTimes(1);
+    expect(mockContextEngineService.deleteAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
         originId: 'viz-1',
         attachmentType: 'visualization',
@@ -109,14 +113,14 @@ describe('registerDeleteRoute', () => {
 
   it('targets only the URL-pinned type even if entries of other types share the bare id', async () => {
     const vizEntry = { ...sampleDocument, id: 'entry-1', type: 'visualization' };
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([vizEntry]);
-    mockCeService.checkItemsAccess.mockResolvedValue(new Map([[vizEntry.id, true]]));
-    mockCeService.deleteAttachment.mockResolvedValue(undefined);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([vizEntry]);
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(new Map([[vizEntry.id, true]]));
+    mockContextEngineService.deleteAttachment.mockResolvedValue(undefined);
 
     await callHandler(validParams);
 
-    expect(mockCeService.deleteAttachment).toHaveBeenCalledTimes(1);
-    expect(mockCeService.deleteAttachment).toHaveBeenCalledWith(
+    expect(mockContextEngineService.deleteAttachment).toHaveBeenCalledTimes(1);
+    expect(mockContextEngineService.deleteAttachment).toHaveBeenCalledWith(
       expect.objectContaining({ attachmentType: 'visualization' })
     );
   });
@@ -127,7 +131,7 @@ describe('registerDeleteRoute', () => {
       router: localRouter as any,
       coreSetup: createTestCoreSetupNoSpaces() as any,
       logger,
-      getCeService: () => mockCeService as any,
+      getContextEngineService: () => mockContextEngineService as any,
     });
 
     const [, localHandler] = localRouter.delete.mock.calls[0];
@@ -135,21 +139,25 @@ describe('registerDeleteRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     const defaultSpaceDoc = { ...sampleDocument, spaces: ['default'] };
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([defaultSpaceDoc]);
-    mockCeService.checkItemsAccess.mockResolvedValue(new Map([[defaultSpaceDoc.id, true]]));
-    mockCeService.deleteAttachment.mockResolvedValue(undefined);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([defaultSpaceDoc]);
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(
+      new Map([[defaultSpaceDoc.id, true]])
+    );
+    mockContextEngineService.deleteAttachment.mockResolvedValue(undefined);
 
     await localHandler(buildMockContext(true), request, response);
 
-    expect(mockCeService.deleteAttachment).toHaveBeenCalledWith(
+    expect(mockContextEngineService.deleteAttachment).toHaveBeenCalledWith(
       expect.objectContaining({ spaces: ['default'] })
     );
   });
 
-  it('propagates errors from ce.deleteAttachment', async () => {
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
-    mockCeService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
-    mockCeService.deleteAttachment.mockRejectedValue(new Error('boom'));
+  it('propagates errors from contextEngine.deleteAttachment', async () => {
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(
+      new Map([[sampleDocument.id, true]])
+    );
+    mockContextEngineService.deleteAttachment.mockRejectedValue(new Error('boom'));
 
     await expect(callHandler(validParams)).rejects.toThrow('boom');
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('boom'));

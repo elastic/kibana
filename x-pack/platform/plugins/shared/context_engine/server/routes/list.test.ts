@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   buildMockContext,
-  createMockCeService,
+  createMockContextEngineService,
   createTestCoreSetup,
   createTestCoreSetupNoSpaces,
   httpServerMock,
@@ -16,23 +16,23 @@ import {
   sampleDocument,
 } from './test_helpers';
 import { registerListRoute } from './list';
-import { CeResultWindowExceededError } from '../services/ce/ce_errors';
+import { ContextEngineResultWindowExceededError } from '../services/context_engine/errors';
 
 describe('registerListRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let handler: Function;
-  let mockCeService: ReturnType<typeof createMockCeService>;
+  let mockContextEngineService: ReturnType<typeof createMockContextEngineService>;
   const logger = loggingSystemMock.create().get();
 
   beforeEach(() => {
     router = httpServiceMock.createRouter();
-    mockCeService = createMockCeService();
+    mockContextEngineService = createMockContextEngineService();
 
     registerListRoute({
       router: router as any,
       coreSetup: createTestCoreSetup() as any,
       logger,
-      getCeService: () => mockCeService as any,
+      getContextEngineService: () => mockContextEngineService as any,
     });
 
     const [, registeredHandler] = router.get.mock.calls[0];
@@ -49,12 +49,15 @@ describe('registerListRoute', () => {
   it('returns 404 when feature flag is disabled', async () => {
     const response = await callHandler({ page: 1, per_page: 20 }, false);
     expect(response.notFound).toHaveBeenCalled();
-    expect(mockCeService.listDocuments).not.toHaveBeenCalled();
+    expect(mockContextEngineService.listDocuments).not.toHaveBeenCalled();
   });
 
   it('returns 200 with paginated results and metadata', async () => {
-    mockCeService.listDocuments.mockResolvedValue({ total: 1, results: [sampleDocument] });
-    mockCeService.checkItemsAccess.mockResolvedValue(new Map([['entry-1', true]]));
+    mockContextEngineService.listDocuments.mockResolvedValue({
+      total: 1,
+      results: [sampleDocument],
+    });
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(new Map([['entry-1', true]]));
     const response = await callHandler({ page: 1, per_page: 20 });
     expect(response.ok).toHaveBeenCalledWith({
       body: {
@@ -67,11 +70,11 @@ describe('registerListRoute', () => {
 
   it('filters out unauthorized items', async () => {
     const doc2 = { ...sampleDocument, id: 'entry-2' };
-    mockCeService.listDocuments.mockResolvedValue({
+    mockContextEngineService.listDocuments.mockResolvedValue({
       total: 2,
       results: [sampleDocument, doc2],
     });
-    mockCeService.checkItemsAccess.mockResolvedValue(
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(
       new Map([
         ['entry-1', true],
         ['entry-2', false],
@@ -85,15 +88,15 @@ describe('registerListRoute', () => {
     });
   });
 
-  it('passes filters and pagination to ce.listDocuments', async () => {
-    mockCeService.listDocuments.mockResolvedValue({ total: 0, results: [] });
+  it('passes filters and pagination to contextEngine.listDocuments', async () => {
+    mockContextEngineService.listDocuments.mockResolvedValue({ total: 0, results: [] });
     await callHandler({
       page: 2,
       per_page: 5,
       type: 'dashboard',
       origin_uri: 'dashboard://dash-1',
     });
-    expect(mockCeService.listDocuments).toHaveBeenCalledWith({
+    expect(mockContextEngineService.listDocuments).toHaveBeenCalledWith({
       spaceId: 'test-space',
       esClient: expect.any(Object),
       page: 2,
@@ -103,18 +106,18 @@ describe('registerListRoute', () => {
     });
   });
 
-  it('passes tags filter to ce.listDocuments when provided (comma-delimited)', async () => {
-    mockCeService.listDocuments.mockResolvedValue({ total: 0, results: [] });
+  it('passes tags filter to contextEngine.listDocuments when provided (comma-delimited)', async () => {
+    mockContextEngineService.listDocuments.mockResolvedValue({ total: 0, results: [] });
     await callHandler({ page: 1, per_page: 20, tags: 'otel,claude-code' });
-    expect(mockCeService.listDocuments).toHaveBeenCalledWith(
+    expect(mockContextEngineService.listDocuments).toHaveBeenCalledWith(
       expect.objectContaining({ tags: ['otel', 'claude-code'] })
     );
   });
 
-  it('omits tags from ce.listDocuments when not provided', async () => {
-    mockCeService.listDocuments.mockResolvedValue({ total: 0, results: [] });
+  it('omits tags from contextEngine.listDocuments when not provided', async () => {
+    mockContextEngineService.listDocuments.mockResolvedValue({ total: 0, results: [] });
     await callHandler({ page: 1, per_page: 20 });
-    expect(mockCeService.listDocuments).toHaveBeenCalledWith(
+    expect(mockContextEngineService.listDocuments).toHaveBeenCalledWith(
       expect.objectContaining({ tags: undefined })
     );
   });
@@ -125,29 +128,29 @@ describe('registerListRoute', () => {
       router: localRouter as any,
       coreSetup: createTestCoreSetupNoSpaces() as any,
       logger,
-      getCeService: () => mockCeService as any,
+      getContextEngineService: () => mockContextEngineService as any,
     });
 
     const [, localHandler] = localRouter.get.mock.calls[0];
     const request = httpServerMock.createKibanaRequest({ query: { page: 1, per_page: 20 } });
     const response = httpServerMock.createResponseFactory();
 
-    mockCeService.listDocuments.mockResolvedValue({ total: 0, results: [] });
+    mockContextEngineService.listDocuments.mockResolvedValue({ total: 0, results: [] });
     await localHandler(buildMockContext(true), request, response);
-    expect(mockCeService.listDocuments).toHaveBeenCalledWith(
+    expect(mockContextEngineService.listDocuments).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'default' })
     );
   });
 
-  it('propagates errors from ce.listDocuments', async () => {
-    mockCeService.listDocuments.mockRejectedValue(new Error('boom'));
+  it('propagates errors from contextEngine.listDocuments', async () => {
+    mockContextEngineService.listDocuments.mockRejectedValue(new Error('boom'));
     await expect(callHandler({ page: 1, per_page: 20 })).rejects.toThrow('boom');
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
 
-  it('returns 400 when ce.listDocuments throws CeResultWindowExceededError', async () => {
-    mockCeService.listDocuments.mockRejectedValue(
-      new CeResultWindowExceededError(
+  it('returns 400 when contextEngine.listDocuments throws ContextEngineResultWindowExceededError', async () => {
+    mockContextEngineService.listDocuments.mockRejectedValue(
+      new ContextEngineResultWindowExceededError(
         'Result window is too large, from + size must be less than or equal to: [10000] but was [11000]'
       )
     );

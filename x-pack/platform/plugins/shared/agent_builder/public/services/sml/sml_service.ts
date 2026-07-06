@@ -7,17 +7,20 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type {
-  CeAutocompleteHttpResponse,
-  CeSearchConstraints,
-  CeSearchFilters,
-  CeSearchHttpResponse,
+  ContextEngineAutocompleteHttpResponse,
+  ContextEngineSearchConstraints,
+  ContextEngineSearchFilters,
+  ContextEngineSearchHttpResponse,
 } from '@kbn/context-engine-plugin/public';
-import { ceAutocompletePath, ceSearchPath } from '@kbn/context-engine-plugin/public';
+import {
+  contextEngineAutocompletePath,
+  contextEngineSearchPath,
+} from '@kbn/context-engine-plugin/public';
 
 /**
  * Browser client for SML.
- *   - `search(...)` → `/internal/context_engine/_search` (hybrid retrieval)
- *   - `autocomplete(...)` → `/internal/context_engine/_autocomplete` (@ menu / typeahead)
+ *   - `search(...)` → `/internal/agent_context_layer/sml/_search` (hybrid retrieval)
+ *   - `autocomplete(...)` → `/internal/agent_context_layer/sml/_autocomplete` (@ menu / typeahead)
  */
 export class SmlService {
   private readonly http: HttpSetup;
@@ -30,11 +33,11 @@ export class SmlService {
     query: string;
     size: number;
     /** Runtime-imposed per-type id-allowlist constraints. */
-    constraints?: CeSearchConstraints;
+    constraints?: ContextEngineSearchConstraints;
     /** Agent-discoverable filters (`types[]`, `tags[]`). */
-    filters?: CeSearchFilters;
-  }): Promise<CeSearchHttpResponse> {
-    return await this.http.post<CeSearchHttpResponse>(ceSearchPath, {
+    filters?: ContextEngineSearchFilters;
+  }): Promise<ContextEngineSearchHttpResponse> {
+    return await this.http.post<ContextEngineSearchHttpResponse>(contextEngineSearchPath, {
       body: JSON.stringify({
         query: params.query,
         size: params.size,
@@ -48,17 +51,20 @@ export class SmlService {
     query: string;
     size: number;
     /** Runtime-imposed per-type id-allowlist constraints. */
-    constraints?: CeSearchConstraints;
+    constraints?: ContextEngineSearchConstraints;
     /** Caller-supplied type/tag refinements. */
-    filters?: CeSearchFilters;
-  }): Promise<CeAutocompleteHttpResponse> {
-    return await this.http.post<CeAutocompleteHttpResponse>(ceAutocompletePath, {
-      body: JSON.stringify({
-        query: params.query,
-        size: params.size,
-        ...(params.constraints ? { constraints: params.constraints } : {}),
-        ...(params.filters ? { filters: params.filters } : {}),
-      }),
-    });
+    filters?: ContextEngineSearchFilters;
+  }): Promise<ContextEngineAutocompleteHttpResponse> {
+    return await this.http.post<ContextEngineAutocompleteHttpResponse>(
+      contextEngineAutocompletePath,
+      {
+        body: JSON.stringify({
+          query: params.query,
+          size: params.size,
+          ...(params.constraints ? { constraints: params.constraints } : {}),
+          ...(params.filters ? { filters: params.filters } : {}),
+        }),
+      }
+    );
   }
 }

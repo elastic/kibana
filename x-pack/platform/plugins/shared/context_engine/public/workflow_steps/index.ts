@@ -6,7 +6,7 @@
  */
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import { contextEngineAddEntryStepDefinition } from './ce_index_attachment_step';
+import { contextEngineAddEntryStepDefinition } from './index_attachment_step';
 
 export const registerContextEngineWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup

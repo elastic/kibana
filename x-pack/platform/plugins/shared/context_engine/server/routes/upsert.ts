@@ -7,26 +7,30 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
-import type { CeUpsertHttpResponse } from '../../common/http_api/ce';
+import type { ContextEngineUpsertHttpResponse } from '../../common/http_api/context_engine';
 import {
-  ceByTypeAndOriginIdPath,
-  MAX_CE_ORIGIN_ID_LENGTH,
-  MAX_CE_TYPE_LENGTH,
-  MAX_CE_TITLE_LENGTH,
-  MAX_CE_CONTENT_LENGTH,
-  MAX_CE_TAG_LENGTH,
-  MAX_CE_TAGS_PER_DOCUMENT,
-  MAX_CE_PERMISSIONS_NAME_LENGTH,
-  MAX_CE_PERMISSIONS_ENTRIES,
+  contextEngineByTypeAndOriginIdPath,
+  MAX_CONTEXT_ENGINE_ORIGIN_ID_LENGTH,
+  MAX_CONTEXT_ENGINE_TYPE_LENGTH,
+  MAX_CONTEXT_ENGINE_TITLE_LENGTH,
+  MAX_CONTEXT_ENGINE_CONTENT_LENGTH,
+  MAX_CONTEXT_ENGINE_TAG_LENGTH,
+  MAX_CONTEXT_ENGINE_TAGS_PER_DOCUMENT,
+  MAX_CONTEXT_ENGINE_PERMISSIONS_NAME_LENGTH,
+  MAX_CONTEXT_ENGINE_PERMISSIONS_ENTRIES,
 } from '../../common/constants';
-import { CePermissionsConflictError } from '../services/ce/errors';
-import type { CeEntry, CePermissions, CeService } from '../services/ce/types';
-import { isVisibleInSpace } from '../services/ce/ce_service';
+import { ContextEnginePermissionsConflictError } from '../services/context_engine/errors';
+import type {
+  ContextEngineEntry,
+  ContextEnginePermissions,
+  ContextEngineService,
+} from '../services/context_engine/types';
+import { isVisibleInSpace } from '../services/context_engine/service';
 import type { ContextEngineStartDependencies, ContextEnginePluginStart } from '../types';
-import { WRITE_SECURITY, toCeHttpItem, withCeFeatureFlag } from './common';
+import { WRITE_SECURITY, toContextEngineHttpItem, withContextEngineFeatureFlag } from './common';
 
 /**
- * `PUT /internal/context_engine/ce/{type}/{originId}`
+ * `PUT /internal/agent_context_layer/sml/{type}/{originId}`
  *
  * Writes a manual entry via `indexAttachment` content-mode (same path as the
  * workflow step). The write replaces all existing entries for the origin
@@ -35,7 +39,7 @@ import { WRITE_SECURITY, toCeHttpItem, withCeFeatureFlag } from './common';
  *
  * `permissions` mirrors the workflow step's `contextEngine.addEntry` input:
  * applies only when `type` has no `getPermissions` hook. Supplying it for a
- * hook-backed type throws {@link CePermissionsConflictError}, mapped below to 409.
+ * hook-backed type throws {@link ContextEnginePermissionsConflictError}, mapped below to 409.
  *
  * Cross-space guard: origins invisible from the caller's space return 404.
  * Per-entry privilege guard: caller must hold read access to every existing
@@ -47,38 +51,38 @@ export const registerUpsertRoute = ({
   router,
   coreSetup,
   logger,
-  getCeService,
+  getContextEngineService,
 }: {
   router: IRouter;
   coreSetup: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>;
   logger: Logger;
-  getCeService: () => CeService;
+  getContextEngineService: () => ContextEngineService;
 }) => {
   router.put(
     {
-      path: ceByTypeAndOriginIdPath,
+      path: contextEngineByTypeAndOriginIdPath,
       validate: {
         // `type` is validated as a lowercase identifier; the indexer is permissive about
         // registration, so this is the last syntactic guard against junk namespace ids.
         params: schema.object({
           type: schema.string({
             minLength: 1,
-            maxLength: MAX_CE_TYPE_LENGTH,
+            maxLength: MAX_CONTEXT_ENGINE_TYPE_LENGTH,
             validate: (v) =>
               /^[a-z][a-z0-9_]*$/.test(v)
                 ? undefined
                 : 'must be a lowercase identifier starting with a letter, e.g. "visualization", "my_notes"',
           }),
-          originId: schema.string({ minLength: 1, maxLength: MAX_CE_ORIGIN_ID_LENGTH }),
+          originId: schema.string({ minLength: 1, maxLength: MAX_CONTEXT_ENGINE_ORIGIN_ID_LENGTH }),
         }),
         // `type` and `originId` are URL params only — never accepted from the body.
         body: schema.object({
-          title: schema.string({ minLength: 1, maxLength: MAX_CE_TITLE_LENGTH }),
-          content: schema.string({ maxLength: MAX_CE_CONTENT_LENGTH }),
+          title: schema.string({ minLength: 1, maxLength: MAX_CONTEXT_ENGINE_TITLE_LENGTH }),
+          content: schema.string({ maxLength: MAX_CONTEXT_ENGINE_CONTENT_LENGTH }),
           tags: schema.maybe(
             schema.arrayOf(
               schema.string({
-                maxLength: MAX_CE_TAG_LENGTH,
+                maxLength: MAX_CONTEXT_ENGINE_TAG_LENGTH,
                 validate: (v) =>
                   /^[a-z0-9][a-z0-9_-]*$/.test(v)
                     ? undefined
@@ -89,7 +93,7 @@ export const registerUpsertRoute = ({
                 },
               }),
               {
-                maxSize: MAX_CE_TAGS_PER_DOCUMENT,
+                maxSize: MAX_CONTEXT_ENGINE_TAGS_PER_DOCUMENT,
                 meta: {
                   description:
                     'Optional tags for grouping and retrieval. Tags are matched with OR semantics on the list endpoint — a document is returned if it has any of the requested tags. Maximum 100 tags per document; each tag is at most 100 characters.',
@@ -107,10 +111,10 @@ export const registerUpsertRoute = ({
                         schema.object({
                           name: schema.string({
                             minLength: 1,
-                            maxLength: MAX_CE_PERMISSIONS_NAME_LENGTH,
+                            maxLength: MAX_CONTEXT_ENGINE_PERMISSIONS_NAME_LENGTH,
                           }),
                         }),
-                        { maxSize: MAX_CE_PERMISSIONS_ENTRIES }
+                        { maxSize: MAX_CONTEXT_ENGINE_PERMISSIONS_ENTRIES }
                       )
                     ),
                   })
@@ -122,10 +126,10 @@ export const registerUpsertRoute = ({
                         schema.object({
                           name: schema.string({
                             minLength: 1,
-                            maxLength: MAX_CE_PERMISSIONS_NAME_LENGTH,
+                            maxLength: MAX_CONTEXT_ENGINE_PERMISSIONS_NAME_LENGTH,
                           }),
                         }),
-                        { maxSize: MAX_CE_PERMISSIONS_ENTRIES }
+                        { maxSize: MAX_CONTEXT_ENGINE_PERMISSIONS_ENTRIES }
                       )
                     ),
                   })
@@ -144,9 +148,9 @@ export const registerUpsertRoute = ({
       options: { access: 'internal' },
       security: WRITE_SECURITY,
     },
-    withCeFeatureFlag(async (ctx, request, response) => {
+    withContextEngineFeatureFlag(async (ctx, request, response) => {
       try {
-        const ce = getCeService();
+        const contextEngine = getContextEngineService();
         const { type, originId } = request.params as { type: string; originId: string };
         const body = request.body as {
           title: string;
@@ -165,19 +169,19 @@ export const registerUpsertRoute = ({
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
 
         // Cross-space guard: 404 (not 403) to avoid disclosing origins in other spaces.
-        const existing = await ce.findByOriginAcrossSpaces({ type, originId, esClient });
+        const existing = await contextEngine.findByOriginAcrossSpaces({ type, originId, esClient });
         const visibleInCallerSpace =
           existing.length === 0 || existing.some((doc) => isVisibleInSpace(doc.spaces, spaceId));
         if (!visibleInCallerSpace) {
           return response.notFound({
-            body: { message: `CE origin '${type}/${originId}' not found` },
+            body: { message: `Context Engine origin '${type}/${originId}' not found` },
           });
         }
 
         // Per-entry privilege gate: caller must hold read access to every entry they
         // are about to replace — prevents content injection on permission-gated origins.
         if (existing.length > 0) {
-          const accessMap = await ce.checkItemsAccess({
+          const accessMap = await contextEngine.checkItemsAccess({
             ids: existing.map((d) => d.id),
             spaceId,
             esClient,
@@ -186,14 +190,14 @@ export const registerUpsertRoute = ({
           const unauthorized = existing.filter((d) => accessMap.get(d.id) !== true);
           if (unauthorized.length > 0) {
             return response.notFound({
-              body: { message: `CE origin '${type}/${originId}' not found` },
+              body: { message: `Context Engine origin '${type}/${originId}' not found` },
             });
           }
         }
 
         const created = existing.length === 0;
         const action = created ? 'create' : 'update';
-        const entry: CeEntry = {
+        const entry: ContextEngineEntry = {
           type,
           title: body.title,
           content: body.content,
@@ -205,7 +209,7 @@ export const registerUpsertRoute = ({
         )?.created_at;
 
         // Fold in empty arrays for any omitted half, as the workflow step does.
-        const permissions: CePermissions | undefined =
+        const permissions: ContextEnginePermissions | undefined =
           body.permissions !== undefined
             ? {
                 kibana: { privileges: body.permissions.kibana?.privileges ?? [] },
@@ -213,7 +217,7 @@ export const registerUpsertRoute = ({
               }
             : undefined;
 
-        await ce.indexAttachment({
+        await contextEngine.indexAttachment({
           originId,
           attachmentType: type,
           action,
@@ -227,21 +231,21 @@ export const registerUpsertRoute = ({
         });
 
         // Re-read to return the indexer-stamped state (permissions, created_at, entry ids).
-        const persisted = await ce.findByOrigin({ type, originId, spaceId, esClient });
+        const persisted = await contextEngine.findByOrigin({ type, originId, spaceId, esClient });
 
-        const responseBody: CeUpsertHttpResponse = {
-          items: persisted.map(toCeHttpItem),
+        const responseBody: ContextEngineUpsertHttpResponse = {
+          items: persisted.map(toContextEngineHttpItem),
           created,
         };
         return response.ok({ body: responseBody });
       } catch (error) {
         // Client input error (caller supplied `permissions` for a type whose
         // `getPermissions` hook is authoritative) — not a server fault.
-        if (error instanceof CePermissionsConflictError) {
-          logger.warn(`CE upsert permissions conflict: ${error.message}`);
+        if (error instanceof ContextEnginePermissionsConflictError) {
+          logger.warn(`Context Engine upsert permissions conflict: ${error.message}`);
           return response.conflict({ body: { message: error.message } });
         }
-        logger.error(`CE upsert route error: ${(error as Error).message}`);
+        logger.error(`Context Engine upsert route error: ${(error as Error).message}`);
         throw error;
       }
     })

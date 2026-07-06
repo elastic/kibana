@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   buildMockContext,
-  createMockCeService,
+  createMockContextEngineService,
   createTestCoreSetup,
   createTestCoreSetupNoSpaces,
   httpServerMock,
@@ -16,7 +16,7 @@ import {
   sampleDocument,
 } from './test_helpers';
 import { registerUpsertRoute } from './upsert';
-import { CePermissionsConflictError } from '../services/ce/errors';
+import { ContextEnginePermissionsConflictError } from '../services/context_engine/errors';
 
 const validBody = {
   title: 'Test Viz',
@@ -28,18 +28,18 @@ const validParams = { type: 'visualization', originId: 'viz-1' };
 describe('registerUpsertRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let handler: Function;
-  let mockCeService: ReturnType<typeof createMockCeService>;
+  let mockContextEngineService: ReturnType<typeof createMockContextEngineService>;
   const logger = loggingSystemMock.create().get();
 
   beforeEach(() => {
     router = httpServiceMock.createRouter();
-    mockCeService = createMockCeService();
+    mockContextEngineService = createMockContextEngineService();
 
     registerUpsertRoute({
       router: router as any,
       coreSetup: createTestCoreSetup() as any,
       logger,
-      getCeService: () => mockCeService as any,
+      getContextEngineService: () => mockContextEngineService as any,
     });
 
     const [, registeredHandler] = router.put.mock.calls[0];
@@ -59,22 +59,22 @@ describe('registerUpsertRoute', () => {
   it('returns 404 when feature flag is disabled', async () => {
     const response = await callHandler({ params: validParams, body: validBody }, false);
     expect(response.notFound).toHaveBeenCalled();
-    expect(mockCeService.indexAttachment).not.toHaveBeenCalled();
+    expect(mockContextEngineService.indexAttachment).not.toHaveBeenCalled();
   });
 
   it('creates a new origin via indexAttachment content-mode when no entries exist', async () => {
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([]);
-    mockCeService.indexAttachment.mockResolvedValue(undefined);
-    mockCeService.findByOrigin.mockResolvedValue([sampleDocument]);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    mockContextEngineService.indexAttachment.mockResolvedValue(undefined);
+    mockContextEngineService.findByOrigin.mockResolvedValue([sampleDocument]);
 
     const response = await callHandler({ params: validParams, body: validBody });
 
     // The route resolves the canonical `(type, originId)` from the URL
     // and hands them to the indexer; the body never carried the type.
-    expect(mockCeService.findByOriginAcrossSpaces).toHaveBeenCalledWith(
+    expect(mockContextEngineService.findByOriginAcrossSpaces).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'visualization', originId: 'viz-1' })
     );
-    expect(mockCeService.indexAttachment).toHaveBeenCalledWith(
+    expect(mockContextEngineService.indexAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
         originId: 'viz-1',
         attachmentType: 'visualization',
@@ -98,15 +98,17 @@ describe('registerUpsertRoute', () => {
   });
 
   it('passes action=update and created=false when origin already exists in caller space', async () => {
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
     // Privilege-checks existing entries before overwriting — authorize the read so the happy path proceeds.
-    mockCeService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
-    mockCeService.indexAttachment.mockResolvedValue(undefined);
-    mockCeService.findByOrigin.mockResolvedValue([sampleDocument]);
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(
+      new Map([[sampleDocument.id, true]])
+    );
+    mockContextEngineService.indexAttachment.mockResolvedValue(undefined);
+    mockContextEngineService.findByOrigin.mockResolvedValue([sampleDocument]);
 
     const response = await callHandler({ params: validParams, body: validBody });
 
-    expect(mockCeService.indexAttachment).toHaveBeenCalledWith(
+    expect(mockContextEngineService.indexAttachment).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'update', createdAt: sampleDocument.created_at })
     );
     const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
@@ -117,27 +119,29 @@ describe('registerUpsertRoute', () => {
     // Regression guard: created_at must be in FIND_ACROSS_SPACES_SOURCE_FIELDS or the
     // update path silently destroys the origin (empty string fails the ES date field).
     const existingWithTimestamp = { ...sampleDocument, created_at: '2024-06-01T12:00:00.000Z' };
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([existingWithTimestamp]);
-    mockCeService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
-    mockCeService.indexAttachment.mockResolvedValue(undefined);
-    mockCeService.findByOrigin.mockResolvedValue([existingWithTimestamp]);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([existingWithTimestamp]);
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(
+      new Map([[sampleDocument.id, true]])
+    );
+    mockContextEngineService.indexAttachment.mockResolvedValue(undefined);
+    mockContextEngineService.findByOrigin.mockResolvedValue([existingWithTimestamp]);
 
     await callHandler({ params: validParams, body: validBody });
 
-    expect(mockCeService.indexAttachment).toHaveBeenCalledWith(
+    expect(mockContextEngineService.indexAttachment).toHaveBeenCalledWith(
       expect.objectContaining({ createdAt: '2024-06-01T12:00:00.000Z' })
     );
   });
 
   it('forwards tags to the indexer when provided', async () => {
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([]);
-    mockCeService.indexAttachment.mockResolvedValue(undefined);
-    mockCeService.findByOrigin.mockResolvedValue([sampleDocument]);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    mockContextEngineService.indexAttachment.mockResolvedValue(undefined);
+    mockContextEngineService.findByOrigin.mockResolvedValue([sampleDocument]);
     const bodyWithTags = { ...validBody, tags: ['otel', 'claude-code'] };
 
     await callHandler({ params: validParams, body: bodyWithTags });
 
-    expect(mockCeService.indexAttachment).toHaveBeenCalledWith(
+    expect(mockContextEngineService.indexAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
         content: [expect.objectContaining({ tags: ['otel', 'claude-code'] })],
       })
@@ -146,15 +150,17 @@ describe('registerUpsertRoute', () => {
 
   it('clears existing tags when the PUT body omits tags (full-document replace semantic)', async () => {
     const taggedDoc = { ...sampleDocument, tags: ['stale-tag-1', 'stale-tag-2'] };
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([taggedDoc]);
-    mockCeService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
-    mockCeService.indexAttachment.mockResolvedValue(undefined);
-    mockCeService.findByOrigin.mockResolvedValue([sampleDocument]);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([taggedDoc]);
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(
+      new Map([[sampleDocument.id, true]])
+    );
+    mockContextEngineService.indexAttachment.mockResolvedValue(undefined);
+    mockContextEngineService.findByOrigin.mockResolvedValue([sampleDocument]);
 
     // Body explicitly does NOT include `tags`.
     await callHandler({ params: validParams, body: validBody });
 
-    const [callArgs] = mockCeService.indexAttachment.mock.calls;
+    const [callArgs] = mockContextEngineService.indexAttachment.mock.calls;
     const passedContent = callArgs[0].content as Array<{ tags?: unknown }>;
     expect(passedContent).toHaveLength(1);
     expect(passedContent[0]).not.toHaveProperty('tags');
@@ -162,59 +168,59 @@ describe('registerUpsertRoute', () => {
 
   it('returns 404 when origin is owned by another space', async () => {
     const otherSpaceDoc = { ...sampleDocument, spaces: ['other-space'] };
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([otherSpaceDoc]);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([otherSpaceDoc]);
 
     const response = await callHandler({ params: validParams, body: validBody });
 
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "CE origin 'visualization/viz-1' not found" },
+      body: { message: "Context Engine origin 'visualization/viz-1' not found" },
     });
-    expect(mockCeService.indexAttachment).not.toHaveBeenCalled();
+    expect(mockContextEngineService.indexAttachment).not.toHaveBeenCalled();
   });
 
   it('returns 404 (and does not overwrite) when caller lacks read access to existing entries', async () => {
     const gatedDoc = { ...sampleDocument, id: 'entry-1', spaces: ['test-space'] };
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([gatedDoc]);
-    mockCeService.checkItemsAccess.mockResolvedValue(new Map([['entry-1', false]]));
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([gatedDoc]);
+    mockContextEngineService.checkItemsAccess.mockResolvedValue(new Map([['entry-1', false]]));
 
     const response = await callHandler({ params: validParams, body: validBody });
 
-    expect(mockCeService.checkItemsAccess).toHaveBeenCalledWith(
+    expect(mockContextEngineService.checkItemsAccess).toHaveBeenCalledWith(
       expect.objectContaining({
         ids: ['entry-1'],
         spaceId: 'test-space',
       })
     );
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "CE origin 'visualization/viz-1' not found" },
+      body: { message: "Context Engine origin 'visualization/viz-1' not found" },
     });
-    expect(mockCeService.indexAttachment).not.toHaveBeenCalled();
+    expect(mockContextEngineService.indexAttachment).not.toHaveBeenCalled();
   });
 
   it('skips checkItemsAccess for a fresh create (no existing entries)', async () => {
     // A brand-new origin has nothing to read-gate — the privilege check
     // would have to short-circuit anyway. Asserting it isn't called
     // both avoids a wasted ES round-trip and documents the contract.
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([]);
-    mockCeService.indexAttachment.mockResolvedValue(undefined);
-    mockCeService.findByOrigin.mockResolvedValue([sampleDocument]);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    mockContextEngineService.indexAttachment.mockResolvedValue(undefined);
+    mockContextEngineService.findByOrigin.mockResolvedValue([sampleDocument]);
 
     await callHandler({
       params: { type: 'visualization', originId: 'viz-new' },
       body: validBody,
     });
 
-    expect(mockCeService.checkItemsAccess).not.toHaveBeenCalled();
-    expect(mockCeService.indexAttachment).toHaveBeenCalled();
+    expect(mockContextEngineService.checkItemsAccess).not.toHaveBeenCalled();
+    expect(mockContextEngineService.indexAttachment).toHaveBeenCalled();
   });
 
   it('accepts an unregistered type and writes it through the indexer (which stamps empty permissions)', async () => {
     // Any identifier regex-valid type passes schema validation; the
     // indexer stamps empty permissions for unregistered types (covered
     // by the indexer's own tests).
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([]);
-    mockCeService.indexAttachment.mockResolvedValue(undefined);
-    mockCeService.findByOrigin.mockResolvedValue([sampleDocument]);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    mockContextEngineService.indexAttachment.mockResolvedValue(undefined);
+    mockContextEngineService.findByOrigin.mockResolvedValue([sampleDocument]);
 
     const response = await callHandler({
       params: { type: 'my_notes', originId: 'note-1' },
@@ -222,7 +228,7 @@ describe('registerUpsertRoute', () => {
     });
 
     expect(response.ok).toHaveBeenCalled();
-    expect(mockCeService.indexAttachment).toHaveBeenCalledWith(
+    expect(mockContextEngineService.indexAttachment).toHaveBeenCalledWith(
       expect.objectContaining({ attachmentType: 'my_notes' })
     );
     expect(response.badRequest).not.toHaveBeenCalled();
@@ -249,25 +255,25 @@ describe('registerUpsertRoute', () => {
 
   it('rejects body/param payloads that overflow the maxLength caps', () => {
     // Pin each cap so a future refactor can't silently drop them. Testing at length+1
-    // keeps assertions agnostic of the literal MAX_CE_* values.
+    // keeps assertions agnostic of the literal MAX_CONTEXT_ENGINE_* values.
     const [routeConfig] = router.put.mock.calls[0];
     const bodySchema = (routeConfig as any).validate.body;
     const paramsSchema = (routeConfig as any).validate.params;
 
-    // title cap: > MAX_CE_TITLE_LENGTH (1024) chars
+    // title cap: > MAX_CONTEXT_ENGINE_TITLE_LENGTH (1024) chars
     expect(() => bodySchema.validate({ title: 'x'.repeat(1025), content: 'c' })).toThrow(/title/);
 
-    // content cap: > MAX_CE_CONTENT_LENGTH (50_000) chars
+    // content cap: > MAX_CONTEXT_ENGINE_CONTENT_LENGTH (50_000) chars
     expect(() => bodySchema.validate({ title: 't', content: 'x'.repeat(50_001) })).toThrow(
       /content/
     );
 
-    // type cap: > MAX_CE_TYPE_LENGTH (256) chars — even when the
+    // type cap: > MAX_CONTEXT_ENGINE_TYPE_LENGTH (256) chars — even when the
     // regex matches, the length envelope must bite. The type now lives
     // in the URL params, not the body.
     expect(() => paramsSchema.validate({ type: 'a'.repeat(257), originId: 'o' })).toThrow(/type/);
 
-    // originId URL param cap: > MAX_CE_ORIGIN_ID_LENGTH (512) chars.
+    // originId URL param cap: > MAX_CONTEXT_ENGINE_ORIGIN_ID_LENGTH (512) chars.
     expect(() => paramsSchema.validate({ type: 'lens', originId: 'x'.repeat(513) })).toThrow(
       /originId/
     );
@@ -279,7 +285,7 @@ describe('registerUpsertRoute', () => {
       router: localRouter as any,
       coreSetup: createTestCoreSetupNoSpaces() as any,
       logger,
-      getCeService: () => mockCeService as any,
+      getContextEngineService: () => mockContextEngineService as any,
     });
 
     const [, localHandler] = localRouter.put.mock.calls[0];
@@ -289,20 +295,20 @@ describe('registerUpsertRoute', () => {
     });
     const response = httpServerMock.createResponseFactory();
 
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([]);
-    mockCeService.indexAttachment.mockResolvedValue(undefined);
-    mockCeService.findByOrigin.mockResolvedValue([sampleDocument]);
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    mockContextEngineService.indexAttachment.mockResolvedValue(undefined);
+    mockContextEngineService.findByOrigin.mockResolvedValue([sampleDocument]);
 
     await localHandler(buildMockContext(true), request, response);
 
-    expect(mockCeService.indexAttachment).toHaveBeenCalledWith(
+    expect(mockContextEngineService.indexAttachment).toHaveBeenCalledWith(
       expect.objectContaining({ spaces: ['default'] })
     );
   });
 
-  it('propagates unexpected errors from ce.indexAttachment', async () => {
-    mockCeService.findByOriginAcrossSpaces.mockResolvedValue([]);
-    mockCeService.indexAttachment.mockRejectedValue(new Error('write failed'));
+  it('propagates unexpected errors from contextEngine.indexAttachment', async () => {
+    mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    mockContextEngineService.indexAttachment.mockRejectedValue(new Error('write failed'));
 
     await expect(callHandler({ params: validParams, body: validBody })).rejects.toThrow(
       'write failed'
@@ -312,9 +318,9 @@ describe('registerUpsertRoute', () => {
 
   describe('permissions field', () => {
     it('forwards a caller-supplied permissions object to indexAttachment', async () => {
-      mockCeService.findByOriginAcrossSpaces.mockResolvedValue([]);
-      mockCeService.indexAttachment.mockResolvedValue(undefined);
-      mockCeService.findByOrigin.mockResolvedValue([sampleDocument]);
+      mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([]);
+      mockContextEngineService.indexAttachment.mockResolvedValue(undefined);
+      mockContextEngineService.findByOrigin.mockResolvedValue([sampleDocument]);
 
       const bodyWithPermissions = {
         ...validBody,
@@ -323,7 +329,7 @@ describe('registerUpsertRoute', () => {
 
       await callHandler({ params: validParams, body: bodyWithPermissions });
 
-      expect(mockCeService.indexAttachment).toHaveBeenCalledWith(
+      expect(mockContextEngineService.indexAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
           permissions: {
             kibana: { privileges: [] },
@@ -334,20 +340,20 @@ describe('registerUpsertRoute', () => {
     });
 
     it('omits permissions from the indexAttachment call when the body does not supply it', async () => {
-      mockCeService.findByOriginAcrossSpaces.mockResolvedValue([]);
-      mockCeService.indexAttachment.mockResolvedValue(undefined);
-      mockCeService.findByOrigin.mockResolvedValue([sampleDocument]);
+      mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([]);
+      mockContextEngineService.indexAttachment.mockResolvedValue(undefined);
+      mockContextEngineService.findByOrigin.mockResolvedValue([sampleDocument]);
 
       await callHandler({ params: validParams, body: validBody });
 
-      const [callArgs] = mockCeService.indexAttachment.mock.calls;
+      const [callArgs] = mockContextEngineService.indexAttachment.mock.calls;
       expect(callArgs[0]).not.toHaveProperty('permissions');
     });
 
-    it('maps CePermissionsConflictError to 409 without rethrowing', async () => {
-      mockCeService.findByOriginAcrossSpaces.mockResolvedValue([]);
-      mockCeService.indexAttachment.mockRejectedValue(
-        new CePermissionsConflictError(
+    it('maps ContextEnginePermissionsConflictError to 409 without rethrowing', async () => {
+      mockContextEngineService.findByOriginAcrossSpaces.mockResolvedValue([]);
+      mockContextEngineService.indexAttachment.mockRejectedValue(
+        new ContextEnginePermissionsConflictError(
           "attachmentType 'lens' derives permissions via getPermissions()"
         )
       );

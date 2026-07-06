@@ -45,8 +45,8 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         const request = params.request;
         const soClient = coreStart.savedObjects.getScopedClient(request);
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-        // CE ingest lives in the Agent Builder family, so crawling connectors
-        // into CE requires both the Agent Builder experimental flag and the
+        // Context Engine ingest lives in the Agent Builder family, so crawling connectors
+        // into Context Engine requires both the Agent Builder experimental flag and the
         // dedicated Context Engine flag. Both must be enabled.
         const [isExperimentalEnabled, isContextEngineEnabled] = await Promise.all([
           uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
@@ -62,11 +62,11 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
             action: 'create',
             includedHiddenTypes: ['action'],
           });
-          logger.info(`Connector lifecycle: indexed connector ${connectorId} into CE`);
-        } catch (ceError) {
+          logger.info(`Connector lifecycle: indexed connector ${connectorId} into Context Engine`);
+        } catch (contextEngineError) {
           logger.warn(
-            `Connector lifecycle: failed to index connector ${connectorId} into CE: ${
-              (ceError as Error).message
+            `Connector lifecycle: failed to index connector ${connectorId} into Context Engine: ${
+              (contextEngineError as Error).message
             }`
           );
         }
@@ -97,11 +97,11 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
             attachmentType: AttachmentType.connector,
             action: 'delete',
           });
-          logger.info(`Connector lifecycle: removed connector ${connectorId} from CE`);
-        } catch (ceError) {
+          logger.info(`Connector lifecycle: removed connector ${connectorId} from Context Engine`);
+        } catch (contextEngineError) {
           logger.warn(
-            `Connector lifecycle: failed to remove connector ${connectorId} from CE: ${
-              (ceError as Error).message
+            `Connector lifecycle: failed to remove connector ${connectorId} from Context Engine: ${
+              (contextEngineError as Error).message
             }`
           );
         }

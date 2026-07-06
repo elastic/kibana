@@ -10,7 +10,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { CeIndexAction, CeIndexAttachmentParams } from '@kbn/context-engine-plugin/server';
+import type {
+  ContextEngineIndexAction,
+  ContextEngineIndexAttachmentParams,
+} from '@kbn/context-engine-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -36,7 +39,7 @@ import type {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { WORKFLOW_CE_TYPE } from '@kbn/workflows/common/constants';
+import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowNotFoundError,
@@ -78,7 +81,7 @@ import type {
   WaitForInputListResult,
 } from '../services/workflow_execution_query_service';
 
-export type CeIndexAttachmentFn = (params: CeIndexAttachmentParams) => Promise<void>;
+export type SmlIndexAttachmentFn = (params: ContextEngineIndexAttachmentParams) => Promise<void>;
 
 const isEnablementOnlyUpdate = (workflow: Partial<EsWorkflow>): boolean => {
   const fields = Object.keys(workflow);
@@ -239,8 +242,8 @@ const isExecuteInlineWorkflowParams = (
 ): params is ExecuteInlineWorkflowParams => params.yaml !== undefined;
 
 export class WorkflowsManagementApi {
-  private ceIndexAttachment: CeIndexAttachmentFn | null = null;
-  private ceLogger: Logger | null = null;
+  private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
+  private smlLogger: Logger | null = null;
 
   constructor(
     private readonly workflowsService: WorkflowsService,
@@ -251,23 +254,27 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowsExecutionEngine();
   }
 
-  public setCeIndexAttachment(fn: CeIndexAttachmentFn, logger: Logger): void {
-    this.ceIndexAttachment = fn;
-    this.ceLogger = logger;
+  public setSmlIndexAttachment(fn: SmlIndexAttachmentFn, logger: Logger): void {
+    this.smlIndexAttachment = fn;
+    this.smlLogger = logger;
   }
 
-  private notifyCe(originId: string, action: CeIndexAction, request: KibanaRequest): void {
-    if (!this.ceIndexAttachment) {
+  private notifySml(
+    originId: string,
+    action: ContextEngineIndexAction,
+    request: KibanaRequest
+  ): void {
+    if (!this.smlIndexAttachment) {
       return;
     }
-    this.ceIndexAttachment({
+    this.smlIndexAttachment({
       request,
       originId,
-      attachmentType: WORKFLOW_CE_TYPE,
+      attachmentType: WORKFLOW_SML_TYPE,
       action,
     }).catch((error) => {
-      this.ceLogger?.warn(
-        `Failed to ${action} CE index for workflow '${originId}': ${(error as Error).message}`
+      this.smlLogger?.warn(
+        `Failed to ${action} SML index for workflow '${originId}': ${(error as Error).message}`
       );
     });
   }
@@ -321,7 +328,7 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
     const result = await this.workflowsService.createWorkflow(workflow, spaceId, request);
-    this.notifyCe(result.id, 'create', request);
+    this.notifySml(result.id, 'create', request);
     return result;
   }
 
@@ -341,7 +348,7 @@ export class WorkflowsManagementApi {
       options
     );
     for (const created of result.created) {
-      this.notifyCe(created.id, options?.overwrite ? 'update' : 'create', request);
+      this.notifySml(created.id, options?.overwrite ? 'update' : 'create', request);
     }
     return result;
   }
@@ -378,7 +385,7 @@ export class WorkflowsManagementApi {
       spaceId,
       request
     );
-    this.notifyCe(result.id, 'create', request);
+    this.notifySml(result.id, 'create', request);
     return result;
   }
 
@@ -402,7 +409,7 @@ export class WorkflowsManagementApi {
       throw new ManagedWorkflowUpdateForbiddenError();
     }
     const result = await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
-    this.notifyCe(id, 'update', request);
+    this.notifySml(id, 'update', request);
     return result;
   }
 
@@ -427,7 +434,7 @@ export class WorkflowsManagementApi {
       spaceId,
       request
     );
-    this.notifyCe(id, 'update', request);
+    this.notifySml(id, 'update', request);
     return result;
   }
 
@@ -445,7 +452,7 @@ export class WorkflowsManagementApi {
     const result = await this.workflowsService.deleteWorkflows(workflowIds, spaceId, options);
     if (result.successfulIds) {
       for (const id of result.successfulIds) {
-        this.notifyCe(id, 'delete', request);
+        this.notifySml(id, 'delete', request);
       }
     }
     return result;

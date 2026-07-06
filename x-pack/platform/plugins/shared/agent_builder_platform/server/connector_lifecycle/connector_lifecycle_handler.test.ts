@@ -102,7 +102,7 @@ describe('createConnectorLifecycleHandler', () => {
       expect(contextEngine.indexAttachment).not.toHaveBeenCalled();
     });
 
-    it('indexes connector into CE', async () => {
+    it('indexes connector into Context Engine', async () => {
       const contextEngine = createMockContextEngine();
       const handler = createConnectorLifecycleHandler({
         logger,
@@ -122,7 +122,7 @@ describe('createConnectorLifecycleHandler', () => {
 
     it('logs warning but does not throw when indexAttachment fails', async () => {
       const contextEngine = createMockContextEngine();
-      contextEngine.indexAttachment.mockRejectedValue(new Error('CE error'));
+      contextEngine.indexAttachment.mockRejectedValue(new Error('Context Engine error'));
       const handler = createConnectorLifecycleHandler({
         logger,
         getStartServices: createMockGetStartServices(createMockUiSettingsClient(), contextEngine),
@@ -137,7 +137,7 @@ describe('createConnectorLifecycleHandler', () => {
   });
 
   describe('onPostDelete', () => {
-    it('removes connector from CE', async () => {
+    it('removes connector from Context Engine', async () => {
       const contextEngine = createMockContextEngine();
       const handler = createConnectorLifecycleHandler({
         logger,
@@ -155,9 +155,9 @@ describe('createConnectorLifecycleHandler', () => {
       );
     });
 
-    it('logs warning but does not throw when CE delete fails', async () => {
+    it('logs warning but does not throw when Context Engine delete fails', async () => {
       const contextEngine = createMockContextEngine();
-      contextEngine.indexAttachment.mockRejectedValue(new Error('CE delete error'));
+      contextEngine.indexAttachment.mockRejectedValue(new Error('Context Engine delete error'));
       const handler = createConnectorLifecycleHandler({
         logger,
         getStartServices: createMockGetStartServices(createMockUiSettingsClient(), contextEngine),

@@ -67,7 +67,7 @@ export const createSmlAttachTool = ({
     const contextEngine = getContextEngine();
     const { spaceId, savedObjectsClient, request, attachments, esClient, logger } = context;
 
-    const resolvedItems = await contextEngine.resolveCeAttachItems({
+    const resolvedItems = await contextEngine.resolveAttachItems({
       entryIds: chunkIds,
       esClient,
       request,

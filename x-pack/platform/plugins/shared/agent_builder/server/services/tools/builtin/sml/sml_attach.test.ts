@@ -26,7 +26,7 @@ const buildAvailabilityContext = (flags: Record<string, boolean>) =>
     },
   } as unknown as ToolAvailabilityContext);
 
-const mockResolveCeAttachItems = jest.fn();
+const mockResolveContextEngineAttachItems = jest.fn();
 const mockAttachmentsAdd = jest.fn();
 
 const getContextEngine = jest.fn(() => ({
@@ -35,7 +35,7 @@ const getContextEngine = jest.fn(() => ({
   deleteAttachment: jest.fn(),
   getDocuments: jest.fn(),
   getTypeDefinition: jest.fn(),
-  resolveCeAttachItems: mockResolveCeAttachItems,
+  resolveAttachItems: mockResolveContextEngineAttachItems,
 }));
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
@@ -96,8 +96,8 @@ describe('createSmlAttachTool', () => {
     });
   });
 
-  it('returns error result when resolveCeAttachItems reports access denied', async () => {
-    mockResolveCeAttachItems.mockResolvedValue([
+  it('returns error result when resolveAttachItems reports access denied', async () => {
+    mockResolveContextEngineAttachItems.mockResolvedValue([
       {
         success: false,
         entry_id: 'entry-1',
@@ -114,8 +114,8 @@ describe('createSmlAttachTool', () => {
     expect((result.results[0] as ErrorResult).data.message).toContain('Access denied');
   });
 
-  it('returns error result when resolveCeAttachItems reports document not found', async () => {
-    mockResolveCeAttachItems.mockResolvedValue([
+  it('returns error result when resolveAttachItems reports document not found', async () => {
+    mockResolveContextEngineAttachItems.mockResolvedValue([
       {
         success: false,
         entry_id: 'entry-1',
@@ -132,8 +132,8 @@ describe('createSmlAttachTool', () => {
     expect((result.results[0] as ErrorResult).data.message).toContain('not found in the index');
   });
 
-  it('returns success when resolveCeAttachItems returns attachment and add succeeds', async () => {
-    mockResolveCeAttachItems.mockResolvedValue([
+  it('returns success when resolveAttachItems returns attachment and add succeeds', async () => {
+    mockResolveContextEngineAttachItems.mockResolvedValue([
       {
         success: true,
         entry_id: 'entry-1',
@@ -166,7 +166,7 @@ describe('createSmlAttachTool', () => {
   });
 
   it('handles multiple items with mix of success and failure', async () => {
-    mockResolveCeAttachItems.mockResolvedValue([
+    mockResolveContextEngineAttachItems.mockResolvedValue([
       { success: false, entry_id: 'denied-entry', message: 'Access denied' },
       {
         success: true,
@@ -185,14 +185,14 @@ describe('createSmlAttachTool', () => {
     expect((result.results[1] as { type: string }).type).toBe(ToolResultType.other);
   });
 
-  it('calls resolveCeAttachItems with correct params', async () => {
-    mockResolveCeAttachItems.mockResolvedValue([]);
+  it('calls resolveAttachItems with correct params', async () => {
+    mockResolveContextEngineAttachItems.mockResolvedValue([]);
     const tool = createSmlAttachTool({ getContextEngine });
     await tool.handler(
       { chunk_ids: ['entry-a', 'entry-b'] },
       mockContext as unknown as ToolHandlerContext
     );
-    expect(mockResolveCeAttachItems).toHaveBeenCalledWith({
+    expect(mockResolveContextEngineAttachItems).toHaveBeenCalledWith({
       entryIds: ['entry-a', 'entry-b'],
       esClient: mockContext.esClient,
       request: mockContext.request,

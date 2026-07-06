@@ -18,17 +18,17 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type {
-  CeTypeDefinition,
-  CeSearchResult,
-  CeSearchFilters,
-  CeSearchConstraints,
-  CeDocument,
-  CeIndexAction,
-  CeDeleteScope,
-  CeIndexAttachmentOriginMode,
-  CeIndexAttachmentContentMode,
-} from './services/ce/types';
-import type { CeResolvedItemResult } from './services/ce/execute_ce_attach_items';
+  ContextEngineTypeDefinition,
+  ContextEngineSearchResult,
+  ContextEngineSearchFilters,
+  ContextEngineSearchConstraints,
+  ContextEngineDocument,
+  ContextEngineIndexAction,
+  ContextEngineDeleteScope,
+  ContextEngineIndexAttachmentOriginMode,
+  ContextEngineIndexAttachmentContentMode,
+} from './services/context_engine/types';
+import type { ContextEngineResolvedItemResult } from './services/context_engine/execute_attach_items';
 
 export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
@@ -43,7 +43,7 @@ export interface ContextEngineStartDependencies {
 }
 
 export interface ContextEnginePluginSetup {
-  registerType: (definition: CeTypeDefinition) => void;
+  registerType: (definition: ContextEngineTypeDefinition) => void;
 }
 
 export interface ContextEnginePluginStart {
@@ -59,13 +59,13 @@ export interface ContextEnginePluginStart {
      */
     fields?: string[];
     /** Runtime-imposed per-type id-allowlist constraints. */
-    constraints?: CeSearchConstraints;
+    constraints?: ContextEngineSearchConstraints;
     /** Agent-discoverable filters (`types[]`, `tags[]`). */
-    filters?: CeSearchFilters;
-  }) => Promise<{ results: CeSearchResult[] }>;
+    filters?: ContextEngineSearchFilters;
+  }) => Promise<{ results: ContextEngineSearchResult[] }>;
 
   /**
-   * Fetch CE documents by their entry IDs.
+   * Fetch Context Engine documents by their entry IDs.
    *
    * The returned map only contains documents the user (identified by `request`) is
    * authorized to access in the resolved space; unauthorized or missing IDs are
@@ -77,57 +77,57 @@ export interface ContextEnginePluginStart {
     request: KibanaRequest;
     /** Optional. Resolved from `request` via the spaces service when omitted. */
     spaceId?: string;
-  }) => Promise<Map<string, CeDocument>>;
+  }) => Promise<Map<string, ContextEngineDocument>>;
 
-  getTypeDefinition: (typeId: string) => CeTypeDefinition | undefined;
+  getTypeDefinition: (typeId: string) => ContextEngineTypeDefinition | undefined;
 
-  resolveCeAttachItems: (params: {
+  resolveAttachItems: (params: {
     entryIds: string[];
     esClient: IScopedClusterClient;
     request: KibanaRequest;
     spaceId: string;
     savedObjectsClient: SavedObjectsClientContract;
     logger: Logger;
-  }) => Promise<CeResolvedItemResult[]>;
+  }) => Promise<ContextEngineResolvedItemResult[]>;
 
-  indexAttachment: (params: CeIndexAttachmentParams) => Promise<void>;
-  deleteAttachment: (params: CeDeleteAttachmentParams) => Promise<void>;
+  indexAttachment: (params: ContextEngineIndexAttachmentParams) => Promise<void>;
+  deleteAttachment: (params: ContextEngineDeleteAttachmentParams) => Promise<void>;
 }
 
 /**
  * Common params shared by both modes of `ContextEnginePluginStart.indexAttachment`.
  *
  * The mode is selected by the discriminator fields from
- * {@link CeIndexAttachmentOriginMode} / {@link CeIndexAttachmentContentMode}, which are
- * shared with the internal `CeIndexerParams` so the public and internal unions cannot
+ * {@link ContextEngineIndexAttachmentOriginMode} / {@link ContextEngineIndexAttachmentContentMode}, which are
+ * shared with the internal `ContextEngineIndexerParams` so the public and internal unions cannot
  * drift on the discriminator.
  */
-interface CeIndexAttachmentBaseParams {
+interface ContextEngineIndexAttachmentBaseParams {
   request: KibanaRequest;
   originId: string;
   attachmentType: string;
-  action: CeIndexAction;
+  action: ContextEngineIndexAction;
   spaceId?: string;
   includedHiddenTypes?: string[];
 }
 
-export type CeIndexAttachmentOriginParams = CeIndexAttachmentBaseParams &
-  CeIndexAttachmentOriginMode;
+export type ContextEngineIndexAttachmentOriginParams = ContextEngineIndexAttachmentBaseParams &
+  ContextEngineIndexAttachmentOriginMode;
 
-export type CeIndexAttachmentContentParams = CeIndexAttachmentBaseParams &
-  CeIndexAttachmentContentMode;
+export type ContextEngineIndexAttachmentContentParams = ContextEngineIndexAttachmentBaseParams &
+  ContextEngineIndexAttachmentContentMode;
 
 /**
  * Discriminated union — `content` selects the mode:
- * - omitted → origin mode (calls `getCeData`, marks `'crawled'`)
- * - provided → content mode (skips `getCeData`, marks `'manual'`)
+ * - omitted → origin mode (calls `getContextEngineData`, marks `'crawled'`)
+ * - provided → content mode (skips `getContextEngineData`, marks `'manual'`)
  *
  * `action: 'delete'` is valid on either variant; the indexer ignores
  * `content` and `force` when deleting and removes only `'crawled'` entries.
  */
-export type CeIndexAttachmentParams =
-  | CeIndexAttachmentOriginParams
-  | CeIndexAttachmentContentParams;
+export type ContextEngineIndexAttachmentParams =
+  | ContextEngineIndexAttachmentOriginParams
+  | ContextEngineIndexAttachmentContentParams;
 
 /**
  * Params for `ContextEnginePluginStart.deleteAttachment`.
@@ -136,12 +136,12 @@ export type CeIndexAttachmentParams =
  * can choose to wipe `'manual'` or `'all'` entries via `ingestionMethod`. With
  * the default (`'crawled'`) the two are equivalent.
  */
-export interface CeDeleteAttachmentParams {
+export interface ContextEngineDeleteAttachmentParams {
   request: KibanaRequest;
   originId: string;
   attachmentType: string;
   /** Defaults to `'crawled'`. Pass `'all'` to fully retire the origin. */
-  ingestionMethod?: CeDeleteScope;
+  ingestionMethod?: ContextEngineDeleteScope;
   spaceId?: string;
   includedHiddenTypes?: string[];
 }

@@ -42,7 +42,7 @@ const createWrapper = () => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  Wrapper.displayName = 'UseCeSearchTestWrapper';
+  Wrapper.displayName = 'UseContextEngineSearchTestWrapper';
   return Wrapper;
 };
 

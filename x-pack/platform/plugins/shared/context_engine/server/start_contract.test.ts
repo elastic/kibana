@@ -7,16 +7,21 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { CeEntry, CePermissions, CeService } from './services/ce/types';
+import type {
+  ContextEngineEntry,
+  ContextEnginePermissions,
+  ContextEngineService,
+} from './services/context_engine/types';
 import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
 // Hand-built rather than `coreMock` — these builders only touch
 // `elasticsearch.client.asInternalUser` and `savedObjects.getScopedClient`.
 const buildDeps = ({ spaceFromRequest }: { spaceFromRequest?: string } = {}) => {
-  const ceService = {
+  const contextEngineService = {
     indexAttachment: jest.fn().mockResolvedValue(undefined),
     deleteAttachment: jest.fn().mockResolvedValue(undefined),
-  } as unknown as jest.Mocked<Pick<CeService, 'indexAttachment' | 'deleteAttachment'>> & CeService;
+  } as unknown as jest.Mocked<Pick<ContextEngineService, 'indexAttachment' | 'deleteAttachment'>> &
+    ContextEngineService;
   const soClient = {};
   const savedObjects = {
     getScopedClient: jest.fn().mockReturnValue(soClient),
@@ -30,7 +35,15 @@ const buildDeps = ({ spaceFromRequest }: { spaceFromRequest?: string } = {}) => 
     : undefined;
   const logger = loggerMock.create();
 
-  return { ceService, savedObjects, soClient, elasticsearch, esInternalClient, spaces, logger };
+  return {
+    contextEngineService,
+    savedObjects,
+    soClient,
+    elasticsearch,
+    esInternalClient,
+    spaces,
+    logger,
+  };
 };
 
 const baseParams = {
@@ -40,15 +53,17 @@ const baseParams = {
   action: 'create' as const,
 };
 
-const entries: CeEntry[] = [{ type: 'dashboard', content: 'some content', title: 'title' }];
+const entries: ContextEngineEntry[] = [
+  { type: 'dashboard', content: 'some content', title: 'title' },
+];
 
-const permissions: CePermissions = {
+const permissions: ContextEnginePermissions = {
   kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
   elasticsearch: { indices: [] },
 };
 
 describe('buildIndexAttachment', () => {
-  it('forwards permissions and createdAt to ceService.indexAttachment in content mode', async () => {
+  it('forwards permissions and createdAt to contextEngineService.indexAttachment in content mode', async () => {
     const deps = buildDeps({ spaceFromRequest: 'space-1' });
     const indexAttachment = buildIndexAttachment(deps);
 
@@ -59,8 +74,8 @@ describe('buildIndexAttachment', () => {
       permissions,
     });
 
-    expect(deps.ceService.indexAttachment).toHaveBeenCalledTimes(1);
-    const callArgs = deps.ceService.indexAttachment.mock.calls[0][0];
+    expect(deps.contextEngineService.indexAttachment).toHaveBeenCalledTimes(1);
+    const callArgs = deps.contextEngineService.indexAttachment.mock.calls[0][0];
     if (callArgs.content === undefined) {
       throw new Error('expected content-mode params');
     }
@@ -78,7 +93,7 @@ describe('buildIndexAttachment', () => {
 
     await indexAttachment({ ...baseParams, content: entries });
 
-    const callArgs = deps.ceService.indexAttachment.mock.calls[0][0];
+    const callArgs = deps.contextEngineService.indexAttachment.mock.calls[0][0];
     if (callArgs.content === undefined) {
       throw new Error('expected content-mode params');
     }
@@ -93,7 +108,7 @@ describe('buildIndexAttachment', () => {
 
     await indexAttachment({ ...baseParams, force: true });
 
-    const callArgs = deps.ceService.indexAttachment.mock.calls[0][0];
+    const callArgs = deps.contextEngineService.indexAttachment.mock.calls[0][0];
     expect(callArgs.force).toBe(true);
     expect('content' in callArgs).toBe(false);
   });
@@ -104,7 +119,7 @@ describe('buildIndexAttachment', () => {
 
     await indexAttachment({ ...baseParams, content: entries });
 
-    const callArgs = deps.ceService.indexAttachment.mock.calls[0][0];
+    const callArgs = deps.contextEngineService.indexAttachment.mock.calls[0][0];
     expect(callArgs.spaces).toEqual(['default']);
   });
 
@@ -114,7 +129,7 @@ describe('buildIndexAttachment', () => {
 
     await indexAttachment({ ...baseParams, content: entries, spaceId: 'explicit-space' });
 
-    const callArgs = deps.ceService.indexAttachment.mock.calls[0][0];
+    const callArgs = deps.contextEngineService.indexAttachment.mock.calls[0][0];
     expect(callArgs.spaces).toEqual(['explicit-space']);
   });
 
@@ -142,7 +157,7 @@ describe('buildDeleteAttachment', () => {
 
     await deleteAttachment({ ...baseParams, ingestionMethod: 'all' });
 
-    expect(deps.ceService.deleteAttachment).toHaveBeenCalledWith(
+    expect(deps.contextEngineService.deleteAttachment).toHaveBeenCalledWith(
       expect.objectContaining({ ingestionMethod: 'all', spaces: ['space-1'] })
     );
   });
@@ -153,7 +168,7 @@ describe('buildDeleteAttachment', () => {
 
     await deleteAttachment(baseParams);
 
-    const callArgs = deps.ceService.deleteAttachment.mock.calls[0][0];
+    const callArgs = deps.contextEngineService.deleteAttachment.mock.calls[0][0];
     expect('ingestionMethod' in callArgs).toBe(false);
   });
 });

@@ -17,8 +17,8 @@ import type {
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
 import { registerSkills } from './skills';
-import { visualizationCeType } from './ce_types/visualization';
-import { createConnectorCeType } from './ce_types/connector';
+import { visualizationContextEngineType } from './context_engine_types/visualization';
+import { createConnectorContextEngineType } from './context_engine_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
 import { getTracingFeaturesEnabled } from './tracing/get_tracing_features_enabled';
 import { syncTracingPlatformFeatures } from './tracing/sync_tracing_platform_features';
@@ -51,16 +51,16 @@ export class AgentBuilderPlatformPlugin
       setupDeps,
     });
     registerSkills(setupDeps.agentBuilder);
-    setupDeps.contextEngine.registerType(visualizationCeType);
+    setupDeps.contextEngine.registerType(visualizationContextEngineType);
 
-    const connectorCeType = createConnectorCeType({
+    const connectorContextEngineType = createConnectorContextEngineType({
       getActionSavedObjectsClient: async (request) => {
         const [coreStart] = await coreSetup.getStartServices();
         return coreStart.savedObjects.getScopedClient(request, { includedHiddenTypes: ['action'] });
       },
-      logger: this.logger.get('ce-connector'),
+      logger: this.logger.get('contextEngine-connector'),
     });
-    setupDeps.contextEngine.registerType(connectorCeType);
+    setupDeps.contextEngine.registerType(connectorContextEngineType);
 
     const connectorLifecycleHandler = createConnectorLifecycleHandler({
       logger: this.logger.get('connector-lifecycle'),

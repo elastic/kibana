@@ -10,7 +10,10 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQuery } from '@kbn/react-query';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { i18n } from '@kbn/i18n';
-import type { CeSearchFilters, CeSearchConstraints } from '@kbn/context-engine-plugin/public';
+import type {
+  ContextEngineSearchFilters,
+  ContextEngineSearchConstraints,
+} from '@kbn/context-engine-plugin/public';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../services/sml/constants';
 import { queryKeys } from '../../query_keys';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
@@ -28,9 +31,9 @@ const smlSearchErrorToastTitle = i18n.translate(
 
 export interface UseSmlSearchOptions {
   /** Runtime-imposed per-type id-allowlist constraints. */
-  readonly constraints?: CeSearchConstraints;
+  readonly constraints?: ContextEngineSearchConstraints;
   /** Agent-discoverable filters (`types[]`, `tags[]`). */
-  readonly filters?: CeSearchFilters;
+  readonly filters?: ContextEngineSearchFilters;
 }
 
 export const useSmlSearch = (query: string, options?: UseSmlSearchOptions) => {

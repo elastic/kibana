@@ -9,7 +9,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { ToolAvailabilityContext } from '@kbn/agent-builder-server';
-import type { CeSearchResult } from '@kbn/context-engine-plugin/server';
+import type { ContextEngineSearchResult } from '@kbn/context-engine-plugin/server';
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
@@ -30,7 +30,7 @@ const getContextEngine = jest.fn(() => ({
   deleteAttachment: jest.fn(),
   getDocuments: jest.fn(),
   getTypeDefinition: jest.fn(),
-  resolveCeAttachItems: jest.fn(),
+  resolveAttachItems: jest.fn(),
 }));
 
 const mockContext = {
@@ -141,7 +141,7 @@ describe('createSmlSearchTool', () => {
   });
 
   it('maps document fields to the LLM-friendly hit shape', async () => {
-    const hits: CeSearchResult[] = [
+    const hits: ContextEngineSearchResult[] = [
       {
         id: 'entry-1',
         origin: { uri: 'visualization://ref-1' },

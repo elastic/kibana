@@ -14,7 +14,7 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
-import { CeSearchFilterType } from '@kbn/context-engine-plugin/server';
+import { ContextEngineSearchFilterType } from '@kbn/context-engine-plugin/server';
 import type { SmlToolsOptions } from './types';
 
 const smlSearchSchema = z.object({
@@ -110,7 +110,7 @@ export const createSmlSearchTool = ({
     const connectorIds = agentConfiguration?.connector_ids;
     const scoping =
       connectorIds !== undefined
-        ? { [CeSearchFilterType.connector]: { ids: connectorIds } }
+        ? { [ContextEngineSearchFilterType.connector]: { ids: connectorIds } }
         : undefined;
 
     // Agent-discoverable filters: forwarded only when the LLM supplied them.

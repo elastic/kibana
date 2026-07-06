@@ -8,9 +8,9 @@
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import type { CeDocument } from '../services/ce/types';
+import type { ContextEngineDocument } from '../services/context_engine/types';
 
-export const createMockCeService = () => ({
+export const createMockContextEngineService = () => ({
   search: jest.fn(),
   autocomplete: jest.fn(),
   checkItemsAccess: jest.fn(),
@@ -58,7 +58,7 @@ export const buildMockContext = (uiSettingsEnabled = true) => ({
   }),
 });
 
-export const sampleDocument: CeDocument = {
+export const sampleDocument: ContextEngineDocument = {
   id: 'entry-1',
   type: 'visualization',
   title: 'Test Viz',

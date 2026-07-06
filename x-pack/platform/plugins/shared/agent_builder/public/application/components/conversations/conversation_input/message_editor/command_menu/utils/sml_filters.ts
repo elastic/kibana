@@ -6,17 +6,17 @@
  */
 
 import type { AgentDefinition } from '@kbn/agent-builder-common/agents/definition';
-import type { CeSearchConstraints } from '@kbn/context-engine-plugin/public';
-import { CeSearchFilterType } from '@kbn/context-engine-plugin/public';
+import type { ContextEngineSearchConstraints } from '@kbn/context-engine-plugin/public';
+import { ContextEngineSearchFilterType } from '@kbn/context-engine-plugin/public';
 
 // Three states: undefined → no constraints (all connectors visible),
 // [] → no connectors allowed, ['id1', ...] → only those connectors.
 export const buildSmlScopingFromAgent = (
   agent: AgentDefinition | null
-): CeSearchConstraints | undefined => {
+): ContextEngineSearchConstraints | undefined => {
   const connectorIds = agent?.configuration?.connector_ids;
   if (connectorIds === undefined) {
     return undefined;
   }
-  return { [CeSearchFilterType.connector]: { ids: connectorIds } };
+  return { [ContextEngineSearchFilterType.connector]: { ids: connectorIds } };
 };

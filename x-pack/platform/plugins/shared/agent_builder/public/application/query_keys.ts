@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { CeSearchFilters, CeSearchConstraints } from '@kbn/context-engine-plugin/public';
+import type {
+  ContextEngineSearchFilters,
+  ContextEngineSearchConstraints,
+} from '@kbn/context-engine-plugin/public';
 
 /**
  * Query keys for react-query
@@ -60,10 +63,16 @@ export const queryKeys = {
     byAgent: (agentId?: string) => ['skills', 'byAgent', agentId],
   },
   sml: {
-    search: (query: string, constraints?: CeSearchConstraints, filters?: CeSearchFilters) =>
-      ['sml', 'search', { query, constraints, filters }] as const,
-    autocomplete: (query: string, constraints?: CeSearchConstraints, filters?: CeSearchFilters) =>
-      ['sml', 'autocomplete', { query, constraints, filters }] as const,
+    search: (
+      query: string,
+      constraints?: ContextEngineSearchConstraints,
+      filters?: ContextEngineSearchFilters
+    ) => ['sml', 'search', { query, constraints, filters }] as const,
+    autocomplete: (
+      query: string,
+      constraints?: ContextEngineSearchConstraints,
+      filters?: ContextEngineSearchFilters
+    ) => ['sml', 'autocomplete', { query, constraints, filters }] as const,
   },
   plugins: {
     all: ['plugins', 'list'] as const,

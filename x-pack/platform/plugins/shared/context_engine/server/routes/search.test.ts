@@ -8,31 +8,34 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   buildMockContext,
-  createMockCeService,
+  createMockContextEngineService,
   createTestCoreSetup,
   createTestCoreSetupNoSpaces,
   httpServerMock,
   httpServiceMock,
 } from './test_helpers';
-import type { CeSearchResult } from '../services/ce/types';
-import { CeAuthzEnumerationIncompleteError, CeCorpusTooLargeError } from '../services/ce/ce_errors';
+import type { ContextEngineSearchResult } from '../services/context_engine/types';
+import {
+  ContextEngineAuthzEnumerationIncompleteError,
+  ContextEngineCorpusTooLargeError,
+} from '../services/context_engine/errors';
 import { registerSearchRoute } from './search';
 
 describe('registerSearchRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let handler: Function;
-  let mockCeService: ReturnType<typeof createMockCeService>;
+  let mockContextEngineService: ReturnType<typeof createMockContextEngineService>;
   const logger = loggingSystemMock.create().get();
 
   beforeEach(() => {
     router = httpServiceMock.createRouter();
-    mockCeService = createMockCeService();
+    mockContextEngineService = createMockContextEngineService();
 
     registerSearchRoute({
       router: router as any,
       coreSetup: createTestCoreSetup() as any,
       logger,
-      getCeService: () => mockCeService as any,
+      getContextEngineService: () => mockContextEngineService as any,
     });
 
     const [, registeredHandler] = router.post.mock.calls[0];
@@ -49,11 +52,11 @@ describe('registerSearchRoute', () => {
   it('returns 404 when feature flag is disabled', async () => {
     const response = await callHandler({ query: 'test', size: 10 }, false);
     expect(response.notFound).toHaveBeenCalled();
-    expect(mockCeService.search).not.toHaveBeenCalled();
+    expect(mockContextEngineService.search).not.toHaveBeenCalled();
   });
 
   it('returns 200 with the hit body when enabled', async () => {
-    const mockResults: CeSearchResult[] = [
+    const mockResults: ContextEngineSearchResult[] = [
       {
         id: 'entry-1',
         type: 'visualization',
@@ -65,7 +68,7 @@ describe('registerSearchRoute', () => {
         references: [{ uri: 'dashboard://abc' }],
       },
     ];
-    mockCeService.search.mockResolvedValue({ results: mockResults });
+    mockContextEngineService.search.mockResolvedValue({ results: mockResults });
 
     const response = await callHandler({ query: 'test', size: 10 });
     expect(response.ok).toHaveBeenCalledWith({
@@ -86,8 +89,8 @@ describe('registerSearchRoute', () => {
     });
   });
 
-  it('passes fields param to ce.search and omits unrequested fields from the response', async () => {
-    const mockResults: CeSearchResult[] = [
+  it('passes fields param to contextEngine.search and omits unrequested fields from the response', async () => {
+    const mockResults: ContextEngineSearchResult[] = [
       {
         id: 'entry-1',
         type: 'visualization',
@@ -95,14 +98,14 @@ describe('registerSearchRoute', () => {
         origin: { uri: 'viz-1' },
       },
     ];
-    mockCeService.search.mockResolvedValue({ results: mockResults });
+    mockContextEngineService.search.mockResolvedValue({ results: mockResults });
 
     const response = await callHandler({
       query: 'test',
       size: 10,
       fields: ['description'],
     });
-    expect(mockCeService.search).toHaveBeenCalledWith(
+    expect(mockContextEngineService.search).toHaveBeenCalledWith(
       expect.objectContaining({ fields: ['description'] })
     );
     const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
@@ -110,14 +113,14 @@ describe('registerSearchRoute', () => {
     expect(results[0]).not.toHaveProperty('content');
   });
 
-  it('passes constraints and agent-supplied filters through to ce.search', async () => {
-    mockCeService.search.mockResolvedValue({ results: [] });
+  it('passes constraints and agent-supplied filters through to contextEngine.search', async () => {
+    mockContextEngineService.search.mockResolvedValue({ results: [] });
     await callHandler({
       query: 'test',
       constraints: { connector: { ids: ['gh-1'] } },
       filters: { types: ['dashboard'], tags: ['production'] },
     });
-    expect(mockCeService.search).toHaveBeenCalledWith(
+    expect(mockContextEngineService.search).toHaveBeenCalledWith(
       expect.objectContaining({
         constraints: { connector: { ids: ['gh-1'] } },
         filters: { types: ['dashboard'], tags: ['production'] },
@@ -125,10 +128,10 @@ describe('registerSearchRoute', () => {
     );
   });
 
-  it('passes spaceId from spaces plugin to ce.search', async () => {
-    mockCeService.search.mockResolvedValue({ results: [] });
+  it('passes spaceId from spaces plugin to contextEngine.search', async () => {
+    mockContextEngineService.search.mockResolvedValue({ results: [] });
     await callHandler({ query: 'test' });
-    expect(mockCeService.search).toHaveBeenCalledWith(
+    expect(mockContextEngineService.search).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'test-space' })
     );
   });
@@ -139,29 +142,29 @@ describe('registerSearchRoute', () => {
       router: localRouter as any,
       coreSetup: createTestCoreSetupNoSpaces() as any,
       logger,
-      getCeService: () => mockCeService as any,
+      getContextEngineService: () => mockContextEngineService as any,
     });
 
     const [, localHandler] = localRouter.post.mock.calls[0];
     const request = httpServerMock.createKibanaRequest({ body: { query: 'test' } });
     const response = httpServerMock.createResponseFactory();
 
-    mockCeService.search.mockResolvedValue({ results: [] });
+    mockContextEngineService.search.mockResolvedValue({ results: [] });
     await localHandler(buildMockContext(true), request, response);
-    expect(mockCeService.search).toHaveBeenCalledWith(
+    expect(mockContextEngineService.search).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'default' })
     );
   });
 
-  it('propagates errors from ce.search', async () => {
-    mockCeService.search.mockRejectedValue(new Error('ES connection failed'));
+  it('propagates errors from contextEngine.search', async () => {
+    mockContextEngineService.search.mockRejectedValue(new Error('ES connection failed'));
     await expect(callHandler({ query: 'test' })).rejects.toThrow('ES connection failed');
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('ES connection failed'));
   });
 
   it('returns 503 when authorization enumeration is incomplete (fail closed)', async () => {
-    mockCeService.search.mockRejectedValue(
-      new CeAuthzEnumerationIncompleteError(
+    mockContextEngineService.search.mockRejectedValue(
+      new ContextEngineAuthzEnumerationIncompleteError(
         'Could not complete permission authorization for this search; please retry.'
       )
     );
@@ -175,13 +178,13 @@ describe('registerSearchRoute', () => {
       })
     );
     expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('CE search authorization unavailable')
+      expect.stringContaining('Context Engine search authorization unavailable')
     );
   });
 
   it('returns 503 when the corpus is too large to enumerate (fail closed)', async () => {
-    mockCeService.search.mockRejectedValue(
-      new CeCorpusTooLargeError(
+    mockContextEngineService.search.mockRejectedValue(
+      new ContextEngineCorpusTooLargeError(
         'Too many distinct permission values to authorize this search; the limit is 100000.'
       )
     );

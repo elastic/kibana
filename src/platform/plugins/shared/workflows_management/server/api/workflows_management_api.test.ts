@@ -10,7 +10,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { type WorkflowDetailDto, WorkflowsManagementApiActions } from '@kbn/workflows';
-import { WORKFLOW_CE_TYPE } from '@kbn/workflows/common/constants';
+import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowNotFoundError,
@@ -20,7 +20,7 @@ import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/se
 import { z } from '@kbn/zod/v4';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import { type CeIndexAttachmentFn, WorkflowsManagementApi } from './workflows_management_api';
+import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
 
 describe('WorkflowsManagementApi', () => {
@@ -1080,9 +1080,9 @@ steps:
     });
   });
 
-  describe('CE notifications', () => {
-    let mockCeIndex: jest.MockedFunction<CeIndexAttachmentFn>;
-    let mockCeLogger: jest.Mocked<Logger>;
+  describe('SML notifications', () => {
+    let mockSmlIndex: jest.MockedFunction<SmlIndexAttachmentFn>;
+    let mockSmlLogger: jest.Mocked<Logger>;
 
     const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
       id: 'wf-1',
@@ -1100,40 +1100,40 @@ steps:
     });
 
     beforeEach(() => {
-      mockCeIndex = jest.fn().mockResolvedValue(undefined);
-      mockCeLogger = { warn: jest.fn(), debug: jest.fn(), info: jest.fn() } as any;
-      api.setCeIndexAttachment(mockCeIndex, mockCeLogger);
+      mockSmlIndex = jest.fn().mockResolvedValue(undefined);
+      mockSmlLogger = { warn: jest.fn(), debug: jest.fn(), info: jest.fn() } as any;
+      api.setSmlIndexAttachment(mockSmlIndex, mockSmlLogger);
     });
 
-    it('does not notify CE when setCeIndexAttachment has not been called', async () => {
+    it('does not notify SML when setSmlIndexAttachment has not been called', async () => {
       const freshApi = new WorkflowsManagementApi(mockWorkflowsService, true);
       mockWorkflowsService.createWorkflow.mockResolvedValue(createWorkflowDto());
 
       await freshApi.createWorkflow({ yaml: 'name: Test' }, 'default', mockRequest);
 
-      expect(mockCeIndex).not.toHaveBeenCalled();
+      expect(mockSmlIndex).not.toHaveBeenCalled();
     });
 
-    it('notifies CE with "create" action on createWorkflow', async () => {
+    it('notifies SML with "create" action on createWorkflow', async () => {
       mockWorkflowsService.createWorkflow.mockResolvedValue(createWorkflowDto({ id: 'wf-new' }));
 
       await api.createWorkflow({ yaml: 'name: Test' }, 'default', mockRequest);
 
-      expect(mockCeIndex).toHaveBeenCalledWith({
+      expect(mockSmlIndex).toHaveBeenCalledWith({
         request: mockRequest,
         originId: 'wf-new',
-        attachmentType: WORKFLOW_CE_TYPE,
+        attachmentType: WORKFLOW_SML_TYPE,
         action: 'create',
       });
     });
 
-    it('notifies CE with "create" action on cloneWorkflow', async () => {
+    it('notifies SML with "create" action on cloneWorkflow', async () => {
       const original = createWorkflowDto();
       mockWorkflowsService.createWorkflow.mockResolvedValue(createWorkflowDto({ id: 'wf-clone' }));
 
       await api.cloneWorkflow(original, 'default', mockRequest);
 
-      expect(mockCeIndex).toHaveBeenCalledWith(
+      expect(mockSmlIndex).toHaveBeenCalledWith(
         expect.objectContaining({
           originId: 'wf-clone',
           action: 'create',
@@ -1141,7 +1141,7 @@ steps:
       );
     });
 
-    it('notifies CE with "update" action on updateWorkflow', async () => {
+    it('notifies SML with "update" action on updateWorkflow', async () => {
       mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ id: 'wf-upd' }));
       mockWorkflowsService.updateWorkflow.mockResolvedValue({} as any);
       (mockRequest as any).authzResult = {
@@ -1150,15 +1150,15 @@ steps:
 
       await api.updateWorkflow('wf-upd', { name: 'Updated' }, 'default', mockRequest);
 
-      expect(mockCeIndex).toHaveBeenCalledWith({
+      expect(mockSmlIndex).toHaveBeenCalledWith({
         request: mockRequest,
         originId: 'wf-upd',
-        attachmentType: WORKFLOW_CE_TYPE,
+        attachmentType: WORKFLOW_SML_TYPE,
         action: 'update',
       });
     });
 
-    it('notifies CE with "delete" action for each successfully deleted workflow', async () => {
+    it('notifies SML with "delete" action for each successfully deleted workflow', async () => {
       mockWorkflowsService.deleteWorkflows.mockResolvedValue({
         total: 2,
         deleted: 2,
@@ -1168,16 +1168,16 @@ steps:
 
       await api.deleteWorkflows(['wf-a', 'wf-b'], 'default', mockRequest);
 
-      expect(mockCeIndex).toHaveBeenCalledTimes(2);
-      expect(mockCeIndex).toHaveBeenCalledWith(
+      expect(mockSmlIndex).toHaveBeenCalledTimes(2);
+      expect(mockSmlIndex).toHaveBeenCalledWith(
         expect.objectContaining({ originId: 'wf-a', action: 'delete' })
       );
-      expect(mockCeIndex).toHaveBeenCalledWith(
+      expect(mockSmlIndex).toHaveBeenCalledWith(
         expect.objectContaining({ originId: 'wf-b', action: 'delete' })
       );
     });
 
-    it('does not notify CE on delete when successfulIds is undefined', async () => {
+    it('does not notify SML on delete when successfulIds is undefined', async () => {
       mockWorkflowsService.deleteWorkflows.mockResolvedValue({
         total: 1,
         deleted: 0,
@@ -1186,10 +1186,10 @@ steps:
 
       await api.deleteWorkflows(['wf-x'], 'default', mockRequest);
 
-      expect(mockCeIndex).not.toHaveBeenCalled();
+      expect(mockSmlIndex).not.toHaveBeenCalled();
     });
 
-    it('notifies CE with "create" for each workflow in bulkCreateWorkflows', async () => {
+    it('notifies SML with "create" for each workflow in bulkCreateWorkflows', async () => {
       mockWorkflowsService.bulkCreateWorkflows.mockResolvedValue({
         created: [createWorkflowDto({ id: 'wf-b1' }), createWorkflowDto({ id: 'wf-b2' })],
         failed: [],
@@ -1201,11 +1201,11 @@ steps:
         mockRequest
       );
 
-      expect(mockCeIndex).toHaveBeenCalledTimes(2);
-      expect(mockCeIndex).toHaveBeenCalledWith(
+      expect(mockSmlIndex).toHaveBeenCalledTimes(2);
+      expect(mockSmlIndex).toHaveBeenCalledWith(
         expect.objectContaining({ originId: 'wf-b1', action: 'create' })
       );
-      expect(mockCeIndex).toHaveBeenCalledWith(
+      expect(mockSmlIndex).toHaveBeenCalledWith(
         expect.objectContaining({ originId: 'wf-b2', action: 'create' })
       );
     });
@@ -1220,21 +1220,21 @@ steps:
         overwrite: true,
       });
 
-      expect(mockCeIndex).toHaveBeenCalledWith(
+      expect(mockSmlIndex).toHaveBeenCalledWith(
         expect.objectContaining({ originId: 'wf-ow', action: 'update' })
       );
     });
 
-    it('logs warning when CE indexing fails but does not throw', async () => {
-      mockCeIndex.mockRejectedValue(new Error('CE unavailable'));
+    it('logs warning when SML indexing fails but does not throw', async () => {
+      mockSmlIndex.mockRejectedValue(new Error('SML unavailable'));
       mockWorkflowsService.createWorkflow.mockResolvedValue(createWorkflowDto({ id: 'wf-err' }));
 
       const result = await api.createWorkflow({ yaml: 'name: Test' }, 'default', mockRequest);
 
       expect(result.id).toBe('wf-err');
       await new Promise((r) => setImmediate(r));
-      expect(mockCeLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining("Failed to create CE index for workflow 'wf-err'")
+      expect(mockSmlLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("Failed to create SML index for workflow 'wf-err'")
       );
     });
   });

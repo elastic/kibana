@@ -16,38 +16,41 @@ import type {
 export type {
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
-  CeIndexAttachmentParams,
-  CeIndexAttachmentOriginParams,
-  CeIndexAttachmentContentParams,
-  CeDeleteAttachmentParams,
+  ContextEngineIndexAttachmentParams,
+  ContextEngineIndexAttachmentOriginParams,
+  ContextEngineIndexAttachmentContentParams,
+  ContextEngineDeleteAttachmentParams,
 } from './types';
 
 export type {
-  CeTypeDefinition,
-  CeEntry,
-  CeData,
-  CeContext,
-  CeToAttachmentContext,
-  CeListItem,
-  CePermissions,
-  CeKibanaPrivilege,
-  CeElasticsearchIndex,
-  CeSearchResult,
-  CeSearchConstraints,
-  CeSearchFilters,
-  CeDocument,
-  CeIndexAction,
-  CeIngestionMethod,
-  CeDeleteScope,
-  CeIndexAttachmentOriginMode,
-  CeIndexAttachmentContentMode,
-} from './services/ce/types';
+  ContextEngineTypeDefinition,
+  ContextEngineEntry,
+  ContextEngineData,
+  ContextEngineContext,
+  ContextEngineToAttachmentContext,
+  ContextEngineListItem,
+  ContextEnginePermissions,
+  ContextEngineKibanaPrivilege,
+  ContextEngineElasticsearchIndex,
+  ContextEngineSearchResult,
+  ContextEngineSearchConstraints,
+  ContextEngineSearchFilters,
+  ContextEngineDocument,
+  ContextEngineIndexAction,
+  ContextEngineIngestionMethod,
+  ContextEngineDeleteScope,
+  ContextEngineIndexAttachmentOriginMode,
+  ContextEngineIndexAttachmentContentMode,
+} from './services/context_engine/types';
 
-export { kibanaSavedObjectPermissions } from './services/ce/permissions/kibana_saved_object';
+export { kibanaSavedObjectPermissions } from './services/context_engine/permissions/kibana_saved_object';
 
-export type { CeResolvedItemResult } from './services/ce/execute_ce_attach_items';
-export { ceElasticsearchIndexMappings, ceIndexName } from './services/ce/ce_storage';
-export { CeSearchFilterType } from '../common/http_api/ce';
+export type { ContextEngineResolvedItemResult } from './services/context_engine/execute_attach_items';
+export {
+  contextEngineElasticsearchIndexMappings,
+  contextEngineIndexName,
+} from './services/context_engine/storage';
+export { ContextEngineSearchFilterType } from '../common/http_api/context_engine';
 
 export const plugin: PluginInitializer<
   ContextEnginePluginSetup,

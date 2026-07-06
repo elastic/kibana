@@ -7,14 +7,20 @@
 
 import { useCallback } from 'react';
 import { useQueryClient } from '@kbn/react-query';
-import type { CeSearchFilters, CeSearchConstraints } from '@kbn/context-engine-plugin/public';
+import type {
+  ContextEngineSearchFilters,
+  ContextEngineSearchConstraints,
+} from '@kbn/context-engine-plugin/public';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/sml/constants';
 import { queryKeys } from '../../../../../../../query_keys';
 import { useAgentBuilderServices } from '../../../../../../../hooks/use_agent_builder_service';
 import { useContextEngineEnabled } from '../../../../../../../hooks/use_context_engine_enabled';
 import { useExperimentalFeatures } from '../../../../../../../hooks/use_experimental_features';
 
-export const usePrefetchSml = (constraints?: CeSearchConstraints, filters?: CeSearchFilters) => {
+export const usePrefetchSml = (
+  constraints?: ContextEngineSearchConstraints,
+  filters?: ContextEngineSearchFilters
+) => {
   const queryClient = useQueryClient();
   const { smlService } = useAgentBuilderServices();
   const contextEngineEnabled = useContextEngineEnabled();

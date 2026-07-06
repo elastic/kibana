@@ -22,15 +22,18 @@ import { registerListRoute } from './routes/list';
 import { registerUpsertRoute } from './routes/upsert';
 import { registerDeleteRoute } from './routes/delete';
 import { registerAutocompleteRoute } from './routes/autocomplete';
-import { createCeService, type CeServiceInstance } from './services/ce/ce_service';
 import {
-  registerCeCrawlerTaskDefinition,
-  scheduleCeCrawlerTasks,
-} from './services/ce/ce_task_definitions';
-import { resolveCeAttachItems } from './services/ce/execute_ce_attach_items';
-import type { CeService } from './services/ce/types';
+  createContextEngineService,
+  type ContextEngineServiceInstance,
+} from './services/context_engine/service';
+import {
+  registerContextEngineCrawlerTaskDefinition,
+  scheduleContextEngineCrawlerTasks,
+} from './services/context_engine/task_definitions';
+import { resolveAttachItems } from './services/context_engine/execute_attach_items';
+import type { ContextEngineService } from './services/context_engine/types';
 import { registerContextEngineWorkflowSteps } from './workflow_steps';
-import { corpusEntryCeType } from './ce_types/corpus_entry';
+import { corpusEntryContextEngineType } from './context_engine_types/corpus_entry';
 import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
 export class ContextEnginePlugin
@@ -43,8 +46,8 @@ export class ContextEnginePlugin
     >
 {
   private logger: Logger;
-  private ceServiceInstance: CeServiceInstance;
-  private ceService?: CeService;
+  private contextEngineServiceInstance: ContextEngineServiceInstance;
+  private contextEngineService?: ContextEngineService;
   private startContract?: ContextEnginePluginStart;
   private spaces?: ContextEngineStartDependencies['spaces'];
   private security?: ContextEngineStartDependencies['security'];
@@ -52,7 +55,7 @@ export class ContextEnginePlugin
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
-    this.ceServiceInstance = createCeService();
+    this.contextEngineServiceInstance = createContextEngineService();
   }
 
   setup(
@@ -62,35 +65,37 @@ export class ContextEnginePlugin
     registerFeatures({ features: setupDeps.features });
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
-    const ceSetup = this.ceServiceInstance.setup({ logger: this.logger.get('ce') });
+    const contextEngineSetup = this.contextEngineServiceInstance.setup({
+      logger: this.logger.get('contextEngine'),
+    });
 
-    // Register the neutral 'corpus_entry' CE type so workflow authors can sink
+    // Register the neutral 'corpus_entry' Context Engine type so workflow authors can sink
     // ad-hoc / eval documents via contextEngine.addEntry without reusing a
     // solution-owned type.
-    ceSetup.registerType(corpusEntryCeType);
+    contextEngineSetup.registerType(corpusEntryContextEngineType);
 
-    registerCeCrawlerTaskDefinition({
+    registerContextEngineCrawlerTaskDefinition({
       taskManager: setupDeps.taskManager,
       getCrawlerDeps: async () => {
         const [coreStart] = await coreSetup.getStartServices();
-        if (!this.ceService) {
+        if (!this.contextEngineService) {
           throw new Error('getCrawlerDeps called before service start');
         }
         return {
-          ceService: this.ceService,
+          contextEngineService: this.contextEngineService,
           elasticsearch: coreStart.elasticsearch,
           savedObjects: coreStart.savedObjects,
           uiSettings: coreStart.uiSettings,
-          logger: this.logger.get('ce'),
+          logger: this.logger.get('contextEngine'),
         };
       },
     });
 
-    const getCeService = (): CeService => {
-      if (!this.ceService) {
-        throw new Error('CE service not available — plugin has not started');
+    const getContextEngineService = (): ContextEngineService => {
+      if (!this.contextEngineService) {
+        throw new Error('Context Engine service not available — plugin has not started');
       }
-      return this.ceService;
+      return this.contextEngineService;
     };
 
     const router = coreSetup.http.createRouter();
@@ -98,17 +103,17 @@ export class ContextEnginePlugin
       router,
       coreSetup,
       logger: this.logger,
-      getCeService,
+      getContextEngineService,
     });
-    registerGetRoute({ router, coreSetup, logger: this.logger, getCeService });
-    registerListRoute({ router, coreSetup, logger: this.logger, getCeService });
-    registerUpsertRoute({ router, coreSetup, logger: this.logger, getCeService });
-    registerDeleteRoute({ router, coreSetup, logger: this.logger, getCeService });
+    registerGetRoute({ router, coreSetup, logger: this.logger, getContextEngineService });
+    registerListRoute({ router, coreSetup, logger: this.logger, getContextEngineService });
+    registerUpsertRoute({ router, coreSetup, logger: this.logger, getContextEngineService });
+    registerDeleteRoute({ router, coreSetup, logger: this.logger, getContextEngineService });
     registerAutocompleteRoute({
       router,
       coreSetup,
       logger: this.logger,
-      getCeService,
+      getContextEngineService,
     });
 
     if (setupDeps.workflowsExtensions) {
@@ -125,8 +130,8 @@ export class ContextEnginePlugin
         getSpaces: () => this.spaces,
         getSecurity: () => this.security,
         isFeatureEnabled: async (request) => {
-          // Mirrors `withCeFeatureFlag` (HTTP routes) and the per-run
-          // check inside the CE crawler task. Request-scoped so per-space
+          // Mirrors `withContextEngineFeatureFlag` (HTTP routes) and the per-run
+          // check inside the Context Engine crawler task. Request-scoped so per-space
           // overrides of the Context Engine setting are honored.
           if (!this.coreStart) {
             throw new Error('Context Engine feature-flag check called before plugin start');
@@ -139,7 +144,7 @@ export class ContextEnginePlugin
     }
 
     return {
-      registerType: ceSetup.registerType,
+      registerType: contextEngineSetup.registerType,
     };
   }
 
@@ -149,26 +154,26 @@ export class ContextEnginePlugin
   ): ContextEnginePluginStart {
     const { elasticsearch, savedObjects } = coreStart;
 
-    this.ceService = this.ceServiceInstance.start({
-      logger: this.logger.get('ce'),
+    this.contextEngineService = this.contextEngineServiceInstance.start({
+      logger: this.logger.get('contextEngine'),
       securityAuthz: security?.authz,
     });
     this.spaces = spaces;
     this.security = security;
     this.coreStart = coreStart;
 
-    const ceService = this.ceService;
+    const contextEngineService = this.contextEngineService;
 
-    scheduleCeCrawlerTasks({
+    scheduleContextEngineCrawlerTasks({
       taskManager,
-      ceService,
-      logger: this.logger.get('ce'),
+      contextEngineService,
+      logger: this.logger.get('contextEngine'),
     }).catch((error) => {
-      this.logger.error(`Failed to schedule CE crawler tasks: ${error.message}`);
+      this.logger.error(`Failed to schedule Context Engine crawler tasks: ${error.message}`);
     });
 
     const startContract: ContextEnginePluginStart = {
-      search: ceService.search,
+      search: contextEngineService.search,
       getDocuments: async ({ ids, request, spaceId }) => {
         if (ids.length === 0) {
           return new Map();
@@ -180,7 +185,7 @@ export class ContextEnginePlugin
         // Unauthorized or missing IDs are absent from the returned map — callers
         // cannot distinguish "denied" from "not found", which is intentional to
         // avoid leaking existence of documents the user is not allowed to see.
-        const accessMap = await ceService.checkItemsAccess({
+        const accessMap = await contextEngineService.checkItemsAccess({
           ids,
           spaceId: resolvedSpaceId,
           esClient,
@@ -190,27 +195,28 @@ export class ContextEnginePlugin
         if (authorizedIds.length === 0) {
           return new Map();
         }
-        return ceService.getDocuments({
+        return contextEngineService.getDocuments({
           ids: authorizedIds,
           spaceId: resolvedSpaceId,
           esClient,
         });
       },
-      getTypeDefinition: ceService.getTypeDefinition,
-      resolveCeAttachItems: (params) => resolveCeAttachItems({ ...params, ce: ceService }),
+      getTypeDefinition: contextEngineService.getTypeDefinition,
+      resolveAttachItems: (params) =>
+        resolveAttachItems({ ...params, contextEngine: contextEngineService }),
       indexAttachment: buildIndexAttachment({
-        ceService,
+        contextEngineService,
         elasticsearch,
         savedObjects,
         spaces,
-        logger: this.logger.get('ce'),
+        logger: this.logger.get('contextEngine'),
       }),
       deleteAttachment: buildDeleteAttachment({
-        ceService,
+        contextEngineService,
         elasticsearch,
         savedObjects,
         spaces,
-        logger: this.logger.get('ce'),
+        logger: this.logger.get('contextEngine'),
       }),
     };
 

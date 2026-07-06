@@ -9,7 +9,7 @@ argument-hint: [connector-type]
 
 This skill creates a live connector instance in a running Kibana by calling the Actions API. The user wants to activate a **$ARGUMENTS** connector.
 
-When `agentBuilder:experimentalFeatures` is enabled, creating a connector automatically indexes it into the Context Engine, making its sub-actions discoverable by AI agents.
+When `contextEngine:enabled` is set, creating a connector automatically indexes it into the Context Engine, making its sub-actions discoverable by AI agents.
 
 **CRITICAL: Never read, log, or display the contents of any credentials file. Credentials must only flow through the bundled scripts.**
 

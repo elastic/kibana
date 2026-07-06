@@ -8,26 +8,26 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { CeDocument } from './services/ce/types';
+import type { ContextEngineDocument } from './services/context_engine/types';
 import type { ContextEngineStartDependencies } from './types';
 
-const mockCeServiceInstance = {
+const mockContextEngineServiceInstance = {
   setup: jest.fn(),
   start: jest.fn(),
 };
 
-jest.mock('./services/ce/ce_service', () => ({
-  createCeService: jest.fn(() => mockCeServiceInstance),
+jest.mock('./services/context_engine/service', () => ({
+  createContextEngineService: jest.fn(() => mockContextEngineServiceInstance),
   isNotFoundError: jest.fn().mockReturnValue(false),
 }));
 
-jest.mock('./services/ce/ce_task_definitions', () => ({
-  registerCeCrawlerTaskDefinition: jest.fn(),
-  scheduleCeCrawlerTasks: jest.fn().mockResolvedValue(undefined),
+jest.mock('./services/context_engine/task_definitions', () => ({
+  registerContextEngineCrawlerTaskDefinition: jest.fn(),
+  scheduleContextEngineCrawlerTasks: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock('./services/ce/execute_ce_attach_items', () => ({
-  resolveCeAttachItems: jest.fn(),
+jest.mock('./services/context_engine/execute_attach_items', () => ({
+  resolveAttachItems: jest.fn(),
 }));
 
 jest.mock('./features', () => ({
@@ -42,7 +42,7 @@ import { ContextEnginePlugin } from './plugin';
 
 describe('ContextEnginePlugin', () => {
   describe('public start contract: getDocuments', () => {
-    const createDoc = (id: string): CeDocument => ({
+    const createDoc = (id: string): ContextEngineDocument => ({
       id,
       type: 'dashboard',
       title: `${id}-title`,
@@ -68,8 +68,8 @@ describe('ContextEnginePlugin', () => {
       getDocumentsImpl: jest.Mock;
       spaceFromRequest?: string;
     }) => {
-      mockCeServiceInstance.setup.mockReturnValue({ registerType: jest.fn() });
-      mockCeServiceInstance.start.mockReturnValue({
+      mockContextEngineServiceInstance.setup.mockReturnValue({ registerType: jest.fn() });
+      mockContextEngineServiceInstance.start.mockReturnValue({
         search: jest.fn(),
         checkItemsAccess,
         getDocuments: getDocumentsImpl,
@@ -110,8 +110,8 @@ describe('ContextEnginePlugin', () => {
     };
 
     beforeEach(() => {
-      mockCeServiceInstance.setup.mockReset();
-      mockCeServiceInstance.start.mockReset();
+      mockContextEngineServiceInstance.setup.mockReset();
+      mockContextEngineServiceInstance.start.mockReset();
     });
 
     it('returns an empty map when no IDs are requested without calling the service', async () => {
@@ -138,7 +138,7 @@ describe('ContextEnginePlugin', () => {
         ])
       );
       const getDocumentsImpl = jest.fn().mockResolvedValue(
-        new Map<string, CeDocument>([
+        new Map<string, ContextEngineDocument>([
           ['a', createDoc('a')],
           ['c', createDoc('c')],
         ])

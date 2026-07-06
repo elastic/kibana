@@ -6,7 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { CeSearchFilterType } from '@kbn/context-engine-plugin/public';
+import { ContextEngineSearchFilterType } from '@kbn/context-engine-plugin/public';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/sml/constants';
 import { queryKeys } from '../../../../../../../query_keys';
 import { usePrefetchSml } from './use_prefetch_sml';
@@ -87,7 +87,7 @@ describe('usePrefetchSml', () => {
   });
 
   it('threads agent-derived constraints into the prefetch call and query key', () => {
-    const constraints = { [CeSearchFilterType.connector]: { ids: ['gh-1'] } };
+    const constraints = { [ContextEngineSearchFilterType.connector]: { ids: ['gh-1'] } };
     const { result } = renderHook(() => usePrefetchSml(constraints));
 
     act(() => {

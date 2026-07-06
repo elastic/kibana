@@ -26,7 +26,7 @@ const defaultMockResults = [
   },
 ];
 
-let mockUseCeAutocompleteReturn: {
+let mockUseContextEngineAutocompleteReturn: {
   results: typeof defaultMockResults;
   total: number;
   isLoading: boolean;
@@ -40,7 +40,7 @@ let mockUseCeAutocompleteReturn: {
   error: null,
 };
 
-const mockUseSmlAutocomplete = jest.fn(() => mockUseCeAutocompleteReturn);
+const mockUseSmlAutocomplete = jest.fn(() => mockUseContextEngineAutocompleteReturn);
 
 jest.mock('../../../../../../../hooks/sml/use_sml_autocomplete', () => ({
   useSmlAutocomplete: (...args: unknown[]) => mockUseSmlAutocomplete(...(args as [])),
@@ -55,7 +55,7 @@ jest.mock('../../../../../../../hooks/agents/use_agent_by_id', () => ({
 }));
 
 beforeEach(() => {
-  mockUseCeAutocompleteReturn = {
+  mockUseContextEngineAutocompleteReturn = {
     results: defaultMockResults,
     total: defaultMockResults.length,
     isLoading: false,
@@ -78,7 +78,7 @@ describe('Sml', () => {
   });
 
   it('shows loading state when autocomplete is loading', () => {
-    mockUseCeAutocompleteReturn = {
+    mockUseContextEngineAutocompleteReturn = {
       results: [],
       total: 0,
       isLoading: true,
@@ -107,7 +107,7 @@ describe('Sml', () => {
   });
 
   it('shows default empty list when autocomplete errors with no results', () => {
-    mockUseCeAutocompleteReturn = {
+    mockUseContextEngineAutocompleteReturn = {
       results: [],
       total: 0,
       isLoading: false,
@@ -123,7 +123,7 @@ describe('Sml', () => {
   });
 
   it('still lists cached results when useSmlAutocomplete reports error', () => {
-    mockUseCeAutocompleteReturn = {
+    mockUseContextEngineAutocompleteReturn = {
       results: defaultMockResults,
       total: defaultMockResults.length,
       isLoading: false,

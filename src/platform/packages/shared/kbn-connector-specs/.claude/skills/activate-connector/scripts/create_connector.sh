@@ -172,7 +172,7 @@ if [[ "$HTTP_CODE" -ge 200 && "$HTTP_CODE" -lt 300 ]]; then
     echo ""
     echo "Connector ID: $CONNECTOR_ID"
     echo ""
-    echo "The connector's sub-actions are now discoverable by AI agents via the CE."
+    echo "The connector's sub-actions are now discoverable by AI agents via the Context Engine."
     echo "Use list_connectors.sh to verify."
   fi
 else

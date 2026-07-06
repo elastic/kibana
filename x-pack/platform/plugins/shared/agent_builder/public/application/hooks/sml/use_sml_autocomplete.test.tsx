@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { CeSearchFilterType } from '@kbn/context-engine-plugin/public';
+import { ContextEngineSearchFilterType } from '@kbn/context-engine-plugin/public';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../services/sml/constants';
 import { useSmlAutocomplete } from './use_sml_autocomplete';
 
@@ -44,7 +44,7 @@ const createWrapper = () => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  Wrapper.displayName = 'UseCeAutocompleteTestWrapper';
+  Wrapper.displayName = 'UseContextEngineAutocompleteTestWrapper';
   return Wrapper;
 };
 
@@ -56,7 +56,7 @@ describe('useSmlAutocomplete', () => {
 
   it('forwards the normalized query and constraints into the autocomplete call', async () => {
     mockAutocomplete.mockResolvedValue({ results: [] });
-    const constraints = { [CeSearchFilterType.connector]: { ids: ['gh-1'] } };
+    const constraints = { [ContextEngineSearchFilterType.connector]: { ids: ['gh-1'] } };
 
     renderHook(() => useSmlAutocomplete('git', { constraints }), { wrapper: createWrapper() });
 

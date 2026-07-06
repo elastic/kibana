@@ -7,39 +7,39 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
-import type { CeListHttpResponse } from '../../common/http_api/ce';
+import type { ContextEngineListHttpResponse } from '../../common/http_api/context_engine';
 import {
-  CE_HTTP_LIST_PAGE_DEFAULT,
-  CE_HTTP_LIST_PER_PAGE_DEFAULT,
-  CE_HTTP_LIST_PER_PAGE_MAX,
-} from '../../common/http_api/ce';
-import { ceBasePath } from '../../common/constants';
-import type { CeService } from '../services/ce/types';
+  CONTEXT_ENGINE_HTTP_LIST_PAGE_DEFAULT,
+  CONTEXT_ENGINE_HTTP_LIST_PER_PAGE_DEFAULT,
+  CONTEXT_ENGINE_HTTP_LIST_PER_PAGE_MAX,
+} from '../../common/http_api/context_engine';
+import { contextEngineBasePath } from '../../common/constants';
+import type { ContextEngineService } from '../services/context_engine/types';
 import type { ContextEngineStartDependencies, ContextEnginePluginStart } from '../types';
-import { READ_SECURITY, toCeHttpItem, withCeFeatureFlag } from './common';
-import { CeResultWindowExceededError } from '../services/ce/ce_errors';
+import { READ_SECURITY, toContextEngineHttpItem, withContextEngineFeatureFlag } from './common';
+import { ContextEngineResultWindowExceededError } from '../services/context_engine/errors';
 
 export const registerListRoute = ({
   router,
   coreSetup,
   logger,
-  getCeService,
+  getContextEngineService,
 }: {
   router: IRouter;
   coreSetup: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>;
   logger: Logger;
-  getCeService: () => CeService;
+  getContextEngineService: () => ContextEngineService;
 }) => {
   router.get(
     {
-      path: ceBasePath,
+      path: contextEngineBasePath,
       validate: {
         query: schema.object({
-          page: schema.number({ defaultValue: CE_HTTP_LIST_PAGE_DEFAULT, min: 1 }),
+          page: schema.number({ defaultValue: CONTEXT_ENGINE_HTTP_LIST_PAGE_DEFAULT, min: 1 }),
           per_page: schema.number({
-            defaultValue: CE_HTTP_LIST_PER_PAGE_DEFAULT,
+            defaultValue: CONTEXT_ENGINE_HTTP_LIST_PER_PAGE_DEFAULT,
             min: 1,
-            max: CE_HTTP_LIST_PER_PAGE_MAX,
+            max: CONTEXT_ENGINE_HTTP_LIST_PER_PAGE_MAX,
           }),
           type: schema.maybe(schema.string({ minLength: 1 })),
           origin_uri: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
@@ -57,9 +57,9 @@ export const registerListRoute = ({
       options: { access: 'internal' },
       security: READ_SECURITY,
     },
-    withCeFeatureFlag(async (ctx, request, response) => {
+    withContextEngineFeatureFlag(async (ctx, request, response) => {
       try {
-        const ce = getCeService();
+        const contextEngine = getContextEngineService();
         const {
           page,
           per_page: perPage,
@@ -86,7 +86,7 @@ export const registerListRoute = ({
               .filter(Boolean)
           : undefined;
 
-        const { results } = await ce.listDocuments({
+        const { results } = await contextEngine.listDocuments({
           spaceId,
           esClient,
           page,
@@ -100,22 +100,27 @@ export const registerListRoute = ({
         let filteredResults = results;
         if (results.length > 0) {
           const ids = results.map((r) => r.id);
-          const accessMap = await ce.checkItemsAccess({ ids, spaceId, esClient, request });
+          const accessMap = await contextEngine.checkItemsAccess({
+            ids,
+            spaceId,
+            esClient,
+            request,
+          });
           filteredResults = results.filter((r) => accessMap.get(r.id) !== false);
         }
 
-        const body: CeListHttpResponse = {
+        const body: ContextEngineListHttpResponse = {
           page,
           per_page: perPage,
-          items: filteredResults.map(toCeHttpItem),
+          items: filteredResults.map(toContextEngineHttpItem),
         };
 
         return response.ok({ body });
       } catch (error) {
-        if (error instanceof CeResultWindowExceededError) {
+        if (error instanceof ContextEngineResultWindowExceededError) {
           return response.badRequest({ body: { message: error.message } });
         }
-        logger.error(`CE list route error: ${(error as Error).message}`);
+        logger.error(`Context Engine list route error: ${(error as Error).message}`);
         throw error;
       }
     })

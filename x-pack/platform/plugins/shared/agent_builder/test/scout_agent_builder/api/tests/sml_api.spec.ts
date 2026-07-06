@@ -10,8 +10,11 @@ import type { Client } from '@elastic/elasticsearch';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy } from '@kbn/ftr-llm-proxy';
-import type { CeSearchHttpResponse } from '@kbn/context-engine-plugin/common/http_api/ce';
-import { ceElasticsearchIndexMappings, ceIndexName } from '@kbn/context-engine-plugin/server';
+import type { ContextEngineSearchHttpResponse } from '@kbn/context-engine-plugin/common/http_api/context_engine';
+import {
+  contextEngineElasticsearchIndexMappings,
+  contextEngineIndexName,
+} from '@kbn/context-engine-plugin/server';
 import type { SmlAttachHttpResponse } from '../../../../common/http_api/sml';
 import {
   createGenAiConnectorForProxy,
@@ -24,7 +27,7 @@ import {
   API_AGENT_BUILDER,
   COMMON_HEADERS,
   INTERNAL_AGENT_BUILDER,
-  INTERNAL_CONTEXT_ENGINE,
+  INTERNAL_AGENT_CONTEXT_LAYER,
 } from '../fixtures/constants';
 import { postConverse } from '../fixtures/converse_http';
 
@@ -32,36 +35,36 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   let adminInteractiveCookieHeader: Record<string, string>;
   let sysEsClient: Client;
 
-  // Shared search-test entry: indexed once and reused by hit, wildcard,
+  // Shared search-test chunk: indexed once and reused by hit, wildcard,
   // and compact-shape assertions so the index is never empty
   const searchRunId = randomUUID();
-  const searchEntryId = `ce-autocomplete-${searchRunId}`;
-  const searchOriginId = `ce-origin-${searchRunId}`;
-  const searchIndexedTitle = `ce autocomplete pacific bluefin ${searchRunId}`;
+  const searchChunkId = `sml-autocomplete-${searchRunId}`;
+  const searchOriginId = `sml-origin-${searchRunId}`;
+  const searchIndexedTitle = `sml autocomplete pacific bluefin ${searchRunId}`;
 
   apiTest.beforeAll(async ({ samlAuth, esClient, config }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     adminInteractiveCookieHeader = cookieHeader;
     sysEsClient = await createSystemIndicesEsClient(esClient, config);
-    const exists = await sysEsClient.indices.exists({ index: ceIndexName });
+    const exists = await sysEsClient.indices.exists({ index: contextEngineIndexName });
     if (!exists) {
       await sysEsClient.indices.create({
-        index: ceIndexName,
-        mappings: ceElasticsearchIndexMappings,
+        index: contextEngineIndexName,
+        mappings: contextEngineElasticsearchIndexMappings,
       });
     }
 
     const now = '2024-06-01T12:00:00.000Z';
     await sysEsClient.index({
-      index: ceIndexName,
-      id: searchEntryId,
+      index: contextEngineIndexName,
+      id: searchChunkId,
       refresh: 'wait_for',
       document: {
-        id: searchEntryId,
+        id: searchChunkId,
         type: 'visualization',
         title: searchIndexedTitle,
         origin: { uri: `visualization://${searchOriginId}` },
-        content: 'pacific bluefin tuna content for ce scout',
+        content: 'pacific bluefin tuna content for sml scout',
         created_at: now,
         updated_at: now,
         spaces: ['default'],
@@ -73,7 +76,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
 
   apiTest.afterAll(async () => {
     try {
-      await sysEsClient.delete({ index: ceIndexName, id: searchEntryId, refresh: true });
+      await sysEsClient.delete({ index: contextEngineIndexName, id: searchChunkId, refresh: true });
     } catch {
       // ignore — already cleaned up
     }
@@ -84,15 +87,15 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     ...adminInteractiveCookieHeader,
   });
 
-  apiTest('POST /internal/context_engine/_search autocomplete', async ({ apiClient }) => {
-    const response = await apiClient.post(`${INTERNAL_CONTEXT_ENGINE}/_search`, {
+  apiTest('POST /internal/agent_builder/sml/_search autocomplete', async ({ apiClient }) => {
+    const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
       headers: ih(),
       body: { query: 'pacif', size: 20 },
       responseType: 'json',
     });
     expect(response).toHaveStatusCode(200);
-    const body = response.body as CeSearchHttpResponse;
-    const match = body.results.find((r) => r.id === searchEntryId);
+    const body = response.body as ContextEngineSearchHttpResponse;
+    const match = body.results.find((r) => r.id === searchChunkId);
     expect(match).toBeDefined();
     expect(match?.title).toContain('pacific');
     expect(match?.origin?.uri).toBe(`visualization://${searchOriginId}`);
@@ -100,15 +103,15 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   });
 
   apiTest(
-    'POST /internal/context_engine/_search wildcard returns item fields',
+    'POST /internal/agent_builder/sml/_search wildcard returns item fields',
     async ({ apiClient }) => {
-      const response = await apiClient.post(`${INTERNAL_CONTEXT_ENGINE}/_search`, {
+      const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
         headers: ih(),
         body: { query: '*', size: 10 },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
-      const body = response.body as CeSearchHttpResponse;
+      const body = response.body as ContextEngineSearchHttpResponse;
       expect(Array.isArray(body.results)).toBe(true);
       for (const item of body.results) {
         expect(typeof item.id).toBe('string');
@@ -119,8 +122,8 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     }
   );
 
-  apiTest('POST /internal/context_engine/_search rejects empty query', async ({ apiClient }) => {
-    const response = await apiClient.post(`${INTERNAL_CONTEXT_ENGINE}/_search`, {
+  apiTest('POST /internal/agent_builder/sml/_search rejects empty query', async ({ apiClient }) => {
+    const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
       headers: ih(),
       body: { query: '' },
       responseType: 'json',
@@ -159,7 +162,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
 
       const now = '2024-06-01T12:00:00.000Z';
       await sysEsClient.index({
-        index: ceIndexName,
+        index: contextEngineIndexName,
         id: chunkId,
         refresh: 'wait_for',
         document: {
@@ -227,7 +230,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       llmProxy.close();
       await deleteConnectorById(kbnClient, connectorId);
       try {
-        await sysEsClient.delete({ index: ceIndexName, id: chunkId, refresh: true });
+        await sysEsClient.delete({ index: contextEngineIndexName, id: chunkId, refresh: true });
       } catch {
         // ignore — document may have been cleaned up by SML auto-indexing
       }

@@ -9,10 +9,10 @@ import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import type { CeAutocompleteResult } from '../services/ce/types';
+import type { ContextEngineAutocompleteResult } from '../services/context_engine/types';
 import { registerAutocompleteRoute } from './autocomplete';
 
-const createMockCeService = () => ({
+const createMockContextEngineService = () => ({
   search: jest.fn(),
   autocomplete: jest.fn(),
   checkItemsAccess: jest.fn(),
@@ -33,12 +33,12 @@ const createMockUiSettingsClient = (enabled = true) => ({
 describe('registerAutocompleteRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let handler: Function;
-  let mockCeService: ReturnType<typeof createMockCeService>;
+  let mockContextEngineService: ReturnType<typeof createMockContextEngineService>;
   const logger = loggingSystemMock.create().get();
 
   beforeEach(() => {
     router = httpServiceMock.createRouter();
-    mockCeService = createMockCeService();
+    mockContextEngineService = createMockContextEngineService();
 
     const coreSetup = coreMock.createSetup();
     (coreSetup.getStartServices as jest.Mock).mockResolvedValue([
@@ -51,7 +51,7 @@ describe('registerAutocompleteRoute', () => {
       router: router as any,
       coreSetup: coreSetup as any,
       logger,
-      getCeService: () => mockCeService as any,
+      getContextEngineService: () => mockContextEngineService as any,
     });
 
     const [, registeredHandler] = router.post.mock.calls[0];
@@ -75,11 +75,11 @@ describe('registerAutocompleteRoute', () => {
   it('returns 404 when feature flag is disabled', async () => {
     const response = await callHandler({ query: 'git', size: 5 }, false);
     expect(response.notFound).toHaveBeenCalled();
-    expect(mockCeService.autocomplete).not.toHaveBeenCalled();
+    expect(mockContextEngineService.autocomplete).not.toHaveBeenCalled();
   });
 
   it('returns 200 with autocomplete results and per-row provenance when enabled', async () => {
-    const mockResults: CeAutocompleteResult[] = [
+    const mockResults: ContextEngineAutocompleteResult[] = [
       {
         id: 'entry-1',
         type: 'connector',
@@ -93,7 +93,7 @@ describe('registerAutocompleteRoute', () => {
         ],
       },
     ];
-    mockCeService.autocomplete.mockResolvedValue({ results: mockResults });
+    mockContextEngineService.autocomplete.mockResolvedValue({ results: mockResults });
 
     const response = await callHandler({ query: 'git', size: 10 });
     expect(response.ok).toHaveBeenCalledWith({
@@ -115,7 +115,7 @@ describe('registerAutocompleteRoute', () => {
   });
 
   it('returns matched_discovery_labels as [] when absent on the result', async () => {
-    const mockResults: CeAutocompleteResult[] = [
+    const mockResults: ContextEngineAutocompleteResult[] = [
       {
         id: 'entry-2',
         type: 'dashboard',
@@ -125,7 +125,7 @@ describe('registerAutocompleteRoute', () => {
         permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
       },
     ];
-    mockCeService.autocomplete.mockResolvedValue({ results: mockResults });
+    mockContextEngineService.autocomplete.mockResolvedValue({ results: mockResults });
 
     const response = await callHandler({ query: 'sal', size: 5 });
     const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
@@ -134,7 +134,7 @@ describe('registerAutocompleteRoute', () => {
   });
 
   it('does not leak server-only fields (permissions, spaces) into the HTTP response', async () => {
-    const mockResults: CeAutocompleteResult[] = [
+    const mockResults: ContextEngineAutocompleteResult[] = [
       {
         id: 'entry-3',
         type: 'visualization',
@@ -147,7 +147,7 @@ describe('registerAutocompleteRoute', () => {
         },
       },
     ];
-    mockCeService.autocomplete.mockResolvedValue({ results: mockResults });
+    mockContextEngineService.autocomplete.mockResolvedValue({ results: mockResults });
 
     const response = await callHandler({ query: 'v' });
     const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
@@ -156,10 +156,10 @@ describe('registerAutocompleteRoute', () => {
     expect(results[0]).not.toHaveProperty('spaces');
   });
 
-  it('passes spaceId from spaces plugin to ce.autocomplete', async () => {
-    mockCeService.autocomplete.mockResolvedValue({ results: [] });
+  it('passes spaceId from spaces plugin to contextEngine.autocomplete', async () => {
+    mockContextEngineService.autocomplete.mockResolvedValue({ results: [] });
     await callHandler({ query: 'test' });
-    expect(mockCeService.autocomplete).toHaveBeenCalledWith(
+    expect(mockContextEngineService.autocomplete).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'test-space' })
     );
   });
@@ -173,7 +173,7 @@ describe('registerAutocompleteRoute', () => {
       router: localRouter as any,
       coreSetup: coreSetup as any,
       logger,
-      getCeService: () => mockCeService as any,
+      getContextEngineService: () => mockContextEngineService as any,
     });
 
     const [, localHandler] = localRouter.post.mock.calls[0];
@@ -186,15 +186,15 @@ describe('registerAutocompleteRoute', () => {
       }),
     };
 
-    mockCeService.autocomplete.mockResolvedValue({ results: [] });
+    mockContextEngineService.autocomplete.mockResolvedValue({ results: [] });
     await localHandler(ctx, request, response);
-    expect(mockCeService.autocomplete).toHaveBeenCalledWith(
+    expect(mockContextEngineService.autocomplete).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'default' })
     );
   });
 
-  it('propagates errors from ce.autocomplete', async () => {
-    mockCeService.autocomplete.mockRejectedValue(new Error('ES connection failed'));
+  it('propagates errors from contextEngine.autocomplete', async () => {
+    mockContextEngineService.autocomplete.mockRejectedValue(new Error('ES connection failed'));
     await expect(callHandler({ query: 'test' })).rejects.toThrow('ES connection failed');
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('ES connection failed'));
   });

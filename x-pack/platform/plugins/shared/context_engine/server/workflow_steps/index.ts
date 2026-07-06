@@ -10,7 +10,7 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { ContextEnginePluginStart } from '../types';
-import { createContextEngineAddEntryStepDefinition } from './ce_index_attachment_step';
+import { createContextEngineAddEntryStepDefinition } from './index_attachment_step';
 
 export const registerContextEngineWorkflowSteps = ({
   workflowsExtensions,

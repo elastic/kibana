@@ -26,17 +26,20 @@ export type {
 export type { ConversationListOptions } from '@kbn/agent-builder-common';
 
 export type {
-  CeTypeDefinition,
-  CeEntry,
-  CeData,
-  CeContext,
-  CeToAttachmentContext,
-  CeListItem,
-  CeSearchResult,
-  CeIndexAttachmentParams,
+  ContextEngineTypeDefinition,
+  ContextEngineEntry,
+  ContextEngineData,
+  ContextEngineContext,
+  ContextEngineToAttachmentContext,
+  ContextEngineListItem,
+  ContextEngineSearchResult,
+  ContextEngineIndexAttachmentParams,
 } from '@kbn/context-engine-plugin/server';
 
-export { ceElasticsearchIndexMappings, ceIndexName } from '@kbn/context-engine-plugin/server';
+export {
+  contextEngineElasticsearchIndexMappings,
+  contextEngineIndexName,
+} from '@kbn/context-engine-plugin/server';
 
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,

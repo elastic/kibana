@@ -87,7 +87,7 @@ export function registerInternalSmlRoutes({
           });
         }
 
-        const resolvedItems = await contextEngine.resolveCeAttachItems({
+        const resolvedItems = await contextEngine.resolveAttachItems({
           entryIds: chunkIds,
           esClient,
           request,

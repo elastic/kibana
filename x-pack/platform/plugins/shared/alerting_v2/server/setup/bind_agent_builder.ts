@@ -14,8 +14,8 @@ import { createRuleAttachmentType } from '../agent_builder/attachments/rule_atta
 import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { registerSkills } from '../agent_builder/skills/register_skills';
 import { SchemaTranslationError } from '../agent_builder/skills/schema_to_skill_docs';
-import { createActionPolicyCeType } from '../agent_builder/ce/action_policy_ce_type';
-import { createRuleCeType } from '../agent_builder/ce/rule_ce_type';
+import { createActionPolicySmlType } from '../agent_builder/sml/action_policy_sml_type';
+import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { AttachmentTypeToken } from '../agent_builder/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
@@ -38,7 +38,7 @@ function getAgentBuilder(container: Container): AgentBuilderSetup | undefined {
  * Wiring for the Agent Builder integration. No-op when the optional
  * `agentBuilder` plugin is not available.
  *
- * - CE types are registered during setup (synchronously) so the agent context
+ * - SML types are registered during setup (synchronously) so the agent context
  *   layer can schedule their crawler tasks during its own start phase. Gated on
  *   the optional `contextEngine` plugin.
  * - Attachment types are bound to {@link AttachmentTypeToken} (deps resolved via
@@ -79,12 +79,12 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
 
     const contextEngine = container.get(contextEngineToken);
 
-    // CE types are registered inline (not via a token registry like attachments):
+    // SML types are registered inline (not via a token registry like attachments):
     // registration happens at setup, but their clients/repositories must be
     // resolved lazily at crawl time (start phase), so deps cannot be eagerly
     // injected at bind/resolution time.
     contextEngine.registerType(
-      createRuleCeType({
+      createRuleSmlType({
         getScopedRulesClient: (request) =>
           resolveRequestScoped(container.get(CoreStart('injection')), request, RulesClient),
         getInternalRepository: () =>
@@ -94,7 +94,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
       })
     );
     contextEngine.registerType(
-      createActionPolicyCeType({
+      createActionPolicySmlType({
         getScopedActionPolicyClient: (request) =>
           resolveRequestScoped(container.get(CoreStart('injection')), request, ActionPolicyClient),
         getInternalRepository: () =>

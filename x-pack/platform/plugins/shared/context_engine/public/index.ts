@@ -14,21 +14,25 @@ import {
   type ContextEnginePublicPluginStartDeps,
 } from './plugin';
 
-export { ceSearchPath, ceAutocompletePath, internalApiPath } from '../common/constants';
 export {
-  CE_HTTP_SEARCH_QUERY_MAX_LENGTH,
-  CE_HTTP_AUTOCOMPLETE_QUERY_MAX_LENGTH,
-  CeSearchFilterType,
-} from '../common/http_api/ce';
+  contextEngineSearchPath,
+  contextEngineAutocompletePath,
+  internalApiPath,
+} from '../common/constants';
+export {
+  CONTEXT_ENGINE_HTTP_SEARCH_QUERY_MAX_LENGTH,
+  CONTEXT_ENGINE_HTTP_AUTOCOMPLETE_QUERY_MAX_LENGTH,
+  ContextEngineSearchFilterType,
+} from '../common/http_api/context_engine';
 export type {
-  CeSearchConstraints,
-  CeSearchFilters,
-  CeSearchHttpResponse,
-  CeSearchHttpResultItem,
-  CeAutocompleteHttpResponse,
-  CeAutocompleteHttpResultItem,
-  CeMatchedDiscoveryLabel,
-} from '../common/http_api/ce';
+  ContextEngineSearchConstraints,
+  ContextEngineSearchFilters,
+  ContextEngineSearchHttpResponse,
+  ContextEngineSearchHttpResultItem,
+  ContextEngineAutocompleteHttpResponse,
+  ContextEngineAutocompleteHttpResultItem,
+  ContextEngineMatchedDiscoveryLabel,
+} from '../common/http_api/context_engine';
 
 export const plugin: PluginInitializer<
   ContextEnginePublicPluginSetup,

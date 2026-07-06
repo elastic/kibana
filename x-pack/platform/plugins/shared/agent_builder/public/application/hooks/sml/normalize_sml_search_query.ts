@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CE_HTTP_SEARCH_QUERY_MAX_LENGTH } from '@kbn/context-engine-plugin/public';
+import { CONTEXT_ENGINE_HTTP_SEARCH_QUERY_MAX_LENGTH } from '@kbn/context-engine-plugin/public';
 
 /**
  * Normalizes the debounced raw query for SML search API and react-query keys.
@@ -15,8 +15,8 @@ import { CE_HTTP_SEARCH_QUERY_MAX_LENGTH } from '@kbn/context-engine-plugin/publ
 export const normalizeSmlSearchQuery = (debouncedQuery: string): string => {
   const trimmed = debouncedQuery.trim();
   const base = trimmed.length > 0 ? trimmed : '*';
-  if (base.length <= CE_HTTP_SEARCH_QUERY_MAX_LENGTH) {
+  if (base.length <= CONTEXT_ENGINE_HTTP_SEARCH_QUERY_MAX_LENGTH) {
     return base;
   }
-  return base.slice(0, CE_HTTP_SEARCH_QUERY_MAX_LENGTH);
+  return base.slice(0, CONTEXT_ENGINE_HTTP_SEARCH_QUERY_MAX_LENGTH);
 };
