@@ -76,7 +76,7 @@ export function useServiceBadgesData({
 
   const anomalyResolved = anomalyStatus === FETCH_STATUS.SUCCESS;
   const canShowAnomaly =
-    canReadMlJobs && anomalyResolved && anomalyData!.anomalyScore !== undefined;
+    canReadMlJobs && anomalyResolved && anomalyData?.anomalyScore !== undefined;
 
   return {
     alertsCount: canShowAlerts ? alertsCount : undefined,

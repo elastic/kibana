@@ -185,7 +185,6 @@ function TemplateWithContext({
                 end={end}
                 onSloClick={onSloClick}
                 alertsTabHref={alertsTabHref}
-                selectedTab={selectedTab}
               />
             ),
           }}

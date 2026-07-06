@@ -123,7 +123,7 @@ export function ServiceBadges({
               service.agentName && anomalyData.anomalyEnvironment
                 ? {
                     serviceName: service.id,
-                    anomalyEnvironment: anomalyData.anomalyEnvironment!,
+                    anomalyEnvironment: anomalyData.anomalyEnvironment,
                     agentName: service.agentName,
                     query: {
                       rangeFrom,

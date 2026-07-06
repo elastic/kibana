@@ -77,7 +77,6 @@ const defaultProps = {
   end: '2026-01-02T00:00:00.000Z',
   onSloClick: jest.fn(),
   alertsTabHref: '/services/test-service/alerts',
-  selectedTab: 'transactions',
 };
 
 function renderBadges(props = defaultProps) {
@@ -296,7 +295,7 @@ describe('ServiceHeaderBadges', () => {
       mostCriticalSloStatus: { status: 'noSLOs', count: 0 },
       sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
     });
-    renderBadges({ ...defaultProps, selectedTab: 'transactions' });
+    renderBadges();
 
     const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
     expect(href).toContain('/services/test-service/overview');
@@ -318,7 +317,7 @@ describe('ServiceHeaderBadges', () => {
 
   it('renders the alerts badge as non-interactive when already on the alerts tab', () => {
     setupMocks({ alertsCount: 3 });
-    renderBadges({ ...defaultProps, selectedTab: 'alerts' });
+    renderBadges();
 
     const badge = screen.getByTestId('serviceHeaderAlertsBadge');
     fireEvent.click(badge);

@@ -25,7 +25,6 @@ interface ServiceHeaderBadgesProps {
   end: string;
   onSloClick: () => void;
   alertsTabHref: string;
-  selectedTab: string;
 }
 
 export function ServiceHeaderBadges({
@@ -33,7 +32,6 @@ export function ServiceHeaderBadges({
   end,
   onSloClick,
   alertsTabHref,
-  selectedTab,
 }: ServiceHeaderBadgesProps) {
   const { euiTheme } = useEuiTheme();
   const { core, plugins } = useApmPluginContext();
