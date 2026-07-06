@@ -71,6 +71,10 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
     [setBreadcrumbs, libraryBreadcrumb]
   );
 
+  useEffect(() => {
+    setBreadcrumbs([libraryBreadcrumb]);
+  }, [slug, libraryBreadcrumb]);
+
   // Set the workflows breadcrumbs on every change
   useEffect(() => {
     setWorkflowsBreadcrumbs(breadcrumbs);
