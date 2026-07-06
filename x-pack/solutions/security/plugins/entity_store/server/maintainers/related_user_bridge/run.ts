@@ -86,6 +86,8 @@ const toSeedEntity = (source: Record<string, unknown>): SeedEntity | undefined =
   return { entityId, namespace, source };
 };
 
+// Seeds are unresolved IDP user entities whose own entityanalytics source
+// records may contain related.user values that point to aliases in other systems.
 export const collectSeeds = async ({
   esClient,
   index,
