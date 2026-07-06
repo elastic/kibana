@@ -21,7 +21,6 @@ const DEFAULT_PER_PAGE = 20;
 export interface GetWorkflowChangeHistoryDeps {
   changeHistoryService: IWorkflowChangeHistoryService;
   getWorkflowSource: (id: string, spaceId: string) => Promise<{ spaceId: string } | null>;
-  workflowVersioningEnabled: boolean;
 }
 
 export interface GetHistoryForWorkflowParams {
@@ -32,14 +31,9 @@ export interface GetHistoryForWorkflowParams {
 }
 
 export const assertWorkflowChangeHistoryEnabled = (
-  changeHistoryService: IWorkflowChangeHistoryService,
-  workflowVersioningEnabled: boolean
+  changeHistoryService: IWorkflowChangeHistoryService
 ): void => {
   if (!changeHistoryService.isInitialized()) {
-    throw new WorkflowChangeHistoryDisabledError('Workflow version history is not available.');
-  }
-
-  if (!workflowVersioningEnabled) {
     throw new WorkflowChangeHistoryDisabledError();
   }
 };
@@ -53,7 +47,7 @@ export const getHistoryForWorkflow = async (
     perPage = DEFAULT_PER_PAGE,
   }: GetHistoryForWorkflowParams
 ): Promise<WorkflowChangesHistoryResponse> => {
-  assertWorkflowChangeHistoryEnabled(deps.changeHistoryService, deps.workflowVersioningEnabled);
+  assertWorkflowChangeHistoryEnabled(deps.changeHistoryService);
 
   const workflow = await deps.getWorkflowSource(workflowId, spaceId);
   if (!workflow) {

@@ -100,8 +100,8 @@ importers:
         specifier: 2.0.10
         version: 2.0.10(react-router-dom@5.3.4(react@18.2.0))(react@18.2.0)
       '@elastic/charts':
-        specifier: 71.7.0
-        version: 71.7.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(reselect@4.1.8)
+        specifier: 71.8.0
+        version: 71.8.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(reselect@4.1.8)
       '@elastic/datemath':
         specifier: 5.0.3
         version: 5.0.3(moment@2.30.1)
@@ -118,8 +118,8 @@ importers:
         specifier: 8.7.0
         version: 8.7.0
       '@elastic/esql':
-        specifier: 4.7.1
-        version: 4.7.1
+        specifier: 4.9.1
+        version: 4.9.1
       '@elastic/eui':
         specifier: 116.5.0
         version: 116.5.0(@elastic/datemath@5.0.3(moment@2.30.1))(@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5)(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.9.3)
@@ -279,6 +279,18 @@ importers:
       '@kbn/agent-builder-tools-base':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base
+      '@kbn/agent-builder-visualizations':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations
+      '@kbn/agent-builder-visualizations-common':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations-common
+      '@kbn/agent-builder-visualizations-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/agent_builder_visualizations
+      '@kbn/agent-builder-visualizations-server':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations-server
       '@kbn/agent-builder-workflow-gen':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/agent-builder/agent-builder-workflow-gen
@@ -1482,6 +1494,12 @@ importers:
       '@kbn/date-range-picker':
         specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
+      '@kbn/date-range-picker-presets':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-presets
+      '@kbn/date-range-picker-presets-common':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-presets-common
       '@kbn/datemath':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-datemath
@@ -3653,7 +3671,7 @@ importers:
         version: 9.10.14
       '@launchdarkly/openfeature-node-server':
         specifier: 1.2.0
-        version: 1.2.0(@launchdarkly/node-server-sdk@9.10.14)(@openfeature/server-sdk@1.21.0(@openfeature/core@1.10.0))
+        version: 1.2.0(@launchdarkly/node-server-sdk@9.10.14)(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -3685,17 +3703,17 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       '@openfeature/core':
-        specifier: 1.10.0
-        version: 1.10.0
+        specifier: 1.11.0
+        version: 1.11.0
       '@openfeature/launchdarkly-client-provider':
         specifier: 0.3.3
-        version: 0.3.3(@openfeature/web-sdk@1.8.0(@openfeature/core@1.10.0))(launchdarkly-js-client-sdk@3.9.1)
+        version: 0.3.3(@openfeature/web-sdk@1.9.0(@openfeature/core@1.11.0))(launchdarkly-js-client-sdk@3.9.1)
       '@openfeature/server-sdk':
-        specifier: 1.21.0
-        version: 1.21.0(@openfeature/core@1.10.0)
+        specifier: 1.22.0
+        version: 1.22.0(@openfeature/core@1.11.0)
       '@openfeature/web-sdk':
-        specifier: 1.8.0
-        version: 1.8.0(@openfeature/core@1.10.0)
+        specifier: 1.9.0
+        version: 1.9.0(@openfeature/core@1.11.0)
       '@opentelemetry/api':
         specifier: 1.9.1
         version: 1.9.1
@@ -5460,7 +5478,7 @@ importers:
         version: 1.61.0
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.6.1
-        version: 0.6.1(@types/webpack@5.28.5(@swc/core@1.15.18(@swc/helpers@0.5.19))(esbuild@0.27.2)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-dev-server@5.2.5)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)
+        version: 0.6.1(@types/webpack@5.28.5(@swc/core@1.15.18(@swc/helpers@0.5.19))(esbuild@0.27.2)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-dev-server@5.2.6)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)
       '@redocly/cli':
         specifier: 2.35.1
         version: 2.35.1
@@ -6375,10 +6393,10 @@ importers:
         version: 4.10.2
       webpack-cli:
         specifier: 5.1.4
-        version: 5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.5)(webpack@5.96.1)
+        version: 5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.6)(webpack@5.96.1)
       webpack-dev-server:
-        specifier: 5.2.5
-        version: 5.2.5(tslib@2.8.1)(webpack-cli@5.1.4)(webpack@5.96.1)
+        specifier: 5.2.6
+        version: 5.2.6(tslib@2.8.1)(webpack-cli@5.1.4)(webpack@5.96.1)
       webpack-merge:
         specifier: 6.0.1
         version: 6.0.1
@@ -7949,6 +7967,10 @@ importers:
 
   src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker: {}
 
+  src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-presets: {}
+
+  src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-presets-common: {}
+
   src/platform/packages/shared/shared-ux/display/kbn-announcement-banner: {}
 
   src/platform/packages/shared/shared-ux/document_data_cascade/impl: {}
@@ -8431,6 +8453,12 @@ importers:
 
   x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base: {}
 
+  x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations: {}
+
+  x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations-common: {}
+
+  x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations-server: {}
+
   x-pack/platform/packages/shared/agent-builder/agent-builder-workflow-gen: {}
 
   x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder: {}
@@ -8768,6 +8796,8 @@ importers:
   x-pack/platform/plugins/shared/agent_builder_dashboards: {}
 
   x-pack/platform/plugins/shared/agent_builder_platform: {}
+
+  x-pack/platform/plugins/shared/agent_builder_visualizations: {}
 
   x-pack/platform/plugins/shared/agent_builder_workflows: {}
 
@@ -10372,8 +10402,8 @@ packages:
   '@elastic/app-search-javascript@8.13.0':
     resolution: {integrity: sha512-E1oV7eqHz0jbSd7mtbFDoP7aeosNORziCr3RLuIt2G2/ex/EnMLnL7Xz7yHzMHa0K9cvdRPW2458BR0JXYmKZQ==}
 
-  '@elastic/charts@71.7.0':
-    resolution: {integrity: sha512-AH+WdEAlAaFY3YjWkLD5WofkH1J9dyDRkqX/GwJxVS7hiCSbKo2AFUIO1JBPnJ0xjMCSk100cFgIb8NDlUo5jw==}
+  '@elastic/charts@71.8.0':
+    resolution: {integrity: sha512-Vtk9vK1naR1yofgQ3VYGMS1vnhYkPNXYlM6Sjt+KWWkGqqgAnX36vVOpeM2xtSzvXk3BziB4V4R+ZDThn29qVA==}
     peerDependencies:
       moment: ^2.29.1
       moment-timezone: ^0.5.32
@@ -10425,8 +10455,8 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 5.9.3
 
-  '@elastic/esql@4.7.1':
-    resolution: {integrity: sha512-bJMJ8B7ICm5WiQ6phEHGNJWrIS2xmlP8AFRQ9dTS+LWrz2vgp18PGQvqVgXheGv/VFPqhD6x32BP/7FctYnckA==}
+  '@elastic/esql@4.9.1':
+    resolution: {integrity: sha512-pdOR21qr80GmdNa+OzXhMLdd7eXyylmCP2uNEDrTy2uAFFH7ylKS4WB8pEuHBZl+ZfBS9IAIFJFpi6uA7mOoaQ==}
 
   '@elastic/eui-theme-borealis@8.0.0':
     resolution: {integrity: sha512-mNcZxVYPr5c1VDru42Z/VnFZn9GtgNSiEF3SfCiI1c29LNWVzz9qle35tffDxJSu/A2iIWA8tBmuxAFYYLydnw==}
@@ -10492,8 +10522,8 @@ packages:
     resolution: {integrity: sha512-3lqkZTdorrXxpeuTPjbZ0csC5IxYuE2cwdyczNoFWWiyOzXWtkXQnla3WNrrqhiumlnztXuJ7wLkyUmf6sJm1w==}
     engines: {node: ^18.19.0 || >=20.6.0}
 
-  '@elastic/pretty-printer@4.7.1':
-    resolution: {integrity: sha512-XFqZECreT7iuZgcy+cEKC6ITLzNSZ4tcm80QBBWHjFVb9geRa73W2t+i5334IQbXPuNKHaTpN8O3r0tCFSYrbA==}
+  '@elastic/pretty-printer@4.9.1':
+    resolution: {integrity: sha512-LzBbvrX0mVx6mZhBiAe/l0fdeXRRPvQc/WoUOMGshkTy0EIE96dMhG3K3hbKfeeR2Nq0LyiKvasVp/5yDMsSXw==}
 
   '@elastic/prismjs-esql@1.1.4':
     resolution: {integrity: sha512-3+RqlYt3mGC4ODcTWHqGXYF8IuDYCOo/b7o1CJFzLmz08QxZol9E3IMZMnY3RLoD3Zs26tJvFpxziOjj/owlcw==}
@@ -12284,8 +12314,8 @@ packages:
   '@open-draft/until@2.1.0':
     resolution: {integrity: sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==}
 
-  '@openfeature/core@1.10.0':
-    resolution: {integrity: sha512-C3ynxtPYhe5qVJgQIqCNxZXeRXo4t1Eo86uiROr8+sD6F2OjEJGIp6VOGxz+r6jkad2s8Br9BnUJOvskhai/3A==}
+  '@openfeature/core@1.11.0':
+    resolution: {integrity: sha512-P0u3/ht/oZCQT89fOed+laLk0kZR529a825cS02uPDglxXbE97irWYpDAeRGGVETIzKfuy+H2g8c3Ccv/tXJNQ==}
 
   '@openfeature/launchdarkly-client-provider@0.3.3':
     resolution: {integrity: sha512-pAhUMC+rxd6SZMfCgqv9VtYnHpF0LOzDftEFz6FQCk/ZrYuK/8ycNCstxt2yA/xnDyb0Ki7Rwe56IXEfQwBuew==}
@@ -12293,16 +12323,16 @@ packages:
       '@openfeature/web-sdk': ^1.0.0
       launchdarkly-js-client-sdk: '>=3.1.3'
 
-  '@openfeature/server-sdk@1.21.0':
-    resolution: {integrity: sha512-ZBVAiyMeN+dxurcXGJlvuOpYg9X7V923MVCI5dq/kE/5o8ys7MCOPhW44e4PS+XABHzSRTw44hcgWez93xwifw==}
+  '@openfeature/server-sdk@1.22.0':
+    resolution: {integrity: sha512-YBrf6SQkn0FNB/dRAtLEs41dvFMUE8CrQTwI+iLaMFUIqWlqGNJfGnulKSneEKS+2OgKTAC6DdmKcZ6tK7kBcg==}
     engines: {node: '>=20'}
     peerDependencies:
-      '@openfeature/core': ^1.10.0
+      '@openfeature/core': ^1.11.0
 
-  '@openfeature/web-sdk@1.8.0':
-    resolution: {integrity: sha512-B7NTG/mm9blV1Z7YjjcWhuoOHcDzyrHKwMRMcku9i9vvQGAE6ilVJPS3C/SsdvnOn2tDqm2lAg9SxvaJTRgp+Q==}
+  '@openfeature/web-sdk@1.9.0':
+    resolution: {integrity: sha512-FCrNfqvE/thHVfCNU0KKx1SD7rk+1wE2UaR5B5OPZl917QJv6AsKRwaI3N+SVgwXWI07GgtXP6hNlTVb49PGhg==}
     peerDependencies:
-      '@openfeature/core': ^1.10.0
+      '@openfeature/core': ^1.11.0
 
   '@opentelemetry/api-logs@0.219.0':
     resolution: {integrity: sha512-FFx7YnaYJlIjqWW/AG/yAZ0L/NEY724PipXXXQLdtZPbLwBGbUMTGL1i/esI56TWfTUXxhLfpgrnWJCG8aUJyg==}
@@ -26111,8 +26141,8 @@ packages:
       webpack:
         optional: true
 
-  webpack-dev-server@5.2.5:
-    resolution: {integrity: sha512-4wZtCquSuv9CKX8oybo+mqxtxZqWz47uM1Ch94lxowBztOhWCbhqvRbfC/mODOwxgV2brY+JGZpHq58/SuVFYg==}
+  webpack-dev-server@5.2.6:
+    resolution: {integrity: sha512-HNLRmamRvVavZQ+avceZifmv8hmdUjg43t6MI4SqJDwFdW7RPQwH5vzGhDRZSX59SgfbeHhLnq3g+uooWo7pVw==}
     engines: {node: '>= 18.12.0'}
     hasBin: true
     peerDependencies:
@@ -28250,7 +28280,7 @@ snapshots:
     dependencies:
       object-hash: 1.3.1
 
-  '@elastic/charts@71.7.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(reselect@4.1.8)':
+  '@elastic/charts@71.8.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(reselect@4.1.8)':
     dependencies:
       '@popperjs/core': 2.11.8
       '@reduxjs/toolkit': 1.9.7(react-redux@8.1.3(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)(redux@4.2.1))(react@18.2.0)
@@ -28345,9 +28375,9 @@ snapshots:
       eslint: 8.57.0
       typescript: 5.9.3
 
-  '@elastic/esql@4.7.1':
+  '@elastic/esql@4.9.1':
     dependencies:
-      '@elastic/pretty-printer': 4.7.1
+      '@elastic/pretty-printer': 4.9.1
       antlr4: 4.13.2
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
@@ -28518,7 +28548,7 @@ snapshots:
       - '@opentelemetry/api'
       - supports-color
 
-  '@elastic/pretty-printer@4.7.1':
+  '@elastic/pretty-printer@4.9.1':
     dependencies:
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
@@ -30126,10 +30156,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-node-server@1.2.0(@launchdarkly/node-server-sdk@9.10.14)(@openfeature/server-sdk@1.21.0(@openfeature/core@1.10.0))':
+  '@launchdarkly/openfeature-node-server@1.2.0(@launchdarkly/node-server-sdk@9.10.14)(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
     dependencies:
       '@launchdarkly/node-server-sdk': 9.10.14
-      '@openfeature/server-sdk': 1.21.0(@openfeature/core@1.10.0)
+      '@openfeature/server-sdk': 1.22.0(@openfeature/core@1.11.0)
 
   '@leichtgewicht/ip-codec@2.0.5': {}
 
@@ -30619,21 +30649,21 @@ snapshots:
 
   '@open-draft/until@2.1.0': {}
 
-  '@openfeature/core@1.10.0': {}
+  '@openfeature/core@1.11.0': {}
 
-  '@openfeature/launchdarkly-client-provider@0.3.3(@openfeature/web-sdk@1.8.0(@openfeature/core@1.10.0))(launchdarkly-js-client-sdk@3.9.1)':
+  '@openfeature/launchdarkly-client-provider@0.3.3(@openfeature/web-sdk@1.9.0(@openfeature/core@1.11.0))(launchdarkly-js-client-sdk@3.9.1)':
     dependencies:
-      '@openfeature/web-sdk': 1.8.0(@openfeature/core@1.10.0)
+      '@openfeature/web-sdk': 1.9.0(@openfeature/core@1.11.0)
       launchdarkly-js-client-sdk: 3.9.1
       lodash.isempty: 4.4.0
 
-  '@openfeature/server-sdk@1.21.0(@openfeature/core@1.10.0)':
+  '@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0)':
     dependencies:
-      '@openfeature/core': 1.10.0
+      '@openfeature/core': 1.11.0
 
-  '@openfeature/web-sdk@1.8.0(@openfeature/core@1.10.0)':
+  '@openfeature/web-sdk@1.9.0(@openfeature/core@1.11.0)':
     dependencies:
-      '@openfeature/core': 1.10.0
+      '@openfeature/core': 1.11.0
 
   '@opentelemetry/api-logs@0.219.0':
     dependencies:
@@ -31929,7 +31959,7 @@ snapshots:
     dependencies:
       playwright: 1.61.0
 
-  '@pmmmwh/react-refresh-webpack-plugin@0.6.1(@types/webpack@5.28.5(@swc/core@1.15.18(@swc/helpers@0.5.19))(esbuild@0.27.2)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-dev-server@5.2.5)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)':
+  '@pmmmwh/react-refresh-webpack-plugin@0.6.1(@types/webpack@5.28.5(@swc/core@1.15.18(@swc/helpers@0.5.19))(esbuild@0.27.2)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-dev-server@5.2.6)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)':
     dependencies:
       anser: 2.3.5
       core-js-pure: 3.49.0
@@ -31942,7 +31972,7 @@ snapshots:
     optionalDependencies:
       '@types/webpack': 5.28.5(@swc/core@1.15.18(@swc/helpers@0.5.19))(esbuild@0.27.2)(webpack-cli@5.1.4)
       type-fest: 4.41.0
-      webpack-dev-server: 5.2.5(tslib@2.8.1)(webpack-cli@5.1.4)(webpack@5.96.1)
+      webpack-dev-server: 5.2.6(tslib@2.8.1)(webpack-cli@5.1.4)(webpack@5.96.1)
       webpack-hot-middleware: 2.26.1
 
   '@polka/url@1.0.0-next.29': {}
@@ -34583,19 +34613,19 @@ snapshots:
   '@webpack-cli/configtest@2.1.1(webpack-cli@5.1.4)(webpack@5.96.1)':
     dependencies:
       webpack: 5.96.1(@swc/core@1.15.18(@swc/helpers@0.5.19))(esbuild@0.27.2)(webpack-cli@5.1.4)
-      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.5)(webpack@5.96.1)
+      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.6)(webpack@5.96.1)
 
   '@webpack-cli/info@2.0.2(webpack-cli@5.1.4)(webpack@5.96.1)':
     dependencies:
       webpack: 5.96.1(@swc/core@1.15.18(@swc/helpers@0.5.19))(esbuild@0.27.2)(webpack-cli@5.1.4)
-      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.5)(webpack@5.96.1)
+      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.6)(webpack@5.96.1)
 
-  '@webpack-cli/serve@2.0.5(webpack-cli@5.1.4)(webpack-dev-server@5.2.5)(webpack@5.96.1)':
+  '@webpack-cli/serve@2.0.5(webpack-cli@5.1.4)(webpack-dev-server@5.2.6)(webpack@5.96.1)':
     dependencies:
       webpack: 5.96.1(@swc/core@1.15.18(@swc/helpers@0.5.19))(esbuild@0.27.2)(webpack-cli@5.1.4)
-      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.5)(webpack@5.96.1)
+      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.6)(webpack@5.96.1)
     optionalDependencies:
-      webpack-dev-server: 5.2.5(tslib@2.8.1)(webpack-cli@5.1.4)(webpack@5.96.1)
+      webpack-dev-server: 5.2.6(tslib@2.8.1)(webpack-cli@5.1.4)(webpack@5.96.1)
 
   '@wojtekmaj/enzyme-adapter-react-17@0.6.7(enzyme@3.11.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
@@ -47452,12 +47482,12 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  webpack-cli@5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.5)(webpack@5.96.1):
+  webpack-cli@5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.6)(webpack@5.96.1):
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
       '@webpack-cli/configtest': 2.1.1(webpack-cli@5.1.4)(webpack@5.96.1)
       '@webpack-cli/info': 2.0.2(webpack-cli@5.1.4)(webpack@5.96.1)
-      '@webpack-cli/serve': 2.0.5(webpack-cli@5.1.4)(webpack-dev-server@5.2.5)(webpack@5.96.1)
+      '@webpack-cli/serve': 2.0.5(webpack-cli@5.1.4)(webpack-dev-server@5.2.6)(webpack@5.96.1)
       colorette: 2.0.20
       commander: 10.0.1
       cross-spawn: 7.0.6
@@ -47470,7 +47500,7 @@ snapshots:
       webpack-merge: 5.10.0
     optionalDependencies:
       webpack-bundle-analyzer: 4.10.2
-      webpack-dev-server: 5.2.5(tslib@2.8.1)(webpack-cli@5.1.4)(webpack@5.96.1)
+      webpack-dev-server: 5.2.6(tslib@2.8.1)(webpack-cli@5.1.4)(webpack@5.96.1)
 
   webpack-dev-middleware@6.1.3(webpack@5.96.1):
     dependencies:
@@ -47495,7 +47525,7 @@ snapshots:
     transitivePeerDependencies:
       - tslib
 
-  webpack-dev-server@5.2.5(tslib@2.8.1)(webpack-cli@5.1.4)(webpack@5.96.1):
+  webpack-dev-server@5.2.6(tslib@2.8.1)(webpack-cli@5.1.4)(webpack@5.96.1):
     dependencies:
       '@types/bonjour': 3.5.13
       '@types/connect-history-api-fallback': 1.5.4
@@ -47527,7 +47557,7 @@ snapshots:
       ws: 8.21.0
     optionalDependencies:
       webpack: 5.96.1(@swc/core@1.15.18(@swc/helpers@0.5.19))(esbuild@0.27.2)(webpack-cli@5.1.4)
-      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.5)(webpack@5.96.1)
+      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.6)(webpack@5.96.1)
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -47583,7 +47613,7 @@ snapshots:
       watchpack: 2.5.2
       webpack-sources: 3.2.3
     optionalDependencies:
-      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.5)(webpack@5.96.1)
+      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.10.2)(webpack-dev-server@5.2.6)(webpack@5.96.1)
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild

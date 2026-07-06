@@ -409,6 +409,7 @@ src/platform/plugins/shared/console/packaging/react/translations
 /x-pack/platform/plugins/shared/agent_builder/package.json
 /x-pack/platform/plugins/shared/agent_builder_dashboards/package.json
 /x-pack/platform/plugins/shared/agent_builder_platform/package.json
+/x-pack/platform/plugins/shared/agent_builder_visualizations/package.json
 /x-pack/platform/plugins/shared/agent_builder_workflows/package.json
 /x-pack/platform/plugins/shared/agent_context_layer/package.json
 /x-pack/platform/plugins/shared/ai_infra/llm_tasks/package.json
@@ -520,3 +521,9 @@ src/platform/plugins/shared/console/packaging/react/translations
 /x-pack/solutions/vectordb/test/package.json
 /x-pack/solutions/workplaceai/test/package.json
 # END GENERATED PNPM PACKAGE JSONS
+
+# Parallel step internal working notes (kept locally, not committed)
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_gaps.md
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_red_flags.md
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_p1_scope_brief.md
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_nested_flow_control_tradeoff.md
