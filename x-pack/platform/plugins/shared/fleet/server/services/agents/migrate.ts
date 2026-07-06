@@ -153,7 +153,8 @@ export async function bulkMigrateAgents(
 
   if ('agentIds' in options) {
     if (options.dryRun) {
-      return { count: options.agentIds.length };
+      const agents = await getAgents(esClient, soClient, options);
+      return { count: agents.length };
     }
     const givenAgents = await getAgents(esClient, soClient, options);
     const response = await bulkMigrateAgentsBatch(esClient, soClient, givenAgents, {

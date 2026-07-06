@@ -652,15 +652,19 @@ describe('unenrollAgents kuery path — cheap count and sync/async branching', (
     expect(mockUnenrollActionRunner).not.toHaveBeenCalled();
   });
 
-  it('dry run (agentIds) returns count without writing', async () => {
+  it('dry run (agentIds) returns count of found agents only', async () => {
     const { soClient, esClient } = createClientMock();
+    const mockGetAgents = jest
+      .spyOn(crud, 'getAgents')
+      .mockResolvedValue([{ id: 'agent-1' }, { id: 'agent-2' }] as any);
 
     const result = await unenrollAgents(soClient, esClient, {
-      agentIds: ['agent-1', 'agent-2', 'agent-3'],
+      agentIds: ['agent-1', 'agent-2', 'missing-1'],
       dryRun: true,
     });
 
-    expect(result).toEqual({ count: 3 });
+    expect(result).toEqual({ count: 2 });
     expect(mockUnenrollBatch).not.toHaveBeenCalled();
+    mockGetAgents.mockRestore();
   });
 });

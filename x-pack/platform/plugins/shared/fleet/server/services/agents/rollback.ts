@@ -130,7 +130,8 @@ export async function sendRollbackAgentsActions(
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
     if (options.dryRun) {
-      return { count: options.agentIds.length };
+      const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+      return { count: maybeAgents.filter((a) => !('notFound' in a)).length };
     }
     const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
     for (const maybeAgent of maybeAgents) {

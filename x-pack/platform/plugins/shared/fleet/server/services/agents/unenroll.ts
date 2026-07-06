@@ -96,7 +96,8 @@ export async function unenrollAgents(
 
   if ('agentIds' in options) {
     if (options.dryRun) {
-      return { count: options.agentIds.length };
+      const agents = await getAgents(esClient, soClient, options);
+      return { count: agents.length };
     }
     const givenAgents = await getAgents(esClient, soClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, {

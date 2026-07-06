@@ -89,8 +89,8 @@ export async function sendUpgradeAgentsActions(
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
     if (options.dryRun) {
-      // Count is the number of provided IDs; not-found agents are not filtered here.
-      return { count: options.agentIds.length };
+      const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+      return { count: maybeAgents.filter((a) => !('notFound' in a)).length };
     }
     const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
     for (const maybeAgent of maybeAgents) {
