@@ -30,7 +30,6 @@ export interface LogWorkflowChangesParams {
   workflows: Array<{ id: string; document: WorkflowProperties }>;
   changeHistoryService: Pick<IWorkflowChangeHistoryService, 'isInitialized'> | undefined;
   scopedChangeHistory: IScopedWorkflowChangeHistoryService | undefined;
-  workflowVersioningEnabled: boolean;
   action: WorkflowChangeHistoryActionType;
   spaceId: string;
   timestamp: string | Date;
@@ -74,7 +73,6 @@ export const logWorkflowChanges = async ({
   workflows,
   changeHistoryService,
   scopedChangeHistory,
-  workflowVersioningEnabled,
   action,
   spaceId,
   timestamp,
@@ -85,10 +83,6 @@ export const logWorkflowChanges = async ({
   retryDelayMs = DEFAULT_RETRY_DELAY_MS,
 }: LogWorkflowChangesParams): Promise<void> => {
   if (!changeHistoryService?.isInitialized() || !scopedChangeHistory) {
-    return;
-  }
-
-  if (!workflowVersioningEnabled) {
     return;
   }
 

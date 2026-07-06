@@ -15,7 +15,6 @@ import {
   WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
-  WORKFLOWS_VERSIONING_SETTING_ID,
 } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../common';
