@@ -102635,6 +102635,7 @@ components:
         namespace_customization_enabled_for:
           description: Namespaces for which namespace-level customization is enabled on this package.
           items:
+            maxLength: 100
             type: string
           maxItems: 100
           type: array
@@ -102645,6 +102646,7 @@ components:
             properties:
               ilm_policy:
                 maxLength: 1024
+                minLength: 1
                 type: string
           description: Per-namespace managed settings (for example, ILM policy) for this package. Keyed by namespace name.
           type: object
