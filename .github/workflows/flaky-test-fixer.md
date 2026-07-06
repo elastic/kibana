@@ -97,6 +97,9 @@ safe-outputs:
     draft: true
     max: 1
     labels: [flaky-test-fixer]
+    # `flaky-test-fixer` is always applied; the agent additionally sets exactly one
+    # backport label per "Backport label" below. Gate what it may set to those two.
+    allowed-labels: ['backport:skip', 'backport:all-open']
     # Request whoever triggered the fix as reviewer. A bot actor (rare) can't be a
     # reviewer, so the handler just logs a warning and the PR is still created.
     reviewers: ${{ github.actor }}
@@ -226,7 +229,7 @@ Kibana is already bootstrapped for you.
 2. Read the failing test and the helpers, fixtures, and page objects it imports.
 3. Apply the smallest test-side patch that addresses the root cause. Don't add explanatory code comments to the patch by default — a good test-side fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it to 1–2 sentences; a simple change like a timeout bump never warrants a comment.
 4. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
-5. Open the PR (see "PR format" below).
+5. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below).
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 7. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 8. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
@@ -262,6 +265,13 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   <bullet list of what you could not verify and why. E.g., behavior under CI parallel load, on a different stack version, against a real Elasticsearch instance, etc. Omit this section if there is nothing to mention.>
 
   </details>
+
+  <details>
+  <summary>Backporting strategy</summary>
+
+  <one or two sentences: which backport label you applied (or that you applied none because you weren't sure) and why. Say whether the failing test exists on the open release branches (from `versions.json`) and whether this patch applies there unchanged. If you left it unlabeled, or a version-specific backport would fit better, note which versions so a reviewer can set the appropriate `backport:*` / `vX.Y.Z` labels.>
+
+  </details>
   ```
 
 The first line attributes the flake:
@@ -277,6 +287,17 @@ Add the following at the very end of the PR description (and outside of the deta
 ```
 
 (Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving the rest of the NOTE.)
+
+## Backport label
+
+Only apply a backport label when you are **confident** about the decision. If you're unsure, apply **no** backport label at all and explain the uncertainty in the "Backporting strategy" section so a human can decide. Never guess.
+
+When you are confident, apply **exactly one** of these by passing it in the `labels` field of the `create_pull_request` safe output (the `flaky-test-fixer` label is added automatically):
+
+- **`backport:skip`** — apply when you're confident the fix is effectively main-only: the failing test (or the file you patched) doesn't exist on the open release branches, it was recently added, or the flakiness is specific to `main`.
+- **`backport:all-open`** — apply when you're confident the same test exists on **every** open release branch and your patch applies there unchanged, so fixing the flakiness across all of them is safe and appropriate. The open `release` branches are listed in `versions.json`; confirm the failing test's file is present on each (e.g. read the path at that ref via the GitHub API).
+
+If only some release branches (not all) warrant the fix, apply no label and call out the specific versions in the "Backporting strategy" section so a human can add the appropriate `backport:version` + `vX.Y.Z` labels. Always explain the choice — including a deliberate no-label decision — in that section.
 
 ## Outcome comment
 
