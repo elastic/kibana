@@ -27,7 +27,6 @@ export const InitializationFlowId = lazySchema(() =>
     'init-endpoint-protection',
     'init-ai-prompts',
     'init-detection-rule-monitoring',
-    'init-alert-analysis-workflow',
   ])
 );
 export type InitializationFlowId = z.infer<typeof InitializationFlowId>;
@@ -96,13 +95,6 @@ export type InstallDetectionEngineRuleMonitoringAssetsReadyResult = z.infer<
   typeof InstallDetectionEngineRuleMonitoringAssetsReadyResult
 >;
 
-export const AlertAnalysisWorkflowReadyResult = lazySchema(() =>
-  z.object({
-    status: z.literal('ready'),
-  })
-);
-export type AlertAnalysisWorkflowReadyResult = z.infer<typeof AlertAnalysisWorkflowReadyResult>;
-
 /**
  * Per-flow results. Only requested flows appear in the response, so all properties are optional. Each flow is either a typed ready result or an error result.
  */
@@ -125,9 +117,6 @@ export const InitializationFlowsResult = lazySchema(() =>
       .optional(),
     'init-detection-rule-monitoring': z
       .union([InstallDetectionEngineRuleMonitoringAssetsReadyResult, InitializationFlowErrorResult])
-      .optional(),
-    'init-alert-analysis-workflow': z
-      .union([AlertAnalysisWorkflowReadyResult, InitializationFlowErrorResult])
       .optional(),
   })
 );

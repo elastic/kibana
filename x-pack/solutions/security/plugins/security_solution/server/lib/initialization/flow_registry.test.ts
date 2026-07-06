@@ -64,14 +64,6 @@ jest.mock('./flows/init_detection_rule_monitoring', () => ({
   },
 }));
 
-jest.mock('./flows/init_alert_analysis_workflow', () => ({
-  initAlertAnalysisWorkflowFlow: {
-    id: 'init-alert-analysis-workflow' as const,
-    spaceAware: true,
-    runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
-  },
-}));
-
 const createMockContext = (): InitializationFlowContext => ({
   requestHandlerContext: {
     securitySolution: Promise.resolve({ getSpaceId: () => 'default' }),

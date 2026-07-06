@@ -9,8 +9,9 @@ import { z } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
+import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
@@ -21,6 +22,7 @@ import {
 } from '@kbn/management-settings-ids';
 import {
   ALERT_ANALYSIS_WORKFLOW_API_VERSION,
+  ALERT_ANALYSIS_WORKFLOW_RUNTIME_CONFIG_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
   AlertAnalysisWorkflowSettings,
 } from '../../../common/workflows/alert_analysis_workflow';
@@ -28,11 +30,8 @@ import { ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../../lib/teleme
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { StartPlugins } from '../../plugin';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../lib/entity_analytics/audit';
-import { initSecurityManagedWorkflowsClient } from '../managed_workflows';
 import { AlertAnalysisWorkflowAuditActions } from './audit';
 import {
-  getSecurityAlertAnalysisWorkflowIdForSpace,
-  installSecurityAlertAnalysisWorkflow,
   readSecurityAlertAnalysisWorkflowSettings,
   type SecurityAlertAnalysisWorkflowSettings,
 } from './install';
@@ -50,10 +49,14 @@ const LICENSE_ERROR_MESSAGE = i18n.translate(
   { defaultMessage: 'Your license does not support this feature.' }
 );
 
+// `workflowEnabled` and `createConversation` are required (not optional): the settings UI always
+// sends the full object, and defaulting a missing field to `true` would let a partial body silently
+// re-enable the workflow or conversation creation. `connectorId` stays optional because an empty
+// connector is a valid, explicit state (the workflow no-ops at run time when it is empty).
 const AlertAnalysisWorkflowSettingsWithConnectorRequestBody = AlertAnalysisWorkflowSettings.extend({
   connectorId: z.string().optional(),
-  workflowEnabled: z.boolean().optional(),
-  createConversation: z.boolean().optional(),
+  workflowEnabled: z.boolean(),
+  createConversation: z.boolean(),
 }).refine(
   ({ autoCloseConfidenceScoreMinThreshold, autoCloseConfidenceScoreMaxThreshold }) =>
     autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold,
@@ -79,8 +82,8 @@ const toWorkflowSettings = ({
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
   connectorId: connectorId ?? '',
-  workflowEnabled: workflowEnabled ?? true,
-  createConversation: createConversation ?? true,
+  workflowEnabled,
+  createConversation,
 });
 
 export const registerAlertAnalysisWorkflowSettingsRoutes = (
@@ -114,18 +117,50 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
           coreStart.savedObjects.getScopedClient(request)
         );
 
-        // Installing the workflow for the space is handled by the
-        // init-alert-analysis-workflow initialization flow, which runs the first
-        // time the Security Solution app loads in a space (see server/lib/initialization).
+        // The workflow is installed once in the global space; every space reads its own settings
+        // from uiSettings at run time, so there is nothing space-specific to install here.
         const settings = await readSecurityAlertAnalysisWorkflowSettings(uiSettingsClient);
-        const spaceId = (await context.securitySolution).getSpaceId();
 
         return response.ok({
           body: {
             settings,
-            workflowId: getSecurityAlertAnalysisWorkflowIdForSpace(spaceId),
+            workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
           },
         });
+      }
+    );
+
+  // Read-only config the managed workflow fetches at run time (see the settings `kibana.request`
+  // step in alert_analysis_workflow.yaml). Gated with RULES_API_READ + Enterprise, which the rule
+  // execution's API key satisfies, rather than the human-admin privileges the GET/PUT above use.
+  router.versioned
+    .get({
+      path: ALERT_ANALYSIS_WORKFLOW_RUNTIME_CONFIG_ROUTE,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: [RULES_API_READ],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
+        validate: false,
+      },
+      async (context, request, response) => {
+        const { license } = await context.licensing;
+        if (!license.hasAtLeast('enterprise')) {
+          return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
+        }
+
+        const [coreStart] = await getStartServices();
+        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+          coreStart.savedObjects.getScopedClient(request)
+        );
+        const settings = await readSecurityAlertAnalysisWorkflowSettings(uiSettingsClient);
+
+        return response.ok({ body: settings });
       }
     );
 
@@ -156,20 +191,9 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
           return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
         }
 
-        const [coreStart, pluginsStart] = await getStartServices();
-        const { workflowsExtensions } = pluginsStart;
-        if (!workflowsExtensions) {
-          return response.customError({
-            statusCode: 503,
-            body: {
-              message: 'Managed workflows are unavailable',
-            },
-          });
-        }
-
+        const [coreStart] = await getStartServices();
         const settings = toWorkflowSettings(request.body);
         const securitySolution = await context.securitySolution;
-        const spaceId = securitySolution.getSpaceId();
 
         const reportSettingsUpdatedEvent = (status: 'success' | 'error') => {
           try {
@@ -198,7 +222,8 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
           );
           // Persist all six settings in a single atomic saved-object update so a mid-write
           // failure can't leave them inconsistent (e.g. a stored min >= max that violates the
-          // cross-field validation applied to the request body).
+          // cross-field validation applied to the request body). No workflow reinstall is needed:
+          // the globally-installed workflow reads these settings from uiSettings on its next run.
           await uiSettingsClient.setMany({
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED]: settings.workflowEnabled,
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED]:
@@ -210,15 +235,6 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID]: settings.connectorId,
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]:
               settings.createConversation,
-          });
-
-          const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(
-            workflowsExtensions
-          );
-          await installSecurityAlertAnalysisWorkflow({
-            managedWorkflowsClient,
-            spaceId,
-            settings,
           });
 
           securitySolution.getAuditLogger()?.log({
@@ -235,7 +251,7 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
           return response.ok({
             body: {
               settings,
-              workflowId: getSecurityAlertAnalysisWorkflowIdForSpace(spaceId),
+              workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
             },
           });
         } catch (error) {

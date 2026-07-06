@@ -7,47 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument } from 'yaml';
 import ALERT_ANALYSIS_WORKFLOW_YAML from './alert_analysis_workflow.yaml';
-import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
+import type { ManagedWorkflowDefinition } from '../../types';
 
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analysis';
 
-export interface SecurityAlertAnalysisWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
-  workflowEnabled: boolean;
-  autoCloseEnabled: boolean;
-  autoCloseConfidenceScoreMinThreshold: number;
-  autoCloseConfidenceScoreMaxThreshold: number;
-  connectorId: string;
-  createConversation: boolean;
-}
-
-const renderAlertAnalysisWorkflowYaml = ({
-  workflowEnabled,
-  autoCloseEnabled,
-  autoCloseConfidenceScoreMinThreshold,
-  autoCloseConfidenceScoreMaxThreshold,
-  connectorId,
-  createConversation,
-}: SecurityAlertAnalysisWorkflowTemplateValues): string => {
-  const document = parseDocument(ALERT_ANALYSIS_WORKFLOW_YAML);
-
-  document.setIn(['enabled'], workflowEnabled);
-  document.setIn(['consts', 'auto_close_enabled'], autoCloseEnabled);
-  document.setIn(
-    ['consts', 'auto_close_confidence_score_min_threshold'],
-    autoCloseConfidenceScoreMinThreshold
-  );
-  document.setIn(
-    ['consts', 'auto_close_confidence_score_max_threshold'],
-    autoCloseConfidenceScoreMaxThreshold
-  );
-  document.setIn(['consts', 'connector_id'], connectorId);
-  document.setIn(['consts', 'create_conversation'], createConversation);
-
-  return document.toString();
-};
-
+// Installed once in the global space. Per-space configuration (connector, thresholds, enabled,
+// create-conversation) is not baked in here; the workflow reads it from the invoking space's
+// uiSettings at run time (see the settings `kibana.request` step in alert_analysis_workflow.yaml),
+// so a single static document serves every space with live config.
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
   id: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   pluginId: 'securitySolution',
@@ -57,10 +25,10 @@ export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
     selectors: ['rule_action'],
     solutions: ['security'],
   },
-  yamlTemplate: renderAlertAnalysisWorkflowYaml,
+  yaml: ALERT_ANALYSIS_WORKFLOW_YAML,
   management: {
-    lifecycle: 'dynamic',
-    versionStrategy: 'on_adopt',
+    lifecycle: 'static',
+    versionStrategy: 'auto',
     enablement: 'enforced',
   },
-} as const satisfies ManagedWorkflowDefinition<SecurityAlertAnalysisWorkflowTemplateValues>;
+} as const satisfies ManagedWorkflowDefinition;

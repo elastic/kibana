@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
-import {
-  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
-  type ManagedWorkflowTemplateValuesForId,
-} from '@kbn/workflows/managed';
-import type { CoreStart, IUiSettingsClient, Logger } from '@kbn/core/server';
+import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
@@ -25,17 +22,23 @@ import {
   type SecurityManagedWorkflowsClient,
 } from '../managed_workflows';
 
-export type SecurityAlertAnalysisWorkflowSettings = ManagedWorkflowTemplateValuesForId<
-  typeof SECURITY_ALERT_ANALYSIS_WORKFLOW_ID
->;
-
-const SPACE_SAVED_OBJECT_TYPE = 'space';
-const DEFAULT_SPACE_ID = 'default';
-const INSTALL_ALL_SPACES_CONCURRENCY = 10;
+/**
+ * The six alert-analysis settings. Read from a space-scoped `uiSettings` client (by the settings
+ * routes and by the workflow's runtime-config route), never baked into the workflow document: the
+ * workflow is installed once in the global space and reads these live per space at run time.
+ */
+export interface SecurityAlertAnalysisWorkflowSettings {
+  workflowEnabled: boolean;
+  autoCloseEnabled: boolean;
+  autoCloseConfidenceScoreMinThreshold: number;
+  autoCloseConfidenceScoreMaxThreshold: number;
+  connectorId: string;
+  createConversation: boolean;
+}
 
 /**
  * Reads the six `alertAnalysisWorkflow*` uiSettings from an already space-scoped
- * `IUiSettingsClient` and shapes them into the workflow's template values.
+ * `IUiSettingsClient` and shapes them into the workflow's settings.
  */
 export const readSecurityAlertAnalysisWorkflowSettings = async (
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>
@@ -61,139 +64,38 @@ export const readSecurityAlertAnalysisWorkflowSettings = async (
 });
 
 /**
- * Reads the alert analysis workflow settings for a given space without a Kibana request,
- * using an internal (system user) Saved Objects client scoped to that space's namespace.
- * Used at plugin start and when self-healing a space that is missing the workflow.
+ * Installs the alert analysis workflow once in the global space. A global workflow is visible from,
+ * and executable in, every space (including spaces created later), with executions stamped in the
+ * invoking space's context, so there is no per-space install, fan-out, or self-heal to manage.
  */
-export const readSecurityAlertAnalysisWorkflowSettingsForSpace = async ({
-  coreStart,
-  spaceId,
-}: {
-  coreStart: Pick<CoreStart, 'savedObjects' | 'uiSettings'>;
-  spaceId: string;
-}): Promise<SecurityAlertAnalysisWorkflowSettings> => {
-  const spaceScopedClient = coreStart.savedObjects
-    .getUnsafeInternalClient()
-    .asScopedToNamespace(spaceId);
-  const uiSettingsClient = coreStart.uiSettings.asScopedToClient(spaceScopedClient);
-  return readSecurityAlertAnalysisWorkflowSettings(uiSettingsClient);
-};
-
-/**
- * Enumerates every space id, paging through the (hidden) `space` saved objects.
- * Always includes the default space, which has no `space` saved object of its own.
- */
-export const getAllSpaceIds = async (
-  coreStart: Pick<CoreStart, 'savedObjects'>
-): Promise<string[]> => {
-  const spaceRepo = coreStart.savedObjects.createInternalRepository([SPACE_SAVED_OBJECT_TYPE]);
-  const perPage = 100;
-  const spaceIds = new Set<string>([DEFAULT_SPACE_ID]);
-
-  for (let page = 1; ; page++) {
-    const { saved_objects: batch } = await spaceRepo.find<unknown>({
-      type: SPACE_SAVED_OBJECT_TYPE,
-      perPage,
-      page,
-    });
-
-    batch.forEach((space) => spaceIds.add(space.id));
-
-    if (batch.length < perPage) {
-      break;
-    }
-  }
-
-  return [...spaceIds];
-};
-
-export const getSecurityAlertAnalysisWorkflowIdForSpace = (spaceId: string): string => {
-  return `${SECURITY_ALERT_ANALYSIS_WORKFLOW_ID}-${spaceId}`;
-};
-
 export const installSecurityAlertAnalysisWorkflow = async ({
   managedWorkflowsClient,
-  spaceId,
-  settings,
 }: {
   managedWorkflowsClient: SecurityManagedWorkflowsClient;
-  spaceId: string;
-  settings: SecurityAlertAnalysisWorkflowSettings;
 }): Promise<void> => {
   await managedWorkflowsClient.install(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID, {
-    spaceId,
-    workflowIdSuffix: spaceId,
-    values: settings,
+    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   });
 };
 
 /**
- * Installs the workflow for the given space if it is missing, or re-installs it if it has
- * drifted from the registered definition (e.g. a bundled YAML/version bump shipped after the
- * space last installed it). Leaves an already up to date, disabled, or otherwise unmanaged
- * workflow untouched.
- *
- * `install`'s own `on_adopt` version strategy already blocks this from upgrading a space during
- * plugin startup, so at plugin start this only repairs spaces that are actually missing the
- * workflow. Called later, e.g. from `init-alert-analysis-workflow` on a subsequent page load,
- * it also propagates a drifted definition to that space.
+ * Plugin-start entry point: install the workflow, then mark managed workflows ready. `ready()` must
+ * run only after the install resolves (it closes the startup window and triggers reconciliation), so
+ * this awaits the install first, reusing a single client, in one try/catch. Intended to be called
+ * once, fire-and-forget, from the plugin's `start()`.
  */
-export const ensureSecurityAlertAnalysisWorkflowInstalled = async ({
-  managedWorkflowsClient,
-  spaceId,
-  settings,
-}: {
-  managedWorkflowsClient: SecurityManagedWorkflowsClient;
-  spaceId: string;
-  settings: SecurityAlertAnalysisWorkflowSettings;
-}): Promise<void> => {
-  const status = await managedWorkflowsClient.getWorkflowStatus(
-    SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
-    { spaceId, workflowIdSuffix: spaceId }
-  );
-
-  if (status.status !== 'missing' && status.status !== 'drifted') {
-    return;
-  }
-
-  await installSecurityAlertAnalysisWorkflow({ managedWorkflowsClient, spaceId, settings });
-};
-
-/**
- * Ensures the alert analysis workflow is installed (enabled by default) in every existing space.
- * Intended to be called once at plugin start, after the managed workflow owner is registered.
- */
-export const installSecurityAlertAnalysisWorkflowForAllSpaces = async ({
-  coreStart,
+export const installSecurityAlertAnalysisWorkflowAndMarkReady = async ({
   workflowsExtensions,
   logger,
 }: {
-  coreStart: Pick<CoreStart, 'savedObjects' | 'uiSettings'>;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   logger: Logger;
 }): Promise<void> => {
-  const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(workflowsExtensions);
-  const spaceIds = await getAllSpaceIds(coreStart);
-
-  await pMap(
-    spaceIds,
-    async (spaceId) => {
-      try {
-        const settings = await readSecurityAlertAnalysisWorkflowSettingsForSpace({
-          coreStart,
-          spaceId,
-        });
-        await ensureSecurityAlertAnalysisWorkflowInstalled({
-          managedWorkflowsClient,
-          spaceId,
-          settings,
-        });
-      } catch (error) {
-        logger.warn(`Failed to install the alert analysis workflow for space "${spaceId}"`, {
-          error,
-        });
-      }
-    },
-    { concurrency: INSTALL_ALL_SPACES_CONCURRENCY }
-  );
+  try {
+    const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(workflowsExtensions);
+    await installSecurityAlertAnalysisWorkflow({ managedWorkflowsClient });
+    await managedWorkflowsClient.ready();
+  } catch (error) {
+    logger.warn('Failed to install the alert analysis workflow', { error });
+  }
 };

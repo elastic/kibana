@@ -25,6 +25,7 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../types';
+import { ALERT_ANALYSIS_WORKFLOW_RUNTIME_CONFIG_ROUTE } from '../../../common/workflows/alert_analysis_workflow';
 import { ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../../lib/telemetry/event_based/events';
 import {
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
@@ -135,14 +136,13 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
             connectorId: 'connector-abc',
             createConversation: true,
           },
-          workflowId: 'system-security-alert-analysis-space-1',
+          workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
         },
       });
     });
 
     it('does not install the workflow on GET', async () => {
-      // Installing for the space is handled by the init-alert-analysis-workflow
-      // initialization flow (server/lib/initialization), not the settings route.
+      // The workflow is installed once in the global space at plugin start, never from a route.
       mockSettings();
 
       const handler = router.versioned.getRoute('get', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
@@ -175,7 +175,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
       createConversation: false,
     };
 
-    it('persists settings and installs the per-space managed workflow', async () => {
+    it('persists settings without reinstalling the workflow', async () => {
       const handler = router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
         .versions['1'].handler;
 
@@ -193,18 +193,13 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]:
           settings.createConversation,
       });
-      expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-        SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
-        {
-          spaceId: 'space-1',
-          workflowIdSuffix: 'space-1',
-          values: settings,
-        }
-      );
+      // The globally-installed workflow reads settings from uiSettings on its next run, so saving
+      // never reinstalls or rewrites the workflow document.
+      expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           settings,
-          workflowId: 'system-security-alert-analysis-space-1',
+          workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
         },
       });
     });
@@ -231,7 +226,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
     });
 
     it('logs a failed audit event and reports telemetry when saving fails', async () => {
-      managedWorkflowsClient.install.mockRejectedValue(new Error('boom'));
+      uiSettingsClient.setMany.mockRejectedValue(new Error('boom'));
       const handler = router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
         .versions['1'].handler;
 
@@ -256,6 +251,50 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
 
       expect(mockResponse.forbidden).toHaveBeenCalled();
       expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('runtime_config GET', () => {
+    const mockSettings = () => {
+      uiSettingsClient.get
+        .mockResolvedValueOnce(true) // workflowEnabled
+        .mockResolvedValueOnce(true) // autoCloseEnabled
+        .mockResolvedValueOnce(0.85) // autoCloseConfidenceScoreMinThreshold
+        .mockResolvedValueOnce(1) // autoCloseConfidenceScoreMaxThreshold
+        .mockResolvedValueOnce('connector-abc') // connectorId
+        .mockResolvedValueOnce(true); // createConversation
+    };
+
+    const getHandler = () =>
+      router.versioned.getRoute('get', ALERT_ANALYSIS_WORKFLOW_RUNTIME_CONFIG_ROUTE).versions['1']
+        .handler;
+
+    it('returns the space-scoped settings the workflow reads at run time', async () => {
+      mockSettings();
+
+      await getHandler()(createContext(), createRequest(), mockResponse);
+
+      // The runtime route returns the bare settings (no workflowId wrapper); the workflow reads
+      // these fields directly.
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          workflowEnabled: true,
+          autoCloseEnabled: true,
+          autoCloseConfidenceScoreMinThreshold: 0.85,
+          autoCloseConfidenceScoreMaxThreshold: 1,
+          connectorId: 'connector-abc',
+          createConversation: true,
+        },
+      });
+    });
+
+    it('returns forbidden when the license does not support the feature', async () => {
+      hasAtLeast.mockReturnValue(false);
+
+      await getHandler()(createContext(), createRequest(), mockResponse);
+
+      expect(mockResponse.forbidden).toHaveBeenCalled();
+      expect(uiSettingsClient.get).not.toHaveBeenCalled();
     });
   });
 });

@@ -63,23 +63,12 @@ consts:
   # workflow tag prefix. Set to true to re-evaluate previously analyzed alerts.
   override_previous: false
 
-  # --- Auto-close settings ---------------------------------------------------
-  # Automatically close alerts classified as false_positive when their
-  # confidence score falls within the defined thresholds.
-  auto_close_enabled: true
-
-  # Confidence score thresholds (0–1 scale)
-  auto_close_confidence_score_min_threshold: 0.85
-  auto_close_confidence_score_max_threshold: 1.0
-
   # Tag suffix appended when an alert is auto-closed by this workflow
   closed_tag_suffix: "closed-by-agent"
 
-  # AI connector used for alert classification
-  connector_id: "gpt41Azure"
-
-  # Whether the AI agent step creates a new conversation per alert analysis
-  create_conversation: true
+# NOTE: connector, auto-close, create-conversation, and enabled settings are NOT constants here.
+# They are per-space and read at run time from the invoking space's uiSettings (see the
+# fetch_runtime_config step below), so a single global install serves every space with live config.
 
 # =============================================================================
 # Steps
@@ -97,6 +86,33 @@ steps:
       running_note: false
       normalized_version: "{{ consts.workflow_version | downcase | replace: ' ', '_' }}"
       tag_prefix: "workflow.{{ consts.workflow_tag_namespace }}"
+
+  # ---------------------------------------------------------------------------
+  # Read this space's configuration at run time
+  # ---------------------------------------------------------------------------
+  # The workflow is installed once in the global space; configuration lives in each space's
+  # uiSettings, not in this document. A raw kibana.request is not space-scoped automatically, so the
+  # path is prefixed with the execution's space to read the invoking space's settings.
+  - name: fetch_runtime_config
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/security_solution/alert_analysis_workflow/runtime_config"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "1"
+        Content-Type: application/json
+
+  - name: set_runtime_config_variables
+    type: data.set
+    with:
+      # `${{ }}` preserves booleans/numbers; `{{ }}` is used for the connector id string.
+      workflow_enabled: "${{ steps.fetch_runtime_config.output.workflowEnabled }}"
+      connector_id: "{{ steps.fetch_runtime_config.output.connectorId }}"
+      create_conversation: "${{ steps.fetch_runtime_config.output.createConversation }}"
+      auto_close_enabled: "${{ steps.fetch_runtime_config.output.autoCloseEnabled }}"
+      auto_close_confidence_score_min_threshold: "${{ steps.fetch_runtime_config.output.autoCloseConfidenceScoreMinThreshold }}"
+      auto_close_confidence_score_max_threshold: "${{ steps.fetch_runtime_config.output.autoCloseConfidenceScoreMaxThreshold }}"
 
   # ---------------------------------------------------------------------------
   # Iterate over each alert in the trigger batch
@@ -129,18 +145,21 @@ steps:
           already_analyzed_condition: "${{ foreach.item.kibana.alert.workflow_tags | has_exp: 'tag', variables.already_analyzed_expr }}"
 
       # -----------------------------------------------------------------------
-      # Gate: skip if the alert was already analyzed
+      # Gate: skip this alert when it was already analyzed, or when the workflow
+      # is disabled or has no connector configured for this space. This is where
+      # the runtime config guards all the expensive work (enrichment, the AI
+      # agent call, auto-close): a disabled or unconfigured space no-ops here.
       # -----------------------------------------------------------------------
       - name: already_analyzed
         type: if
-        condition: "${{ variables.already_analyzed_condition and consts.override_previous == false }}"
+        condition: "${{ (variables.already_analyzed_condition and consts.override_previous == false) or variables.workflow_enabled == false or variables.connector_id == '' }}"
         steps:
           - name: log_already_analyzed
             type: console
             with:
               message: >-
-                Alert {{ foreach.item._id }} has already been analyzed.
-                Remove the "{{ variables.tag_prefix }}" tag to re-run.
+                Skipping alert {{ foreach.item._id }} (already analyzed, workflow
+                disabled, or no connector configured).
         else:
 
           # -------------------------------------------------------------------
@@ -920,8 +939,8 @@ steps:
           - name: onechat_runAgent_step
             type: ai.agent
             agent-id: "elastic-ai-agent"
-            connector-id: "{{ consts.connector_id }}"
-            create-conversation: "${{ consts.create_conversation }}"
+            connector-id: "{{ variables.connector_id }}"
+            create-conversation: "${{ variables.create_conversation }}"
             on-failure:
               retry:
                 max-attempts: 3
@@ -1103,10 +1122,10 @@ steps:
               - name: check_auto_close_conditions
                 type: if
                 condition: >-
-                  consts.auto_close_enabled: true
+                  variables.auto_close_enabled: true
                   and steps.onechat_runAgent_step.output.structured_output.classification: "false_positive"
-                  and steps.onechat_runAgent_step.output.structured_output.confidence_score >= {{ consts.auto_close_confidence_score_min_threshold }}
-                  and steps.onechat_runAgent_step.output.structured_output.confidence_score <= {{ consts.auto_close_confidence_score_max_threshold }}
+                  and steps.onechat_runAgent_step.output.structured_output.confidence_score >= {{ variables.auto_close_confidence_score_min_threshold }}
+                  and steps.onechat_runAgent_step.output.structured_output.confidence_score <= {{ variables.auto_close_confidence_score_max_threshold }}
                 steps:
                   # Tag the alert so it can be identified as auto-closed.
                   - name: set_close_tags

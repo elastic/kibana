@@ -11,6 +11,12 @@ export const ALERT_ANALYSIS_WORKFLOW_API_VERSION = '1' as const;
 
 export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE =
   '/internal/security_solution/alert_analysis_workflow/settings' as const;
+// Read-only settings route the managed workflow calls at run time (via a kibana.request step,
+// authenticated with the rule execution's API key). Kept separate from the settings route above,
+// which is gated for the human admin editing settings (manage_advanced_settings), a privilege the
+// rule execution key does not carry.
+export const ALERT_ANALYSIS_WORKFLOW_RUNTIME_CONFIG_ROUTE =
+  '/internal/security_solution/alert_analysis_workflow/runtime_config' as const;
 export const ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE =
   '/internal/security_solution/alert_analysis_workflow/rules' as const;
 export const ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE =

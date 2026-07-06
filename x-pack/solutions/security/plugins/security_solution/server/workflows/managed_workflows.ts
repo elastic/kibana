@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -26,19 +25,4 @@ export const initSecurityManagedWorkflowsClient = async (
   workflowsExtensions: WorkflowsExtensionsServerPluginStart
 ): Promise<SecurityManagedWorkflowsClient> => {
   return workflowsExtensions.initManagedWorkflowsClient(APP_ID);
-};
-
-export const markSecurityManagedWorkflowsReady = async ({
-  workflowsExtensions,
-  logger,
-}: {
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
-  logger: Logger;
-}): Promise<void> => {
-  try {
-    const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(workflowsExtensions);
-    await managedWorkflowsClient.ready();
-  } catch (error) {
-    logger.warn('Failed to mark Security managed workflows ready', { error });
-  }
 };

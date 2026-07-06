@@ -39,7 +39,9 @@ jest.mock(
   })
 );
 
-const WORKFLOW_ID = 'system-security-alert-analysis-space-1';
+// The workflow is installed once in the global space, so rule actions reference the bare id (no
+// per-space suffix); the route builds its service with this same id.
+const WORKFLOW_ID = 'system-security-alert-analysis';
 
 const createWorkflowAction = () => createWorkflowActionFixture(WORKFLOW_ID);
 

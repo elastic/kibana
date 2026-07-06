@@ -6,27 +6,14 @@
  */
 
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
 import {
-  ensureSecurityAlertAnalysisWorkflowInstalled,
-  getAllSpaceIds,
-  getSecurityAlertAnalysisWorkflowIdForSpace,
   installSecurityAlertAnalysisWorkflow,
-  installSecurityAlertAnalysisWorkflowForAllSpaces,
+  installSecurityAlertAnalysisWorkflowAndMarkReady,
   readSecurityAlertAnalysisWorkflowSettings,
-  readSecurityAlertAnalysisWorkflowSettingsForSpace,
 } from './install';
-
-const settings = {
-  workflowEnabled: true,
-  autoCloseEnabled: true,
-  autoCloseConfidenceScoreMinThreshold: 0.8,
-  autoCloseConfidenceScoreMaxThreshold: 0.95,
-  connectorId: '',
-  createConversation: true,
-};
 
 describe('alert analysis workflow install', () => {
   const createManagedClient = () => ({
@@ -37,27 +24,14 @@ describe('alert analysis workflow install', () => {
     execute: jest.fn().mockResolvedValue('execution-id'),
   });
 
-  it('installs the per-space alert analysis workflow with template values', async () => {
+  it('installs the workflow once in the global space, without a suffix or template values', async () => {
     const managed = createManagedClient();
 
-    await installSecurityAlertAnalysisWorkflow({
-      managedWorkflowsClient: managed,
-      spaceId: 'security',
-      settings,
-    });
+    await installSecurityAlertAnalysisWorkflow({ managedWorkflowsClient: managed });
 
     expect(managed.install).toHaveBeenCalledWith(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID, {
-      spaceId: 'security',
-      workflowIdSuffix: 'security',
-      values: settings,
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
-    expect(managed.ready).not.toHaveBeenCalled();
-  });
-
-  it('builds the per-space alert analysis workflow id from the managed id and space id', () => {
-    expect(getSecurityAlertAnalysisWorkflowIdForSpace('security')).toBe(
-      'system-security-alert-analysis-security'
-    );
   });
 
   describe('readSecurityAlertAnalysisWorkflowSettings', () => {
@@ -86,190 +60,46 @@ describe('alert analysis workflow install', () => {
     });
   });
 
-  describe('readSecurityAlertAnalysisWorkflowSettingsForSpace', () => {
-    it('reads settings via a namespace-scoped internal Saved Objects client', async () => {
-      const coreStart = coreMock.createStart();
-      const uiSettingsClient = {
-        get: jest
-          .fn()
-          .mockResolvedValueOnce(true)
-          .mockResolvedValueOnce(true)
-          .mockResolvedValueOnce(0.8)
-          .mockResolvedValueOnce(0.95)
-          .mockResolvedValueOnce('')
-          .mockResolvedValueOnce(true),
-      };
-      (coreStart.uiSettings.asScopedToClient as jest.Mock).mockReturnValue(uiSettingsClient);
-
-      const result = await readSecurityAlertAnalysisWorkflowSettingsForSpace({
-        coreStart,
-        spaceId: 'my-space',
-      });
-
-      expect(coreStart.savedObjects.getUnsafeInternalClient).toHaveBeenCalled();
-      expect(result).toEqual(settings);
-    });
-  });
-
-  describe('getAllSpaceIds', () => {
-    it('always includes the default space and pages through the space saved objects', async () => {
-      const coreStart = coreMock.createStart();
-      const spaceRepo = coreStart.savedObjects.createInternalRepository(['space']);
-      (spaceRepo.find as jest.Mock).mockResolvedValueOnce({
-        saved_objects: [{ id: 'security' }],
-      });
-
-      const spaceIds = await getAllSpaceIds(coreStart);
-
-      expect(spaceIds).toEqual(['default', 'security']);
-    });
-  });
-
-  describe('ensureSecurityAlertAnalysisWorkflowInstalled', () => {
-    it('installs the workflow when it is missing', async () => {
+  describe('installSecurityAlertAnalysisWorkflowAndMarkReady', () => {
+    it('awaits the install before marking managed workflows ready', async () => {
       const managed = createManagedClient();
-      managed.getWorkflowStatus.mockResolvedValue({ status: 'missing' });
-
-      await ensureSecurityAlertAnalysisWorkflowInstalled({
-        managedWorkflowsClient: managed,
-        spaceId: 'security',
-        settings,
+      const order: string[] = [];
+      managed.install.mockImplementation(async () => {
+        order.push('install');
       });
-
-      expect(managed.install).toHaveBeenCalledWith(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID, {
-        spaceId: 'security',
-        workflowIdSuffix: 'security',
-        values: settings,
+      managed.ready.mockImplementation(async () => {
+        order.push('ready');
       });
-    });
-
-    it('reinstalls the workflow when it has drifted from the registered definition', async () => {
-      const managed = createManagedClient();
-      managed.getWorkflowStatus.mockResolvedValue({ status: 'drifted' });
-
-      await ensureSecurityAlertAnalysisWorkflowInstalled({
-        managedWorkflowsClient: managed,
-        spaceId: 'security',
-        settings,
-      });
-
-      expect(managed.install).toHaveBeenCalledWith(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID, {
-        spaceId: 'security',
-        workflowIdSuffix: 'security',
-        values: settings,
-      });
-    });
-
-    it('does not reinstall the workflow when it is already installed', async () => {
-      const managed = createManagedClient();
-      managed.getWorkflowStatus.mockResolvedValue({ status: 'disabled' });
-
-      await ensureSecurityAlertAnalysisWorkflowInstalled({
-        managedWorkflowsClient: managed,
-        spaceId: 'security',
-        settings,
-      });
-
-      expect(managed.install).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('installSecurityAlertAnalysisWorkflowForAllSpaces', () => {
-    const setUpSingleSpace = (uiSettingsClient: { get: jest.Mock }) => {
-      const coreStart = coreMock.createStart();
-      // Only the default space; no extra `space` saved objects.
-      const spaceRepo = coreStart.savedObjects.createInternalRepository(['space']);
-      (spaceRepo.find as jest.Mock).mockResolvedValue({ saved_objects: [] });
-      (coreStart.uiSettings.asScopedToClient as jest.Mock).mockReturnValue(uiSettingsClient);
-      return coreStart;
-    };
-
-    it('installs the workflow for the default space when it is missing', async () => {
-      const uiSettingsClient = {
-        get: jest
-          .fn()
-          .mockResolvedValueOnce(settings.workflowEnabled)
-          .mockResolvedValueOnce(settings.autoCloseEnabled)
-          .mockResolvedValueOnce(settings.autoCloseConfidenceScoreMinThreshold)
-          .mockResolvedValueOnce(settings.autoCloseConfidenceScoreMaxThreshold)
-          .mockResolvedValueOnce(settings.connectorId)
-          .mockResolvedValueOnce(settings.createConversation),
-      };
-      const coreStart = setUpSingleSpace(uiSettingsClient);
-
       const workflowsExtensions = workflowsExtensionsMock.createStart();
-      const managed = createManagedClient();
-      managed.getWorkflowStatus.mockResolvedValue({ status: 'missing' });
       workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
 
-      await installSecurityAlertAnalysisWorkflowForAllSpaces({
-        coreStart,
+      await installSecurityAlertAnalysisWorkflowAndMarkReady({
         workflowsExtensions,
         logger: loggerMock.create(),
       });
 
       expect(managed.install).toHaveBeenCalledWith(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID, {
-        spaceId: 'default',
-        workflowIdSuffix: 'default',
-        values: settings,
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       });
+      // ready() must run only after install resolves, else it closes the startup window and
+      // reconciles before the workflow is installed.
+      expect(order).toEqual(['install', 'ready']);
     });
 
-    it('bounds concurrent installs when there are many spaces', async () => {
-      const spaceCount = 24;
-      const coreStart = coreMock.createStart();
-      const spaceRepo = coreStart.savedObjects.createInternalRepository(['space']);
-      (spaceRepo.find as jest.Mock).mockResolvedValue({
-        saved_objects: Array.from({ length: spaceCount }, (_, index) => ({ id: `space-${index}` })),
-      });
-      const uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
-      (coreStart.uiSettings.asScopedToClient as jest.Mock).mockReturnValue(uiSettingsClient);
-
-      const workflowsExtensions = workflowsExtensionsMock.createStart();
+    it('logs a warning and does not throw, and does not mark ready, when the install fails', async () => {
       const managed = createManagedClient();
-      let active = 0;
-      let maxActive = 0;
-      managed.getWorkflowStatus.mockImplementation(async () => {
-        active += 1;
-        maxActive = Math.max(maxActive, active);
-        await new Promise((resolve) => setTimeout(resolve, 1));
-        active -= 1;
-        return { status: 'missing' };
-      });
-      workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
-
-      await installSecurityAlertAnalysisWorkflowForAllSpaces({
-        coreStart,
-        workflowsExtensions,
-        logger: loggerMock.create(),
-      });
-
-      // spaceCount named spaces plus the implicit 'default' space.
-      expect(managed.getWorkflowStatus).toHaveBeenCalledTimes(spaceCount + 1);
-      expect(maxActive).toBeLessThanOrEqual(10);
-    });
-
-    it('logs a warning and does not throw when a space fails to install', async () => {
-      const uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
-      const coreStart = setUpSingleSpace(uiSettingsClient);
-
+      managed.install.mockRejectedValue(new Error('boom'));
       const workflowsExtensions = workflowsExtensionsMock.createStart();
-      const managed = createManagedClient();
-      managed.getWorkflowStatus.mockRejectedValue(new Error('boom'));
       workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
       const logger = loggerMock.create();
 
       await expect(
-        installSecurityAlertAnalysisWorkflowForAllSpaces({
-          coreStart,
-          workflowsExtensions,
-          logger,
-        })
+        installSecurityAlertAnalysisWorkflowAndMarkReady({ workflowsExtensions, logger })
       ).resolves.not.toThrow();
 
-      expect(managed.install).not.toHaveBeenCalled();
+      expect(managed.ready).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('default'),
+        expect.stringContaining('Failed to install the alert analysis workflow'),
         expect.objectContaining({ error: expect.any(Error) })
       );
     });

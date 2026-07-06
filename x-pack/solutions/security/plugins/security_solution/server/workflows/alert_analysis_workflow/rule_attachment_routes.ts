@@ -9,6 +9,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { i18n } from '@kbn/i18n';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
   ALERT_ANALYSIS_WORKFLOW_API_VERSION,
   ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,
@@ -30,7 +31,6 @@ import type {
 } from '../../types';
 import { buildSiemResponse } from '../../lib/detection_engine/routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { getSecurityAlertAnalysisWorkflowIdForSpace } from './install';
 import { createAlertAnalysisWorkflowRuleAttachmentService } from './rule_attachments';
 
 export {
@@ -57,11 +57,10 @@ const hasEnterpriseLicense = async (
 const createReadService = async (context: SecuritySolutionRequestHandlerContext) => {
   const ctx = await context.resolve(['securitySolution', 'alerting']);
   const rulesClient = await ctx.alerting.getRulesClient();
-  const spaceId = ctx.securitySolution.getSpaceId();
 
   return createAlertAnalysisWorkflowRuleAttachmentService({
     rulesClient,
-    workflowId: getSecurityAlertAnalysisWorkflowIdForSpace(spaceId),
+    workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   });
 };
 
@@ -70,11 +69,10 @@ const createWriteService = async (context: SecuritySolutionRequestHandlerContext
   const rulesClient = await ctx.alerting.getRulesClient();
   const actionsClient = ctx.actions.getActionsClient();
   const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
-  const spaceId = ctx.securitySolution.getSpaceId();
 
   return createAlertAnalysisWorkflowRuleAttachmentService({
     rulesClient,
-    workflowId: getSecurityAlertAnalysisWorkflowIdForSpace(spaceId),
+    workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
     bulkEditDependencies: {
       actionsClient,
       prebuiltRuleAssetClient: createPrebuiltRuleAssetsClient(ctx.core.savedObjects.client),
