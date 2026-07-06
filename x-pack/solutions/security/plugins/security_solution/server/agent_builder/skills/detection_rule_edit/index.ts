@@ -122,7 +122,8 @@ security.create_detection_rule({
   attachment_id: "<attachment id from step 1>"
 })
 \`\`\`
-- Always provide \`attachment_id\` when rewriting a query so the tool reads the current rule state and updates the attachment in place, preserving non-query fields (severity, tags, schedule, etc.).
+- Always provide \`attachment_id\` when rewriting a query so the tool reads the current rule state and updates the attachment in place instead of creating a new card.
+- ⚠️ The rewrite regenerates name, description, tags, MITRE mappings, and schedule along with the query; only fields the generator does not produce (e.g. severity, risk score) carry over unchanged. If the user previously customized any of the regenerated fields, re-apply their values with \`attachment_update\` after the rewrite.
 3. Render: \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result.
 
 ##### Editing other fields (not query)
@@ -360,7 +361,7 @@ Pre-check: user wants to modify existing rule → edit path → proceed to Step 
      attachment_id: "ATTACHMENT_ID"
    })
    \`\`\`
-   The tool reads the current rule from the attachment and rewrites only the query, preserving all other fields.
+   The tool reads the current rule from the attachment and updates it in place. Name, description, tags, MITRE mappings, and schedule are regenerated along with the query — if the user had customized any of those fields, re-apply their values with \`attachment_update\` afterwards.
 3. Render: \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result.
 
 ## CRITICAL INSTRUCTIONS — READ CAREFULLY
