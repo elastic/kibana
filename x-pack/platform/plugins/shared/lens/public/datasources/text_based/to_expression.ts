@@ -27,7 +27,7 @@ function getExpressionForLayer(
       id: col.columnId,
       label: col.customLabel ? col.label : col.fieldName,
       variable: col?.variable,
-      dropPartials: col.params?.dropPartials,
+      ...(col.params?.dropPartials !== undefined ? { dropPartials: col.params.dropPartials } : {}),
     } as OriginalColumn;
 
     if (idMapper[col.fieldName]) {
