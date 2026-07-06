@@ -54,7 +54,7 @@ export interface FetchEsqlParams {
   esqlVariables?: ESQLControlVariable[];
   searchSessionId?: string;
   projectRouting?: ProjectRouting;
-  esqlApproximation?: boolean;
+  isApproximate?: boolean;
   inspectorConfig?: {
     title: string;
     description: string;
@@ -75,7 +75,7 @@ export function fetchEsql({
   esqlVariables,
   searchSessionId,
   projectRouting,
-  esqlApproximation,
+  isApproximate,
   inspectorConfig,
 }: FetchEsqlParams): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
@@ -96,7 +96,7 @@ export function fetchEsql({
             timeRange,
             esqlVariables,
             projectRouting,
-            esqlApproximation,
+            isApproximate,
           },
           searchSessionId,
         });

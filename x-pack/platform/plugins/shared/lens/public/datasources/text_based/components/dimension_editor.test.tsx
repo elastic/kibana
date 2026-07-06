@@ -131,8 +131,8 @@ describe('TextBasedDimensionEditor', () => {
     expect(screen.getByTestId('text-based-dimension-field')).toBeInTheDocument();
   });
 
-  it('passes esqlApproximation to fetchFieldsFromESQLExpression', async () => {
-    render(<TextBasedDimensionEditor {...defaultProps} esqlApproximation={true} />);
+  it('passes isApproximate to fetchFieldsFromESQLExpression', async () => {
+    render(<TextBasedDimensionEditor {...defaultProps} isApproximate={true} />);
     await waitToLoad();
 
     await waitFor(() => {

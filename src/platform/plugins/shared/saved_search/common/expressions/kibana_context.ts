@@ -137,7 +137,7 @@ export const getKibanaContextFn = (
         filters: uniqFilters(filters.filter((f: Filter) => !f.meta?.disabled)),
         timeRange,
         projectRouting: input?.projectRouting,
-        esqlApproximation: input?.esqlApproximation,
+        isApproximate: input?.isApproximate,
       };
     },
   };

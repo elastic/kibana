@@ -134,7 +134,7 @@ export function ESQLEditor({
   const submittedQueryRef = useRef(submittedQuery);
   submittedQueryRef.current = submittedQuery;
 
-  const { esqlVariables, esqlApproximation } = useFetchContext({ uuid: panelId, parentApi });
+  const { esqlVariables, isApproximate } = useFetchContext({ uuid: panelId, parentApi });
   const esqlQueryStats = useESQLQueryStats(isTextBasedLanguage, lensAdapters?.requests);
 
   // Update column limit indicator when chart data finishes loading
@@ -165,7 +165,7 @@ export function ESQLEditor({
         esqlVariables,
         shouldUpdateAttrs,
         currentAttributesRef.current,
-        esqlApproximation ?? undefined
+        isApproximate ?? undefined
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -184,7 +184,7 @@ export function ESQLEditor({
       visualizationMap,
       adHocDataViews,
       esqlVariables,
-      esqlApproximation,
+      isApproximate,
       setCurrentAttributes,
       updateSuggestion,
     ]

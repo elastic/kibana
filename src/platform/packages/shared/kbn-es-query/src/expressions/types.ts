@@ -18,5 +18,5 @@ export interface ExecutionContextSearch {
   disableWarningToasts?: boolean;
   esqlVariables?: ESQLControlVariable[];
   projectRouting?: ProjectRouting;
-  esqlApproximation?: boolean;
+  isApproximate?: boolean;
 }

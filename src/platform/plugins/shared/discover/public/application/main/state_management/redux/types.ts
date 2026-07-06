@@ -133,7 +133,7 @@ export interface DiscoverAppState {
    * Intentionally URL-only and not persisted to saved sessions in v1 — this may need to
    * be reconsidered in a future version once the embedding story is clearer.
    */
-  esqlApproximation?: boolean;
+  isApproximate?: boolean;
 }
 
 export interface CascadedDocumentsState {

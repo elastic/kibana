@@ -2,7 +2,6 @@
 
 exports[`interpreter/functions#kibana returns an object with the correct structure 1`] = `
 Object {
-  "esqlApproximation": undefined,
   "esqlVariables": undefined,
   "filters": Array [
     Object {
@@ -16,6 +15,7 @@ Object {
       },
     },
   ],
+  "isApproximate": undefined,
   "now": 0,
   "projectRouting": undefined,
   "query": Array [

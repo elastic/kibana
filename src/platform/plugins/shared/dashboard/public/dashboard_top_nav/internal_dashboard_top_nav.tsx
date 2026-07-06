@@ -455,7 +455,7 @@ export function InternalDashboardTopNav({
           esqlApproximation={
             isEsqlApproximationEnabled
               ? {
-                  esqlApproximation: esqlApproximation ?? false,
+                  isApproximate: esqlApproximation ?? false,
                   onChange: dashboardApi.setEsqlApproximation,
                   disabled: !hasEsqlPanel,
                   additionalText: i18n.translate(
