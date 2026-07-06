@@ -33,7 +33,7 @@ export const spec: Record<string, unknown> = {
       },
     },
     {
-      mark: { type: 'line', strokeWidth: 2, point: true, color: '#e8843c' },
+      mark: { type: 'line', strokeWidth: 2, point: true },
       encoding: {
         y: { field: 'avg_latency', type: 'quantitative', axis: { title: 'Avg Latency (ms)' } },
       },
