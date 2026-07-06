@@ -311,8 +311,6 @@ export function getModelDeprecatedMessage(deprecatedFormattedDate: string | null
       );
 }
 
-export { REGION_DISPLAY_NAMES } from '../../common/constants';
-
 const GEO_DISPLAY_NAMES: Record<string, string> = {
   apac: i18n.translate('xpack.searchInferenceEndpoints.geo.asiaPacific', {
     defaultMessage: 'Asia Pacific',

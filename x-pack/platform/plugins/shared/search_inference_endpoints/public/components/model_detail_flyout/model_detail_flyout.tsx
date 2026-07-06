@@ -44,8 +44,8 @@ import {
   getModelReleaseDate,
   getModelStatus,
   getRegionZoneCounts,
-  REGION_DISPLAY_NAMES,
 } from '../../utils/eis_utils';
+import { REGION_DISPLAY_NAMES } from '../../../common/constants';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { isInferencePreferencesEnabled } from '../../feature_flag';

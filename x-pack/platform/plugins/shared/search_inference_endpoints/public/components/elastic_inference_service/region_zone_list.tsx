@@ -17,7 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CspRegion } from '../../../common/types';
-import { regionKey, REGION_DISPLAY_NAMES } from '../../utils/eis_utils';
+import { regionKey } from '../../utils/eis_utils';
+import { REGION_DISPLAY_NAMES } from '../../../common/constants';
 
 export interface ZoneGroup {
   geo: string;
