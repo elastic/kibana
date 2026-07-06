@@ -104,12 +104,11 @@ export const updateAssetCriticalityStepCommonDefinition: CommonStepDefinition<
 \`\`\`yaml
 - name: mark_user_critical
   type: entityStore.updateAssetCriticality
+  recalculate-risk-score: false
   with:
     entity_type: "user"
     entity_id: "{{ variables.user_entity_id }}"
     criticality_level: "extreme_impact"
-  config:
-    recalculate-risk-score: false
 \`\`\``,
     ],
   },
