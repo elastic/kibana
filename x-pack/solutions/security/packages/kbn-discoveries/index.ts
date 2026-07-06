@@ -31,8 +31,6 @@ export type {
   GetAttackDiscoveryGraph,
   GetDefendInsightsGraph,
   GraphInsightTypes,
-  GraphInvocationResult,
-  InvokeGraphParams,
 } from './impl/lib/types';
 
 // Attack Discovery
@@ -80,14 +78,11 @@ export {
   getDefaultAttackDiscoveryGraph,
 } from './impl/attack_discovery/graphs';
 export type {
-  AttackDiscoveryGraphResult,
   AttackDiscoveryPrompts,
   CombinedPrompts,
   DefaultAttackDiscoveryGraph,
   GenerationPrompts,
   GetDefaultAttackDiscoveryGraphParams,
-  InvokeAttackDiscoveryGraphWithDocs,
-  InvokeAttackDiscoveryGraphWithDocsParams,
 } from './impl/attack_discovery/graphs';
 export {
   filterHallucinatedAlerts,
@@ -97,7 +92,6 @@ export {
   logFilteredDiscoveries,
   logUnverifiableDiscoveries,
 } from './impl/attack_discovery/hallucination_detection';
-export type { DiscoveryWithAlertIds } from './impl/attack_discovery/hallucination_detection';
 
 // Event logging — introduced in this PR (Orchestration + Event Logging).
 export {
@@ -119,17 +113,7 @@ export {
   ATTACK_DISCOVERY_EVENT_PROVIDER,
   writeAttackDiscoveryEvent,
 } from './impl/attack_discovery/persistence/event_logging';
-export type {
-  AttackDiscoverySource,
-  DiagnosticsConfig,
-  DiagnosticsContext,
-  DiagnosticsPreExecutionCheck,
-  DiagnosticsWorkflowIntegrity,
-  EventLogRefresher,
-  SourceMetadata,
-  WorkflowExecutionTracking,
-  WorkflowExecutionsTracking,
-} from './impl/attack_discovery/persistence/event_logging';
+export type { EventLogRefresher } from './impl/attack_discovery/persistence/event_logging';
 
 // Defend Insights
 export {
@@ -140,12 +124,8 @@ export type {
   DefaultDefendInsightsGraph,
   DefendInsightsCombinedPrompts,
   DefendInsightsGenerationPrompts,
-  DefendInsightsGraphResult,
   DefendInsightsPrompts,
   GetDefaultDefendInsightsGraphParams,
-  IKnowledgeBaseDataClient,
-  InvokeDefendInsightsGraphWithDocs,
-  InvokeDefendInsightsGraphWithDocsParams,
 } from './impl/defend_insights/graphs';
 
 // Note: schedules/transforms and telemetry/event_based_telemetry barrel exports
