@@ -24,6 +24,8 @@ export type {
   AppHeaderMetadataItems,
   AppHeaderMetadataTextItem,
   AppHeaderTab,
+  AppHeaderTabAction,
+  AppHeaderTabActions,
   AppHeaderTabBadge,
   AppHeaderTabIconBadge,
   AppHeaderTitle,
@@ -66,6 +68,8 @@ export type {
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  NavigationCustomization,
+  NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';

@@ -242,12 +242,11 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   runToolReturn = afterToolHooksResult.toolReturn;
 
   if (runToolReturn.results && !isExcludedFromFilestore(tool.id)) {
-    runToolReturn.results.forEach((result) => {
-      resultStore.add({
-        tool_id: tool.id,
-        tool_call_id: toolCallId,
-        result,
-      });
+    resultStore.add({
+      tool_id: tool.id,
+      tool_call_id: toolCallId,
+      params: toolParams,
+      results: runToolReturn.results,
     });
   }
 
@@ -298,7 +297,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     request,
     spaceId,
     logger,
-    esClient: elasticsearch.client.asScoped(request),
+    esClient: elasticsearch.client.asScoped(request, { projectRouting: 'space' }),
     savedObjectsClient,
     modelProvider,
     runner: manager.getRunner(),
