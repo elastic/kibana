@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PageObjects,
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
-} from '@kbn/scout';
-import { createLazyPageObject, spaceTest as spaceBaseTest } from '@kbn/scout';
+import type { PageObjects, ScoutParallelTestFixtures } from '@kbn/scout';
+import { createLazyPageObject } from '@kbn/scout';
+import type { DiscoverWorkerFixtures } from './common';
+import { spaceTest as spaceBaseTest } from './common';
 import { DocViewer } from './page_objects';
 
 export interface DiscoverPageObjects extends PageObjects {
@@ -23,7 +21,7 @@ export interface DiscoverTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: DiscoverPageObjects;
 }
 
-export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, ScoutParallelWorkerFixtures>({
+export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,

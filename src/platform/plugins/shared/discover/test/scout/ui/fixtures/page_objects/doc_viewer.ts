@@ -38,6 +38,14 @@ export class DocViewer {
     await this.dataGrid.openDocViewerTab(tabId);
   }
 
+  getFlyout() {
+    return this.dataGrid.getDocViewer();
+  }
+
+  getTab(tabId: string) {
+    return this.dataGrid.getDocViewerTab(tabId);
+  }
+
   async getFieldTokens(limit = 10): Promise<string[]> {
     return this.dataGrid.getDocViewerFieldTokens(limit);
   }
