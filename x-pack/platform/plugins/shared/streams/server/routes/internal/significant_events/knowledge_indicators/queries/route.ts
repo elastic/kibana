@@ -246,7 +246,7 @@ export const bulkDeleteQueriesRoute = createServerRoute({
       }
     });
 
-    // syncQueries uninstalls rules before writing storage, so a mid-flight
+    // deleteQueries uninstalls rules before writing storage, so a mid-flight
     // throw can leave rules gone while stored links still reference them. Log
     // the backed rule IDs on failure so ops can reconcile manually.
     const sigEventsLogger = logger.get('significant_events');
@@ -262,10 +262,7 @@ export const bulkDeleteQueriesRoute = createServerRoute({
         continue;
       }
       try {
-        const deleteIds = new Set(queryIds);
-        await kiClient.replaceStreamQueries(definition, (currentLinks) =>
-          currentLinks.filter((l) => !deleteIds.has(l.query.id)).map((l) => l.query)
-        );
+        await kiClient.deleteQueries(definition, queryIds);
         succeeded += queryIds.length;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);

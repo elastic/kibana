@@ -212,6 +212,13 @@ export class KnowledgeIndicatorClient {
     return this.orchestrator.deleteQuery(definition, queryId);
   }
 
+  deleteQueries(
+    definition: Streams.all.Definition,
+    queryIds: string[]
+  ): Promise<{ deleted: number }> {
+    return this.orchestrator.deleteQueries(definition, queryIds);
+  }
+
   deleteAllQueries(streamName: string): Promise<void> {
     return this.orchestrator.deleteAllQueries(streamName);
   }

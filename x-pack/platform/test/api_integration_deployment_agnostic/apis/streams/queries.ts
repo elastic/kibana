@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { omit, sortBy } from 'lodash';
 import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
+import type { BaseFeature } from '@kbn/significant-events-schema';
 import { v4 } from 'uuid';
 import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
@@ -17,11 +18,13 @@ import type { StreamsSupertestRepositoryClient } from './helpers/repository_clie
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
   bulkQueries,
+  deleteFeature,
   deleteStream,
   disableStreams,
   enableStreams,
   getQueries,
   putStream,
+  upsertFeature,
 } from './helpers/requests';
 import type { RoleCredentials } from '../../services';
 
@@ -556,6 +559,176 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
         expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([]);
         expect((await getQueries(apiClient, SECOND_STREAM_NAME)).queries).to.eql([]);
+      });
+
+      it('actually removes an already-expired query, not just from the default listing', async () => {
+        // Regression: delete used to report success without writing the tombstone.
+        const expiredQuery = {
+          id: v4(),
+          title: 'already expired',
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'expired'")`,
+          },
+          expires_at: '2020-01-01T00:00:00.000Z',
+        };
+        await bulkQueries(apiClient, STREAM_NAME, [{ index: expiredQuery }]);
+        expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([]);
+
+        const firstDelete = await apiClient
+          .fetch('POST /internal/streams/queries/_bulk_delete', {
+            params: { body: { queryIds: [expiredQuery.id] } },
+          })
+          .expect(200)
+          .then((res) => res.body);
+        expect(firstDelete).to.eql({ succeeded: 1, failed: 0, skipped: 0 });
+
+        // Repeating the delete must report skipped, proving the first call really deleted it.
+        const secondDelete = await apiClient
+          .fetch('POST /internal/streams/queries/_bulk_delete', {
+            params: { body: { queryIds: [expiredQuery.id] } },
+          })
+          .expect(200)
+          .then((res) => res.body);
+        expect(secondDelete).to.eql({ succeeded: 0, failed: 0, skipped: 1 });
+      });
+
+      it('does not touch a surviving sibling query or its rule', async () => {
+        // Regression: deleting one query used to re-diff the whole stream, spuriously
+        // calling updateRule on every other rule-backed query in it.
+        const survivor = {
+          id: v4(),
+          title: 'bulk-delete survivor',
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'survivor'")`,
+          },
+        };
+        const target = {
+          id: v4(),
+          title: 'bulk-delete target',
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'target'")`,
+          },
+        };
+        await bulkQueries(apiClient, STREAM_NAME, [{ index: survivor }, { index: target }]);
+
+        const rulesBefore = await alertingApi.searchRules(roleAuthc, '');
+        const survivorRuleBefore = rulesBefore.body.data.find(
+          (rule: any) => rule.name === survivor.title
+        );
+        expect(survivorRuleBefore).to.be.ok();
+
+        const response = await apiClient
+          .fetch('POST /internal/streams/queries/_bulk_delete', {
+            params: { body: { queryIds: [target.id] } },
+          })
+          .expect(200)
+          .then((res) => res.body);
+        expect(response).to.eql({ succeeded: 1, failed: 0, skipped: 0 });
+
+        expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([
+          { ...survivor, type: 'match' },
+        ]);
+
+        const rulesAfter = await alertingApi.searchRules(roleAuthc, '');
+        const survivorRuleAfter = rulesAfter.body.data.find(
+          (rule: any) => rule.name === survivor.title
+        );
+        expect(survivorRuleAfter.id).to.eql(survivorRuleBefore.id);
+        expect(survivorRuleAfter.updated_at).to.eql(survivorRuleBefore.updated_at);
+        expect(survivorRuleAfter.revision).to.eql(survivorRuleBefore.revision);
+      });
+    });
+
+    describe('feature-grounding survives unrelated query bulk operations', () => {
+      const testFeature: BaseFeature = {
+        id: 'reconcile-ttl-probe',
+        stream_name: STREAM_NAME,
+        type: 'entity',
+        description: 'grounding probe for TTL-preservation regression tests',
+        properties: {},
+        confidence: 90,
+      };
+
+      async function persistGroundedQuery(title: string) {
+        const response = await apiClient
+          .fetch('POST /internal/streams/{streamName}/queries/_persist', {
+            params: {
+              path: { streamName: STREAM_NAME },
+              body: {
+                queries: [
+                  {
+                    type: 'match',
+                    title,
+                    description: '',
+                    esql: {
+                      query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'${title}'")`,
+                    },
+                    severity_score: 10,
+                    features: [{ id: testFeature.id }],
+                  },
+                ],
+              },
+            },
+          })
+          .expect(200)
+          .then((res) => res.body);
+        return response.persistedQueries[0].id as string;
+      }
+
+      it('reconcileStream still tombstones a survivor of _bulk_delete once its feature is gone', async () => {
+        // Regression: deleting a sibling used to drop expires_at on rewrite, making this
+        // survivor durable and immune to the reconciliation below.
+        const { uuid: featureUuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
+        const survivorId = await persistGroundedQuery('persist-survivor-bulk-delete');
+
+        const fillerQuery = {
+          id: v4(),
+          title: 'bulk-delete filler',
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'filler'")`,
+          },
+        };
+        await bulkQueries(apiClient, STREAM_NAME, [{ index: fillerQuery }]);
+
+        await apiClient
+          .fetch('POST /internal/streams/queries/_bulk_delete', {
+            params: { body: { queryIds: [fillerQuery.id] } },
+          })
+          .expect(200);
+
+        // Deleting the grounding feature auto-reconciles the stream.
+        await deleteFeature(apiClient, STREAM_NAME, featureUuid);
+
+        const { queries } = await getQueries(apiClient, STREAM_NAME);
+        expect(queries.find((q) => q.id === survivorId)).to.be(undefined);
+      });
+
+      it('reconcileStream still tombstones a survivor of the public bulk queries endpoint once its feature is gone', async () => {
+        // Same regression, via the public bulk endpoint's own version of the rewrite.
+        const { uuid: featureUuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
+        const survivorId = await persistGroundedQuery('persist-survivor-public-bulk');
+
+        await bulkQueries(apiClient, STREAM_NAME, [
+          {
+            index: {
+              id: v4(),
+              title: 'public bulk unrelated draft',
+              description: '',
+              esql: {
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'unrelated'")`,
+              },
+            },
+          },
+        ]);
+
+        await deleteFeature(apiClient, STREAM_NAME, featureUuid);
+
+        const { queries } = await getQueries(apiClient, STREAM_NAME);
+        expect(queries.find((q) => q.id === survivorId)).to.be(undefined);
       });
     });
   });

@@ -14,6 +14,7 @@ import {
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { QueryNotFoundError } from '../../../lib/streams/errors/query_not_found_error';
+import { queryFromLink } from '../../../lib/streams/ki/knowledge_indicator_client/serializers';
 import {
   upsertStreamQueryRequest,
   bulkStreamQueriesRequest,
@@ -390,10 +391,12 @@ const bulkQueriesRoute = createServerRoute({
     );
     const { [streamName]: currentLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
     const currentIds = new Set(currentLinks.map((l) => l.query.id));
+    // expires_at lives on the link, not the nested query — `l.query` alone would drop
+    // it, silently making the query durable.
     const nextQueries: StreamQuery[] = [
       ...currentLinks
         .filter((l) => !deleteIds.has(l.query.id))
-        .map((l) => indexQueriesById.get(l.query.id) ?? l.query),
+        .map((l) => indexQueriesById.get(l.query.id) ?? queryFromLink(l)),
       ...Array.from(indexQueriesById.values()).filter((q) => !currentIds.has(q.id)),
     ];
     await kiClient.syncQueries(definition, nextQueries, { currentLinks });
