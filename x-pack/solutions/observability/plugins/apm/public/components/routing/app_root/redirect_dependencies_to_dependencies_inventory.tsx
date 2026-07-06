@@ -28,7 +28,7 @@ export function RedirectDependenciesToDependenciesInventory({
     (normalizedPathname.startsWith('/dependencies/') &&
       normalizedPathname !== '/dependencies/inventory');
 
-  if (isDependencyDetailRoute && !('dependencyName' in query)) {
+  if (isDependencyDetailRoute && typeof query?.dependencyName !== 'string') {
     return (
       <Redirect
         to={qs.stringifyUrl({
