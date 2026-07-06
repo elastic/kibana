@@ -16,6 +16,8 @@ import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
+import { validateParallelFanOut } from './validate_parallel_fan_out';
+import { validateParallelMode } from './validate_parallel_mode';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
@@ -70,7 +72,9 @@ export function runWorkflowYamlValidations({
   if (workflowLookup && lineCounter) {
     results.push(
       ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
-      ...validateIfConditions(workflowLookup, lineCounter)
+      ...validateIfConditions(workflowLookup, lineCounter),
+      ...validateParallelMode(workflowLookup, lineCounter),
+      ...validateParallelFanOut(workflowLookup, lineCounter)
     );
   }
 

@@ -79,6 +79,8 @@ interface SandboxFlyoutMockProps {
   onQueryChange?: (query: RuleQuery) => void;
   onApply?: () => void;
   onClose: () => void;
+  helpText?: React.ReactNode;
+  headerActions?: React.ReactNode;
 }
 
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
@@ -89,6 +91,8 @@ jest.mock('./query_sandbox_flyout', () => ({
     sandboxFlyoutProps = props;
     return (
       <div data-test-subj="composeDiscoverChildMock">
+        <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
+        <div data-test-subj="mockSandboxHeaderActions">{props.headerActions}</div>
         {props.onApply ? (
           <button type="button" data-test-subj="mockSandboxApply" onClick={() => props.onApply?.()}>
             Apply
@@ -752,7 +756,56 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
     });
 
-    it('does not re-split in edit mode and commits the sandbox structure as-is', () => {
+    it('runs heuristic split and commits the result in edit + alert unified editor', () => {
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: { segment: '| WHERE count > 100' },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      act(() => {
+        mockComposeDiscoverForm.mock.calls[
+          mockComposeDiscoverForm.mock.calls.length - 1
+        ][0].dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
+      });
+
+      expect(sandboxFlyoutProps).toBeDefined();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'composed',
+          base: 'FROM logs-* | WHERE count > 200',
+          breach: { segment: '' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query after Apply');
+      }
+      expect(committed.base).toContain('FROM logs-*');
+      expect(committed.breach.segment).toContain('WHERE count > 200');
+    });
+
+    it('does not re-split in edit mode YAML and commits the sandbox structure as-is', () => {
       const editFormValues: FormValues = {
         kind: 'alert',
         metadata: { name: 'Edit rule', enabled: true, description: '', tags: [] },
@@ -814,6 +867,357 @@ describe('ComposeDiscoverFlyout', () => {
         base: 'FROM metrics-*',
         breach: { segment: '| WHERE count > 50' },
       });
+    });
+
+    it('commits manual split base/alert verbatim without running the heuristic', () => {
+      renderFlyout({ mode: 'create' });
+
+      expect(sandboxFlyoutProps).toBeDefined();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+
+      expect(sandboxFlyoutProps?.query).toMatchObject({
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      });
+
+      const manualSplitQuery: RuleQuery = {
+        format: 'composed',
+        base: 'FROM custom-base',
+        breach: { segment: '| WHERE custom > 1' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(manualSplitQuery);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
+    });
+
+    it('preserves custom recovery when applying manual split edits', () => {
+      const queryWithRecovery: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-* | WHERE count > 100',
+        breach: { segment: '' },
+        recovery: { segment: '| WHERE count < 50' },
+      };
+
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: { segment: '| WHERE count > 100' },
+            recovery: { segment: '| WHERE count < 50' },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      act(() => {
+        mockComposeDiscoverForm.mock.calls[
+          mockComposeDiscoverForm.mock.calls.length - 1
+        ][0].dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
+      });
+
+      expect(sandboxFlyoutProps).toBeDefined();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(queryWithRecovery);
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+
+      expect(sandboxFlyoutProps?.query).toMatchObject({
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+        recovery: { segment: '| WHERE count < 50' },
+      });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: '| WHERE count > 200' },
+          recovery: { segment: '| WHERE count < 50' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 200' },
+        recovery: { segment: '| WHERE count < 50' },
+      });
+    });
+
+    it('commits subsequent recovery edits when manualSplitEnabled is stale from alert condition', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: '| WHERE count > 100' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      fireEvent.click(screen.getByTestId('composeDiscoverNext'));
+
+      const getLatestFormProps = (): FormProps =>
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+      act(() => {
+        getLatestFormProps().onRecoveryTypeChange('custom');
+      });
+
+      const firstRecoveryEdit: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+        recovery: { segment: '| WHERE count < 50' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(firstRecoveryEdit);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+      expect(readCommittedQuery?.()).toEqual(firstRecoveryEdit);
+
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 1, isAlert: true });
+      });
+
+      const secondRecoveryEdit: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+        recovery: { segment: '| WHERE count < 10' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(secondRecoveryEdit);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readCommittedQuery?.()).toEqual(secondRecoveryEdit);
+    });
+  });
+
+  describe('manual split mode', () => {
+    const getLatestFormProps = (): FormProps =>
+      mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+    it('passes onManualSplit in create and edit modes', () => {
+      renderFlyout({ mode: 'create' });
+      expect(getLatestFormProps().onManualSplit).toBeDefined();
+
+      mockComposeDiscoverForm.mockClear();
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: { segment: '| WHERE count > 100' },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+      expect(getLatestFormProps().onManualSplit).toBeDefined();
+    });
+
+    it('shows the split button before any query is typed', () => {
+      renderFlyout({ mode: 'create' });
+
+      expect(screen.getByTestId('querySandboxSplitBaseAndAlert')).toBeInTheDocument();
+    });
+
+    it('shows split controls in edit mode when the sandbox is open', () => {
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: { segment: '| WHERE count > 100' },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
+      });
+
+      expect(screen.getByTestId('querySandboxSplitBaseAndAlert')).toBeInTheDocument();
+      expect(screen.getByTestId('querySandboxUnifiedHelper')).toBeInTheDocument();
+    });
+
+    it('resets manual split when the sandbox is closed without Apply', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
+
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(false);
+    });
+
+    it('keeps manual split enabled after Apply in manual split mode', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+
+      const manualSplitQuery: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(manualSplitQuery);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+    });
+
+    it('resets manual split when switching to YAML mode', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+
+      const manualSplitQuery: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(manualSplitQuery);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+      expect(screen.queryByTestId('composeDiscoverChildMock')).not.toBeInTheDocument();
+
+      clickEditMode('yaml');
+      clickEditMode('form');
+
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(false);
+    });
+
+    it('shows split controls and unified helper on the alert condition step only', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+
+      expect(screen.getByTestId('querySandboxSplitBaseAndAlert')).toBeInTheDocument();
+      expect(screen.getByTestId('querySandboxUnifiedHelper')).toBeInTheDocument();
+    });
+
+    it('hides split controls and unified helper on the custom recovery step', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      fireEvent.click(screen.getByTestId('composeDiscoverNext'));
+
+      act(() => {
+        getLatestFormProps().onRecoveryTypeChange('custom');
+      });
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxSplitBaseAndAlert')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxUseSingleEditor')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxUnifiedHelper')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxManualSplitHelper')).not.toBeInTheDocument();
     });
   });
 
