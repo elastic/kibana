@@ -43,6 +43,7 @@ export const WORKFLOW_READ_ONLY_MONACO_OPTIONS: monaco.editor.IStandaloneEditorC
     readOnly: true,
     domReadOnly: true,
     contextmenu: false,
+    glyphMargin: false, // read-only surfaces have no glyph decorations
     lightbulb: { enabled: false },
     quickSuggestions: false,
     suggestOnTriggerCharacters: false,

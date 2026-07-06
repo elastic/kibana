@@ -361,12 +361,12 @@ export const WorkflowYAMLEditor = ({
   openAgentChatRef.current = openAgentChat;
 
   useEffect(() => {
-    if (!isAgentBuilderAvailable || isReadOnlyYaml || hasAutoOpenedAgentChatRef.current) {
+    if (!isEditorMounted || !isAgentBuilderAvailable || hasAutoOpenedAgentChatRef.current) {
       return;
     }
     hasAutoOpenedAgentChatRef.current = true;
     openAgentChatRef.current();
-  }, [isAgentBuilderAvailable, isReadOnlyYaml]);
+  }, [isEditorMounted, isAgentBuilderAvailable]);
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {
@@ -436,16 +436,15 @@ export const WorkflowYAMLEditor = ({
         disposablesRef.current.push(disposable);
       }
 
-      // Listen to content changes to detect typing
+      // Mark editor as mounted (deferred so consumers see the ref set on the same tick)
+      setTimeout(() => {
+        setIsEditorMounted(true);
+      }, 0);
+
       const model = editor.getModel();
       if (!model) {
         return;
       }
-
-      // If no model, just set the mounted state
-      setTimeout(() => {
-        setIsEditorMounted(true);
-      }, 0);
 
       // Setup Elasticsearch step providers if we have the required services
       if (http && notifications) {

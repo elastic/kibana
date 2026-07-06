@@ -37,6 +37,10 @@ jest.mock('../../../shared/ui/yaml_editor', () => ({
           const editorMock = {
             getModel: jest.fn(),
             dispose: jest.fn(),
+            onDidScrollChange: jest.fn(() => ({ dispose: jest.fn() })),
+            onDidChangeCursorPosition: jest.fn(() => ({ dispose: jest.fn() })),
+            getPosition: jest.fn(),
+            revealLineInCenter: jest.fn(),
           } as unknown as monaco.editor.IStandaloneCodeEditor;
           if (el) {
             editorDidMount?.(editorMock);
@@ -700,7 +704,7 @@ steps:
       expect(openAgentChat).toHaveBeenCalledTimes(1);
     });
 
-    it('does not open the agent chat when the editor is read-only (managed workflow)', async () => {
+    it('still opens the agent chat when the editor is read-only (managed workflow)', async () => {
       const openAgentChat = setupAvailable();
       const store = createMockStore();
       store.dispatch(setWorkflow({ ...mockWorkflow, managed: true }));
@@ -709,13 +713,11 @@ steps:
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
       await waitFor(() => {
-        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+        expect(openAgentChat).toHaveBeenCalledTimes(1);
       });
-
-      expect(openAgentChat).not.toHaveBeenCalled();
     });
 
-    it('does not open the agent chat on the executions tab', async () => {
+    it('still opens the agent chat on the executions tab', async () => {
       const openAgentChat = setupAvailable();
       const store = createMockStore();
       store.dispatch(setActiveTab('executions'));
@@ -723,10 +725,8 @@ steps:
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
       await waitFor(() => {
-        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+        expect(openAgentChat).toHaveBeenCalledTimes(1);
       });
-
-      expect(openAgentChat).not.toHaveBeenCalled();
     });
   });
 
