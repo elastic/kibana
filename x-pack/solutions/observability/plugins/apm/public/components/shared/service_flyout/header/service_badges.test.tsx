@@ -10,6 +10,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { ServiceBadges } from './service_badges';
+import type { ServiceAnomalyScoreResponse } from '../../../../../server/routes/services/get_services/get_service_anomaly_score_for_service';
 
 const mockNavigateToUrl = jest.fn();
 const mockUseApmPluginContext = jest.fn();
@@ -22,11 +23,14 @@ jest.mock('../hooks/use_service_badges_data', () => ({
   useServiceBadgesData: (...args: unknown[]) => mockUseServiceBadgesData(...args),
 }));
 
-jest.mock('../hooks/use_service_links', () => ({
-  useServiceLinks: () => ({
-    overviewHref: '/app/apm/overview-href',
-    alertsHref: '/app/apm/alerts-href',
-  }),
+const mockLink = jest.fn(
+  (path: string, { path: pathParams, query }: { path: Record<string, string>; query: unknown }) =>
+    `${path.replace('{serviceName}', pathParams.serviceName)}?${new URLSearchParams(
+      query as Record<string, string>
+    ).toString()}`
+);
+jest.mock('../../../../hooks/use_apm_router', () => ({
+  useApmRouter: () => ({ link: mockLink }),
 }));
 
 const mockUseManageSlosUrl = jest.fn();
@@ -54,9 +58,9 @@ function setupContext({ canReadSlos = true }: { canReadSlos?: boolean } = {}) {
 
 function setupBadgesData({
   alertsCount,
-  anomalyScore,
-}: { alertsCount?: number; anomalyScore?: number } = {}) {
-  mockUseServiceBadgesData.mockReturnValue({ alertsCount, anomalyScore });
+  anomalyData,
+}: { alertsCount?: number; anomalyData?: ServiceAnomalyScoreResponse } = {}) {
+  mockUseServiceBadgesData.mockReturnValue({ alertsCount, anomalyData });
 }
 
 function renderBadges({ service = baseNodeData }: { service?: ServiceNodeData } = {}) {
@@ -99,7 +103,9 @@ describe('ServiceBadges', () => {
       expect(badge).toHaveAttribute('data-ebt-element', 'serviceFlyoutAlertsBadge');
 
       fireEvent.click(badge);
-      expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/apm/alerts-href');
+      expect(mockNavigateToUrl).toHaveBeenCalled();
+      const href = mockNavigateToUrl.mock.calls[0][0] as string;
+      expect(href).toContain('/services/opbeans-java/alerts');
     });
 
     it('hides the alerts badge when the hook returns no count', () => {
@@ -149,7 +155,7 @@ describe('ServiceBadges', () => {
   describe('anomaly badge', () => {
     it('shows the anomaly badge when the hook returns a score', () => {
       setupContext();
-      setupBadgesData({ anomalyScore: 75 });
+      setupBadgesData({ anomalyData: { anomalyScore: 75, anomalyEnvironment: 'production' } });
       renderBadges();
 
       expect(screen.getByTestId('serviceFlyoutAnomaliesBadge')).toBeInTheDocument();
@@ -157,7 +163,7 @@ describe('ServiceBadges', () => {
 
     it('hides the anomaly badge when the hook returns no score', () => {
       setupContext();
-      setupBadgesData({ anomalyScore: undefined });
+      setupBadgesData({ anomalyData: undefined });
       renderBadges();
 
       expect(screen.queryByTestId('serviceFlyoutAnomaliesBadge')).not.toBeInTheDocument();
