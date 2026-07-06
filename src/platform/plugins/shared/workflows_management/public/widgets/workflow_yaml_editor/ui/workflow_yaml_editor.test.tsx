@@ -12,6 +12,7 @@ import React from 'react';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
+import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
@@ -26,7 +27,6 @@ import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import type { YamlEditorProps } from '../../../shared/ui';
 import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_item_provider';
-import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
 
 // Mock the YamlEditor component to avoid Monaco complexity in tests
 jest.mock('../../../shared/ui/yaml_editor', () => ({
