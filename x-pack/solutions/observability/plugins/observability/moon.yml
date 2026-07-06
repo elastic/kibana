@@ -113,6 +113,8 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/alerting-types'
   - '@kbn/response-ops-alerts-table'
+  - '@kbn/response-ops-alerts-apis'
+  - '@kbn/response-ops-alert-snooze'
   - '@kbn/streams-plugin'
   - '@kbn/response-ops-rule-form'
   - '@kbn/data-service'
