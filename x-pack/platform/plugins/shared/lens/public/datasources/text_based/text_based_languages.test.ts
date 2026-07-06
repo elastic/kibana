@@ -491,7 +491,7 @@ describe('Textbased Data Source', () => {
       });
 
       expect(newState.layers.trendline.query?.esql).toBe(
-        'FROM kibana_sample_data_logs | STATS AVG(bytes) BY @timestamp, BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+        'FROM kibana_sample_data_logs | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
       );
       expect(
         newState.layers.trendline.columns.find(
@@ -499,10 +499,10 @@ describe('Textbased Data Source', () => {
         )?.fieldName
       ).toBe('AVG(bytes)');
       expect(
-        newState.layers.trendline.columns.find(
+        newState.layers.trendline.columns.some(
           (column) => column.columnId === 'trendline-breakdown-accessor'
-        )?.fieldName
-      ).toBe('@timestamp');
+        )
+      ).toBe(false);
     });
   });
 

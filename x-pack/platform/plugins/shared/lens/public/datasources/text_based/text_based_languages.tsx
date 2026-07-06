@@ -415,11 +415,12 @@ export function getTextBasedDatasource({
           .filter((c): c is TextBasedLayerColumn => Boolean(c))
           .map((c) => c.fieldName);
 
-        const groupByFields = trendlineLayerLinks
+        const groupByColumns = trendlineLayerLinks
           .filter((l) => l.from.groupId === LENS_METRIC_GROUP_ID.BREAKDOWN_BY)
           .map((l) => fromLayer.columns.find((c) => c.columnId === l.from.columnId))
           .filter((c): c is TextBasedLayerColumn => Boolean(c))
-          .map((c) => c.fieldName);
+          .filter((c) => c.fieldName !== toLayer.timeField);
+        const groupByFields = groupByColumns.map((c) => c.fieldName);
 
         // Sync the trendline layer's query from the source layer.
         // The trendline query is derived from the main query with an appended
@@ -447,6 +448,9 @@ export function getTextBasedDatasource({
           }
         }
 
+        const shouldSkipColumn =
+          link.from.groupId === LENS_METRIC_GROUP_ID.BREAKDOWN_BY &&
+          !groupByColumns.some((c) => c.columnId === link.from.columnId);
         const newCol: TextBasedLayerColumn = {
           ...sourceCol,
           columnId: link.to.columnId,
@@ -461,7 +465,9 @@ export function getTextBasedDatasource({
 
         // Update columns: add if missing, update if field changed
         let updatedColumns = toLayer.columns;
-        if (!existingCol) {
+        if (shouldSkipColumn) {
+          updatedColumns = toLayer.columns.filter((c) => c.columnId !== link.to.columnId);
+        } else if (!existingCol) {
           updatedColumns = [...toLayer.columns, newCol];
         } else if (existingCol.fieldName !== newCol.fieldName) {
           updatedColumns = toLayer.columns.map((c) =>

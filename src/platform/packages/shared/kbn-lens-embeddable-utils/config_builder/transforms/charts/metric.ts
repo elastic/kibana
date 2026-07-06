@@ -9,7 +9,7 @@
 
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
-  appendTimeBucketToEsqlQuery,
+  buildTrendlineQueryWithMetricFieldMap,
   buildTrendlineBucketExpression,
   type FormBasedPersistedState,
   type MetricVisualizationState,
@@ -714,8 +714,34 @@ function buildEsqlTrendlineLayer(
   const timeField = mainLayer.timeField;
   if (!timeField) return undefined;
 
-  // Build the trendline query: take the main query and add time bucketing
-  const trendlineQuery = appendTimeBucketToEsqlQuery(dataSource.query, timeField);
+  const metricColumn = mainLayer.columns.find((c) => c.columnId === getAccessorName('metric'));
+  const secondaryColumn = mainLayer.columns.find(
+    (c) => c.columnId === getAccessorName('secondary')
+  );
+  const breakdownColumn = mainLayer.columns.find(
+    (c) => c.columnId === getAccessorName('breakdown')
+  );
+
+  // Build the trendline query: take the main query and add time bucketing.
+  // For queries without STATS, raw metric columns are aggregated and breakdown
+  // columns are preserved in BY so the generated query columns match the layer columns.
+  let trendlineQueryResult: ReturnType<typeof buildTrendlineQueryWithMetricFieldMap>;
+  try {
+    trendlineQueryResult = buildTrendlineQueryWithMetricFieldMap(
+      dataSource.query,
+      timeField,
+      [metricColumn, secondaryColumn]
+        .filter((c): c is TextBasedLayerColumn => Boolean(c))
+        .map((c) => c.fieldName),
+      breakdownColumn ? [breakdownColumn.fieldName] : []
+    );
+  } catch (error) {
+    throw new Error(
+      `Failed to build ES|QL trendline query for metric chart: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
 
   // Build trendline columns: time bucket + copies of metric columns from main layer
   // The fieldName must match the ES|QL result column name, which is the full
@@ -727,27 +753,33 @@ function buildEsqlTrendlineLayer(
     meta: { type: 'date' },
   };
 
-  const metricColumn = mainLayer.columns.find((c) => c.columnId === getAccessorName('metric'));
   const trendlineColumns: TextBasedLayerColumn[] = [
     timeColumn,
-    ...(metricColumn ? [{ ...metricColumn, columnId: `${ACCESSOR}_trendline` }] : []),
+    ...(metricColumn
+      ? [
+          {
+            ...metricColumn,
+            columnId: `${ACCESSOR}_trendline`,
+            fieldName:
+              trendlineQueryResult.metricFieldMap.get(metricColumn.fieldName) ??
+              metricColumn.fieldName,
+          },
+        ]
+      : []),
   ];
 
   // Add secondary metric column if present
-  const secondaryColumn = mainLayer.columns.find(
-    (c) => c.columnId === getAccessorName('secondary')
-  );
   if (secondaryColumn) {
     trendlineColumns.push({
       ...secondaryColumn,
       columnId: `${getAccessorName('secondary')}_trendline`,
+      fieldName:
+        trendlineQueryResult.metricFieldMap.get(secondaryColumn.fieldName) ??
+        secondaryColumn.fieldName,
     });
   }
 
   // Add breakdown column if present
-  const breakdownColumn = mainLayer.columns.find(
-    (c) => c.columnId === getAccessorName('breakdown')
-  );
   if (breakdownColumn) {
     trendlineColumns.push({
       ...breakdownColumn,
@@ -761,7 +793,7 @@ function buildEsqlTrendlineLayer(
   return {
     layer: {
       index: dataViewId,
-      query: { esql: trendlineQuery },
+      query: { esql: trendlineQueryResult.query },
       timeField,
       columns: trendlineColumns,
     },

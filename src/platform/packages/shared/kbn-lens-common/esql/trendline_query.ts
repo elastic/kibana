@@ -133,7 +133,8 @@ export const appendTimeBucketToEsqlQuery = (
       metricFields && metricFields.length > 0
         ? metricFields.map((f) => `AVG(${esql.col(f)})`).join(', ')
         : 'COUNT(*)';
-    const groupByExprs = [...groupByFields.map((f) => esql.col(f)), bucketExpr].join(', ');
+    const effectiveGroupByFields = groupByFields.filter((field) => field !== timeField);
+    const groupByExprs = [...effectiveGroupByFields.map((f) => esql.col(f)), bucketExpr].join(', ');
     const { root: helperAst } = Parser.parse(`FROM _x | STATS ${statsExprs} BY ${groupByExprs}`);
     root.commands.push(findStatsCommand(helperAst.commands));
   }

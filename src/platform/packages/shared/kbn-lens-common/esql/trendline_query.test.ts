@@ -139,6 +139,18 @@ describe('appendTimeBucketToEsqlQuery', () => {
       'FROM index | STATS AVG(bytes) BY host, BUCKET(timestamp, 75, ?_tstart, ?_tend)'
     );
   });
+
+  it('does not add the time field as a group by field when query has no STATS', () => {
+    const result = appendTimeBucketToEsqlQuery(
+      'FROM index',
+      '@timestamp',
+      ['bytes'],
+      ['@timestamp']
+    );
+    expect(result).toBe(
+      'FROM index | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+    );
+  });
 });
 
 describe('buildTrendlineQueryWithMetricFieldMap', () => {

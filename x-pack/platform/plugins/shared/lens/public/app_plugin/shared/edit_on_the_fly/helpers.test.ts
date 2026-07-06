@@ -376,6 +376,122 @@ describe('Lens inline editing helpers', () => {
         ).toBe('AVG(bytes)');
       });
 
+      it('removes stale trendline breakdown when the edited query switches to a single metric', async () => {
+        const metricAccessor = 'metric-accessor';
+        const trendlineMetricAccessor = 'trend-metric-1';
+        const trendlineBreakdownAccessor = 'trend-breakdown-1';
+        const newQuery = { esql: 'FROM index1 | KEEP bytes' };
+        const prevAttributesWithBreakdown: TypedLensSerializedState['attributes'] = {
+          ...prevAttributes,
+          state: {
+            ...prevAttributes.state,
+            visualization: {
+              ...prevAttributes.state.visualization,
+              breakdownByAccessor: 'breakdown-accessor',
+              trendlineBreakdownByAccessor: trendlineBreakdownAccessor,
+            },
+            datasourceStates: {
+              textBased: {
+                layers: {
+                  ...prevAttributes.state.datasourceStates.textBased!.layers,
+                  [mainLayerId]: {
+                    ...prevAttributes.state.datasourceStates.textBased!.layers[mainLayerId],
+                    columns: [
+                      ...prevAttributes.state.datasourceStates.textBased!.layers[mainLayerId]
+                        .columns,
+                      {
+                        columnId: 'breakdown-accessor',
+                        fieldName: '@timestamp',
+                        meta: { type: 'date' },
+                      },
+                    ],
+                  },
+                  [trendlineLayerId]: {
+                    ...prevAttributes.state.datasourceStates.textBased!.layers[trendlineLayerId],
+                    columns: [
+                      ...prevAttributes.state.datasourceStates.textBased!.layers[trendlineLayerId]
+                        .columns,
+                      {
+                        columnId: trendlineBreakdownAccessor,
+                        fieldName: '@timestamp',
+                        meta: { type: 'date' },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        };
+
+        mockSuggestionApi.mockReturnValueOnce([
+          {
+            title: 'Metric',
+            score: 1,
+            visualizationId: 'lnsMetric',
+            previewIcon: 'metric',
+            visualizationState: {
+              layerId: mainLayerId,
+              layerType: 'data',
+              metricAccessor,
+              trendlineLayerId,
+              trendlineMetricAccessor,
+              trendlineTimeAccessor: 'trend-time-1',
+            },
+            keptLayerIds: [mainLayerId],
+            datasourceState: {
+              layers: {
+                [mainLayerId]: {
+                  index: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+                  query: newQuery,
+                  columns: [
+                    {
+                      columnId: metricAccessor,
+                      fieldName: 'bytes',
+                      meta: { type: 'number' },
+                    },
+                  ],
+                  timeField: '@timestamp',
+                },
+              },
+              fieldList: [],
+              indexPatternRefs: [],
+              initialContext: {},
+            },
+            datasourceId: 'textBased',
+            columns: 1,
+            changeType: 'initial',
+          },
+        ]);
+
+        const result = await getSuggestions(
+          newQuery,
+          startDependencies.data,
+          httpMock,
+          uiSettingsMock,
+          mockDatasourceMap(),
+          mockVisualizationMap(),
+          dataviewSpecArr,
+          jest.fn(),
+          undefined,
+          undefined,
+          [],
+          true,
+          prevAttributesWithBreakdown
+        );
+
+        const trendlineLayer = getTextBasedLayers(result)[trendlineLayerId];
+        const visualization = result?.state.visualization as Partial<MetricVisualizationState>;
+
+        expect(trendlineLayer.query?.esql).toBe(
+          'FROM index1 | KEEP bytes | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+        );
+        expect(
+          trendlineLayer.columns.some((column) => column.columnId === trendlineBreakdownAccessor)
+        ).toBe(false);
+        expect(visualization.trendlineBreakdownByAccessor).toBeUndefined();
+      });
+
       it('does not add a trendline layer when none existed', async () => {
         const attrsWithoutTrendline: TypedLensSerializedState['attributes'] = {
           ...prevAttributes,

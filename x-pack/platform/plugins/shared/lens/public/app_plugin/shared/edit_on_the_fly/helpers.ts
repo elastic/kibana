@@ -287,9 +287,17 @@ const preserveTrendlineLayer = (
     { from: newVis.secondaryMetricAccessor, to: prevVis.trendlineSecondaryMetricAccessor },
   ];
 
+  const breakdownColumn = newMainLayer?.columns.find(
+    (c) => c.columnId === newVis.breakdownByAccessor
+  );
+  const activeBreakdownAccessor =
+    breakdownColumn && breakdownColumn.fieldName !== prevTrendlineLayer.timeField
+      ? newVis.breakdownByAccessor
+      : undefined;
+
   const accessorPairs = [
     ...metricAccessorPairs,
-    { from: newVis.breakdownByAccessor, to: prevVis.trendlineBreakdownByAccessor },
+    { from: activeBreakdownAccessor, to: prevVis.trendlineBreakdownByAccessor },
   ];
 
   const metricFields = newMainLayer
@@ -298,12 +306,8 @@ const preserveTrendlineLayer = (
         .filter((c): c is TextBasedLayerColumn => Boolean(c))
         .map((c) => c.fieldName)
     : [];
-  const groupByFields = newMainLayer
-    ? [newVis.breakdownByAccessor]
-        .map((from) => newMainLayer.columns.find((c) => c.columnId === from))
-        .filter((c): c is TextBasedLayerColumn => Boolean(c))
-        .map((c) => c.fieldName)
-    : [];
+  const groupByFields =
+    activeBreakdownAccessor && breakdownColumn ? [breakdownColumn.fieldName] : [];
 
   let trendlineQuery = prevTrendlineLayer.query;
   let metricFieldMap = new Map<string, string>();
@@ -322,12 +326,16 @@ const preserveTrendlineLayer = (
     }
   }
 
+  const updatedVisualization = { ...attrs.state.visualization } as PartialMetricVis;
   let updatedColumns = prevTrendlineLayer.columns;
   if (newMainLayer) {
     for (const { from, to } of accessorPairs) {
-      if (!from || !to) continue;
-      const sourceCol = newMainLayer.columns.find((c) => c.columnId === from);
-      if (!sourceCol) continue;
+      if (!to) continue;
+      const sourceCol = from ? newMainLayer.columns.find((c) => c.columnId === from) : undefined;
+      if (!sourceCol) {
+        updatedColumns = updatedColumns.filter((c) => c.columnId !== to);
+        continue;
+      }
       const newCol: TextBasedLayerColumn = {
         ...sourceCol,
         columnId: to,
@@ -342,14 +350,30 @@ const preserveTrendlineLayer = (
     }
   }
 
-  attrs.state.datasourceStates.textBased = {
-    ...newDsState,
-    layers: {
-      ...newDsState.layers,
-      [trendlineLayerId]: {
-        ...prevTrendlineLayer,
-        query: trendlineQuery,
-        columns: updatedColumns,
+  if (!newVis.secondaryMetricAccessor) {
+    delete updatedVisualization.trendlineSecondaryMetricAccessor;
+  }
+  if (!activeBreakdownAccessor) {
+    delete updatedVisualization.trendlineBreakdownByAccessor;
+  }
+
+  const updatedTrendlineLayer = {
+    ...prevTrendlineLayer,
+    query: trendlineQuery,
+    columns: updatedColumns,
+  };
+
+  attrs.state = {
+    ...attrs.state,
+    visualization: updatedVisualization as MetricVisualizationState,
+    datasourceStates: {
+      ...attrs.state.datasourceStates,
+      textBased: {
+        ...newDsState,
+        layers: {
+          ...newDsState.layers,
+          [trendlineLayerId]: updatedTrendlineLayer,
+        },
       },
     },
   };
