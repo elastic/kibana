@@ -45,6 +45,7 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
   return (
     <Chart
       id="latency"
+      isSelected={false}
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}

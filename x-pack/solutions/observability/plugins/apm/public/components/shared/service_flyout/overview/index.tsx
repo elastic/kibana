@@ -6,22 +6,25 @@
  */
 
 import {
-  EuiAccordion,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIconTip,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../../common/service_map';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
 import { getChartDefinitions } from './chart_configs';
@@ -71,6 +74,7 @@ function ServiceFlyoutChartsSection({
   title,
   description,
   charts,
+  columns = 2,
   rangeFrom,
   rangeTo,
   refreshToken,
@@ -79,57 +83,46 @@ function ServiceFlyoutChartsSection({
   title: string;
   description?: string;
   charts: FlyoutLensChartDefinition[];
+  columns?: 2 | 3;
   rangeFrom: string;
   rangeTo: string;
   refreshToken: number;
 }) {
-  const [isOpen, setIsOpen] = useState(true);
-
   return (
     <>
-      <EuiAccordion
-        id={`sectionAccordion-${id}`}
-        initialIsOpen
-        onToggle={setIsOpen}
-        buttonContent={
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3>{title}</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            {description ? (
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={description}
-                  size="s"
-                  color="subdued"
-                  aria-label={description}
-                />
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        }
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
         data-test-subj={`serviceFlyoutSection-${id}`}
       >
-        <EuiSpacer size="s" />
-        <EuiFlexGrid columns={2} responsive={false} gutterSize="m">
-          {charts.map((chart) => (
-            <EuiFlexItem key={chart.id}>
-              <ServiceFlyoutLensChart
-                id={chart.id}
-                title={chart.title}
-                titleAction={chart.titleAction}
-                config={chart.config}
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
-                refreshToken={refreshToken}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-      </EuiAccordion>
-      {isOpen ? null : <EuiHorizontalRule margin="xs" />}
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>{title}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {description ? (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip content={description} size="s" color="subdued" aria-label={description} />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGrid columns={columns} responsive={false} gutterSize="m">
+        {charts.map((chart) => (
+          <EuiFlexItem key={chart.id}>
+            <ServiceFlyoutLensChart
+              id={chart.id}
+              title={chart.title}
+              titleAction={chart.titleAction}
+              config={chart.config}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              refreshToken={refreshToken}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
     </>
   );
 }
@@ -148,9 +141,11 @@ export function ServiceFlyoutOverview({
   onTransactionTypeChange,
 }: ServiceFlyoutOverviewProps) {
   const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
+  const { core, share } = useApmPluginContext();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { dataView } = useAdHocApmDataView();
   const indexes = dataView?.getIndexPattern();
-  const hasSystemMetrics = useServiceHasSystemMetrics({
+  const { hasSystemMetrics, isLoading: isSystemMetricsLoading } = useServiceHasSystemMetrics({
     serviceName: service.id,
     environment,
     rangeFrom,
@@ -192,18 +187,25 @@ export function ServiceFlyoutOverview({
         onTransactionTypeChange={onTransactionTypeChange}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup direction="column" responsive={false} gutterSize="l">
+      <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
         <EuiFlexItem>
           <ServiceFlyoutChartsSection
             id="keyMetrics"
             title={KEY_METRICS_SECTION_TITLE}
             charts={keyMetrics}
+            columns={3}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             refreshToken={refreshToken}
           />
         </EuiFlexItem>
-        {hasSystemMetrics && (
+        {isSystemMetricsLoading ? (
+          <EuiFlexItem data-test-subj="serviceFlyoutSection-infrastructureMetricsSkeleton">
+            <EuiSkeletonTitle size="xs" />
+            <EuiSpacer size="s" />
+            <EuiSkeletonText lines={2} />
+          </EuiFlexItem>
+        ) : hasSystemMetrics ? (
           <EuiFlexItem>
             <ServiceFlyoutChartsSection
               id="infrastructureMetrics"
@@ -215,7 +217,21 @@ export function ServiceFlyoutOverview({
               refreshToken={refreshToken}
             />
           </EuiFlexItem>
-        )}
+        ) : null}
+        <EuiFlexItem>
+          <ServiceFlyoutTransactionsSection
+            http={core.http}
+            notifications={core.notifications}
+            locators={share.url.locators}
+            serviceName={service.id}
+            environment={environment}
+            start={start}
+            end={end}
+            transactionType={transactionType}
+            latencyAggregationType={latencyAggregationType}
+            refreshToken={refreshToken}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </div>
   );
