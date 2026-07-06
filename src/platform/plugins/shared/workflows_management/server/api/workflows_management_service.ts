@@ -10,11 +10,11 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type {
+  CoreSetup,
   CoreStart,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
-  StartServicesAccessor,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
@@ -37,7 +37,6 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
-import { readWorkflowVersioningEnabled } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
@@ -95,7 +94,7 @@ import { WorkflowSearchService } from '../services/workflow_search_service';
 import { WorkflowValidationService } from '../services/workflow_validation_service';
 import { createStorage, type WorkflowStorage } from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
-import type { WorkflowsServerPluginStartDeps } from '../types';
+import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } from '../types';
 
 export interface SearchExecutionsViewParams {
   query?: estypes.QueryDslQueryContainer;
@@ -149,12 +148,13 @@ export class WorkflowsService {
   private readonly initPromise: Promise<void>;
 
   constructor(
-    startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>,
+    public readonly core: CoreSetup<WorkflowsServerPluginStartDeps>,
+    public readonly plugins: WorkflowsServerPluginSetupDeps,
     private readonly logger: Logger,
-    kibanaVersion: string
+    public readonly kibanaVersion: string
   ) {
     this.changeHistoryService = new WorkflowChangeHistoryService(logger, kibanaVersion);
-    this.initPromise = this.initialize(startServices);
+    this.initPromise = this.initialize(core);
   }
 
   private async ensureInitialized(): Promise<void> {
@@ -173,8 +173,8 @@ export class WorkflowsService {
     this.logger.warn('Workflows Management: workflow change history is not initialized');
   }
 
-  private async initialize(startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>) {
-    const [coreStart, pluginsStart] = await startServices();
+  private async initialize(core: CoreSetup<WorkflowsServerPluginStartDeps>) {
+    const [coreStart, pluginsStart] = await core.getStartServices();
     this.coreStart = coreStart;
     this.pluginsStart = pluginsStart;
     this.esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -210,15 +210,7 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
-    const workflowVersioningEnabled = await readWorkflowVersioningEnabled(coreStart, this.logger);
-
-    if (workflowVersioningEnabled) {
-      await this.initializeChangeHistoryService(coreStart);
-    } else {
-      this.logger.debug(
-        'Workflow version history is disabled; skipping change-history data stream init'
-      );
-    }
+    await this.initializeChangeHistoryService(coreStart);
 
     this.crudService = new WorkflowCrudService({
       logger: this.logger,
@@ -231,7 +223,6 @@ export class WorkflowsService {
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
       changeHistoryService: this.changeHistoryService,
-      workflowVersioningEnabled,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -282,7 +273,6 @@ export class WorkflowsService {
         changeHistoryService: this.changeHistoryService,
         getWorkflowSource: (workflowId, sid) =>
           this.crudService.getWorkflowDocumentSource(workflowId, sid, { includeGlobal: true }),
-        workflowVersioningEnabled: await readWorkflowVersioningEnabled(this.coreStart, this.logger),
       },
       { workflowId: id, spaceId, ...options }
     );
