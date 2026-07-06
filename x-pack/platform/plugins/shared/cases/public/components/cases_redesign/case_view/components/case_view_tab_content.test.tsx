@@ -17,7 +17,7 @@ import { useUrlParams } from '../../../../common/navigation';
 jest.mock('../../../../common/navigation/hooks');
 jest.mock('../../../../common/lib/kibana');
 
-jest.mock('./case_view_activity', () => ({
+jest.mock('./activity/case_view_activity', () => ({
   CaseViewActivity: () => <div data-test-subj="case-view-activity" />,
 }));
 jest.mock('../../../case_view/components/case_view_attachments', () => ({
@@ -26,10 +26,10 @@ jest.mock('../../../case_view/components/case_view_attachments', () => ({
 jest.mock('../../../case_view/components/case_view_similar_cases', () => ({
   CaseViewSimilarCases: () => <div data-test-subj="case-view-similar-cases" />,
 }));
-jest.mock('./case_view_sidebar', () => ({
+jest.mock('./sidebar/case_view_sidebar', () => ({
   CaseViewSidebar: () => <div data-test-subj="case-view-page-sidebar" />,
 }));
-jest.mock('./sidebar_toggle_button', () => ({
+jest.mock('./sidebar/sidebar_toggle_button', () => ({
   SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
 }));
 jest.mock('../../../case_view/case_view_tabs', () => ({

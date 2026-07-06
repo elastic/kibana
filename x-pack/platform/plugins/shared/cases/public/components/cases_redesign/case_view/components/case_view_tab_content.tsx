@@ -14,11 +14,11 @@ import type { CaseUI } from '../../../../../common';
 import { useUrlParams } from '../../../../common/navigation';
 import { ATTACHMENT_TAB_ALIASES } from '../../../case_view/use_case_attachment_tabs';
 import { CaseViewTabs } from '../../../case_view/case_view_tabs';
-import { CaseViewActivity } from './case_view_activity';
+import { CaseViewActivity } from './activity/case_view_activity';
 import { CaseViewSimilarCases } from '../../../case_view/components/case_view_similar_cases';
 import { CaseViewAttachments } from '../../../case_view/components/case_view_attachments';
-import { CaseViewSidebar } from './case_view_sidebar';
-import { SidebarProvider, useSidebar } from './sidebar_context';
+import { CaseViewSidebar } from './sidebar/case_view_sidebar';
+import { SidebarProvider, useSidebar } from './sidebar/sidebar_context';
 import { SavedObjectInAppUrlsProvider } from '../../../attachments/common/saved_object/saved_object_in_app_urls_context';
 import type { OnUpdateFields } from '../../../case_view/types';
 
