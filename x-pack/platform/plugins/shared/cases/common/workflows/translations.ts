@@ -346,7 +346,7 @@ export const ADD_ATTACHMENTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.addAttachments.documentation.details',
   {
     defaultMessage:
-      'This step adds one or more attachments to an existing case in a single bulk request. Each `attachments` entry is a per-type payload whose shape is chosen by its `type` discriminator (`comment`, alerts, events, etc.); the YAML editor narrows the available fields once a type is picked.',
+      'This step adds one or more attachments to an existing case in a single bulk request. Each `attachments` entry is a per-type payload whose shape is chosen by its `type` discriminator (`comment`, `stack.alert`, `security.event`, etc.); the YAML editor narrows the available fields once a type is picked.',
   }
 );
 
