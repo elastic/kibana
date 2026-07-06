@@ -5,5 +5,24 @@
  * 2.0.
  */
 
-export { test } from '@kbn/scout';
+import { test as baseTest } from '@kbn/scout';
+import type { PageObjects, ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import type { MlUiPageObjects } from './page_objects';
+import { extendPageObjects } from './page_objects';
+
 export { CUSTOM_ROLES } from '../../api/fixtures/custom_roles';
+
+export interface MlUiTestFixtures extends ScoutTestFixtures {
+  pageObjects: MlUiPageObjects;
+}
+
+export const test = baseTest.extend<MlUiTestFixtures, ScoutWorkerFixtures>({
+  pageObjects: async (
+    { pageObjects, page }: { pageObjects: PageObjects; page: ScoutPage },
+    use: (pageObjects: MlUiPageObjects) => Promise<void>
+  ) => {
+    await use(extendPageObjects(pageObjects, page));
+  },
+});
+
+export * as testData from './constants';

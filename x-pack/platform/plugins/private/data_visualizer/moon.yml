@@ -94,6 +94,8 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/presentation-util'
   - '@kbn/cps'
+  - '@kbn/scout'
+  - '@kbn/ml-anomaly-utils'
 tags:
   - plugin
   - prod
@@ -107,6 +109,8 @@ fileGroups:
     - scripts/**/*
     - server/**/*
     - types/**/*
+    - test/scout/**/*
+    - test/scout_basic_license/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

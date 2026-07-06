@@ -9,7 +9,9 @@
     "public/**/*",
     "scripts/**/*",
     "server/**/*",
-    "types/**/*"
+    "types/**/*",
+    "test/scout/**/*",
+    "test/scout_basic_license/**/*"
   ],
   "kbn_references": [
     "@kbn/aiops-components",
@@ -88,7 +90,9 @@
     "@kbn/file-upload",
     "@kbn/charts-theme",
     "@kbn/presentation-util",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/scout",
+    "@kbn/ml-anomaly-utils"
   ],
   "exclude": ["target/**/*"]
 }

@@ -1,0 +1,135 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+
+export type RandomSamplerOption =
+  | 'dvRandomSamplerOptionOnAutomatic'
+  | 'dvRandomSamplerOptionOnManual'
+  | 'dvRandomSamplerOptionOff';
+
+const RANDOM_SAMPLER_OPTION_VALUES: Record<RandomSamplerOption, string> = {
+  dvRandomSamplerOptionOff: 'off',
+  dvRandomSamplerOptionOnManual: 'on_manual',
+  dvRandomSamplerOptionOnAutomatic: 'on_automatic',
+};
+
+export class IndexDataVisualizer {
+  readonly randomSamplerOptionsButton: Locator;
+  readonly randomSamplerPopover: Locator;
+  private readonly timeRangeSelectorSection: Locator;
+  private readonly useFullDataButton: Locator;
+  private readonly applyTimeButton: Locator;
+  private readonly totalDocCount: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.randomSamplerOptionsButton = this.page.testSubj.locator('dvRandomSamplerOptionsButton');
+    this.randomSamplerPopover = this.page.testSubj.locator('dvRandomSamplerOptionsPopover');
+    this.timeRangeSelectorSection = this.page.testSubj.locator(
+      'dataVisualizerTimeRangeSelectorSection'
+    );
+    this.useFullDataButton = this.page.testSubj.locator('mlDatePickerButtonUseFullData');
+    this.applyTimeButton = this.page.testSubj.locator('superDatePickerApplyTimeButton');
+    this.totalDocCount = this.page.testSubj.locator('dataVisualizerTotalDocCount');
+  }
+
+  async openRandomSamplerPopover() {
+    await this.page.keyboard.press('Escape');
+    await expect(this.randomSamplerOptionsButton).toBeEnabled({ timeout: 20_000 });
+    await this.randomSamplerOptionsButton.click();
+    await this.randomSamplerPopover.waitFor({ state: 'visible', timeout: 10_000 });
+  }
+
+  async setRandomSamplingOption(option: RandomSamplerOption) {
+    await this.openRandomSamplerPopover();
+    await this.page.testSubj
+      .locator('dvRandomSamplerOptionsSelect')
+      .selectOption(RANDOM_SAMPLER_OPTION_VALUES[option]);
+    await this.page.keyboard.press('Escape');
+  }
+
+  async waitForTimeRangeSelectorSection() {
+    await this.timeRangeSelectorSection.waitFor({ state: 'visible' });
+  }
+
+  async waitForTotalDocumentCount(expectedFormattedTotalDocCount: string) {
+    await expect(this.totalDocCount).toHaveText(expectedFormattedTotalDocCount, {
+      timeout: 30_000,
+    });
+  }
+
+  async clickUseFullDataButton(
+    expectedFormattedTotalDocCount: string,
+    randomSamplerOption: RandomSamplerOption | 'none' = 'dvRandomSamplerOptionOff'
+  ) {
+    await expect(this.useFullDataButton).toBeEnabled({ timeout: 30_000 });
+    await this.useFullDataButton.click();
+    await expect(this.applyTimeButton).toBeEnabled({ timeout: 10_000 });
+    await this.applyTimeButton.click();
+
+    if (randomSamplerOption !== 'none') {
+      await this.setRandomSamplingOption(randomSamplerOption);
+    }
+
+    await this.waitForTotalDocumentCount(expectedFormattedTotalDocCount);
+  }
+
+  async waitForTotalDocCountHeader() {
+    await this.page.testSubj
+      .locator('dataVisualizerTotalDocCountHeader')
+      .waitFor({ state: 'visible' });
+  }
+
+  async waitForTotalDocCountChart() {
+    await this.page.testSubj
+      .locator('dataVisualizerDocumentCountChart')
+      .waitFor({ state: 'visible' });
+  }
+
+  async waitForDataVisualizerTable() {
+    await this.page.testSubj.locator('~dataVisualizerTable-loaded').waitFor({ state: 'visible' });
+  }
+
+  async waitForFieldCountPanel() {
+    await this.page.testSubj.locator('dataVisualizerFieldCountPanel').waitFor({ state: 'visible' });
+  }
+
+  async waitForMetricFieldsSummary() {
+    await this.page.testSubj
+      .locator('dataVisualizerMetricFieldsSummary')
+      .waitFor({ state: 'visible' });
+  }
+
+  async waitForFieldsSummary() {
+    await this.page.testSubj.locator('dataVisualizerFieldsSummary').waitFor({ state: 'visible' });
+  }
+
+  async waitForVisibleMetricFieldsCount(count: number) {
+    await expect(this.page.testSubj.locator('dataVisualizerVisibleMetricFieldsCount')).toHaveText(
+      count.toString()
+    );
+  }
+
+  async waitForTotalMetricFieldsCount(count: number) {
+    await expect(this.page.testSubj.locator('dataVisualizerMetricFieldsCount')).toContainText(
+      count.toString()
+    );
+  }
+
+  async waitForVisibleFieldsCount(count: number) {
+    await expect(this.page.testSubj.locator('dataVisualizerVisibleFieldsCount')).toHaveText(
+      count.toString()
+    );
+  }
+
+  async waitForTotalFieldsCount(count: number) {
+    await expect(this.page.testSubj.locator('dataVisualizerTotalFieldsCount')).toContainText(
+      count.toString()
+    );
+  }
+}
