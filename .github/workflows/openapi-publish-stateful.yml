@@ -8,6 +8,10 @@ on:
     paths:
       - 'oas_docs/output/kibana.yaml'
 
+concurrency:
+  group: openapi-publish-stateful-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   id-token: write

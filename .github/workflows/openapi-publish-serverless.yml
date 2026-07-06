@@ -7,6 +7,10 @@ on:
     paths:
       - 'oas_docs/output/kibana.serverless.yaml'
 
+concurrency:
+  group: openapi-publish-serverless-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   id-token: write
