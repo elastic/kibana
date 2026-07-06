@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, type EuiBasicTableColumn } from '@elastic/eui';
+import { type EuiBasicTableColumn, EuiText } from '@elastic/eui';
 
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { EventFieldsData } from '../../../common/components/event_details/types';
-import { TableFieldNameCell } from '../../document_details/right/components/table_field_name_cell';
-import { getFieldFromBrowserField } from '../../document_details/right/tabs/table_tab';
-import { CellActions } from '../components/cell_actions';
+import type { EventFieldsData } from '../../../../common/components/event_details/types';
+import { TableFieldNameCell } from '../../../../flyout/document_details/right/components/table_field_name_cell';
+import { getFieldFromBrowserField } from '../../../../flyout/document_details/right/tabs/table_tab';
+import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import { TableFieldValueCell } from '../components/table_field_value_cell';
 
 export const FIELD = i18n.translate(
@@ -35,12 +35,26 @@ export type ColumnsProvider = (providerOptions: {
    * Id of the attack document
    */
   attackId: string;
+  /**
+   * Scope the cell actions are rendered for (drives the sourcerer scope and metadata)
+   */
+  scopeId: string;
+  /**
+   * Wraps each value cell with cell actions (filter for/out, copy, etc.). The caller decides
+   * what to inject (real security cell actions in Security Solution, no-op elsewhere).
+   */
+  renderCellActions: CellActionRenderer;
 }) => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
 
 /**
  * Returns the columns for the table tab
  */
-export const getTableTabColumns: ColumnsProvider = ({ browserFields, attackId }) => [
+export const getTableTabColumns: ColumnsProvider = ({
+  browserFields,
+  attackId,
+  scopeId,
+  renderCellActions,
+}) => [
   {
     field: 'field',
     name: (
@@ -63,16 +77,19 @@ export const getTableTabColumns: ColumnsProvider = ({ browserFields, attackId })
     render: (values, data) => {
       const fieldFromBrowserField = getFieldFromBrowserField(data.field, browserFields);
 
-      return (
-        <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
+      return renderCellActions({
+        field: data.field,
+        value: values,
+        scopeId,
+        children: (
           <TableFieldValueCell
             data={data as EventFieldsData}
             attackId={attackId}
             fieldFromBrowserField={fieldFromBrowserField}
             values={values}
           />
-        </CellActions>
-      );
+        ),
+      });
     },
   },
 ];

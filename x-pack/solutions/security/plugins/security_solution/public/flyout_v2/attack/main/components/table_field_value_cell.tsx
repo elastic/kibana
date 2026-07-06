@@ -11,10 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import { css } from '@emotion/react';
-import type { EventFieldsData } from '../../../common/components/event_details/types';
-import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
-import { getFieldFormat } from '../../document_details/right/utils/get_field_format';
-import { useExpandableValues } from '../../document_details/shared/hooks/use_expandable_values';
+import type { EventFieldsData } from '../../../../common/components/event_details/types';
+import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
+import { getFieldFormat } from '../../../../flyout/document_details/right/utils/get_field_format';
+import { useExpandableValues } from '../../../../flyout/document_details/shared/hooks/use_expandable_values';
 
 export interface FieldValueCellProps {
   /**
