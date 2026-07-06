@@ -319,7 +319,9 @@ const RiskInputsTabContent = <T extends EntityType>({
     ? getEntityId(resolutionGroup.target)
     : undefined;
   const historyEntityId = isResolutionView ? resolutionTargetEntityId : entityId;
-  const historyScoreType = isResolutionView ? 'resolution' : 'base';
+  const historyScoreType: RiskScoreHistoryEntry['score_type'] = isResolutionView
+    ? 'resolution'
+    : 'base';
   const historyEntityName =
     isResolutionView && resolutionGroup?.target
       ? getEntityName(resolutionGroup.target) || entityName
