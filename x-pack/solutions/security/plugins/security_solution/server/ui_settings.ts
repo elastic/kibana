@@ -44,6 +44,7 @@ import {
   ENABLE_DE_HEALTH_UI_SETTING,
   ENABLE_NEW_FLYOUT_SETTING,
   ENABLE_NEWS_FEED_SETTING,
+  ENABLE_RULE_CHANGES_HISTORY_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
@@ -326,6 +327,29 @@ export const initUiSettings = (
         requiresPageReload: true,
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
+      },
+    }),
+    // TODO(rule-changes-history GA): remove this setting and its call sites (including alerting `log_rule_changes.ts`)
+    ...(experimentalFeatures.ruleChangesHistoryEnabled && {
+      [ENABLE_RULE_CHANGES_HISTORY_SETTING]: {
+        name: i18n.translate('xpack.securitySolution.uiSettings.enableRuleChangesHistoryLabel', {
+          defaultMessage: 'Enable detection rule changes history',
+        }),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableRuleChangesHistoryDescription',
+          {
+            defaultMessage:
+              '<p>Enables the detection rule changes history feature within Security Solution.</p>',
+            values: { p: (chunks) => `<p>${chunks}</p>` },
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+        technicalPreview: true,
       },
     }),
     [NEWS_FEED_URL_SETTING]: {

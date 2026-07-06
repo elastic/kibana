@@ -26,7 +26,7 @@ import {
   xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes,
 } from './basicXY.mock';
 import { dualReferenceLineXY, referenceLineXY } from './referenceLines.mock';
-import { annotationXY, byRefAnnotationXY } from './annotations.mock';
+import { annotationXY, byRefAnnotationXY, runtimeByRefAnnotationXY } from './annotations.mock';
 import {
   esqlChart,
   esqlChartWithBreakdownColorMapping,
@@ -82,6 +82,51 @@ describe('XY', () => {
 
       it('should convert a bar chart with 2 layers', () => {
         validator.xy.fromState(barWithTwoLayersAttributes);
+      });
+
+      // Regression test for https://github.com/elastic/kibana/issues/268820
+      // Column/accessor ids must be unique across the whole document, not just
+      // within a layer. Two layers of the same series type used to produce
+      // colliding column ids (e.g. both `line_x`/`line_y_0`) on the
+      // `fromAPIFormat` round trip, which corrupts multi-layer state and prevents
+      // the suggestion engine from recognizing the layer/column shape (e.g. the
+      // treemap suggestion no longer appears when transitioning a multi-layer
+      // stacked bar chart).
+      it('produces unique, layer-aligned column ids for a multi-layer chart after an API round trip', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(barWithTwoLayersAttributes);
+        const lensState = builder.fromAPIFormat(api);
+
+        const layers = lensState.state.datasourceStates.formBased?.layers ?? {};
+
+        // Column ids must be globally unique across all layers.
+        const allColumnIds = Object.values(layers).flatMap((layer) => Object.keys(layer.columns));
+        expect(new Set(allColumnIds).size).toBe(allColumnIds.length);
+
+        // Every visualization data-layer accessor must resolve to a column in its
+        // own datasource layer.
+        const visualizationLayers = (lensState.state.visualization as XYVisualizationState).layers;
+        for (const vizLayer of visualizationLayers as Array<{
+          layerId: string;
+          layerType?: string;
+          accessors?: string[];
+          xAccessor?: string;
+          splitAccessors?: string[];
+        }>) {
+          if (vizLayer.layerType && vizLayer.layerType !== 'data') {
+            continue;
+          }
+          const layerColumns = layers[vizLayer.layerId]?.columns ?? {};
+          for (const accessor of vizLayer.accessors ?? []) {
+            expect(layerColumns).toHaveProperty(accessor);
+          }
+          if (vizLayer.xAccessor) {
+            expect(layerColumns).toHaveProperty(vizLayer.xAccessor);
+          }
+          for (const splitAccessor of vizLayer.splitAccessors ?? []) {
+            expect(layerColumns).toHaveProperty(splitAccessor);
+          }
+        }
       });
 
       it('should convert a mixed chart with 3 layers', () => {
@@ -316,6 +361,61 @@ describe('XY', () => {
         const adHocDataViews = lensState.state.adHocDataViews ?? {};
         expect(annotationReference?.id).toBeDefined();
         expect(Object.keys(adHocDataViews)).toContain(annotationReference?.id);
+      });
+
+      for (const type of ['bar', 'line', 'area'] as const) {
+        it(`should validate a runtime by-reference annotation with a ${type} chart`, () => {
+          validator.xy.fromState(setSeriesType(runtimeByRefAnnotationXY, type));
+        });
+      }
+
+      it('emits annotation_group with group_id for a runtime by-reference annotation layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(runtimeByRefAnnotationXY) as XYConfig;
+        const annotationLayer = api.layers.find((l) => l.type === 'annotation_group');
+
+        expect(annotationLayer).toBeDefined();
+        expect(annotationLayer).toEqual({
+          type: 'annotation_group',
+          group_id: 'my-runtime-annotation-group-id',
+        });
+      });
+
+      it('does not emit inline annotations or data_source for a runtime by-reference annotation layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(runtimeByRefAnnotationXY) as XYConfig;
+        const annotationLayer = api.layers.find((l) => l.type === 'annotation_group');
+
+        expect(annotationLayer).toBeDefined();
+        expect(annotationLayer).not.toHaveProperty('annotations');
+        expect(annotationLayer).not.toHaveProperty('data_source');
+        expect(annotationLayer).not.toHaveProperty('events');
+      });
+
+      it('round-trips a runtime by-reference annotation as a persisted by-reference layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(runtimeByRefAnnotationXY);
+        const lensState = builder.fromAPIFormat(api);
+
+        const visualizationLayers = (
+          lensState.state.visualization as { layers: Array<Record<string, unknown>> }
+        ).layers;
+        const annotationLayer = visualizationLayers.find(
+          (layer) => layer.layerType === 'annotations'
+        );
+
+        expect(annotationLayer).toBeDefined();
+        expect(annotationLayer?.persistanceType).toBe('byReference');
+        expect(annotationLayer).toHaveProperty('annotationGroupRef');
+        expect(annotationLayer).not.toHaveProperty('indexPatternId');
+        expect(annotationLayer).not.toHaveProperty('annotations');
+
+        const matchingRef = lensState.references.find(
+          (ref) => ref.name === annotationLayer?.annotationGroupRef
+        );
+        expect(matchingRef).toBeDefined();
+        expect(matchingRef?.id).toBe('my-runtime-annotation-group-id');
+        expect(matchingRef?.type).toBe('event-annotation-group');
       });
     });
 

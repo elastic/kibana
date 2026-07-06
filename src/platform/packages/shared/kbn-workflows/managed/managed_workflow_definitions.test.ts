@@ -13,8 +13,8 @@ import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
-  SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
@@ -39,10 +39,10 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
-  [SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
+  [SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
     detectionIntervalMinutes: 30,
   },
-  [SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID]: {
+  [SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID]: {
     reviewIntervalMinutes: 10,
     discoveryBatchSize: 3,
     triageBatchSize: 5,
