@@ -9,8 +9,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
-  SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { pollUntil } from './poll_until';
@@ -113,13 +113,13 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     config: SignificantEventsScheduledWorkflowsConfig;
   }) => {
     await Promise.all([
-      client.install(SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+      client.install(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
         spaceId,
         values: {
           detectionIntervalMinutes: config.detectionIntervalMinutes,
         },
       }),
-      client.install(SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
+      client.install(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
         spaceId,
         values: {
           reviewIntervalMinutes: config.reviewIntervalMinutes,
@@ -168,9 +168,10 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     spaceId: string;
   }) => {
     await Promise.all(
-      [SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID].map(
-        (workflowId) => setManagedEnabled({ workflowId, enabled, request, spaceId })
-      )
+      [
+        SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+      ].map((workflowId) => setManagedEnabled({ workflowId, enabled, request, spaceId }))
     );
   };
 
@@ -182,11 +183,13 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     spaceId: string;
   }) => {
     await Promise.all(
-      [SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID].map(
-        (workflowId) =>
-          cancelAndAwaitTermination({ workflowId, spaceId, request }).catch((err) =>
-            log.warn(`Failed to cancel running scheduled Significant Events executions: ${err}`)
-          )
+      [
+        SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+      ].map((workflowId) =>
+        cancelAndAwaitTermination({ workflowId, spaceId, request }).catch((err) =>
+          log.warn(`Failed to cancel running scheduled Significant Events executions: ${err}`)
+        )
       )
     );
   };
@@ -199,8 +202,8 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     spaceId: string;
   }) => {
     await Promise.all([
-      client.uninstall(SIGEVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, { spaceId }),
-      client.uninstall(SIGEVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, { spaceId }),
+      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, { spaceId }),
+      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, { spaceId }),
     ]);
   };
 
