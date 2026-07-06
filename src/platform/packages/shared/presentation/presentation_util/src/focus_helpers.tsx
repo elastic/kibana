@@ -14,13 +14,23 @@ const getFirstFocusable = (el: HTMLElement | null): { focus: () => void } | null
   return el.querySelector(selector) as HTMLElement | null;
 };
 
-export const focusFirstFocusable = (elId: Element | null) => {
-  if (!elId) return;
-  const focusable = getFirstFocusable(elId as HTMLElement);
+/**
+ * Focuses the first focusable element of `target` on the next tick.
+ *
+ * `target` may be an element or a function that resolves one. The resolver form
+ * is important when the target may be (re)rendered between the time focus is
+ * requested and the deferred focus runs: the element is looked up inside the
+ * `setTimeout`, so a node replaced by a re-render is resolved to its fresh
+ * instance rather than a stale, detached node.
+ */
+export const focusFirstFocusable = (target: Element | null | (() => Element | null)) => {
   setTimeout(() => {
-    if (!elId.contains(document.activeElement)) {
-      // only focus on the first element of the flyout if the currently focused element is not a descendant of the flyout (ie. the focus was not set by the content)
-      focusable?.focus();
+    const el = typeof target === 'function' ? target() : target;
+    if (!el) return;
+    if (!el.contains(document.activeElement)) {
+      // only focus the first element of the target if the currently focused element is not
+      // a descendant of it (ie. the focus was not already set by the target's own content)
+      getFirstFocusable(el as HTMLElement)?.focus();
     }
   });
 };

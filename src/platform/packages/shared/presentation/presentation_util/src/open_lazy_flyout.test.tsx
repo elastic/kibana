@@ -147,14 +147,16 @@ describe('openLazyFlyout', () => {
 
       openLazyFlyout({ core, loadContent });
 
-      // Simulate the triggering panel re-rendering while the flyout is open: the
-      // original node is removed and a fresh node with the same id is inserted.
+      getOnClose()();
+
+      // Simulate the triggering panel re-rendering as a result of closing the
+      // flyout (after onClose runs, before the deferred focus fires): the original
+      // node is replaced by a fresh node with the same id.
       document.body.removeChild(trigger);
       const refreshed = document.createElement('button');
       refreshed.id = 'panelActionButton';
       document.body.appendChild(refreshed);
 
-      getOnClose()();
       jest.runAllTimers();
 
       expect(document.activeElement).toBe(refreshed);

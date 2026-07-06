@@ -86,7 +86,10 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const onClose = () => {
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
-    focusFirstFocusable(getTriggerElement());
+    // Resolve the trigger element lazily: closing the flyout can re-render the
+    // triggering panel, so the element must be looked up after that render (inside
+    // focusFirstFocusable's deferred callback) to avoid focusing a stale node.
+    focusFirstFocusable(getTriggerElement);
   };
 
   const flyoutRef = core.overlays.openFlyout(
