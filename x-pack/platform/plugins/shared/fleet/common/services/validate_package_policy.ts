@@ -291,7 +291,7 @@ const isVarRequiredByVarGroup = (
 };
 
 const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
-  /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
+  /^(logs)|(metrics)|(traces)|(synthetics)|(profiles)-(.*)$/;
 
 /*
  * Returns validation information for a given package policy and package info
@@ -460,7 +460,7 @@ export const validatePackagePolicy = (
   }, {});
 
   // Validate each package policy input with either its own var fields and stream vars
-  packagePolicy.inputs.forEach((input) => {
+  (packagePolicy.inputs ?? []).forEach((input) => {
     if (!input.vars && !input.streams) {
       return;
     }

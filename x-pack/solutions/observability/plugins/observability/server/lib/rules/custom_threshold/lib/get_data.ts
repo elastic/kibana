@@ -25,6 +25,7 @@ export type GetDataResponse = Record<
   string,
   {
     trigger: boolean;
+    warn: boolean;
     value: number | null;
     bucketKey: BucketKey;
     flattenGrouping?: Record<string, string>;
@@ -46,6 +47,9 @@ interface Aggs {
     };
   };
   aggregatedValue?: AggregatedValue;
+  shouldWarn?: {
+    value: number;
+  };
   shouldTrigger?: {
     value: number;
   };
@@ -104,6 +108,7 @@ const NO_DATA_RESPONSE = {
   [UNGROUPED_FACTORY_KEY]: {
     value: null,
     trigger: false,
+    warn: false,
     bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
   },
 };
@@ -196,8 +201,14 @@ export const getData = async (
 
       for (const bucket of groupings.buckets) {
         const key = Object.values(bucket.key).join(',');
-        const { shouldTrigger, missingGroup, currentPeriod, additionalContext, containerContext } =
-          bucket;
+        const {
+          shouldWarn,
+          shouldTrigger,
+          missingGroup,
+          currentPeriod,
+          additionalContext,
+          containerContext,
+        } = bucket;
 
         const { aggregatedValue } = currentPeriod.buckets.all;
 
@@ -215,6 +226,7 @@ export const getData = async (
         if (missingGroup && missingGroup.value > 0) {
           previous[key] = {
             trigger: false,
+            warn: false,
             value: null,
             bucketKey: bucket.key,
             flattenGrouping,
@@ -224,6 +236,7 @@ export const getData = async (
 
           previous[key] = {
             trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
+            warn: (shouldWarn && shouldWarn.value > 0) || false,
             value,
             bucketKey: bucket.key,
             flattenGrouping,
@@ -255,7 +268,7 @@ export const getData = async (
       return previous;
     }
     if (aggs.all?.buckets.all) {
-      const { currentPeriod, shouldTrigger } = aggs.all.buckets.all;
+      const { currentPeriod, shouldWarn, shouldTrigger } = aggs.all.buckets.all;
 
       const { aggregatedValue } = currentPeriod.buckets.all;
       const value = aggregatedValue ? aggregatedValue.value : null;
@@ -263,6 +276,7 @@ export const getData = async (
         [UNGROUPED_FACTORY_KEY]: {
           value,
           trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
+          warn: (shouldWarn && shouldWarn.value > 0) || false,
           bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
         },
       };
