@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -35,6 +36,11 @@ export const useAgentBuilderAvailability = (): UseAgentBuilderAvailability => {
     },
   } = useKibana();
   const licenseService = useLicense();
+  // Subscribed via the observable (rather than reading `licenseService.isEnterprise()`
+  // directly) so the button reacts when the license resolves asynchronously after
+  // mount instead of staying stuck on the pre-resolution snapshot.
+  const isEnterprise$ = useMemo(() => licenseService.isEnterprise$(), [licenseService]);
+  const hasValidAgentBuilderLicense = useObservable(isEnterprise$, licenseService.isEnterprise());
 
   return useMemo(() => {
     const agentBuilderCapabilities = capabilities[AGENTBUILDER_FEATURE_ID];
@@ -45,7 +51,7 @@ export const useAgentBuilderAvailability = (): UseAgentBuilderAvailability => {
       isAgentBuilderEnabled: hasAgentBuilderPrivilege && isAgentChatExperienceEnabled,
       hasAgentBuilderPrivilege,
       isAgentChatExperienceEnabled,
-      hasValidAgentBuilderLicense: licenseService.isEnterprise(),
+      hasValidAgentBuilderLicense,
     };
-  }, [capabilities, chatExperience, licenseService]);
+  }, [capabilities, chatExperience, hasValidAgentBuilderLicense]);
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import type { LicenseService } from './license';
 
 export const createLicenseServiceMock = (): jest.Mocked<LicenseService> => {
@@ -17,5 +18,6 @@ export const createLicenseServiceMock = (): jest.Mocked<LicenseService> => {
     isGoldPlus: jest.fn().mockReturnValue(true),
     isPlatinumPlus: jest.fn().mockReturnValue(true),
     isEnterprise: jest.fn().mockReturnValue(true),
+    isEnterprise$: jest.fn().mockReturnValue(of(true)),
   } as unknown as jest.Mocked<LicenseService>;
 };

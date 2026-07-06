@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useAgentBuilderAvailability } from './use_agent_builder_availability';
 import { useKibana } from '../../common/lib/kibana';
@@ -25,6 +26,7 @@ describe('useAgentBuilderAvailability', () => {
     jest.clearAllMocks();
     mockUseLicense.mockReturnValue({
       isEnterprise: jest.fn(() => true),
+      isEnterprise$: jest.fn(() => of(true)),
     });
   });
 
@@ -207,6 +209,7 @@ describe('useAgentBuilderAvailability', () => {
     mockUseUiSetting$.mockReturnValue([AIChatExperience.Agent]);
     mockUseLicense.mockReturnValue({
       isEnterprise: jest.fn(() => false),
+      isEnterprise$: jest.fn(() => of(false)),
     });
 
     const { result } = renderHook(() => useAgentBuilderAvailability());

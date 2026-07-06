@@ -6,6 +6,7 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
+import { map, of } from 'rxjs';
 import type { ILicense, LicenseType } from '@kbn/licensing-types';
 
 // Generic license service class that works with the license observable
@@ -61,6 +62,18 @@ export class LicenseService {
   }
   public isEnterprise(): boolean {
     return this.isAtLeast('enterprise');
+  }
+
+  /**
+   * Emits whenever the enterprise-license check changes, so consumers that need to
+   * react to a license resolving asynchronously (e.g. right after `start()`) can
+   * update instead of reading a snapshot that goes stale once mutated internally.
+   */
+  public isEnterprise$(): Observable<boolean> {
+    if (!this.observable) {
+      return of(this.isEnterprise());
+    }
+    return this.observable.pipe(map((license) => isAtLeast(license, 'enterprise')));
   }
 }
 
