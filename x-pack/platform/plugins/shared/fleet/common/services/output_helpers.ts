@@ -19,6 +19,7 @@ import type {
 } from '../types';
 import {
   FLEET_APM_PACKAGE,
+  FLEET_CONNECTORS_PACKAGE,
   FLEET_SERVER_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   outputType,
@@ -33,6 +34,16 @@ import { packagePolicyHasOtelInputs } from './otelcol_helpers';
 
 const agentPolicyHasOtelInputs = (agentPolicy: Partial<AgentPolicy>): boolean =>
   (agentPolicy.package_policies ?? []).some((pp) => packagePolicyHasOtelInputs(pp.inputs));
+
+const agentPolicyUsesConnectors = (agentPolicy: Partial<AgentPolicy>): boolean =>
+  (agentPolicy.package_policies ?? []).some((pp) => pp.package?.name === FLEET_CONNECTORS_PACKAGE);
+
+/**
+ * Whether an agent policy is eligible to route its data through the managed bulk output
+ * rather than direct ES: connector and OTel policies must stay on direct ES or managed OTLP.
+ */
+export const canUseManagedBulk = (agentPolicy: Partial<AgentPolicy>): boolean =>
+  !agentPolicyUsesConnectors(agentPolicy) && !agentPolicyHasOtelInputs(agentPolicy);
 
 const sameClusterRestrictedPackages = [
   FLEET_SERVER_PACKAGE,
