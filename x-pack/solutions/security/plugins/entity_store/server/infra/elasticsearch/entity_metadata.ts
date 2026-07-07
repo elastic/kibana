@@ -6,13 +6,16 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
+import { BulkDropAggregator } from './bulk_drop_aggregator';
+import type { BulkDropTypeSummary } from './bulk_drop_aggregator';
 
 export interface BulkCreateEntityMetadataDocsResult {
   /** Number of docs successfully appended. */
   successful: number;
   /** Number of docs dropped after exhausting the helper's retries. */
   failed: number;
+  /** Dropped docs grouped by ES error type, sorted by frequency. Empty when nothing was dropped. */
+  dropsByType: BulkDropTypeSummary[];
 }
 
 /**
@@ -26,8 +29,12 @@ export interface BulkCreateEntityMetadataDocsResult {
  * hand-rolled `esClient.bulk`: the helper streams from the datasource instead
  * of materializing the whole `operations` array, chunks by `flushBytes` so a
  * high-fan-out run can't exceed `http.max_content_length`, and retries 429s.
- * Per-doc drops are surfaced via `onDrop` and logged here; the call resolves
- * to `{ successful, failed }` counts.
+ * Per-doc drops are surfaced via `onDrop`; this function only aggregates them
+ * by error type — it does not log. A systemic failure (missing privileges, a
+ * read-only index) rejects every doc in the batch, so logging per drop here
+ * would flood the log with identical lines. The call resolves to
+ * `{ successful, failed, dropsByType }`; callers own logging a single
+ * summary line with whatever domain context they have.
  *
  */
 export const bulkCreateEntityMetadataDocs = async <TDoc extends object>(
@@ -35,22 +42,19 @@ export const bulkCreateEntityMetadataDocs = async <TDoc extends object>(
   params: {
     index: string;
     docs: TDoc[];
-    logger: Logger;
   }
 ): Promise<BulkCreateEntityMetadataDocsResult> => {
+  const dropAggregator = new BulkDropAggregator();
+
   const { successful, failed } = await esClient.helpers.bulk({
     datasource: params.docs,
     index: params.index,
     refresh: false,
     onDocument: () => ({ create: {} }),
     onDrop: (dropped) => {
-      params.logger.error(
-        `entity metadata doc dropped from bulk operation (reason: ${
-          dropped.error?.reason || 'unknown error'
-        })`
-      );
+      dropAggregator.record(dropped);
     },
   });
 
-  return { successful, failed };
+  return { successful, failed, dropsByType: dropAggregator.summary() };
 };
