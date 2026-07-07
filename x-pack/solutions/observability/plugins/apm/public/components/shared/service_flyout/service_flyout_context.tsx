@@ -8,10 +8,16 @@
 import React, { createContext, useContext } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ApmPluginSetupDeps } from '../../../plugin';
 
-interface ServiceFlyoutContextValue {
+export interface ServiceFlyoutContextValue {
   core: CoreStart;
   share: SharePluginSetup;
+  lens: LensPublicStart;
+  dataViews: DataViewsPublicPluginStart;
+  plugins: ApmPluginSetupDeps;
 }
 
 const ServiceFlyoutContext = createContext({} as ServiceFlyoutContextValue);
@@ -19,10 +25,13 @@ const ServiceFlyoutContext = createContext({} as ServiceFlyoutContextValue);
 export function ServiceFlyoutContextProvider({
   core,
   share,
+  lens,
+  dataViews,
+  plugins,
   children,
 }: ServiceFlyoutContextValue & { children: React.ReactNode }) {
   return (
-    <ServiceFlyoutContext.Provider value={{ core, share }}>
+    <ServiceFlyoutContext.Provider value={{ core, share, lens, dataViews, plugins }}>
       {children}
     </ServiceFlyoutContext.Provider>
   );

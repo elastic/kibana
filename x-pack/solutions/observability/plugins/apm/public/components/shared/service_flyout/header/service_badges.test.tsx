@@ -13,9 +13,9 @@ import { ServiceBadges } from './service_badges';
 import type { ServiceAnomalyScoreResponse } from '../../../../../server/routes/services/get_services/get_service_anomaly_score_for_service';
 
 const mockNavigateToUrl = jest.fn();
-const mockUseApmPluginContext = jest.fn();
-jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => mockUseApmPluginContext(),
+const mockUseServiceFlyoutContext = jest.fn();
+jest.mock('../service_flyout_context', () => ({
+  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
 }));
 
 const mockUseServiceBadgesData = jest.fn();
@@ -46,7 +46,7 @@ const baseNodeData: ServiceNodeData = {
 };
 
 function setupContext({ canReadSlos = true }: { canReadSlos?: boolean } = {}) {
-  mockUseApmPluginContext.mockReturnValue({
+  mockUseServiceFlyoutContext.mockReturnValue({
     core: {
       application: {
         navigateToUrl: mockNavigateToUrl,

@@ -22,7 +22,7 @@ import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../../common/service_map';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
@@ -141,7 +141,7 @@ export function ServiceFlyoutOverview({
   onTransactionTypeChange,
 }: ServiceFlyoutOverviewProps) {
   const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
-  const { core, share } = useApmPluginContext();
+  const { core, share } = useServiceFlyoutContext();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { dataView } = useAdHocApmDataView();
   const indexes = dataView?.getIndexPattern();

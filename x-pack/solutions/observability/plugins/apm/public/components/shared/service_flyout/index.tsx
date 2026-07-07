@@ -8,15 +8,16 @@
 import { EuiFlyoutBody, EuiPortal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import type { CoreStart } from '@kbn/core/public';
-import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../common/service_map';
 import { ResponsiveFlyout } from '../responsive_flyout';
 import { ServiceFlyoutFooter } from './footer';
 import { ServiceFlyoutHeader } from './header';
 import { ServiceFlyoutOverview } from './overview';
-import { ServiceFlyoutContextProvider } from './service_flyout_context';
+import {
+  ServiceFlyoutContextProvider,
+  type ServiceFlyoutContextValue,
+} from './service_flyout_context';
 
 export const SERVICE_FLYOUT_TAB_IDS = {
   overview: 'overview',
@@ -38,15 +39,13 @@ export const SERVICE_FLYOUT_TABS = [
   },
 ] as const;
 
-interface ServiceFlyoutProps {
+interface ServiceFlyoutProps extends ServiceFlyoutContextValue {
   service: ServiceNodeData;
   environment: Environment;
   kuery: string;
   initialRangeFrom: string;
   initialRangeTo: string;
   initialTransactionType?: string;
-  core: CoreStart;
-  share: SharePluginSetup;
   onView?: (params: { tabId: ServiceFlyoutTabId }) => void;
   onClose: () => void;
 }
@@ -60,6 +59,9 @@ export function ServiceFlyout({
   initialTransactionType,
   core,
   share,
+  lens,
+  dataViews,
+  plugins,
   onView,
   onClose,
 }: ServiceFlyoutProps) {
@@ -107,7 +109,13 @@ export function ServiceFlyout({
 
   return (
     <EuiPortal>
-      <ServiceFlyoutContextProvider core={core} share={share}>
+      <ServiceFlyoutContextProvider
+        core={core}
+        share={share}
+        lens={lens}
+        dataViews={dataViews}
+        plugins={plugins}
+      >
         <ResponsiveFlyout
           data-test-subj="serviceFlyout"
           flyoutMenuDisplayMode="always"

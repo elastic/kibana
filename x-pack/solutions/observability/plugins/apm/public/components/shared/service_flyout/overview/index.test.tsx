@@ -19,8 +19,8 @@ const mockUseServiceHasSystemMetrics = jest.fn<
 let transactionsSectionProps: React.ComponentProps<typeof ServiceFlyoutTransactionsSection> | null =
   null;
 
-jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
+jest.mock('../service_flyout_context', () => ({
+  useServiceFlyoutContext: () => ({
     core: { http: {}, notifications: { toasts: { addDanger: jest.fn() } } },
     share: { url: { locators: { get: jest.fn() } } },
   }),

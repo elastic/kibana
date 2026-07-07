@@ -100,6 +100,9 @@ const service: ServiceNodeData = {
   agentName: 'java',
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const contextProps = { core: {} as any, share: {} as any, lens: {} as any, dataViews: {} as any, plugins: {} as any };
+
 beforeEach(() => {
   jest.clearAllMocks();
 });
@@ -110,6 +113,7 @@ describe('ServiceFlyout onView', () => {
 
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
         environment="ENVIRONMENT_ALL"
         kuery=""
@@ -129,6 +133,7 @@ describe('ServiceFlyout onView', () => {
 
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
         environment="ENVIRONMENT_ALL"
         kuery=""
@@ -149,6 +154,7 @@ describe('ServiceFlyout initial state', () => {
   it('does not seed transactionType from a hardcoded default before the fetch resolves', () => {
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
         environment="ENVIRONMENT_ALL"
         kuery=""
@@ -168,6 +174,7 @@ describe('ServiceFlyout local filter state', () => {
 
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
         environment="ENVIRONMENT_ALL"
         kuery=""
@@ -192,6 +199,7 @@ describe('ServiceFlyout local filter state', () => {
 
     render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
         environment="ENVIRONMENT_ALL"
         kuery=""
@@ -209,6 +217,7 @@ describe('ServiceFlyout local filter state', () => {
   it('does not reset local filter edits when host props change without a remount', () => {
     const { rerender } = render(
       <ServiceFlyout
+        {...contextProps}
         service={service}
         environment="ENVIRONMENT_ALL"
         kuery=""
@@ -224,6 +233,7 @@ describe('ServiceFlyout local filter state', () => {
     // Same key (same service): a host environment change must not clobber the local edit.
     rerender(
       <ServiceFlyout
+        {...contextProps}
         service={service}
         environment="staging"
         kuery=""
@@ -239,6 +249,7 @@ describe('ServiceFlyout local filter state', () => {
   it('re-seeds local state from props when remounted for a different service', () => {
     const { rerender } = render(
       <ServiceFlyout
+        {...contextProps}
         key={service.id}
         service={service}
         environment="ENVIRONMENT_ALL"
@@ -256,6 +267,7 @@ describe('ServiceFlyout local filter state', () => {
     const otherService: ServiceNodeData = { ...service, id: 'opbeans-go', label: 'opbeans-go' };
     rerender(
       <ServiceFlyout
+        {...contextProps}
         key={otherService.id}
         service={otherService}
         environment="staging"

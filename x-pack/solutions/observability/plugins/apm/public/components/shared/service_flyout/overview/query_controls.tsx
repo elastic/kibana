@@ -21,7 +21,7 @@ import { ApmDocumentType } from '../../../../../common/document_type';
 import type { Environment } from '../../../../../common/environment_rt';
 import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
 import { useServiceTransactionTypesFetcher } from '../../../../context/apm_service/use_service_transaction_types_fetcher';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useEnvironmentsFetcher } from '../../../../hooks/use_environments_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
@@ -56,7 +56,7 @@ export function ServiceFlyoutQueryControls({
   onRangeChange,
   onRefresh,
 }: ServiceFlyoutQueryControlsProps) {
-  const { core } = useApmPluginContext();
+  const { core } = useServiceFlyoutContext();
 
   const { start = '', end = '' } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 

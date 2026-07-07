@@ -9,7 +9,7 @@ import type { ServiceAnomalyScoreResponse } from '../../../../../server/routes/s
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { Environment } from '../../../../../common/environment_rt';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 interface ServiceBadgesDataParams {
@@ -30,7 +30,7 @@ export function useServiceBadgesData({
   rangeFrom,
   rangeTo,
 }: ServiceBadgesDataParams): ServiceBadgesData {
-  const { core, plugins } = useApmPluginContext();
+  const { core, plugins } = useServiceFlyoutContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
   const { start = '', end = '' } = useTimeRange({ rangeFrom, rangeTo });

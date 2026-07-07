@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { AnomaliesBadge } from '../../../app/service_inventory/service_list/anomalies_badge';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { AlertsBadge } from '../../badge/alerts_badge';
 import { SloStatusBadge } from '../../slo_status_badge';
@@ -43,7 +43,7 @@ export function ServiceBadges({
   rangeFrom,
   rangeTo,
 }: ServiceBadgesProps) {
-  const { core } = useApmPluginContext();
+  const { core } = useServiceFlyoutContext();
   const { capabilities, navigateToUrl } = core.application;
   const canReadSlos = !!capabilities.slo?.read;
 
