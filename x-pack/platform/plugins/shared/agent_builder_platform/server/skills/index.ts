@@ -6,6 +6,5 @@
  */
 
 export { graphCreationSkill } from './graph_creation_skill';
-export { visualizationCreationSkill } from './visualization_creation_skill';
 export { skillManagementSkill } from './skill_management';
 export { registerSkills } from './register_skills';

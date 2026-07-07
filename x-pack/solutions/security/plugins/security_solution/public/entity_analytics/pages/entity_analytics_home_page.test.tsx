@@ -57,12 +57,6 @@ jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
   })),
 }));
 
-jest.mock('../components/home/combined_risk_donut_chart', () => ({
-  CombinedRiskDonutChart: () => (
-    <div data-test-subj="combined-risk-donut-chart">{'Donut Chart'}</div>
-  ),
-}));
-
 jest.mock('../components/home/anomalies_panel', () => ({
   EntityAnalyticsRecentAnomalies: () => (
     <div data-test-subj="recent-anomalies-panel">{'Recent anomalies'}</div>
@@ -79,20 +73,14 @@ jest.mock('../components/home/entities_table', () => ({
   useEntityURLState: jest.fn(() => ({
     sort: [],
     filters: [],
-    pageFilters: [],
     query: { bool: { filter: [], must: [], must_not: [], should: [] } },
     pageIndex: 0,
-    urlQuery: { query: { language: 'kuery', query: '' }, filters: [] },
     setUrlQuery: jest.fn(),
-    setTableOptions: jest.fn(),
-    handleUpdateQuery: jest.fn(),
     pageSize: 25,
-    setPageSize: jest.fn(),
     onChangeItemsPerPage: jest.fn(),
     onChangePage: jest.fn(),
     onSort: jest.fn(),
     onResetFilters: jest.fn(),
-    columnsLocalStorageKey: 'entityAnalytics:columns',
     getRowsFromPages: jest.fn(() => []),
   })),
 }));
