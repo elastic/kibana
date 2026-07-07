@@ -29,6 +29,10 @@ export class CallbackDeliveryService {
   }
 
   validateCallbackUrl(callbackUrl: string): void {
+    if (!callbackUrl.trim()) {
+      throw new Error('Callback URL must be a non-empty string');
+    }
+
     this.actions.getActionsConfigurationUtilities().ensureUriAllowed(callbackUrl);
   }
 
@@ -49,7 +53,7 @@ export class CallbackDeliveryService {
       return;
     }
 
-    await this.makeCallbackRequestIfConfigured({
+    await this.makeCallbackRequest({
       callbackUrl,
       payload: {
         execution_id: executionId,
@@ -70,20 +74,20 @@ export class CallbackDeliveryService {
     callbackUrl: string | undefined;
     payload: ChatCallbackFailurePayload;
   }): Promise<void> {
-    await this.makeCallbackRequestIfConfigured({ callbackUrl, payload });
-  }
-
-  private async makeCallbackRequestIfConfigured({
-    callbackUrl,
-    payload,
-  }: {
-    callbackUrl: string | undefined;
-    payload: CallbackPayload;
-  }): Promise<void> {
     if (!callbackUrl) {
       return;
     }
 
+    await this.makeCallbackRequest({ callbackUrl, payload });
+  }
+
+  private async makeCallbackRequest({
+    callbackUrl,
+    payload,
+  }: {
+    callbackUrl: string;
+    payload: CallbackPayload;
+  }): Promise<void> {
     this.validateCallbackUrl(callbackUrl);
 
     const { timeout } = this.actions.getActionsConfigurationUtilities().getResponseSettings();

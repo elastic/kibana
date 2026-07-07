@@ -42,6 +42,20 @@ describe('validateCallbackUrl', () => {
 
     expect(ensureUriAllowed).toHaveBeenCalledWith(callbackUrl);
   });
+
+  it.each(['', '   '])(
+    'throws without delegating to the allowed-host validator for a blank callback URL (%p)',
+    (blankUrl) => {
+      const ensureUriAllowed = jest.fn();
+      const callbackDeliveryService = createCallbackDeliveryService(ensureUriAllowed);
+
+      expect(() => callbackDeliveryService.validateCallbackUrl(blankUrl)).toThrow(
+        'Callback URL must be a non-empty string'
+      );
+
+      expect(ensureUriAllowed).not.toHaveBeenCalled();
+    }
+  );
 });
 
 describe('callback request delivery', () => {
