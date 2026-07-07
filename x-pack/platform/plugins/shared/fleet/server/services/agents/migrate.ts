@@ -25,7 +25,11 @@ import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import { getAgents, getAgentsByKuery, openPointInTime } from './crud';
 
-import { MigrateActionRunner, bulkMigrateAgentsBatch } from './migrate_action_runner';
+import {
+  MigrateActionRunner,
+  bulkMigrateAgentsBatch,
+  partitionAgentsForMigration,
+} from './migrate_action_runner';
 import { detectTargetClusterType } from './detect_target_cluster_type';
 
 export async function migrateSingleAgent(
@@ -153,8 +157,12 @@ export async function bulkMigrateAgents(
 
   if ('agentIds' in options) {
     if (options.dryRun) {
+      // Count only agents that would actually be migrated — protected-policy,
+      // fleet-server, and migration-unsupported agents are dropped by
+      // bulkMigrateAgentsBatch, so exclude them here to avoid over-reporting.
       const agents = await getAgents(esClient, soClient, options);
-      return { count: agents.length };
+      const { agentsToAction } = await partitionAgentsForMigration(soClient, agents);
+      return { count: agentsToAction.length };
     }
     const givenAgents = await getAgents(esClient, soClient, options);
     const response = await bulkMigrateAgentsBatch(esClient, soClient, givenAgents, {

@@ -240,5 +240,112 @@ export default function (providerContext: FtrProviderContext) {
         expect(actionsAfter).to.eql(actionsBefore);
       });
     });
+
+    describe('bulk_migrate', () => {
+      it('returns { count } by agent ids without creating actions', async () => {
+        const actionsBefore = await getActionCount();
+
+        const { body } = await supertest
+          .post('/api/fleet/agents/bulk_migrate')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: ['agent1', 'agent2'],
+            uri: 'https://example.com',
+            enrollment_token: 'test-token',
+            dryRun: true,
+          })
+          .expect(200);
+
+        expect(body).to.have.property('count');
+        expect(body.count).to.be.a('number');
+
+        const actionsAfter = await getActionCount();
+        expect(actionsAfter).to.eql(actionsBefore);
+      });
+
+      it('returns { count } by kuery without creating actions', async () => {
+        const actionsBefore = await getActionCount();
+
+        const { body } = await supertest
+          .post('/api/fleet/agents/bulk_migrate')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: 'active:true',
+            uri: 'https://example.com',
+            enrollment_token: 'test-token',
+            dryRun: true,
+          })
+          .expect(200);
+
+        expect(body).to.have.property('count');
+        expect(body.count).to.be.a('number');
+
+        const actionsAfter = await getActionCount();
+        expect(actionsAfter).to.eql(actionsBefore);
+      });
+    });
+
+    describe('bulk_privilege_level_change', () => {
+      it('returns { count } by agent ids without creating actions', async () => {
+        const actionsBefore = await getActionCount();
+
+        const { body } = await supertest
+          .post('/api/fleet/agents/bulk_privilege_level_change')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: ['agent1', 'agent2'],
+            user_info: { username: 'user1', groupname: 'group1', password: 'password' },
+            dryRun: true,
+          })
+          .expect(200);
+
+        expect(body).to.have.property('count');
+        expect(body.count).to.be.a('number');
+
+        const actionsAfter = await getActionCount();
+        expect(actionsAfter).to.eql(actionsBefore);
+      });
+
+      it('returns { count } by kuery without creating actions', async () => {
+        const actionsBefore = await getActionCount();
+
+        const { body } = await supertest
+          .post('/api/fleet/agents/bulk_privilege_level_change')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: 'active:true',
+            user_info: { username: 'user1', groupname: 'group1', password: 'password' },
+            dryRun: true,
+          })
+          .expect(200);
+
+        expect(body).to.have.property('count');
+        expect(body.count).to.be.a('number');
+
+        const actionsAfter = await getActionCount();
+        expect(actionsAfter).to.eql(actionsBefore);
+      });
+    });
+
+    describe('bulk_remove_collectors', () => {
+      it('returns { count } counting only OPAMP agents when mixed agents are passed by kuery', async () => {
+        const actionsBefore = await getActionCount();
+
+        const { body } = await supertest
+          .post('/api/fleet/agents/bulk_remove_collectors')
+          .set('kbn-xsrf', 'xxx')
+          .send({ agents: 'active:true', dryRun: true })
+          .expect(200);
+
+        // The fixture agents (agent1–agent4) are PERMANENT type, not OPAMP,
+        // so the dry-run count must be 0 — not the total active agent count.
+        expect(body).to.have.property('count');
+        expect(body.count).to.be.a('number');
+        expect(body.count).to.eql(0);
+
+        const actionsAfter = await getActionCount();
+        expect(actionsAfter).to.eql(actionsBefore);
+      });
+    });
   });
 }
