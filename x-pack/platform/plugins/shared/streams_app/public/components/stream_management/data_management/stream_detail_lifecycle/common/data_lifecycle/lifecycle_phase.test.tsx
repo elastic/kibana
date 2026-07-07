@@ -330,6 +330,20 @@ describe('LifecyclePhase', () => {
 
       expect(screen.queryByTestId('lifecyclePhase-hot-size')).not.toBeInTheDocument();
     });
+
+    it('should hide size label when disableInteractions is true', () => {
+      render(
+        <LifecyclePhase
+          label="hot"
+          color="#FF0000"
+          size="1.0 GB"
+          canManageLifecycle
+          disableInteractions
+        />
+      );
+
+      expect(screen.queryByTestId('lifecyclePhase-hot-size')).not.toBeInTheDocument();
+    });
   });
 
   describe('Remove actions', () => {

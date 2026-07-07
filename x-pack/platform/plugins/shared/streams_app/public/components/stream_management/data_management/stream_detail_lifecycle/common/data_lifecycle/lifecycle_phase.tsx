@@ -174,6 +174,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
           size={size}
           testSubjPrefix={testSubjPrefix}
           isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+          disableInteractions={disableInteractions}
           showWarningIcon={showWarningIcon}
         />
       }
