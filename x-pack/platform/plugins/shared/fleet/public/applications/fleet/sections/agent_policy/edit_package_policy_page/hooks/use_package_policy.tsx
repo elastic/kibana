@@ -19,7 +19,6 @@ import type {
 } from '../../../../../../../common/types/rest_spec';
 import {
   sendBulkGetAgentPolicies,
-  sendGetAgentlessPolicy,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
   sendGetSettings,
@@ -36,10 +35,8 @@ import type {
   PackagePolicy,
   PackageInfo,
 } from '../../../../types';
-import {
-  agentlessPolicyToPackagePolicy,
-  toNewAgentlessPolicy,
-} from '../../../../../../../common/services';
+import { toNewAgentlessPolicy } from '../../../../../../../common/services';
+import { fetchAgentlessPolicyAsPackagePolicy } from '../../services';
 import {
   type PackagePolicyValidationResults,
   validatePackagePolicy,
@@ -479,56 +476,41 @@ export function usePackagePolicyWithRelatedData(
       setLoadingError(undefined);
       setIsUpgrade(false);
       try {
-        const prerelease = await isPreleaseEnabled();
-
-        const { item: agentlessPolicy } = await sendGetAgentlessPolicy(packagePolicyId);
-
-        // `sendGetPackageInfoByKey` resolves to a `{ data, error }` envelope instead of throwing.
-        // Ignoring `error` would leave `loadingError` unset and hide the real failure (status
-        // code, message) behind the page's generic loading-error copy.
-        const { data: packageData, error: packageInfoError } = await sendGetPackageInfoByKey(
-          agentlessPolicy.package.name,
-          agentlessPolicy.package.version,
-          { prerelease, full: true }
-        );
-
-        if (packageInfoError) {
-          throw packageInfoError;
-        }
+        // The shared read helper throws on failure (no `{ data, error }` envelope), so
+        // `loadingError` carries the real failure (status code, message) rather than the page's
+        // generic loading-error copy.
+        const {
+          agentlessPolicy,
+          packageInfo: agentlessPackageInfo,
+          packagePolicy: hydratedPackagePolicy,
+        } = await fetchAgentlessPolicyAsPackagePolicy(packagePolicyId);
 
         if (ignore) {
           return;
         }
 
-        if (packageData?.item && yaml) {
-          const hydratedPackagePolicy = agentlessPolicyToPackagePolicy(
-            agentlessPolicy,
-            packageData.item
-          );
+        setPackageInfo(agentlessPackageInfo);
+        setPackagePolicy(hydratedPackagePolicy as UpdatePackagePolicy);
+        // Edit extensions receive the loaded policy as their baseline. Agentless policies carry
+        // no server-only compiled fields at edit time, so the hydrated form policy is the
+        // "original" — enriched with the identifiers/timestamps from the API response.
+        setOriginalPackagePolicy({
+          ...hydratedPackagePolicy,
+          id: agentlessPolicy.id,
+          revision: 1,
+          created_at: agentlessPolicy.created_at,
+          created_by: agentlessPolicy.created_by,
+          updated_at: agentlessPolicy.updated_at,
+          updated_by: agentlessPolicy.updated_by,
+        } as PackagePolicy);
 
-          setPackageInfo(packageData.item);
-          setPackagePolicy(hydratedPackagePolicy as UpdatePackagePolicy);
-          // Edit extensions receive the loaded policy as their baseline. Agentless policies carry
-          // no server-only compiled fields at edit time, so the hydrated form policy is the
-          // "original" — enriched with the identifiers/timestamps from the API response.
-          setOriginalPackagePolicy({
-            ...hydratedPackagePolicy,
-            id: agentlessPolicy.id,
-            revision: 1,
-            created_at: agentlessPolicy.created_at,
-            created_by: agentlessPolicy.created_by,
-            updated_at: agentlessPolicy.updated_at,
-            updated_by: agentlessPolicy.updated_by,
-          } as PackagePolicy);
-
-          const newValidationResults = validatePackagePolicy(
-            hydratedPackagePolicy,
-            packageData.item,
-            { safeLoadYaml: yaml.parse, conditionValidator: validateAgentConditionExpression }
-          );
-          setValidationResults(newValidationResults);
-          setFormState(validationHasErrors(newValidationResults) ? 'INVALID' : 'VALID');
-        }
+        const newValidationResults = validatePackagePolicy(
+          hydratedPackagePolicy,
+          agentlessPackageInfo,
+          { safeLoadYaml: yaml.parse, conditionValidator: validateAgentConditionExpression }
+        );
+        setValidationResults(newValidationResults);
+        setFormState(validationHasErrors(newValidationResults) ? 'INVALID' : 'VALID');
       } catch (e) {
         if (!ignore) {
           setLoadingError(e);

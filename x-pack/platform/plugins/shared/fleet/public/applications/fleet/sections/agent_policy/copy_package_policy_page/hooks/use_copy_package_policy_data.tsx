@@ -7,15 +7,10 @@
 
 import { useQuery } from '@kbn/react-query';
 
-import {
-  sendGetAgentlessPolicy,
-  sendGetPackageInfoByKeyForRq,
-  sendGetSettings,
-  useGetOnePackagePolicyQuery,
-} from '../../../../hooks';
+import { useGetOnePackagePolicyQuery } from '../../../../hooks';
 import type { RequestError } from '../../../../hooks';
 import type { PackagePolicy } from '../../../../types';
-import { agentlessPolicyToPackagePolicy } from '../../../../../../../common/services';
+import { fetchAgentlessPolicyAsPackagePolicy } from '../../services';
 
 /**
  * Read the policy that a copy is being created from.
@@ -37,20 +32,11 @@ export function useCopyPackagePolicyData(
   const agentlessPolicyQuery = useQuery<PackagePolicy, RequestError>(
     ['copyAgentlessPolicy', packagePolicyId],
     async () => {
-      const { item: agentlessPolicy } = await sendGetAgentlessPolicy(packagePolicyId);
-      // Resolve prerelease from settings
-      const { data: settings } = await sendGetSettings();
-      const prerelease = Boolean(settings?.item.prerelease_integrations_enabled);
-      const packageInfo = await sendGetPackageInfoByKeyForRq(
-        agentlessPolicy.package.name,
-        agentlessPolicy.package.version,
-        { prerelease, full: true }
-      );
-
-      // `agentlessPolicyToPackagePolicy` already carries the id through; the copy helper strips it
-      // (along with `version`) before creating the fresh policy. `supports_agentless` stays true so
-      // the create page routes the copy write through the agentless create API.
-      return agentlessPolicyToPackagePolicy(agentlessPolicy, packageInfo.item) as PackagePolicy;
+      // The expanded policy carries the source id through; the copy helper strips it (along with
+      // `version`) before creating the fresh policy. `supports_agentless` stays true so the
+      // create page routes the copy write through the agentless create API.
+      const { packagePolicy } = await fetchAgentlessPolicyAsPackagePolicy(packagePolicyId);
+      return packagePolicy as PackagePolicy;
     },
     { enabled: isAgentless, refetchOnWindowFocus: false }
   );

@@ -18,6 +18,7 @@ import { omit } from 'lodash';
 import {
   sendGetAgentlessPolicy,
   sendGetPackageInfoByKey,
+  sendGetPackageInfoByKeyForRq,
   sendUpdateAgentlessPolicy,
   sendUpdatePackagePolicy,
   sendUpgradePackagePolicyDryRun,
@@ -56,6 +57,87 @@ const mockPackagePolicy = {
     },
   ],
 };
+
+// A function declaration (hoisted, `mock`-prefixed) so the `jest.mock` factory below — which
+// runs while the imports above are still being evaluated — can build both the envelope
+// (`sendGetPackageInfoByKey`, legacy loader) and throwing (`sendGetPackageInfoByKeyForRq`,
+// agentless read helper) package-info mocks from one definition.
+function mockPackageInfoItem(name: string, version: string) {
+  return {
+    name,
+    title: 'Nginx',
+    version,
+    release: 'ga',
+    description: 'Collect logs and metrics from Nginx HTTP servers with Elastic Agent.',
+    policy_templates: [
+      {
+        name: 'nginx',
+        title: 'Nginx logs and metrics',
+        description: 'Collect logs and metrics from Nginx instances',
+        inputs: [
+          {
+            type: 'logfile',
+            title: 'Collect logs from Nginx instances',
+            description: 'Collecting Nginx access and error logs',
+            vars: [
+              {
+                name: 'new_input_level_var',
+                type: 'text',
+                title: 'Paths',
+                required: false,
+                show_user: true,
+              },
+            ],
+          },
+        ],
+        multiple: true,
+      },
+    ],
+    data_streams: [
+      {
+        type: 'logs',
+        dataset: 'nginx.access',
+        title: 'Nginx access logs',
+        release: 'experimental',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'logfile',
+            vars: [
+              {
+                name: 'paths',
+                type: 'text',
+                title: 'Paths',
+                multi: true,
+                required: true,
+                show_user: true,
+                default: ['/var/log/nginx/access.log*'],
+              },
+            ],
+            template_path: 'stream.yml.hbs',
+            title: 'Nginx access logs',
+            description: 'Collect Nginx access logs',
+            enabled: true,
+          },
+        ],
+        package: 'nginx',
+        path: 'access',
+      },
+    ],
+    latestVersion: version,
+    keepPoliciesUpToDate: false,
+    status: 'not_installed',
+    vars: [
+      {
+        name: 'new_package_level_var',
+        type: 'text',
+        title: 'Paths',
+        required: false,
+        show_user: true,
+      },
+    ],
+  };
+}
 
 jest.mock('../../../../../../hooks/use_request', () => ({
   ...jest.requireActual('../../../../../../hooks/use_request'),
@@ -168,87 +250,16 @@ jest.mock('../../../../../../hooks/use_request', () => ({
       };
     }
   },
-  sendGetPackageInfoByKey: jest.fn().mockImplementation((name, version) =>
-    Promise.resolve({
-      data: {
-        item: {
-          name,
-          title: 'Nginx',
-          version,
-          release: 'ga',
-          description: 'Collect logs and metrics from Nginx HTTP servers with Elastic Agent.',
-          policy_templates: [
-            {
-              name: 'nginx',
-              title: 'Nginx logs and metrics',
-              description: 'Collect logs and metrics from Nginx instances',
-              inputs: [
-                {
-                  type: 'logfile',
-                  title: 'Collect logs from Nginx instances',
-                  description: 'Collecting Nginx access and error logs',
-                  vars: [
-                    {
-                      name: 'new_input_level_var',
-                      type: 'text',
-                      title: 'Paths',
-                      required: false,
-                      show_user: true,
-                    },
-                  ],
-                },
-              ],
-              multiple: true,
-            },
-          ],
-          data_streams: [
-            {
-              type: 'logs',
-              dataset: 'nginx.access',
-              title: 'Nginx access logs',
-              release: 'experimental',
-              ingest_pipeline: 'default',
-              streams: [
-                {
-                  input: 'logfile',
-                  vars: [
-                    {
-                      name: 'paths',
-                      type: 'text',
-                      title: 'Paths',
-                      multi: true,
-                      required: true,
-                      show_user: true,
-                      default: ['/var/log/nginx/access.log*'],
-                    },
-                  ],
-                  template_path: 'stream.yml.hbs',
-                  title: 'Nginx access logs',
-                  description: 'Collect Nginx access logs',
-                  enabled: true,
-                },
-              ],
-              package: 'nginx',
-              path: 'access',
-            },
-          ],
-          latestVersion: version,
-          keepPoliciesUpToDate: false,
-          status: 'not_installed',
-          vars: [
-            {
-              name: 'new_package_level_var',
-              type: 'text',
-              title: 'Paths',
-              required: false,
-              show_user: true,
-            },
-          ],
-        },
-      },
-      isLoading: false,
-    })
-  ),
+  sendGetPackageInfoByKey: jest
+    .fn()
+    .mockImplementation((name: string, version: string) =>
+      Promise.resolve({ data: { item: mockPackageInfoItem(name, version) }, isLoading: false })
+    ),
+  sendGetPackageInfoByKeyForRq: jest
+    .fn()
+    .mockImplementation((name: string, version: string) =>
+      Promise.resolve({ item: mockPackageInfoItem(name, version) })
+    ),
   sendUpgradePackagePolicyDryRun: jest.fn().mockResolvedValue({
     data: [
       {
@@ -699,7 +710,7 @@ describe('usePackagePolicy - agentless', () => {
     );
     expect(saveResult).toEqual({ data: { item: { id: 'agentless-1' } }, error: null });
     // Never falls back to the package-policy update API for agentless policies.
-    expect(sendGetPackageInfoByKey).toHaveBeenCalled();
+    expect(sendUpdatePackagePolicy).not.toHaveBeenCalled();
   });
 
   it('detects an agentless policy read without the isAgentless hint and saves through the agentless API', async () => {
@@ -818,12 +829,10 @@ describe('usePackagePolicy - agentless', () => {
   });
 
   it('surfaces a package info load failure through loadingError instead of swallowing it', async () => {
-    // `sendGetPackageInfoByKey` resolves to a `{ data, error }` envelope; the agentless loader
-    // must not drop the error, or the page shows only its generic loading-error copy.
+    // The shared read helper's package-info request throws on failure; the loader must surface
+    // it through `loadingError`, or the page shows only its generic loading-error copy.
     const pkgError = Object.assign(new Error('registry unavailable'), { statusCode: 502 });
-    jest
-      .mocked(sendGetPackageInfoByKey)
-      .mockResolvedValueOnce({ data: undefined, error: pkgError } as any);
+    jest.mocked(sendGetPackageInfoByKeyForRq).mockRejectedValueOnce(pkgError);
 
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() =>
