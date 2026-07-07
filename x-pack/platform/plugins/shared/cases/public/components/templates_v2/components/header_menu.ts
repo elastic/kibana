@@ -119,6 +119,8 @@ export const getTemplateFormMenu = ({
       onChange: onIsEnabledChange,
       disabled: isActionDisabled,
       'data-test-subj': 'templateEnabledSwitch',
+      // Render after the revert button, immediately before the save button.
+      position: 'trailing',
     },
     primaryActionItem: {
       id: 'saveTemplate',

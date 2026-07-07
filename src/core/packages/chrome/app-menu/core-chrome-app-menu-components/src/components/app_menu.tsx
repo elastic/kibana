@@ -106,6 +106,11 @@ export const AppMenuComponent = ({
     />
   ) : undefined;
 
+  const switchComponent = switchConfig ? (
+    <AppMenuSwitchComponent switchConfig={switchConfig} />
+  ) : undefined;
+  const isSwitchTrailing = switchConfig?.position === 'trailing';
+
   const collapsedComponent = (
     <AppMenuOverflowButton
       items={[...displayedItems, ...allOverflowItems]}
@@ -125,7 +130,7 @@ export const AppMenuComponent = ({
   if (isBetweenMandXlBreakpoint) {
     return (
       <EuiHeaderLinks {...headerLinksProps}>
-        {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
+        {!isSwitchTrailing && switchComponent}
         <AppMenuOverflowButton
           items={[...displayedItems, ...allOverflowItems]}
           staticItems={processedStaticItems}
@@ -133,6 +138,7 @@ export const AppMenuComponent = ({
           onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
           onPopoverClose={handleOnPopoverClose}
         />
+        {isSwitchTrailing && switchComponent}
         {primaryActionComponent}
       </EuiHeaderLinks>
     );
@@ -141,7 +147,7 @@ export const AppMenuComponent = ({
   if (isAboveXlBreakpoint) {
     return (
       <EuiHeaderLinks {...headerLinksProps}>
-        {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
+        {!isSwitchTrailing && switchComponent}
         {displayedItems?.length > 0 &&
           displayedItems.map((menuItem) => (
             <AppMenuItem
@@ -161,6 +167,7 @@ export const AppMenuComponent = ({
             onPopoverClose={handleOnPopoverClose}
           />
         )}
+        {isSwitchTrailing && switchComponent}
         {primaryActionComponent}
       </EuiHeaderLinks>
     );

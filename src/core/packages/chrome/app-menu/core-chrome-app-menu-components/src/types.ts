@@ -289,6 +289,12 @@ export interface AppMenuSwitch {
   tooltipContent?: string | (() => string | undefined);
   tooltipTitle?: string | (() => string | undefined);
   'data-test-subj'?: string;
+  /**
+   * Where the switch is rendered relative to `items` in the app menu row.
+   * `leading` (default) renders it before `items`; `trailing` renders it after `items`
+   * (and any overflow button), immediately before `primaryActionItem`.
+   */
+  position?: 'leading' | 'trailing';
 }
 
 interface AppMenuPrimaryActionBase extends AppMenuItemBase {
@@ -358,8 +364,9 @@ export interface AppMenuConfig {
    */
   primaryActionItem?: AppMenuPrimaryActionItem;
   /**
-   * App menu switch. Only one switch is available per app menu
-   * and it is rendered to the left of the menu items.
+   * App menu switch. Only one switch is available per app menu.
+   * Rendered to the left of `items` by default; see `AppMenuSwitch.position`
+   * to render it after `items` instead.
    */
   switch?: AppMenuSwitch;
 }
