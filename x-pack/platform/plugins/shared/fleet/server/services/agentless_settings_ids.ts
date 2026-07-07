@@ -75,36 +75,46 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
     await pMap(
       agentPolicies,
       async (agentPolicy) => {
-        // Fetched per policy, scoped to this page (bounded by FETCH_PAGE_SIZE), so this never
-        // holds package policies for more than one page of agent policies at a time.
-        const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
-          internalSoClientWithoutSpaceExtension,
-          agentPolicy.id
-        );
-        const correctOutputId = agentlessAgentService.getDefaultOutputId({
-          package_policies: packagePolicies,
-        });
-        const attributes: Partial<AgentPolicy> = {};
+        try {
+          // Fetched per policy, scoped to this page (bounded by FETCH_PAGE_SIZE), so this never
+          // holds package policies for more than one page of agent policies at a time.
+          const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
+            internalSoClientWithoutSpaceExtension,
+            agentPolicy.id
+          );
+          const correctOutputId = agentlessAgentService.getDefaultOutputId({
+            package_policies: packagePolicies,
+          });
+          const attributes: Partial<AgentPolicy> = {};
 
-        if (
-          correctOutputId &&
-          (agentPolicy.data_output_id !== correctOutputId ||
-            agentPolicy.monitoring_output_id !== correctOutputId) &&
-          (await outputExists(correctOutputId))
-        ) {
-          attributes.data_output_id = correctOutputId;
-          attributes.monitoring_output_id = correctOutputId;
-        }
+          if (
+            correctOutputId &&
+            (agentPolicy.data_output_id !== correctOutputId ||
+              agentPolicy.monitoring_output_id !== correctOutputId) &&
+            (await outputExists(correctOutputId))
+          ) {
+            attributes.data_output_id = correctOutputId;
+            attributes.monitoring_output_id = correctOutputId;
+          }
 
-        if (
-          correctFleetServerIdExists &&
-          agentPolicy.fleet_server_host_id !== correctFleetServerId
-        ) {
-          attributes.fleet_server_host_id = correctFleetServerId;
-        }
+          if (
+            correctFleetServerIdExists &&
+            agentPolicy.fleet_server_host_id !== correctFleetServerId
+          ) {
+            attributes.fleet_server_host_id = correctFleetServerId;
+          }
 
-        if (Object.keys(attributes).length > 0) {
-          updates.push({ id: agentPolicy.id, attributes });
+          if (Object.keys(attributes).length > 0) {
+            updates.push({ id: agentPolicy.id, attributes });
+          }
+        } catch (e) {
+          // Skip this policy rather than aborting the whole page/migration — it will be
+          // retried on the next Kibana startup.
+          appContextService
+            .getLogger()
+            .error(
+              `Failed to evaluate agentless settings for agent policy ${agentPolicy.id}: ${e.message}`
+            );
         }
       },
       { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
@@ -124,10 +134,23 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
 
     await pMap(
       updates,
-      ({ id, attributes }) =>
-        agentPolicyService.update(internalSoClientWithoutSpaceExtension, esClient, id, attributes, {
-          force: true,
-        }),
+      async ({ id, attributes }) => {
+        try {
+          await agentPolicyService.update(
+            internalSoClientWithoutSpaceExtension,
+            esClient,
+            id,
+            attributes,
+            { force: true }
+          );
+        } catch (e) {
+          // Skip this policy rather than aborting the rest of the page — it will be retried
+          // on the next Kibana startup.
+          appContextService
+            .getLogger()
+            .error(`Failed to update agentless settings for agent policy ${id}: ${e.message}`);
+        }
+      },
       {
         concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
       }
