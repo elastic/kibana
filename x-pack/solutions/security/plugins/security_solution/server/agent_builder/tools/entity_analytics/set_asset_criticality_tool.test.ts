@@ -37,15 +37,30 @@ describe('setAssetCriticalityTool', () => {
   const handlerContext = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
   const mockCheckPrivileges = jest.fn().mockResolvedValue({
+    hasAllRequested: true,
     privileges: {
       elasticsearch: {
-        index: new Proxy({}, { get: () => [{ privilege: 'write', authorized: true }] }),
+        cluster: [],
+        index: new Proxy(
+          {},
+          {
+            get: () => [
+              { privilege: 'read', authorized: true },
+              { privilege: 'write', authorized: true },
+            ],
+          }
+        ),
       },
+      kibana: [
+        { privilege: 'api:securitySolution', authorized: true },
+        { privilege: 'api:securitySolution-entity-analytics', authorized: true },
+      ],
     },
   });
   const mockSecurity = {
     authz: {
       checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+      actions: { api: { get: (privilege: string) => `api:${privilege}` } },
     },
   };
 
@@ -138,6 +153,46 @@ describe('setAssetCriticalityTool', () => {
           criticality: CRITICALITY,
         }).success
       ).toBe(false);
+    });
+  });
+
+  describe('handler — permissions', () => {
+    it('returns a permission error and does not update the entity when the caller lacks the Kibana feature privilege', async () => {
+      mockCheckPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        privileges: {
+          elasticsearch: {
+            cluster: [],
+            index: new Proxy(
+              {},
+              {
+                get: () => [
+                  { privilege: 'read', authorized: true },
+                  { privilege: 'write', authorized: true },
+                ],
+              }
+            ),
+          },
+          kibana: [
+            { privilege: 'api:securitySolution', authorized: false },
+            { privilege: 'api:securitySolution-entity-analytics', authorized: false },
+          ],
+        },
+      });
+
+      const ctx = handlerContext();
+      const result = (await tool.handler(
+        { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results).toHaveLength(1);
+      const errResult = result.results[0] as ErrorResult;
+      expect(errResult.type).toBe(ToolResultType.error);
+      expect((errResult.data as { message: string }).message).toContain(
+        'You do not have permission to update asset criticality in this space.'
+      );
+      expect(mockBulkUpdateEntity).not.toHaveBeenCalled();
     });
   });
 

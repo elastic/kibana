@@ -302,11 +302,20 @@ describe('EditDlmPhasesFlyout', () => {
 
     const frozenPanel = withinPhase('frozen');
     expect(frozenPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`)).toBeVisible();
+    expect(frozenPanel.getByText('Must occur before the delete phase (60d).')).toBeInTheDocument();
     expect(frozenPanel.getByTestId(`${DATA_TEST_SUBJ}DlmSearchableSnapshotInfo`)).toBeVisible();
     expect(
       frozenPanel.queryByTestId(`${DATA_TEST_SUBJ}FrozenEnterpriseRequiredCallout`)
     ).not.toBeInTheDocument();
     expect(frozenPanel.getByTestId(`${DATA_TEST_SUBJ}RemoveFrozenPhaseButton`)).toBeVisible();
+  });
+
+  it('does not show frozen help text when the delete phase is not enabled', async () => {
+    renderDlmFlyout({ initialDsl: { frozen_after: '30d' } }, { initialSelectedPhase: 'frozen' });
+    await tick();
+
+    const frozenPanel = withinPhase('frozen');
+    expect(frozenPanel.queryByText(/Must occur before the .* phase/i)).not.toBeInTheDocument();
   });
 
   it('shows a default repository required callout in frozen searchable snapshot section when default repo is missing', async () => {

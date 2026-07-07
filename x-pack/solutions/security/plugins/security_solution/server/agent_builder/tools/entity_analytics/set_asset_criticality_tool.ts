@@ -11,8 +11,10 @@ import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core/server';
-import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
-import { getLatestEntityIndexPattern } from '@kbn/entity-store/common';
+import {
+  checkEntityStoreIndexPrivileges,
+  ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES,
+} from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
@@ -36,25 +38,17 @@ const checkAssetCriticalityAccess = async ({
   security: SecurityPluginStart;
   spaceId: string;
 }): Promise<{ allowed: true } | { allowed: false; result: ErrorResult }> => {
-  const entitiesAlias = getEntitiesAlias(ENTITY_LATEST, spaceId);
-  const latestIndexPattern = getLatestEntityIndexPattern(spaceId);
-  const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
-  const { privileges } = await checkPrivileges({
-    elasticsearch: {
-      cluster: [],
-      index: {
-        [entitiesAlias]: ['write'],
-        [latestIndexPattern]: ['write'],
-      },
-    },
+  const {
+    has_write_permissions: hasWritePermissions,
+    has_kibana_feature_access: hasKibanaFeatureAccess,
+  } = await checkEntityStoreIndexPrivileges({
+    request,
+    security,
+    spaceId,
+    kibanaFeaturePrivileges: ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES,
   });
 
-  const hasWriteOnIndex = (key: string) =>
-    privileges.elasticsearch.index[key]?.some(
-      ({ privilege, authorized }) => privilege === 'write' && authorized
-    );
-
-  if (hasWriteOnIndex(entitiesAlias) && hasWriteOnIndex(latestIndexPattern)) {
+  if (hasWritePermissions && hasKibanaFeatureAccess) {
     return { allowed: true };
   }
 
