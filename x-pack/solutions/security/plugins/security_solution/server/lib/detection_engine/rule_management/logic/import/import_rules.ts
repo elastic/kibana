@@ -27,7 +27,7 @@ import {
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
  * @param detectionRulesClient {object}
- * @param experimentalFeatures - feature flags; in particular `bulkCreateRulesEnabled`
+ * @param experimentalFeatures - feature flags; in particular `bulkImportRulesEnabled`
  * @returns {Promise} an array of error and success messages from import
  */
 export const importRules = async ({
@@ -53,7 +53,7 @@ export const importRules = async ({
     return response;
   }
 
-  const useBulk = experimentalFeatures?.bulkCreateRulesEnabled ?? false;
+  const useBulk = experimentalFeatures?.bulkImportRulesEnabled ?? false;
 
   if (!useBulk) {
     for (const batch of chunk(RULE_MANAGEMENT_IMPORT_BATCH_SIZE, rules)) {

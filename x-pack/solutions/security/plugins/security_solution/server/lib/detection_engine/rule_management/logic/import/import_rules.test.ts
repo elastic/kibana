@@ -217,8 +217,8 @@ describe('importRules', () => {
     ]);
   });
 
-  describe('bulk path (bulkCreateRulesEnabled)', () => {
-    const experimentalFeatures = { bulkCreateRulesEnabled: true } as never;
+  describe('bulk path (bulkImportRulesEnabled)', () => {
+    const experimentalFeatures = { bulkImportRulesEnabled: true } as never;
 
     it('sends all rules within a single batch to one bulkImportRules call', async () => {
       const r1 = { ...ruleToImport, rule_id: 'r1' };

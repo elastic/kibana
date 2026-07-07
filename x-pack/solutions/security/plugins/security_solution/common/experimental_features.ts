@@ -30,7 +30,7 @@ export const allowedExperimentalValues = Object.freeze({
    *
    * Release: TBD
    */
-  bulkCreateRulesEnabled: false,
+  bulkImportRulesEnabled: false,
 
   /**
    * Enables extended rule execution logging to Event Log. When this setting is enabled:

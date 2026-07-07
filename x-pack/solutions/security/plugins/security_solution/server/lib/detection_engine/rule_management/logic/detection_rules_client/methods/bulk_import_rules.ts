@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { escapeQuotes } from '@kbn/es-query';
 import { v4 as uuidv4 } from 'uuid';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { BulkCreateRulesParams, RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../../../common';
@@ -197,6 +197,7 @@ export const bulkImportRules = async ({
             rulesClient,
             mlAuthz,
             prebuiltRuleAssetClient,
+            changeTracking,
             importRulePayload: {
               ruleToImport: { ...p.rule, exceptions_list: [...(p.exceptionsList ?? [])] },
               overrideFields: { rule_source: p.ruleSource, immutable: p.immutable },
@@ -226,26 +227,20 @@ export const bulkImportRules = async ({
 
   // Bulk-create new rules in a single alerting call. Pre-assign uuids so we
   // can re-pair successes/failures back to the source `rule_id`.
-  const inputById = new Map<string, PreparedImport>();
-  const bulkInputs = toBulkCreate.map((p) => {
-    const id = uuidv4();
-    inputById.set(id, p);
-    const ruleResponse = applyRuleDefaults({
-      ...p.rule,
-      exceptions_list: [...(p.exceptionsList ?? [])],
-      immutable: p.immutable,
-      rule_source: p.ruleSource,
-    });
-    const data = {
-      ...convertRuleResponseToAlertingRule(ruleResponse, actionsClient),
-      alertTypeId: ruleTypeMappings[p.rule.type],
-      consumer: SERVER_APP_ID,
-      // Preserve the user-requested enabled flag — alerting handles enabled
-      // rules natively (API key + task scheduling) in this single call.
-      enabled: p.rule.enabled ?? false,
-    };
-    return { data, options: { id }, allowMissingConnectorSecrets };
+  const {
+    bulkInputs,
+    inputById,
+    errors: buildErrors,
+  } = buildBulkInputs({
+    rules: toBulkCreate,
+    actionsClient,
+    allowMissingConnectorSecrets,
   });
+  responses.push(...buildErrors);
+
+  if (bulkInputs.length === 0) {
+    return { responses };
+  }
 
   const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
     rules: bulkInputs,
@@ -272,4 +267,52 @@ export const bulkImportRules = async ({
   });
 
   return { responses };
+};
+
+const buildBulkInputs = ({
+  rules,
+  actionsClient,
+  allowMissingConnectorSecrets,
+}: {
+  rules: PreparedImport[];
+  actionsClient: ActionsClient;
+  allowMissingConnectorSecrets?: boolean;
+}): {
+  bulkInputs: BulkCreateRulesParams<RuleParams>['rules'];
+  inputById: Map<string, PreparedImport>;
+  errors: RuleImportErrorObject[];
+} => {
+  const bulkInputs: BulkCreateRulesParams<RuleParams>['rules'] = [];
+  const inputById = new Map<string, PreparedImport>();
+  const errors: RuleImportErrorObject[] = [];
+
+  for (const p of rules) {
+    const id = uuidv4();
+    try {
+      const ruleResponse = applyRuleDefaults({
+        ...p.rule,
+        exceptions_list: [...(p.exceptionsList ?? [])],
+        immutable: p.immutable,
+        rule_source: p.ruleSource,
+      });
+      const data = {
+        ...convertRuleResponseToAlertingRule(ruleResponse, actionsClient),
+        alertTypeId: ruleTypeMappings[p.rule.type],
+        consumer: SERVER_APP_ID,
+        // Alerting mints the API key and schedules the task inline for enabled rules.
+        enabled: p.rule.enabled ?? false,
+      };
+      inputById.set(id, p);
+      bulkInputs.push({ data, options: { id }, allowMissingConnectorSecrets });
+    } catch (e) {
+      errors.push(
+        createRuleImportErrorObject({
+          ruleId: p.rule.rule_id,
+          message: e instanceof Error ? e.message : String(e),
+        })
+      );
+    }
+  }
+
+  return { bulkInputs, inputById, errors };
 };
