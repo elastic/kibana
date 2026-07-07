@@ -4,4 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { NOT_AVAILABLE_LABEL } from '@kbn/apm-common';
+
+import { i18n } from '@kbn/i18n';
+
+export const NOT_AVAILABLE_LABEL = i18n.translate('apmCommon.notAvailableLabel', {
+  defaultMessage: 'N/A',
+});

@@ -65,3 +65,4 @@ export type {
 } from './src/agent_configuration/setting_definitions/types';
 
 export { truncate, unit } from './src/utils/style';
+export { NOT_AVAILABLE_LABEL } from './src/utils/i18n';
