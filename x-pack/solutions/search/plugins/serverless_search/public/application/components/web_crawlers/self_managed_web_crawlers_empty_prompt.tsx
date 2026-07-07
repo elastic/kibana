@@ -156,12 +156,7 @@ export const SelfManagedWebCrawlersEmptyPrompt = () => {
                           <EuiIcon size="m" type="sortRight" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon
-                            color="primary"
-                            size="l"
-                            type="logoElasticsearch"
-                            aria-hidden
-                          />
+                          <EuiIcon color="primary" size="l" type="logoElasticsearch" aria-hidden />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
