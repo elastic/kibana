@@ -172,9 +172,7 @@ const manageTarFields = async (beat, filePath, beatFields) =>
           return reject(new Error(err));
         }
         console.log('building fields', beat.index);
-        const obj = parse(
-          fs.readFileSync(`${beat.outputDir}/fields.yml`, { encoding: 'utf-8' })
-        );
+        const obj = parse(fs.readFileSync(`${beat.outputDir}/fields.yml`, { encoding: 'utf-8' }));
         const ebeatFields = convertSchemaToHash(obj, beatFields);
         console.log('deleting files', beat.index);
         fs.rmSync(beat.outputDir, { recursive: true });
