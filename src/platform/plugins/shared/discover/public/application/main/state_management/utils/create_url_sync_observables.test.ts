@@ -21,30 +21,7 @@ import {
   selectTab,
   type DiscoverAppState,
 } from '../redux';
-import { selectTabRuntimeState, type RuntimeStateManager } from '../redux/runtime_state';
 import { TEST_PROFILE_STATE_DEF } from '../../../../context_awareness/__mocks__/profile_state';
-
-const setActiveDataSourceProfileState = ({
-  runtimeStateManager,
-  tabId,
-}: {
-  runtimeStateManager: RuntimeStateManager;
-  tabId: string;
-}) => {
-  const scopedProfilesManager = selectTabRuntimeState(
-    runtimeStateManager,
-    tabId
-  ).scopedProfilesManager$.getValue();
-  const contexts = scopedProfilesManager.getContexts();
-
-  jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
-    ...contexts,
-    dataSourceContext: {
-      ...contexts.dataSourceContext,
-      profileState: TEST_PROFILE_STATE_DEF,
-    },
-  });
-};
 
 describe('createUrlSyncObservables', () => {
   const setup = async () => {
@@ -78,6 +55,7 @@ describe('createUrlSyncObservables', () => {
       internalState: toolkit.internalState,
       runtimeStateManager: toolkit.runtimeStateManager,
       tabId: persistedTab.id,
+      initializeSingleTab: toolkit.initializeSingleTab,
     };
   };
 
@@ -212,7 +190,7 @@ describe('createUrlSyncObservables', () => {
   });
 
   it('should allow profileStateContainer to get active profile URL state', async () => {
-    const { result, internalState, runtimeStateManager, tabId } = await setup();
+    const { result, internalState, tabId, initializeSingleTab } = await setup();
 
     internalState.dispatch(
       internalStateActions.setProfileState({
@@ -227,7 +205,7 @@ describe('createUrlSyncObservables', () => {
       })
     );
 
-    setActiveDataSourceProfileState({ runtimeStateManager, tabId });
+    await initializeSingleTab({ tabId });
 
     expect(result.profileStateContainer.get()).toEqual({
       [TEST_PROFILE_STATE_DEF.key]: {
@@ -237,7 +215,7 @@ describe('createUrlSyncObservables', () => {
   });
 
   it('should allow profileStateContainer to set active profile URL state', async () => {
-    const { result, internalState, runtimeStateManager, tabId } = await setup();
+    const { result, internalState, tabId, initializeSingleTab } = await setup();
     const currentProfileState = {
       uiValue: 'ui',
       urlValue: 'oldUrl',
@@ -245,7 +223,7 @@ describe('createUrlSyncObservables', () => {
       nestedValue: { count: 1 },
     };
 
-    setActiveDataSourceProfileState({ runtimeStateManager, tabId });
+    await initializeSingleTab({ tabId });
     internalState.dispatch(
       internalStateActions.setProfileState({
         tabId,
@@ -269,7 +247,7 @@ describe('createUrlSyncObservables', () => {
   });
 
   it('should reset profile URL state fields when profileStateContainer is cleared', async () => {
-    const { result, internalState, runtimeStateManager, tabId } = await setup();
+    const { result, internalState, tabId, initializeSingleTab } = await setup();
     const currentProfileState = {
       uiValue: 'ui',
       urlValue: 'nextUrl',
@@ -277,7 +255,7 @@ describe('createUrlSyncObservables', () => {
       nestedValue: { count: 1 },
     };
 
-    setActiveDataSourceProfileState({ runtimeStateManager, tabId });
+    await initializeSingleTab({ tabId });
     internalState.dispatch(
       internalStateActions.setProfileState({
         tabId,

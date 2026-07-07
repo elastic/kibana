@@ -56,28 +56,6 @@ const setup = async () => {
   };
 };
 
-const setActiveDataSourceProfileState = ({
-  runtimeStateManager,
-  tabId,
-}: {
-  runtimeStateManager: Awaited<ReturnType<typeof setup>>['runtimeStateManager'];
-  tabId: string;
-}) => {
-  const scopedProfilesManager = selectTabRuntimeState(
-    runtimeStateManager,
-    tabId
-  ).scopedProfilesManager$.getValue();
-  const contexts = scopedProfilesManager.getContexts();
-
-  jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
-    ...contexts,
-    dataSourceContext: {
-      ...contexts.dataSourceContext,
-      profileState: TEST_PROFILE_STATE_DEF,
-    },
-  });
-};
-
 describe('tab_sync actions', () => {
   beforeEach(() => {
     jest.restoreAllMocks();
@@ -296,16 +274,9 @@ describe('tab_sync actions', () => {
     });
 
     it('should sync profile URL state changes into Redux', async () => {
-      const {
-        tabId,
-        initializeSingleTab,
-        internalState,
-        runtimeStateManager,
-        stateStorageContainer,
-      } = await setup();
+      const { tabId, initializeSingleTab, internalState, stateStorageContainer } = await setup();
 
       await initializeSingleTab({ tabId });
-      setActiveDataSourceProfileState({ runtimeStateManager, tabId });
 
       await stateStorageContainer.set(PROFILE_STATE_URL_KEY, {
         [TEST_PROFILE_STATE_DEF.key]: {

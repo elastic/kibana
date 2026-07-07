@@ -19,7 +19,6 @@ import {
   createRuntimeStateManager,
   selectAllTabs,
   selectTab,
-  selectTabRuntimeState,
   internalStateActions,
   DEFAULT_TAB_STATE,
 } from '..';
@@ -50,28 +49,6 @@ const setup = async () => {
   });
 
   return toolkit;
-};
-
-const setActiveDataSourceProfileState = ({
-  runtimeStateManager,
-  tabId,
-}: {
-  runtimeStateManager: Awaited<ReturnType<typeof setup>>['runtimeStateManager'];
-  tabId: string;
-}) => {
-  const scopedProfilesManager = selectTabRuntimeState(
-    runtimeStateManager,
-    tabId
-  ).scopedProfilesManager$.getValue();
-  const contexts = scopedProfilesManager.getContexts();
-
-  jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
-    ...contexts,
-    dataSourceContext: {
-      ...contexts.dataSourceContext,
-      profileState: TEST_PROFILE_STATE_DEF,
-    },
-  });
 };
 
 describe('tabs actions', () => {
@@ -174,13 +151,8 @@ describe('tabs actions', () => {
     });
 
     it('replaces profile URL state when switching selected tabs', async () => {
-      const {
-        internalState,
-        runtimeStateManager,
-        stateStorageContainer,
-        initializeSingleTab,
-        getCurrentTab,
-      } = await setup();
+      const { internalState, stateStorageContainer, initializeSingleTab, getCurrentTab } =
+        await setup();
       const currentTab = getCurrentTab();
       const profileState = {
         ...TEST_PROFILE_STATE_DEF.defaultState,
@@ -205,8 +177,7 @@ describe('tabs actions', () => {
           selectedItem: otherTab,
         })
       );
-      await initializeSingleTab({ tabId: otherTab.id, skipWaitForDataFetching: true });
-      setActiveDataSourceProfileState({ runtimeStateManager, tabId: otherTab.id });
+      await initializeSingleTab({ tabId: otherTab.id });
 
       await internalState.dispatch(
         internalStateActions.updateTabs({
