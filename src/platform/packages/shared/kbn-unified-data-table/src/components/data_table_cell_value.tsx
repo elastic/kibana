@@ -16,9 +16,9 @@ export const DataTablePopoverCellValue = ({ children }: { children: React.ReactN
   const styles = useMemoCss(componentStyles);
 
   return (
-    <div className="unifiedDataTable__cellPopoverValue eui-textBreakWord" css={styles.popover}>
+    <span className="unifiedDataTable__cellPopoverValue eui-textBreakWord" css={styles.popover}>
       {children}
-    </div>
+    </span>
   );
 };
 

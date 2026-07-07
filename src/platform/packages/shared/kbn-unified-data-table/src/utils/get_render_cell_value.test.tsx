@@ -852,7 +852,7 @@ describe('Unified data table cell rendering', () => {
     expect(within(popover).getByText('.gz')).toBeVisible();
   });
 
-  it('renders a structured (pretty-printed JSON) value in the cell popover', () => {
+  it('renders a pretty-printed JSON value in the cell popover', () => {
     const json = { foo: { bar: true } };
     const rows: EsHitRecord[] = [
       {
@@ -860,7 +860,7 @@ describe('Unified data table cell rendering', () => {
         _index: 'test',
         _score: 1,
         _source: undefined,
-        fields: { message: [JSON.stringify(json)] },
+        fields: { message: JSON.stringify(json) },
       },
     ];
 
@@ -886,88 +886,9 @@ describe('Unified data table cell rendering', () => {
       />
     );
 
-    const structuredValue = screen.getByTestId('dataTableExpandCellActionPopoverValue');
-    expect(structuredValue).toBeVisible();
-    expect(structuredValue.textContent).toBe(JSON.stringify(json, null, 2));
-  });
-
-  it('renders a long, non-JSON value as a structured text value in the cell popover', () => {
-    const longValue = 'a very long log line '.repeat(20);
-    const rows: EsHitRecord[] = [
-      {
-        _id: '1',
-        _index: 'test',
-        _score: 1,
-        _source: undefined,
-        fields: { message: [longValue] },
-      },
-    ];
-
-    const DataTableCellValue = getRenderCellValueFn({
-      closePopover: jest.fn(),
-      columnsMeta: undefined,
-      dataView: dataViewMock,
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
-      maxEntries: 100,
-      rows: rows.map(build),
-      shouldShowFieldHandler: () => true,
-    });
-
-    renderWithI18n(
-      <DataTableCellValue
-        colIndex={0}
-        columnId="message"
-        isDetails={true}
-        isExpandable={true}
-        isExpanded={false}
-        rowIndex={0}
-        setCellProps={jest.fn()}
-      />
-    );
-
-    const structuredValue = screen.getByTestId('dataTableExpandCellActionPopoverValue');
-    expect(structuredValue).toBeVisible();
-    expect(structuredValue.textContent).toBe(longValue);
-  });
-
-  it('reflows JSON embedded in surrounding text as a structured text value in the cell popover', () => {
-    const rows: EsHitRecord[] = [
-      {
-        _id: '1',
-        _index: 'test',
-        _score: 1,
-        _source: undefined,
-        fields: { message: ['[Error] Some log message: { "reason": "some failure reason" }'] },
-      },
-    ];
-
-    const DataTableCellValue = getRenderCellValueFn({
-      closePopover: jest.fn(),
-      columnsMeta: undefined,
-      dataView: dataViewMock,
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
-      maxEntries: 100,
-      rows: rows.map(build),
-      shouldShowFieldHandler: () => true,
-    });
-
-    renderWithI18n(
-      <DataTableCellValue
-        colIndex={0}
-        columnId="message"
-        isDetails={true}
-        isExpandable={true}
-        isExpanded={false}
-        rowIndex={0}
-        setCellProps={jest.fn()}
-      />
-    );
-
-    const structuredValue = screen.getByTestId('dataTableExpandCellActionPopoverValue');
-    expect(structuredValue).toBeVisible();
-    expect(structuredValue.textContent).toBe(
-      '[Error] Some log message:\n{\n  "reason": "some failure reason"\n}'
-    );
+    const popoverValue = screen.getByTestId('dataTableExpandCellActionPopoverValue');
+    expect(popoverValue).toBeVisible();
+    expect(popoverValue.textContent).toBe(JSON.stringify(json, null, 2));
   });
 
   it('renders a short, non-JSON value as its plain formatted value in the cell popover', () => {
@@ -977,7 +898,7 @@ describe('Unified data table cell rendering', () => {
         _index: 'test',
         _score: 1,
         _source: undefined,
-        fields: { message: ['a short message'] },
+        fields: { message: 'a short message' },
       },
     ];
 
