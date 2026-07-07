@@ -6,6 +6,7 @@
  */
 
 import { formatDuration } from '@kbn/alerting-plugin/common';
+import { recoveryStrategy, type Query, type RecoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import type { RuleApiResponse } from '../../services/rules_api';
 
@@ -120,4 +121,15 @@ export function formatRecoveryDelay(stateTransition: RuleApiResponse['state_tran
     timeframe: stateTransition.recovering_timeframe,
     operator: stateTransition.recovering_operator,
   });
+}
+
+export function getRecoverEsqlSegment(
+  query: Query,
+  strategy?: RecoveryStrategy
+): string | undefined {
+  if (strategy !== recoveryStrategy.query || !query.recovery) return undefined;
+  if (query.format === 'composed') {
+    return query.recovery.segment;
+  }
+  return query.recovery.query;
 }
