@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { V2RulesAdapter, V2RulesNotInstalledAdapter } from './v2_rules_adapter';
+import { RulesAdapterV2, RulesNotInstalledAdapterV2 } from './v2_rules_adapter';
 import type { CreateRuleBody, UpdateRuleBody } from './rules_management_client';
 import { STREAMS_RULE_CONSUMER, STREAMS_ESQL_RULE_TYPE_ID } from './rules_management_client';
 
@@ -21,7 +21,7 @@ function makeRulesClientMock() {
 }
 
 function makeAdapter(mock: ReturnType<typeof makeRulesClientMock>) {
-  return new V2RulesAdapter(mock as unknown as RulesClientApi);
+  return new RulesAdapterV2(mock as unknown as RulesClientApi);
 }
 
 function lastCreateCall(mock: ReturnType<typeof makeRulesClientMock>) {
@@ -59,7 +59,7 @@ const updateBody: UpdateRuleBody = {
   schedule: { interval: '1m' },
 };
 
-describe('V2RulesAdapter', () => {
+describe('RulesAdapterV2', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -82,7 +82,7 @@ describe('V2RulesAdapter', () => {
         grouping: { fields: ['_id'] },
         query: {
           format: 'standalone',
-          breach: { query: 'FROM logs-* METADATA _id | WHERE level == "error"' },
+          breach: { query: 'FROM logs-* METADATA _id | WHERE level == "error" | LIMIT 1000' },
         },
       });
       expect(lastCreateCall(mock).options).toEqual({ id: 'rule-1' });
@@ -108,6 +108,22 @@ describe('V2RulesAdapter', () => {
       expect(data.grouping).toEqual({ fields: ['_id'] });
     });
 
+    it('rejects STATS queries until rule-on-rule provisioning', async () => {
+      const mock = makeRulesClientMock();
+      const adapter = makeAdapter(mock);
+      const statsQuery =
+        'FROM logs-* | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | WHERE count > 0';
+
+      await expect(
+        adapter.createRule('rule-stats', {
+          ...createBody,
+          params: { ...createBody.params, query: statsQuery },
+        })
+      ).rejects.toThrow('STATS queries cannot be installed as v2 signal rules');
+
+      expect(mock.createRule).not.toHaveBeenCalled();
+    });
+
     it('maps updateRule body to v2 partial shape (no kind)', async () => {
       const mock = makeRulesClientMock();
       mock.updateRule.mockResolvedValue({} as never);
@@ -126,7 +142,7 @@ describe('V2RulesAdapter', () => {
           grouping: { fields: ['_id'] },
           query: {
             format: 'standalone',
-            breach: { query: 'FROM logs-* METADATA _id | WHERE level == "error"' },
+            breach: { query: 'FROM logs-* METADATA _id | WHERE level == "error" | LIMIT 1000' },
           },
         },
       });
@@ -194,7 +210,7 @@ describe('V2RulesAdapter', () => {
         query: { format: 'standalone'; breach: { query: string } };
       };
       expect(data.query.breach.query).toBe(
-        'FROM logs.child, logs.child.* METADATA _id | WHERE KQL("message: error")'
+        'FROM logs.child, logs.child.* METADATA _id | WHERE KQL("message: error") | LIMIT 1000'
       );
     });
 
@@ -213,7 +229,31 @@ describe('V2RulesAdapter', () => {
       const data = lastUpdateCall(mock).data as {
         query: { format: 'standalone'; breach: { query: string } };
       };
-      expect(data.query.breach.query).toBe('FROM logs-* METADATA _id | WHERE level == "error"');
+      expect(data.query.breach.query).toBe(
+        'FROM logs-* METADATA _id | WHERE level == "error" | LIMIT 1000'
+      );
+    });
+
+    it('appends MAX_ALERTS_PER_EXECUTION unconditionally — ES|QL min-semantics clamp larger author limits', async () => {
+      // | LIMIT 500 | LIMIT 1000 → 500 (author wins, smaller limit)
+      // | LIMIT 50000 | LIMIT 1000 → 1000 (capped)
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock);
+      await adapter.createRule('rule-1', {
+        ...createBody,
+        params: {
+          timestampField: '@timestamp',
+          query: 'FROM logs-* METADATA _id, _source | WHERE level == "error" | LIMIT 500',
+        },
+      });
+
+      const data = lastCreateCall(mock).data as {
+        query: { format: 'standalone'; breach: { query: string } };
+      };
+      expect(data.query.breach.query).toBe(
+        'FROM logs-* METADATA _id | WHERE level == "error" | LIMIT 500 | LIMIT 1000'
+      );
     });
 
     it('leaves queries without METADATA unchanged', async () => {
@@ -231,7 +271,7 @@ describe('V2RulesAdapter', () => {
       const data = lastCreateCall(mock).data as {
         query: { format: 'standalone'; breach: { query: string } };
       };
-      expect(data.query.breach.query).toBe('FROM logs-* | WHERE level == "error"');
+      expect(data.query.breach.query).toBe('FROM logs-* | WHERE level == "error" | LIMIT 1000');
     });
   });
 
@@ -334,9 +374,9 @@ describe('V2RulesAdapter', () => {
   });
 });
 
-describe('V2RulesNotInstalledAdapter', () => {
+describe('RulesNotInstalledAdapterV2', () => {
   it('bulkDeleteRules is a no-op', async () => {
-    const adapter = new V2RulesNotInstalledAdapter(loggerMock.create());
+    const adapter = new RulesNotInstalledAdapterV2(loggerMock.create());
     await expect(adapter.bulkDeleteRules(['a'])).resolves.toBeUndefined();
   });
 });

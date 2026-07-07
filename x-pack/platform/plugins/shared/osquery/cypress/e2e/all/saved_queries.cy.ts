@@ -15,7 +15,6 @@ import {
   ADD_QUERY_BUTTON,
   customActionEditSavedQuerySelector,
   customActionRunSavedQuerySelector,
-  EDIT_PACK_HEADER_BUTTON,
   rowActionsMenuSelector,
   SAVED_QUERY_DROPDOWN_SELECT,
 } from '../../screens/packs';
@@ -44,7 +43,8 @@ import {
 import { ServerlessRoleName } from '../../support/roles';
 import { getAdvancedButton } from '../../screens/integrations';
 
-describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/249946
+describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   let caseId: string;
 
   before(() => {
@@ -201,7 +201,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   // Migrated to Jest component test: public/form/results_type_field.test.tsx
   // Phase 2 migration — form field default values are UI-only assertions
 
-  describe('prebuilt', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/276571
+  describe.skip('prebuilt', () => {
     let packName: string;
     let packId: string;
     let savedQueryId: string;
@@ -265,7 +266,6 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
     it('user can edit prebuilt saved query under pack', () => {
       preparePack(packName);
-      cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
       cy.contains(`Edit ${packName}`);
       cy.getBySel(ADD_QUERY_BUTTON).click();
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { render, screen } from '@testing-library/react';
+import React from 'react';
 import type { WorkflowListDto } from '@kbn/workflows';
 import {
   getSelectedWorkflowDisabledError,
@@ -17,7 +19,8 @@ import {
 const createMockWorkflow = (
   id: string,
   enabled: boolean,
-  tags?: string[]
+  tags?: string[],
+  managed?: boolean
 ): WorkflowListDto['results'][number] => ({
   id,
   name: `workflow-${id}`,
@@ -35,6 +38,7 @@ const createMockWorkflow = (
   history: [],
   valid: true,
   tags,
+  managed,
 });
 
 describe('workflow_utils', () => {
@@ -84,6 +88,16 @@ describe('workflow_utils', () => {
 
       const options = processWorkflowsToOptions(workflows, undefined, config);
       expect(options[0].validationResult).toEqual({ severity: 'error', message: 'Invalid' });
+    });
+
+    it('adds a managed badge for managed workflows', () => {
+      const workflows = [createMockWorkflow('1', true, undefined, true)];
+
+      const [option] = processWorkflowsToOptions(workflows);
+
+      render(<>{option.append}</>);
+
+      expect(screen.getByText('Managed')).toBeInTheDocument();
     });
   });
 

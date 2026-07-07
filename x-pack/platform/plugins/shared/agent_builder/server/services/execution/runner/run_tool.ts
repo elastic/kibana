@@ -45,6 +45,7 @@ import {
   createSkillsService,
 } from './utils';
 import { toolConfirmationId, createToolConfirmationPrompt } from './utils/prompts';
+import { enforceResultSizeLimit } from './utils/enforce_result_size_limit';
 import type { RunnerManager } from './runner';
 
 export const runTool = async <TParams = Record<string, unknown>>({
@@ -202,7 +203,10 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
           tool_result_id: result.tool_result_id ?? getToolResultId(),
         } as ToolResult)
     );
-    runToolReturn = { results: resultsWithIds };
+    // Storage guardrail: cap the total persisted size for non-MCP calls
+    const guardedResults =
+      source === 'mcp' ? resultsWithIds : enforceResultSizeLimit(resultsWithIds);
+    runToolReturn = { results: guardedResults };
 
     reportToolCallTelemetry({
       parentManager,
@@ -210,7 +214,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       toolType: tool.type,
       toolCallId,
       source,
-      results: resultsWithIds,
+      results: guardedResults,
       duration,
     });
   } else {
@@ -242,12 +246,11 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   runToolReturn = afterToolHooksResult.toolReturn;
 
   if (runToolReturn.results && !isExcludedFromFilestore(tool.id)) {
-    runToolReturn.results.forEach((result) => {
-      resultStore.add({
-        tool_id: tool.id,
-        tool_call_id: toolCallId,
-        result,
-      });
+    resultStore.add({
+      tool_id: tool.id,
+      tool_call_id: toolCallId,
+      params: toolParams,
+      results: runToolReturn.results,
     });
   }
 
@@ -298,7 +301,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     request,
     spaceId,
     logger,
-    esClient: elasticsearch.client.asScoped(request),
+    esClient: elasticsearch.client.asScoped(request, { projectRouting: 'space' }),
     savedObjectsClient,
     modelProvider,
     runner: manager.getRunner(),

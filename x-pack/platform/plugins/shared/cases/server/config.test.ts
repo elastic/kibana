@@ -17,6 +17,13 @@ describe('config validation', () => {
               "enabled": false,
             },
           },
+          "analyticsV2": Object {
+            "enableAdminRoutes": false,
+            "enabled": false,
+            "reconciliationIntervalMinutes": 30,
+            "resetPageDelayMs": 0,
+            "resetTaskTimeoutMinutes": 60,
+          },
           "attachments": Object {
             "enabled": false,
           },
@@ -24,6 +31,9 @@ describe('config validation', () => {
             "details": false,
             "list": false,
             "settings": false,
+          },
+          "chat": Object {
+            "enabled": false,
           },
           "enabled": true,
           "files": Object {
@@ -149,6 +159,16 @@ describe('config validation', () => {
     it('allows attachments.enabled to be set to false explicitly', () => {
       const config = ConfigSchema.validate({ attachments: { enabled: false } });
       expect(config.attachments.enabled).toBe(false);
+    });
+
+    it('sets chat.enabled default to false', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.chat.enabled).toBe(false);
+    });
+
+    it('allows chat.enabled to be set to true', () => {
+      const config = ConfigSchema.validate({ chat: { enabled: true } });
+      expect(config.chat.enabled).toBe(true);
     });
   });
 });
