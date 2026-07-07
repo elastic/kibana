@@ -8,7 +8,7 @@
 import {
   platformCoreTools,
   platformCoreCasesTools,
-  platformStreamsSigEventsTools,
+  platformSignificantEventsTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 
@@ -22,7 +22,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Cases CRUD tools, registered by the Cases plugin
   ...Object.values(platformCoreCasesTools),
   // Streams / Significant Events
-  ...Object.values(platformStreamsSigEventsTools),
+  ...Object.values(platformSignificantEventsTools),
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
@@ -63,6 +63,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.list_leads`,
   `${internalNamespaces.security}.generate_leads`,
   `${internalNamespaces.security}.dismiss_lead`,
+  `${internalNamespaces.security}.set_asset_criticality`,
   `${internalNamespaces.security}.pci_scope_discovery`,
   `${internalNamespaces.security}.pci_compliance`,
   `${internalNamespaces.security}.pci_field_mapper`,
@@ -70,6 +71,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_readiness.get_quality`,
   `${internalNamespaces.security}.siem_readiness.get_continuity`,
   `${internalNamespaces.security}.siem_readiness.get_retention`,
+  `${internalNamespaces.security}.alert-triage`,
 
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,
@@ -101,9 +103,9 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
-  `${internalNamespaces.streams}.significant-events.discovery.investigator`,
-  `${internalNamespaces.streams}.significant-events.discovery.judge`,
-  `${internalNamespaces.streams}.investigation`,
+  `${internalNamespaces.platformSignificantEvents}.discovery.investigator`,
+  `${internalNamespaces.platformSignificantEvents}.discovery.judge`,
+  `${internalNamespaces.platformSignificantEvents}.investigation`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -162,6 +164,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'entity-analytics',
   'manage-watchlists',
   'alert-analysis',
+  'alert-triage',
   'detection-rule-edit',
   'recommend-prebuilt-rules',
   'threat-hunting',
