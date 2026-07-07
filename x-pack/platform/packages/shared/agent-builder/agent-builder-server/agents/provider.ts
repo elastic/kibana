@@ -35,6 +35,7 @@ import type {
   ConversationStateManager,
   SkillsService,
   PluginsService,
+  RenderersService,
   ToolManager,
   TodoStateManager,
   IFilesystemService,
@@ -156,6 +157,13 @@ export interface AgentHandlerContext {
    * Attachment service to interact with attachments.
    */
   attachments: AttachmentsService;
+  /**
+   * Renderers service, giving read access to the renderer types registered in
+   * agent builder (used to advertise them to the agent in the prompt).
+   * Optional: absent when the context is constructed outside agentBuilder's
+   * runner (treated as no renderers).
+   */
+  renderers?: RenderersService;
   /**
    * Skills service to interact with skills.
    */
