@@ -27,7 +27,6 @@ import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { ESQL_APPROXIMATION_FEATURE_FLAG_KEY } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
@@ -139,12 +138,6 @@ export function InternalDashboardTopNav({
   const hasUnpublishedVariables = useMemo(() => {
     return !deepEqual(publishedEsqlVariables, unpublishedEsqlVariables);
   }, [publishedEsqlVariables, unpublishedEsqlVariables]);
-
-  // temporary flag — will be removed once the feature is fully enabled
-  const isEsqlApproximationEnabled = useMemo(
-    () => coreServices.featureFlags.getBooleanValue(ESQL_APPROXIMATION_FEATURE_FLAG_KEY, false),
-    []
-  );
 
   const [hasEsqlPanel, setHasEsqlPanel] = useState(false);
   useEffect(() => {
@@ -452,22 +445,15 @@ export function InternalDashboardTopNav({
             dataService.search.isBackgroundSearchEnabled &&
             getDashboardCapabilities().storeSearchSession
           }
-          esqlApproximation={
-            isEsqlApproximationEnabled
-              ? {
-                  isApproximate: esqlApproximation ?? false,
-                  onChange: dashboardApi.setEsqlApproximation,
-                  disabled: !hasEsqlPanel,
-                  additionalText: i18n.translate(
-                    'dashboard.esqlApproximationToggle.additionalText',
-                    {
-                      defaultMessage:
-                        'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
-                    }
-                  ),
-                }
-              : undefined
-          }
+          esqlApproximation={{
+            isApproximate: esqlApproximation ?? false,
+            onChange: dashboardApi.setEsqlApproximation,
+            disabled: !hasEsqlPanel,
+            additionalText: i18n.translate('dashboard.esqlApproximationToggle.additionalText', {
+              defaultMessage:
+                'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
+            }),
+          }}
         />
       )}
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
