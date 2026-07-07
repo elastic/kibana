@@ -81,6 +81,7 @@ import {
   type ServiceNodeData,
   type ServiceMapEdge as ServiceMapEdgeType,
 } from '../../../../common/service_map';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ServiceFlyout } from '../../shared/service_flyout';
 import { SERVICE_FLYOUT_SOURCES } from '../../shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../shared/service_flyout/types';
@@ -180,6 +181,7 @@ function GraphInner({
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
+  const { core, share } = useApmPluginContext();
   const { euiTheme } = useEuiTheme();
   const { fitView, zoomIn, zoomOut, setCenter, getNodes, getNodesBounds } =
     useReactFlow<ServiceMapNode>();
@@ -929,6 +931,8 @@ function GraphInner({
               initialRangeFrom={flyoutOptions?.rangeFrom ?? start}
               initialRangeTo={flyoutOptions?.rangeTo ?? end}
               initialTransactionType={flyoutOptions?.initialTransactionType}
+              core={core}
+              share={share}
               onView={handleServiceFlyoutView}
               onClose={handlePopoverClose}
             />

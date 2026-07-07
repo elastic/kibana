@@ -15,11 +15,6 @@ jest.mock('../../links/discover_links/use_discover_href', () => ({
   useDiscoverHref: (args: unknown) => mockUseDiscoverHref(args),
 }));
 
-const mockUseServiceLinks = jest.fn();
-jest.mock('../hooks/use_service_links', () => ({
-  useServiceLinks: (...args: unknown[]) => mockUseServiceLinks(...args),
-}));
-
 const mockGetManageSlosUrl = jest.fn();
 jest.mock('../../../../hooks/use_manage_slos_url', () => ({
   getManageSlosUrl: (...args: unknown[]) => mockGetManageSlosUrl(...args),
@@ -27,6 +22,10 @@ jest.mock('../../../../hooks/use_manage_slos_url', () => ({
 
 const mockShare = {
   url: { locators: { get: jest.fn() } },
+} as any;
+
+const mockCore = {
+  http: { basePath: { prepend: (path: string) => path } },
 } as any;
 
 function renderFooter() {
@@ -38,6 +37,7 @@ function renderFooter() {
         rangeFrom="now-15m"
         rangeTo="now"
         transactionType="request"
+        core={mockCore}
         share={mockShare}
       />
     </IntlProvider>
@@ -57,7 +57,6 @@ describe('ServiceFlyoutFooter', () => {
     mockUseDiscoverHref.mockImplementation(({ indexType }: { indexType: string }) =>
       indexType === 'traces' ? '/app/discover/traces' : '/app/discover/logs'
     );
-    mockUseServiceLinks.mockReturnValue({ alertsHref: '/app/apm/alerts' });
     mockGetManageSlosUrl.mockReturnValue('/app/slos');
   }
 
@@ -71,6 +70,7 @@ describe('ServiceFlyoutFooter', () => {
           rangeFrom="now-15m"
           rangeTo="now"
           transactionType=""
+          core={mockCore}
           share={mockShare}
         />
       </IntlProvider>
@@ -140,7 +140,14 @@ describe('ServiceFlyoutFooter', () => {
     expect(logsAction).toHaveAttribute('data-ebt-detail', 'logs');
 
     const alertsAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openAlerts');
-    expect(alertsAction).toHaveAttribute('href', '/app/apm/alerts');
+    expect(alertsAction).toHaveAttribute(
+      'href',
+      expect.stringContaining('/app/observability/alerts')
+    );
+    const alertsHref = alertsAction.getAttribute('href') ?? '';
+    expect(alertsHref).toContain('opbeans-java');
+    expect(alertsHref).toContain('service.environment');
+    expect(alertsHref).toContain('production');
     expect(alertsAction).toHaveAttribute('data-ebt-action', 'viewAlerts');
     expect(alertsAction).toHaveAttribute('data-ebt-element', 'serviceFlyoutActionsMenu');
 
@@ -161,16 +168,26 @@ describe('ServiceFlyoutFooter', () => {
 
   it('disables the actions button when no actions are available', () => {
     mockUseDiscoverHref.mockReturnValue(undefined);
-    mockUseServiceLinks.mockReturnValue({ alertsHref: undefined });
     mockGetManageSlosUrl.mockReturnValue(undefined);
-    renderFooter();
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutFooter
+          serviceName="opbeans-java"
+          environment="production"
+          rangeFrom="now-15m"
+          rangeTo="now"
+          transactionType="request"
+          core={{ http: { basePath: { prepend: () => undefined } } } as any}
+          share={mockShare}
+        />
+      </IntlProvider>
+    );
 
     expect(screen.getByTestId('serviceFlyoutActionsButton')).toBeDisabled();
   });
 
   it('omits the Discover actions when no Discover hrefs resolve', () => {
     mockUseDiscoverHref.mockReturnValue(undefined);
-    mockUseServiceLinks.mockReturnValue({ alertsHref: '/app/apm/alerts' });
     mockGetManageSlosUrl.mockReturnValue('/app/slos');
     renderFooter();
 
