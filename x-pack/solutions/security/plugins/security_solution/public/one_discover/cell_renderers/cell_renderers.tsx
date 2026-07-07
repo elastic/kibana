@@ -18,7 +18,7 @@ import {
   SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
 } from '../../timelines/components/timeline/body/renderers/constants';
-import { getEcsField } from '../../flyout/document_details/right/components/table_field_name_cell';
+import { getEcsField } from '../../flyout_v2/shared/components/table_field_name_cell';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { IpCellRenderer } from './ip_cell_renderer';
