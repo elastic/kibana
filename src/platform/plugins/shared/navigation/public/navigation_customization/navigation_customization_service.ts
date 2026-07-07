@@ -61,7 +61,8 @@ export class NavigationCustomizationService {
   private readonly stop$ = new ReplaySubject<void>(1);
   private handlerRegistered = false;
   private menuLinkAdded = false;
-  private activeSolution?: SolutionId;
+  /** Whether the active space has resolved to a solution, gating the save event. */
+  private solutionResolved = false;
   private loadedReported = false;
 
   /**
@@ -107,7 +108,7 @@ export class NavigationCustomizationService {
     }
 
     if (solution) {
-      this.activeSolution = solution;
+      this.solutionResolved = true;
     }
 
     // Emit the per-load nav-state event once, the first time the solution is known.
@@ -119,9 +120,12 @@ export class NavigationCustomizationService {
       const navCustomizeState =
         savedCustomization !== undefined &&
         (savedCustomization.moves.length > 0 || savedCustomization.hidden.length > 0);
-      reportNavigationLoaded(core.analytics, {
-        nav_customize_state: navCustomizeState,
-      });
+      const emitLoaded = () =>
+        reportNavigationLoaded(core.analytics, { nav_customize_state: navCustomizeState });
+
+      // Gate on the user signal so EBT's context.userId (from the same cached
+      // getCurrentUser()) is stamped before we emit, avoiding a null-userId bucket.
+      core.security.authc.getCurrentUser().then(emitLoaded, emitLoaded);
     }
 
     if (!this.menuLinkAdded && security) {
@@ -180,7 +184,7 @@ export class NavigationCustomizationService {
           persist
             .then(() => {
               // Report persisted customizations
-              if (!this.activeSolution) return;
+              if (!this.solutionResolved) return;
               const hiddenSet = new Set(hiddenIds);
 
               // A save with no moves and nothing hidden does not count as a customization

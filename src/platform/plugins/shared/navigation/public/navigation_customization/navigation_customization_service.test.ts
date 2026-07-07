@@ -37,8 +37,8 @@ jest.mock('@kbn/core-chrome-browser-navigation-utils', () => ({
 
 const openModalMock = openCustomizeNavigationModal as jest.Mock;
 
-/** Flush pending microtasks + macrotask so a dynamic import()'s .then() callback runs. */
-const flushAsyncImport = () => new Promise((resolve) => setImmediate(resolve));
+/** Drain the microtask queue (dynamic import()s, resolved promise .then()s) before asserting. */
+const flushAsync = () => new Promise((resolve) => setImmediate(resolve));
 
 /**
  * `NavigationCustomization['hidden']` is typed as `AppDeepLinkId[]`. The tests use
@@ -57,6 +57,8 @@ const makeDeps = (overrides?: {
   core.userStorage.peek.mockReturnValue(overrides?.userStorageValue);
   core.userStorage.get$.mockReturnValue(userStorage$);
   core.userStorage.get.mockReturnValue(overrides?.userStorageValue);
+  // The per-load event is gated on this resolving (so EBT stamps context.userId).
+  (core.security.authc.getCurrentUser as jest.Mock).mockResolvedValue({ username: 'test-user' });
 
   const fakeNav = {
     renderableNodes: [
@@ -183,7 +185,7 @@ describe('NavigationCustomizationService', () => {
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome, security });
-      await flushAsyncImport();
+      await flushAsync();
 
       expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
       const [links] = (security.navControlService.addUserMenuLinks as jest.Mock).mock.calls[0];
@@ -196,7 +198,7 @@ describe('NavigationCustomizationService', () => {
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome }); // no security
-      await flushAsyncImport();
+      await flushAsync();
 
       expect(security.navControlService.addUserMenuLinks).not.toHaveBeenCalled();
     });
@@ -207,7 +209,7 @@ describe('NavigationCustomizationService', () => {
 
       service.enableUi({ core, chrome, security });
       service.enableUi({ core, chrome, security });
-      await flushAsyncImport();
+      await flushAsync();
 
       expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
     });
@@ -220,7 +222,7 @@ describe('NavigationCustomizationService', () => {
       service.enableUi({ core, chrome });
       // Later: active space confirmed, add menu link
       service.enableUi({ core, chrome, security });
-      await flushAsyncImport();
+      await flushAsync();
 
       expect(chrome.project.registerCustomizeNavigationHandler).toHaveBeenCalledTimes(1);
       expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
@@ -228,12 +230,13 @@ describe('NavigationCustomizationService', () => {
   });
 
   describe('per-load nav-state event', () => {
-    it('reports nav_customize_state: false on load when nothing is stored', () => {
+    it('reports nav_customize_state: false on load when nothing is stored', async () => {
       const { core, chrome } = makeDeps();
       const reportEvent = core.analytics.reportEvent as jest.Mock;
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome, solution: 'es' });
+      await flushAsync();
 
       expect(reportEvent).toHaveBeenCalledTimes(1);
       expect(reportEvent).toHaveBeenCalledWith(NAV_LOADED_EVENT_TYPE, {
@@ -241,7 +244,7 @@ describe('NavigationCustomizationService', () => {
       });
     });
 
-    it('reports nav_customize_state: true when a non-default customization is stored', () => {
+    it('reports nav_customize_state: true when a non-default customization is stored', async () => {
       const { core, chrome } = makeDeps({
         userStorageValue: { moves: [{ id: 'b', afterId: 'a' }], hidden: [] },
       });
@@ -249,6 +252,7 @@ describe('NavigationCustomizationService', () => {
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome, solution: 'es' });
+      await flushAsync();
 
       expect(reportEvent).toHaveBeenCalledTimes(1);
       expect(reportEvent).toHaveBeenCalledWith(NAV_LOADED_EVENT_TYPE, {
@@ -256,12 +260,13 @@ describe('NavigationCustomizationService', () => {
       });
     });
 
-    it('treats an empty stored customization as the default (nav_customize_state: false)', () => {
+    it('treats an empty stored customization as the default (nav_customize_state: false)', async () => {
       const { core, chrome } = makeDeps({ userStorageValue: { moves: [], hidden: [] } });
       const reportEvent = core.analytics.reportEvent as jest.Mock;
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome, solution: 'es' });
+      await flushAsync();
 
       expect(reportEvent).toHaveBeenCalledWith(NAV_LOADED_EVENT_TYPE, {
         nav_customize_state: false,
@@ -288,15 +293,50 @@ describe('NavigationCustomizationService', () => {
       expect(reportEvent).not.toHaveBeenCalled();
     });
 
-    it('reports at most once across repeated enableUi calls', () => {
+    it('reports at most once across repeated enableUi calls', async () => {
       const { core, chrome } = makeDeps();
       const reportEvent = core.analytics.reportEvent as jest.Mock;
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome, solution: 'es' });
       service.enableUi({ core, chrome, solution: 'es' });
+      await flushAsync();
 
       expect(reportEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('gates the event on the user signal so EBT can stamp context.userId', async () => {
+      const { core, chrome } = makeDeps();
+      const reportEvent = core.analytics.reportEvent as jest.Mock;
+      const service = new NavigationCustomizationService();
+
+      service.enableUi({ core, chrome, solution: 'es' });
+
+      // Not emitted synchronously: it waits for getCurrentUser() to resolve so
+      // context.userId is stamped before the event ships.
+      expect(core.security.authc.getCurrentUser).toHaveBeenCalledTimes(1);
+      expect(reportEvent).not.toHaveBeenCalled();
+
+      await flushAsync();
+
+      expect(reportEvent).toHaveBeenCalledWith(NAV_LOADED_EVENT_TYPE, {
+        nav_customize_state: false,
+      });
+    });
+
+    it('still emits once even if the user signal rejects', async () => {
+      const { core, chrome } = makeDeps();
+      (core.security.authc.getCurrentUser as jest.Mock).mockRejectedValue(new Error('no user'));
+      const reportEvent = core.analytics.reportEvent as jest.Mock;
+      const service = new NavigationCustomizationService();
+
+      service.enableUi({ core, chrome, solution: 'es' });
+      await flushAsync();
+
+      expect(reportEvent).toHaveBeenCalledTimes(1);
+      expect(reportEvent).toHaveBeenCalledWith(NAV_LOADED_EVENT_TYPE, {
+        nav_customize_state: false,
+      });
     });
   });
 
@@ -315,15 +355,15 @@ describe('NavigationCustomizationService', () => {
       const service = new NavigationCustomizationService();
       service.start({ core, chrome, isUnauthenticated: false });
       service.enableUi({ core, chrome });
-      await flushAsyncImport();
+      await flushAsync();
 
       const [handler] = (chrome.project.registerCustomizeNavigationHandler as jest.Mock).mock
         .calls[0];
       // openModal fires run() without awaiting it, so flush microtasks to let the
       // dynamic imports and getNavigationItems resolve before inspecting callbacks.
       (handler as () => void)();
-      await flushAsyncImport();
-      await flushAsyncImport();
+      await flushAsync();
+      await flushAsync();
 
       const callbacks = (openCustomizeNavigationModalModule as jest.Mock).mock.calls[0]?.[0];
       return { core, chrome, callbacks };
@@ -399,7 +439,7 @@ describe('NavigationCustomizationService', () => {
       const handler = (chrome.project.registerCustomizeNavigationHandler as jest.Mock).mock
         .calls[0][0] as () => void;
       handler();
-      await flushAsyncImport();
+      await flushAsync();
 
       const reportEvent = core.analytics.reportEvent as jest.Mock;
       reportEvent.mockClear();
@@ -415,7 +455,7 @@ describe('NavigationCustomizationService', () => {
       // Reset-to-default / unchanged: no moves and nothing hidden.
       onSave({ moves: [], hidden: [] }, ['a', 'b'], []);
       // The event is reported only after the persistence operation (here a `remove`) resolves.
-      await flushAsyncImport();
+      await flushAsync();
 
       expect(reportEvent).toHaveBeenCalledTimes(1);
       expect(reportEvent).toHaveBeenCalledWith(
@@ -434,7 +474,7 @@ describe('NavigationCustomizationService', () => {
       const { onSave, reportEvent } = await openModalAndGetOnSave(deps);
 
       onSave({ moves: [{ id: 'b', afterId: null }], hidden: [] }, ['b', 'a'], []);
-      await flushAsyncImport();
+      await flushAsync();
 
       expect(reportEvent).toHaveBeenCalledWith(
         NAV_CUSTOMIZATION_EVENT_TYPE,
@@ -451,7 +491,7 @@ describe('NavigationCustomizationService', () => {
       const { onSave, reportEvent } = await openModalAndGetOnSave(deps);
 
       onSave({ moves: [], hidden: asHidden('b') }, ['a', 'b'], ['b']);
-      await flushAsyncImport();
+      await flushAsync();
 
       expect(reportEvent).toHaveBeenCalledWith(
         NAV_CUSTOMIZATION_EVENT_TYPE,
@@ -473,7 +513,7 @@ describe('NavigationCustomizationService', () => {
       const { onSave, reportEvent } = await openModalAndGetOnSave(deps);
 
       onSave({ moves: [{ id: 'b', afterId: null }], hidden: [] }, ['b', 'a'], []);
-      await flushAsyncImport();
+      await flushAsync();
 
       // The write failed (the user saw the error toast instead), so no event is
       // emitted for a customization that never landed.
