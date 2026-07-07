@@ -20,11 +20,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { getNavigationNodeIcon } from '@kbn/core-chrome-browser-navigation-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { NAV_CUSTOMIZATION_STORAGE_KEY } from '../../common/constants';
-import {
-  buildNavItemsProperties,
-  reportNavigationCustomization,
-  reportNavigationLoaded,
-} from './telemetry';
+import { NavigationCustomizationReporter } from './navigation_customization_reporter';
 
 /**
  * Upper bound for waiting on the first navigation snapshot when the modal is opened.
@@ -59,11 +55,9 @@ export interface NavigationCustomizationServiceUiDeps {
  */
 export class NavigationCustomizationService {
   private readonly stop$ = new ReplaySubject<void>(1);
+  private readonly reporter = new NavigationCustomizationReporter();
   private handlerRegistered = false;
   private menuLinkAdded = false;
-  /** Whether the active space has resolved to a solution, gating the save event. */
-  private solutionResolved = false;
-  private loadedReported = false;
 
   /**
    * Applies the stored customization to the project navigation. Must be called
@@ -107,25 +101,17 @@ export class NavigationCustomizationService {
       chrome.project.registerCustomizeNavigationHandler(() => this.openModal(core, chrome));
     }
 
+    // Once the active space resolves, enable save reporting and emit the
+    // per-load nav-state event (the reporter dedupes it to once per lifecycle).
     if (solution) {
-      this.solutionResolved = true;
-    }
-
-    // Emit the per-load nav-state event once, the first time the solution is known.
-    if (solution && !this.loadedReported) {
-      this.loadedReported = true;
-      const savedCustomization = core.userStorage.get<NavigationCustomization>(
-        NAV_CUSTOMIZATION_STORAGE_KEY
-      );
-      const navCustomizeState =
-        savedCustomization !== undefined &&
-        (savedCustomization.moves.length > 0 || savedCustomization.hidden.length > 0);
-      const emitLoaded = () =>
-        reportNavigationLoaded(core.analytics, { nav_customize_state: navCustomizeState });
-
-      // Gate on the user signal so EBT's context.userId (from the same cached
-      // getCurrentUser()) is stamped before we emit, avoiding a null-userId bucket.
-      core.security.authc.getCurrentUser().then(emitLoaded, emitLoaded);
+      this.reporter.markSolutionResolved();
+      this.reporter.reportLoadedOnce({
+        analytics: core.analytics,
+        getCurrentUser: () => core.security.authc.getCurrentUser(),
+        savedCustomization: core.userStorage.get<NavigationCustomization>(
+          NAV_CUSTOMIZATION_STORAGE_KEY
+        ),
+      });
     }
 
     if (!this.menuLinkAdded && security) {
@@ -183,16 +169,12 @@ export class NavigationCustomizationService {
 
           persist
             .then(() => {
-              // Report persisted customizations
-              if (!this.solutionResolved) return;
-              const hiddenSet = new Set(hiddenIds);
-
-              // A save with no moves and nothing hidden does not count as a customization
-              const didCustomize = c.moves.length > 0 || c.hidden.length > 0;
-              reportNavigationCustomization(core.analytics, {
-                action: didCustomize ? 'customization_saved' : 'default_saved',
-                did_customize: didCustomize,
-                ...buildNavItemsProperties(order.map((id) => ({ id, hidden: hiddenSet.has(id) }))),
+              // Report the persisted layout (gated on a resolved solution).
+              this.reporter.reportSave({
+                analytics: core.analytics,
+                customization: c,
+                order,
+                hiddenIds,
               });
             })
             .catch((error: Error) => {

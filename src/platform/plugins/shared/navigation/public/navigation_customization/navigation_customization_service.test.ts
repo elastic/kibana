@@ -40,13 +40,6 @@ const openModalMock = openCustomizeNavigationModal as jest.Mock;
 /** Drain the microtask queue (dynamic import()s, resolved promise .then()s) before asserting. */
 const flushAsync = () => new Promise((resolve) => setImmediate(resolve));
 
-/**
- * `NavigationCustomization['hidden']` is typed as `AppDeepLinkId[]`. The tests use
- * synthetic ids ('a', 'b'), so this keeps the necessary cast in one readable place.
- */
-const asHidden = (...ids: string[]): NavigationCustomization['hidden'] =>
-  ids as NavigationCustomization['hidden'];
-
 const makeDeps = (overrides?: {
   isUnauthenticated?: boolean;
   userStorageValue?: NavigationCustomization | undefined;
@@ -229,45 +222,25 @@ describe('NavigationCustomizationService', () => {
     });
   });
 
+  // Payload/state derivation for these events is covered in
+  // navigation_customization_reporter.test.ts; here we only assert that the
+  // service wires the reporter to the right lifecycle points and inputs.
   describe('per-load nav-state event', () => {
-    it('reports nav_customize_state: false on load when nothing is stored', async () => {
+    it('emits once the solution resolves, gated on the user signal', async () => {
       const { core, chrome } = makeDeps();
       const reportEvent = core.analytics.reportEvent as jest.Mock;
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome, solution: 'es' });
+
+      // Not emitted synchronously: it waits for getCurrentUser() to resolve so
+      // EBT's context.userId is stamped before the event ships.
+      expect(core.security.authc.getCurrentUser).toHaveBeenCalledTimes(1);
+      expect(reportEvent).not.toHaveBeenCalled();
+
       await flushAsync();
 
       expect(reportEvent).toHaveBeenCalledTimes(1);
-      expect(reportEvent).toHaveBeenCalledWith(NAV_LOADED_EVENT_TYPE, {
-        nav_customize_state: false,
-      });
-    });
-
-    it('reports nav_customize_state: true when a non-default customization is stored', async () => {
-      const { core, chrome } = makeDeps({
-        userStorageValue: { moves: [{ id: 'b', afterId: 'a' }], hidden: [] },
-      });
-      const reportEvent = core.analytics.reportEvent as jest.Mock;
-      const service = new NavigationCustomizationService();
-
-      service.enableUi({ core, chrome, solution: 'es' });
-      await flushAsync();
-
-      expect(reportEvent).toHaveBeenCalledTimes(1);
-      expect(reportEvent).toHaveBeenCalledWith(NAV_LOADED_EVENT_TYPE, {
-        nav_customize_state: true,
-      });
-    });
-
-    it('treats an empty stored customization as the default (nav_customize_state: false)', async () => {
-      const { core, chrome } = makeDeps({ userStorageValue: { moves: [], hidden: [] } });
-      const reportEvent = core.analytics.reportEvent as jest.Mock;
-      const service = new NavigationCustomizationService();
-
-      service.enableUi({ core, chrome, solution: 'es' });
-      await flushAsync();
-
       expect(reportEvent).toHaveBeenCalledWith(NAV_LOADED_EVENT_TYPE, {
         nav_customize_state: false,
       });
@@ -283,60 +256,16 @@ describe('NavigationCustomizationService', () => {
       expect(core.userStorage.remove).not.toHaveBeenCalled();
     });
 
-    it('does not report before the solution is resolved (handler-only registration)', () => {
+    it('does not report before the solution is resolved (handler-only registration)', async () => {
       const { core, chrome } = makeDeps();
       const reportEvent = core.analytics.reportEvent as jest.Mock;
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome }); // no solution yet
+      await flushAsync();
 
+      expect(core.security.authc.getCurrentUser).not.toHaveBeenCalled();
       expect(reportEvent).not.toHaveBeenCalled();
-    });
-
-    it('reports at most once across repeated enableUi calls', async () => {
-      const { core, chrome } = makeDeps();
-      const reportEvent = core.analytics.reportEvent as jest.Mock;
-      const service = new NavigationCustomizationService();
-
-      service.enableUi({ core, chrome, solution: 'es' });
-      service.enableUi({ core, chrome, solution: 'es' });
-      await flushAsync();
-
-      expect(reportEvent).toHaveBeenCalledTimes(1);
-    });
-
-    it('gates the event on the user signal so EBT can stamp context.userId', async () => {
-      const { core, chrome } = makeDeps();
-      const reportEvent = core.analytics.reportEvent as jest.Mock;
-      const service = new NavigationCustomizationService();
-
-      service.enableUi({ core, chrome, solution: 'es' });
-
-      // Not emitted synchronously: it waits for getCurrentUser() to resolve so
-      // context.userId is stamped before the event ships.
-      expect(core.security.authc.getCurrentUser).toHaveBeenCalledTimes(1);
-      expect(reportEvent).not.toHaveBeenCalled();
-
-      await flushAsync();
-
-      expect(reportEvent).toHaveBeenCalledWith(NAV_LOADED_EVENT_TYPE, {
-        nav_customize_state: false,
-      });
-    });
-
-    it('still emits once even if the user signal rejects', async () => {
-      const { core, chrome } = makeDeps();
-      (core.security.authc.getCurrentUser as jest.Mock).mockRejectedValue(new Error('no user'));
-      const reportEvent = core.analytics.reportEvent as jest.Mock;
-      const service = new NavigationCustomizationService();
-
-      service.enableUi({ core, chrome, solution: 'es' });
-      await flushAsync();
-
-      expect(reportEvent).toHaveBeenCalledTimes(1);
-      expect(reportEvent).toHaveBeenCalledWith(NAV_LOADED_EVENT_TYPE, {
-        nav_customize_state: false,
-      });
     });
   });
 
@@ -421,9 +350,8 @@ describe('NavigationCustomizationService', () => {
     /**
      * Opens the modal through the registered chrome handler and returns the
      * `onSave` callback the service handed to `openCustomizeNavigationModal`,
-     * plus the analytics mock. The per-load nav-state event fires synchronously
-     * inside `enableUi`, so we clear analytics after opening to isolate the save
-     * event under test.
+     * plus the analytics mock. The per-load nav-state event fires from `enableUi`,
+     * so we clear analytics after opening to isolate the save event under test.
      */
     const openModalAndGetOnSave = async (
       deps: ReturnType<typeof makeDeps>
@@ -448,58 +376,23 @@ describe('NavigationCustomizationService', () => {
       return { onSave, reportEvent };
     };
 
-    it('reports did_customize: false when the saved layout matches the default (e.g. reset to default)', async () => {
-      const deps = makeDeps();
-      const { onSave, reportEvent } = await openModalAndGetOnSave(deps);
-
-      // Reset-to-default / unchanged: no moves and nothing hidden.
-      onSave({ moves: [], hidden: [] }, ['a', 'b'], []);
-      // The event is reported only after the persistence operation (here a `remove`) resolves.
-      await flushAsync();
-
-      expect(reportEvent).toHaveBeenCalledTimes(1);
-      expect(reportEvent).toHaveBeenCalledWith(
-        NAV_CUSTOMIZATION_EVENT_TYPE,
-        expect.objectContaining({
-          action: 'default_saved',
-          did_customize: false,
-          visible_item_ids: ['a', 'b'],
-          hidden_item_ids: [],
-        })
-      );
-    });
-
-    it('reports did_customize: true when the user reordered items', async () => {
+    // Payload derivation (action / did_customize / item arrays) is covered in
+    // the reporter test; here we assert the save event fires only after the
+    // write resolves, with the modal's inputs forwarded through.
+    it('reports the save event, forwarding modal inputs, after persistence resolves', async () => {
       const deps = makeDeps();
       const { onSave, reportEvent } = await openModalAndGetOnSave(deps);
 
       onSave({ moves: [{ id: 'b', afterId: null }], hidden: [] }, ['b', 'a'], []);
       await flushAsync();
 
+      expect(reportEvent).toHaveBeenCalledTimes(1);
       expect(reportEvent).toHaveBeenCalledWith(
         NAV_CUSTOMIZATION_EVENT_TYPE,
         expect.objectContaining({
           action: 'customization_saved',
           did_customize: true,
           visible_item_ids: ['b', 'a'],
-        })
-      );
-    });
-
-    it('reports did_customize: true when the user hid an item', async () => {
-      const deps = makeDeps();
-      const { onSave, reportEvent } = await openModalAndGetOnSave(deps);
-
-      onSave({ moves: [], hidden: asHidden('b') }, ['a', 'b'], ['b']);
-      await flushAsync();
-
-      expect(reportEvent).toHaveBeenCalledWith(
-        NAV_CUSTOMIZATION_EVENT_TYPE,
-        expect.objectContaining({
-          action: 'customization_saved',
-          did_customize: true,
-          visible_item_ids: ['a'],
-          hidden_item_ids: ['b'],
         })
       );
     });
