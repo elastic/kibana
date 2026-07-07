@@ -10,25 +10,24 @@
 import { EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { selectUnit } from '@formatjs/intl-utils';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useParams } from 'react-router-dom';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
+import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
-import { WorkflowDetailActionsMenu } from './workflow_detail_actions_menu';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
   selectHasChanges,
   selectHasYamlSchemaValidationErrors,
-  selectIsExecutionsTab,
   selectIsSavingYaml,
   selectIsYamlSynced,
   selectIsYamlSyntaxValid,
@@ -84,11 +83,13 @@ export const WorkflowDetailHeader = React.memo(
       canCreateWorkflow,
       canUpdateWorkflow,
       canExecuteWorkflow,
+      canReadWorkflow,
       canReadWorkflowExecution,
       canReadManagedWorkflowExecution,
     } = useWorkflowsCapabilities();
 
-    const { setActiveTab } = useWorkflowUrlState();
+    const { tab: activeTab, setActiveTab } = useWorkflowUrlState();
+    const isExecutionsTab = activeTab === 'executions';
 
     const workflow = useSelector(selectWorkflow);
     const isManagedWorkflow = workflow?.managed === true;
@@ -100,7 +101,6 @@ export const WorkflowDetailHeader = React.memo(
     const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
     const hasYamlSchemaValidationErrors = useSelector(selectHasYamlSchemaValidationErrors);
     const hasUnsavedChanges = useSelector(selectHasChanges);
-    const isExecutionsTab = useSelector(selectIsExecutionsTab);
     const isYamlSynced = useSelector(selectIsYamlSynced);
 
     const { name, isEnabled, lastUpdatedAt } = useMemo(
@@ -240,6 +240,25 @@ export const WorkflowDetailHeader = React.memo(
       WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
     );
 
+    const changeHistoryModal = useContext(ChangeHistoryModalContext);
+    const openHistoryModal = changeHistoryModal?.openModal;
+    const historyItem = useMemo<AppMenuItemType | undefined>(() => {
+      if (!canReadWorkflow || !openHistoryModal) {
+        return undefined;
+      }
+      return {
+        id: 'workflowHistory',
+        order: 100,
+        overflow: true,
+        label: i18n.translate('workflows.workflowDetailHeader.historyButton', {
+          defaultMessage: 'History',
+        }),
+        iconType: 'clock',
+        run: openHistoryModal,
+        testId: 'workflowDetailHistoryButton',
+      };
+    }, [canReadWorkflow, openHistoryModal]);
+
     const { handleRunClick, runConfirmationModal } = useRunWorkflowWithConfirmation(openTestModal);
 
     const badges = useMemo<AppHeaderBadge[]>(() => {
@@ -310,6 +329,9 @@ export const WorkflowDetailHeader = React.memo(
           testId: 'runWorkflowHeaderButton',
         });
       }
+      if (historyItem) {
+        items.push(historyItem);
+      }
 
       return {
         primaryActionItem: {
@@ -358,6 +380,7 @@ export const WorkflowDetailHeader = React.memo(
       isExecutionsTab,
       workflowId,
       executionsToggleItem,
+      historyItem,
       isVisualEditorEnabled,
       handleSaveWorkflow,
       canSaveWorkflow,
@@ -398,7 +421,6 @@ export const WorkflowDetailHeader = React.memo(
             docLink={WORKFLOWS_DOCUMENTATION_URL}
             showAddIntegrations
           />
-          {workflowId && !isExecutionsTab ? <WorkflowDetailActionsMenu /> : null}
         </EuiPageTemplate>
         {runConfirmationModal}
       </>
