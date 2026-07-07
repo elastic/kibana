@@ -10,10 +10,10 @@ import { internalDetectionsRoutes } from './internal/detections/route';
 import { internalDetectionsWorkflowRoutes } from './internal/detections/workflow_route';
 import { internalDiscoveriesRoutes } from './internal/discoveries/route';
 import { internalDiscoveryRoutes } from './internal/discovery/route';
-import { internalEligibleStreamsRoutes } from './internal/extraction/eligible_streams_route';
 import { internalEventsRoutes } from './internal/events/route';
 import { internalIdentifyKIFeaturesRoutes } from './internal/knowledge_indicators/features/identify_route';
 import { internalKIContinuousKIExtractionRoutes } from './internal/knowledge_indicators/continuous_ki_extraction/route';
+import { internalKIEligibleStreamsRoutes } from './internal/knowledge_indicators/extraction/eligible_streams_route';
 import { internalKIFeatureRoutes } from './internal/knowledge_indicators/features/route';
 import { internalKIKeepAliveRoutes } from './internal/knowledge_indicators/keep_alive/route';
 import { internalKIOnboardingRoutes } from './internal/knowledge_indicators/onboarding/route';
@@ -32,11 +32,12 @@ export const significantEventsRouteRepository = {
   ...internalDetectionsWorkflowRoutes,
   ...internalDiscoveriesRoutes,
   ...internalDiscoveryRoutes,
-  ...internalEligibleStreamsRoutes,
   ...internalEventsRoutes,
   ...internalIdentifyKIFeaturesRoutes,
   ...internalKIContinuousKIExtractionRoutes,
+  ...internalKIEligibleStreamsRoutes,
   ...internalKIFeatureRoutes,
+  ...internalKIKeepAliveRoutes,
   ...internalKIOnboardingRoutes,
   ...internalKIQueriesRoutes,
   ...internalKIQueryOccurrencesRoutes,
@@ -44,7 +45,6 @@ export const significantEventsRouteRepository = {
   ...internalMemoryRoutes,
   ...internalPromptsRoutes,
   // public APIs
-  ...internalKIKeepAliveRoutes,
   ...queryRoutes,
   ...significantEventsRoutes,
 };

@@ -9,7 +9,7 @@ import { Streams, streamMatchesIndexPatterns } from '@kbn/streams-schema';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { minimatch } from 'minimatch';
 import { isTerminalStatus } from '@kbn/workflows';
-import { parseStreamNameFromConcurrencyKey } from '../../../lib/workflows/onboarding_workflow_client';
+import { parseStreamNameFromConcurrencyKey } from '../../../../lib/workflows/onboarding_workflow_client';
 
 export interface StreamCandidate {
   streamName: string;

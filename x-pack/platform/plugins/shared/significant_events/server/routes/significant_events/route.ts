@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { QueryOccurrencesResponse } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
@@ -21,6 +21,7 @@ import { searchModeSchema } from '../utils/search_mode';
 const makeDateFromString = (description: string) =>
   z
     .string()
+    .max(MAX_ID_LENGTH)
     .describe(description)
     .transform((input) => new Date(input));
 
@@ -33,10 +34,12 @@ const readSignificantEventsKIQueryOccurrenceStatsRoute = createServerRoute({
       to: makeDateFromString('End of the time range as an ISO 8601 date string.'),
       bucketSize: z
         .string()
+        .max(MAX_ID_LENGTH)
         .regex(BUCKET_SIZE_PATTERN)
         .describe('The bucket size for aggregating events (e.g. "1m", "1h").'),
       query: z
         .string()
+        .max(MAX_TEXT_LENGTH)
         .optional()
         .describe('Query string to filter significant events on metadata fields'),
       searchMode: searchModeSchema,

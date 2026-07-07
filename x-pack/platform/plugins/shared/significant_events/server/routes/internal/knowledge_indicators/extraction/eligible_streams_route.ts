@@ -15,18 +15,19 @@ import {
 } from '@kbn/management-settings-ids';
 import { parseIndexPatterns } from '@kbn/streams-schema';
 import {
+  MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
-import { createServerRoute } from '../../create_server_route';
-import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { createServerRoute } from '../../../create_server_route';
+import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import {
   STREAMS_API_PRIVILEGES,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MAX_SCHEDULED_STREAMS,
-} from '../../../../common/constants';
-import { StatusError } from '../../../lib/errors/status_error';
-import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
+} from '../../../../../common/constants';
+import { StatusError } from '../../../../lib/errors/status_error';
+import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import {
   classifyStreams,
   filterEligibleStreams,
@@ -34,7 +35,7 @@ import {
   type StreamCandidate,
   type StreamClassificationResult,
 } from './classify_streams';
-import { resolveConnectorForFeature } from '../../utils/resolve_connector_for_feature';
+import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
@@ -59,6 +60,7 @@ export interface EligibleStreamsResponse {
 
 const NumberFromString = z
   .string()
+  .max(MAX_ID_LENGTH)
   .optional()
   .transform((value) => {
     if (value === undefined) return undefined;
@@ -193,6 +195,6 @@ const eligibleStreamsRoute = createServerRoute({
   },
 });
 
-export const internalEligibleStreamsRoutes = {
+export const internalKIEligibleStreamsRoutes = {
   ...eligibleStreamsRoute,
 };

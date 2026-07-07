@@ -45,6 +45,7 @@ const baseRequestParamsSchema = z.object({
   to: dateFromString.describe('End of the time range'),
   bucketSize: z
     .string()
+    .max(MAX_ID_LENGTH)
     .regex(BUCKET_SIZE_PATTERN)
     .describe('Size of time buckets for aggregation'),
   query: z
@@ -443,6 +444,7 @@ const generateQueriesRoute = createServerRoute({
       .object({
         connectorId: z
           .string()
+          .max(MAX_ID_LENGTH)
           .optional()
           .describe(
             'Optional connector ID override. When omitted the connector is resolved via the Inference Feature Registry.'
