@@ -11,8 +11,7 @@
     "server/**/*",
     "public/**/*",
     "types/**/*",
-    "test/**/*",
-    "../significant_events/server/routes/internal/knowledge_indicators/reset_kis"
+    "test/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
@@ -89,6 +88,6 @@
     "@kbn/elastic-agent-utils",
     "@kbn/sample-log-parser",
     "@kbn/workflows-extensions",
-    "@kbn/agent-context-layer-plugin",
+    "@kbn/agent-context-layer-plugin"
   ]
 }
