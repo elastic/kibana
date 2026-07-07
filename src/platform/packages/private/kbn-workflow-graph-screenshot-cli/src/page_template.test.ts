@@ -31,7 +31,9 @@ describe('buildPageHtml', () => {
 
   it('embeds config in kbn-graph-config data attribute as JSON', () => {
     const html = buildPageHtml('name: hello', config, width, height);
-    expect(html).toContain('<kbn-graph-config data="{&quot;transparent&quot;:false}"></kbn-graph-config>');
+    expect(html).toContain(
+      '<kbn-graph-config data="{&quot;transparent&quot;:false}"></kbn-graph-config>'
+    );
   });
 
   it('escapes </script> in YAML so it cannot break out of any script block', () => {
