@@ -65233,6 +65233,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65300,6 +65301,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65330,16 +65332,19 @@ paths:
                             properties:
                               description:
                                 default: ''
+                                maxLength: 10000
                                 type: string
                               esql:
                                 type: object
                                 properties:
                                   query:
+                                    maxLength: 10000
                                     type: string
                                 required:
                                   - query
                               evidence:
                                 items:
+                                  maxLength: 10000
                                   type: string
                                 type: array
                               expires_at:
@@ -65368,6 +65373,7 @@ paths:
                             type: object
                             properties:
                               id:
+                                maxLength: 255
                                 type: string
                             required:
                               - id
@@ -65411,12 +65417,14 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The identifier of the query to remove.
           in: path
           name: queryId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65463,12 +65471,14 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The identifier of the query.
           in: path
           name: queryId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65486,17 +65496,20 @@ paths:
               properties:
                 description:
                   default: ''
+                  maxLength: 10000
                   type: string
                 esql:
                   additionalProperties: false
                   type: object
                   properties:
                     query:
+                      maxLength: 10000
                       type: string
                   required:
                     - query
                 evidence:
                   items:
+                    maxLength: 10000
                     type: string
                   type: array
                 expires_at:
@@ -65540,24 +65553,28 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Start of the time range as an ISO 8601 date string.
           in: query
           name: from
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: End of the time range as an ISO 8601 date string.
           in: query
           name: to
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The bucket size for aggregating events (e.g. "1m", "1h").
           in: query
           name: bucketSize
           required: true
           schema:
+            maxLength: 255
             pattern: ^(\d+)([smhd])$
             type: string
         - description: Query string to filter significant events on metadata fields
@@ -65565,6 +65582,7 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: 'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). When omitted, defaults to hybrid with a silent keyword fallback on failure. When set explicitly, failures propagate as errors.'
           in: query
