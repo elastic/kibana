@@ -62,11 +62,16 @@ export const executionHistoryKeys = {
     page: number;
     perPage: number;
     search?: string;
+    ruleIds?: string[];
     outcome?: 'all' | 'dispatched' | 'throttled';
   }) => [...executionHistoryKeys.all, 'list', filters] as const,
   countSince: (
     since: string,
-    filters: { search?: string; outcome?: 'all' | 'dispatched' | 'throttled' } = {}
+    filters: {
+      search?: string;
+      ruleIds?: string[];
+      outcome?: 'all' | 'dispatched' | 'throttled';
+    } = {}
   ) => [...executionHistoryKeys.all, 'countSince', since, filters] as const,
 };
 
