@@ -48940,9 +48940,11 @@ paths:
                   properties:
                     additionalIndexPatterns:
                       items:
+                        maxLength: 255
                         type: string
                       type: array
                     delay:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     docsLimit:
@@ -48951,6 +48953,7 @@ paths:
                       type: integer
                     excludedIndexPatterns:
                       items:
+                        maxLength: 255
                         type: string
                       type: array
                     fieldHistoryLength:
@@ -48958,9 +48961,11 @@ paths:
                       minimum: -9007199254740991
                       type: integer
                     frequency:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     lookbackPeriod:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     maxLogsPerPage:
@@ -48977,6 +48982,7 @@ paths:
                         - drop
                       type: string
                     maxTimeWindowSize:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
               required:
@@ -49088,12 +49094,15 @@ paths:
                   type: object
                   properties:
                     delay:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     frequency:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     lookbackPeriod:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
               required:
@@ -56722,9 +56731,11 @@ paths:
                   properties:
                     additionalIndexPatterns:
                       items:
+                        maxLength: 255
                         type: string
                       type: array
                     delay:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     docsLimit:
@@ -56733,6 +56744,7 @@ paths:
                       type: integer
                     excludedIndexPatterns:
                       items:
+                        maxLength: 255
                         type: string
                       type: array
                     fieldHistoryLength:
@@ -56740,9 +56752,11 @@ paths:
                       minimum: -9007199254740991
                       type: integer
                     frequency:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     lookbackPeriod:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     maxLogsPerPage:
@@ -56759,6 +56773,7 @@ paths:
                         - drop
                       type: string
                     maxTimeWindowSize:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
       responses:
@@ -56876,9 +56891,11 @@ paths:
                   properties:
                     additionalIndexPatterns:
                       items:
+                        maxLength: 255
                         type: string
                       type: array
                     delay:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     docsLimit:
@@ -56887,6 +56904,7 @@ paths:
                       type: integer
                     excludedIndexPatterns:
                       items:
+                        maxLength: 255
                         type: string
                       type: array
                     fieldHistoryLength:
@@ -56894,9 +56912,11 @@ paths:
                       minimum: -9007199254740991
                       type: integer
                     frequency:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     lookbackPeriod:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
                     maxLogsPerPage:
@@ -56913,6 +56933,7 @@ paths:
                         - drop
                       type: string
                     maxTimeWindowSize:
+                      maxLength: 32
                       pattern: '[smdh]$'
                       type: string
       responses:
