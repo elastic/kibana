@@ -31,7 +31,6 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
-import { readWorkflowVersioningEnabled } from '@kbn/workflows/server';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import {
   maybeDrainConcurrencyQueueAfterTerminal,
@@ -570,7 +569,6 @@ export class WorkflowsExecutionEnginePlugin
                 defaultTriggeredBy: 'scheduled',
                 authenticatedUser: executedBy,
                 now: workflowCreatedAt,
-                workflowVersioningEnabled: await readWorkflowVersioningEnabled(coreStart, logger),
                 maxEventChainDepth: this.config.eventDriven.maxChainDepth,
                 getConcurrencyGroupKey: (execution) =>
                   this.getConcurrencyGroupKey(
@@ -704,10 +702,6 @@ export class WorkflowsExecutionEnginePlugin
       }
     };
 
-    const isWorkflowVersioningEnabled = async (): Promise<boolean> => {
-      return readWorkflowVersioningEnabled(coreStart, this.logger);
-    };
-
     const buildExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
       context: Record<string, unknown>;
@@ -715,10 +709,8 @@ export class WorkflowsExecutionEnginePlugin
       authenticatedUser: string;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
-      const versioningEnabled = await isWorkflowVersioningEnabled();
       return buildWorkflowExecutionDocument({
         ...args,
-        workflowVersioningEnabled: versioningEnabled,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
         getConcurrencyGroupKey: (execution) =>
           this.getConcurrencyGroupKey(

@@ -516,6 +516,7 @@ export const useIlmLifecycleSummary = ({
     <>
       {uiState.activeModal === 'delete' && uiState.deleteContext && (
         <EditPolicyModal
+          policyName={policyName}
           affectedResources={affectedResources}
           isManaged={uiState.deleteContext?.isManaged}
           isProcessing={uiState.isProcessing}
@@ -527,6 +528,7 @@ export const useIlmLifecycleSummary = ({
 
       {uiState.activeModal === 'edit' && uiState.editContext && (
         <EditPolicyModal
+          policyName={policyName}
           affectedResources={affectedResources}
           isManaged={uiState.editContext.isManaged}
           isProcessing={uiState.isProcessing}

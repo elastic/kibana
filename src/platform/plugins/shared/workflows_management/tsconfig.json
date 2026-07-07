@@ -30,6 +30,7 @@
     "@kbn/workflows",
     "@kbn/workflows-library",
     "@kbn/human-readable-id",
+    "@kbn/dag-layout",
     "@kbn/workflows-ui",
     "@kbn/workflows-yaml",
     "@kbn/zod",

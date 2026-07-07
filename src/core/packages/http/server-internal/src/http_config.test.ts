@@ -280,6 +280,41 @@ test('throws if xsrf.allowlist element does not start with a slash', () => {
   );
 });
 
+describe('xsrf.allowedSchemes', () => {
+  it('rejects schemes outside the apikey/bearer safe set', () => {
+    const httpSchema = config.schema;
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['basic'] } })).toThrow(
+      /xsrf\.allowedSchemes/
+    );
+    expect(() => httpSchema.validate({ xsrf: { allowedSchemes: ['foo'] } })).toThrow(
+      /xsrf\.allowedSchemes/
+    );
+  });
+
+  it('accepts the canonical apikey and bearer literals unchanged and an empty list', () => {
+    const httpSchema = config.schema;
+    expect(
+      httpSchema.validate({ xsrf: { allowedSchemes: ['apikey', 'bearer'] } }).xsrf.allowedSchemes
+    ).toEqual(['apikey', 'bearer']);
+    expect(
+      httpSchema.validate({ xsrf: { allowedSchemes: ['bearer'] } }).xsrf.allowedSchemes
+    ).toEqual(['bearer']);
+    expect(
+      httpSchema.validate({ xsrf: { allowedSchemes: [] } }, { serverless: true }).xsrf
+        .allowedSchemes
+    ).toEqual([]);
+  });
+
+  it('defaults to apikey and bearer on serverless and empty on traditional', () => {
+    const httpSchema = config.schema;
+    expect(httpSchema.validate({}, { serverless: true }).xsrf.allowedSchemes).toEqual([
+      'apikey',
+      'bearer',
+    ]);
+    expect(httpSchema.validate({}, { traditional: true }).xsrf.allowedSchemes).toEqual([]);
+  });
+});
+
 test('accepts any type of objects for custom headers', () => {
   const httpSchema = config.schema;
   const obj = {
