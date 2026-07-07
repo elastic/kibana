@@ -6,9 +6,9 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { ExecutionError } from '@kbn/workflows/server';
 import { DETECTION_ENGINE_ATTACKS_STATUS_URL } from '../../../../common/constants';
 import { setAttackStatusStepCommonDefinition } from '../../../../common/workflows/step_types/set_attack_status_step/set_attack_status_step_common';
+import { toAlertApiExecutionError } from '../to_alert_api_execution_error';
 
 export const setAttackStatusStepDefinition = createServerStepDefinition({
   ...setAttackStatusStepCommonDefinition,
@@ -19,9 +19,11 @@ export const setAttackStatusStepDefinition = createServerStepDefinition({
     const attackIds = Array.isArray(ids) ? ids : [ids];
 
     try {
-      const { status: responseStatus, body } = await context.contextManager.callKibanaApi<
-        Record<string, unknown>
-      >({
+      await context.contextManager.callKibanaApi<{
+        took?: number;
+        errors?: boolean;
+        items?: unknown[];
+      }>({
         method: 'POST',
         path: DETECTION_ENGINE_ATTACKS_STATUS_URL,
         body: {
@@ -32,14 +34,6 @@ export const setAttackStatusStepDefinition = createServerStepDefinition({
         },
       });
 
-      if (responseStatus >= 400) {
-        throw new ExecutionError({
-          type: 'ApiError',
-          message: `Failed to set attack status: HTTP ${responseStatus}`,
-          details: { body },
-        });
-      }
-
       return {
         output: {
           success: true,
@@ -47,14 +41,7 @@ export const setAttackStatusStepDefinition = createServerStepDefinition({
         },
       };
     } catch (error) {
-      if (error instanceof ExecutionError) {
-        throw error;
-      }
-      throw new ExecutionError({
-        type: 'ApiError',
-        message: error instanceof Error ? error.message : 'Unknown error occurred',
-        details: { error },
-      });
+      throw toAlertApiExecutionError(error, 'set attack status');
     }
   },
 });

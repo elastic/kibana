@@ -25,7 +25,7 @@ import type YAML from 'yaml';
 import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isTriggerType, WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
+import { isTriggerType, WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsMonacoTheme } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
@@ -194,7 +194,7 @@ export const WorkflowYAMLEditor = ({
   hideEditorTools = false,
 }: WorkflowYAMLEditorProps) => {
   const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
-    WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
+    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
     false
   );
   const { notifications, http } = useKibana().services;
