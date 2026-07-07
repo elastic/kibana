@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
-export const USER_PANEL_OBSERVED_USER_QUERY_ID = 'UserPanelObservedUserQuery';
+import { PREFIX } from '../../../../../flyout/shared/test_ids';
+
+export const OKTA_INSIGHTS_TOOL_TEST_ID = `${PREFIX}UserOktaInsightsTool` as const;
