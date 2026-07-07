@@ -69,12 +69,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                           <React.Fragment key={connector.serviceType}>
                             {index === Math.floor(connectorExamples.length / 2) && (
                               <EuiFlexItem grow={false}>
-                                <EuiIcon
-                                  color="primary"
-                                  size="l"
-                                  type="documents"
-                                  aria-hidden
-                                />
+                                <EuiIcon color="primary" size="l" type="documents" aria-hidden />
                               </EuiFlexItem>
                             )}
                             <EuiFlexItem grow={false}>
@@ -182,12 +177,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                           <EuiIcon size="m" type="sortRight" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon
-                            color="primary"
-                            size="l"
-                            type="logoElasticsearch"
-                            aria-hidden
-                          />
+                          <EuiIcon color="primary" size="l" type="logoElasticsearch" aria-hidden />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
