@@ -490,10 +490,7 @@ export class AttachmentService {
         }) as unknown as UnifiedAttachmentSavedObjectTransformed;
       }
 
-      assertLegacyWriteableAttachmentType(
-        getAttachmentTypeFromAttributes(decodedAttributes),
-        decodedAttributes.owner
-      );
+      assertLegacyWriteableAttachmentType(decodedAttributes);
 
       const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
       const { attributes: extractedAttributes, references: extractedReferences } =
@@ -577,10 +574,7 @@ export class AttachmentService {
               attachment.attributes
             );
 
-            assertLegacyWriteableAttachmentType(
-              getAttachmentTypeFromAttributes(decodedAttributes),
-              decodedAttributes.owner
-            );
+            assertLegacyWriteableAttachmentType(decodedAttributes);
             const transformer = getAttachmentTypeTransformers(
               getAttachmentTypeFromAttributes(decodedAttributes),
               decodedAttributes.owner
@@ -704,10 +698,7 @@ export class AttachmentService {
         return Object.assign(res, { attributes: decodedAttributes });
       }
 
-      assertLegacyWriteableAttachmentType(
-        getAttachmentTypeFromAttributes(decodedAttributes),
-        decodedAttributes.owner ?? ''
-      );
+      assertLegacyWriteableAttachmentType(decodedAttributes);
 
       const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
       const {
@@ -810,10 +801,7 @@ export class AttachmentService {
           // Skip when `requestWithoutType` is set: the patch carries no `type`
           // to resolve, and only the typed path can introduce a unified-only type.
           if (!requestWithoutType) {
-            assertLegacyWriteableAttachmentType(
-              getAttachmentTypeFromAttributes(decodedAttributes),
-              decodedAttributes.owner ?? ''
-            );
+            assertLegacyWriteableAttachmentType(decodedAttributes);
           }
           const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
           const {

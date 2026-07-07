@@ -13,6 +13,8 @@ import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
 import { useMultipleAgentPolicies, useLink, useGetOneAgentPolicy } from '../hooks';
+import { allowedExperimentalValues } from '../../common/experimental_features';
+import { ExperimentalFeaturesService } from '../services';
 
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 
@@ -264,11 +266,35 @@ describe('PackagePolicyActionsMenu', () => {
       expect(jest.mocked(useLink().getHref)).toHaveBeenCalledWith('integration_policy_edit', {
         packagePolicyId: 'some-uuid2',
       });
+      // Agentless edit links carry the detect-before-read hint so the edit page uses the
+      // agentless API instead of the package-policy API.
+      expect(editButton).toHaveAttribute(
+        'href',
+        '/mock/app/integrations/edit-integration/some-uuid2?isAgentless=true'
+      );
+    });
+  });
+
+  it('Should not append the isAgentless hint to agentless edit links when the agentless policies UI is disabled', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      ...allowedExperimentalValues,
+      enableAgentlessPoliciesUI: false,
+    });
+    const agentPolicies = createMockAgentPolicies({});
+    const packagePolicy = createMockPackagePolicy({
+      supports_agentless: true,
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
+      // Route target is unchanged; only the hint is suppressed so the edit page falls
+      // back to the legacy package-policy APIs.
       expect(editButton).toHaveAttribute(
         'href',
         '/mock/app/integrations/edit-integration/some-uuid2'
       );
     });
+    jest.mocked(ExperimentalFeaturesService.get).mockRestore();
   });
 
   it('Should show Edit integration with correct href when there is no agent policy', async () => {
@@ -459,6 +485,33 @@ describe('PackagePolicyActionsMenu', () => {
         package: { name: 'cloud_security_posture', version: '1.0.0', title: 'CSPM' },
       });
       renderMenu({ agentPolicies: [], packagePolicy });
+      await waitFor(() => {
+        expect(capturedCopyText).toEqual(
+          'elastic-support-bundle\ndeployment_id=abc123def456\ncluster_id=fetched-cluster\npolicy_id=policy-uuid\nintegration=cloud_security_posture'
+        );
+      });
+    });
+
+    it('should fall back to useGetOneAgentPolicy for cluster_id when the agent policy is a minimal synthesized one', async () => {
+      useGetOneAgentPolicyMock.mockReturnValue({
+        data: {
+          item: {
+            id: 'policy-uuid',
+            agentless: { cluster_id: 'fetched-cluster' },
+          },
+        },
+        isLoading: false,
+      } as any);
+      // The agentless deployments table synthesizes agent policies without `agentless` details.
+      const agentPolicies = [
+        { id: 'policy-uuid', name: 'Test Policy', supports_agentless: true },
+      ] as AgentPolicy[];
+      const packagePolicy = createMockPackagePolicy({
+        supports_agentless: true,
+        policy_ids: ['policy-uuid'],
+        package: { name: 'cloud_security_posture', version: '1.0.0', title: 'CSPM' },
+      });
+      renderMenu({ agentPolicies, packagePolicy });
       await waitFor(() => {
         expect(capturedCopyText).toEqual(
           'elastic-support-bundle\ndeployment_id=abc123def456\ncluster_id=fetched-cluster\npolicy_id=policy-uuid\nintegration=cloud_security_posture'
