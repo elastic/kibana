@@ -105,60 +105,22 @@ export const bulkImportRules = async ({
   const existingLists = await getReferencedExceptionLists({ rules, savedObjectsClient });
   await ruleSourceImporter.setup(rules);
 
-  // Per-rule prep: validate in-process, collect errors, pass survivors on to classification.
-  const prepared: PreparedImport[] = [];
-  for (const rule of rules) {
-    if (!ruleSourceImporter.isPrebuiltRule(rule)) {
-      rule.version = rule.version ?? 1;
-    }
-    if (!ruleToImportHasVersion(rule)) {
-      responses.push(missingVersionError(rule.rule_id));
-    } else {
-      try {
-        await validateMlAuth(mlAuthz, rule.type);
-
-        const [exceptionErrors, exceptionsList] = checkRuleExceptionReferences({
-          rule,
-          existingLists,
-        });
-        responses.push(...exceptionErrors);
-
-        const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
-        prepared.push({ rule, immutable, ruleSource, exceptionsList });
-      } catch (e) {
-        responses.push(
-          createRuleImportErrorObject({
-            ruleId: rule.rule_id,
-            message: e instanceof Error ? e.message : String(e),
-          })
-        );
-      }
-    }
-  }
+  const { prepared, errors: prepErrors } = await prepareRules({
+    rules,
+    mlAuthz,
+    ruleSourceImporter,
+    existingLists,
+  });
+  responses.push(...prepErrors);
 
   if (prepared.length === 0) {
     return { responses };
   }
 
-  // Bulk lookup for `rule_id` conflicts: single parenthesized OR-list. `rule_id`
-  // is free-form, so escape it to keep one bad value from breaking the whole query.
+  // One query resolves every `rule_id` conflict up front so we can classify the
+  // whole set (overwrite vs create) without a per-rule existence check.
   const ruleIds = prepared.map((p) => p.rule.rule_id);
-  const filter = `alert.attributes.params.ruleId: (${ruleIds
-    .map((id) => `"${escapeQuotes(id)}"`)
-    .join(' OR ')})`;
-  const found = await findRules({
-    rulesClient,
-    filter,
-    page: 1,
-    perPage: ruleIds.length,
-    fields: ['params.ruleId'],
-    sortField: undefined,
-    sortOrder: undefined,
-  });
-  const existingRuleIds = new Set<string>();
-  for (const alertingRule of found.data) {
-    existingRuleIds.add(alertingRule.params.ruleId);
-  }
+  const existingRuleIds = await findExistingRuleIds({ rulesClient, ruleIds });
 
   // Classify: conflict | overwrite-fallback | bulk-create.
   const conflicts: PreparedImport[] = [];
@@ -183,42 +145,20 @@ export const bulkImportRules = async ({
     );
   });
 
-  // Overwrite branch: stays per-rule via existing single-rule importRule. The
-  // resulting full RuleResponse is collapsed to { rule_id } for a uniform
-  // success shape across the overwrite and bulk-create branches.
+  // Overwrite branch: stays per-rule via existing single-rule importRule. The full
+  // RuleResponse is collapsed to { rule_id } for a uniform success shape.
   if (toOverwrite.length > 0) {
-    const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
-    const overwriteResults = await pMap(
-      toOverwrite,
-      async (p): Promise<BulkImportRuleSuccess | RuleImportErrorObject> => {
-        try {
-          const updated = (await importRuleSingle({
-            actionsClient,
-            rulesClient,
-            mlAuthz,
-            prebuiltRuleAssetClient,
-            changeTracking,
-            importRulePayload: {
-              ruleToImport: { ...p.rule, exceptions_list: [...(p.exceptionsList ?? [])] },
-              overrideFields: { rule_source: p.ruleSource, immutable: p.immutable },
-              overwriteRules: true,
-              allowMissingConnectorSecrets,
-            },
-          })) as RuleResponse | RuleImportErrorObject;
-          if (isRuleImportError(updated)) return updated;
-          return { rule_id: updated.rule_id };
-        } catch (err) {
-          if (isRuleImportError(err)) return err;
-          return createRuleImportErrorObject({
-            ruleId: p.rule.rule_id,
-            message: err?.message ?? 'unknown error',
-          });
-        }
-      },
-      // Mirror the old per-chunk Promise.all bound now that chunks are flattened.
-      { concurrency: RULE_MANAGEMENT_IMPORT_BATCH_SIZE }
+    responses.push(
+      ...(await overwriteExisting({
+        rules: toOverwrite,
+        actionsClient,
+        rulesClient,
+        savedObjectsClient,
+        mlAuthz,
+        changeTracking,
+        allowMissingConnectorSecrets,
+      }))
     );
-    responses.push(...overwriteResults);
   }
 
   if (toBulkCreate.length === 0) {
@@ -242,31 +182,160 @@ export const bulkImportRules = async ({
     return { responses };
   }
 
-  const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
-    rules: bulkInputs,
-    batchSize: RULE_MANAGEMENT_BULK_IMPORT_BATCH_SIZE,
-    changeTracking: { ...changeTracking, action: SecurityRuleChangeTrackingAction.ruleImport },
-  });
+  // Whole-batch pre-checks (authz, schedule-limit) throw; isolate so one batch can't 500 the import.
+  try {
+    const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
+      rules: bulkInputs,
+      batchSize: RULE_MANAGEMENT_BULK_IMPORT_BATCH_SIZE,
+      changeTracking: { ...changeTracking, action: SecurityRuleChangeTrackingAction.ruleImport },
+    });
 
-  for (const id of successfulIds) {
-    const source = inputById.get(id);
-    if (source) {
-      responses.push({ rule_id: source.rule.rule_id });
+    for (const id of successfulIds) {
+      const source = inputById.get(id);
+      if (source) {
+        responses.push({ rule_id: source.rule.rule_id });
+      }
+    }
+
+    bulkErrors.forEach((err) => {
+      const source = inputById.get(err.rule.id);
+      if (!source) return;
+      responses.push(
+        createRuleImportErrorObject({
+          ruleId: source.rule.rule_id,
+          message: err.message,
+        })
+      );
+    });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    for (const source of inputById.values()) {
+      responses.push(createRuleImportErrorObject({ ruleId: source.rule.rule_id, message }));
     }
   }
 
-  bulkErrors.forEach((err) => {
-    const source = inputById.get(err.rule.id);
-    if (!source) return;
-    responses.push(
-      createRuleImportErrorObject({
-        ruleId: source.rule.rule_id,
-        message: err.message,
-      })
-    );
-  });
-
   return { responses };
+};
+
+const prepareRules = async ({
+  rules,
+  mlAuthz,
+  ruleSourceImporter,
+  existingLists,
+}: {
+  rules: RuleToImport[];
+  mlAuthz: MlAuthz;
+  ruleSourceImporter: IRuleSourceImporter;
+  existingLists: Awaited<ReturnType<typeof getReferencedExceptionLists>>;
+}): Promise<{ prepared: PreparedImport[]; errors: RuleImportErrorObject[] }> => {
+  const prepared: PreparedImport[] = [];
+  const errors: RuleImportErrorObject[] = [];
+
+  for (const rule of rules) {
+    if (!ruleSourceImporter.isPrebuiltRule(rule)) {
+      rule.version = rule.version ?? 1;
+    }
+    if (!ruleToImportHasVersion(rule)) {
+      errors.push(missingVersionError(rule.rule_id));
+    } else {
+      try {
+        await validateMlAuth(mlAuthz, rule.type);
+
+        const [exceptionErrors, exceptionsList] = checkRuleExceptionReferences({
+          rule,
+          existingLists,
+        });
+        errors.push(...exceptionErrors);
+
+        const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
+        prepared.push({ rule, immutable, ruleSource, exceptionsList });
+      } catch (e) {
+        errors.push(
+          createRuleImportErrorObject({
+            ruleId: rule.rule_id,
+            message: e instanceof Error ? e.message : String(e),
+          })
+        );
+      }
+    }
+  }
+
+  return { prepared, errors };
+};
+
+const findExistingRuleIds = async ({
+  rulesClient,
+  ruleIds,
+}: {
+  rulesClient: RulesClient;
+  ruleIds: string[];
+}): Promise<Set<string>> => {
+  const filter = `alert.attributes.params.ruleId: (${ruleIds
+    .map((id) => `"${escapeQuotes(id)}"`)
+    .join(' OR ')})`;
+  const found = await findRules({
+    rulesClient,
+    filter,
+    page: 1,
+    perPage: ruleIds.length,
+    fields: ['params.ruleId'],
+    sortField: undefined,
+    sortOrder: undefined,
+  });
+  const existing = new Set<string>();
+  for (const rule of found.data) {
+    existing.add(rule.params.ruleId);
+  }
+  return existing;
+};
+
+const overwriteExisting = async ({
+  rules,
+  actionsClient,
+  rulesClient,
+  savedObjectsClient,
+  mlAuthz,
+  changeTracking,
+  allowMissingConnectorSecrets,
+}: {
+  rules: PreparedImport[];
+  actionsClient: ActionsClient;
+  rulesClient: RulesClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  mlAuthz: MlAuthz;
+  changeTracking?: SecurityRuleChangeTracking<never>;
+  allowMissingConnectorSecrets?: boolean;
+}): Promise<Array<BulkImportRuleSuccess | RuleImportErrorObject>> => {
+  const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+  return pMap(
+    rules,
+    async (p): Promise<BulkImportRuleSuccess | RuleImportErrorObject> => {
+      try {
+        const updated = (await importRuleSingle({
+          actionsClient,
+          rulesClient,
+          mlAuthz,
+          prebuiltRuleAssetClient,
+          changeTracking,
+          importRulePayload: {
+            ruleToImport: { ...p.rule, exceptions_list: [...(p.exceptionsList ?? [])] },
+            overrideFields: { rule_source: p.ruleSource, immutable: p.immutable },
+            overwriteRules: true,
+            allowMissingConnectorSecrets,
+          },
+        })) as RuleResponse | RuleImportErrorObject;
+        if (isRuleImportError(updated)) return updated;
+        return { rule_id: updated.rule_id };
+      } catch (err) {
+        if (isRuleImportError(err)) return err;
+        return createRuleImportErrorObject({
+          ruleId: p.rule.rule_id,
+          message: err?.message ?? 'unknown error',
+        });
+      }
+    },
+    { concurrency: RULE_MANAGEMENT_IMPORT_BATCH_SIZE }
+  );
 };
 
 const buildBulkInputs = ({
