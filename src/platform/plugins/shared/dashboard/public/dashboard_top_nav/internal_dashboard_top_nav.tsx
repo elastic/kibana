@@ -102,7 +102,7 @@ export function InternalDashboardTopNav({
     allDataViews,
     fullScreenMode,
     hasUnsavedChanges,
-    isApproximate,
+    esqlApproximation,
     lastSavedId,
     query,
     title,
@@ -455,8 +455,8 @@ export function InternalDashboardTopNav({
           esqlApproximation={
             isEsqlApproximationEnabled
               ? {
-                  isApproximate: isApproximate ?? false,
-                  onChange: dashboardApi.setIsApproximate,
+                  isApproximate: esqlApproximation ?? false,
+                  onChange: dashboardApi.setEsqlApproximation,
                   disabled: !hasEsqlPanel,
                   additionalText: i18n.translate(
                     'dashboard.esqlApproximationToggle.additionalText',
