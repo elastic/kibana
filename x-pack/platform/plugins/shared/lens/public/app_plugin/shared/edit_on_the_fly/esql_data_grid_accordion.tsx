@@ -67,6 +67,12 @@ export const ESQLDataGridAccordion = ({
             flex-direction: column;
             height: 100%;
           }
+          .euiDataGrid__virtualized {
+            /* Prevents the horizontal scrollbar from toggling on/off as the accordion's
+             * height-animating ancestor resizes, which otherwise feeds back into EUI's
+             * column-width/ResizeObserver calculation and can hang the tab. */
+            overflow-x: scroll !important;
+          }
         `}
         buttonContent={
           <EuiTitle

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type {
@@ -18,8 +19,12 @@ import {
   setupMockCoreStartServices,
 } from '../../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../../common';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
 import { getWatchlistToolAvailability } from './watchlist_availability';
-import { removeEntitiesFromWatchlistTool } from './remove_entities_from_watchlist_tool';
+import {
+  removeEntitiesFromWatchlistTool,
+  SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
+} from './remove_entities_from_watchlist_tool';
 
 jest.mock('./watchlist_availability', () => ({
   getWatchlistToolAvailability: jest.fn(),
@@ -128,10 +133,11 @@ describe('removeEntitiesFromWatchlistTool', () => {
     mocks.mockLogger,
     mockExperimentalFeatures
   );
+  let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setupMockCoreStartServices(mocks.mockCore, mocks.mockEsClient);
+    mockCoreStart = setupMockCoreStartServices(mocks.mockCore, mocks.mockEsClient);
     mockGetWatchlistToolAvailability.mockResolvedValue({ status: 'available' });
     mockGetUserWatchlistPrivileges.mockResolvedValue({
       privileges: {},
@@ -290,6 +296,116 @@ describe('removeEntitiesFromWatchlistTool', () => {
       const error = result.results[0] as ErrorResult;
       expect(error.type).toBe(ToolResultType.error);
       expect(error.data.message).toContain('boom');
+    });
+
+    describe('telemetry', () => {
+      it('does not report telemetry while only asking for confirmation', async () => {
+        mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist());
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ watchlistId: 'wl-1', entityIds: ['user:a'] }, ctx);
+
+        expect(mockCoreStart.analytics.reportEvent).not.toHaveBeenCalled();
+      });
+
+      it('reports resultCount matching service.successful after a successful unassign', async () => {
+        mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist());
+        mockUnassignFn.mockResolvedValueOnce(buildUnassignMixed());
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+
+        await tool.handler(
+          { watchlistId: 'wl-1', entityIds: ['user:alice', 'user:fromsource'] },
+          ctx
+        );
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
+            actionType: 'mutation',
+            spaceId: 'default',
+            success: true,
+            resultCount: 1,
+            errorMessage: undefined,
+            userConfirmationOutcome: ConfirmationStatus.accepted,
+          }
+        );
+      });
+
+      it('reports userConfirmationOutcome=rejected when the user declines the prompt', async () => {
+        mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist());
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.rejected,
+        });
+
+        await tool.handler({ watchlistId: 'wl-1', entityIds: ['user:a'] }, ctx);
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
+            actionType: 'mutation',
+            spaceId: 'default',
+            success: true,
+            resultCount: 0,
+            errorMessage: undefined,
+            userConfirmationOutcome: ConfirmationStatus.rejected,
+          }
+        );
+      });
+
+      it('reports success=false when the caller lacks write privilege', async () => {
+        mockGetUserWatchlistPrivileges.mockResolvedValueOnce({
+          privileges: {},
+          has_all_required: false,
+          has_read_permissions: true,
+          has_write_permissions: false,
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks);
+
+        await tool.handler({ watchlistId: 'wl-1', entityIds: ['user:a'] }, ctx);
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
+            actionType: 'mutation',
+            spaceId: 'default',
+            success: false,
+            resultCount: 0,
+            errorMessage:
+              'You do not have permission to modify watchlist membership in this space.',
+            userConfirmationOutcome: undefined,
+          }
+        );
+      });
+
+      it('reports success=false and errorMessage when the unassign call throws', async () => {
+        mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist());
+        mockUnassignFn.mockRejectedValueOnce(new Error('boom'));
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+
+        await tool.handler({ watchlistId: 'wl-1', entityIds: ['user:a'] }, ctx);
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
+            actionType: 'mutation',
+            spaceId: 'default',
+            success: false,
+            resultCount: 0,
+            errorMessage: 'boom',
+            userConfirmationOutcome: ConfirmationStatus.accepted,
+          }
+        );
+      });
     });
   });
 });
