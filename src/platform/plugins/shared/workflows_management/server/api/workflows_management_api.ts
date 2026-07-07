@@ -45,6 +45,14 @@ import {
   WorkflowNotFoundError,
 } from '@kbn/workflows/common/errors';
 import type {
+  ExecuteInlineWorkflowParams,
+  ExecuteSavedWorkflowParams,
+  ExecuteWorkflowBaseParams,
+  ExecuteWorkflowParams,
+  ExecuteWorkflowResult,
+  WorkflowsManagementExecutionApi,
+} from '@kbn/workflows/server';
+import type {
   ChildWorkflowExecutionItem,
   WorkflowPartialDetailDto,
   WorkflowSortField,
@@ -80,6 +88,18 @@ import type {
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
 } from '../services/workflow_execution_query_service';
+
+// The execute-workflow param/result types now live in `@kbn/workflows/server` so that
+// consumers which cannot take a project reference to this plugin (e.g. to avoid a
+// dependency cycle) can share the exact contract. Re-exported here to preserve this
+// module's public surface for existing importers.
+export type {
+  ExecuteWorkflowBaseParams,
+  ExecuteSavedWorkflowParams,
+  ExecuteInlineWorkflowParams,
+  ExecuteWorkflowParams,
+  ExecuteWorkflowResult,
+};
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
 
@@ -198,51 +218,11 @@ const executeWorkflowFinalStatuses = [
   ExecutionStatus.WAITING_FOR_INPUT,
 ];
 
-export interface ExecuteWorkflowBaseParams {
-  request: KibanaRequest;
-  spaceId: string;
-  inputs?: Record<string, unknown>;
-  waitForCompletion?: boolean;
-  completionTimeoutSec?: number;
-  triggeredBy?: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface ExecuteSavedWorkflowParams extends ExecuteWorkflowBaseParams {
-  /** Saved workflow ID. The workflow is fetched, validated, and checked for enabled state. */
-  workflowId: string;
-  yaml?: never;
-  name?: never;
-  isTestRun?: never;
-}
-
-export interface ExecuteInlineWorkflowParams extends ExecuteWorkflowBaseParams {
-  /**
-   * Optional synthetic workflow ID used on the execution document, telemetry, and result
-   * correlation. It does not trigger a saved-workflow lookup; inline executions are
-   * always marked ephemeral by the management API.
-   */
-  workflowId?: string;
-  /** Workflow YAML to validate, parse, execute, and persist on the execution document. */
-  yaml: string;
-  name?: string;
-  /** Authoring/test-run semantics are independent from whether the workflow is ephemeral. */
-  isTestRun?: boolean;
-}
-
-export type ExecuteWorkflowParams = ExecuteSavedWorkflowParams | ExecuteInlineWorkflowParams;
-
-export interface ExecuteWorkflowResult {
-  workflowExecutionId: string;
-  execution?: WorkflowExecutionDto;
-  timedOut?: boolean;
-}
-
 const isExecuteInlineWorkflowParams = (
   params: ExecuteWorkflowParams
 ): params is ExecuteInlineWorkflowParams => params.yaml !== undefined;
 
-export class WorkflowsManagementApi {
+export class WorkflowsManagementApi implements WorkflowsManagementExecutionApi {
   private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
   private smlLogger: Logger | null = null;
 

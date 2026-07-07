@@ -9,9 +9,11 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   type CoreSetup,
   type CoreStart,
+  type KibanaRequest,
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { Logger } from '@kbn/logging';
 import { PLUGIN_ID, PLUGIN_NAME, EVALS_API_PRIVILEGES, EVALS_UI_PRIVILEGES } from '../common';
 import type { EvalsConfig } from './config';
@@ -32,6 +34,9 @@ import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/dataset_service';
 import { EvaluationScoreService } from './storage/evaluation_score_service';
 import { evaluationsDataStreamDefinition } from './storage/scores_index_template';
+import { createTaskProviderRegistry } from './task_providers/registry';
+import type { TaskProviderRegistry } from './task_providers/types';
+import { registerEvalsWorkflowSteps } from './workflows';
 
 export class EvalsPlugin
   implements
@@ -43,6 +48,7 @@ export class EvalsPlugin
   private evaluatorRegistry?: EvaluatorRegistry;
   private datasetService?: DatasetService;
   private evaluationScoreService?: EvaluationScoreService;
+  private taskProviderRegistry?: TaskProviderRegistry;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -52,15 +58,22 @@ export class EvalsPlugin
 
   setup(
     coreSetup: CoreSetup<EvalsStartDependencies, EvalsPluginStart>,
-    { features, encryptedSavedObjects }: EvalsSetupDependencies
+    {
+      features,
+      encryptedSavedObjects,
+      workflowsExtensions,
+      workflowsManagement,
+    }: EvalsSetupDependencies
   ): EvalsPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('Evals plugin is disabled');
-      return {};
+      return { registerTaskProvider: () => {} };
     }
 
     this.logger.info('Setting up Evals plugin');
     coreSetup.dataStreams.registerDataStream(evaluationsDataStreamDefinition);
+
+    this.taskProviderRegistry = createTaskProviderRegistry();
 
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
     encryptedSavedObjects.registerType({
@@ -123,19 +136,44 @@ export class EvalsPlugin
       })
     );
 
+    const getInferenceStart = () =>
+      coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.inference);
+
+    const getSpaceId = async (request: KibanaRequest): Promise<string> => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    };
+
     registerRoutes({
       router,
       logger: this.logger,
       canEncrypt: encryptedSavedObjects.canEncrypt,
       evaluatorRegistry: this.evaluatorRegistry,
-      getInferenceStart: () =>
-        coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.inference),
+      getInferenceStart,
       getEncryptedSavedObjectsStart: () =>
         coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.encryptedSavedObjects),
       getInternalRemoteConfigsSoClient: () => internalRemoteConfigsSoClientPromise,
+      getSpaceId,
+      taskProviderRegistry: this.taskProviderRegistry,
+      workflowsManagement,
     });
 
-    return {};
+    if (workflowsExtensions) {
+      registerEvalsWorkflowSteps(workflowsExtensions, {
+        logger: this.logger,
+        taskProviderRegistry: this.taskProviderRegistry,
+        getInferenceStart,
+      });
+    } else {
+      this.logger.debug(
+        'workflowsExtensions plugin is not available; evals workflow steps were not registered'
+      );
+    }
+
+    const taskProviderRegistry = this.taskProviderRegistry;
+    return {
+      registerTaskProvider: (provider) => taskProviderRegistry.register(provider),
+    };
   }
 
   start(coreStart: CoreStart, _plugins: EvalsStartDependencies): EvalsPluginStart {

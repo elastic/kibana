@@ -94,6 +94,13 @@ export const COMPARE_SELECTED_BUTTON = i18n.translate(
   }
 );
 
+export const NEW_EXPERIMENT_BUTTON = i18n.translate(
+  'xpack.evals.experimentsList.newExperimentButton',
+  {
+    defaultMessage: 'New experiment',
+  }
+);
+
 export const COMPARE_SELECTION_HINT = i18n.translate(
   'xpack.evals.experimentsList.compareSelectionHint',
   {

@@ -417,7 +417,20 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
   });
 };
 
-export const useEvaluationExperiment = (experimentId: string, executionId?: string) => {
+interface EvaluationExperimentOptions {
+  /**
+   * Poll interval (ms). Used right after "Run now" to keep retrying while the
+   * async workflow creates the experiment document (recovers from the initial
+   * 404) and to refresh stats as scores stream in.
+   */
+  refetchInterval?: number | false;
+}
+
+export const useEvaluationExperiment = (
+  experimentId: string,
+  executionId?: string,
+  options: EvaluationExperimentOptions = {}
+) => {
   const { services } = useKibana();
 
   return useQuery({
@@ -440,6 +453,7 @@ export const useEvaluationExperiment = (experimentId: string, executionId?: stri
       }
       return true;
     },
+    refetchInterval: options.refetchInterval,
     refetchOnWindowFocus: false,
   });
 };

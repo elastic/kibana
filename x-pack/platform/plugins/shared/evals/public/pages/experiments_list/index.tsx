@@ -27,6 +27,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import type { EvaluationExperimentSummary } from '@kbn/evals-common';
 import { useEvaluationExperiments } from '../../hooks/use_evals_api';
+import { NewExperimentFlyout } from '../../components/new_experiment_flyout/new_experiment_flyout';
 import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
 
@@ -38,6 +39,7 @@ export const ExperimentsListPage: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [suiteIdFilter, setSuiteIdFilter] = useState('');
   const [selectedExperiments, setSelectedExperiments] = useState<EvaluationExperimentSummary[]>([]);
+  const [isNewExperimentOpen, setIsNewExperimentOpen] = useState(false);
 
   const { data, isLoading, error, refetch } = useEvaluationExperiments({
     page: pageIndex + 1,
@@ -101,16 +103,13 @@ export const ExperimentsListPage: React.FC = () => {
         field: 'experiment_count',
         name: i18n.COLUMN_EXPERIMENTS,
         width: '150px',
-        render: (count: number | undefined, item: EvaluationExperimentSummary) => {
+        render: (count: number | undefined) => {
           const c = count ?? 1;
-          if (c > 1 || !!item.suite_id) {
-            return (
-              <EuiBadge color="hollow">
-                {c} {i18n.getExperimentsBadge(c)}
-              </EuiBadge>
-            );
-          }
-          return '-';
+          return (
+            <EuiBadge color="hollow">
+              {c} {i18n.getExperimentsBadge(c)}
+            </EuiBadge>
+          );
         },
       },
       {
@@ -234,11 +233,18 @@ export const ExperimentsListPage: React.FC = () => {
   const handleCompare = useCallback(() => {
     if (!canCompare) return;
     const [a, b] = selectedExperiments;
-    const isSuiteRun = !!a.suite_id || !!b.suite_id;
-    const type = isSuiteRun ? 'execution' : 'experiment';
-    const baselineId = isSuiteRun ? a.execution_id ?? a.experiment_id : a.experiment_id;
-    const targetId = isSuiteRun ? b.execution_id ?? b.experiment_id : b.experiment_id;
-    const params = new URLSearchParams({ type, baseline: baselineId, target: targetId });
+    // The listing aggregates by execution id (one row per execution), and the
+    // row's `experiment_id` mirrors that execution id — not the per-run
+    // experiment id stored on the score docs. So every comparison here is
+    // execution-vs-execution; comparing by `experiment_id` would filter on an id
+    // that doesn't exist in the score docs and 404. Always compare by execution.
+    const baselineId = a.execution_id ?? a.experiment_id;
+    const targetId = b.execution_id ?? b.experiment_id;
+    const params = new URLSearchParams({
+      type: 'execution',
+      baseline: baselineId,
+      target: targetId,
+    });
 
     history.push(`/compare?${params.toString()}`);
   }, [canCompare, selectedExperiments, history]);
@@ -282,6 +288,17 @@ export const ExperimentsListPage: React.FC = () => {
             </EuiToolTip>
           </EuiFlexItem>
         )}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            size="m"
+            onClick={() => setIsNewExperimentOpen(true)}
+            data-test-subj="evalsNewExperimentButton"
+          >
+            {i18n.NEW_EXPERIMENT_BUTTON}
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {error ? (
@@ -316,6 +333,7 @@ export const ExperimentsListPage: React.FC = () => {
           })}
         />
       )}
+      {isNewExperimentOpen && <NewExperimentFlyout onClose={() => setIsNewExperimentOpen(false)} />}
     </EuiPageSection>
   );
 };

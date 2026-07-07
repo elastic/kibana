@@ -27,6 +27,7 @@ describe('POST /internal/evals/_evaluate', () => {
     name = 'groundedness',
     version = '1.0.0',
     kind = 'llm',
+    requiresChatEvidence,
     evaluate = jest.fn().mockResolvedValue({
       scores: [{ name: 'groundedness', score: 1, label: 'GROUNDED' }],
     }),
@@ -35,6 +36,7 @@ describe('POST /internal/evals/_evaluate', () => {
     version,
     kind,
     description: `${name} evaluator`,
+    requiresChatEvidence,
     evaluate,
   });
 
@@ -499,11 +501,15 @@ describe('POST /internal/evals/_evaluate', () => {
     ]);
   });
 
-  it('returns 404 when trace readiness check fails', async () => {
+  it('returns 404 when trace readiness check fails for a chat-evidence evaluator', async () => {
     awaitTraceReadyMock.mockRejectedValueOnce(
       new Error('Trace abc123 is not ready: agent response not yet available')
     );
-    const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
+    const groundedness = buildEvaluator({
+      name: 'groundedness',
+      kind: 'llm',
+      requiresChatEvidence: true,
+    });
     const latency = buildEvaluator({ name: 'latency', kind: 'code' });
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([groundedness, latency]),
@@ -529,5 +535,34 @@ describe('POST /internal/evals/_evaluate', () => {
     });
     expect(groundedness.evaluate).not.toHaveBeenCalled();
     expect(latency.evaluate).not.toHaveBeenCalled();
+  });
+
+  it('skips the chat-evidence readiness check when no evaluator requires chat evidence', async () => {
+    // The readiness probe reads chat-event columns that do not exist on a
+    // trace-metric-only run; it must not run (and must not 404) here.
+    awaitTraceReadyMock.mockRejectedValue(
+      new Error('verification_exception: Unknown column [attributes.content]')
+    );
+    const latency = buildEvaluator({ name: 'latency', kind: 'code' });
+    const inputTokens = buildEvaluator({ name: 'input_tokens', kind: 'code' });
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([latency, inputTokens]),
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }] },
+          evaluators: [{ name: 'latency' }, { name: 'input_tokens' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(awaitTraceReadyMock).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(latency.evaluate).toHaveBeenCalledTimes(1);
+    expect(inputTokens.evaluate).toHaveBeenCalledTimes(1);
   });
 });

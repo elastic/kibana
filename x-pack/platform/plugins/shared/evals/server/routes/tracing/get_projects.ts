@@ -15,7 +15,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-import { escapeWildcard } from './utils';
+import { escapeWildcard, EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS } from './utils';
 
 export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned
@@ -67,7 +67,7 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
               bool: {
                 must_not: [
                   { exists: { field: 'parent_span_id' } },
-                  { exists: { field: 'attributes.evaluator.name' } },
+                  EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS,
                 ],
                 filter: [
                   ...extraFilters,

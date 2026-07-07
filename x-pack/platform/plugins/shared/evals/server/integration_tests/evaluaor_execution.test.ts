@@ -10,7 +10,12 @@ import { httpServiceMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { BoundInferenceClient } from '@kbn/inference-common';
-import { API_VERSIONS, EVALS_EVALUATE_URL } from '@kbn/evals-common';
+import {
+  API_VERSIONS,
+  EVALS_EVALUATE_URL,
+  LOGS_INDEX_PATTERN,
+  TRACES_INDEX_PATTERN,
+} from '@kbn/evals-common';
 import { EVALS_API_PRIVILEGES } from '../../common';
 import { createEvaluatorRegistry } from '../evaluators/registry';
 import type { GroundednessAnalysis } from '../evaluators/groundedness/types';
@@ -87,8 +92,93 @@ const createMockEsqlQuery = ({ hasToolEvidence }: { hasToolEvidence: boolean }) 
   });
 };
 
+// Trace evidence (user_query / agent_response / tool_call_history) is read from
+// `_source` via `_search` (DSL), not ES|QL, because large `keyword` values are
+// truncated in doc values by `ignore_above`. These tests grade conversations, so
+// the root-span probe returns a non-tool root (CHAIN), routing to conversation
+// evidence rather than a bare tool execution.
+const createMockSearch = ({ hasToolEvidence }: { hasToolEvidence: boolean }) => {
+  const userPrompt = hasToolEvidence
+    ? 'What is the payment service status?'
+    : 'What is the billing service status?';
+  const agentResponse = hasToolEvidence
+    ? 'The payment service is healthy, as confirmed by the health check tool.'
+    : 'The billing service has 99.9% uptime based on the last 30 days.';
+
+  return jest.fn().mockImplementation(async (params: Record<string, any>) => {
+    const { index } = params;
+    const filter = params?.query?.bool?.filter ?? [];
+    const mustNot = params?.query?.bool?.must_not ?? [];
+    const filterHas = (predicate: (clause: any) => boolean) => filter.some(predicate);
+    const hasEvent = (name: string) => filterHas((clause) => clause?.term?.event_name === name);
+
+    // Root-span probe (extractToolEvidence): traces-* with no parent span.
+    if (
+      index === TRACES_INDEX_PATTERN &&
+      mustNot.some((c: any) => c?.exists?.field === 'parent_span_id')
+    ) {
+      return {
+        hits: { hits: [{ _source: { attributes: { 'elastic.inference.span.kind': 'CHAIN' } } }] },
+      };
+    }
+
+    // User message span event (gen_ai.user.message) from logs-*.
+    if (index === LOGS_INDEX_PATTERN && hasEvent('gen_ai.user.message')) {
+      return { hits: { hits: [{ _source: { attributes: { content: userPrompt } } }] } };
+    }
+
+    // Agent response span event (gen_ai.choice) from logs-*.
+    if (index === LOGS_INDEX_PATTERN && hasEvent('gen_ai.choice')) {
+      return {
+        hits: {
+          hits: [
+            {
+              _source: { attributes: { 'message.content': agentResponse, finish_reason: 'stop' } },
+            },
+          ],
+        },
+      };
+    }
+
+    // Tool spans (groundedness tool_call_history) from traces-*.
+    if (
+      index === TRACES_INDEX_PATTERN &&
+      filterHas((clause) => clause?.term?.['attributes.elastic.inference.span.kind'] === 'TOOL')
+    ) {
+      return {
+        hits: {
+          hits: hasToolEvidence
+            ? [
+                {
+                  _source: {
+                    attributes: {
+                      'gen_ai.tool.call.id': 'call_123',
+                      'gen_ai.tool.name': 'health_check',
+                      'gen_ai.tool.call.arguments': '{"service":"payment"}',
+                      'gen_ai.tool.call.result': '{"status":"healthy"}',
+                    },
+                  },
+                },
+              ]
+            : [],
+        },
+      };
+    }
+
+    throw new Error(`Unexpected _search in integration test: ${JSON.stringify(params)}`);
+  });
+};
+
 describe('trace evaluators integration', () => {
-  const setupRoute = ({ esqlQuery, prompt }: { esqlQuery: jest.Mock; prompt: jest.Mock }) => {
+  const setupRoute = ({
+    esqlQuery,
+    prompt,
+    search,
+  }: {
+    esqlQuery: jest.Mock;
+    prompt: jest.Mock;
+    search?: jest.Mock;
+  }) => {
     const router = httpServiceMock.createRouter();
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const getClient = jest.fn().mockReturnValue({ prompt } as unknown as BoundInferenceClient);
@@ -116,6 +206,7 @@ describe('trace evaluators integration', () => {
               esql: {
                 query: esqlQuery,
               },
+              search: search ?? jest.fn(),
             },
           },
         },
@@ -175,6 +266,7 @@ describe('trace evaluators integration', () => {
       });
     const { handler, context } = setupRoute({
       esqlQuery: createMockEsqlQuery({ hasToolEvidence: true }),
+      search: createMockSearch({ hasToolEvidence: true }),
       prompt,
     });
 
@@ -255,6 +347,7 @@ describe('trace evaluators integration', () => {
     });
     const hallucinatedRoute = setupRoute({
       esqlQuery: createMockEsqlQuery({ hasToolEvidence: false }),
+      search: createMockSearch({ hasToolEvidence: false }),
       prompt: hallucinatedPrompt,
     });
     const hallucinatedResponse = await hallucinatedRoute.handler(
@@ -310,6 +403,7 @@ describe('trace evaluators integration', () => {
       });
     const { handler, context } = setupRoute({
       esqlQuery: createMockEsqlQuery({ hasToolEvidence: true }),
+      search: createMockSearch({ hasToolEvidence: true }),
       prompt: correctnessPrompt,
     });
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
-import { extractChatEvidence } from '../chat_evidence';
+import { TRACES_INDEX_PATTERN } from '@kbn/evals-common';
+import { extractTraceEvidence } from '../trace_evidence';
 import type { TraceAccessor } from '../types';
-import { createTraceAccessor } from '../trace_accessor';
-import { rowsFromEsqlResponse } from '../esql_utils';
 
 interface GroundednessEvidence {
   user_query: string;
@@ -29,16 +29,31 @@ export class IncompleteGroundednessEvidenceError extends Error {
   }
 }
 
-const TOOL_CALL_ID_COLUMN = 'attributes.gen_ai.tool.call.id';
-const TOOL_NAME_COLUMN = 'attributes.gen_ai.tool.name';
-const TOOL_ARGUMENTS_COLUMN = 'attributes.gen_ai.tool.call.arguments';
-const TOOL_RESULT_COLUMN = 'attributes.gen_ai.tool.call.result';
+/**
+ * Tool spans live in `traces-*`. Their argument/result attributes
+ * (`gen_ai.tool.call.arguments`, `gen_ai.tool.call.result`) are `keyword`-mapped
+ * with `ignore_above`, so large tool payloads (e.g. a full `list_indices`
+ * result) are present in `_source` but NOT indexed into doc values. We read
+ * `_source` via a regular `_search`: ES|QL reads doc values and returns `null`
+ * for values above `ignore_above`, which makes the judge believe the tool
+ * returned nothing and score genuine, grounded answers as hallucinations.
+ */
+const SPAN_KIND_FIELD = 'attributes.elastic.inference.span.kind';
+const TOOL_SPAN_KIND = 'TOOL';
+// Trace id is stored as `trace.id` in `traces-*` (vs `trace_id` in `logs-*`).
+const TRACE_ID_FIELD = 'trace.id';
 
-interface ToolSpanRow extends Record<string, unknown> {
-  [TOOL_CALL_ID_COLUMN]: string | null;
-  [TOOL_NAME_COLUMN]: string | null;
-  [TOOL_ARGUMENTS_COLUMN]: string | null;
-  [TOOL_RESULT_COLUMN]: string | null;
+// Keys *within* the flattened `attributes` object of a span's `_source`.
+const TOOL_CALL_ID_KEY = 'gen_ai.tool.call.id';
+const TOOL_NAME_KEY = 'gen_ai.tool.name';
+const TOOL_ARGUMENTS_KEY = 'gen_ai.tool.call.arguments';
+const TOOL_RESULT_KEY = 'gen_ai.tool.call.result';
+
+// A single trace rarely has more than a handful of tool calls; cap generously.
+const MAX_TOOL_SPANS = 200;
+
+interface ToolSpanSource {
+  attributes?: Record<string, unknown>;
 }
 
 const parseJsonIfPossible = (value: unknown): unknown => {
@@ -58,17 +73,18 @@ const parseJsonIfPossible = (value: unknown): unknown => {
   }
 };
 
-const TOOL_SPANS_PIPELINE = `| WHERE attributes.elastic.inference.span.kind == "TOOL"
-| KEEP attributes.gen_ai.tool.call.id, attributes.gen_ai.tool.name, attributes.gen_ai.tool.call.arguments, attributes.gen_ai.tool.call.result, @timestamp
-| SORT @timestamp ASC`;
+const readStringAttribute = (hit: SearchHit<ToolSpanSource>, key: string): string | undefined => {
+  const value = hit._source?.attributes?.[key];
+  return typeof value === 'string' ? value : undefined;
+};
 
 export const extractGroundednessEvidence = async (
   traceAccessor: TraceAccessor,
   log: Logger
 ): Promise<GroundednessEvidence> => {
-  const accessor = createTraceAccessor(traceAccessor);
+  const { esClient, traceId } = traceAccessor;
 
-  const chatEvidence = await extractChatEvidence(traceAccessor);
+  const chatEvidence = await extractTraceEvidence(traceAccessor);
 
   const baseEvidence: GroundednessEvidence = {
     user_query: chatEvidence.user_query,
@@ -77,23 +93,30 @@ export const extractGroundednessEvidence = async (
   };
 
   if (!chatEvidence.agent_response.trim()) {
-    const incompleteEvidence: GroundednessEvidence = {
-      ...baseEvidence,
-      agent_response: '',
-      tool_call_history: [],
-    };
-    log.warn(`Returning incomplete groundedness evidence for trace ${traceAccessor.traceId}.`);
-    throw new IncompleteGroundednessEvidenceError(incompleteEvidence);
+    log.warn(`Returning incomplete groundedness evidence for trace ${traceId}.`);
+    throw new IncompleteGroundednessEvidenceError({ ...baseEvidence, agent_response: '' });
   }
 
-  const toolResponse = await accessor.runEsql('traces', TOOL_SPANS_PIPELINE);
-  const toolRows = rowsFromEsqlResponse<ToolSpanRow>(toolResponse);
+  const toolResponse = await esClient.search<ToolSpanSource>({
+    index: TRACES_INDEX_PATTERN,
+    size: MAX_TOOL_SPANS,
+    _source: ['attributes'],
+    sort: [{ '@timestamp': { order: 'asc' } }],
+    query: {
+      bool: {
+        filter: [
+          { term: { [TRACE_ID_FIELD]: traceId } },
+          { term: { [SPAN_KIND_FIELD]: TOOL_SPAN_KIND } },
+        ],
+      },
+    },
+  });
 
-  const toolCallHistory = toolRows.map((toolRow) => ({
-    tool_call_id: toolRow[TOOL_CALL_ID_COLUMN] ?? undefined,
-    tool_id: toolRow[TOOL_NAME_COLUMN] ?? undefined,
-    arguments: parseJsonIfPossible(toolRow[TOOL_ARGUMENTS_COLUMN]),
-    result: parseJsonIfPossible(toolRow[TOOL_RESULT_COLUMN]),
+  const toolCallHistory = toolResponse.hits.hits.map((hit) => ({
+    tool_call_id: readStringAttribute(hit, TOOL_CALL_ID_KEY),
+    tool_id: readStringAttribute(hit, TOOL_NAME_KEY),
+    arguments: parseJsonIfPossible(hit._source?.attributes?.[TOOL_ARGUMENTS_KEY]),
+    result: parseJsonIfPossible(hit._source?.attributes?.[TOOL_RESULT_KEY]),
   }));
 
   return {

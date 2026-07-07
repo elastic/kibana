@@ -7,10 +7,10 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { awaitTraceReady } from './trace_readiness';
-import * as chatEvidenceModule from './chat_evidence';
+import * as traceEvidenceModule from './trace_evidence';
 import type { TraceAccessor } from './types';
 
-jest.mock('./chat_evidence');
+jest.mock('./trace_evidence');
 
 describe('awaitTraceReady', () => {
   const traceId = '0af7651916cd43dd8448eb211c80319c';
@@ -19,7 +19,7 @@ describe('awaitTraceReady', () => {
     traceId,
     esClient: {} as TraceAccessor['esClient'],
   };
-  const extractChatEvidenceMock = chatEvidenceModule.extractChatEvidence as jest.Mock;
+  const extractTraceEvidenceMock = traceEvidenceModule.extractTraceEvidence as jest.Mock;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -31,14 +31,15 @@ describe('awaitTraceReady', () => {
   });
 
   const flushRetries = async () => {
+    // Async advance interleaves microtasks so the full pRetry chain (all
+    // attempts + backoff timers) drains regardless of the retry count.
     for (let i = 0; i < 10; i++) {
-      jest.advanceTimersByTime(15000);
-      await Promise.resolve();
+      await jest.advanceTimersByTimeAsync(8000);
     }
   };
 
   it('resolves immediately when agent response is present', async () => {
-    extractChatEvidenceMock.mockResolvedValueOnce({
+    extractTraceEvidenceMock.mockResolvedValueOnce({
       user_query: 'hello',
       agent_response: 'world',
     });
@@ -46,40 +47,45 @@ describe('awaitTraceReady', () => {
     const promise = awaitTraceReady(traceAccessor, logger);
     await flushRetries();
     await expect(promise).resolves.toBeUndefined();
-    expect(extractChatEvidenceMock).toHaveBeenCalledTimes(1);
+    expect(extractTraceEvidenceMock).toHaveBeenCalledTimes(1);
   });
 
   it('retries when agent response is empty and succeeds on subsequent attempt', async () => {
-    extractChatEvidenceMock
+    extractTraceEvidenceMock
       .mockResolvedValueOnce({ user_query: 'hello', agent_response: '' })
       .mockResolvedValueOnce({ user_query: 'hello', agent_response: 'world' });
 
     const promise = awaitTraceReady(traceAccessor, logger);
     await flushRetries();
     await expect(promise).resolves.toBeUndefined();
-    expect(extractChatEvidenceMock).toHaveBeenCalledTimes(2);
+    expect(extractTraceEvidenceMock).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenCalled();
   });
 
   it('throws after exhausting retries when agent response never appears', async () => {
-    extractChatEvidenceMock.mockResolvedValue({
+    extractTraceEvidenceMock.mockResolvedValue({
       user_query: 'hello',
       agent_response: '',
     });
 
     const promise = awaitTraceReady(traceAccessor, logger);
-    await flushRetries();
-    await expect(promise).rejects.toThrow(
+    // Attach the rejection handler before draining timers so the rejection that
+    // occurs mid-flush is already handled (Kibana's jest treats an
+    // asynchronously-handled rejection warning as a fatal error).
+    const assertion = expect(promise).rejects.toThrow(
       `Trace ${traceId} is not ready: agent response not yet available`
     );
-    expect(extractChatEvidenceMock).toHaveBeenCalledTimes(3);
+    await flushRetries();
+    await assertion;
+    expect(extractTraceEvidenceMock).toHaveBeenCalledTimes(5);
   });
 
-  it('propagates errors from extractChatEvidence', async () => {
-    extractChatEvidenceMock.mockRejectedValue(new Error('ES query failed'));
+  it('propagates errors from extractTraceEvidence', async () => {
+    extractTraceEvidenceMock.mockRejectedValue(new Error('ES query failed'));
 
     const promise = awaitTraceReady(traceAccessor, logger);
+    const assertion = expect(promise).rejects.toThrow('ES query failed');
     await flushRetries();
-    await expect(promise).rejects.toThrow('ES query failed');
+    await assertion;
   });
 });

@@ -111,7 +111,7 @@ describe('GET /internal/evals/tracing/projects', () => {
     );
   });
 
-  it('filters root spans only (must_not parent_span_id and evaluator.name)', async () => {
+  it('excludes non-root spans and non-judge evaluator roots (keeps judge spans)', async () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
@@ -125,7 +125,12 @@ describe('GET /internal/evals/tracing/projects', () => {
     const searchCall = esClient.search.mock.calls[0][0] as any;
     expect(searchCall.query.bool.must_not).toEqual([
       { exists: { field: 'parent_span_id' } },
-      { exists: { field: 'attributes.evaluator.name' } },
+      {
+        bool: {
+          filter: [{ exists: { field: 'attributes.evaluator.name' } }],
+          must_not: [{ prefix: { name: 'judge · ' } }],
+        },
+      },
     ]);
   });
 

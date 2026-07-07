@@ -19,6 +19,7 @@ import type {
   EvalsSetupDependencies,
   EvalsStartDependencies,
 } from './types';
+import { registerEvalsPublicWorkflowSteps } from './workflows';
 
 const MANAGEMENT_KEYWORDS = ['evals', 'evaluations', 'ai', 'llm', 'trace', 'tracing'] as const;
 
@@ -32,8 +33,12 @@ export class EvalsPublicPlugin
 {
   public setup(
     coreSetup: CoreSetup<EvalsStartDependencies>,
-    { management }: EvalsSetupDependencies
+    { management, workflowsExtensions }: EvalsSetupDependencies
   ): EvalsPublicSetup {
+    if (workflowsExtensions) {
+      registerEvalsPublicWorkflowSteps(workflowsExtensions);
+    }
+
     if (management) {
       management.sections.section.ai.registerApp({
         id: PLUGIN_ID,

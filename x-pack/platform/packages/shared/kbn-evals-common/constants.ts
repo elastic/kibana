@@ -13,6 +13,16 @@ export const EVALS_EXPERIMENT_SCORES_URL =
   `${EVALS_INTERNAL_URL}/experiments/{experimentId}/scores` as const;
 export const EVALS_SCORES_URL = `${EVALS_INTERNAL_URL}/scores` as const;
 export const EVALS_EXPERIMENTS_COMPARE_URL = `${EVALS_INTERNAL_URL}/experiments/compare` as const;
+export const EVALS_EXPERIMENTS_RUN_URL = `${EVALS_INTERNAL_URL}/experiments/_run` as const;
+export const EVALS_EXPERIMENTS_SAVE_WORKFLOW_URL =
+  `${EVALS_INTERNAL_URL}/experiments/_save_as_workflow` as const;
+export const EVALS_EXPERIMENTS_PREVIEW_URL = `${EVALS_INTERNAL_URL}/experiments/_preview` as const;
+export const EVALS_EXPERIMENT_TEMPLATES_URL =
+  `${EVALS_INTERNAL_URL}/experiments/templates` as const;
+export const EVALS_EXPERIMENT_EXECUTION_URL =
+  `${EVALS_INTERNAL_URL}/experiments/executions/{workflowExecutionId}` as const;
+export const EVALS_EXPERIMENT_EXECUTION_CANCEL_URL =
+  `${EVALS_INTERNAL_URL}/experiments/executions/{workflowExecutionId}/_cancel` as const;
 export const EVALS_EXPERIMENT_DATASET_EXAMPLES_URL =
   `${EVALS_INTERNAL_URL}/experiments/{experimentId}/datasets/{datasetId}/examples` as const;
 export const EVALS_EXAMPLE_SCORES_URL =

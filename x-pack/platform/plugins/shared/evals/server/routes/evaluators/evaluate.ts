@@ -20,6 +20,7 @@ import { EVALS_API_PRIVILEGES } from '../../../common';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import { awaitTraceReady } from '../../evaluators/trace_readiness';
 import type { EvaluatorDefinition } from '../../evaluators/types';
+import { withEvalsEvaluatorSpan } from '../../task_providers/tracing';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerEvaluateRoute = ({
@@ -116,10 +117,20 @@ export const registerEvaluateRoute = ({
           esClient: coreContext.elasticsearch.client.asInternalUser,
         });
 
-        try {
-          await awaitTraceReady(traceAccessor, logger);
-        } catch (error) {
-          return response.notFound({ body: { message: String(error) } });
+        // Only wait for chat evidence when an evaluator actually consumes it. The
+        // readiness probe reads chat-event columns (`attributes.content`) that exist
+        // only for chat/agent traces; running it for a trace-metric-only request
+        // (tokens, latency, tool calls) would fail on a non-chat trace. Those
+        // evaluators handle trace-export latency with their own retries.
+        const needsChatEvidence = resolvedEvaluators.some(
+          (entry) => entry.definition.requiresChatEvidence
+        );
+        if (needsChatEvidence) {
+          try {
+            await awaitTraceReady(traceAccessor, logger);
+          } catch (error) {
+            return response.notFound({ body: { message: String(error) } });
+          }
         }
 
         let inferenceStartPromise: ReturnType<RouteDependencies['getInferenceStart']> | undefined;
@@ -159,12 +170,22 @@ export const registerEvaluateRoute = ({
                 ? await getInferenceClient(config.connector_id)
                 : undefined;
 
-            const result = await definition.evaluate({
-              trace: traceAccessor,
-              referenceData: parsedReferenceData,
-              inferenceClient,
-              log: logger,
-            });
+            const runEvaluate = () =>
+              definition.evaluate({
+                trace: traceAccessor,
+                referenceData: parsedReferenceData,
+                inferenceClient,
+                log: logger,
+              });
+
+            // Root LLM judges in their own `judge · <name>` span so they read as
+            // judges (not tasks) in the Tracing UI, with the model's `chat` span
+            // nested underneath. Trace-metric evaluators emit no model spans, so
+            // they neither need nor want a wrapper span.
+            const result =
+              definition.kind === 'llm'
+                ? await withEvalsEvaluatorSpan(definition.name, runEvaluate)
+                : await runEvaluate();
 
             results.push({
               status: 'ok',

@@ -6,6 +6,7 @@
  */
 
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
 export type EvalsPublicSetup = Record<string, never>;
 
@@ -89,6 +90,8 @@ export interface EvalsPublicStart {
 
 export interface EvalsSetupDependencies {
   management?: ManagementSetup;
+  /** Optional: register editor metadata for the evals workflow steps. */
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export type EvalsStartDependencies = Record<string, never>;

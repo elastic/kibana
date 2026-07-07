@@ -16,37 +16,39 @@ describe('correctness evaluator', () => {
   const traceId = '0af7651916cd43dd8448eb211c80319c';
 
   const createEsClient = () => {
-    const queryMock = jest.fn();
-    const esClient = {
-      esql: {
-        query: queryMock,
-      },
-    } as unknown as ElasticsearchClient;
+    const searchMock = jest.fn();
+    const esClient = { search: searchMock } as unknown as ElasticsearchClient;
 
-    return { esClient, queryMock };
+    return { esClient, searchMock };
   };
 
   it('uses one prompt call to produce factuality, relevance, and sequence_accuracy scores', async () => {
     const logger = loggingSystemMock.createLogger();
-    const { esClient, queryMock } = createEsClient();
+    const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
 
-    queryMock
+    searchMock
+      // Root-span probe (traces-*): a non-tool root means the resolver grades the
+      // conversation, not a bare tool execution.
       .mockResolvedValueOnce({
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: 'attributes.content', type: 'keyword' },
-          { name: 'span_id', type: 'keyword' },
-        ],
-        values: [['2026-06-26T10:00:00.000Z', 'What is the payment status?', 'span-001']],
+        hits: { hits: [{ _source: { attributes: { 'elastic.inference.span.kind': 'CHAIN' } } }] },
       })
       .mockResolvedValueOnce({
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: 'attributes.message.content', type: 'keyword' },
-          { name: 'span_id', type: 'keyword' },
-        ],
-        values: [['2026-06-26T10:00:01.000Z', 'Payment service is healthy.', 'span-002']],
+        hits: { hits: [{ _source: { attributes: { content: 'What is the payment status?' } } }] },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                attributes: {
+                  'message.content': 'Payment service is healthy.',
+                  finish_reason: 'stop',
+                },
+              },
+            },
+          ],
+        },
       });
 
     const promptMock = jest.fn().mockResolvedValue({

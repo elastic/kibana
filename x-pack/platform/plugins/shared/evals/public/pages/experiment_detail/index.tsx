@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, type MouseEvent } from 'react';
+import React, { useCallback, useEffect, useMemo, type MouseEvent } from 'react';
 import {
   EuiAccordion,
   EuiBasicTable,
@@ -42,7 +42,11 @@ import {
   useEvalsTraceFetcher,
   useExperimentDatasetExamples,
 } from '../../hooks/use_evals_api';
+import type { LaunchedExperimentConfig } from '../../../common/experiments/run_experiment';
+import { useWorkflowExecutions } from '../../hooks/use_experiments_api';
 import { ExampleScoresTable } from '../../components/example_scores_table';
+import { WorkflowRunProgress } from '../../components/workflow_run_progress';
+import { LaunchedConfigSummary } from '../../components/launched_config_summary';
 import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
 
@@ -177,12 +181,51 @@ export const ExperimentDetailPage: React.FC = () => {
 
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const executionId = searchParams.get('execution_id') ?? undefined;
+  const workflowExecutionIds = useMemo(
+    () => searchParams.get('workflow_execution_id')?.split(',').filter(Boolean) ?? [],
+    [searchParams]
+  );
+
+  // While a launch is in flight the experiment document is created asynchronously
+  // by the workflow (an experiment only exists once scores are ingested). A single
+  // hook polls every launched execution and tells us whether the run has settled
+  // and how many scores have landed so far.
+  const isLaunching = workflowExecutionIds.length > 0;
+  const {
+    executions: workflowExecutions,
+    allSettled: runSettled,
+    scoresIngested,
+  } = useWorkflowExecutions(workflowExecutionIds);
+  const anyScoresIngested = scoresIngested > 0;
+
+  // The submitted form, forwarded via router state on "Run now", so the config
+  // stays visible while the run has not produced queryable results yet.
+  const launchedConfig = useMemo(
+    () =>
+      (location.state as { experimentConfig?: LaunchedExperimentConfig } | null)?.experimentConfig,
+    [location.state]
+  );
 
   const {
     data: experimentDetail,
     isLoading: experimentLoading,
     error: experimentError,
-  } = useEvaluationExperiment(experimentId, executionId);
+    refetch: refetchExperiment,
+  } = useEvaluationExperiment(experimentId, executionId, {
+    // Only poll once scores start landing (to stream stats in). Before that the
+    // experiment document does not exist, so polling would 404 continuously; once
+    // the run settles we stop, since a run that ingested no scores never becomes a
+    // queryable experiment.
+    refetchInterval: isLaunching && anyScoresIngested && !runSettled ? 3000 : false,
+  });
+
+  // Fetch the experiment as soon as scores appear, and once more when the run
+  // settles, without waiting for the next poll tick.
+  useEffect(() => {
+    if (isLaunching && (anyScoresIngested || runSettled)) {
+      refetchExperiment();
+    }
+  }, [isLaunching, anyScoresIngested, runSettled, refetchExperiment]);
 
   const openDatasetId = searchParams.get('dataset_id');
   const selectedExampleId = searchParams.get('example_id');
@@ -199,7 +242,7 @@ export const ExperimentDetailPage: React.FC = () => {
     return pr ? resolvePrUrl(pr) : null;
   }, [experimentDetail?.ci?.pull_request]);
 
-  const experimentName = experimentDetail?.experiment_name;
+  const experimentName = experimentDetail?.experiment_name ?? launchedConfig?.name;
   const suiteId = experimentDetail?.suite_id;
 
   const pageTitle = suiteId
@@ -216,9 +259,12 @@ export const ExperimentDetailPage: React.FC = () => {
       history.push({
         pathname: location.pathname,
         search: search ? `?${search}` : '',
+        // Preserve the launched-config router state across in-page navigations
+        // (e.g. opening a dataset accordion) so the config summary stays visible.
+        state: location.state,
       });
     },
-    [history, location.pathname, location.search]
+    [history, location.pathname, location.search, location.state]
   );
 
   const setOpenDatasetId = useCallback(
@@ -344,7 +390,10 @@ export const ExperimentDetailPage: React.FC = () => {
     []
   );
 
-  if (experimentLoading) {
+  // Full-page spinner only for the normal detail view's initial load; during a
+  // launch we render a stable layout (config + run progress) instead of swapping
+  // between a spinner and the 404 branch, which caused flicker.
+  if (experimentLoading && !isLaunching) {
     return (
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         <EuiLoadingSpinner size="xl" />
@@ -352,9 +401,15 @@ export const ExperimentDetailPage: React.FC = () => {
     );
   }
 
-  if (experimentError) {
-    const isNotFound =
-      isHttpFetchError(experimentError) && experimentError.response?.status === 404;
+  const isNotFound = isHttpFetchError(experimentError) && experimentError.response?.status === 404;
+  // While a launch is in flight the experiment document appears only once scores
+  // are ingested, so "no experiment yet" is an expected transient state, not an
+  // error.
+  const showLaunchView = isLaunching && !experimentDetail;
+
+  // Hard error: a genuine load failure, or a "not found" outside a launch flow.
+  // The launch view below owns the "preparing" and "no results" outcomes.
+  if (experimentError && !showLaunchView) {
     return (
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         <EuiEmptyPrompt
@@ -387,6 +442,13 @@ export const ExperimentDetailPage: React.FC = () => {
           <h2>{pageTitle}</h2>
         </EuiTitle>
         <EuiSpacer size="l" />
+
+        {isLaunching && launchedConfig && (
+          <>
+            <LaunchedConfigSummary config={launchedConfig} />
+            <EuiSpacer size="l" />
+          </>
+        )}
 
         {experimentDetail && (
           <>
@@ -472,28 +534,77 @@ export const ExperimentDetailPage: React.FC = () => {
           </>
         )}
 
-        <EuiText size="s">
-          <h3>{i18n.SECTION_DATASETS}</h3>
-        </EuiText>
-        <EuiSpacer size="m" />
-        {datasetStatsGroups.map((group) => (
-          <DatasetStatsAccordion
-            key={group.datasetId}
-            experimentId={experimentId}
-            executionId={executionId}
-            group={group}
-            statsColumns={statsColumns}
-            experimentLoading={experimentLoading}
-            isOpen={openDatasetId === group.datasetId}
-            datasetExists={existingDatasetIds ? existingDatasetIds.has(group.datasetId) : true}
-            selectedExampleId={openDatasetId === group.datasetId ? selectedExampleId : null}
-            onTraceClick={(traceId, exampleId) => setSelectedTrace(traceId, exampleId)}
-            onDatasetToggle={(targetDatasetId, nextIsOpen) =>
-              setOpenDatasetId(nextIsOpen ? targetDatasetId : null)
-            }
-            onExampleClick={(exampleId) => setSelectedExample(exampleId)}
-          />
-        ))}
+        {isLaunching && (
+          <>
+            <EuiText size="s">
+              <h3>{i18n.SECTION_RUN_PROGRESS}</h3>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <WorkflowRunProgress executions={workflowExecutions} />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        {showLaunchView ? (
+          runSettled && !anyScoresIngested ? (
+            <EuiEmptyPrompt
+              color="warning"
+              iconType="warning"
+              title={<h2>{i18n.EXPERIMENT_NO_RESULTS_TITLE}</h2>}
+              body={<p>{i18n.EXPERIMENT_NO_RESULTS_BODY}</p>}
+              actions={[
+                <EuiButton onClick={() => history.push('/')}>{i18n.BACK_TO_EXPERIMENTS}</EuiButton>,
+              ]}
+            />
+          ) : anyScoresIngested ? (
+            // Scores have landed but the experiment document hasn't been fetched
+            // yet. Show a loading state (never "no results") so the yellow
+            // "no results" prompt doesn't flash as the run settles just before the
+            // detail query resolves.
+            <EuiEmptyPrompt
+              color="subdued"
+              icon={<EuiLoadingSpinner size="xl" />}
+              title={<h2>{i18n.EXPERIMENT_LOADING_RESULTS_TITLE}</h2>}
+              body={<p>{i18n.EXPERIMENT_LOADING_RESULTS_BODY}</p>}
+            />
+          ) : (
+            <EuiEmptyPrompt
+              color="subdued"
+              icon={<EuiLoadingSpinner size="xl" />}
+              title={<h2>{i18n.EXPERIMENT_PREPARING_TITLE}</h2>}
+              body={<p>{i18n.EXPERIMENT_PREPARING_BODY}</p>}
+            />
+          )
+        ) : (
+          experimentDetail && (
+            <>
+              <EuiText size="s">
+                <h3>{i18n.SECTION_DATASETS}</h3>
+              </EuiText>
+              <EuiSpacer size="m" />
+              {datasetStatsGroups.map((group) => (
+                <DatasetStatsAccordion
+                  key={group.datasetId}
+                  experimentId={experimentId}
+                  executionId={executionId}
+                  group={group}
+                  statsColumns={statsColumns}
+                  experimentLoading={experimentLoading}
+                  isOpen={openDatasetId === group.datasetId}
+                  datasetExists={
+                    existingDatasetIds ? existingDatasetIds.has(group.datasetId) : true
+                  }
+                  selectedExampleId={openDatasetId === group.datasetId ? selectedExampleId : null}
+                  onTraceClick={(traceId, exampleId) => setSelectedTrace(traceId, exampleId)}
+                  onDatasetToggle={(targetDatasetId, nextIsOpen) =>
+                    setOpenDatasetId(nextIsOpen ? targetDatasetId : null)
+                  }
+                  onExampleClick={(exampleId) => setSelectedExample(exampleId)}
+                />
+              ))}
+            </>
+          )
+        )}
       </EuiPageSection>
 
       {selectedTraceId && (

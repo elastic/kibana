@@ -13,75 +13,92 @@ describe('groundedness trace extractor', () => {
   const traceId = '0af7651916cd43dd8448eb211c80319c';
 
   const createEsClient = () => {
-    const queryMock = jest.fn();
+    const searchMock = jest.fn();
     const esClient = {
-      esql: {
-        query: queryMock,
-      },
+      search: searchMock,
     } as unknown as ElasticsearchClient;
 
-    return { esClient, queryMock };
+    return { esClient, searchMock };
   };
 
-  it('queries span events and tool spans for the trace and maps groundedness evidence', async () => {
+  it('reads chat evidence and tool spans from _source and maps groundedness evidence', async () => {
     const logger = loggingSystemMock.createLogger();
-    const { esClient, queryMock } = createEsClient();
+    const { esClient, searchMock } = createEsClient();
 
-    queryMock
-      // 1. User message span event from logs-*
+    searchMock
+      // 0. Root span probe from traces-* (the resolver checks whether the trace's
+      //    root is an execute_tool span). A conversation trace has a non-tool root,
+      //    so tool-evidence reconstruction is skipped and conversation evidence is used.
       .mockResolvedValueOnce({
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: 'attributes.content', type: 'keyword' },
-          { name: 'span_id', type: 'keyword' },
-        ],
-        values: [['2026-06-26T10:00:00.000Z', 'What is the payment status?', 'span-001']],
+        hits: { hits: [{ _source: { attributes: { 'elastic.inference.span.kind': 'CHAIN' } } }] },
       })
-      // 2. Agent response span event (gen_ai.choice) from logs-*
+      // 1. User message span event from logs-* (reads _source)
       .mockResolvedValueOnce({
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: 'attributes.message.content', type: 'keyword' },
-          { name: 'span_id', type: 'keyword' },
-        ],
-        values: [['2026-06-26T10:00:01.000Z', 'Payment service is healthy.', 'span-002']],
+        hits: { hits: [{ _source: { attributes: { content: 'What is the payment status?' } } }] },
       })
-      // 3. Tool spans from traces-*
+      // 2. Agent response span event (gen_ai.choice) from logs-* (reads _source)
       .mockResolvedValueOnce({
-        columns: [
-          { name: 'attributes.gen_ai.tool.call.id', type: 'keyword' },
-          { name: 'attributes.gen_ai.tool.name', type: 'keyword' },
-          { name: 'attributes.gen_ai.tool.call.arguments', type: 'keyword' },
-          { name: 'attributes.gen_ai.tool.call.result', type: 'keyword' },
-          { name: '@timestamp', type: 'date' },
-        ],
-        values: [
-          [
-            'call-1',
-            'health_check',
-            '{"service":"payments"}',
-            '{"status":"healthy"}',
-            '2026-06-26T10:00:00.500Z',
+        hits: {
+          hits: [
+            {
+              _source: {
+                attributes: {
+                  'message.content': 'Payment service is healthy.',
+                  finish_reason: 'stop',
+                },
+              },
+            },
           ],
-        ],
+        },
+      })
+      // 3. Tool spans from traces-* (reads _source, not ES|QL — large results are
+      //    present in _source but null in doc values due to `ignore_above`).
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                attributes: {
+                  'gen_ai.tool.call.id': 'call-1',
+                  'gen_ai.tool.name': 'health_check',
+                  'gen_ai.tool.call.arguments': '{"service":"payments"}',
+                  'gen_ai.tool.call.result': '{"status":"healthy"}',
+                },
+              },
+            },
+          ],
+        },
       });
 
     const evidence = await extractGroundednessEvidence({ traceId, esClient }, logger);
 
-    expect(queryMock).toHaveBeenCalledTimes(3);
+    expect(searchMock).toHaveBeenCalledTimes(4);
 
-    // Logs queries use ?trace_id placeholder with bound params
-    expect(queryMock.mock.calls[0][0]?.query).toContain('trace_id == ?trace_id');
-    expect(queryMock.mock.calls[0][0]?.params).toEqual([{ trace_id: traceId }]);
-    expect(queryMock.mock.calls[0][0]?.query).toContain('gen_ai.user.message');
+    // Root probe reads traces-* for the parentless root span.
+    const rootSearch = searchMock.mock.calls[0][0];
+    expect(rootSearch.index).toBe('traces-*');
+    expect(rootSearch.query.bool.must_not).toEqual([{ exists: { field: 'parent_span_id' } }]);
 
-    expect(queryMock.mock.calls[1][0]?.query).toContain('trace_id == ?trace_id');
-    expect(queryMock.mock.calls[1][0]?.params).toEqual([{ trace_id: traceId }]);
-    expect(queryMock.mock.calls[1][0]?.query).toContain('gen_ai.choice');
+    // Chat-evidence searches read logs-* `_source`, filtered by trace_id + event_name.
+    const userSearch = searchMock.mock.calls[1][0];
+    expect(userSearch.query.bool.filter).toContainEqual({ term: { trace_id: traceId } });
+    expect(userSearch.query.bool.filter).toContainEqual({
+      term: { event_name: 'gen_ai.user.message' },
+    });
 
-    // Traces query uses trace.id with bound params
-    expect(queryMock.mock.calls[2][0]?.query).toContain('trace.id == ?trace_id');
-    expect(queryMock.mock.calls[2][0]?.params).toEqual([{ trace_id: traceId }]);
+    const agentSearch = searchMock.mock.calls[2][0];
+    expect(agentSearch.query.bool.filter).toContainEqual({ term: { event_name: 'gen_ai.choice' } });
+    expect(agentSearch.query.bool.must_not).toEqual([
+      { term: { 'attributes.finish_reason': 'tool_calls' } },
+    ]);
+
+    // Tool spans read traces-* `_source`, filtered by trace.id + span kind = TOOL.
+    const toolSearch = searchMock.mock.calls[3][0];
+    expect(toolSearch.index).toBe('traces-*');
+    expect(toolSearch.query.bool.filter).toContainEqual({ term: { 'trace.id': traceId } });
+    expect(toolSearch.query.bool.filter).toContainEqual({
+      term: { 'attributes.elastic.inference.span.kind': 'TOOL' },
+    });
 
     expect(evidence).toEqual({
       user_query: 'What is the payment status?',

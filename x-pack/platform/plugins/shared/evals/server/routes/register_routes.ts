@@ -8,9 +8,11 @@
 import type { Logger } from '@kbn/logging';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EvalsRouter } from '../types';
 import type { EvaluatorRegistry } from '../evaluators/types';
+import type { TaskProviderRegistry } from '../task_providers/types';
+import type { EvalsWorkflowsManagementSetup } from '../workflows/workflows_management_types';
 import { registerGetExperimentsRoute } from './experiments/get_experiments';
 import { registerGetExperimentRoute } from './experiments/get_experiment';
 import { registerGetExperimentScoresRoute } from './experiments/get_experiment_scores';
@@ -33,6 +35,14 @@ import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
 import { registerIngestScoresRoute } from './scores/ingest_scores';
 import { registerListEvaluatorsRoute } from './evaluators/list_evaluators';
 import { registerEvaluateRoute } from './evaluators/evaluate';
+import { registerRunExperimentRoute } from './experiments/run_experiment';
+import { registerSaveExperimentWorkflowRoute } from './experiments/save_experiment_workflow';
+import { registerPreviewExperimentRoute } from './experiments/preview_experiment';
+import { registerGetExperimentTemplatesRoute } from './experiments/get_experiment_templates';
+import {
+  registerGetExperimentExecutionRoute,
+  registerCancelExperimentExecutionRoute,
+} from './experiments/experiment_executions';
 
 export interface RouteDependencies {
   router: EvalsRouter;
@@ -42,6 +52,14 @@ export interface RouteDependencies {
   getInferenceStart: () => Promise<InferenceServerStart>;
   getEncryptedSavedObjectsStart: () => Promise<EncryptedSavedObjectsPluginStart>;
   getInternalRemoteConfigsSoClient: () => Promise<SavedObjectsClientContract>;
+  /**
+   * Resolves the active space for a request. Always supplied by the plugin; typed
+   * optional so existing route unit tests can pass partial dependencies.
+   */
+  getSpaceId?: (request: KibanaRequest) => Promise<string>;
+  /** Present only when the Workflows plugins are enabled; gates the experiment-execution routes. */
+  taskProviderRegistry?: TaskProviderRegistry;
+  workflowsManagement?: EvalsWorkflowsManagementSetup;
 }
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
@@ -66,5 +84,11 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerUpsertDatasetRoute(dependencies);
   registerListEvaluatorsRoute(dependencies);
   registerEvaluateRoute(dependencies);
+  registerRunExperimentRoute(dependencies);
+  registerSaveExperimentWorkflowRoute(dependencies);
+  registerPreviewExperimentRoute(dependencies);
+  registerGetExperimentTemplatesRoute(dependencies);
+  registerGetExperimentExecutionRoute(dependencies);
+  registerCancelExperimentExecutionRoute(dependencies);
   registerRemoteConfigsRoutes(dependencies);
 };

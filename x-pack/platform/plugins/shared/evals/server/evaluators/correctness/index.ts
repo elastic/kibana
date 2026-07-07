@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { extractChatEvidence } from '../chat_evidence';
+import { extractTraceEvidence } from '../trace_evidence';
 import { runLlmJudge } from '../llm_judge';
 import type { EvaluatorDefinition } from '../types';
 import { LlmCorrectnessEvaluationPrompt } from './prompt';
@@ -32,12 +32,13 @@ export const correctnessEvaluator: EvaluatorDefinition<z.infer<typeof referenceD
   kind: 'llm',
   description: 'Measures factuality, relevance, and sequence accuracy against expected output.',
   referenceDataSchema,
+  requiresChatEvidence: true,
   async evaluate({ trace, referenceData, inferenceClient }) {
     if (!inferenceClient) {
       throw new Error('Inference client is required for correctness evaluator');
     }
 
-    const chatEvidence = await extractChatEvidence(trace);
+    const chatEvidence = await extractTraceEvidence(trace);
 
     const analysis = await runLlmJudge<CorrectnessAnalysis>({
       inferenceClient,
