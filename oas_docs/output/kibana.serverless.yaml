@@ -87259,6 +87259,12 @@ components:
       additionalProperties: false
       description: Visual chart styling options
       properties:
+        density:
+          description: Density preset for the metric chart layout. Use `compact` for a compact layout, or `default` for increased padding, element spacing, and font size.
+          enum:
+            - compact
+            - default
+          type: string
         icon:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_metricIconConfig'
         primary:
