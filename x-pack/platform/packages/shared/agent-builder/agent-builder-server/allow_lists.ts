@@ -104,7 +104,7 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
   `${internalNamespaces.streams}.sig-events.discovery`,
-  `${internalNamespaces.streams}.sig-events.discoveryJudge`,
+  `${internalNamespaces.streams}.sig-events.discovery-judge`,
   `${internalNamespaces.platformSignificantEvents}.investigation`,
 ] as const;
 
