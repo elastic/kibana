@@ -51,9 +51,7 @@ export class DiagnosticsPage {
     // readers. That copy is clipped off-screen rather than hidden, so Playwright's `visible`
     // check still matches it. Exclude anything nested under the live region instead.
     await this.page
-      .locator(
-        '[data-test-subj="apmTemplateDescriptionClearBundleButton"]:not([role="status"] *)'
-      )
+      .locator('[data-test-subj="apmTemplateDescriptionClearBundleButton"]:not([role="status"] *)')
       .click();
   }
 
