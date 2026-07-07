@@ -38,7 +38,7 @@ import { buildDiscoveryJudgeInput } from '../../src/evaluators/discovery/judge/b
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 evaluate.describe(
-  'Significant Events Discovery - Judge',
+  'Significant Events Discovery - Judge Agent',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
