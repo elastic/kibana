@@ -178,6 +178,39 @@ describe('lens_date_histogram_textbased', () => {
     });
   });
 
+  it('returns the table unchanged when the ES|QL date column has no bucket metadata', async () => {
+    const input: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: 'a',
+          name: 'A',
+          meta: {
+            type: 'date',
+            esType: 'date',
+            sourceParams: {
+              params: { drop_partials: true },
+              appliedTimeRange: {
+                from: '1970-01-01T00:00:01.000Z',
+                to: '1970-01-01T00:00:04.000Z',
+              },
+            },
+          },
+        },
+        { id: 'b', name: 'B', meta: { type: 'number' } },
+      ],
+      rows: [
+        { a: 0, b: 1 },
+        { a: 1000, b: 2 },
+        { a: 4000, b: 5 },
+      ],
+    };
+
+    const result = await dateHistogram.fn(input, {}, createMockExecutionContext());
+
+    expect(result).toBe(input);
+  });
+
   it('returns the table unchanged when there is no date histogram bucket column', async () => {
     const input: Datatable = {
       type: 'datatable',

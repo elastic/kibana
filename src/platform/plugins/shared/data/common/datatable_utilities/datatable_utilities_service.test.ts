@@ -177,6 +177,26 @@ describe('DatatableUtilitiesService', () => {
       });
     });
 
+    it('should return undefined for an ES|QL date column when bucket metadata is not available', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: {
+          type: 'date',
+          esType: 'date',
+          sourceParams: {
+            appliedTimeRange: { from: '2024-02-01', to: '2024-02-02' },
+            params: {},
+            indexPattern: 'logs-*',
+            sourceField: 'test',
+            isSourceFieldFilterable: true,
+          },
+        },
+      } satisfies DatatableColumn;
+
+      expect(datatableUtilitiesService.getDateHistogramMeta(column)).toBeUndefined();
+    });
+
     it('surfaces the precomputed domain from sourceParams for an ES|QL column', () => {
       const column = {
         id: 'test',
