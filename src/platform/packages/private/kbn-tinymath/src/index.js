@@ -15,15 +15,21 @@ import { parse as parseFn } from './grammar.peggy';
 const MAX_EXPRESSION_LENGTH = 1000;
 const MAX_NESTING_DEPTH = 20;
 
+// Matches single- and double-quoted strings, including escaped quotes (\' and \").
+// Used to strip quoted spans before counting parenthesis nesting depth, so that
+// parentheses inside KQL/Lucene filter strings (e.g. count(kql='(a or b)')) are
+// not mistakenly counted as structural nesting.
+const QUOTED_STRINGS_RE = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g;
+
 function checkNestingDepth(input) {
+  const unquoted = input.replace(QUOTED_STRINGS_RE, '');
   let depth = 0;
-  for (let i = 0; i < input.length; i++) {
-    const ch = input[i];
-    if (ch === '(') {
+  for (let i = 0; i < unquoted.length; i++) {
+    if (unquoted[i] === '(') {
       if (++depth > MAX_NESTING_DEPTH) {
         throw new Error(`Expression exceeds maximum nesting depth of ${MAX_NESTING_DEPTH}`);
       }
-    } else if (ch === ')') {
+    } else if (unquoted[i] === ')') {
       depth--;
     }
   }

@@ -355,6 +355,17 @@ describe('Parser', () => {
     expect(() => parse(okExpr)).not.toThrow();
   });
 
+  it('ignores parentheses inside quoted strings for nesting depth', () => {
+    const deepParensInQuotes = `foo(filter='((a or b) and (c or (d or (e or (f)))))')`;
+    expect(() => parse(deepParensInQuotes)).not.toThrow();
+
+    const doubleQuoted = `foo(filter="((((((((((((((((((((nested))))))))))))))))))))")`;
+    expect(() => parse(doubleQuoted)).not.toThrow();
+
+    const withEscapes = `foo(filter='it\\'s (a (b (c)))')`;
+    expect(() => parse(withEscapes)).not.toThrow();
+  });
+
   it('parses deeply nested parentheses without hanging', () => {
     const depth = 20;
     const expr = '('.repeat(depth) + '1' + ')'.repeat(depth);
