@@ -295,19 +295,15 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       transform: 'translateX(-50%)',
       zIndex: 2,
     }),
-    // Editor fills the panel; the per-view inset below adds the framing.
     editorInset: css({
       flexGrow: 1,
       minHeight: 0,
       overflow: 'hidden',
     }),
-    // YAML keeps a flush-left gutter (8px on top/right/bottom, 0 left) so Monaco's
-    // line numbers sit against the panel edge.
+    // 0 left keeps Monaco's gutter flush against the panel edge.
     yamlInset: css({
       padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s} 0`,
     }),
-    // Graph is full-bleed: the canvas fills the panel so its floating controls
-    // (minimap, zoom, bottom bar) sit a uniform 16px in from the panel borders.
     graphInset: css({
       padding: 0,
     }),

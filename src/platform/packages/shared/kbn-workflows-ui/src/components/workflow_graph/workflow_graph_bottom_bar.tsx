@@ -389,7 +389,6 @@ export function WorkflowDetailBottomBar({
             transition: 'opacity 200ms ease',
             background: euiTheme.colors.backgroundBasePlain,
             borderRadius: 12,
-            // 8px on every side so the inner content is inset uniformly.
             padding: euiTheme.size.s,
             boxShadow: BAR_SHADOW,
             display: 'inline-flex',

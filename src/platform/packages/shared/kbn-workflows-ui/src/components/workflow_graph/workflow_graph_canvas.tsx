@@ -497,9 +497,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         | undefined;
       const status = data?.stepExecution?.status;
       if (status === 'failed') return euiTheme.colors.danger;
-      // Figma (node 10808:19179): the trigger node reads as pink in the minimap,
-      // matching its icon; all other steps are blue. Uses the same vis tokens as
-      // the node icons — euiColorVis2 (#61a2ff) / euiColorVis4 (#ee72a6).
       const isTriggerNode =
         data?.isTrigger || (data?.stepType ? TRIGGER_STEP_TYPES.has(data.stepType) : false);
       return isTriggerNode ? euiTheme.colors.vis.euiColorVis4 : euiTheme.colors.vis.euiColorVis2;

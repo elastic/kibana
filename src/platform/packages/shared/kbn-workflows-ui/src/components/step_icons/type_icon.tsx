@@ -76,8 +76,6 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, color, .
       <span
         css={css`
           display: inline-block;
-          /* Match EuiIcon's vertical-align so data-URL (masked) icons line up
-             with EuiIcon-rendered icons in the same row (e.g. template cards). */
           vertical-align: middle;
           width: 16px;
           height: 16px;
@@ -85,8 +83,6 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, color, .
           mask-size: contain;
           mask-repeat: no-repeat;
           mask-position: center;
-          /* Honor the caller's color (e.g. the graph node's pink trigger tint);
-             fall back to the default text color when none is passed. */
           background-color: ${color ?? euiTheme.colors.textParagraph};
         `}
         aria-hidden={true}
