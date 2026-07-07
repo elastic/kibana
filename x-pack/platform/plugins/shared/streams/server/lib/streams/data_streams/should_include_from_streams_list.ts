@@ -19,12 +19,6 @@ import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
  * rows on `/app/streams/`. Fleet applies a similar exclusion for its data
  * streams list (`handlers.ts`: dot-prefixed names such as `.workflows-events`).
  */
-export const shouldExcludeFromStreamsList = (
-  dataStream: Pick<IndicesDataStream, 'hidden'>
-): boolean => {
-  if (dataStream.hidden === true) {
-    return true;
-  }
-
-  return false;
-};
+export const shouldIncludeFromStreamsList = ({
+  hidden,
+}: Pick<IndicesDataStream, 'hidden'>): boolean => !hidden;

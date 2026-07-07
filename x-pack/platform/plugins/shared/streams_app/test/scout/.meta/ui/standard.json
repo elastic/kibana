@@ -1,5 +1,5 @@
 {
-  "sha1": "4a725a5346319ae08653304896183853c8e9c00b",
+  "sha1": "7628d4383c895a077d2b1e8f6bd601a35069d5cf",
   "tests": [
     {
       "id": "8fdb537796db270-7132d4e40af07dc",
@@ -510,6 +510,146 @@
       }
     },
     {
+      "id": "319f1486042e7a2-7125b76e6bc4408",
+      "title": "Stream data retention - Add data phase flow replaces \"Add delete phase\" with the \"Add data phase\" popover offering frozen and delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 94,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-c1193447be49baf",
+      "title": "Stream data retention - Add data phase flow adds a delete phase through the data phases flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 107,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-e2d23299cf3b3ba",
+      "title": "Stream data retention - Add data phase flow adds a frozen phase through the data phases flyout when a default repository exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 131,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-71176235574c755",
+      "title": "Stream data retention - Add data phase flow gates the frozen phase behind the \"default snapshot repository required\" modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 191,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-1cb86d12d86aca9",
+      "title": "Stream data retention - Add data phase flow resumes adding the frozen phase when a default repository is created and the modal is refreshed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 207,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-85432343e986a5d",
+      "title": "Stream data retention - Add data phase flow opens the data phases flyout when editing an existing phase from the timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 246,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-9e6e0a8bd8c98df",
+      "title": "Stream data retention - Add data phase flow disables \"Add data phase\" when both frozen and delete phases are configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 261,
+        "column": 9
+      }
+    },
+    {
+      "id": "319f1486042e7a2-db888af9e14084a",
+      "title": "Stream data retention - Add data phase flow edits and removes the frozen phase from its timeline popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
+        "line": 275,
+        "column": 9
+      }
+    },
+    {
+      "id": "727030c9fcca07a-17861509951c185",
+      "title": "Stream data retention - Add delete phase flow (serverless) shows the dedicated \"Add delete phase\" button and no \"Add data phase\" popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_delete_phase_flow.spec.ts",
+        "line": 47,
+        "column": 9
+      }
+    },
+    {
+      "id": "727030c9fcca07a-44f3707e565b32e",
+      "title": "Stream data retention - Add delete phase flow (serverless) adds and removes a delete phase via the Add delete phase flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_delete_phase_flow.spec.ts",
+        "line": 55,
+        "column": 9
+      }
+    },
+    {
       "id": "1590b4af49c6b0b-6b8296211e38431",
       "title": "Stream data retention - custom retention periods should set and reset retention policy",
       "expectedStatus": "passed",
@@ -521,7 +661,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 129,
+        "line": 132,
         "column": 9
       }
     },
@@ -537,13 +677,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 140,
+        "line": 144,
         "column": 9
       }
     },
     {
-      "id": "1590b4af49c6b0b-37ff27f069ce66d",
-      "title": "Stream data retention - custom retention periods should set retention on classic stream",
+      "id": "1590b4af49c6b0b-f053ee9169261fb",
+      "title": "Stream data retention - custom retention periods should display retention on classic stream",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -553,7 +693,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 152,
+        "line": 165,
         "column": 9
       }
     },
@@ -569,7 +709,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 180,
+        "line": 184,
         "column": 9
       }
     },
@@ -585,7 +725,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 191,
+        "line": 201,
         "column": 9
       }
     },
@@ -601,7 +741,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 220,
+        "line": 235,
         "column": 9
       }
     },
@@ -617,7 +757,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 286,
+        "line": 301,
         "column": 9
       }
     },
@@ -1021,7 +1161,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_flyout_interactions.spec.ts",
-        "line": 62,
+        "line": 63,
         "column": 9
       }
     },
@@ -1037,7 +1177,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_flyout_interactions.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 9
       }
     },
