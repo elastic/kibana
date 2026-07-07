@@ -20,9 +20,17 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION } from '../utils/route_constants';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
+const EXTERNAL_RESUME_ID_PARAM_MAX_LENGTH = 128;
+
 const externalResumeFormParamsSchema = schema.object({
-  executionId: schema.string({ meta: { description: 'Workflow execution ID' } }),
-  stepId: schema.string({ meta: { description: 'Workflow step execution ID' } }),
+  executionId: schema.string({
+    maxLength: EXTERNAL_RESUME_ID_PARAM_MAX_LENGTH,
+    meta: { description: 'Workflow execution ID' },
+  }),
+  stepId: schema.string({
+    maxLength: EXTERNAL_RESUME_ID_PARAM_MAX_LENGTH,
+    meta: { description: 'Workflow step execution ID' },
+  }),
 });
 
 export function registerExternalResumeFormRoute(deps: RouteDependencies) {
