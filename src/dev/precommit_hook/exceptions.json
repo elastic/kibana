@@ -350,7 +350,7 @@
   "@elastic/obs-exploration-team": {
     "src/platform/packages/shared/shared-ux/toolbar_selector": "'toolbar_selector' should be kebab-case"
   },
-  "@elastic/obs-onboarding-team": {
+  "@elastic/streams-ui": {
     "src/platform/packages/shared/kbn-otel-semantic-conventions/src/generated/resolved-semconv.ts": "'resolved-semconv.ts' should be snake_case",
     "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Android": "'Android' should be snake_case",
     "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Apache": "'Apache' should be snake_case",

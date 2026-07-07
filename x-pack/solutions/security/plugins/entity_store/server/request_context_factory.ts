@@ -23,6 +23,7 @@ import { CRUDClient } from './domain/crud';
 import { EntityMetadataClient } from './domain/entity_metadata';
 import { ResolutionClient } from './domain/resolution';
 import type { TelemetryReporter } from './telemetry/events';
+import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: EntityStoreCoreSetup;
@@ -44,7 +45,13 @@ export async function createRequestHandlerContext({
   const core = await context.core;
   const [coreStart, startPlugins] = await coreSetup.getStartServices();
   const taskManagerStart = startPlugins.taskManager;
+
   const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
+  const emitEvent = createWorkflowTriggerEmitter({
+    getWorkflowsClient: () => startPlugins.workflowsExtensions.getClient(request),
+    logger,
+    context: `namespace "${namespace}"`,
+  });
 
   const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
     core.savedObjects.client,
@@ -73,6 +80,7 @@ export async function createRequestHandlerContext({
     logger,
     esClient,
     namespace,
+    emitWorkflowTriggerEvent: emitEvent,
   });
   const entityMetadataClient = new EntityMetadataClient({
     logger,

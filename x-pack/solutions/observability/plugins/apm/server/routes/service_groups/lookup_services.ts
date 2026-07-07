@@ -7,15 +7,10 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { LookupServicesResponse } from '@kbn/apm-api-shared';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-
-export type LookupServicesResponse = Array<{
-  serviceName: string;
-  environments: string[];
-  agentName: AgentName;
-}>;
 
 export async function lookupServices({
   apmEventClient,
