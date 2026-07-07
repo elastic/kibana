@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
 import type { RuleQuery } from '../../form/types';
 import type { QueryTab } from './types';
+import { MIN_EDITOR_HEIGHT } from './constants';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LineNumbersType = monaco.editor.LineNumbersType;
@@ -48,7 +49,6 @@ interface LockedBaseEditorProps {
 
 const LOCKED_FONT_SIZE = 13;
 const LOCKED_LINE_HEIGHT = 18;
-const MIN_EDITOR_HEIGHT = 80;
 
 const SPLIT_EDITOR_CONTAINER_STYLES: React.CSSProperties = {
   display: 'flex',
