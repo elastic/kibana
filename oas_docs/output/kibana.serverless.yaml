@@ -126228,7 +126228,7 @@ components:
       properties:
         allowHtml:
           description: |
-            Specifies whether this connector can send email with HTML bodies. This property cannot be set to `true` when `service` is `elastic_cloud`.
+            When `true`, the connector can send emails with HTML-formatted content in the body. Defaults to `false`. This option is unavailable when `service` is `elastic_cloud`.
           default: false
           type: boolean
         clientId:
