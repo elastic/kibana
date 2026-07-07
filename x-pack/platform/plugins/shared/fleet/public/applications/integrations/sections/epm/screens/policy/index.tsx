@@ -31,11 +31,7 @@ export const Policy = memo(() => {
   const isAgentless = useIsAgentlessQueryParam();
 
   // This read only resolves the edit UI extension, whose `useLatestPackageVersion` flag feeds
-  // `forceUpgrade`. Skipping it for agentless is safe and avoids touching the package-policy API:
-  // this screen is only used for regular (non-upgrade) edit, and the agentless load path forces
-  // `isUpgrade=false` and ignores `forceUpgrade`. Agentless *upgrades* use the separate
-  // `upgrade_package_policy` route, which omits the `isAgentless` hint and stays on the legacy
-  // package-policy path for now. The form re-resolves the extension from the loaded policy.
+  // `forceUpgrade`. Skipping it for agentless is safe and avoids touching the package-policy API.
   const { data: packagePolicyData } = useGetOnePackagePolicyQuery(packagePolicyId, {
     enabled: !isAgentless,
   });

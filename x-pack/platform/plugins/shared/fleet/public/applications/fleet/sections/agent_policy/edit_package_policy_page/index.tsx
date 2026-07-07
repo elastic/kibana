@@ -88,18 +88,11 @@ export const EditPackagePolicyPage = memo(() => {
 
   // Detect-before-read: the route only carries `packagePolicyId`, shared between agentless and
   // agent-based policies. Agentless surfaces append this hint so we can read/write through the
-  // agentless API without first reading the package policy. Always false when the agentless
-  // policies UI kill switch is off, so the page falls back to the legacy APIs. See task4
-  // follow-ups for the (provisional) mechanism.
+  // agentless API without first reading the package policy.
   const isAgentless = useIsAgentlessQueryParam();
 
   // This read only resolves the edit UI extension, whose `useLatestPackageVersion` flag feeds
-  // `forceUpgrade`. Skipping it for agentless is safe and avoids touching the package-policy API:
-  // this wrapper is only used for regular (non-upgrade) edit, and the agentless load path forces
-  // `isUpgrade=false` and ignores `forceUpgrade`. Agentless *upgrades* use the separate
-  // `upgrade_package_policy` route, which deliberately omits the `isAgentless` hint and stays on the
-  // legacy package-policy path for now (wiring the agentless `_upgrade` UI is a follow-up / task5).
-  // The form re-resolves the extension from the agentless-loaded policy for rendering.
+  // `forceUpgrade`. Skipping it for agentless is safe and avoids touching the package-policy API.
   const packagePolicy = useGetOnePackagePolicyQuery(packagePolicyId, { enabled: !isAgentless });
   const extensionView = useUIExtension(
     packagePolicy.data?.item?.package?.name ?? '',
