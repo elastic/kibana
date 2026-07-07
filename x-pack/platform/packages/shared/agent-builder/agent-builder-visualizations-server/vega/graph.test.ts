@@ -10,11 +10,16 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
 import { VEGA_LITE_SCHEMA } from './normalize_spec';
+import { validateVegaSpec } from './vega_validator';
 import { createVegaGraph } from './graph';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
   executeEsql: jest.fn(),
+}));
+
+jest.mock('./vega_validator', () => ({
+  validateVegaSpec: jest.fn(),
 }));
 
 jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
@@ -31,6 +36,7 @@ jest.mock('../shared/esql_instructions', () => ({
 
 const mockedGenerateEsql = jest.mocked(generateEsql);
 const mockedExecuteEsql = jest.mocked(executeEsql);
+const mockedValidateVegaSpec = jest.mocked(validateVegaSpec);
 
 const createMockLogger = (): Logger =>
   ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
@@ -61,6 +67,7 @@ describe('createVegaGraph', () => {
     mockedExecuteEsql.mockResolvedValue({ columns: [], values: [] } as Awaited<
       ReturnType<typeof executeEsql>
     >);
+    mockedValidateVegaSpec.mockResolvedValue({ warnings: [] });
   });
 
   const run = async (
@@ -174,6 +181,46 @@ describe('createVegaGraph', () => {
     expect(invoke).toHaveBeenCalledTimes(2);
     expect(state.error).toBeNull();
     expect(JSON.parse(state.spec!).mark).toBe('arc');
+  });
+
+  it('retries authoring when the spec fails to compile/render, then succeeds', async () => {
+    invoke
+      .mockResolvedValueOnce(asCodeBlock({ mark: 'bar', encoding: { x: { field: 'nope' } } }))
+      .mockResolvedValueOnce(asCodeBlock({ mark: 'line' }));
+    mockedValidateVegaSpec
+      .mockResolvedValueOnce({ error: 'Unrecognized encoding channel', warnings: [] })
+      .mockResolvedValueOnce({ warnings: [] });
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(state.error).toBeNull();
+    expect(JSON.parse(state.spec!).mark).toBe('line');
+  });
+
+  it('feeds the render error into the next authoring attempt', async () => {
+    invoke
+      .mockResolvedValueOnce(asCodeBlock({ mark: 'bar' }))
+      .mockResolvedValueOnce(asCodeBlock({ mark: 'line' }));
+    mockedValidateVegaSpec
+      .mockResolvedValueOnce({ error: 'Unknown transform op: bogus', warnings: [] })
+      .mockResolvedValueOnce({ warnings: [] });
+
+    await run({ esqlQuery: PROVIDED_ESQL });
+
+    const secondPrompt = JSON.stringify(invoke.mock.calls[1][0]);
+    expect(secondPrompt).toContain('Unknown transform op: bogus');
+  });
+
+  it('gives up when the spec never renders within the retry budget', async () => {
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+    mockedValidateVegaSpec.mockResolvedValue({ error: 'Infinite extent', warnings: [] });
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.spec).toBeNull();
+    expect(state.error).toContain('Infinite extent');
+    expect(invoke).toHaveBeenCalledTimes(3);
   });
 
   it('regenerates a corrected query when the provided ES|QL fails to execute', async () => {

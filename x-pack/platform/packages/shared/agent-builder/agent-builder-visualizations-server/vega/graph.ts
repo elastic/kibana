@@ -16,6 +16,7 @@ import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { normalizeVegaSpec } from './normalize_spec';
+import { validateVegaSpec } from './vega_validator';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
 import {
   GENERATE_ESQL_NODE,
@@ -273,6 +274,21 @@ export const createVegaGraph = async (
         esqlQuery: state.esqlQuery,
         columns: state.columns,
       });
+
+      // Compile (Vega-Lite -> Vega) and headless-render the normalized spec to
+      // catch compile/render errors a structural check cannot. A render error
+      // fails validation so authoring retries with the message as feedback;
+      // infra failures/timeouts fail open (no error) so they never block.
+      const { error: renderError, warnings } = await validateVegaSpec({
+        spec: normalized,
+        logger,
+      });
+      if (renderError) {
+        throw new Error(renderError);
+      }
+      if (warnings.length > 0) {
+        logger.debug(`Vega spec validated with warnings: ${warnings.join('; ')}`);
+      }
 
       action = {
         type: 'validate_spec',
