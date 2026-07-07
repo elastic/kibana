@@ -10,37 +10,14 @@
 import { unescape } from 'lodash';
 
 /**
- * Pretty-prints a field value that is either entirely JSON or plain text with JSON
- * objects/arrays embedded in it. Returns the transformed string, or undefined when
- * the value contains no JSON to format, so the caller can render the original value.
+ * Pretty-prints a field value that contains JSON blocks, replacing every JSON block with its pretty-printed
+ * form and placing each block (and each surrounding run of text) on its own line so
+ * the result reads clearly. Returns the transformed string, or undefined
+ * when the value contains no JSON to format, so the caller can render it as-is.
  */
-export const tryFormatJsonContent = (value: unknown): string | undefined => {
-  if (value === undefined || value === null || typeof value !== 'string') {
-    return undefined;
-  }
-
-  return tryPrettyPrintJson(value) ?? prettyPrintJsonBlocks(value);
-};
-
-/**
- * Attempts to parse a value as JSON and pretty-print it. Returns undefined if the
- * value is not valid JSON.
- */
-const tryPrettyPrintJson = (value: string): string | undefined => {
-  try {
-    return JSON.stringify(JSON.parse(unescape(value)), null, 2);
-  } catch {
-    return undefined;
-  }
-};
-
-/**
- * Replaces every embedded JSON object/array in `value` with its pretty-printed
- * form, placing each block (and each surrounding run of text) on its own line so
- * the result reads clearly. Returns undefined when no embedded JSON is found.
- */
-const prettyPrintJsonBlocks = (value: string): string | undefined => {
-  const segments = extractEmbeddedJsonSegments(value);
+export const prettyPrintJsonBlocks = (value: unknown): string | undefined => {
+  const unescapedValue = unescape(String(value));
+  const segments = extractEmbeddedJsonSegments(unescapedValue);
   if (!segments.length) {
     return undefined;
   }
@@ -49,7 +26,7 @@ const prettyPrintJsonBlocks = (value: string): string | undefined => {
   let cursor = 0;
 
   for (const segment of segments) {
-    const precedingText = value.slice(cursor, segment.start).trim();
+    const precedingText = unescapedValue.slice(cursor, segment.start).trim();
     if (precedingText) {
       parts.push(precedingText);
     }
@@ -57,7 +34,7 @@ const prettyPrintJsonBlocks = (value: string): string | undefined => {
     cursor = segment.end;
   }
 
-  const trailingText = value.slice(cursor).trim();
+  const trailingText = unescapedValue.slice(cursor).trim();
   if (trailingText) {
     parts.push(trailingText);
   }

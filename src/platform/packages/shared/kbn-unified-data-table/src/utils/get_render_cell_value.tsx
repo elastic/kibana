@@ -20,7 +20,7 @@ import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldValueReact, tryFormatJsonContent } from '@kbn/discover-utils';
+import { formatFieldValueReact, prettyPrintJsonBlocks } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
@@ -272,7 +272,7 @@ function renderPopoverContent({
   }
 
   const value = row.flattened[columnId];
-  const jsonContent = tryFormatJsonContent(value);
+  const jsonContent = prettyPrintJsonBlocks(value);
 
   return (
     <EuiFlexGroup
