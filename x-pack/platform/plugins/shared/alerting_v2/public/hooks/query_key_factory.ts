@@ -54,6 +54,7 @@ export const actionPolicyKeys = {
   }) => [...actionPolicyKeys.lists(), filters] as const,
   allTags: () => [...actionPolicyKeys.all, 'tags'] as const,
   tags: (search?: string) => [...actionPolicyKeys.allTags(), { search }] as const,
+  linkedForRule: (ruleId: string) => [...actionPolicyKeys.all, 'linkedForRule', ruleId] as const,
 };
 
 export const executionHistoryKeys = {

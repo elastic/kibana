@@ -1,0 +1,127 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { buildRuleScopedMatcher } from '@kbn/alerting-v2-rule-form';
+import { useLinkedActionPolicies } from './use_linked_action_policies';
+
+const mockListActionPolicies = jest.fn();
+
+jest.mock('../../../../services/action_policies_api', () => ({
+  ActionPoliciesApi: 'ActionPoliciesApi',
+}));
+
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: (token: unknown) => {
+    if (token === 'ActionPoliciesApi') {
+      return { listActionPolicies: mockListActionPolicies };
+    }
+    return {};
+  },
+  CoreStart: (key: string) => key,
+}));
+
+const RULE_ID = 'rule-1';
+
+const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse =>
+  ({
+    id: 'policy-1',
+    name: 'Alpha Policy',
+    description: '',
+    enabled: true,
+    destinations: [{ type: 'workflow', id: 'workflow-1' }],
+    matcher: buildRuleScopedMatcher(RULE_ID),
+    groupBy: null,
+    tags: null,
+    groupingMode: 'per_episode',
+    throttle: null,
+    snoozedUntil: null,
+    auth: { owner: 'user', createdByUser: true },
+    createdBy: 'user',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedBy: 'user',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+    ...overrides,
+  }) as ActionPolicyResponse;
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
+};
+
+describe('useLinkedActionPolicies', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockListActionPolicies.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 100 });
+  });
+
+  it('does not fetch when ruleId is empty', () => {
+    const Wrapper = createWrapper();
+    renderHook(() => useLinkedActionPolicies(''), { wrapper: Wrapper });
+
+    expect(mockListActionPolicies).not.toHaveBeenCalled();
+  });
+
+  it('fetches policies and returns explicitly linked matches with counts', async () => {
+    mockListActionPolicies.mockResolvedValue({
+      items: [
+        buildPolicy({ id: 'linked-catch-all', name: 'Catch all' }),
+        buildPolicy({
+          id: 'linked-filtered',
+          name: 'Filtered',
+          matcher: `rule.id: "${RULE_ID}" and severity: "high"`,
+        }),
+        buildPolicy({
+          id: 'global',
+          name: 'Global',
+          matcher: null,
+        }),
+      ],
+      total: 3,
+      page: 1,
+      perPage: 100,
+    });
+
+    const Wrapper = createWrapper();
+    const { result } = renderHook(() => useLinkedActionPolicies(RULE_ID), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(mockListActionPolicies).toHaveBeenCalledWith({
+      page: 1,
+      perPage: 100,
+    });
+    expect(result.current.totalCount).toBe(2);
+    expect(result.current.catchAllCount).toBe(1);
+    expect(result.current.matchingCriteriaCount).toBe(1);
+    expect(result.current.policies.map((policy) => policy.id)).toEqual([
+      'linked-catch-all',
+      'linked-filtered',
+    ]);
+    expect(result.current.isError).toBe(false);
+    expect(result.current.error).toBeNull();
+  });
+
+  it('surfaces API errors', async () => {
+    mockListActionPolicies.mockRejectedValue(new Error('network error'));
+
+    const Wrapper = createWrapper();
+    const { result } = renderHook(() => useLinkedActionPolicies(RULE_ID), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(result.current.error?.message).toBe('network error');
+    expect(result.current.policies).toEqual([]);
+    expect(result.current.totalCount).toBe(0);
+  });
+});
