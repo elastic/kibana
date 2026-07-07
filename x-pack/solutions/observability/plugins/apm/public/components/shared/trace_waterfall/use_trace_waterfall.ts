@@ -9,11 +9,11 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import type { Error } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
+import type { ErrorMark } from '@kbn/apm-ui-shared';
 import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import { WaterfallLegendType, type IWaterfallLegend } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import type { OnErrorClick } from './trace_waterfall_context';
-import type { ErrorMark } from '../charts/timeline/marker/error_marker';
 
 const FALLBACK_WARNING = i18n.translate(
   'xpack.apm.traceWaterfallItem.warningMessage.fallbackWarning',

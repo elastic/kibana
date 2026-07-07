@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -14,13 +16,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
-import type { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useState } from 'react';
 import type { Error } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
-import { asDuration } from '../../../../../../common/utils/formatters';
-import type { ApmRoutes } from '../../../../routing/apm_route_config';
-import { ErrorDetailLink } from '../../../links/apm/error_detail_link';
+import { asDuration } from '../../../utils';
 import { Legend, Shape } from '../legend';
 import type { Mark } from '.';
 
@@ -33,16 +32,10 @@ export interface ErrorMark extends Mark {
 
 interface Props {
   mark: ErrorMark;
-  query?: TypeOf<ApmRoutes, '/services/{serviceName}/errors/{groupId}'>['query'];
 }
 
 const Popover = styled.div`
   max-width: 280px;
-`;
-
-const ErrorLink = styled(ErrorDetailLink)`
-  display: block;
-  overflow-wrap: break-word;
 `;
 
 const Button = styled(Legend)`
@@ -55,13 +48,13 @@ const Button = styled(Legend)`
 function truncateMessage(errorMessage?: string) {
   const maxLength = 240;
   if (typeof errorMessage === 'string' && errorMessage.length > maxLength) {
-    return errorMessage.substring(0, maxLength) + '…';
+    return errorMessage.substring(0, maxLength) + '\u2026';
   } else {
     return errorMessage;
   }
 }
 
-export function ErrorMarker({ mark, query }: Props) {
+export function ErrorMarker({ mark }: Props) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, showPopover] = useState(false);
 
@@ -110,19 +103,7 @@ export function ErrorMarker({ mark, query }: Props) {
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            {mark.onClick === undefined && error.error.grouping_key && query ? (
-              <EuiText size="s">
-                <ErrorLink
-                  data-test-subj="errorLink"
-                  serviceName={error.service.name}
-                  errorGroupId={error.error.grouping_key}
-                  query={query}
-                  title={errorMessage}
-                >
-                  {truncatedErrorMessage}
-                </ErrorLink>
-              </EuiText>
-            ) : mark.onClick ? (
+            {mark.onClick ? (
               <EuiButtonEmpty
                 data-test-subj="apmTimelineErrorMarkerButton"
                 onClick={() => {
@@ -133,7 +114,7 @@ export function ErrorMarker({ mark, query }: Props) {
                 {truncatedErrorMessage}
               </EuiButtonEmpty>
             ) : (
-              truncatedErrorMessage
+              <EuiText size="s">{truncatedErrorMessage}</EuiText>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

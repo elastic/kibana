@@ -1,17 +1,46 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 import { screen } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
+import moment from 'moment';
+import type { Moment } from 'moment-timezone';
 import type { TimelineProps } from '.';
 import { TimelineAxisContainer, VerticalLinesContainer } from '.';
-import { mockMoment, disableConsoleWarning } from '../../../../utils/test_helpers';
-import { renderWithTheme } from '../../../../utils/test_helpers';
 import type { AgentMark } from './marker/agent_marker';
+
+function renderWithTheme(component: React.ReactNode, params?: any) {
+  return render(<EuiThemeProvider>{component}</EuiThemeProvider>, params);
+}
+
+function mockMoment() {
+  // avoid timezone issues
+  jest.spyOn(moment.prototype, 'format').mockImplementation(function (this: Moment) {
+    return `1st of January (mocking ${this.unix()})`;
+  });
+
+  // convert relative time to absolute time to avoid timing issues
+  jest.spyOn(moment.prototype, 'fromNow').mockImplementation(function (this: Moment) {
+    return `1337 minutes ago (mocking ${this.unix()})`;
+  });
+}
+
+const originalConsoleWarn = console.warn; // eslint-disable-line no-console
+function disableConsoleWarning(messageToDisable: string) {
+  return jest.spyOn(console, 'warn').mockImplementation((message) => {
+    if (!message.startsWith(messageToDisable)) {
+      originalConsoleWarn(message);
+    }
+  });
+}
 
 describe('Timeline Components', () => {
   let consoleMock: jest.SpyInstance;

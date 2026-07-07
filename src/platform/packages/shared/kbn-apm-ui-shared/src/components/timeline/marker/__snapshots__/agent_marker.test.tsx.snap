@@ -7,10 +7,10 @@ exports[`AgentMarker renders correctly 1`] = `
     id="agent-wrapper"
   >
     <div
-      class="css-1ejn3a9-Container en0jakt1"
+      class="css-1ejn3a9-Container e1j6lx041"
     >
       <span
-        class="css-xbgcmn-Indicator en0jakt0"
+        class="css-xbgcmn-Indicator e1j6lx040"
         color="#8E9FBC"
         shape="circle"
       />

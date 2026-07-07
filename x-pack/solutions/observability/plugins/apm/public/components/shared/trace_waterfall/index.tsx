@@ -18,12 +18,12 @@ import {
 import type { ListRowRenderer, ListRowProps } from 'react-virtualized';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { Error } from '@kbn/apm-types';
+import { TimelineAxisContainer, VerticalLinesContainer } from '@kbn/apm-ui-shared';
 import type {
   IWaterfallGetRelatedErrorsHref,
   WaterfallGetServiceBadgeHref,
 } from '../../../../common/waterfall/typings';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
-import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
 import { CriticalPathToggle } from './critical_path';
 import { ScrollToOriginButton } from './scroll_to_origin_button';

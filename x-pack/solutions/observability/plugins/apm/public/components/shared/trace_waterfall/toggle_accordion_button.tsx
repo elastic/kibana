@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { asBigNumber } from '../../../../common/utils/formatters';
+import { asBigNumber } from '@kbn/apm-common';
 
 export const TOGGLE_BUTTON_WIDTH = 20;
 interface Props {

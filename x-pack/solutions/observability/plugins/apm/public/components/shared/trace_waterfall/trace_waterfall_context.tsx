@@ -5,25 +5,22 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { groupBy } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
-import type { Error } from '@kbn/apm-types';
+import type { Error, TraceItem } from '@kbn/apm-types';
+import type { AgentMark, ErrorMark } from '@kbn/apm-ui-shared';
+import { getAgentMarks } from '@kbn/apm-ui-shared';
+import { groupBy } from 'lodash';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
+import { WaterfallLegendType } from '../../../../common/waterfall/legend';
 import type {
   IWaterfallGetRelatedErrorsHref,
   WaterfallGetServiceBadgeHref,
 } from '../../../../common/waterfall/typings';
-import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
-import { WaterfallLegendType } from '../../../../common/waterfall/legend';
-import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import { getCriticalPath, type CriticalPathSegment } from './critical_path';
 import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
-import { TraceDataState, type TraceWaterfallItem } from './use_trace_waterfall';
-import { useTraceWaterfall } from './use_trace_waterfall';
-import { getCriticalPath, type CriticalPathSegment } from './critical_path';
-import type { ErrorMark } from '../charts/timeline/marker/error_marker';
-import { getAgentMarks } from '../charts/timeline/marker/get_agent_marks';
-import type { AgentMark } from '../charts/timeline/marker/agent_marker';
+import { TraceDataState, useTraceWaterfall, type TraceWaterfallItem } from './use_trace_waterfall';
 
 export type TraceWaterfallScrollStrategy = 'parent' | 'window';
 

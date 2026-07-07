@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -11,7 +13,6 @@ import type { AgentMark } from './agent_marker';
 import { AgentMarker } from './agent_marker';
 import type { ErrorMark } from './error_marker';
 import { ErrorMarker } from './error_marker';
-import { ErrorMarkerWithLink } from './error_marker_with_link';
 
 export interface Mark {
   type: string;
@@ -34,15 +35,7 @@ export function Marker({ mark, x }: Props) {
   const legendWidth = 11;
   return (
     <MarkerContainer style={{ left: x - legendWidth / 2 }}>
-      {mark.type === 'errorMark' ? (
-        mark.onClick ? (
-          <ErrorMarker mark={mark} />
-        ) : (
-          <ErrorMarkerWithLink mark={mark} />
-        )
-      ) : (
-        <AgentMarker mark={mark} />
-      )}
+      {mark.type === 'errorMark' ? <ErrorMarker mark={mark} /> : <AgentMarker mark={mark} />}
     </MarkerContainer>
   );
 }

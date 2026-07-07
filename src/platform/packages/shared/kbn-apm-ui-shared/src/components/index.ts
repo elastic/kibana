@@ -18,3 +18,9 @@ export * from './timestamp';
 export * from './transactions_table';
 export * from './truncate_with_tooltip';
 export { getSpanIcon } from './span_icon/get_span_icon';
+// Timeline
+export { TimelineAxisContainer, VerticalLinesContainer } from './timeline';
+export { Legend } from './timeline/legend';
+export type { AgentMark } from './timeline/marker/agent_marker';
+export type { ErrorMark } from './timeline/marker/error_marker';
+export { getAgentMarks } from './timeline/marker/get_agent_marks';
