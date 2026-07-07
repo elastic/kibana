@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiCheckbox,
@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CspRegion } from '../../../common/types';
@@ -36,6 +35,10 @@ interface RegionZoneListProps {
   onToggleExpand: (zoneId: string, isOpen: boolean) => void;
 }
 
+const zoneCheckboxStyles = ({ euiTheme }: UseEuiTheme) => ({
+  marginTop: euiTheme.size.xs,
+});
+
 export const RegionZoneList: React.FC<RegionZoneListProps> = ({
   zoneGroups,
   checkedKeys,
@@ -44,10 +47,6 @@ export const RegionZoneList: React.FC<RegionZoneListProps> = ({
   onToggleZone,
   onToggleExpand,
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const regionListStyles = css({ padding: euiTheme.size.s });
-  const zoneCheckboxStyles = css({ marginTop: euiTheme.size.xs });
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {zoneGroups.map((zone) => {
@@ -100,24 +99,21 @@ export const RegionZoneList: React.FC<RegionZoneListProps> = ({
                   extraAction={extraAction}
                   forceState={expandedZones.has(zone.geo) ? 'open' : 'closed'}
                   onToggle={(isOpen) => onToggleExpand(zone.geo, isOpen)}
-                  paddingSize="none"
+                  paddingSize="s"
                 >
-                  <EuiFlexGroup direction="column" gutterSize="s" css={regionListStyles}>
-                    {zone.regions.map((r) => {
-                      const key = regionKey(r);
-                      return (
-                        <EuiFlexItem key={key} grow={false}>
-                          <EuiCheckbox
-                            id={`region-${key}`}
-                            label={REGION_DISPLAY_NAMES[key] ?? r.region}
-                            checked={checkedKeys.has(key)}
-                            onChange={() => onToggleRegion(key)}
-                            data-test-subj={`manageRegionsCheckbox-${key}`}
-                          />
-                        </EuiFlexItem>
-                      );
-                    })}
-                  </EuiFlexGroup>
+                  {zone.regions.map((r) => {
+                    const key = regionKey(r);
+                    return (
+                      <EuiCheckbox
+                        key={key}
+                        id={`region-${key}`}
+                        label={REGION_DISPLAY_NAMES[key] ?? r.region}
+                        checked={checkedKeys.has(key)}
+                        onChange={() => onToggleRegion(key)}
+                        data-test-subj={`manageRegionsCheckbox-${key}`}
+                      />
+                    );
+                  })}
                 </EuiAccordion>
               </EuiFlexItem>
             </EuiFlexGroup>
