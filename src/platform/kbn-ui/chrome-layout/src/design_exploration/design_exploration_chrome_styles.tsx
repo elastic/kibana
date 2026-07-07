@@ -27,8 +27,11 @@ export const DESIGN_EXPLORATION_BORDER_WIDTH = 0.5;
 /** Default inner padding for nav panel content. */
 export const DESIGN_EXPLORATION_PADDING = 16;
 
+/** Compact inner padding for tighter chrome regions. */
+export const DESIGN_EXPLORATION_PADDING_COMPACT = 12;
+
 /** Application top bar slot height when Chrome app header is shown. */
-export const DESIGN_EXPLORATION_TOP_BAR_HEIGHT = 72;
+export const DESIGN_EXPLORATION_TOP_BAR_HEIGHT = 64;
 
 export const DESIGN_EXPLORATION_BODY_ATTR = 'data-design-exploration';
 
@@ -81,6 +84,14 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       box-shadow: ${embeddablePanelShadow} !important;
     }
 
+    ${scope} [data-test-subj='dashboardPanelTitle'] {
+      padding-top: ${DESIGN_EXPLORATION_GAP}px !important;
+    }
+
+    ${scope} [data-test-subj='embeddablePanelTitle'] {
+      padding-left: 4px !important;
+    }
+
     ${scope} .euiFormControlLayout input:not(:focus):not(:disabled):not(:invalid):not([aria-invalid='true']),
     ${scope} .euiFormControlLayout select:not(:focus):not(:disabled),
     ${scope} .euiFormControlLayout textarea:not(:focus):not(:disabled):not(:invalid):not([aria-invalid='true']),
@@ -102,13 +113,13 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} [data-test-subj='globalQueryBar'] {
-      padding: ${DESIGN_EXPLORATION_PADDING}px !important;
+      padding: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
       padding-bottom: ${DESIGN_EXPLORATION_GAP}px !important;
     }
 
     ${scope} [data-test-subj='controls-group-wrapper'] {
-      padding-inline: ${DESIGN_EXPLORATION_PADDING}px !important;
-      padding-bottom: ${DESIGN_EXPLORATION_PADDING}px !important;
+      padding-inline: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
+      padding-bottom: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
     }
 
     ${scope}:has(.dshDashboardViewportWrapper--isFullscreen) [data-test-subj='controls-group-wrapper'] {
@@ -146,8 +157,8 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) {
-      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 2}px) !important;
-      margin: ${DESIGN_EXPLORATION_PADDING}px !important;
+      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 1}px) !important;
+      margin: calc(${DESIGN_EXPLORATION_PADDING}px - 8px) !important;
       min-height: 48px !important;
     }
 
@@ -159,9 +170,11 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
       top: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
+      width: calc(100% - ${DESIGN_EXPLORATION_PADDING}px) !important;
       background: transparent !important;
       background-color: transparent !important;
       backdrop-filter: none !important;
+      margin-inline: ${DESIGN_EXPLORATION_GAP}px !important;
       -webkit-backdrop-filter: none !important;
       border: none !important;
       box-shadow: none !important;
@@ -171,8 +184,8 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']
       .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
-      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 2}px - 24px) !important;
-      margin: calc(${DESIGN_EXPLORATION_PADDING}px + 12px) !important;
+      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 2}px) !important;
+      margin: ${DESIGN_EXPLORATION_PADDING}px !important;
       border-radius: ${scrolledBarBorderRadius} !important;
       box-shadow: ${embeddablePanelShadow} !important;
       background-color: color-mix(
