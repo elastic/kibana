@@ -55,15 +55,14 @@ test.describe('APM Onboarding', { tag: tags.stateful.classic }, () => {
       await test.step(`shows the ${agent} snippet`, async () => {
         await onboardingPage.selectAgent(agent);
 
-        if (role === 'text') {
-          await expect(page.getByText(snippet, { exact })).toBeVisible({
-            timeout: EXTENDED_TIMEOUT,
-          });
-        } else {
-          await expect(page.getByRole(role as any, { name: snippet, exact })).toBeVisible({
-            timeout: EXTENDED_TIMEOUT,
-          });
-        }
+        const locator =
+          role === 'text'
+            ? page.getByText(snippet, { exact })
+            : page.getByRole(role as any, { name: snippet, exact });
+
+        await expect(locator).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
     }
   });
