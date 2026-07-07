@@ -34,7 +34,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
-import { RuleKindBadge } from '../../components/rule_details/rule_header_description';
+import { RuleKindBadge } from '../../components/rule_details/rule_summary_header';
 import { RuleActionsMenu } from './rule_actions_menu';
 
 const labelsContainerStyle = css`
