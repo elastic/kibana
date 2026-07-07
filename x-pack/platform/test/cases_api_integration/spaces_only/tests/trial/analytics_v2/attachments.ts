@@ -13,6 +13,7 @@ import {
   createCase,
   createComment,
   deleteAllCaseItems,
+  deleteCases,
   deleteComment,
   getAuthWithSuperUser,
   updateComment,
@@ -90,7 +91,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const userDoc = docs.find((d) => d.attachment.type === UNIFIED_COMMENT_TYPE);
       expect(userDoc).to.be.an('object');
       expect(userDoc!.cases.id).to.eql(created.id);
-      expect(userDoc!.space_id).to.eql('default');
+      // The suite creates every case in `space1` (see `getAuthWithSuperUser`),
+      // so the analytics doc's `space_id` — derived from the SO namespaces —
+      // is `space1`, not the default space.
+      expect(userDoc!.space_id).to.eql(auth.space);
       // Curated extract: the user comment text round-trips via the
       // legacy → unified normalization (legacy `comment` field →
       // `data.content` → `attachment.comment` extract).
@@ -176,11 +180,13 @@ export default ({ getService }: FtrProviderContext): void => {
       });
       await waitForAttachmentForCase(es, created.id, 2);
 
-      await supertestWithoutAuth
-        .delete(`/api/cases?ids=${encodeURIComponent(JSON.stringify([created.id]))}`)
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'kibana')
-        .expect(204);
+      // Delete must be scoped to `space1` (where the case lives) via `auth`;
+      // an unscoped delete hits the default space and 404s.
+      await deleteCases({
+        supertest: supertestWithoutAuth,
+        caseIDs: [created.id],
+        auth,
+      });
 
       await waitForAttachmentsAbsent(es, created.id);
     });

@@ -1069,6 +1069,220 @@ describe('AttachmentService', () => {
     });
   });
 
+  describe('analyticsV2 mirror on create / bulkCreate / bulkDelete', () => {
+    // The update path re-reads the SO (covered above); create/bulkCreate/
+    // bulkDelete mirror directly. These pin: the mirror fires with the right
+    // shape, partial-failure entries are excluded, and it can NEVER fail the
+    // primary SO write (the core safety property).
+    const makeMirrorWriter = () => ({
+      upsertAttachment: jest.fn(),
+      deleteAttachment: jest.fn(),
+      bulkUpsertAttachments: jest.fn(),
+      bulkDeleteAttachments: jest.fn(),
+      bulkDeleteAttachmentsByCaseIds: jest.fn(),
+      bulkUpsertAttachmentsAwait: jest.fn(async () => {}),
+    });
+
+    const makeService = (writer: ReturnType<typeof makeMirrorWriter>, attachmentsEnabled = false) =>
+      new AttachmentService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(attachmentsEnabled),
+        analyticsV2AttachmentsWriter: writer,
+      });
+
+    describe('create mirror', () => {
+      it('mirrors the created legacy SO via upsertAttachment', async () => {
+        const writer = makeMirrorWriter();
+        const svc = makeService(writer);
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createUserAttachment());
+
+        await svc.create({
+          attributes: createUserAttachment().attributes,
+          references: [],
+          id: '1',
+        });
+
+        expect(writer.upsertAttachment).toHaveBeenCalledTimes(1);
+        const mirrored = writer.upsertAttachment.mock.calls[0][0];
+        expect(mirrored.id).toBe('1');
+        expect(mirrored.type).toBe(CASE_COMMENT_SAVED_OBJECT);
+      });
+
+      it('mirrors the created unified SO via upsertAttachment when the attachments SO is enabled', async () => {
+        const writer = makeMirrorWriter();
+        const svc = makeService(writer, true);
+        unsecuredSavedObjectsClient.create.mockResolvedValue({
+          ...createUserAttachment(),
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+        });
+
+        await svc.create({
+          attributes: createUserAttachment().attributes,
+          references: [],
+          id: '1',
+        });
+
+        expect(writer.upsertAttachment).toHaveBeenCalledTimes(1);
+        expect(writer.upsertAttachment.mock.calls[0][0].type).toBe(CASE_ATTACHMENT_SAVED_OBJECT);
+      });
+    });
+
+    describe('bulkCreate mirror', () => {
+      it('mirrors every successful SO via a single bulkUpsertAttachments', async () => {
+        const writer = makeMirrorWriter();
+        const svc = makeService(writer);
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [
+            { ...createUserAttachment(), id: '1', type: CASE_COMMENT_SAVED_OBJECT },
+            { ...createUserAttachment(), id: '2', type: CASE_COMMENT_SAVED_OBJECT },
+          ],
+        });
+
+        await svc.bulkCreate({
+          attachments: [
+            { attributes: createUserAttachment().attributes, references: [], id: '1' },
+            { attributes: createUserAttachment().attributes, references: [], id: '2' },
+          ],
+        });
+
+        expect(writer.bulkUpsertAttachments).toHaveBeenCalledTimes(1);
+        const mirrored = writer.bulkUpsertAttachments.mock.calls[0][0];
+        expect(mirrored.map((so: { id: string }) => so.id)).toEqual(['1', '2']);
+      });
+
+      it('excludes per-entry error SOs from the mirror on partial success', async () => {
+        const writer = makeMirrorWriter();
+        const svc = makeService(writer);
+        // Entry 2 is an error SO (no persisted SO), so it must not be mirrored.
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [
+            { ...createUserAttachment(), id: '1', type: CASE_COMMENT_SAVED_OBJECT },
+            { ...createErrorSO(CASE_COMMENT_SAVED_OBJECT), id: '2' },
+          ] as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+
+        await svc.bulkCreate({
+          attachments: [
+            { attributes: createUserAttachment().attributes, references: [], id: '1' },
+            { attributes: createUserAttachment().attributes, references: [], id: '2' },
+          ],
+        });
+
+        expect(writer.bulkUpsertAttachments).toHaveBeenCalledTimes(1);
+        const mirrored = writer.bulkUpsertAttachments.mock.calls[0][0];
+        expect(mirrored.map((so: { id: string }) => so.id)).toEqual(['1']);
+      });
+
+      it('does not call the mirror when every entry errored', async () => {
+        const writer = makeMirrorWriter();
+        const svc = makeService(writer);
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [
+            { ...createErrorSO(CASE_COMMENT_SAVED_OBJECT), id: '1' },
+            { ...createErrorSO(CASE_COMMENT_SAVED_OBJECT), id: '2' },
+          ] as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+
+        await svc.bulkCreate({
+          attachments: [
+            { attributes: createUserAttachment().attributes, references: [], id: '1' },
+            { attributes: createUserAttachment().attributes, references: [], id: '2' },
+          ],
+        });
+
+        expect(writer.bulkUpsertAttachments).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('bulkDelete mirror', () => {
+      it('only mirrors ids whose SO delete succeeded across both source types', async () => {
+        const writer = makeMirrorWriter();
+        const svc = makeService(writer);
+        // id-1: both source-type deletes succeeded. id-2: the unified delete
+        // failed → the SO may survive → its analytics doc must NOT be dropped
+        // (reconciliation can't recover a doc whose `updated_at` never changed).
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            { id: 'id-1', type: CASE_ATTACHMENT_SAVED_OBJECT, success: true },
+            { id: 'id-1', type: CASE_COMMENT_SAVED_OBJECT, success: true },
+            { id: 'id-2', type: CASE_ATTACHMENT_SAVED_OBJECT, success: false },
+            { id: 'id-2', type: CASE_COMMENT_SAVED_OBJECT, success: true },
+          ],
+        });
+
+        await svc.bulkDelete({ savedObjectIds: ['id-1', 'id-2'], refresh: false });
+
+        expect(writer.bulkDeleteAttachments).toHaveBeenCalledTimes(1);
+        expect(writer.bulkDeleteAttachments.mock.calls[0][0]).toEqual(['id-1']);
+      });
+    });
+
+    describe('fire-and-forget: a throwing analytics writer never breaks the primary SO write', () => {
+      it('create: swallows a synchronous writer throw and still returns the created attachment', async () => {
+        const writer = makeMirrorWriter();
+        writer.upsertAttachment.mockImplementation(() => {
+          throw new Error('writer boom');
+        });
+        const svc = makeService(writer);
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createUserAttachment());
+
+        const res = await svc.create({
+          attributes: createUserAttachment().attributes,
+          references: [],
+          id: '1',
+        });
+
+        // create still resolves with the persisted SO despite the writer throw.
+        expect(res.id).toBe('1');
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('attachments mirror dispatch threw')
+        );
+      });
+
+      it('bulkCreate: swallows a synchronous writer throw and still returns the SO response', async () => {
+        const writer = makeMirrorWriter();
+        writer.bulkUpsertAttachments.mockImplementation(() => {
+          throw new Error('writer boom');
+        });
+        const svc = makeService(writer);
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [{ ...createUserAttachment(), id: '1', type: CASE_COMMENT_SAVED_OBJECT }],
+        });
+
+        const res = await svc.bulkCreate({
+          attachments: [{ attributes: createUserAttachment().attributes, references: [], id: '1' }],
+        });
+
+        expect(res.saved_objects[0].id).toBe('1');
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('attachments mirror dispatch threw')
+        );
+      });
+
+      it('bulkDelete: swallows a synchronous writer throw and still resolves', async () => {
+        const writer = makeMirrorWriter();
+        writer.bulkDeleteAttachments.mockImplementation(() => {
+          throw new Error('writer boom');
+        });
+        const svc = makeService(writer);
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            { id: 'id-1', type: CASE_ATTACHMENT_SAVED_OBJECT, success: true },
+            { id: 'id-1', type: CASE_COMMENT_SAVED_OBJECT, success: true },
+          ],
+        });
+
+        await expect(
+          svc.bulkDelete({ savedObjectIds: ['id-1'], refresh: false })
+        ).resolves.toBeUndefined();
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('attachments mirror dispatch threw')
+        );
+      });
+    });
+  });
+
   describe('bulkUpdate', () => {
     const soClientRes = {
       id: '1',

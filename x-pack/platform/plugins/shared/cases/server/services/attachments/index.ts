@@ -399,17 +399,35 @@ export class AttachmentService {
         { id, type: CASE_ATTACHMENT_SAVED_OBJECT },
         { id, type: CASE_COMMENT_SAVED_OBJECT },
       ]);
-      await this.context.unsecuredSavedObjectsClient.bulkDelete(deleteRequests, {
-        refresh,
-      });
+      const { statuses } = await this.context.unsecuredSavedObjectsClient.bulkDelete(
+        deleteRequests,
+        {
+          refresh,
+        }
+      );
 
-      // analyticsV2 mirror to `.cases-attachments`. Fire-and-forget — the
-      // SO bulkDelete is the source of truth; the writer logs and
-      // reconciliation has nothing to repair (the source SOs are gone).
-      // Same id is unique across both source SO types, so a single
-      // bulk-delete by id on the analytics index covers both source-side
-      // deletes.
-      this.context.analyticsV2AttachmentsWriter.bulkDeleteAttachments(savedObjectIds);
+      // analyticsV2 mirror to `.cases-attachments`. Fire-and-forget; the SO
+      // delete is the source of truth. One bulk-delete by id covers both
+      // source types (id is unique across them).
+      //
+      // Drop the analytics doc ONLY for ids whose SO delete succeeded —
+      // `bulkDelete` reports partial failure via `statuses[]` rather than
+      // throwing. Dropping the doc for a surviving SO is unrecoverable:
+      // its `updated_at` didn't change, so reconciliation never re-emits it
+      // (permanent undercount until `/reset`). Same guard as
+      // `CasesService.bulkDeleteCaseEntities`. `success` covers 200 and 404
+      // (both mean "SO gone"); each id has two requests (unified + legacy),
+      // so exclude it if EITHER failed.
+      const failedIds = new Set<string>();
+      for (const status of statuses) {
+        if (!status.success) {
+          failedIds.add(status.id);
+        }
+      }
+      const idsToMirror = savedObjectIds.filter((id) => !failedIds.has(id));
+      this.mirrorSafely(() =>
+        this.context.analyticsV2AttachmentsWriter.bulkDeleteAttachments(idsToMirror)
+      );
     } catch (error) {
       this.context.log.error(`Error on DELETE attachments ${savedObjectIds}: ${error}`);
       throw error;
@@ -456,11 +474,13 @@ export class AttachmentService {
         const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
           injectedAttachment.attributes
         );
-        // analyticsV2 mirror to `.cases-attachments`. Fire-and-forget —
-        // the SO write is the source of truth; the writer logs and
-        // reconciliation fixes anything that fails.
-        this.context.analyticsV2AttachmentsWriter.upsertAttachment(
-          unifiedAttachment as unknown as SavedObject<UnifiedAttachmentAttributes>
+        // analyticsV2 mirror to `.cases-attachments`. Fire-and-forget and
+        // guarded (`mirrorSafely`) so it can't fail the create that already
+        // persisted the SO; reconciliation backstops any failure.
+        this.mirrorSafely(() =>
+          this.context.analyticsV2AttachmentsWriter.upsertAttachment(
+            unifiedAttachment as unknown as SavedObject<UnifiedAttachmentAttributes>
+          )
         );
         return Object.assign(injectedAttachment, {
           attributes: validatedAttributes,
@@ -493,10 +513,11 @@ export class AttachmentService {
         transformedAttachment.attributes
       );
 
-      // analyticsV2 mirror — see comment in the unified branch above.
-      // Same writer for both source SO types; the doc-builder normalizes
-      // legacy → unified at write time.
-      this.context.analyticsV2AttachmentsWriter.upsertAttachment(attachment);
+      // analyticsV2 mirror — same writer for both source types; see the
+      // unified branch above.
+      this.mirrorSafely(() =>
+        this.context.analyticsV2AttachmentsWriter.upsertAttachment(attachment)
+      );
 
       return Object.assign(transformedAttachment, { attributes: validatedAttributes });
     } catch (error) {
@@ -589,9 +610,7 @@ export class AttachmentService {
       | UnifiedAttachmentSavedObjectTransformed
       | AttachmentSavedObjectTransformedV2
     > = [];
-    // Filter out per-entry errors before mirroring to analytics — the
-    // SO bulkCreate returns a per-entry response, and a failed entry
-    // means there's no SO to mirror. Mirror only the successes.
+    // Only successes get mirrored — a per-entry error means there's no SO.
     const successesToMirror: Array<
       SavedObject<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
     > = [];
@@ -630,12 +649,12 @@ export class AttachmentService {
       }
     }
 
-    // analyticsV2 mirror to `.cases-attachments`. Fire-and-forget — single
-    // bulk request regardless of how many entries succeeded. The writer
-    // logs per-item failures; reconciliation backstops anything that gets
-    // dropped. No-op when v2 is disabled (writer is V2_NOOP_ATTACHMENTS_WRITER).
+    // analyticsV2 mirror to `.cases-attachments` — one guarded, fire-and-
+    // forget bulk request for the successes; reconciliation backstops the rest.
     if (successesToMirror.length > 0) {
-      this.context.analyticsV2AttachmentsWriter.bulkUpsertAttachments(successesToMirror);
+      this.mirrorSafely(() =>
+        this.context.analyticsV2AttachmentsWriter.bulkUpsertAttachments(successesToMirror)
+      );
     }
 
     return Object.assign(res, { saved_objects: validatedAttachments });
@@ -984,6 +1003,24 @@ export class AttachmentService {
    * swallowed here rather than in the writer because the read, not the
    * write, is what can throw.
    */
+  /**
+   * Dispatch a best-effort analytics mirror so a throwing writer can NEVER
+   * fail the primary create / bulkCreate / delete that already persisted the
+   * SO. The throw is swallowed with a WARN; reconciliation re-emits next tick.
+   * (The update path guards itself via `mirrorUpdatedAttachments`' `.catch()`.)
+   */
+  private mirrorSafely(dispatch: () => void): void {
+    try {
+      dispatch();
+    } catch (error) {
+      this.context.log.warn(
+        `cases-analyticsV2: attachments mirror dispatch threw (non-fatal, reconciliation will repair): ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
   private mirrorUpdatedAttachments(refs: Array<{ type: string; id: string }>): void {
     if (refs.length === 0) {
       return;
