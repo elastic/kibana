@@ -109,4 +109,130 @@ describe('UserActions (redesign)', () => {
       expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
     });
   });
+
+  describe('no search results', () => {
+    it('shows the empty prompt when a search filter has no matches', async () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        data: { pages: [{ userActions: [], latestAttachments: [], total: 0 }] },
+        isLoading: false,
+        hasNextPage: false,
+        fetchNextPage: jest.fn(),
+        isFetchingNextPage: false,
+      });
+
+      renderWithTestingProviders(
+        <UserActions
+          {...defaultProps}
+          userActivityQueryParams={{ ...userActivityQueryParams, search: 'no matches' }}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user-actions-no-search-results')).toBeInTheDocument();
+      });
+      // The "add comment" UI (rendered via UserActionsList) must remain
+      // usable even when the current filters match nothing.
+      expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
+    });
+
+    it('shows the empty prompt when an author filter has no matches', async () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        data: { pages: [{ userActions: [], latestAttachments: [], total: 0 }] },
+        isLoading: false,
+        hasNextPage: false,
+        fetchNextPage: jest.fn(),
+        isFetchingNextPage: false,
+      });
+
+      renderWithTestingProviders(
+        <UserActions
+          {...defaultProps}
+          userActivityQueryParams={{ ...userActivityQueryParams, authors: ['elastic'] }}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user-actions-no-search-results')).toBeInTheDocument();
+      });
+    });
+
+    it('shows the empty prompt when filtering by type only has no matches', async () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        data: { pages: [{ userActions: [], latestAttachments: [], total: 0 }] },
+        isLoading: false,
+        hasNextPage: false,
+        fetchNextPage: jest.fn(),
+        isFetchingNextPage: false,
+      });
+
+      renderWithTestingProviders(
+        <UserActions
+          {...defaultProps}
+          userActivityQueryParams={{ ...userActivityQueryParams, type: 'action' }}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user-actions-no-search-results')).toBeInTheDocument();
+      });
+    });
+
+    it('does not show the empty prompt when there are matches', async () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        data: { pages: [{ userActions: [{ id: '1' }], latestAttachments: [], total: 1 }] },
+        isLoading: false,
+        hasNextPage: false,
+        fetchNextPage: jest.fn(),
+        isFetchingNextPage: false,
+      });
+
+      renderWithTestingProviders(
+        <UserActions
+          {...defaultProps}
+          userActivityQueryParams={{ ...userActivityQueryParams, search: 'matches' }}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('user-actions-no-search-results')).not.toBeInTheDocument();
+    });
+
+    it('does not show the empty prompt when no filter is active, even with zero user actions', async () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        data: { pages: [{ userActions: [], latestAttachments: [], total: 0 }] },
+        isLoading: false,
+        hasNextPage: false,
+        fetchNextPage: jest.fn(),
+        isFetchingNextPage: false,
+      });
+
+      renderWithTestingProviders(<UserActions {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('user-actions-no-search-results')).not.toBeInTheDocument();
+    });
+
+    it('does not show the empty prompt while results are still loading', () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        hasNextPage: false,
+        fetchNextPage: jest.fn(),
+        isFetchingNextPage: false,
+      });
+
+      renderWithTestingProviders(
+        <UserActions
+          {...defaultProps}
+          userActivityQueryParams={{ ...userActivityQueryParams, search: 'no matches yet' }}
+        />
+      );
+
+      expect(screen.queryByTestId('user-actions-no-search-results')).not.toBeInTheDocument();
+    });
+  });
 });
