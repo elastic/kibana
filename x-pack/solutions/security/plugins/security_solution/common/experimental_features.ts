@@ -69,6 +69,13 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointCancel: false,
 
   /**
+   * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
+   * (Fleet remote output) is visible from the managing cluster's Kibana. Off by default while
+   * we test impact on other features.
+   */
+  defendRemoteOutputCcs: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -113,12 +120,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
   filterProcessDescendantsForTrustedAppsEnabled: true,
-
-  /**
-   * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
-   * can be disabled if necessary in a given environment.
-   */
-  entityStoreDisabled: false,
 
   /**
    * Entity Analytics: enables attaching entities (users, hosts, IPs) to a case from
@@ -291,7 +292,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Agents, Discover and Workflows external links in the classic Security Solution side navigation
    */
-  securityClassicNavExternalLinks: false,
+  securityClassicNavExternalLinks: true,
   /**
    * Enables public Detection Engine attacks REST APIs
    * (`/api/detection_engine/attacks/*`).

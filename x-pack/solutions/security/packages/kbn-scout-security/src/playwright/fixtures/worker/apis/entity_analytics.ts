@@ -13,11 +13,9 @@ import type {
   StoreStatus,
 } from '../../../constants/entity_analytics';
 
-const ENTITY_STORE_V2_INSTALL_URL = '/api/security/entity_store/install';
-const ENTITY_STORE_V2_UNINSTALL_URL = '/api/security/entity_store/uninstall';
-const ENTITY_STORE_ENGINES_URL = '/api/entity_store/engines';
-const ENTITY_STORE_STATUS_URL = '/api/entity_store/status';
-const ENTITY_STORE_V2_STATUS_URL = '/api/security/entity_store/status';
+const ENTITY_STORE_INSTALL_URL = '/api/security/entity_store/install';
+const ENTITY_STORE_UNINSTALL_URL = '/api/security/entity_store/uninstall';
+const ENTITY_STORE_STATUS_URL = '/api/security/entity_store/status';
 const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
 const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status';
@@ -41,12 +39,7 @@ export interface EntityAnalyticsApiService {
   initRiskEngine: () => Promise<void>;
   getRiskEngineStatus: () => Promise<RiskEngineStatusResponse>;
   getEntityStoreStatus: () => Promise<GetEntityStoreStatusResponse>;
-  getEntityStoreStatusV2: () => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreStatus: (
-    expectedStatus: StoreStatus,
-    timeoutMs?: number
-  ) => Promise<GetEntityStoreStatusResponse>;
-  waitForEntityStoreStatusV2: (
     expectedStatus: StoreStatus,
     timeoutMs?: number
   ) => Promise<GetEntityStoreStatusResponse>;
@@ -75,7 +68,7 @@ export const getEntityAnalyticsApiService = ({
         log,
         'security.entityAnalytics.installEntityStore',
         async () => {
-          const current = await service.getEntityStoreStatusV2();
+          const current = await service.getEntityStoreStatus();
           if (current.status === 'running') {
             return;
           }
@@ -106,13 +99,13 @@ export const getEntityAnalyticsApiService = ({
           }
           await kbnClient.request({
             method: 'POST',
-            path: `${basePath}${ENTITY_STORE_V2_INSTALL_URL}`,
+            path: `${basePath}${ENTITY_STORE_INSTALL_URL}`,
             headers: {
               'elastic-api-version': API_VERSIONS.public.v1,
             },
             body: { entityTypes },
           });
-          await service.waitForEntityStoreStatusV2('running');
+          await service.waitForEntityStoreStatus('running');
         }
       );
     },
@@ -124,12 +117,12 @@ export const getEntityAnalyticsApiService = ({
         async () => {
           await kbnClient.request({
             method: 'POST',
-            path: `${basePath}${ENTITY_STORE_V2_UNINSTALL_URL}`,
+            path: `${basePath}${ENTITY_STORE_UNINSTALL_URL}`,
             headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
             body: { entityTypes },
             ignoreErrors: [404],
           });
-          await service.waitForEntityStoreStatusV2('not_installed');
+          await service.waitForEntityStoreStatus('not_installed');
         }
       );
     },
@@ -161,13 +154,29 @@ export const getEntityAnalyticsApiService = ({
         log,
         'security.entityAnalytics.deleteEntityStoreEngines',
         async () => {
+          // The v2 status route returns 403 when the entity store v2 feature
+          // flag is disabled. In that case there is nothing to clean up, so
+          // short-circuit instead of polling forever. Use ignoreErrors so only
+          // a 403 is treated as "flag off"; any other error (5xx, network)
+          // still surfaces and fails the test.
+          const statusProbe = await kbnClient.request<GetEntityStoreStatusResponse>({
+            method: 'GET',
+            path: `${basePath}${ENTITY_STORE_STATUS_URL}`,
+            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+            ignoreErrors: [403],
+          });
+          if (statusProbe.status === 403) {
+            log.debug('Skipping entity store cleanup; feature flag disabled (403)');
+            return;
+          }
           await kbnClient.request({
-            method: 'DELETE',
-            path: `${basePath}${ENTITY_STORE_ENGINES_URL}`,
-            query: {
-              delete_data: 'true',
+            method: 'POST',
+            path: `${basePath}${ENTITY_STORE_UNINSTALL_URL}`,
+            headers: {
+              'elastic-api-version': API_VERSIONS.public.v1,
             },
-            ignoreErrors: [404, 500],
+            body: {},
+            ignoreErrors: [403, 404, 500],
           });
           // Wait for cleanup to complete - ensure server state is fully cleaned up
           await service.waitForEntityStoreCleanup();
@@ -259,23 +268,6 @@ export const getEntityAnalyticsApiService = ({
       );
     },
 
-    getEntityStoreStatusV2: async () => {
-      return measurePerformanceAsync(
-        log,
-        'security.entityAnalytics.getEntityStoreStatusV2',
-        async () => {
-          const response = await kbnClient.request<GetEntityStoreStatusResponse>({
-            method: 'GET',
-            path: `${basePath}${ENTITY_STORE_V2_STATUS_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.public.v1,
-            },
-          });
-          return response.data;
-        }
-      );
-    },
-
     waitForEntityStoreStatus: async (expectedStatus: StoreStatus, timeoutMs: number = 60000) => {
       return measurePerformanceAsync(
         log,
@@ -287,38 +279,6 @@ export const getEntityAnalyticsApiService = ({
           while (Date.now() - startTime < timeoutMs) {
             try {
               const status = await service.getEntityStoreStatus();
-              lastStatus = status;
-
-              if (status.status === expectedStatus) {
-                return status;
-              }
-            } catch (error) {
-              log.debug(`Error checking entity store status: ${error}`);
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
-
-          throw new Error(
-            `Timeout waiting for entity store status '${expectedStatus}' after ${timeoutMs}ms. Last status: ${JSON.stringify(
-              lastStatus
-            )}`
-          );
-        }
-      );
-    },
-
-    waitForEntityStoreStatusV2: async (expectedStatus: StoreStatus, timeoutMs: number = 60000) => {
-      return measurePerformanceAsync(
-        log,
-        `security.entityAnalytics.waitForEntityStoreStatusV2 [${expectedStatus}]`,
-        async () => {
-          const startTime = Date.now();
-          let lastStatus: GetEntityStoreStatusResponse | undefined;
-
-          while (Date.now() - startTime < timeoutMs) {
-            try {
-              const status = await service.getEntityStoreStatusV2();
               lastStatus = status;
 
               if (status.status === expectedStatus) {
