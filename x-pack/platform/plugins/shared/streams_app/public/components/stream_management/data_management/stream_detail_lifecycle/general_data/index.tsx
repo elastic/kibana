@@ -192,7 +192,6 @@ const StreamDetailGeneralDataInner = ({
 
   const successfulLifecycleFlyout = useEditSuccessfulLifecycleFlyout({
     definition,
-    stats: data.stats?.ds.stats,
     core,
     http,
     application,
@@ -560,6 +559,7 @@ const StreamDetailGeneralDataInner = ({
               dataPhaseInvalidPhases={
                 isEditDataPhasesFlyoutOpen ? dataPhaseInvalidPhases : undefined
               }
+              isEditingDeletePhase={isEditSuccessfulDeletePhaseFlyoutOpen}
               frozenPhaseGating={{
                 excludeFrozen: frozenPhaseGating.excludeFrozen,
                 ...frozenPhaseGating.addPhaseBadges,

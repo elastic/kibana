@@ -16,6 +16,11 @@ import {
   isInheritFailureStore,
   isEnabledFailureStore,
 } from '@kbn/streams-schema';
+import {
+  CLOUD_SUBSCRIPTION_FEATURES_URL,
+  CONTACT_US_URL,
+  SUBSCRIPTION_FEATURES_URL,
+} from '@kbn/data-lifecycle-phases';
 import type { IlmPolicyForFlyout } from '@kbn/data-lifecycle-phases';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 
@@ -97,7 +102,7 @@ export const useEditDataLifecycle = ({
   resolvedLifecycle,
   onClose,
 }: UseEditDataLifecycleArgs) => {
-  const { config, core, docLinks, plugins, services, url } = useAppContext();
+  const { config, core, plugins, services, url } = useAppContext();
   const locator = url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID);
 
   const [isEditingDataLifecycle, setIsEditingDataLifecycle] = useState(false);
@@ -818,7 +823,12 @@ export const useEditDataLifecycle = ({
           canManageLicense:
             core.application.capabilities.management?.stack?.license_management === true,
           trialDaysLeft: plugins.cloud?.trialDaysLeft?.(),
-          subscriptionFeaturesUrl: docLinks.links.subscriptions,
+          subscriptionFeaturesUrl: plugins.cloud?.isCloudEnabled
+            ? CLOUD_SUBSCRIPTION_FEATURES_URL
+            : SUBSCRIPTION_FEATURES_URL,
+          onUpgrade: plugins.cloud?.isCloudEnabled
+            ? undefined
+            : () => window.open(CONTACT_US_URL, '_blank', 'noopener'),
         },
         onRefreshDefaultSnapshotRepository: loadDefaultSnapshotRepository,
       },
@@ -838,7 +848,6 @@ export const useEditDataLifecycle = ({
       core,
       dataStream?.lifecycle?.globalMaxRetention,
       defaultSnapshotRepository,
-      docLinks.links.subscriptions,
       handleInheritSuccessfulLifecycleChange,
       hasEnterpriseLicense,
       ilmPolicies,

@@ -129,7 +129,25 @@ Every step (regardless of type) supports these properties. They are NOT repeated
 - **console**: Log messages to execution output
 - **elasticsearch.search**: Query Elasticsearch indices
 - **elasticsearch.bulk**: Bulk index documents
-- **ai.agent**: Invoke an AI agent
+- **ai.prompt**: One-shot LLM call
+- **ai.summarize**: Summarize text
+- **ai.classify**: Classify text into one of a set of labels
+- **ai.agent**: Invoke an AI agent (multi-turn, tool-using)
+
+**AI steps: ONLY use the \`ai.*\` step family.** Discovery may also surface
+direct model-connector step types (\`inference.*\`, \`bedrock.*\`, \`gen-ai.*\`,
+\`gemini.*\`); these are deprecated and must NOT be used for new steps. Pick the
+narrowest \`ai.*\` step for the task: \`ai.summarize\` for summarization,
+\`ai.classify\` for classification/routing, \`ai.agent\` for tool-using flows,
+\`ai.prompt\` for everything else.
+
+**AI step example (PREFERRED):**
+\`\`\`yaml
+- name: triage_analysis
+  type: ai.prompt
+  with:
+    prompt: "Analyze the alert: {{ steps.fetch_alert.output }}"
+\`\`\`
 
 #### Connector-Based Step Types (PREFERRED for integrations!)
 

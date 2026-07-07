@@ -8,12 +8,12 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
-import { SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { SignificantEventsDiscoveryClient } from './significant_events_discovery_client';
 
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => ({
   getWorkflow: jest.fn().mockResolvedValue({
-    id: SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID,
+    id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
     name: 'sigevents-orchestrator',
     enabled: true,
     definition: {},
@@ -46,7 +46,7 @@ describe('SignificantEventsDiscoveryClient', () => {
 
       expect(result).toEqual({ executionId: 'execution-id', isNew: true });
       expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ id: SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID }),
+        expect.objectContaining({ id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID }),
         'space-a',
         { agentConnectorId: 'connector-1' },
         request

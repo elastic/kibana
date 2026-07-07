@@ -58,6 +58,10 @@ interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
 }
 
+interface SyntheticSourceStatus {
+  syntheticSourceFallbackToStoredSource: boolean;
+}
+
 // Temporary hack to provide the uiMetricService and reindexService instance to this file.
 // TODO: Refactor and export an ApiService instance through the app dependencies context
 let uiMetricService: UiMetricService;
@@ -382,6 +386,12 @@ export async function loadIndexSettings(indexName: string) {
   return response;
 }
 
+export async function loadSyntheticSourceStatus(): Promise<SyntheticSourceStatus> {
+  return await httpService.httpClient.get<SyntheticSourceStatus>(
+    `${API_BASE_PATH}/synthetic_source`
+  );
+}
+
 export async function updateIndexSettings(indexName: string, body: object) {
   const response = await sendRequest({
     path: `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
@@ -439,6 +449,18 @@ export function useLoadIndexTemplate(name: TemplateDeserialized['name'], isLegac
     query: {
       legacy: isLegacy,
     },
+  });
+}
+
+export interface FailureStoreClusterSettings {
+  enabled?: string[] | string;
+  defaultRetentionPeriod?: string;
+}
+
+export function useLoadFailureStoreSettings() {
+  return useRequest<FailureStoreClusterSettings>({
+    path: `${API_BASE_PATH}/data_streams/failure_store_settings`,
+    method: 'get',
   });
 }
 
