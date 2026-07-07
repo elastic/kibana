@@ -6,7 +6,6 @@
  */
 
 import {
-  createAgentBuilderCorrectnessEvaluators,
   type DefaultEvaluators,
   type EvalsExecutorClient,
   type Evaluator,
@@ -24,6 +23,7 @@ import {
   type ExperimentTask,
   type TaskOutput,
 } from '@kbn/evals';
+import { createAgentBuilderCorrectnessEvaluators } from '@kbn/evals-extensions';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {

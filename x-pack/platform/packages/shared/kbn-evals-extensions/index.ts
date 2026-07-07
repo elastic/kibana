@@ -23,3 +23,11 @@ export type { EvaluationScoreDocument } from '@kbn/evals-common';
 export * as cli from './src/cli';
 export { runRedTeam, RED_TEAM_MODULE_IDS } from './src/red_team';
 export type { RedTeamConfig, RedTeamReport, RedTeamModuleId } from './src/red_team';
+
+// Security/agent-builder correctness evaluators (NOT_IN_GROUND_TRUTH-excluded
+// Factuality scorer). Additive, opt-in — the shared `calculateFactualScore` in
+// core `@kbn/evals` is intentionally left untouched.
+export {
+  calculateAgentBuilderFactualScore,
+  createAgentBuilderCorrectnessEvaluators,
+} from './src/correctness';

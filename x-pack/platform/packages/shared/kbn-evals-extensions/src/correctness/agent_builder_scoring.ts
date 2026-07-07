@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import type { Evaluator } from '../../types';
-import { createQuantitativeCorrectnessEvaluators } from '.';
-import type { CorrectnessAnalysis } from './types';
+import {
+  createQuantitativeCorrectnessEvaluators,
+  type CorrectnessAnalysis,
+  type Evaluator,
+} from '@kbn/evals';
 
 const FACTUALITY_EVALUATOR_NAME = 'Factuality';
 
 // Per-claim weights, mirroring the shared `CLAIM_FACTUAL_SCORE_MAP` in
-// `./scoring`. Kept as a separate constant so this additive scorer is
-// self-contained and never mutates the shared scorer that the context-engine
-// framework depends on.
+// `@kbn/evals` (`correctness/scoring`). Kept as a separate constant so this
+// additive scorer is self-contained and never mutates the shared scorer that
+// the context-engine framework depends on.
 const CLAIM_FACTUAL_SCORE_MAP = {
   FULLY_SUPPORTED: 1.0,
   PARTIALLY_SUPPORTED: { central: 0.9, peripheral: 0.95 },
@@ -25,7 +27,7 @@ const CLAIM_FACTUAL_SCORE_MAP = {
 /**
  * Security/agent-builder Factuality scorer.
  *
- * The shared `calculateFactualScore` (`./scoring`) computes a geometric mean
+ * The shared `calculateFactualScore` (`@kbn/evals`) computes a geometric mean
  * over ALL claims, including `NOT_IN_GROUND_TRUTH` (statements the reference
  * neither supports nor contradicts). Because the mean is a product, each such
  * extra claim multiplicatively crushes the score: a fully accurate answer that
@@ -43,9 +45,10 @@ const CLAIM_FACTUAL_SCORE_MAP = {
  * reference overlap at all) the original behaviour is retained so a fully
  * off-reference answer is not rewarded with a perfect score.
  *
- * This is an additive, opt-in evaluator: the shared `calculateFactualScore`
- * remains untouched, so the context-engine framework's numbers do not diverge
- * (per reviewer guidance on #276536 / #276331).
+ * This is an additive, opt-in evaluator living in `@kbn/evals-extensions`: the
+ * shared `calculateFactualScore` in the core `@kbn/evals` package remains
+ * untouched, so the context-engine framework's numbers do not diverge (per
+ * reviewer guidance on #276536 / #276331).
  */
 export function calculateAgentBuilderFactualScore(
   correctnessEvaluation: CorrectnessAnalysis

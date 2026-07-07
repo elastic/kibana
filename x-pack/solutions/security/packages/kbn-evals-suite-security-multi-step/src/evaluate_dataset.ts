@@ -7,7 +7,6 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
-  createAgentBuilderCorrectnessEvaluators,
   createSkillInvocationEvaluator,
   createTrajectoryEvaluator,
   getToolCallSteps,
@@ -20,6 +19,7 @@ import {
   type TaskOutput,
   withEvaluatorSpan,
 } from '@kbn/evals';
+import { createAgentBuilderCorrectnessEvaluators } from '@kbn/evals-extensions';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { MultiStepExample } from './dataset';
 import type { MultiStepAgentBuilderChatClient } from './chat_client';

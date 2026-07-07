@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { CorrectnessAnalysis } from '@kbn/evals';
 import {
   calculateAgentBuilderFactualScore,
   createAgentBuilderCorrectnessEvaluators,
 } from './agent_builder_scoring';
-import type { CorrectnessAnalysis } from './types';
 
 const buildAnalysis = (
   claims: Array<{ verdict: string; centrality: 'central' | 'peripheral' }>,

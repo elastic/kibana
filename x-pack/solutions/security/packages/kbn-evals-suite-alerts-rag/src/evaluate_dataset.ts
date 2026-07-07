@@ -7,7 +7,6 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
-  createAgentBuilderCorrectnessEvaluators,
   createQuantitativeGroundednessEvaluator,
   createSkillInvocationEvaluator,
   createTrajectoryEvaluator,
@@ -21,6 +20,7 @@ import {
   type TaskOutput,
   withEvaluatorSpan,
 } from '@kbn/evals';
+import { createAgentBuilderCorrectnessEvaluators } from '@kbn/evals-extensions';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AlertsRagCategory, AlertsRagExample } from './dataset';
 import type { AlertsRagAgentBuilderChatClient } from './chat_client';

@@ -7,7 +7,6 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
-  createAgentBuilderCorrectnessEvaluators,
   createSkillInvocationEvaluator,
   buildSkillInvokedCaseExpression,
   createTrajectoryEvaluator,
@@ -22,6 +21,7 @@ import {
   type TaskOutput,
   withEvaluatorSpan,
 } from '@kbn/evals';
+import { createAgentBuilderCorrectnessEvaluators } from '@kbn/evals-extensions';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { SecuritySkillsExample } from './dataset';
