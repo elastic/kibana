@@ -207,11 +207,11 @@ export class DiscoverApp {
   async editCurrentDataViewName(name: string) {
     await this.openDataViewSwitcher();
     await this.page.testSubj.click('indexPattern-manage-field');
-    await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
-
-    const editor = new DataViewEditorPage(this.page);
-    await editor.setName(name);
-    await editor.save();
+    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
+    await flyout.waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('createIndexPatternTitleInput').fill(name);
+    await this.page.testSubj.click('saveIndexPatternButton');
+    await flyout.waitFor({ state: 'hidden' });
     await this.waitUntilTabIsLoaded();
   }
 
@@ -344,7 +344,11 @@ export class DiscoverApp {
         ?.getAttribute('data-share-url');
     });
 
-    return sharedUrl.jsonValue();
+    const url = await sharedUrl.jsonValue();
+    if (typeof url !== 'string') {
+      throw new Error('Share URL was not available on the copy button');
+    }
+    return url;
   }
 
   async closeShareModal() {
@@ -474,6 +478,10 @@ export class DiscoverApp {
   async getHitCountInt(): Promise<number> {
     const hitCount = await this.page.testSubj.innerText('discoverQueryHits');
     return parseInt(hitCount.replace(/,/g, ''), 10);
+  }
+
+  async getHitCount(): Promise<string> {
+    return this.page.testSubj.innerText('discoverQueryHits');
   }
 
   async getChartTimespan(): Promise<string> {
@@ -766,7 +774,12 @@ export class DiscoverApp {
    * `waitUntilSearchingHasFinished()` or `waitUntilTabIsLoaded()` as appropriate.
    */
   async submitQuery() {
+    await this.hideTabPreview();
     await this.page.testSubj.click('querySubmitButton');
+  }
+
+  async getQuerySubmitButtonLabel(): Promise<string | null> {
+    return this.page.testSubj.locator('querySubmitButton').getAttribute('aria-label');
   }
 
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
@@ -813,6 +826,85 @@ export class DiscoverApp {
   async openSidebar() {
     await this.page.testSubj.locator('dscShowSidebarButton').click();
     await this.waitUntilFieldListHasCountOfFields();
+  }
+
+  async closeSidebar() {
+    await this.page.testSubj.locator('dscHideSidebarButton').click();
+    await this.page.testSubj.locator('fieldList').waitFor({ state: 'hidden' });
+  }
+
+  async isSidebarPanelOpen(): Promise<boolean> {
+    return this.page.testSubj
+      .locator('fieldList')
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  async getSidebarWidth(): Promise<number> {
+    const sidebar = this.page.testSubj.locator('discover-sidebar');
+    await sidebar.waitFor({ state: 'visible' });
+    const box = await sidebar.boundingBox();
+    if (!box) {
+      throw new Error('Unable to measure Discover sidebar width');
+    }
+    return Math.round(box.width);
+  }
+
+  async resizeSidebarBy(distance: number) {
+    const resizeButton = this.page.testSubj.locator('discoverLayoutResizableButton');
+    await resizeButton.waitFor({ state: 'visible' });
+    const box = await resizeButton.boundingBox();
+    if (!box) {
+      throw new Error('Unable to find Discover sidebar resize handle');
+    }
+    const startX = box.x + box.width / 2;
+    const startY = box.y + box.height / 2;
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + distance, startY, { steps: 10 });
+    await this.page.mouse.up();
+  }
+
+  async isEsqlHistoryPanelOpen(): Promise<boolean> {
+    return this.page.testSubj
+      .locator('ESQLEditor-history-container')
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  async toggleEsqlHistoryPanel() {
+    const wasOpen = await this.isEsqlHistoryPanelOpen();
+    await this.page.testSubj.locator('ESQLEditor-toggle-query-history-icon').click();
+    await this.page.testSubj
+      .locator('ESQLEditor-history-container')
+      .waitFor({ state: wasOpen ? 'hidden' : 'visible' });
+  }
+
+  async getEsqlEditorHeight(): Promise<number> {
+    const editor = this.page.testSubj.locator('ESQLEditor');
+    await editor.waitFor({ state: 'visible' });
+    const box = await editor.boundingBox();
+    if (!box) {
+      throw new Error('Unable to measure ES|QL editor height');
+    }
+    return Math.round(box.height);
+  }
+
+  async resizeEsqlEditorBy(distance: number) {
+    const resizeButton = this.page.testSubj.locator('ESQLEditor-resize');
+    await resizeButton.waitFor({ state: 'visible' });
+    const box = await resizeButton.boundingBox();
+    if (!box) {
+      throw new Error('Unable to find ES|QL editor resize handle');
+    }
+    const startX = box.x + box.width / 2;
+    const startY = box.y + box.height / 2;
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX, startY + distance, { steps: 10 });
+    await this.page.mouse.up();
   }
 
   async addBreakdownFieldFromSidebar(
@@ -942,6 +1034,47 @@ export class DiscoverApp {
     const searchInput = flyout.locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
     await searchInput.fill(name);
     await expect(searchInput).toHaveValue(name, { timeout: 5_000 });
+  }
+
+  async getDocViewerFieldSearchValue(): Promise<string> {
+    return this.page.testSubj
+      .locator('docViewerFlyout')
+      .locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]')
+      .inputValue();
+  }
+
+  async getDocViewerFieldNameCount(): Promise<number> {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await flyout.waitFor({ state: 'visible' });
+    return flyout.locator('.kbnDocViewer__fieldName').count();
+  }
+
+  getDocViewerFieldNames(): Locator {
+    return this.page.testSubj.locator('docViewerFlyout').locator('.kbnDocViewer__fieldName');
+  }
+
+  async openDocViewerFieldTypeFilter() {
+    await this.page.testSubj.locator('unifiedDocViewerFieldsTableFieldTypeFilterToggle').click();
+    await this.page.testSubj
+      .locator('unifiedDocViewerFieldsTableFieldTypeFilterOptions')
+      .waitFor({ state: 'visible' });
+  }
+
+  async closeDocViewerFieldTypeFilter() {
+    await this.page.testSubj.locator('unifiedDocViewerFieldsTableFieldTypeFilterToggle').click();
+    await this.page.testSubj
+      .locator('unifiedDocViewerFieldsTableFieldTypeFilterOptions')
+      .waitFor({ state: 'hidden' });
+  }
+
+  async getDocViewerFieldTypeFilterCount(): Promise<string> {
+    return this.page.testSubj
+      .locator('unifiedDocViewerFieldsTableFieldTypeFilterToggle')
+      .innerText();
+  }
+
+  async isDocViewerSwitchChecked(testSubj: string): Promise<boolean> {
+    return (await this.page.testSubj.locator(testSubj).getAttribute('aria-checked')) === 'true';
   }
 
   /**
