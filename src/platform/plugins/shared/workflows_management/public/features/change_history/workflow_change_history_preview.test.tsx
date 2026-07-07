@@ -16,9 +16,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { renderWorkflowChangeHistoryPreview } from './workflow_change_history_preview';
 
 jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
   useDefineWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
-  WORKFLOW_READ_ONLY_MONACO_OPTIONS: { folding: true },
 }));
 
 jest.mock('./use_workflow_change_history_preview_validation', () => ({
