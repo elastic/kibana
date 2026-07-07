@@ -13,19 +13,15 @@ import {
   ENTITY_ANALYTICS_HOME_PAGE_PATH,
 } from '../../../../../common/constants';
 
-// These literals mirror public-side constants that a server module cannot import:
-//  - panel keys: `HostPanelKey`/`UserPanelKey`/`ServicePanelKey` (right) and
-//    `HostDetailsPanelKey`/`UserDetailsPanelKey`/`ServiceDetailsPanelKey` (left)
-//    from public/flyout/entity_details/{shared/constants,*_details_left}.
-//  - `resolution_group` = `EntityDetailsLeftPanelTab.RESOLUTION_GROUP`.
-//  - `watchlists-flyout` = `WatchlistsFlyoutKey`.
-const RESOLUTION_GROUP_TAB = 'resolution_group';
-const WATCHLISTS_FLYOUT_KEY = 'watchlists-flyout';
+// Server code can't import from public/, so these mirror public-side constants by value.
+// urls.test.ts asserts they stay in sync with the real constants.
+export const RESOLUTION_GROUP_TAB = 'resolution_group';
+export const WATCHLISTS_FLYOUT_KEY = 'watchlists-flyout';
 // Flyout `scopeId` / `contextID`. We use the id the Entity Analytics home page's own entities table
-// passes, since the deep-link opens the flyout on that page.
-const ENTITY_ANALYTICS_HOME_TABLE_SCOPE = 'entity-analytics-home-table';
+// passes (`ENTITY_ANALYTICS_TABLE_ID`), since the deep-link opens the flyout on that page.
+export const ENTITY_ANALYTICS_HOME_TABLE_SCOPE = 'entity-analytics-home-table';
 
-const ENTITY_RESOLUTION_PANEL = {
+export const ENTITY_RESOLUTION_PANEL = {
   host: { right: 'host-panel', left: 'host_details' },
   user: { right: 'user-panel', left: 'user_details' },
   service: { right: 'service-panel', left: 'service_details' },

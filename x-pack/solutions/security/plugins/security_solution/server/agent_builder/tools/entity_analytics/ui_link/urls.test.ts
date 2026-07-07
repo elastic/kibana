@@ -6,7 +6,24 @@
  */
 
 import { decode } from '@kbn/rison';
-import { buildUiLinkUrl } from './urls';
+import {
+  buildUiLinkUrl,
+  RESOLUTION_GROUP_TAB,
+  WATCHLISTS_FLYOUT_KEY,
+  ENTITY_ANALYTICS_HOME_TABLE_SCOPE,
+  ENTITY_RESOLUTION_PANEL,
+} from './urls';
+import {
+  HostPanelKey,
+  UserPanelKey,
+  ServicePanelKey,
+  WatchlistsFlyoutKey,
+} from '../../../../../public/flyout/entity_details/shared/constants';
+import { HostDetailsPanelKey } from '../../../../../public/flyout/entity_details/host_details_left';
+import { UserDetailsPanelKey } from '../../../../../public/flyout/entity_details/user_details_left';
+import { ServiceDetailsPanelKey } from '../../../../../public/flyout/entity_details/service_details_left';
+import { EntityDetailsLeftPanelTab } from '../../../../../public/flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { ENTITY_ANALYTICS_TABLE_ID } from '../../../../../public/entity_analytics/components/home/constants';
 
 interface DecodedFlyoutPanel {
   id: string;
@@ -253,5 +270,27 @@ describe('flyout param encoding (rison + markdown-safe percent-encoding)', () =>
     expect(rawFlyoutValue(url)).toContain('%20');
     expect(rawFlyoutValue(url)).not.toContain('+');
     expect(flyoutOf(url).left?.params.hostName).toBe(entityName);
+  });
+});
+
+// urls.ts can't import across the server/public boundary, so it hardcodes copies of these
+// flyout/panel keys. These checks fail if a client-side rename drifts from the copies.
+describe('hardcoded flyout/panel keys stay in sync with their public constants', () => {
+  it('flyout/tab/scope keys match the values hardcoded in urls.ts', () => {
+    expect(WatchlistsFlyoutKey).toBe(WATCHLISTS_FLYOUT_KEY);
+    expect(EntityDetailsLeftPanelTab.RESOLUTION_GROUP).toBe(RESOLUTION_GROUP_TAB);
+    expect(ENTITY_ANALYTICS_TABLE_ID).toBe(ENTITY_ANALYTICS_HOME_TABLE_SCOPE);
+  });
+
+  it('right (preview) entity panel keys match the values hardcoded in urls.ts', () => {
+    expect(HostPanelKey).toBe(ENTITY_RESOLUTION_PANEL.host.right);
+    expect(UserPanelKey).toBe(ENTITY_RESOLUTION_PANEL.user.right);
+    expect(ServicePanelKey).toBe(ENTITY_RESOLUTION_PANEL.service.right);
+  });
+
+  it('left (details) entity panel keys match the values hardcoded in urls.ts', () => {
+    expect(HostDetailsPanelKey).toBe(ENTITY_RESOLUTION_PANEL.host.left);
+    expect(UserDetailsPanelKey).toBe(ENTITY_RESOLUTION_PANEL.user.left);
+    expect(ServiceDetailsPanelKey).toBe(ENTITY_RESOLUTION_PANEL.service.left);
   });
 });
