@@ -12,6 +12,23 @@ import memoizeOne from 'memoize-one';
 import { functions as includedFunctions } from './functions';
 import { parse as parseFn } from './grammar.peggy';
 
+const MAX_EXPRESSION_LENGTH = 1000;
+const MAX_NESTING_DEPTH = 20;
+
+function checkNestingDepth(input) {
+  let depth = 0;
+  for (let i = 0; i < input.length; i++) {
+    const ch = input[i];
+    if (ch === '(') {
+      if (++depth > MAX_NESTING_DEPTH) {
+        throw new Error(`Expression exceeds maximum nesting depth of ${MAX_NESTING_DEPTH}`);
+      }
+    } else if (ch === ')') {
+      depth--;
+    }
+  }
+}
+
 function parse(input, options) {
   if (input == null) {
     throw new Error('Missing expression');
@@ -20,6 +37,12 @@ function parse(input, options) {
   if (typeof input !== 'string') {
     throw new Error('Expression must be a string');
   }
+
+  if (input.length > MAX_EXPRESSION_LENGTH) {
+    throw new Error(`Expression exceeds maximum length of ${MAX_EXPRESSION_LENGTH} characters`);
+  }
+
+  checkNestingDepth(input);
 
   try {
     return parseFn(input, options);
