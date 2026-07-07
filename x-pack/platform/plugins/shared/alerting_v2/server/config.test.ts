@@ -8,6 +8,17 @@
 import { configSchema } from './config';
 
 describe('alerting_v2 config schema', () => {
+  describe('enabled', () => {
+    it('defaults to true', () => {
+      const config = configSchema.validate({});
+      expect(config.enabled).toBe(true);
+    });
+
+    it('can be turned off', () => {
+      expect(configSchema.validate({ enabled: false }).enabled).toBe(false);
+    });
+  });
+
   describe('rules.minimumScheduleInterval', () => {
     it('defaults to 1m', () => {
       const config = configSchema.validate({});

@@ -12,9 +12,11 @@ import type { EndpointAppContextService } from '../../endpoint/endpoint_app_cont
 import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 import { getDetectionRuleEditSkill } from './detection_rule_edit';
 import { getEntityAnalyticsSkill } from './entity_analytics';
+import { manageWatchlistsSkill } from './manage_watchlists';
 import { pciComplianceSkill } from './pci_compliance';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
+import { alertTriageSkill } from './alert_triage';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 import { createFindRulesSkill } from './find_rules';
@@ -57,7 +59,15 @@ export const registerSkills = async ({
     getEntityAnalyticsSkill({ getStartServices, isEntityStoreV2Enabled, kibanaVersion, logger })
   );
 
-  agentBuilder.skills.register(getDetectionRuleEditSkill());
+  if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
+    agentBuilder.skills.register(manageWatchlistsSkill);
+  }
+
+  agentBuilder.skills.register(
+    getDetectionRuleEditSkill({
+      rulePreviewEnabled: experimentalFeatures.rulePreviewAttachmentEnabled,
+    })
+  );
   if (experimentalFeatures.dexAiSkillRecommendPrebuiltRules) {
     await agentBuilder.skills.register(
       createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml })
@@ -70,6 +80,7 @@ export const registerSkills = async ({
 
   await agentBuilder.skills.register(threatHuntingSkill);
   await agentBuilder.skills.register(alertAnalysisSkill);
+  await agentBuilder.skills.register(alertTriageSkill);
   if (experimentalFeatures.dexAiSkillFindRules) {
     await agentBuilder.skills.register(createFindRulesSkill({ getStartServices, logger }));
   }

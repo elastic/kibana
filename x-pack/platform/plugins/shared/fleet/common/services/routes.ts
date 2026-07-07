@@ -184,6 +184,9 @@ export const epmRouteService = {
       pkgVersion
     );
   },
+  getIlmPoliciesPath: () => {
+    return EPM_API_ROUTES.ILM_POLICIES_PATTERN;
+  },
 };
 
 export const packagePolicyRouteService = {
@@ -234,8 +237,17 @@ export const agentlessPolicyRouteService = {
   getInfoPath: (policyId: string) => {
     return AGENTLESS_POLICIES_ROUTES.GET_PATTERN.replace('{policyId}', policyId);
   },
+  getUpdatePath: (policyId: string) => {
+    return AGENTLESS_POLICIES_ROUTES.UPDATE_PATTERN.replace('{policyId}', policyId);
+  },
   getDeletePath: (policyId: string) => {
     return AGENTLESS_POLICIES_ROUTES.DELETE_PATTERN.replace('{policyId}', policyId);
+  },
+  getUpgradePath: () => {
+    return AGENTLESS_POLICIES_ROUTES.UPGRADE_PATTERN;
+  },
+  getUpgradeDryRunPath: () => {
+    return AGENTLESS_POLICIES_ROUTES.UPGRADE_DRYRUN_PATTERN;
   },
   getBulkThroughputPath: () => {
     return AGENTLESS_POLICIES_ROUTES.BULK_THROUGHPUT_PATTERN;

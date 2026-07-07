@@ -1,5 +1,5 @@
 {
-  "sha1": "1f219738812acc77abff1d619c1ccc129a67ce45",
+  "sha1": "c29015ecd4d130100b55b80a8b7d52d076b5e2c2",
   "tests": [
     {
       "id": "7f09fed36a7e0d8-c1ae45431291e6d",
@@ -287,11 +287,29 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/mute_unmute.spec.ts",
-        "line": 123,
+        "line": 150,
+        "column": 9
+      }
+    },
+    {
+      "id": "0bc216e8d6c9fd0-8450021caccf973",
+      "title": "Observability alerts - bulk mute / unmute Observability Alerts only user sees the muted indicator without mute privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/mute_unmute.spec.ts",
+        "line": 229,
         "column": 9
       }
     },
