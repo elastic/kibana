@@ -53,11 +53,14 @@ export const searchAttacks = async ({
   query,
   signal,
 }: SearchAttacksParams): Promise<SearchAttacksResponse> => {
-  return KibanaServices.get().http.post<SearchAttacksResponse>(DETECTION_ENGINE_ATTACKS_SEARCH_URL, {
-    version: ATTACKS_API_VERSION,
-    body: JSON.stringify(query),
-    signal,
-  });
+  return KibanaServices.get().http.post<SearchAttacksResponse>(
+    DETECTION_ENGINE_ATTACKS_SEARCH_URL,
+    {
+      version: ATTACKS_API_VERSION,
+      body: JSON.stringify(query),
+      signal,
+    }
+  );
 };
 
 /**
