@@ -6,4 +6,3 @@
  */
 
 export { ArtifactsSection } from './artifacts_section';
-export { DashboardArtifactsSubsection } from './dashboard_artifacts_subsection';

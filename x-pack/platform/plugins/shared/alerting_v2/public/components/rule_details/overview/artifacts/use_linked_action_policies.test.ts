@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { buildRuleScopedMatcher } from '@kbn/alerting-v2-rule-form';
 import { useLinkedActionPolicies } from './use_linked_action_policies';
+import { actionPolicyKeys } from '../../../../hooks/query_key_factory';
 
 const mockListActionPolicies = jest.fn();
 
@@ -49,15 +50,12 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     updatedBy: 'user',
     updatedAt: '2026-01-01T00:00:00.000Z',
     ...overrides,
-  }) as ActionPolicyResponse;
+  } as ActionPolicyResponse);
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  return ({ children }: { children: React.ReactNode }) =>
+const createWrapper =
+  (queryClient: QueryClient) =>
+  ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
-};
 
 describe('useLinkedActionPolicies', () => {
   beforeEach(() => {
@@ -66,10 +64,42 @@ describe('useLinkedActionPolicies', () => {
   });
 
   it('does not fetch when ruleId is empty', () => {
-    const Wrapper = createWrapper();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const Wrapper = createWrapper(queryClient);
     renderHook(() => useLinkedActionPolicies(''), { wrapper: Wrapper });
 
     expect(mockListActionPolicies).not.toHaveBeenCalled();
+  });
+
+  it('uses a query key nested under action policy list keys', async () => {
+    mockListActionPolicies.mockResolvedValue({
+      items: [buildPolicy()],
+      total: 1,
+      page: 1,
+      perPage: 100,
+    });
+
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const Wrapper = createWrapper(queryClient);
+    renderHook(() => useLinkedActionPolicies(RULE_ID), { wrapper: Wrapper });
+
+    await waitFor(() => {
+      expect(queryClient.getQueryCache().getAll()).toHaveLength(1);
+    });
+
+    expect(queryClient.getQueryCache().getAll()[0]?.queryKey).toEqual(
+      actionPolicyKeys.linkedForRule(RULE_ID)
+    );
+    expect(actionPolicyKeys.linkedForRule(RULE_ID)).toEqual([
+      'actionPolicy',
+      'list',
+      'linkedForRule',
+      RULE_ID,
+    ]);
   });
 
   it('fetches policies and returns explicitly linked matches with counts', async () => {
@@ -92,7 +122,11 @@ describe('useLinkedActionPolicies', () => {
       perPage: 100,
     });
 
-    const Wrapper = createWrapper();
+    const Wrapper = createWrapper(
+      new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      })
+    );
     const { result } = renderHook(() => useLinkedActionPolicies(RULE_ID), { wrapper: Wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -115,7 +149,11 @@ describe('useLinkedActionPolicies', () => {
   it('surfaces API errors', async () => {
     mockListActionPolicies.mockRejectedValue(new Error('network error'));
 
-    const Wrapper = createWrapper();
+    const Wrapper = createWrapper(
+      new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      })
+    );
     const { result } = renderHook(() => useLinkedActionPolicies(RULE_ID), { wrapper: Wrapper });
 
     await waitFor(() => expect(result.current.isError).toBe(true));

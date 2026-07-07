@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiAccordion, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ActionPoliciesArtifactsSubsection } from './action_policies_artifacts_subsection';
 import { DashboardArtifactsSubsection } from './dashboard_artifacts_subsection';
 
 export const ArtifactsSection: React.FC = () => {
@@ -29,7 +30,14 @@ export const ArtifactsSection: React.FC = () => {
       paddingSize="m"
       initialIsOpen
     >
-      <DashboardArtifactsSubsection />
+      <EuiFlexGroup gutterSize="l" responsive={false} data-test-subj="ruleArtifactsSubsectionsRow">
+        <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+          <DashboardArtifactsSubsection />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+          <ActionPoliciesArtifactsSubsection />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiAccordion>
   );
 };

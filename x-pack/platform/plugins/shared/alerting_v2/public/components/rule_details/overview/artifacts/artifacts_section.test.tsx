@@ -16,8 +16,14 @@ jest.mock('./dashboard_artifacts_subsection', () => ({
   ),
 }));
 
+jest.mock('./action_policies_artifacts_subsection', () => ({
+  ActionPoliciesArtifactsSubsection: () => (
+    <div data-test-subj="actionPoliciesArtifactsSubsectionMock">action policies</div>
+  ),
+}));
+
 describe('ArtifactsSection', () => {
-  it('renders the artifacts accordion with the dashboards subsection', () => {
+  it('renders the artifacts accordion with dashboard and action policy subsections', () => {
     render(
       <I18nProvider>
         <ArtifactsSection />
@@ -26,6 +32,8 @@ describe('ArtifactsSection', () => {
 
     expect(screen.getByTestId('ruleArtifactsSection')).toBeInTheDocument();
     expect(screen.getByText('Artifacts')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleArtifactsSubsectionsRow')).toBeInTheDocument();
     expect(screen.getByTestId('dashboardArtifactsSubsectionMock')).toBeInTheDocument();
+    expect(screen.getByTestId('actionPoliciesArtifactsSubsectionMock')).toBeInTheDocument();
   });
 });
