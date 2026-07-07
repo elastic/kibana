@@ -42,7 +42,11 @@ const GENAI_SETTINGS_APP_PATH = '/app/management/ai/genAiSettings';
 export const productDocumentationTool = (
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>
 ): BuiltinToolDefinition<typeof productDocumentationSchema> => {
-  let startServicesPromise: ReturnType<CoreSetup['getStartServices']> | undefined;
+  let startServicesPromise:
+    | ReturnType<
+        CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>['getStartServices']
+      >
+    | undefined;
   const getStartServices = () => {
     if (!startServicesPromise) {
       startServicesPromise = coreSetup.getStartServices();
@@ -52,7 +56,7 @@ export const productDocumentationTool = (
 
   const getLlmTasks = async (): Promise<LlmTasksPluginStart | undefined> => {
     const [, plugins] = await getStartServices();
-    return (plugins as PluginStartDependencies).llmTasks;
+    return plugins?.llmTasks;
   };
 
   const getDefaultInferenceId = async () => {
