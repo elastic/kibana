@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FilterControlConfig } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { i18n } from '@kbn/i18n';
+import type { FilterControlConfig } from '../../shared/ui/filter_controls';
 
 export const EXECUTION_FILTERS_URL_PARAM_KEY = 'workflowsExecutionsPageFilters' as const;
 export const EXECUTION_FILTERS_STORAGE_KEY = 'workflows.executions.pageFilters' as const;

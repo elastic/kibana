@@ -9,8 +9,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
-import type { FilterControlConfig } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
@@ -25,6 +23,7 @@ import {
 } from './workflow_executions_page_constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceId } from '../../hooks/use_space_id';
+import { type FilterControlConfig, FilterControls } from '../../shared/ui/filter_controls';
 
 export interface WorkflowExecutionsFiltersProps {
   filters: Filter[];
@@ -35,7 +34,7 @@ export interface WorkflowExecutionsFiltersProps {
 
 export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersProps>(
   ({ filters, query, timeRange, onFiltersChange }) => {
-    const { http, notifications, dataViews } = useKibana().services;
+    const { dataViews } = useKibana().services;
     const spaceId = useSpaceId();
     const history = useHistory();
     const location = useLocation();
@@ -66,12 +65,10 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
 
     const services = useMemo(
       () => ({
-        http,
-        notifications,
         dataViews,
         storage: Storage,
       }),
-      [http, notifications, dataViews]
+      [dataViews]
     );
 
     if (!spaceId) {
@@ -80,7 +77,7 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
 
     return (
       <div data-test-subj="workflowExecutionsFilters" key={location.search}>
-        <AlertFilterControls
+        <FilterControls
           controlsUrlState={controlsUrlState}
           dataViewSpec={{
             ...WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
@@ -91,7 +88,6 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
           maxControls={4}
           onFiltersChange={onFiltersChange}
           query={query}
-          ruleTypeIds={[]}
           services={services}
           setControlsUrlState={setControlsUrlState}
           spaceId={spaceId}
