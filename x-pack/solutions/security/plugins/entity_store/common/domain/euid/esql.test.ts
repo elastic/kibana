@@ -17,8 +17,14 @@ import {
   buildDestinationFieldEsql,
   buildOneFieldEvaluationEsql,
 } from './esql';
-import type { EuidRankingBranch, FieldEvaluation } from '../definitions/entity_schema';
+import type {
+  EuidRankingBranch,
+  FieldEvaluation,
+  FieldEvaluationWhenClause,
+} from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinition } from '../definitions/registry';
+import { userEntityDefinition } from '../definitions/user';
 
 const normalize = (s: string) =>
   s
@@ -528,6 +534,61 @@ describe('buildDestinationFieldEsql', () => {
         '_src' +
         ')'
     );
+  });
+
+  describe('field-mapping then', () => {
+    // Use the real user definition as source of truth so this block stays in sync
+    // with user.ts automatically — no duplicate manual copy to drift.
+    const { identityField } = userEntityDefinition;
+    if (isSingleFieldIdentity(identityField)) throw new Error('expected multi-field identity');
+    const { fieldEvaluations } = identityField;
+    if (!fieldEvaluations?.length) throw new Error('expected fieldEvaluations');
+    const cloudProviderClause = fieldEvaluations[0].whenClauses[1] as FieldEvaluationWhenClause & {
+      condition: object;
+      then: { field: string; mapping: Record<string, string> };
+    };
+
+    it('emits a precompute column for the condition and a nested CASE for the mapping', () => {
+      const { expression, conditionPrecomputes } = buildDestinationFieldEsql(
+        '_src',
+        '_eval_dest',
+        '"unknown"',
+        [cloudProviderClause]
+      );
+
+      expect(conditionPrecomputes).toHaveLength(1);
+      expect(conditionPrecomputes[0].colName).toBe('_eval_dest_arm0');
+      // The precomputed condition covers both fields from the real user.ts compound condition.
+      expect(conditionPrecomputes[0].esql).toContain('event.kind');
+      expect(conditionPrecomputes[0].esql).toContain('asset_discovery');
+
+      // Outer CASE guards on the condition column; inner CASE maps cloud.provider values.
+      // When condition is true but cloud.provider is absent or not in the mapping,
+      // the inner CASE returns NULL → COALESCE falls through to the next arm.
+      // The expression structure is stable regardless of the condition shape.
+      expect(expression).toBe(
+        'COALESCE(' +
+          'CASE(COALESCE(_eval_dest_arm0, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == "aws", "aws", MV_FIRST(TO_STRING(cloud.provider)) == "gcp", "gcp", MV_FIRST(TO_STRING(cloud.provider)) == "azure", "entra_id")), ' +
+          'CASE(_src IS NULL OR _src == "", "unknown"), ' +
+          '_src' +
+          ')'
+      );
+    });
+
+    it('inner mapping CASE has no fallback arm so unmapped values produce NULL (fall-through)', () => {
+      // The inner CASE has exactly 3 explicit condition→value pairs and no trailing fallback.
+      // An unmapped provider (e.g. "ibm") or absent cloud.provider yields NULL,
+      // which causes the outer COALESCE to try the next arm instead of assigning a namespace.
+      const { expression } = buildDestinationFieldEsql('_src', '_eval_dest', '"unknown"', [
+        cloudProviderClause,
+      ]);
+      // Inner CASE maps exactly the 3 declared providers.
+      expect(expression).toContain('"aws", "aws"');
+      expect(expression).toContain('"gcp", "gcp"');
+      expect(expression).toContain('"azure", "entra_id"');
+      // No trailing catch-all default inside the inner CASE.
+      expect(expression).not.toContain('"ibm"');
+    });
   });
 });
 

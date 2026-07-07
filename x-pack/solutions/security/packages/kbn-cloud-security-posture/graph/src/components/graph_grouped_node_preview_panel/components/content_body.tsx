@@ -44,17 +44,19 @@ export const ContentBody: FC<ContentBodyProps> = ({
 }) => {
   // Show pagination only when there are more items than fit on a single page with default size
   const shouldShowPagination = totalHits > DEFAULT_PAGE_SIZE;
-
   return (
     <PanelBody data-test-subj={CONTENT_BODY_TEST_ID}>
       <Title icon={icon} text={groupedItemsType} count={totalHits} />
       <ListHeader groupedItemsType={groupedItemsType} />
       <EuiText size="s">{maxDocumentsShownLabel}</EuiText>
       <List>
-        {items.map((item) => (
-          // React key must be `docId` for fetched documents (events & alerts)
-          // Fallback to `id` for non-fetched entities
-          <li key={'docId' in item ? item.docId : item.id}>
+        {items.map((item, index) => (
+          // `entity.id` is not guaranteed to be unique within a group (ideally the
+          // server dedupes, but the UI must not rely on it). Duplicate sibling keys
+          // break React reconciliation, leaving stale <li> nodes from a previously
+          // previewed group mounted when switching between grouped nodes (issue
+          // #275261). Suffix the index to guarantee a unique key per rendered item.
+          <li key={'docId' in item ? item.docId : `${item.id}-${index}`}>
             <GroupedItem item={item} scopeId={scopeId} />
           </li>
         ))}

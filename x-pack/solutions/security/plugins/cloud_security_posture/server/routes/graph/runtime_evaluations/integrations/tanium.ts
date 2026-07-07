@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable prettier/prettier */
- 
+
 
 import type { IntegrationEvaluations } from "../types";
 
@@ -77,7 +77,6 @@ export const taniumEvaluations = {
   host.target.name = CASE(
     host.target.name IS NOT NULL, host.target.name,
     data_stream.dataset == "tanium.threat_response" AND tanium.threat_response.state.target.hostname IS NOT NULL, tanium.threat_response.state.target.hostname,
-    data_stream.dataset == "tanium.threat_response" AND tanium.threat_response.event.name IS NOT NULL AND tanium.threat_response.state.target.hostname IS NULL, host.name,
     null
   ),
   host.target.ip = CASE(

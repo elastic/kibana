@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
+import type { RefObject } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { RetentionSelector } from '../retention_selector';
 import type { RetentionOption } from '../retention_selector/types';
 import { editDataLifecycleFlyoutStrings as strings } from './strings';
@@ -42,6 +44,7 @@ interface InternalMethodArgs {
 interface InternalIlmArgs {
   retentionOptions: RetentionOption[];
   selectedPolicyName?: string;
+  isLoadingInherited?: boolean;
   onSelect: (policyName: string) => void;
   onInspect?: (policyName: string) => void;
 }
@@ -54,6 +57,7 @@ export interface EditDataLifecycleFlyoutBodyContentProps {
   method?: InternalMethodArgs;
   ilm?: InternalIlmArgs;
   dataStreamLifecycleContent?: React.ReactNode;
+  flyoutScrollContainerRef?: RefObject<HTMLElement | null>;
 }
 
 export const EditDataLifecycleFlyoutBodyContent = ({
@@ -64,6 +68,7 @@ export const EditDataLifecycleFlyoutBodyContent = ({
   method,
   ilm,
   dataStreamLifecycleContent,
+  flyoutScrollContainerRef,
 }: EditDataLifecycleFlyoutBodyContentProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -73,8 +78,14 @@ export const EditDataLifecycleFlyoutBodyContent = ({
     lifecycleMethod,
   });
 
+  const lifecycleMethodLabelCss = css`
+    margin: 0;
+    margin-bottom: ${euiTheme.size.xs};
+    font-weight: ${euiTheme.font.weight.semiBold};
+  `;
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false} css={styles.container}>
+    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false} css={styles.headerSection}>
         {inherit && (
           <>
@@ -99,11 +110,9 @@ export const EditDataLifecycleFlyoutBodyContent = ({
 
         {method && (
           <>
-            <EuiTitle size="xxs">
-              <h3>{strings.lifecycleMethodTitle}</h3>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
+            <EuiText size="xs" css={lifecycleMethodLabelCss}>
+              {strings.lifecycleMethodTitle}
+            </EuiText>
 
             <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
               <LifecycleMethodCard
@@ -134,7 +143,7 @@ export const EditDataLifecycleFlyoutBodyContent = ({
       </EuiFlexItem>
 
       {showLifecycleMethodPicker && lifecycleMethod === 'ilm' && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           {!ilm ? (
             <EuiPanel
               hasBorder
@@ -146,6 +155,25 @@ export const EditDataLifecycleFlyoutBodyContent = ({
               <EuiText color="subdued" size="s">
                 {strings.ilmNotConfiguredDescription}
               </EuiText>
+            </EuiPanel>
+          ) : inheritLifecycle && ilm.isLoadingInherited ? (
+            <EuiPanel
+              hasBorder
+              color="subdued"
+              paddingSize="l"
+              css={styles.noInheritedPolicyPanel}
+              data-test-subj="editDataLifecycle-loadingInheritedPanel"
+            >
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText color="subdued" size="s">
+                    {strings.loadingInheritedDescription}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiPanel>
           ) : inheritLifecycle && !ilm.selectedPolicyName ? (
             <EuiPanel
@@ -167,6 +195,7 @@ export const EditDataLifecycleFlyoutBodyContent = ({
               onInspect={ilm.onInspect}
               isDisabled={inheritLifecycle}
               height="full"
+              flyoutScrollContainerRef={flyoutScrollContainerRef}
               showSearch={!inheritLifecycle}
               listStyle={inheritLifecycle ? 'panel' : 'plain'}
               showRowActions={!inheritLifecycle}

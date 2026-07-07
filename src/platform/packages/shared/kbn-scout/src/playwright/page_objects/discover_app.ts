@@ -10,17 +10,17 @@
 import type { Download } from 'playwright-core';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
+import { DataGrid } from './data_grid';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
-import { DataViewEditorPage } from './data_view_editor_page';
-import { resolveSelector } from '../utils/locator_helper';
+import { resolveSelector } from '../utils';
 
 const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 
 export type DiscoverQueryMode = 'esql' | 'classic';
 
 export interface DiscoverGotoOptions {
-  queryMode?: DiscoverQueryMode;
+  queryMode: DiscoverQueryMode;
 }
 
 export interface DataViewOptions {
@@ -32,13 +32,15 @@ export interface DataViewOptions {
 
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
+  private readonly dataGrid: DataGrid;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
+    this.dataGrid = new DataGrid(page);
   }
 
-  async goto(options: DiscoverGotoOptions = {}) {
-    if (options.queryMode) await this.setQueryMode(options.queryMode);
+  async goto(options: DiscoverGotoOptions) {
+    await this.setQueryMode(options.queryMode);
 
     await this.page.gotoApp('discover');
     await this.waitForDiscoverPage();
@@ -81,7 +83,7 @@ export class DiscoverApp {
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = this.page.testSubj
       .locator('indexPattern-switcher')
-      .locator(`[title="${name}"]`);
+      .locator(`[data-test-subj="dataView-${name}"]`);
     if (await matchingDataViewLocator.isVisible()) {
       await matchingDataViewLocator.click();
     } else {
@@ -105,25 +107,35 @@ export class DiscoverApp {
   }
 
   private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
-    const editor = new DataViewEditorPage(this.page);
-    await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
+    // Minimal inline interaction with the data view editor flyout. The full
+    // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
+    // `kbn-scout` is a base package and must not depend on a plugin, so the few
+    // steps Discover needs are driven directly here.
+    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
+    const form = this.page.testSubj.locator('indexPatternEditorForm');
+    const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
+    const timestampField = this.page.testSubj.locator('timestampField');
+
+    await flyout.waitFor({ state: 'visible' });
 
     // FTR passes the base name and relies on the editor auto-appending `*` as the
     // user types. Scout sets the title verbatim (`fill`), so append the wildcard
     // here to preserve that contract (`name`, `* will be added automatically`).
-    await editor.setTitle(name.endsWith('*') ? name : `${name}*`);
+    await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
+    // wait for async title validation to settle before continuing.
+    await form.and(this.page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
 
     // wait for timestamp options; default @timestamp applies.
-    await editor.timestampField
+    await timestampField
       .and(this.page.locator('[data-is-loading="0"]'))
       .waitFor({ state: 'visible', timeout: 30_000 });
 
     if (adHoc) {
       await this.page.testSubj.click('exploreIndexPatternButton');
-      await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'hidden' });
     } else {
-      await editor.save();
+      await this.page.testSubj.click('saveIndexPatternButton');
     }
+    await flyout.waitFor({ state: 'hidden' });
 
     await this.waitUntilTabIsLoaded();
   }
@@ -176,16 +188,27 @@ export class DiscoverApp {
     await menuItem.click();
   }
 
-  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
-    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
-    await this.page.testSubj.hover('dscHideSidebarButton'); // cancel tooltips
-    await this.waitForDiscoverPage();
-    await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
+  private async dismissHoverOverlays() {
+    await this.page.mouse.move(0, 0);
   }
 
-  async saveSearch(name: string) {
+  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
+    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
+    await this.dismissHoverOverlays();
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
     await this.page.testSubj.click('discoverSaveButton');
     await this.page.testSubj.fill('savedObjectTitle', name);
+    if (storeTimeRange !== undefined) {
+      const switchControl = this.page.testSubj.locator('storeTimeWithSearch');
+      await switchControl.waitFor({ state: 'visible' });
+      const isChecked = (await switchControl.getAttribute('aria-checked')) === 'true';
+      if (isChecked !== storeTimeRange) {
+        await switchControl.click();
+      }
+    }
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
   }
@@ -199,6 +222,14 @@ export class DiscoverApp {
     }
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+  }
+
+  async saveUnsavedChanges() {
+    await this.page.testSubj.click('discoverSaveButton');
+    await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+    await this.waitUntilSearchingHasFinished();
   }
 
   /**
@@ -335,151 +366,14 @@ export class DiscoverApp {
     await canvas.click();
   }
 
-  async waitUntilSearchingHasFinished() {
-    // Give the grid-updating indicator a brief window to appear. Without this,
-    // `waitForSelector({ state: 'hidden' })` returns immediately when the
-    // indicator hasn't yet mounted — callers would then observe pre-search
-    // state (e.g. request-count assertions reading 0 before the search fires).
-    try {
-      await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
-        state: 'visible',
-        timeout: 2_000,
-      });
-    } catch {
-      // Indicator never appeared — assume nothing was in flight.
-    }
-    await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
-      state: 'hidden',
-      timeout: 30_000,
-    });
-  }
-
   // Waits for a Discover tab to finish loading.
   async waitUntilTabIsLoaded() {
     await this.waitForDiscoverPage();
     await this.waitUntilSearchingHasFinished();
   }
 
-  // Waits for the document table to be fully rendered and stable
-  async waitForDocTableRendered() {
-    const table = this.page.testSubj.locator('discoverDocTable');
-    const minDurationMs = 2_000;
-    const pollIntervalMs = 100;
-    const totalTimeoutMs = 30_000;
-
-    await expect(table).toBeVisible({ timeout: totalTimeoutMs });
-
-    let stableSince: number | null = null;
-
-    await expect
-      .poll(
-        async () => {
-          const attr = await table.getAttribute('data-render-complete');
-          const now = Date.now();
-
-          if (attr === 'true') {
-            if (!stableSince) {
-              stableSince = now;
-            }
-            const elapsed = now - stableSince;
-            return elapsed >= minDurationMs;
-          } else {
-            // Reset if it flips to anything other than 'true'
-            stableSince = null;
-            return false;
-          }
-        },
-        {
-          message: `data-render-complete did not stay 'true' for ${minDurationMs}ms`,
-          timeout: totalTimeoutMs,
-          intervals: [pollIntervalMs],
-        }
-      )
-      .toBe(true);
-  }
-
-  async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
-    const expandButton = this.page.locator(
-      `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="docTableExpandToggleColumn"]`
-    );
-
-    // Ensure button stable after grid render (catches row shifts)
-    await expect(expandButton).toBeVisible();
-
-    // Scroll to, hover, and click the expand button
-    await expandButton.scrollIntoViewIfNeeded();
-    await expandButton.hover();
-    await expandButton.click({ delay: 50 });
-  }
-
-  async waitForDocViewerFlyoutOpen() {
-    const docViewer = this.page.testSubj.locator('kbnDocViewer');
-    await expect(docViewer).toBeVisible({ timeout: 30_000 });
-  }
-
-  async openAndWaitForDocViewerFlyout({ rowIndex }: { rowIndex: number }) {
-    await this.openDocumentDetails({ rowIndex });
-    await this.waitForDocViewerFlyoutOpen();
-  }
-
-  /**
-   * Close the Discover document-viewer flyout and wait for it to disappear.
-   */
-  async closeDocViewerFlyout() {
-    await this.page.testSubj.click('euiFlyoutCloseButton');
-    await this.page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
-  }
-
-  /**
-   * Hover the given data-grid cell and click its "expand" action, opening the
-   * cell-value popover (which embeds a Monaco editor with the row JSON).
-   *
-   * @param rowIndex - 0-based visible row index.
-   * @param columnId - EUI data-grid column id (e.g. `_source`, `@timestamp`).
-   */
-  async expandGridCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
-    const cell = this.page.locator(
-      `[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="${columnId}"]`
-    );
-    await cell.hover();
-    await cell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
-    await this.page.testSubj.waitForSelector('euiDataGridExpansionPopover', { state: 'visible' });
-  }
-
-  /**
-   * Inside an open document-viewer flyout, toggle the grid column for `fieldName`
-   * from the field-table tab. Calling this twice on the same field toggles it off.
-   */
-  async toggleColumnInDocViewer(fieldName: string) {
-    const flyout = this.page.testSubj.locator('docViewerFlyout');
-    await expect(async () => {
-      const nameElement = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
-      await nameElement.evaluate((el) => {
-        el.scrollIntoView({ block: 'center', inline: 'nearest' });
-      });
-      await nameElement.hover();
-      const toggle = flyout.locator(`[data-test-subj="toggleColumnButton-${fieldName}"]`);
-      await toggle.waitFor({ state: 'visible' });
-      await toggle.scrollIntoViewIfNeeded();
-      await toggle.click();
-    }).toPass({ timeout: 15_000 });
-  }
-
-  /**
-   * Read JSON from the active Monaco source editor (cell expansion popover, or doc
-   * flyout after the JSON tab is selected). Retries until the model is non-empty —
-   * the wrapper can return `''` before the document attaches.
-   */
-  async readMonacoJson(): Promise<{ _id: string } & Record<string, unknown>> {
-    let parsed: { _id: string } & Record<string, unknown> = { _id: '' };
-    await expect(async () => {
-      const raw = await this.codeEditor.getCodeEditorValue();
-      if (!raw) {
-        throw new Error('Monaco editor has not rendered a value yet');
-      }
-      parsed = JSON.parse(raw);
-    }).toPass({ timeout: 30_000 });
-    return parsed;
+  async waitUntilSearchingHasFinished() {
+    await this.dataGrid.waitForLoad();
   }
 
   async getDocTableIndex(index: number): Promise<string> {
@@ -565,8 +459,8 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
-  getColumnHeader(name: string): Locator {
-    return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
+  unsavedChangesIndicator(): Locator {
+    return this.page.testSubj.locator('split-button-notification-indicator');
   }
 
   public readonly controls = {
@@ -577,7 +471,7 @@ export class DiscoverApp {
   };
 
   async clickFieldSort(field: string, sortOption: string) {
-    const header = this.getColumnHeader(field);
+    const header = this.dataGrid.getColumnHeader(field);
     await header.click();
     await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
       state: 'visible',
@@ -650,6 +544,15 @@ export class DiscoverApp {
     await this.page.testSubj.click('unifiedHistogramEditVisualization');
   }
 
+  async openLensEditFlyout() {
+    await this.page.testSubj.locator('unifiedHistogramEditFlyoutVisualization').click();
+    await this.getLensEditFlyout().waitFor({ state: 'visible' });
+  }
+
+  getLensEditFlyout(): Locator {
+    return this.page.testSubj.locator('lnsChartSwitchPopover');
+  }
+
   async getTheColumnFromGrid(): Promise<string[]> {
     const columnLocators = await this.page.testSubj.locator('unifiedDataTableColumnTitle').all();
     return await Promise.all(columnLocators.map((locator) => locator.innerText()));
@@ -711,8 +614,7 @@ export class DiscoverApp {
   }
 
   async moveColumn(fieldName: string, direction: 'left' | 'right') {
-    await this.page.testSubj.hover(`dataGridHeaderCell-${fieldName}`);
-    await this.page.testSubj.click(`dataGridHeaderCellActionButton-${fieldName}`);
+    await this.dataGrid.openColumnMenuByField(fieldName);
     await this.page.getByText(`Move ${direction}`).click();
   }
 
@@ -782,6 +684,11 @@ export class DiscoverApp {
 
   async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
     return this.codeEditor.getCodeEditorValue(nthIndex);
+  }
+
+  async openSidebar() {
+    await this.page.testSubj.locator('dscShowSidebarButton').click();
+    await this.waitUntilFieldListHasCountOfFields();
   }
 
   async addBreakdownFieldFromSidebar(

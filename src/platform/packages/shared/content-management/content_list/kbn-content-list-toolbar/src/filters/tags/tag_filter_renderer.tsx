@@ -102,7 +102,7 @@ export const TagFilterRenderer = ({
           <EuiFlexItem grow={false}>
             <EuiHealth
               color={option.data?.color}
-              data-test-subj={getContentListTagOptionSubj(option.key)}
+              data-test-subj={getContentListTagOptionSubj(option.label)}
             >
               <EuiText size="s">{option.label}</EuiText>
             </EuiHealth>
