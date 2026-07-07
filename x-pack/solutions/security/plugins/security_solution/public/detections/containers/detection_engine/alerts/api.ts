@@ -93,8 +93,7 @@ export const fetchQueryAttacks = async <Hit, Aggregations>({
   query,
   signal,
 }: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> => {
-  const response = await searchAttacks({ query, signal });
-  return response as AlertSearchResponse<Hit, Aggregations>;
+  return searchAttacks<AlertSearchResponse<Hit, Aggregations>>({ query, signal });
 };
 
 /**

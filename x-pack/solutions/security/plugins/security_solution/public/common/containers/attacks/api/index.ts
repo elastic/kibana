@@ -49,18 +49,15 @@ export interface SearchAttacksParams {
  * @param params.signal - Optional AbortSignal for cancelling the request
  * @returns Promise resolving to the search response containing attacks
  */
-export const searchAttacks = async ({
+export const searchAttacks = async <TResponse = SearchAttacksResponse>({
   query,
   signal,
-}: SearchAttacksParams): Promise<SearchAttacksResponse> => {
-  return KibanaServices.get().http.post<SearchAttacksResponse>(
-    DETECTION_ENGINE_ATTACKS_SEARCH_URL,
-    {
-      version: ATTACKS_API_VERSION,
-      body: JSON.stringify(query),
-      signal,
-    }
-  );
+}: SearchAttacksParams): Promise<TResponse> => {
+  return KibanaServices.get().http.post<TResponse>(DETECTION_ENGINE_ATTACKS_SEARCH_URL, {
+    version: ATTACKS_API_VERSION,
+    body: JSON.stringify(query),
+    signal,
+  });
 };
 
 /**
