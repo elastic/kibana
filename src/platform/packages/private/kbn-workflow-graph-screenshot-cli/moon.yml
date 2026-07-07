@@ -24,9 +24,6 @@ dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/tooling-log'
   - '@kbn/node-libs-browser-webpack-plugin'
-  - '@kbn/repo-info'
-  - '@kbn/babel-preset'
-  - '@kbn/peggy-loader'
 tags:
   - shared-common
   - package
