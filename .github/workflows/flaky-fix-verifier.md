@@ -102,6 +102,14 @@ network:
 sandbox:
   agent: awf
 
+# Shallow-fetch the fixer PR branches into the safe_outputs job so the
+# `push_to_pull_request_branch` handler's own branch fetch is a fast no-op
+# instead of an unbounded fetch that hangs on a repo Kibana's size. The fixer
+# enforces the `fix/flaky-*` branch prefix (see flaky-test-fixer.md).
+checkout:
+  fetch:
+    - fix/flaky-*
+
 jobs:
   prefetch_pr_context:
     permissions:
