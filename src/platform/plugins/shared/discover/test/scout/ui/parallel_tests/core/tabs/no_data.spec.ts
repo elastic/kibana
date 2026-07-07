@@ -17,11 +17,12 @@ const createDataViewFromPrompt = async (page: ScoutPage, name: string) => {
   await page.testSubj.locator('createDataViewButton').click();
 
   const flyout = page.testSubj.locator('indexPatternEditorFlyout');
+  const form = page.testSubj.locator('indexPatternEditorForm');
   await flyout.waitFor({ state: 'visible' });
 
   const titleInput = page.testSubj.locator('createIndexPatternTitleInput');
-  await titleInput.clear();
-  await titleInput.pressSequentially(name);
+  await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
+  await form.and(page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
   await page.testSubj.locator('saveIndexPatternButton').click();
   await flyout.waitFor({ state: 'hidden' });
 };

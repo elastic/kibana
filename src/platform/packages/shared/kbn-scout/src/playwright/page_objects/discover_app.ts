@@ -209,9 +209,8 @@ export class DiscoverApp {
     await this.page.testSubj.click('indexPattern-manage-field');
     const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
     await flyout.waitFor({ state: 'visible' });
-    const nameInput = flyout.getByRole('textbox', { name: 'Name' });
-    await nameInput.clear();
-    await nameInput.pressSequentially(name);
+    const nameInput = this.page.testSubj.locator('createIndexPatternNameInput');
+    await nameInput.fill(name);
     await expect(nameInput).toHaveValue(name);
     await this.page.testSubj.click('saveIndexPatternButton');
     const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');

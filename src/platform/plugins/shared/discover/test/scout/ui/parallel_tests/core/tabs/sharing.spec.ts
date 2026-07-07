@@ -92,17 +92,24 @@ const getSavedSearchTitle = async (page: ScoutPage) =>
 const hasFilter = async (page: ScoutPage, field: string, value: string) =>
   page
     .locator(`[data-test-subj*="filter-key-${field}"][data-test-subj*="filter-value-${value}"]`)
-    .isVisible();
+    .waitFor({ state: 'visible', timeout: 1_000 })
+    .then(() => true)
+    .catch(() => false);
 
 const isCurrentDataViewAdHoc = async (page: ScoutPage) => {
   const dataViewSwitches = [
     page.locator(testSubj('discover-dataView-switch-link')),
     page.locator(testSubj('dataView-switch-link')),
   ];
-  const visibleDataViewSwitches = [];
+  const visibleDataViewSwitches: Array<ReturnType<ScoutPage['locator']>> = [];
 
   for (const dataViewSwitch of dataViewSwitches) {
-    if (await dataViewSwitch.isVisible()) {
+    const isDataViewSwitchVisible = await dataViewSwitch
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (isDataViewSwitchVisible) {
       visibleDataViewSwitches.push(dataViewSwitch);
     }
   }
@@ -121,7 +128,9 @@ const isCurrentDataViewAdHoc = async (page: ScoutPage) => {
   await dataViewSwitch.click();
   const isAdHoc = await page
     .locator(testSubj(`dataViewItemTempBadge-${dataViewTitle}`))
-    .isVisible();
+    .waitFor({ state: 'visible', timeout: 1_000 })
+    .then(() => true)
+    .catch(() => false);
   await page.keyboard.press('Escape');
   await page.locator(testSubj('indexPattern-switcher')).waitFor({ state: 'hidden' });
 
