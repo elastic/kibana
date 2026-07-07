@@ -16,19 +16,32 @@ import { CollectorContextProvider } from '../../../../../../../components/otel_u
 import { CollectorDetailTabs } from '../../../../../../../components/otel_ui/collector_config_view/collector_detail/collector_detail_tabs';
 import { ErrorPatternPanel } from '../../../../../../../components/otel_ui/collector_config_view/error_pattern_panel';
 
+const NON_REPORTING_STATUSES: Array<NonNullable<Agent['status']>> = [
+  'offline',
+  'inactive',
+  'unenrolled',
+  'uninstalled',
+];
+
 export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> = ({ agent }) => {
   const { data: configData, isLoading } = useGetAgentEffectiveConfigQuery(agent.id);
   const config = configData?.effective_config ?? {};
   const serviceInstanceId = String(
     agent.non_identifying_attributes?.['elastic.display.name'] ?? agent.id
   );
+  const offlineAt =
+    agent.status && NON_REPORTING_STATUSES.includes(agent.status) ? agent.last_checkin : undefined;
 
   if (isLoading) {
     return <EuiLoadingSpinner />;
   }
 
   return (
-    <CollectorContextProvider serviceInstanceId={serviceInstanceId} enrolledAt={agent.enrolled_at}>
+    <CollectorContextProvider
+      serviceInstanceId={serviceInstanceId}
+      enrolledAt={agent.enrolled_at}
+      offlineAt={offlineAt}
+    >
       <EuiPanel paddingSize="m" hasBorder>
         <CollectorConfigView config={config} health={agent.health} />
       </EuiPanel>
