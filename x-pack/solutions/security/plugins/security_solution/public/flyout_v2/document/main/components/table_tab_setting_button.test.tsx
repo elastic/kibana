@@ -13,7 +13,7 @@ import {
   TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID,
   TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID,
   TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID,
-} from './test_ids';
+} from '../../../../flyout/document_details/right/components/test_ids';
 import userEvent from '@testing-library/user-event';
 
 const mockTableTabState = {
