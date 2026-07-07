@@ -326,10 +326,16 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
           .coerce('filters', parseJsonArrayFlag('filters'))
           .check((argv: HandlerArgv) => {
             const cardinalityFields: string[] = argv.cardinalityField ?? [];
-            const values = argv.cardinalityValue ?? [];
+            const values: number[] = argv.cardinalityValue ?? [];
             if (cardinalityFields.length !== values.length) {
               throw new Error(
                 `--cardinality-field and --cardinality-value must be repeated the same number of times, got ${cardinalityFields.length} field(s) and ${values.length} value(s)`
+              );
+            }
+            const invalidValue = values.find((v) => !Number.isInteger(v) || v < 0);
+            if (invalidValue !== undefined) {
+              throw new Error(
+                `--cardinality-value must be a non-negative integer, got "${invalidValue}"`
               );
             }
             const thresholdFields: string[] = argv.thresholdField ?? [];

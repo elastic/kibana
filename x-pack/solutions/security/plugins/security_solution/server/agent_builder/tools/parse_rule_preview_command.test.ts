@@ -552,6 +552,28 @@ describe('parseRulePreviewCommand — threshold cardinality', () => {
       expect(result.message).toContain('Cardinality of a field that is being aggregated on');
     }
   });
+
+  it('returns kind:error when --cardinality-value is negative', () => {
+    const result = parseRulePreviewCommand(
+      'threshold --query "process.name: *" --threshold-value 5 ' +
+        '--cardinality-field user.name --cardinality-value -1'
+    );
+    expect(result.kind).toBe('error');
+    if (result.kind === 'error') {
+      expect(result.message).toContain('cardinality-value');
+    }
+  });
+
+  it('returns kind:error when --cardinality-value is not an integer', () => {
+    const result = parseRulePreviewCommand(
+      'threshold --query "process.name: *" --threshold-value 5 ' +
+        '--cardinality-field user.name --cardinality-value 1.5'
+    );
+    expect(result.kind).toBe('error');
+    if (result.kind === 'error') {
+      expect(result.message).toContain('cardinality-value');
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------
