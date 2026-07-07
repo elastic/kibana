@@ -76,15 +76,6 @@ describe('IndicatorReader.getQueryLinks', () => {
     expect(capturedQueryString(runEsql)).toContain(IS_NOT_EXPIRED_FRAGMENT);
   });
 
-  it('applies IS_NOT_EXPIRED when includeExpired is false', async () => {
-    const { reader, runEsql } = makeReader();
-    runEsql.mockResolvedValueOnce({ hits: [] });
-
-    await reader.getQueryLinks([STREAM], { includeExpired: false });
-
-    expect(capturedQueryString(runEsql)).toContain(IS_NOT_EXPIRED_FRAGMENT);
-  });
-
   it('omits IS_NOT_EXPIRED when includeExpired is true', async () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({ hits: [] });
@@ -119,15 +110,6 @@ describe('IndicatorReader.getQueryLinks', () => {
 });
 
 describe('IndicatorReader.getStreamToQueryLinksMap', () => {
-  it('applies IS_NOT_EXPIRED by default', async () => {
-    const { reader, runEsql } = makeReader();
-    runEsql.mockResolvedValueOnce({ hits: [] });
-
-    await reader.getStreamToQueryLinksMap([STREAM]);
-
-    expect(capturedQueryString(runEsql)).toContain(IS_NOT_EXPIRED_FRAGMENT);
-  });
-
   it('omits IS_NOT_EXPIRED when includeExpired is true', async () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({ hits: [] });

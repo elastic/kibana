@@ -394,8 +394,7 @@ const bulkQueriesRoute = createServerRoute({
     );
     const { [streamName]: currentLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
     const currentIds = new Set(currentLinks.map((l) => l.query.id));
-    // expires_at lives on the link, not the nested query — `l.query` alone would drop
-    // it, silently making the query durable.
+    // expires_at lives on the link, not `l.query` — using `l.query` alone would drop it.
     const nextQueries: StreamQuery[] = [
       ...currentLinks
         .filter((l) => !deleteIds.has(l.query.id))

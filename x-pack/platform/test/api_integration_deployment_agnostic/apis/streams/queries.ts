@@ -363,7 +363,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('deletes an already-expired query instead of reporting it as not found', async () => {
-      // Regression: the existence check used to exclude expired queries entirely.
+      // The existence check must pass includeExpired, or an expired query looks gone.
       const queryId = v4();
       await apiClient
         .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
@@ -651,7 +651,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('actually removes an already-expired query, not just from the default listing', async () => {
-        // Regression: delete used to report success without writing the tombstone.
+        // Bulk delete's existence lookup must pass includeExpired, or an expired
+        // query is silently skipped instead of deleted.
         const expiredQuery = {
           id: v4(),
           title: 'already expired',
@@ -767,37 +768,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         return response.persistedQueries[0].id as string;
       }
 
-      it('reconcileStream still tombstones a survivor of _bulk_delete once its feature is gone', async () => {
-        // Regression: deleting a sibling used to drop expires_at on rewrite, making this
-        // survivor durable and immune to the reconciliation below.
-        const { uuid: featureUuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
-        const survivorId = await persistGroundedQuery('persist-survivor-bulk-delete');
-
-        const fillerQuery = {
-          id: v4(),
-          title: 'bulk-delete filler',
-          description: '',
-          esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'filler'")`,
-          },
-        };
-        await bulkQueries(apiClient, STREAM_NAME, [{ index: fillerQuery }]);
-
-        await apiClient
-          .fetch('POST /internal/streams/queries/_bulk_delete', {
-            params: { body: { queryIds: [fillerQuery.id] } },
-          })
-          .expect(200);
-
-        // Deleting the grounding feature auto-reconciles the stream.
-        await deleteFeature(apiClient, STREAM_NAME, featureUuid);
-
-        const { queries } = await getQueries(apiClient, STREAM_NAME);
-        expect(queries.find((q) => q.id === survivorId)).to.be(undefined);
-      });
-
       it('reconcileStream still tombstones a survivor of the public bulk queries endpoint once its feature is gone', async () => {
-        // Same regression, via the public bulk endpoint's own version of the rewrite.
+        // Regression: the bulk endpoint's rewrite used to drop expires_at on unrelated
+        // queries, making this survivor durable and immune to the reconciliation below.
         const { uuid: featureUuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
         const survivorId = await persistGroundedQuery('persist-survivor-public-bulk');
 

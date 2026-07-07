@@ -386,8 +386,7 @@ export class QueryRuleOrchestrator {
       return { tombstoned: 0, orphanRulesDeleted: 0 };
     }
 
-    // includeExpired: reconciliation must see expired queries too, or they'd
-    // never get their backing rule uninstalled / tombstoned.
+    // includeExpired: expired queries still need their rule uninstalled/tombstoned.
     const [{ hits }, links, ownedRuleIds] = await Promise.all([
       this.reader.getFeatures(stream),
       this.reader.getQueryLinks([stream], { ruleUnbacked: 'include', includeExpired: true }),
@@ -415,13 +414,8 @@ export class QueryRuleOrchestrator {
       orphanRulesDeleted = orphans.length;
     }
 
-    // Seam: a rule-backed KI query whose rule was deleted out of band (e.g.
-    // manually, via the alerting UI) is invisible to the orphan-rule sweep
-    // above — it doesn't appear in `ownedRuleIds`. Tombstone the query so the
-    // KI data stream doesn't keep advertising a rule that no longer exists.
-    // `ownedRuleIds` unions both alerting engines (see DualCleanupRulesAdapter),
-    // so this only fires when the rule is confirmed absent from both. Excludes
-    // candidateIds to avoid double-counting.
+    // Seam: a rule-backed query whose rule was deleted out of band (invisible to the
+    // orphan sweep above, since it's absent from `ownedRuleIds`) gets tombstoned here.
     const staleQueryIds = backedLinks
       .filter((link) => !ownedRuleIdSet.has(link.rule_id) && !candidateIdSet.has(link.query.id))
       .map((link) => link.query.id);

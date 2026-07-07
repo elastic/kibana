@@ -203,9 +203,9 @@ export const bulkDeleteQueriesRoute = createServerRoute({
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
-    // Bulk delete must cover both backed and unbacked queries; the default
-    // 'exclude' filter would skip unbacked (draft) ones. includeExpired: explicit-id
-    // action, so an expired query must stay reachable.
+    // Bulk delete must cover both backed and unbacked queries; the default 'exclude'
+    // filter would skip unbacked (draft) ones. includeExpired: explicit-id action, so
+    // an expired query must stay reachable.
     const queryLinks = await kiClient.getQueryLinks([], {
       queryIds: params.body.queryIds,
       ruleUnbacked: 'include',

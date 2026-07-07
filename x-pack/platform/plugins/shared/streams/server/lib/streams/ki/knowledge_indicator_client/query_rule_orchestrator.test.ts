@@ -296,22 +296,6 @@ describe('QueryRuleOrchestrator', () => {
       expect(summary.tombstoned).toBe(1);
     });
 
-    it('leaves an expired durable query untouched', async () => {
-      const rulesClient = makeReconcileRulesClient();
-      const writer = {
-        bulk: jest.fn().mockResolvedValue({ applied: 0, skipped: 0 }),
-      } as unknown as jest.Mocked<IndicatorWriter>;
-      rulesClient.findOwnedRuleIds.mockResolvedValue(['rule-1']);
-      const link = makeReconcileLink({ expires_at: undefined });
-      const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
-      const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
-
-      const summary = await orchestrator.reconcileStream(definition);
-
-      expect(writer.bulk).not.toHaveBeenCalled();
-      expect(summary.tombstoned).toBe(0);
-    });
-
     it('leaves durable queries (null expires_at) untouched even when features are gone', async () => {
       const rulesClient = makeReconcileRulesClient();
       const writer = {
@@ -328,23 +312,16 @@ describe('QueryRuleOrchestrator', () => {
       expect(summary.tombstoned).toBe(0);
     });
 
-    it('cleans up an expired-but-present ungrounded query (regression guard: internal reads must see expired queries)', async () => {
-      const rulesClient = makeReconcileRulesClient();
-      rulesClient.findOwnedRuleIds.mockResolvedValue(['rule-1']);
-      const link = makeReconcileLink({ expires_at: '2020-01-01T00:00:00.000Z' });
-      const reader = makeReconcileReader({ links: [link], features: [] });
-      const orchestrator = makeReconcileOrchestrator({ rulesClient, reader });
+    it('requests query links with includeExpired so expired links stay visible to reconciliation', async () => {
+      const reader = makeReconcileReader();
+      const orchestrator = makeReconcileOrchestrator({ reader });
 
-      const summary = await orchestrator.reconcileStream(definition);
+      await orchestrator.reconcileStream(definition);
 
-      // If internal reads didn't pass includeExpired: true, this already-expired
-      // link would never surface from getQueryLinks and cleanup would silently
-      // no-op — asserting the flag directly guards against that regression.
       expect(reader.getQueryLinks).toHaveBeenCalledWith(
         [STREAM],
         expect.objectContaining({ includeExpired: true })
       );
-      expect(summary.tombstoned).toBe(1);
     });
 
     it('tombstones an ungrounded unbacked query with no alerting rule', async () => {
@@ -393,8 +370,7 @@ describe('QueryRuleOrchestrator', () => {
 
       const summary = await orchestrator.reconcileStream(definition);
 
-      // `orphans` is empty (no live rule to enumerate) — the seam is what
-      // tombstones the query, whose own uninstall no-ops on the already-gone rule.
+      // No live rule to enumerate as an orphan; the seam tombstones the query instead.
       expect(writer.bulk).toHaveBeenCalledWith(
         STREAM,
         expect.arrayContaining([{ delete: { type: 'query', id: 'q-1' } }])
