@@ -578,7 +578,7 @@ export function registerChatRoutes({
       options: {
         tags: ['oas-tag:agent builder'],
         availability: {
-          since: '9.2.0',
+          since: '9.5.0',
         },
       },
     })
