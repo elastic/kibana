@@ -19,9 +19,10 @@ export const significantEventsResetKisRoute = createServerRoute({
     summary: 'Reset Significant Events KIs for alerting v2 upgrade',
     description:
       'Prepares a cluster that onboarded Significant Events on experimental alerting v1 for alerting v2. ' +
+      'Cluster-wide by design: acts on ALL spaces, not just the caller’s. ' +
       'Cancels in-flight onboarding, deletes all knowledge indicators and backing alerting rules, and ' +
-      'removes documents from `.alerts-streams.alerts-default`. Does not modify detections, discoveries, ' +
-      'events, memories, or `.rule-events`. Re-onboard streams via POST ' +
+      'removes documents from `.alerts-streams.alerts-default` across every space. Does not modify ' +
+      'detections, discoveries, events, memories, or `.rule-events`. Re-onboard streams via POST ' +
       '/internal/streams/{streamName}/onboarding/_execute to create new KIs and v2 rules.',
   },
   security: {

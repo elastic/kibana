@@ -17,17 +17,17 @@ export interface StreamsSignificantEventsResetDeletedCounts {
   queries: number;
   features: number;
   rules: number;
-  alertsV1: number;
+  alerts_v1: number;
 }
 
 /** Response from POST /internal/streams/significant_events/_reset_kis. */
 export interface StreamsSignificantEventsResetResult {
   /** Stream names that had knowledge indicators before the reset. */
   streams: string[];
-  canceledOnboardingCount: number;
+  canceled_onboarding_count: number;
   deleted: StreamsSignificantEventsResetDeletedCounts;
   /** Per-stream KI and rule snapshot counts before deletion. */
-  byStream: Record<string, StreamsSignificantEventsResetDeletedCounts>;
+  by_stream: Record<string, StreamsSignificantEventsResetDeletedCounts>;
 }
 
 export const emptySignificantEventsResetDeletedCounts =
@@ -35,7 +35,7 @@ export const emptySignificantEventsResetDeletedCounts =
     queries: 0,
     features: 0,
     rules: 0,
-    alertsV1: 0,
+    alerts_v1: 0,
   });
 
 const sumDeletedCounts = (
@@ -118,6 +118,9 @@ export interface ResetSignificantEventsDeps {
 /**
  * Clears experimental alerting v1 state so a cluster can onboard again on alerting v2.
  * Removes all KIs, backing rules, and documents in `.alerts-streams.alerts-default`.
+ *
+ * Cluster-wide by design: KI/rule enumeration and the v1 alerts delete are NOT space-scoped,
+ * so this affects every space, not just the caller's. It is a one-time cluster migration tool.
  */
 export const resetSignificantEvents = async ({
   kiClient,
@@ -140,6 +143,10 @@ export const resetSignificantEvents = async ({
     await resetStreamKnowledgeIndicators({ streamName, kiClient, ruleIds, logger });
   }
 
+  // Intentionally cluster-wide: this reset wipes v1 alerts across ALL spaces, not just the
+  // caller's. `.alerts-streams.alerts-default` is a shared, space-partitioned index, but the
+  // reset is a cluster-level alerting-v1 -> v2 migration tool, so `match_all` (no
+  // `kibana.space_ids` filter) is deliberate and mirrors the cluster-wide KI/rule cleanup above.
   const alertsDeleteResponse = await esClient.deleteByQuery(
     {
       index: V1_ALERTS_INDEX,
@@ -148,12 +155,12 @@ export const resetSignificantEvents = async ({
     },
     { ignore: [404] }
   );
-  deleted.alertsV1 = alertsDeleteResponse.deleted ?? 0;
+  deleted.alerts_v1 = alertsDeleteResponse.deleted ?? 0;
 
   return {
     streams: streamNames,
-    canceledOnboardingCount,
+    canceled_onboarding_count: canceledOnboardingCount,
     deleted,
-    byStream,
+    by_stream: byStream,
   };
 };

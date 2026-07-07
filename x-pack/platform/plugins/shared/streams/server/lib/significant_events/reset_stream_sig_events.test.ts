@@ -80,25 +80,25 @@ describe('resetSignificantEvents', () => {
 
     expect(result).toEqual({
       streams: ['logs.nginx', 'logs.apache'],
-      canceledOnboardingCount: 2,
+      canceled_onboarding_count: 2,
       deleted: {
         queries: 1,
         features: 2,
         rules: 1,
-        alertsV1: 9,
+        alerts_v1: 9,
       },
-      byStream: {
+      by_stream: {
         'logs.nginx': {
           queries: 1,
           features: 1,
           rules: 1,
-          alertsV1: 0,
+          alerts_v1: 0,
         },
         'logs.apache': {
           queries: 0,
           features: 1,
           rules: 0,
-          alertsV1: 0,
+          alerts_v1: 0,
         },
       },
     });
@@ -123,8 +123,32 @@ describe('resetSignificantEvents', () => {
 
     expect(result.streams).toEqual([]);
     expect(result.deleted).toEqual(emptySignificantEventsResetDeletedCounts());
-    expect(result.byStream).toEqual({});
+    expect(result.by_stream).toEqual({});
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it('wipes v1 alerts cluster-wide (all spaces, no kibana.space_ids filter) by design', async () => {
+    const kiClient = {
+      getStreamNamesWithKnowledgeIndicators: jest.fn().mockResolvedValue([]),
+    } as unknown as KnowledgeIndicatorClient;
+
+    const streamsKIsOnboardingClient = {
+      cancelAllRunning: jest.fn().mockResolvedValue(0),
+    } as unknown as StreamsKIsOnboardingClient;
+
+    await resetSignificantEvents({
+      kiClient,
+      esClient,
+      logger,
+      request,
+      streamsKIsOnboardingClient,
+    });
+
+    // The reset is a cluster-level alerting-v1 -> v2 migration tool: it must delete alerts
+    // across every space, so the query is match_all with no `kibana.space_ids` scoping.
+    const [deleteArgs] = (esClient.deleteByQuery as jest.Mock).mock.calls[0];
+    expect(deleteArgs.query).toEqual({ match_all: {} });
+    expect(JSON.stringify(deleteArgs)).not.toContain('kibana.space_ids');
   });
 
   it('reports zero v1 alerts deleted when the alerts index is missing', async () => {
@@ -146,6 +170,6 @@ describe('resetSignificantEvents', () => {
       streamsKIsOnboardingClient,
     });
 
-    expect(result.deleted.alertsV1).toBe(0);
+    expect(result.deleted.alerts_v1).toBe(0);
   });
 });
