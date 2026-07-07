@@ -13,3 +13,101 @@ export const ALERT_ANALYSIS_WORKFLOW_TITLE = i18n.translate(
     defaultMessage: 'Alert analysis workflow',
   }
 );
+
+export const THRESHOLD_RANGE_ERROR = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.thresholdRangeErrorMessage',
+  {
+    defaultMessage: 'Minimum confidence score must be lower than maximum confidence score.',
+  }
+);
+
+export const TAG_PREFIX_ERROR = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.tagPrefixErrorMessage',
+  {
+    defaultMessage: 'Tag prefix is required.',
+  }
+);
+
+export const SAVE_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.saveSuccessMessage',
+  {
+    defaultMessage: 'Alert analysis workflow settings saved',
+  }
+);
+
+export const SAVE_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.saveErrorMessage',
+  {
+    defaultMessage: 'Failed to save alert analysis workflow settings',
+  }
+);
+
+export const WORKFLOW_ENABLED_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.workflowEnabledAriaLabel',
+  {
+    defaultMessage: 'Enable alert analysis workflow',
+  }
+);
+
+export const WORKFLOW_ENABLED_HIDDEN_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.workflowEnabledHiddenLabel',
+  {
+    defaultMessage: 'Enable alert analysis workflow',
+  }
+);
+
+export const CONNECTOR_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.connectorLabel',
+  {
+    defaultMessage: 'Connector',
+  }
+);
+
+export const CREATE_CONVERSATION_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.createConversationAriaLabel',
+  {
+    defaultMessage: 'Create conversation per alert analysis',
+  }
+);
+
+export const CREATE_CONVERSATION_HIDDEN_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.createConversationHiddenLabel',
+  {
+    defaultMessage: 'Create conversation per alert analysis',
+  }
+);
+
+export const AUTO_CLOSE_ENABLED_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.autoCloseEnabledAriaLabel',
+  {
+    defaultMessage: 'Auto-close alerts classified as false positives',
+  }
+);
+
+export const AUTO_CLOSE_ENABLED_HIDDEN_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.autoCloseEnabledHiddenLabel',
+  {
+    defaultMessage: 'Auto-close alerts classified as false positives',
+  }
+);
+
+export const MIN_THRESHOLD_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.minThresholdAriaLabel',
+  {
+    defaultMessage: 'Auto-close minimum confidence score',
+  }
+);
+
+export const MAX_THRESHOLD_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.maxThresholdAriaLabel',
+  {
+    defaultMessage: 'Auto-close maximum confidence score',
+  }
+);
+
+export const TAG_PREFIX_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.tagPrefixAriaLabel',
+  {
+    defaultMessage: 'Alert tag prefix',
+  }
+);
