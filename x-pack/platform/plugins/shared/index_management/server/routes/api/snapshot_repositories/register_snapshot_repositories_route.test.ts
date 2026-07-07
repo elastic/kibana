@@ -101,6 +101,27 @@ describe('[Index management API Routes] Snapshot repositories', () => {
     });
   });
 
+  test('defaults hasRepositories to false when listing repositories fails, without failing the endpoint', async () => {
+    getSettings.mockResolvedValue({
+      persistent: { repositories: { default_repository: 'found-snapshots' } },
+    });
+    getRepository.mockRejectedValue(
+      Object.assign(new Error('missing privilege'), { statusCode: 403 })
+    );
+    hasPrivileges.mockResolvedValue({
+      cluster: { 'cluster:admin/repository/put': true },
+    });
+
+    await expect(router.runRequest(mockRequest)).resolves.toEqual({
+      body: {
+        hasDefaultRepository: true,
+        defaultRepository: 'found-snapshots',
+        hasRepositories: false,
+        canCreateRepository: true,
+      },
+    });
+  });
+
   test('reports canCreateRepository as true without checking privileges when security is disabled', async () => {
     (routeDependencies.config.isSecurityEnabled as jest.Mock).mockReturnValueOnce(false);
     getSettings.mockResolvedValue({});
