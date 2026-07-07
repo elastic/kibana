@@ -70175,12 +70175,14 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 128
             type: string
         - description: Workflow step execution ID
           in: path
           name: stepId
           required: true
           schema:
+            maxLength: 128
             type: string
         - description: The token created when the workflow execution was paused. Authenticates the request to resume execution.
           in: query
@@ -70244,12 +70246,14 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 128
             type: string
         - description: Workflow step execution ID
           in: path
           name: stepId
           required: true
           schema:
+            maxLength: 128
             type: string
         - description: The resume token authenticating this request.
           in: query
@@ -70316,12 +70320,14 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 128
             type: string
         - description: Workflow step execution ID
           in: path
           name: stepId
           required: true
           schema:
+            maxLength: 128
             type: string
         - description: The resume token authenticating this request.
           in: query
