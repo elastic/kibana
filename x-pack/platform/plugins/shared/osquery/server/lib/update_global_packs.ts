@@ -88,6 +88,8 @@ export const updateGlobalPacksCreateCallback = async (
         set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
           shard: 100,
           pack_id: pack.saved_object_id,
+          // Human-readable name for scheduled result docs (see create route).
+          pack_name: pack.name,
           ...packDefaults,
           queries,
         });

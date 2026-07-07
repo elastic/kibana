@@ -427,6 +427,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           return {
             shard: policyShards[agentPolicyId] ?? 100,
             pack_id: updatedPackSO.id,
+            // Human-readable name for scheduled result docs (see create route).
+            pack_name: updatedPackSO.attributes.name,
             ...packDefaults,
             queries: builtQueries,
           };

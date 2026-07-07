@@ -135,6 +135,8 @@ export const backfillScheduleIds = async ({
                     }
                   );
                   set(draft, `${packPath}.pack_id`, packSO.id);
+                  // Human-readable name for scheduled result docs (see create route).
+                  set(draft, `${packPath}.pack_name`, packSO.attributes.name);
                   for (const [k, v] of Object.entries(packDefaults)) {
                     set(draft, `${packPath}.${k}`, v);
                   }

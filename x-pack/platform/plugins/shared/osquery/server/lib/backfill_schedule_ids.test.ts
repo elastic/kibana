@@ -370,6 +370,7 @@ describe('backfillScheduleIds', () => {
       const updatedPolicy = packagePolicyUpdate.mock.calls[0][3];
       const packBlock = updatedPolicy.inputs[0].config.osquery.value.packs['default--rrule-pack'];
       expect(packBlock).toBeDefined();
+      expect(packBlock.pack_name).toEqual('rrule-pack');
       // Flag-on + rrule mode: rrule wire field present.
       expect(packBlock.default_rrule_schedule).toEqual(rruleValue);
       // Interval wire field must NOT be present in rrule mode.
