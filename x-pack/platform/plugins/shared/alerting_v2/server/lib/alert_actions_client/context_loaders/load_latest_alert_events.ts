@@ -89,27 +89,17 @@ export const loadLatestAlertEvents = async ({
     | EVAL data_json = JSON_EXTRACT(_source, "$.data")
     | DROP _source
     | STATS
-        last_ts = MAX(@timestamp),
-        last_episode_id = LAST(episode.id, @timestamp),
-        last_episode_status = LAST(episode.status, @timestamp),
-        last_episode_status_count = LAST(episode.status_count, @timestamp),
-        last_data_json = LAST(data_json, @timestamp),
-        last_severity = LAST(severity, @timestamp),
-        last_status = LAST(status, @timestamp),
-        last_source = LAST(source, @timestamp),
-        last_rule_id = LAST(rule.id, @timestamp),
-        last_rule_version = LAST(rule.version, @timestamp)
+        @timestamp = MAX(@timestamp),
+        episode_id = LAST(episode.id, @timestamp),
+        episode_status = LAST(episode.status, @timestamp),
+        episode_status_count = LAST(episode.status_count, @timestamp),
+        data_json = LAST(data_json, @timestamp),
+        severity = LAST(severity, @timestamp),
+        status = LAST(status, @timestamp),
+        source = LAST(source, @timestamp),
+        rule_id = LAST(rule.id, @timestamp),
+        rule_version = LAST(rule.version, @timestamp)
       BY group_hash, space_id
-    | RENAME last_ts AS @timestamp,
-        last_episode_id AS episode_id,
-        last_episode_status AS episode_status,
-        last_episode_status_count AS episode_status_count,
-        last_data_json AS data_json,
-        last_severity AS severity,
-        last_status AS status,
-        last_source AS source,
-        last_rule_id AS rule_id,
-        last_rule_version AS rule_version
     | KEEP @timestamp, group_hash, episode_id, episode_status, episode_status_count, rule_id, rule_version, space_id, status, source, data_json, severity
   `.toRequest();
 

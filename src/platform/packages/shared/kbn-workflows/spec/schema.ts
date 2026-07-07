@@ -1039,7 +1039,22 @@ export { WorkflowSchemaForAutocompleteBase };
 export const WorkflowTokenUsageSchema = z.object({
   inputTokens: z.number().describe('Total input (prompt) tokens consumed.'),
   outputTokens: z.number().describe('Total output (completion) tokens produced.'),
+  cachedTokens: z
+    .number()
+    .optional()
+    .describe('Cached input tokens reused. This is a subset of inputTokens.'),
   totalTokens: z.number().describe('Sum of input and output tokens.'),
+});
+
+// Token usage attributed to a single step, adding the step id and its resolved
+// connector to the aggregate token shape.
+export const WorkflowStepTokenUsageSchema = WorkflowTokenUsageSchema.extend({
+  stepId: z.string().max(512).describe('Id of the step that produced this usage.'),
+  connectorId: z
+    .string()
+    .max(512)
+    .optional()
+    .describe('Id of the LLM connector the step resolved to, when reported by the model.'),
 });
 
 export const WorkflowExecutionContextSchema = z.object({
