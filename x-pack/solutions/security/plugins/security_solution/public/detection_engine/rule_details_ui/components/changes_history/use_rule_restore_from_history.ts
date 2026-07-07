@@ -118,7 +118,7 @@ export function useRuleRestoreFromHistory({
             isConflictRetry: wasRestoringAnyway,
           });
         } else {
-          addError(new Error(i18n.RESTORE_ERROR_MESSAGE), { title: i18n.RESTORE_ERROR_TOAST });
+          addError(error, { title: i18n.RESTORE_ERROR_TOAST });
           telemetry.reportEvent(RuleChangesHistoryEventTypes.ChangesHistoryRestoreTriggered, {
             status: 'error',
             ruleType,
