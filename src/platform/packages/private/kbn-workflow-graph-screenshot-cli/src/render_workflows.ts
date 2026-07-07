@@ -256,9 +256,9 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
     const ok = results.filter((r) => r.status === 'ok').length;
     const failed = results.filter((r) => r.status === 'error').length;
     log.info(
-      `Done. ${ok} PNG(s) written ${outputInPlace ? 'alongside their YAML files' : `to ${outputDir}`}${
-        failed > 0 ? `, ${failed} error(s) — check manifest.json` : ''
-      }`
+      `Done. ${ok} PNG(s) written ${
+        outputInPlace ? 'alongside their YAML files' : `to ${outputDir}`
+      }${failed > 0 ? `, ${failed} error(s) — check manifest.json` : ''}`
     );
 
     if (serve) {
