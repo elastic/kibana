@@ -12,9 +12,9 @@ import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+  WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
-  WORKFLOWS_VERSIONING_SETTING_ID,
 } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../common';
@@ -92,20 +92,18 @@ export const registerUISettings = (
   });
 
   uiSettings.registerGlobal({
-    [WORKFLOWS_VERSIONING_SETTING_ID]: {
-      name: i18n.translate('workflowsManagement.uiSettings.changeHistory.name', {
-        defaultMessage: 'Workflow version history',
+    [WORKFLOWS_LIBRARY_ENABLED_SETTING_ID]: {
+      name: i18n.translate('workflowsManagement.uiSettings.libraryEnabled.name', {
+        defaultMessage: 'Workflow Template Library',
       }),
-      description: i18n.translate('workflowsManagement.uiSettings.changeHistory.description', {
-        defaultMessage:
-          'Internal gate for workflow version history (change-history writes and read routes).',
+      description: i18n.translate('workflowsManagement.uiSettings.libraryEnabled.description', {
+        defaultMessage: 'Enables the Workflow Template Library.',
       }),
       schema: schema.boolean(),
       value: false,
       readonly: true,
       readonlyMode: 'ui',
       requiresPageReload: true,
-      scope: 'global',
     },
   });
 };
