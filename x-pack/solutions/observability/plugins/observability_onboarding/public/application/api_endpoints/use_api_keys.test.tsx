@@ -18,9 +18,15 @@ jest.mock('../../services/rest/create_call_api', () => ({
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockCallApi = callObservabilityOnboardingApi as jest.Mock;
-
 const addSuccess = jest.fn();
 const addError = jest.fn();
+
+const createKeyResponse = {
+  encodedApiKey: 'encoded-key',
+  apiKeyId: 'key-1',
+  verificationId: 'obs-onb-1',
+  detectionActive: true,
+};
 
 describe('useApiKeys', () => {
   beforeEach(() => {
@@ -30,29 +36,86 @@ describe('useApiKeys', () => {
     });
   });
 
-  it('stores the key and shows a single success toast on success', async () => {
-    mockCallApi.mockResolvedValue({ encodedApiKey: 'encoded-key' });
+  it('stores full verification state and shows one success toast', async () => {
+    mockCallApi.mockResolvedValue(createKeyResponse);
 
     const { result } = renderHook(() => useApiKeys());
     await act(async () => {
       await result.current.createApiKey(ApiEndpointId.Elasticsearch);
     });
 
-    expect(result.current.encodedApiKeys[ApiEndpointId.Elasticsearch]).toBe('encoded-key');
+    expect(result.current.keys[ApiEndpointId.Elasticsearch]).toEqual({
+      encodedApiKey: 'encoded-key',
+      apiKeyId: 'key-1',
+      verificationId: 'obs-onb-1',
+      status: 'waiting',
+      detectionActive: true,
+    });
     expect(addSuccess).toHaveBeenCalledTimes(1);
     expect(addError).not.toHaveBeenCalled();
   });
 
-  it('shows the error toast and no success toast when creation fails', async () => {
-    mockCallApi.mockRejectedValue(new Error('boom'));
+  it('setVerification updates the status of an existing key', async () => {
+    mockCallApi.mockResolvedValue(createKeyResponse);
 
     const { result } = renderHook(() => useApiKeys());
     await act(async () => {
       await result.current.createApiKey(ApiEndpointId.Elasticsearch);
     });
+    act(() => {
+      result.current.setVerification(ApiEndpointId.Elasticsearch, { status: 'accepted' });
+    });
 
+    expect(result.current.keys[ApiEndpointId.Elasticsearch]?.status).toBe('accepted');
+  });
+
+  it('setVerification preserves existing key fields while updating status', async () => {
+    mockCallApi.mockResolvedValue(createKeyResponse);
+
+    const { result } = renderHook(() => useApiKeys());
+    await act(async () => {
+      await result.current.createApiKey(ApiEndpointId.Elasticsearch);
+    });
+    act(() => {
+      result.current.setVerification(ApiEndpointId.Elasticsearch, { status: 'expired' });
+    });
+
+    expect(result.current.keys[ApiEndpointId.Elasticsearch]).toEqual({
+      encodedApiKey: 'encoded-key',
+      apiKeyId: 'key-1',
+      verificationId: 'obs-onb-1',
+      status: 'expired',
+      detectionActive: true,
+    });
+  });
+
+  it('setVerification for an endpoint with no existing key leaves keys unchanged', () => {
+    const { result } = renderHook(() => useApiKeys());
+
+    act(() => {
+      result.current.setVerification(ApiEndpointId.Elasticsearch, { status: 'accepted' });
+    });
+
+    expect(result.current.keys).toEqual({});
+  });
+
+  it('shows the error toast when creation fails', async () => {
+    mockCallApi.mockRejectedValue(new Error('boom'));
+    const { result } = renderHook(() => useApiKeys());
+    await act(async () => {
+      await result.current.createApiKey(ApiEndpointId.Elasticsearch);
+    });
     expect(addError).toHaveBeenCalledTimes(1);
     expect(addSuccess).not.toHaveBeenCalled();
-    expect(result.current.encodedApiKeys[ApiEndpointId.Elasticsearch]).toBeUndefined();
+    expect(result.current.keys[ApiEndpointId.Elasticsearch]).toBeUndefined();
+  });
+
+  it('keeps setVerification callback identity stable across rerender', () => {
+    const { result, rerender } = renderHook(() => useApiKeys());
+    const initialSetVerification = result.current.setVerification;
+
+    rerender();
+
+    expect(result.current.setVerification).toBe(initialSetVerification);
   });
 });

@@ -11,9 +11,11 @@ import type {
   KibanaResponseFactory,
   Logger,
 } from '@kbn/core/server';
+import type { DefaultRouteCreateOptions } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
 import type { ObservabilityOnboardingServerRouteRepository } from '.';
 import type { EsLegacyConfigService } from '../services/es_legacy_config_service';
+import type { VerificationStore } from '../lib/api_endpoints/verification_store';
 import type {
   ObservabilityOnboardingPluginSetupDependencies,
   ObservabilityOnboardingPluginStartDependencies,
@@ -42,12 +44,11 @@ export interface ObservabilityOnboardingRouteHandlerResources {
   kibanaVersion: string;
   services: {
     esLegacyConfigService: EsLegacyConfigService;
+    verificationStore: VerificationStore;
   };
 }
 
-export interface ObservabilityOnboardingRouteCreateOptions {
-  xsrfRequired?: boolean;
-}
+export type ObservabilityOnboardingRouteCreateOptions = DefaultRouteCreateOptions;
 
 export const IntegrationRT = t.intersection([
   t.type({

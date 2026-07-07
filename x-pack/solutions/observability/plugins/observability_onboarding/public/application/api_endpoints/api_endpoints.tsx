@@ -30,6 +30,8 @@ import { ApiKeyField } from './api_key_field';
 import { EndpointField } from './endpoint_field';
 import { useApiEndpoints } from './use_api_endpoints';
 import { useApiKeys } from './use_api_keys';
+import { useVerificationPolling } from './use_verification_polling';
+import { VerificationStatus } from './verification_status';
 
 const LEARN_MORE_LINK = 'https://ela.st/connect-deployment-endpoints';
 
@@ -43,7 +45,7 @@ export const ApiEndpoints = () => {
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const { endpoints, isLoading, isError } = useApiEndpoints();
-  const { encodedApiKeys, creatingEndpointId, createApiKey } = useApiKeys();
+  const { keys, creatingEndpointId, createApiKey, setVerification } = useApiKeys();
   const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string | undefined>(undefined);
   const [apiKeysManagementUrl, setApiKeysManagementUrl] = useState<string | undefined>(undefined);
@@ -53,12 +55,21 @@ export const ApiEndpoints = () => {
     locator?.getUrl({ sectionId: 'security', appId: 'api_keys' }).then(setApiKeysManagementUrl);
   }, [share.url.locators]);
 
+  const selectedEndpoint =
+    endpoints.find((endpoint) => endpoint.id === selectedEndpointId) ?? endpoints[0];
+  const selectedKey = selectedEndpoint ? keys[selectedEndpoint.id] : undefined;
+
+  useVerificationPolling({
+    endpointId: selectedEndpoint?.id ?? endpoints[0]?.id,
+    verificationId: selectedKey?.verificationId,
+    status: selectedKey?.status,
+    endpointLabel: selectedEndpoint?.label ?? '',
+    onStatus: setVerification,
+  });
+
   if (endpoints.length === 0) {
     return null;
   }
-
-  const selectedEndpoint =
-    endpoints.find((endpoint) => endpoint.id === selectedEndpointId) ?? endpoints[0];
 
   const openInApiKeysLabel = i18n.translate(
     'xpack.observability_onboarding.apiEndpoints.openInApiKeys',
@@ -159,13 +170,23 @@ export const ApiEndpoints = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <ApiKeyField
-                encodedApiKey={encodedApiKeys[selectedEndpoint.id]}
+                encodedApiKey={selectedKey?.encodedApiKey}
                 isCreating={creatingEndpointId === selectedEndpoint.id}
                 canCreate={canCreateApiKey}
                 onCreate={() => createApiKey(selectedEndpoint.id)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          {selectedKey && (
+            <>
+              <EuiSpacer size="m" />
+              <VerificationStatus
+                status={selectedKey.status}
+                detectionActive={selectedKey.detectionActive}
+                endpointLabel={selectedEndpoint.label}
+              />
+            </>
+          )}
           {isMobile && canCreateApiKey && (
             <>
               <EuiSpacer size="m" />
