@@ -41,6 +41,7 @@ import {
   renderMustacheObject,
   renderMustacheString,
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { isNotificationExecutionSource } from '@kbn/actions-plugin/server/lib';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -72,10 +73,18 @@ export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
 };
 
 const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
+const NOTIFICATIONS_REQUESTER_ID = 'notifications';
 
 const NO_RECIPIENTS_ERROR_MESSAGE = i18n.translate(
   'xpack.stackConnectors.email.noRecipientsErrorMessage',
   { defaultMessage: 'At least one entry in [to], [cc], or [bcc] is required' }
+);
+
+const HTML_NOT_ALLOWED_ERROR_MESSAGE = i18n.translate(
+  'xpack.stackConnectors.email.htmlNotAllowedErrorMessage',
+  {
+    defaultMessage: 'HTML email can only be sent when the connector is configured to allow HTML',
+  }
 );
 
 const isNonBlankRecipient = (email: string) => email.trim().length > 0;
@@ -108,6 +117,10 @@ function validateConfig(
   });
   if (invalidEmailsMessage) {
     throw new Error(`[from]: ${invalidEmailsMessage}`);
+  }
+
+  if (config.service === AdditionalEmailServices.ELASTIC_CLOUD && config.allowHtml === true) {
+    throw new Error('[allowHtml]: cannot be true when [service] is "elastic_cloud"');
   }
 
   const { oauthTokenUrl } = config;
@@ -294,6 +307,22 @@ function renderParameterTemplates(
   };
 }
 
+function isTrustedNotificationHtmlSource(
+  source: EmailConnectorTypeExecutorOptions['source']
+): boolean {
+  if (!isNotificationExecutionSource(source)) {
+    return false;
+  }
+
+  return (
+    source.source?.requesterId == null || source.source.requesterId === NOTIFICATIONS_REQUESTER_ID
+  );
+}
+
+function isHtmlAllowedForConnector(config: ConnectorTypeConfigType): boolean {
+  return config.allowHtml === true && config.service !== AdditionalEmailServices.ELASTIC_CLOUD;
+}
+
 // action executor
 
 async function executor(
@@ -342,11 +371,15 @@ async function executor(
   }
 
   if (params.messageHTML != null) {
-    if (execOptions.source?.type !== ActionExecutionSourceType.NOTIFICATION) {
+    if (
+      !isTrustedNotificationHtmlSource(execOptions.source) &&
+      !isHtmlAllowedForConnector(config)
+    ) {
       return {
         status: 'error',
         actionId,
-        message: `HTML email can only be sent via notifications`,
+        message: HTML_NOT_ALLOWED_ERROR_MESSAGE,
+        errorSource: TaskErrorSource.USER,
       };
     }
   }
