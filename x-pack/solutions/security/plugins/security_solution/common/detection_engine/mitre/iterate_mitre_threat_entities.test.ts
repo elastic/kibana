@@ -6,7 +6,10 @@
  */
 
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
-import { iterateMitreThreatEntities, MITRE_ATTACK_FRAMEWORK } from './iterate_mitre_threat_entities';
+import {
+  iterateMitreThreatEntities,
+  MITRE_ATTACK_FRAMEWORK,
+} from './iterate_mitre_threat_entities';
 
 const MITRE_FRAMEWORK = MITRE_ATTACK_FRAMEWORK;
 
