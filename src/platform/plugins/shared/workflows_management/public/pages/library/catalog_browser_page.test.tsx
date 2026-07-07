@@ -11,7 +11,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
 import type { Template } from '@kbn/workflows-library';
-import { LibraryCatalogBrowserPage } from './catalog_browser';
+import { LibraryCatalogBrowserPage } from './catalog_browser_page';
 import { WorkflowsDeepLinks } from '../../deep_links';
 import { createStartServicesMock, type StartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
