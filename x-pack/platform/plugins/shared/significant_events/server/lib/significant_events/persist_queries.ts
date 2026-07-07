@@ -10,8 +10,8 @@ import { normalizeEsqlSafe } from '@kbn/streams-schema';
 import { HIGH_SEVERITY_THRESHOLD } from '@kbn/significant-events-schema';
 import { v4 } from 'uuid';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
-import type { KnowledgeIndicatorClient, KIBulkOperation } from '../ki';
-import { queryFromLink } from '../ki/knowledge_indicator_client/serializers';
+import type { KnowledgeIndicatorClient, KIBulkOperation } from '../knowledge_indicators';
+import { queryFromLink } from '../knowledge_indicators/knowledge_indicator_client/serializers';
 import { canQueryBeRuleBacked } from './alerting/significant_events_alerting_context';
 
 type PersistedQuery = GeneratedSignificantEventQuery & { id: string };

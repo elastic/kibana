@@ -32,11 +32,19 @@ import { Footer } from './footer';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 import { JsonTab } from './tabs/json_tab';
+import { TableTab } from './tabs/table_tab';
 import { NotesDetails } from '../../shared/tools/notes';
 import { useKibana } from '../../../common/lib/kibana';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
+import type { OpenFlyoutLinkProps } from '../../shared/components/open_flyout_link';
+import { OpenFlyoutLink } from '../../shared/components/open_flyout_link';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
+import {
+  HOST_NAME_FIELD_NAME,
+  LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
+} from '../../../timelines/components/timeline/body/renderers/constants';
 import { RemoteDocumentCallout } from './components/remote_document_callout';
 
 const footerStyles = css`
@@ -54,6 +62,7 @@ const headerStyles = css`
 type DocumentFlyoutTabId = 'overview' | 'table' | 'json';
 
 export const OVERVIEW_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutOverviewTab';
+export const TABLE_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutTableTab';
 export const JSON_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutJsonTab';
 
 const OVERVIEW_TAB_LABEL = i18n.translate(
@@ -62,6 +71,9 @@ const OVERVIEW_TAB_LABEL = i18n.translate(
     defaultMessage: 'Overview',
   }
 );
+const TABLE_TAB_LABEL = i18n.translate('xpack.securitySolution.flyout.document.tableTabLabel', {
+  defaultMessage: 'Table',
+});
 const JSON_TAB_LABEL = i18n.translate('xpack.securitySolution.flyout.document.jsonTabLabel', {
   defaultMessage: 'JSON',
 });
@@ -101,6 +113,37 @@ export const DocumentFlyout = memo(
 
     // The Table and JSON tabs are only available in Security Solution, not in Discover.
     const [selectedTabId, setSelectedTabId] = useState<DocumentFlyoutTabId>('overview');
+
+    // The rule flyout is keyed by the rule UUID, but the table/highlighted fields display the rule
+    // name. We resolve the UUID from the document so a click on a rule name opens the right rule.
+    const ruleId = useMemo(
+      () =>
+        (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal
+          ? (getFieldValue(hit, 'kibana.alert.rule.uuid') as string)
+          : (getFieldValue(hit, 'signal.rule.id') as string),
+      [hit]
+    );
+
+    // Opens the relevant system flyout (host, ip, rule) when a supported value is clicked in the
+    // Table tab. Mirrors the Highlighted Fields behavior in the Overview tab.
+    const renderFlyoutLink = useCallback(
+      (props: OpenFlyoutLinkProps) => {
+        // Rule name fields: substitute the rule UUID as the link target (the flyout is keyed by
+        // UUID) while keeping the rule name as the displayed text. When no UUID is available,
+        // render plain text to avoid opening the rule flyout with an invalid id.
+        if (
+          props.field === SIGNAL_RULE_NAME_FIELD_NAME ||
+          props.field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME
+        ) {
+          if (!ruleId) {
+            return <>{props.children}</>;
+          }
+          return <OpenFlyoutLink {...props} value={ruleId} />;
+        }
+        return <OpenFlyoutLink {...props} asParent={props.field === HOST_NAME_FIELD_NAME} />;
+      },
+      [ruleId]
+    );
 
     const onShowNotes = useCallback(() => {
       overlays.openSystemFlyout(
@@ -148,6 +191,13 @@ export const DocumentFlyout = memo(
                   {OVERVIEW_TAB_LABEL}
                 </EuiTab>
                 <EuiTab
+                  isSelected={selectedTabId === 'table'}
+                  onClick={() => setSelectedTabId('table')}
+                  data-test-subj={TABLE_TAB_TEST_ID}
+                >
+                  {TABLE_TAB_LABEL}
+                </EuiTab>
+                <EuiTab
                   isSelected={selectedTabId === 'json'}
                   onClick={() => setSelectedTabId('json')}
                   data-test-subj={JSON_TAB_TEST_ID}
@@ -158,7 +208,13 @@ export const DocumentFlyout = memo(
               <EuiSpacer size="m" />
             </>
           )}
-          {selectedTabId === 'json' ? (
+          {selectedTabId === 'table' ? (
+            <TableTab
+              hit={hit}
+              renderCellActions={renderCellActions}
+              renderFlyoutLink={renderFlyoutLink}
+            />
+          ) : selectedTabId === 'json' ? (
             <JsonTab hit={hit} />
           ) : (
             <OverviewTab

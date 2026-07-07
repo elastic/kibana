@@ -12,7 +12,7 @@ import type {
   StreamQuery,
 } from '@kbn/significant-events-schema';
 import { persistQueries } from './persist_queries';
-import type { KnowledgeIndicatorClient } from '../ki';
+import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
 
 jest.mock('uuid', () => ({ v4: () => 'generated-uuid' }));

@@ -9,7 +9,7 @@ import type { Streams } from '@kbn/streams-schema';
 import type { Feature, StreamQuery } from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
-import type { KnowledgeIndicatorClient } from '../../../lib/ki';
+import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { searchKnowledgeIndicatorsToolHandler } from './handler';
 
 function makeFeature(overrides: Partial<Feature> = {}): Feature {

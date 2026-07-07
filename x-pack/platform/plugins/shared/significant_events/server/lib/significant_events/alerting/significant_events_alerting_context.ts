@@ -11,13 +11,13 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2 } from '@kbn/management-settings-ids';
 import { QUERY_TYPE_STATS, type QueryType } from '@kbn/significant-events-schema';
-import { DualCleanupRulesAdapter } from '../../ki/knowledge_indicator_client/rules/dual_cleanup_rules_adapter';
-import type { IRulesManagementClient } from '../../ki/knowledge_indicator_client/rules/rules_management_client';
-import { RulesAdapterV1 } from '../../ki/knowledge_indicator_client/rules/v1_rules_adapter';
+import { DualCleanupRulesAdapter } from '../../knowledge_indicators/knowledge_indicator_client/rules/dual_cleanup_rules_adapter';
+import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
+import { RulesAdapterV1 } from '../../knowledge_indicators/knowledge_indicator_client/rules/v1_rules_adapter';
 import {
   RulesAdapterV2,
   RulesNotInstalledAdapterV2,
-} from '../../ki/knowledge_indicator_client/rules/v2_rules_adapter';
+} from '../../knowledge_indicators/knowledge_indicator_client/rules/v2_rules_adapter';
 import type { ISignificantEventsAlertsReader } from './alerts_reader';
 import { createAlertsReader } from './alerts_reader';
 

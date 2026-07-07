@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 interface GetKiIdentificationStatusHandlerParams {
   streamName: string;
-  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
+  streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
 }
 
 export async function getKiIdentificationStatusToolHandler({

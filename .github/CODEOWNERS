@@ -2633,6 +2633,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/hubspot/** @elastic/w
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/one_drive/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/outlook/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/workchat-eng
@@ -2651,6 +2652,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/work
 
 # Connector Agent Skills
 src/platform/packages/shared/kbn-connector-specs/.claude/skills @elastic/workchat-eng
+
 
 # Connector Workflow Tests
 src/platform/plugins/shared/workflows_management/test/connector_workflows @elastic/workchat-eng
@@ -3066,6 +3068,8 @@ x-pack/solutions/security/plugins/entity_store @elastic/security-entity-analytic
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/threat_intelligence_paywall.tsx @elastic/security-threat-hunting
 
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/alert_analysis @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/alert_triage @elastic/security-threat-hunting
+/x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/security/alert_triage_skill @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/threat_hunting @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/lib/timeline @elastic/security-threat-hunting
@@ -3119,6 +3123,12 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_alert_tags_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_attack_tags_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_attack_status_step @elastic/security-threat-hunting
+
+# Alert analysis workflow
+src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analysis_workflow.ts @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-threat-hunting
 
 ## Security Threat Hunting owner connectors
 # OpenAI

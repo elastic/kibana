@@ -7,7 +7,7 @@
 
 import type { BaseFeature } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
-import type { KnowledgeIndicatorClient } from '../../../lib/ki';
+import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 
 export async function createFeatureKnowledgeIndicatorToolHandler({
   kiClient,

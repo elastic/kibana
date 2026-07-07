@@ -12,7 +12,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
-import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { classifyError } from '../../utils/error_utils';
 import { startKiIdentificationToolHandler } from './handler';
 
@@ -39,7 +39,7 @@ export const createKiIdentificationStartTool = ({
   streamsKIsOnboardingClient,
 }: {
   telemetry: EbtTelemetryClient;
-  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
+  streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
 }): BuiltinSkillBoundedTool<typeof onboardingStartSchema> => ({
   id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
   type: ToolType.builtin,

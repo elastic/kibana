@@ -9,8 +9,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import { getStreamsLocation } from '@kbn/streams-plugin/common/get_streams_location/get_streams_location';
 import type {
-  StreamsKIsOnboardingClient,
-  StreamsKIsOnboardingInputs,
+  SignificantEventsKIsOnboardingClient,
+  SignificantEventsKIsOnboardingInputs,
 } from '../../../lib/workflows/onboarding_workflow_client';
 
 const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
@@ -22,7 +22,7 @@ interface StartKiIdentificationHandlerParams {
     features?: string;
     queries?: string;
   };
-  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
+  streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   request: KibanaRequest;
 }
 
@@ -41,7 +41,7 @@ export async function startKiIdentificationToolHandler({
   const skipFeatures = !steps.includes(KIsOnboardingStep.FeaturesIdentification);
   const skipQueries = !steps.includes(KIsOnboardingStep.QueriesGeneration);
 
-  const inputs: StreamsKIsOnboardingInputs = {
+  const inputs: SignificantEventsKIsOnboardingInputs = {
     streamName,
     features: {
       skip: skipFeatures,

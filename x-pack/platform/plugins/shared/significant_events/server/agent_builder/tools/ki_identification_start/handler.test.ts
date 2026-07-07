@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { startKiIdentificationToolHandler } from './handler';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
-import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 describe('startKiIdentificationToolHandler', () => {
   const setup = () => {
@@ -23,7 +23,7 @@ describe('startKiIdentificationToolHandler', () => {
       runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
     };
     const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
-    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
+    const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: managementApi as never,
       telemetry,
     });

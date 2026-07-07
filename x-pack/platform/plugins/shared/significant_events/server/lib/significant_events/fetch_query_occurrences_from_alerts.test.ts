@@ -10,7 +10,7 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { SecurityError } from '../errors/security_error';
-import type { KnowledgeIndicatorClient } from '../ki';
+import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import {
   buildQueryOccurrences,
   computeOccurrences,

@@ -12,7 +12,7 @@ import type {
 } from '@kbn/streams-ai';
 import type { Logger } from '@kbn/core/server';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
-import type { KnowledgeIndicatorClient } from '../../../lib/ki';
+import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 
 export async function searchKnowledgeIndicatorsToolHandler({
   streamsClient,

@@ -11,7 +11,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
-import type { StreamsKIsOnboardingClient } from './onboarding_workflow_client';
+import type { SignificantEventsKIsOnboardingClient } from './onboarding_workflow_client';
 import { pollUntil } from './poll_until';
 
 // The managed continuous onboarding workflow is installed and scheduled in the
@@ -45,7 +45,7 @@ export const createContinuousKiOnboardingWorkflowService = ({
 }: {
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
-  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
+  streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
 }): ContinuousKiOnboardingWorkflowService => {
   const log = logger.get('continuous-ki-onboarding-workflow');
 

@@ -7,11 +7,11 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
-import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 interface CancelKiIdentificationHandlerParams {
   streamName: string;
-  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
+  streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   request: KibanaRequest;
 }
 

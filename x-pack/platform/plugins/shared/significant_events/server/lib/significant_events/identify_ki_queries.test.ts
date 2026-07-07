@@ -11,7 +11,7 @@ import type { InferenceClient } from '@kbn/inference-common';
 import type { Streams } from '@kbn/streams-schema';
 import { identifyKIQueries as identifyKIQueriesThroughAgent } from '@kbn/streams-ai';
 import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
-import type { KnowledgeIndicatorClient } from '../ki';
+import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import { identifyKIQueries } from './identify_ki_queries';
 
 jest.mock('@kbn/streams-ai', () => ({

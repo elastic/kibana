@@ -840,8 +840,8 @@ describe('API Keys', () => {
         body: {
           api_key: apiKeyCredentials,
           name: 'cloned-key',
-          expiration: null,
           metadata: { managed: true },
+          expiration: null,
         },
       });
 

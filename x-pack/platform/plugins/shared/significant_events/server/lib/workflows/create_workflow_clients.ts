@@ -6,12 +6,12 @@
  */
 
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { StreamsKIsOnboardingClient } from './onboarding_workflow_client';
+import { SignificantEventsKIsOnboardingClient } from './onboarding_workflow_client';
 import { SignificantEventsDiscoveryClient } from './significant_events_discovery_client';
 import type { EbtTelemetryClient } from '../telemetry/ebt/client';
 
 export interface WorkflowClients {
-  streamsKIsOnboardingClient: StreamsKIsOnboardingClient | undefined;
+  streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient | undefined;
   significantEventsDiscoveryClient: SignificantEventsDiscoveryClient | undefined;
 }
 export const createWorkflowClients = (
@@ -23,7 +23,10 @@ export const createWorkflowClients = (
   }
 
   return {
-    streamsKIsOnboardingClient: new StreamsKIsOnboardingClient({ managementApi, telemetry }),
+    streamsKIsOnboardingClient: new SignificantEventsKIsOnboardingClient({
+      managementApi,
+      telemetry,
+    }),
     significantEventsDiscoveryClient: new SignificantEventsDiscoveryClient({ managementApi }),
   };
 };

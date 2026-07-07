@@ -34,7 +34,7 @@ const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, 
  * These are flattened into {@link OnboardingWorkflowInputPayload} before being
  * handed to the workflow engine, whose manual trigger only accepts flat scalars.
  */
-export interface StreamsKIsOnboardingInputs {
+export interface SignificantEventsKIsOnboardingInputs {
   streamName: string;
   features: {
     skip: boolean;
@@ -60,7 +60,7 @@ export interface StreamsKIsOnboardingInputs {
 /**
  * Flat scalar payload actually passed to the workflow engine's manual trigger,
  * matching the `inputs` keys declared in streams_ki/onboarding.yaml. Nested
- * {@link StreamsKIsOnboardingInputs} are flattened into this shape in `run()`.
+ * {@link SignificantEventsKIsOnboardingInputs} are flattened into this shape in `run()`.
  */
 interface OnboardingWorkflowInputPayload {
   streamName: string;
@@ -84,7 +84,7 @@ interface OnboardingWorkflowInputPayload {
 /**
  * Raw, flat `context.output` emitted by a completed onboarding workflow
  * execution (see the `output_result` step in streams_ki/onboarding.yaml).
- * Mapped into the nested {@link StreamsKIsOnboardingOutput} shape on read.
+ * Mapped into the nested {@link SignificantEventsKIsOnboardingOutput} shape on read.
  */
 interface OnboardingWorkflowOutputContext {
   streamName: string;
@@ -103,13 +103,13 @@ interface OnboardingWorkflowOutputContext {
  * Nested domain representation of a completed onboarding run, grouped by step.
  * Used to extract summary counts for the status response.
  */
-export interface StreamsKIsOnboardingOutput extends KIsOnboardingResult {
+export interface SignificantEventsKIsOnboardingOutput extends KIsOnboardingResult {
   streamName: string;
 }
 
 /** Flattens nested onboarding inputs into the workflow engine's scalar payload. */
 const toWorkflowInputPayload = (
-  inputs: StreamsKIsOnboardingInputs
+  inputs: SignificantEventsKIsOnboardingInputs
 ): OnboardingWorkflowInputPayload => {
   const { streamName, features, queries } = inputs;
   return {
@@ -145,7 +145,7 @@ const toWorkflowInputPayload = (
 /** Maps the raw flat workflow output into the nested onboarding output shape. */
 const parseWorkflowOutput = (
   output: Partial<OnboardingWorkflowOutputContext>
-): StreamsKIsOnboardingOutput => ({
+): SignificantEventsKIsOnboardingOutput => ({
   streamName: output.streamName ?? '',
   features: {
     skipped: output.featuresSkipped === true,
@@ -191,7 +191,7 @@ export const MAX_STREAMS_PER_QUERY = 10000;
  * Each stream's onboarding execution is keyed by a concurrency group derived
  * from the stream name, so at most one onboarding run is active per stream.
  */
-export class StreamsKIsOnboardingClient {
+export class SignificantEventsKIsOnboardingClient {
   private readonly workflowExecutionService: WorkflowExecutionService<OnboardingWorkflowInputPayload>;
   private readonly telemetry: EbtTelemetryClient;
 
@@ -221,7 +221,7 @@ export class StreamsKIsOnboardingClient {
     inputs,
     request,
   }: {
-    inputs: StreamsKIsOnboardingInputs;
+    inputs: SignificantEventsKIsOnboardingInputs;
     request: KibanaRequest;
   }): Promise<{ executionId: string }> {
     const executionId = await this.workflowExecutionService.execute({
@@ -342,15 +342,17 @@ export class StreamsKIsOnboardingClient {
   /**
    * Cancels every non-terminal onboarding execution across all streams.
    * Used during teardown of the continuous KI onboarding workflow.
+   *
+   * @returns The number of executions that were canceled.
    */
-  async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<void> {
+  async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<number> {
     const { results } = await this.workflowExecutionService.getExecutions(
       { statuses: [...NonTerminalExecutionStatuses], size: MAX_STREAMS_PER_QUERY },
       ONBOARDING_EXECUTIONS_SPACE_ID
     );
 
     if (results.length === 0) {
-      return;
+      return 0;
     }
 
     await Promise.all(
@@ -362,6 +364,8 @@ export class StreamsKIsOnboardingClient {
         })
       )
     );
+
+    return results.length;
   }
 
   /**

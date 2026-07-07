@@ -14,7 +14,7 @@ import {
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
-  StreamsKIsOnboardingClient,
+  SignificantEventsKIsOnboardingClient,
   buildConcurrencyKey,
   parseStreamNameFromConcurrencyKey,
 } from './onboarding_workflow_client';
@@ -36,7 +36,7 @@ const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => (
 const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
   const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
-  const client = new StreamsKIsOnboardingClient({
+  const client = new SignificantEventsKIsOnboardingClient({
     managementApi: managementApi as never,
     telemetry,
   });
@@ -468,7 +468,7 @@ describe('StreamsKIsOnboardingClient', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      await client.cancelAllRunning({ request });
+      await expect(client.cancelAllRunning({ request })).resolves.toBe(2);
 
       expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledTimes(2);
       expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
@@ -484,12 +484,10 @@ describe('StreamsKIsOnboardingClient', () => {
     });
 
     it('does nothing when no running executions exist', async () => {
-      const { client, managementApi } = createClient();
+      const { client } = createClient();
       const request = httpServerMock.createKibanaRequest();
 
-      await client.cancelAllRunning({ request });
-
-      expect(managementApi.cancelWorkflowExecution).not.toHaveBeenCalled();
+      await expect(client.cancelAllRunning({ request })).resolves.toBe(0);
     });
   });
 

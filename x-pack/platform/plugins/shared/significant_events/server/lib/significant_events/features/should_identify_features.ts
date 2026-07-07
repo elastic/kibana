@@ -6,7 +6,7 @@
  */
 
 import { COMPUTED_FEATURE_TYPES, INFERRED_FEATURE_TYPES } from '@kbn/significant-events-schema';
-import type { KnowledgeIndicatorClient } from '../../ki';
+import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 
 export interface ShouldIdentifyFeaturesResult {
   shouldIdentify: boolean;

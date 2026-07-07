@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
-import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { cancelKiIdentificationToolHandler } from './handler';
 
 describe('cancelKiIdentificationToolHandler', () => {
@@ -20,7 +20,7 @@ describe('cancelKiIdentificationToolHandler', () => {
       cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
     };
     const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
-    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
+    const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: managementApi as never,
       telemetry,
     });
@@ -50,7 +50,7 @@ describe('cancelKiIdentificationToolHandler', () => {
       cancelWorkflowExecution: jest.fn(),
     };
     const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
-    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
+    const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: managementApi as never,
       telemetry,
     });

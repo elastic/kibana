@@ -10,7 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
-import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
+import type { SignificantEventsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
 import { MemoryServiceImpl } from '../lib/memory';
 import type { MemoryToolsOptions } from './tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
@@ -58,7 +58,7 @@ export const registerStreamsAgentBuilder = async ({
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-  streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
+  streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   investigationEnabled?: boolean;
 }): Promise<void> => {
   const memoryToolsOptions = createMemoryToolsOptions({ getScopedClients, server, logger });

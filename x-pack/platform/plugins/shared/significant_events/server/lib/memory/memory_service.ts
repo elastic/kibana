@@ -19,7 +19,7 @@ import { createMemoryHistoryStorage } from './history_storage';
 import { memoriesDataStream, type memoriesMappings, type StoredMemoryPage } from './data_stream';
 import { MEMORIES_DATA_STREAM } from '../../../common/constants';
 import { resolveSearchMode, type SearchMode } from '../../../common/queries';
-import { bulkCreateWithInferenceFallback } from '../ki/knowledge_indicator_client/bulk_with_inference_fallback';
+import { bulkCreateWithInferenceFallback } from '../knowledge_indicators/knowledge_indicator_client/bulk_with_inference_fallback';
 import type {
   MemoryEntry,
   MemoryVersionRecord,

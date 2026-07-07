@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import dedent from 'dedent';
-import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { classifyError } from '../../utils/error_utils';
 import { getKiIdentificationStatusToolHandler } from './handler';
 
@@ -24,7 +24,7 @@ const onboardingStatusSchema = z.object({
 export const createKiIdentificationStatusTool = ({
   streamsKIsOnboardingClient,
 }: {
-  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
+  streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
 }): BuiltinSkillBoundedTool<typeof onboardingStatusSchema> => ({
   id: SIGNIFICANT_EVENTS_KI_IDENTIFICATION_STATUS_TOOL_ID,
   type: ToolType.builtin,

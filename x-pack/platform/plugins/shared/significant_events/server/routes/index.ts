@@ -19,6 +19,7 @@ import { internalKIKeepAliveRoutes } from './internal/knowledge_indicators/keep_
 import { internalKIOnboardingRoutes } from './internal/knowledge_indicators/onboarding/route';
 import { internalKIQueriesRoutes } from './internal/knowledge_indicators/queries/route';
 import { internalKIQueryOccurrencesRoutes } from './internal/knowledge_indicators/query_occurrences/route';
+import { internalKIResetKisRoutes } from './internal/knowledge_indicators/reset_kis/route';
 import { internalMemoryRoutes } from './internal/memory/route';
 import { internalPromptsRoutes } from './internal/prompts/route';
 import { queryRoutes } from './queries/route';
@@ -39,6 +40,7 @@ export const significantEventsRouteRepository = {
   ...internalKIOnboardingRoutes,
   ...internalKIQueriesRoutes,
   ...internalKIQueryOccurrencesRoutes,
+  ...internalKIResetKisRoutes,
   ...internalMemoryRoutes,
   ...internalPromptsRoutes,
   // public APIs

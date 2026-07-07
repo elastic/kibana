@@ -14,7 +14,7 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
 import type { AttachmentClient } from '@kbn/streams-plugin/server';
-import type { KnowledgeIndicatorClient } from '../../lib/ki';
+import type { KnowledgeIndicatorClient } from '../../lib/knowledge_indicators';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
 
 /**

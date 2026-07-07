@@ -7,7 +7,7 @@
 
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
-import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationStatusTool } from './tool';
 import { createMockToolContext } from '../../utils/test_helpers';
 
@@ -38,7 +38,7 @@ describe('createKiIdentificationStatusTool', () => {
         },
       }),
     };
-    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
+    const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: managementApi as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
     });

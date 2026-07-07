@@ -27,7 +27,7 @@ import { PromptsConfigService } from '@kbn/streams-plugin/server';
 import { isSignificantEventsMemoryEnabled } from '../memory/is_significant_events_memory_enabled';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
-import type { KnowledgeIndicatorClient } from '../ki';
+import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import type { EbtTelemetryClient } from '../telemetry';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { formatInferenceProviderError } from '../../routes/utils/create_connector_sse_error';

@@ -19,7 +19,7 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import {
   MAX_STREAMS_PER_QUERY,
-  type StreamsKIsOnboardingInputs,
+  type SignificantEventsKIsOnboardingInputs,
 } from '../../../../lib/workflows/onboarding_workflow_client';
 
 const timestampFromString = z.string().transform((input) => new Date(input).getTime());
@@ -104,7 +104,7 @@ export const onboardingExecuteRoute = createServerRoute({
     if (body.action === 'schedule') {
       const { skipFeatures, skipQueries } = mapStepsToSkipFlags(body.steps);
 
-      const inputs: StreamsKIsOnboardingInputs = {
+      const inputs: SignificantEventsKIsOnboardingInputs = {
         streamName,
         features: {
           skip: skipFeatures,

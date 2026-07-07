@@ -6,12 +6,12 @@
  */
 
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
-import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { getKiIdentificationStatusToolHandler } from './handler';
 
 describe('getKiIdentificationStatusToolHandler', () => {
   it('returns stream_name alongside the onboarding status', async () => {
-    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
+    const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: {
         getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),
         getWorkflowExecution: jest.fn().mockResolvedValue(null),

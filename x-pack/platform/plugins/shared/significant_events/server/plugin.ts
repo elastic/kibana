@@ -40,7 +40,7 @@ import {
   type KnowledgeIndicatorClient,
   KnowledgeIndicatorService,
   initializeKnowledgeIndicatorsTemplate,
-} from './lib/ki';
+} from './lib/knowledge_indicators';
 import {
   createSignificantEventsClients,
   createSignificantEventsServices,

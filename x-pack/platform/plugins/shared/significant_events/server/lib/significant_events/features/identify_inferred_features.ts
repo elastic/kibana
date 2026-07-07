@@ -30,7 +30,7 @@ import {
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 import { PromptsConfigService } from '@kbn/streams-plugin/server';
-import type { KnowledgeIndicatorClient } from '../../ki';
+import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
 import {

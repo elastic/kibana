@@ -18,7 +18,7 @@ import {
 import { identifyKIQueries as identifyKIQueriesThroughAgent } from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
-import type { KnowledgeIndicatorClient } from '../ki';
+import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import type { MemoryDiscoveryTools } from './memory_discovery_tools';
 import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 

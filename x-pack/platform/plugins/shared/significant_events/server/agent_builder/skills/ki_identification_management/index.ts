@@ -7,7 +7,7 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
-import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationCancelTool } from '../../tools/ki_identification_cancel/tool';
 import { createKiIdentificationStartTool } from '../../tools/ki_identification_start/tool';
 import { createKiIdentificationStatusTool } from '../../tools/ki_identification_status/tool';
@@ -19,7 +19,7 @@ export const createKiIdentificationManagementSkill = ({
   streamsKIsOnboardingClient,
 }: {
   telemetry: EbtTelemetryClient;
-  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
+  streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
 }) =>
   defineSkillType({
     id: 'ki-identification-management',

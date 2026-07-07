@@ -6,7 +6,7 @@
  */
 
 import { COMPUTED_FEATURE_TYPES, INFERRED_FEATURE_TYPES } from '@kbn/significant-events-schema';
-import type { KnowledgeIndicatorClient } from '../../ki';
+import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { shouldIdentifyFeatures } from './should_identify_features';
 
 type Timestamp = { '@timestamp': string } | null;
