@@ -27,7 +27,8 @@ import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../c
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { isEqualState } from '../../utils/state_comparators';
-import { getProfileUrlState, ProfileUrlState } from '../../utils/profile_state_url';
+import type { ProfileUrlState } from '../../utils/profile_state_url';
+import { getProfileUrlState } from '../../utils/profile_state_url';
 import {
   internalStateSlice,
   type InternalStateThunkActionCreator,
