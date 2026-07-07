@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
+  EuiCallOut,
   EuiFormRow,
   EuiModal,
   EuiModalBody,
@@ -18,6 +19,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSkeletonRectangle,
+  EuiSpacer,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -26,8 +28,7 @@ import type { CaseUI } from '../../../common';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetTemplates } from '../templates_v2/hooks/use_get_templates';
 import { useGetTemplate } from '../templates_v2/hooks/use_get_template';
-import { useApplyTemplateConnectorGuard } from '../case_view/use_apply_template_connector_guard';
-import { TemplateConnectorChangeModal } from '../case_view/template_connector_change_modal';
+import { useChangeAppliedTemplate } from '../case_view/use_change_applied_template';
 import * as i18n from '../../common/translations';
 
 interface ApplyTemplateModalProps {
@@ -65,14 +66,7 @@ export const ApplyTemplateModal: FC<ApplyTemplateModalProps> = ({ caseData, onCl
     selectedTemplateId || undefined
   );
 
-  const {
-    applyTemplate,
-    pendingConnectorChange,
-    confirmConnectorChange,
-    cancelConnectorChange,
-    isInitializing,
-    isApplying,
-  } = useApplyTemplateConnectorGuard({ caseData });
+  const { mutate: changeAppliedTemplate, isLoading: isApplying } = useChangeAppliedTemplate();
 
   const onChange = useCallback((selected: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedTemplateId(selected[0]?.value ?? '');
@@ -81,37 +75,22 @@ export const ApplyTemplateModal: FC<ApplyTemplateModalProps> = ({ caseData, onCl
   const onApply = useCallback(() => {
     if (!selectedTemplateId || !selectedTemplateData) return;
 
-    applyTemplate(
+    changeAppliedTemplate(
       {
-        id: selectedTemplateData.templateId,
-        version: selectedTemplateData.templateVersion,
-        fields: selectedTemplateData.definition.fields,
-        connector: selectedTemplateData.definition.connector,
-        settings: selectedTemplateData.definition.settings,
+        caseData,
+        newTemplate: {
+          id: selectedTemplateData.templateId,
+          version: selectedTemplateData.templateVersion,
+          fields: selectedTemplateData.definition.fields,
+          settings: selectedTemplateData.definition.settings,
+        },
       },
       { onSuccess: onClose }
     );
-  }, [selectedTemplateId, selectedTemplateData, applyTemplate, onClose]);
+  }, [selectedTemplateId, selectedTemplateData, changeAppliedTemplate, caseData, onClose]);
 
-  // `isInitializing` gates on connectors + push history loading so the connector guard can make a
-  // safe decision; applying before they load could silently drop the connector.
   const isApplyDisabled =
-    !selectedTemplateId ||
-    isFetchingDefinition ||
-    !selectedTemplateData ||
-    isInitializing ||
-    isApplying;
-
-  if (pendingConnectorChange) {
-    return (
-      <TemplateConnectorChangeModal
-        pendingChange={pendingConnectorChange}
-        onConfirm={confirmConnectorChange}
-        onCancel={cancelConnectorChange}
-        isApplying={isApplying}
-      />
-    );
-  }
+    !selectedTemplateId || isFetchingDefinition || !selectedTemplateData || isApplying;
 
   return (
     <EuiModal onClose={onClose} aria-labelledby={titleId} data-test-subj="apply-template-modal">
@@ -135,6 +114,13 @@ export const ApplyTemplateModal: FC<ApplyTemplateModalProps> = ({ caseData, onCl
             />
           )}
         </EuiFormRow>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          size="s"
+          iconType="info"
+          title={i18n.APPLY_TEMPLATE_MODAL_CONNECTOR_NOTICE}
+          data-test-subj="apply-template-modal-connector-notice"
+        />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose} data-test-subj="apply-template-modal-cancel">

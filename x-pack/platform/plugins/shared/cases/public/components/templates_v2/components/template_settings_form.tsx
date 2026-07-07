@@ -28,6 +28,11 @@ export interface TemplateSettingsFormProps {
   connector?: CaseConnectorWithoutName;
   onSettingsChange: (settings: TemplateSettings) => void;
   onConnectorChange: (connector: CaseConnectorWithoutName) => void;
+  /**
+   * Bumped by the parent on Reset. Used as part of the connector form's `key` so it remounts and
+   * re-seeds from the reverted connector (its inner form only reads `defaultValue` at mount).
+   */
+  formResetKey?: number;
 }
 
 export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
@@ -35,6 +40,7 @@ export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
   connector,
   onSettingsChange,
   onConnectorChange,
+  formResetKey = 0,
 }) => {
   // Alert syncing is not a feature in every solution (e.g. Observability disables it), so the toggle
   // is hidden there — mirroring the create-case form and case settings popover.
@@ -90,7 +96,11 @@ export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      <TemplateConnectorForm connector={connector} onChange={onConnectorChange} />
+      <TemplateConnectorForm
+        key={`template-connector-form-${formResetKey}`}
+        connector={connector}
+        onChange={onConnectorChange}
+      />
     </EuiForm>
   );
 };

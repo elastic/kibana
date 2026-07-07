@@ -14,30 +14,20 @@ import { CaseSettingsPopover } from './case_settings_popover';
 import { renderWithTestingProviders } from '../../../../common/mock';
 import { basicCase } from '../../../../containers/mock';
 import { useGetTemplates } from '../../../templates_v2/hooks/use_get_templates';
-import { useApplyTemplateConnectorGuard } from '../../../case_view/use_apply_template_connector_guard';
+import { useChangeAppliedTemplate } from '../../../case_view/use_change_applied_template';
 import { useGetTemplate } from '../../../templates_v2/hooks/use_get_template';
 import { KibanaServices } from '../../../../common/lib/kibana';
 
 jest.mock('../../../templates_v2/hooks/use_get_templates');
-jest.mock('../../../case_view/use_apply_template_connector_guard');
+jest.mock('../../../case_view/use_change_applied_template');
 jest.mock('../../../templates_v2/hooks/use_get_template');
 jest.mock('../../../../common/lib/kibana');
-
-const buildGuardReturn = (overrides = {}) => ({
-  applyTemplate: jest.fn(),
-  pendingConnectorChange: null,
-  confirmConnectorChange: jest.fn(),
-  cancelConnectorChange: jest.fn(),
-  isInitializing: false,
-  isApplying: false,
-  ...overrides,
-});
 
 (useGetTemplates as jest.Mock).mockReturnValue({
   data: { templates: [] },
   isLoading: false,
 });
-(useApplyTemplateConnectorGuard as jest.Mock).mockReturnValue(buildGuardReturn());
+(useChangeAppliedTemplate as jest.Mock).mockReturnValue({ mutate: jest.fn(), isLoading: false });
 (useGetTemplate as jest.Mock).mockReturnValue({ data: null });
 
 describe('CaseSettingsPopover', () => {
@@ -64,7 +54,7 @@ describe('CaseSettingsPopover', () => {
       data: { templates: [] },
       isLoading: false,
     });
-    (useApplyTemplateConnectorGuard as jest.Mock).mockReturnValue(buildGuardReturn());
+    (useChangeAppliedTemplate as jest.Mock).mockReturnValue({ mutate: jest.fn(), isLoading: false });
     (useGetTemplate as jest.Mock).mockReturnValue({ data: null });
   });
 
@@ -152,12 +142,13 @@ describe('CaseSettingsPopover', () => {
   });
 
   it('does not apply a template when the case already has the selected template applied', async () => {
-    const applyTemplateMock = jest.fn();
+    const changeAppliedTemplateMock = jest.fn();
     const templateId = 'template-1';
 
-    (useApplyTemplateConnectorGuard as jest.Mock).mockReturnValue(
-      buildGuardReturn({ applyTemplate: applyTemplateMock })
-    );
+    (useChangeAppliedTemplate as jest.Mock).mockReturnValue({
+      mutate: changeAppliedTemplateMock,
+      isLoading: false,
+    });
     (useGetTemplate as jest.Mock).mockReturnValue({
       data: { templateId, templateVersion: 1, definition: { fields: [] } },
     });
@@ -173,22 +164,7 @@ describe('CaseSettingsPopover', () => {
 
     await screen.findByTestId('case-settings-popover');
 
-    expect(applyTemplateMock).not.toHaveBeenCalled();
-  });
-
-  it('renders the connector-change confirmation modal when a change is pending', async () => {
-    (useApplyTemplateConnectorGuard as jest.Mock).mockReturnValue(
-      buildGuardReturn({
-        pendingConnectorChange: {
-          currentConnectorName: 'My SN connector',
-          nextConnectorName: 'My Jira',
-        },
-      })
-    );
-
-    renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />);
-
-    expect(await screen.findByTestId('template-connector-change-modal')).toBeInTheDocument();
+    expect(changeAppliedTemplateMock).not.toHaveBeenCalled();
   });
 
   it('does not render edit case name link', async () => {

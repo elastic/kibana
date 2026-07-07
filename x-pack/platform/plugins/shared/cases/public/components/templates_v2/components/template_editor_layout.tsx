@@ -36,6 +36,7 @@ interface TemplateEditorLayoutProps {
   connector?: CaseConnectorWithoutName;
   onSettingsChange: (settings: TemplateSettings) => void;
   onConnectorChange: (connector: CaseConnectorWithoutName) => void;
+  formResetKey?: number;
 }
 
 export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
@@ -52,6 +53,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   connector,
   onSettingsChange,
   onConnectorChange,
+  formResetKey,
 }) => {
   const styles = useMemoCss(componentStyles);
 
@@ -86,6 +88,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
             onSettingsChange={onSettingsChange}
             onConnectorChange={onConnectorChange}
             onFieldDefaultChange={onFieldDefaultChange}
+            formResetKey={formResetKey}
           />
         </div>
       }

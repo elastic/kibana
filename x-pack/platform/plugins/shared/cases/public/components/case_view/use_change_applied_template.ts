@@ -8,82 +8,39 @@
 import { useMutation } from '@kbn/react-query';
 import type { z } from '@kbn/zod/v4';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
-import type {
-  CaseConnector,
-  CaseSettings,
-  ConnectorTypeFields,
-} from '../../../common/types/domain';
-import { ConnectorTypes } from '../../../common/types/domain';
-import type { CaseConnectorWithoutName } from '../../../common/types/domain_zod/connector/v1';
+import type { CaseSettings } from '../../../common/types/domain';
 import type { TemplateSettings } from '../../../common/types/domain/template/v1';
 import type { CaseUI } from '../../../common';
-import { getNoneConnector } from '../../../common/utils/connectors';
 import type { FieldSchema } from '../../../common/types/domain/template/fields';
 import { isInlineField } from '../../../common/types/domain/template/fields';
 import { patchCase } from '../../containers/api';
 import { casesMutationsKeys } from '../../containers/constants';
 import { useCasesToast } from '../../common/use_cases_toast';
-import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import type { ServerError } from '../../types';
-import type { CaseActionConnector } from '../types';
 import { getFieldCamelKey, getFieldSnakeKey } from '../../../common/utils';
-import { getConnectorById } from '../utils';
-import { normalizeActionConnector } from '../configure_cases/utils';
 import { getYamlDefaultAsString } from '../templates_v2/utils';
-import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import * as i18n from './translations';
 
 type Field = z.infer<typeof FieldSchema>;
 
 /**
- * A template's raw definition values as passed to {@link useChangeAppliedTemplate}. `connector` /
- * `settings` are unresolved (the hook resolves the connector and applies create-flow defaults).
- * `null` removes the applied template.
+ * A template's raw definition values as passed to {@link useChangeAppliedTemplate}. `settings` is
+ * applied to the case; the case's connector is intentionally left untouched (applying a template
+ * never changes an existing case's connector — see the apply-template modal notice). `null` removes
+ * the applied template.
  */
 export type NewAppliedTemplate = {
   id: string;
   version: number;
   fields: Field[];
-  connector?: CaseConnectorWithoutName;
   settings?: TemplateSettings;
 } | null;
 
 interface ChangeAppliedTemplateArgs {
   caseData: CaseUI;
-  /**
-   * Pass null to remove the applied template. `connector` / `settings` are the template's raw
-   * definition values; the hook resolves the connector and applies the same defaults as create.
-   */
+  /** Pass null to remove the applied template. `settings` are the template's raw definition values. */
   newTemplate: NewAppliedTemplate;
-  /**
-   * When provided, this fully-resolved connector is written to the case instead of the one resolved
-   * from `newTemplate.connector`. Callers use it to retain the case's existing connector after the
-   * user declines a connector change on an already-pushed case (see the connector-change guard).
-   */
-  connectorOverride?: CaseConnector;
 }
-
-/**
- * Resolves a template's default connector (`type` + `id` + raw `fields`) into a full case connector.
- * Falls back to `.none` when the template declares no connector or its `id` no longer resolves to a
- * connector of the same type (deleted / unauthorized / other space), mirroring the create flow.
- */
-export const resolveTemplateConnector = (
-  connector: CaseConnectorWithoutName | undefined,
-  connectors: CaseActionConnector[]
-): CaseConnector => {
-  if (!connector || connector.type === ConnectorTypes.none) {
-    return getNoneConnector();
-  }
-  const actionConnector = getConnectorById(connector.id, connectors);
-  if (!actionConnector || actionConnector.actionTypeId !== connector.type) {
-    return getNoneConnector();
-  }
-  return normalizeActionConnector(
-    actionConnector,
-    (connector.fields ?? null) as ConnectorTypeFields['fields']
-  );
-};
 
 /**
  * A template is authoritative for the case's settings: keys it declares are applied and keys it
@@ -115,14 +72,10 @@ export const computeNewExtendedFields = (
 };
 
 export const useChangeAppliedTemplate = () => {
-  const { showErrorToast, showSuccessToast } = useCasesToast();
-  const refreshCaseViewPage = useRefreshCaseViewPage();
-  // Needed to resolve a template's default connector `id` to a full case connector (and fall back to
-  // `.none` when it no longer exists). The case view already loads these, so the cache is warm.
-  const { data: connectors = [] } = useGetSupportedActionConnectors();
+  const { showErrorToast } = useCasesToast();
 
   return useMutation(
-    ({ caseData, newTemplate, connectorOverride }: ChangeAppliedTemplateArgs) => {
+    ({ caseData, newTemplate }: ChangeAppliedTemplateArgs) => {
       const newExtendedFields = newTemplate
         ? computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {})
         : {};
@@ -131,11 +84,9 @@ export const useChangeAppliedTemplate = () => {
         updatedCase: {
           template: newTemplate ? { id: newTemplate.id, version: newTemplate.version } : null,
           [CASE_EXTENDED_FIELDS]: newExtendedFields,
-          // The applied template owns the connector and settings; a template that declares neither
-          // (or removing the template) resets them to `.none` / off so the case matches the template.
-          // `connectorOverride` wins when the caller chose to retain the case's existing connector.
-          connector:
-            connectorOverride ?? resolveTemplateConnector(newTemplate?.connector, connectors),
+          // The applied template owns the case settings (a template that declares none, or removing
+          // the template, resets them to off). The case's connector is intentionally NOT changed
+          // here — applying a template never reassigns an existing case's connector.
           settings: buildTemplateSettings(newTemplate?.settings),
         },
         version: caseData.version,
@@ -144,8 +95,10 @@ export const useChangeAppliedTemplate = () => {
     {
       mutationKey: casesMutationsKeys.changeAppliedTemplate,
       onSuccess: () => {
-        refreshCaseViewPage();
-        showSuccessToast(i18n.TEMPLATE_CHANGED_SUCCESSFULLY);
+        // Applying a template changes case fields and settings that several independently-cached
+        // components render. A full page reload is the simplest reliable way to reflect all of the
+        // updates at once (react-query cache invalidation alone left some components stale).
+        window.location.reload();
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_CHANGING_TEMPLATE });

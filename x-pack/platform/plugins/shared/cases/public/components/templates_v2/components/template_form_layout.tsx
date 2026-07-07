@@ -88,6 +88,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
   const [isEnabled, setIsEnabled] = useState(initialIsEnabled);
+  // Bumped whenever we revert the Settings-tab state to its initial values (Reset). The connector
+  // picker runs its own hook_form_lib form that only seeds from `defaultValue` at mount, so it's
+  // remounted via this key to re-seed from the reverted connector. Keyed on a counter (not the
+  // connector object) so editing the connector fields never remounts and drops focus.
+  const [formResetKey, setFormResetKey] = useState(0);
 
   // `connector` / `settings` are edited in the Settings tab, not the YAML buffer, so split them out
   // of the initial definition (the editor shows fields only) and merge them back on save.
@@ -215,6 +220,8 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const handleResetConfirm = useCallback(() => {
     handleReset();
     setStoredFormState(initialFormState);
+    // Remount the connector picker so it re-seeds from the reverted connector (see formResetKey).
+    setFormResetKey((count) => count + 1);
     setIsResetModalVisible(false);
   }, [handleReset, setStoredFormState, initialFormState]);
 
@@ -308,6 +315,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             connector={connector}
             onSettingsChange={handleSettingsChange}
             onConnectorChange={handleConnectorChange}
+            formResetKey={formResetKey}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

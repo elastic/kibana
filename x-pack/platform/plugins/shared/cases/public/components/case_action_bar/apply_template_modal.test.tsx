@@ -13,22 +13,13 @@ import { renderWithTestingProviders } from '../../common/mock';
 import { basicCase } from '../../containers/mock';
 import { ApplyTemplateModal } from './apply_template_modal';
 
-const mockApplyTemplate = jest.fn();
-const mockConfirmConnectorChange = jest.fn();
-const mockCancelConnectorChange = jest.fn();
-const mockGuard = jest.fn();
-jest.mock('../case_view/use_apply_template_connector_guard', () => ({
-  useApplyTemplateConnectorGuard: () => mockGuard(),
+const mockChangeAppliedTemplate = jest.fn();
+jest.mock('../case_view/use_change_applied_template', () => ({
+  useChangeAppliedTemplate: () => ({
+    mutate: mockChangeAppliedTemplate,
+    isLoading: false,
+  }),
 }));
-
-const defaultGuardReturn = {
-  applyTemplate: mockApplyTemplate,
-  pendingConnectorChange: null,
-  confirmConnectorChange: mockConfirmConnectorChange,
-  cancelConnectorChange: mockCancelConnectorChange,
-  isInitializing: false,
-  isApplying: false,
-};
 
 const mockUseGetTemplates = jest.fn();
 jest.mock('../templates_v2/hooks/use_get_templates', () => ({
@@ -93,7 +84,6 @@ describe('ApplyTemplateModal', () => {
 
     mockUseGetTemplates.mockReturnValue({ data: mockTemplatesData, isLoading: false });
     mockUseGetTemplate.mockReturnValue({ data: undefined, isFetching: false });
-    mockGuard.mockReturnValue(defaultGuardReturn);
   });
 
   it('renders the modal title', () => {
@@ -153,7 +143,16 @@ describe('ApplyTemplateModal', () => {
     expect(screen.getByTestId('apply-template-modal-apply')).not.toBeDisabled();
   });
 
-  it('calls applyTemplate with the correct arguments when Apply is clicked', async () => {
+  it('renders a notice that the connector will not be changed', () => {
+    renderWithTestingProviders(<ApplyTemplateModal {...defaultProps} />);
+
+    expect(screen.getByTestId('apply-template-modal-connector-notice')).toBeInTheDocument();
+    expect(
+      screen.getByText("Applying a template does not change this case's connector.")
+    ).toBeInTheDocument();
+  });
+
+  it('calls changeAppliedTemplate without a connector when Apply is clicked', async () => {
     mockUseGetTemplate.mockReturnValue({ data: mockParsedTemplate, isFetching: false });
 
     renderWithTestingProviders(<ApplyTemplateModal {...defaultProps} />);
@@ -169,62 +168,20 @@ describe('ApplyTemplateModal', () => {
     await user.click(screen.getByText('Security Template'));
     await user.click(screen.getByTestId('apply-template-modal-apply'));
 
-    expect(mockApplyTemplate).toHaveBeenCalledWith(
+    expect(mockChangeAppliedTemplate).toHaveBeenCalledWith(
       {
-        id: 'tmpl-1',
-        version: 3,
-        fields: mockParsedTemplate.definition.fields,
-        connector: mockParsedTemplate.definition.connector,
-        settings: mockParsedTemplate.definition.settings,
+        caseData: basicCase,
+        newTemplate: {
+          id: 'tmpl-1',
+          version: 3,
+          fields: mockParsedTemplate.definition.fields,
+          settings: mockParsedTemplate.definition.settings,
+        },
       },
       expect.objectContaining({ onSuccess: mockOnClose })
     );
-  });
-
-  it('disables Apply while the connector guard is initializing', () => {
-    mockUseGetTemplate.mockReturnValue({ data: mockParsedTemplate, isFetching: false });
-    mockGuard.mockReturnValue({ ...defaultGuardReturn, isInitializing: true });
-
-    const caseWithTemplate = { ...basicCase, template: { id: 'tmpl-1', version: 3 } };
-    renderWithTestingProviders(
-      <ApplyTemplateModal {...defaultProps} caseData={caseWithTemplate} />
-    );
-
-    expect(screen.getByTestId('apply-template-modal-apply')).toBeDisabled();
-  });
-
-  it('renders the connector-change confirmation modal when a change is pending', () => {
-    mockGuard.mockReturnValue({
-      ...defaultGuardReturn,
-      pendingConnectorChange: {
-        currentConnectorName: 'My SN connector',
-        nextConnectorName: 'My Jira',
-      },
-    });
-
-    renderWithTestingProviders(<ApplyTemplateModal {...defaultProps} />);
-
-    expect(screen.getByTestId('template-connector-change-modal')).toBeInTheDocument();
-    // The base apply modal is replaced by the confirmation modal.
-    expect(screen.queryByTestId('apply-template-modal-select')).not.toBeInTheDocument();
-  });
-
-  it('confirms and cancels the pending connector change', async () => {
-    mockGuard.mockReturnValue({
-      ...defaultGuardReturn,
-      pendingConnectorChange: {
-        currentConnectorName: 'My SN connector',
-        nextConnectorName: 'My Jira',
-      },
-    });
-
-    renderWithTestingProviders(<ApplyTemplateModal {...defaultProps} />);
-
-    await user.click(screen.getByText('Change to My Jira'));
-    expect(mockConfirmConnectorChange).toHaveBeenCalled();
-
-    await user.click(screen.getByText('Keep My SN connector'));
-    expect(mockCancelConnectorChange).toHaveBeenCalled();
+    // Applying a template must never reassign the case's connector.
+    expect(mockChangeAppliedTemplate.mock.calls[0][0].newTemplate).not.toHaveProperty('connector');
   });
 
   it('calls onClose when Cancel is clicked', async () => {

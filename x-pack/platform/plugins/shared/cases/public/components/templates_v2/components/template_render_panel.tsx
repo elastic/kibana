@@ -22,6 +22,7 @@ interface TemplateRenderPanelProps {
   onSettingsChange: (settings: TemplateSettings) => void;
   onConnectorChange: (connector: CaseConnectorWithoutName) => void;
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+  formResetKey?: number;
 }
 
 /**
@@ -35,6 +36,7 @@ export const TemplateRenderPanel: React.FC<TemplateRenderPanelProps> = ({
   onSettingsChange,
   onConnectorChange,
   onFieldDefaultChange,
+  formResetKey,
 }) => {
   const [selectedTab, setSelectedTab] = useState<TabId>('fields');
 
@@ -67,6 +69,7 @@ export const TemplateRenderPanel: React.FC<TemplateRenderPanelProps> = ({
           connector={connector}
           onSettingsChange={onSettingsChange}
           onConnectorChange={onConnectorChange}
+          formResetKey={formResetKey}
         />
       )}
     </div>

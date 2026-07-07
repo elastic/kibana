@@ -11,7 +11,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import { parse as parseYaml } from 'yaml';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ParsedTemplate } from '../../../common/types/domain/template/v1';
-import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
+import { CASE_EXTENDED_FIELDS, NONE_CONNECTOR_ID } from '../../../common/constants';
 import { ConnectorTypes } from '../../../common/types/domain';
 import type { CaseConnectorWithoutName } from '../../../common/types/domain_zod/connector/v1';
 import { useGetTemplate } from '../templates_v2/hooks/use_get_template';
@@ -30,7 +30,6 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
  * Values a template applies by default and reverts to when it stops applying them. Sync alerts and
  * extract observables default to off for templates — a template only turns them on if it says so.
  */
-const NONE_CONNECTOR_ID = 'none';
 const DEFAULT_SYNC_ALERTS = false;
 const DEFAULT_EXTRACT_OBSERVABLES = false;
 

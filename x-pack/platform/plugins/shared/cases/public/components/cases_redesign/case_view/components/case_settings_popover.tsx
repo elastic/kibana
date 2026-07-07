@@ -20,8 +20,7 @@ import type { CaseUI } from '../../../../../common';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../../../common/use_cases_features';
 import { useGetTemplates } from '../../../templates_v2/hooks/use_get_templates';
-import { useApplyTemplateConnectorGuard } from '../../../case_view/use_apply_template_connector_guard';
-import { TemplateConnectorChangeModal } from '../../../case_view/template_connector_change_modal';
+import { useChangeAppliedTemplate } from '../../../case_view/use_change_applied_template';
 import { useGetTemplate } from '../../../templates_v2/hooks/use_get_template';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../case_view/translations';
@@ -78,110 +77,86 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
   const { data: selectedTemplateData } = useGetTemplate(
     isTemplatesEnabled ? selectedTemplateId || undefined : undefined
   );
-  const {
-    applyTemplate,
-    pendingConnectorChange,
-    confirmConnectorChange,
-    cancelConnectorChange,
-    isInitializing,
-    isApplying,
-  } = useApplyTemplateConnectorGuard({ caseData });
+  const { mutate: changeAppliedTemplate } = useChangeAppliedTemplate();
 
   // Applied via useEffect rather than inside onTemplateChange because the
   // template definition (fields, version) is fetched asynchronously by
   // useGetTemplate and isn't available at the time the user selects a template.
-  // Gated on `isInitializing` so the connector guard has connectors + push history loaded.
   useEffect(() => {
     if (
       isTemplatesEnabled &&
-      !isInitializing &&
       selectedTemplateId &&
       selectedTemplateData &&
       selectedTemplateData.templateId === selectedTemplateId &&
       caseData.template?.id !== selectedTemplateId
     ) {
-      applyTemplate({
-        id: selectedTemplateData.templateId,
-        version: selectedTemplateData.templateVersion,
-        fields: selectedTemplateData.definition.fields,
-        connector: selectedTemplateData.definition.connector,
-        settings: selectedTemplateData.definition.settings,
+      changeAppliedTemplate({
+        caseData,
+        newTemplate: {
+          id: selectedTemplateData.templateId,
+          version: selectedTemplateData.templateVersion,
+          fields: selectedTemplateData.definition.fields,
+          settings: selectedTemplateData.definition.settings,
+        },
       });
     }
-  }, [
-    isTemplatesEnabled,
-    isInitializing,
-    selectedTemplateId,
-    selectedTemplateData,
-    caseData,
-    applyTemplate,
-  ]);
+  }, [isTemplatesEnabled, selectedTemplateId, selectedTemplateData, caseData, changeAppliedTemplate]);
 
   const onTemplateChange = useCallback((selected: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedTemplateId(selected[0]?.value ?? '');
   }, []);
 
   return (
-    <>
-      {pendingConnectorChange && (
-        <TemplateConnectorChangeModal
-          pendingChange={pendingConnectorChange}
-          onConfirm={confirmConnectorChange}
-          onCancel={cancelConnectorChange}
-          isApplying={isApplying}
+    <EuiWrappingPopover
+      button={anchorElement}
+      isOpen={isOpen}
+      closePopover={onClose}
+      anchorPosition="downRight"
+      panelPaddingSize="m"
+      aria-label={i18n.CASE_SETTINGS}
+      data-test-subj="case-settings-popover"
+    >
+      <EuiPopoverTitle>{i18n.CASE_SETTINGS}</EuiPopoverTitle>
+      {isTemplatesEnabled && (
+        <>
+          <EuiFormRow label={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL} fullWidth>
+            <EuiComboBox
+              fullWidth
+              singleSelection={{ asPlainText: true }}
+              options={options}
+              selectedOptions={selectedOptions}
+              onChange={onTemplateChange}
+              isLoading={isLoadingTemplates}
+              placeholder={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER}
+              data-test-subj="case-settings-template-select"
+              compressed
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {isSyncAlertsEnabled && (
+        <>
+          <EuiSwitch
+            label={i18n.SYNC_ALERTS}
+            checked={syncAlerts}
+            onChange={(e) => onSyncAlertsChange(e.target.checked)}
+            compressed
+            data-test-subj="case-settings-sync-alerts-switch"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {hasMetrics && (
+        <EuiSwitch
+          label={SHOW_METRICS}
+          checked={showMetrics}
+          onChange={(e) => onShowMetricsChange(e.target.checked)}
+          compressed
+          data-test-subj="case-settings-show-metrics-switch"
         />
       )}
-      <EuiWrappingPopover
-        button={anchorElement}
-        isOpen={isOpen}
-        closePopover={onClose}
-        anchorPosition="downRight"
-        panelPaddingSize="m"
-        aria-label={i18n.CASE_SETTINGS}
-        data-test-subj="case-settings-popover"
-      >
-        <EuiPopoverTitle>{i18n.CASE_SETTINGS}</EuiPopoverTitle>
-        {isTemplatesEnabled && (
-          <>
-            <EuiFormRow label={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL} fullWidth>
-              <EuiComboBox
-                fullWidth
-                singleSelection={{ asPlainText: true }}
-                options={options}
-                selectedOptions={selectedOptions}
-                onChange={onTemplateChange}
-                isLoading={isLoadingTemplates}
-                placeholder={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER}
-                data-test-subj="case-settings-template-select"
-                compressed
-              />
-            </EuiFormRow>
-            <EuiSpacer size="m" />
-          </>
-        )}
-        {isSyncAlertsEnabled && (
-          <>
-            <EuiSwitch
-              label={i18n.SYNC_ALERTS}
-              checked={syncAlerts}
-              onChange={(e) => onSyncAlertsChange(e.target.checked)}
-              compressed
-              data-test-subj="case-settings-sync-alerts-switch"
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        {hasMetrics && (
-          <EuiSwitch
-            label={SHOW_METRICS}
-            checked={showMetrics}
-            onChange={(e) => onShowMetricsChange(e.target.checked)}
-            compressed
-            data-test-subj="case-settings-show-metrics-switch"
-          />
-        )}
-      </EuiWrappingPopover>
-    </>
+    </EuiWrappingPopover>
   );
 };
 

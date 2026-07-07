@@ -6,7 +6,6 @@
  */
 
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { ConnectorTypes } from '../../../common/types/domain';
 import { TestProviders } from '../../common/mock';
 import { basicCase } from '../../containers/mock';
 import { computeNewExtendedFields, useChangeAppliedTemplate } from './use_change_applied_template';
@@ -17,26 +16,6 @@ jest.mock('../../containers/api', () => ({
   patchCase: (...args: unknown[]) => mockPatchCase(...args),
 }));
 
-const mockConnectors = [
-  {
-    id: 'jira-1',
-    actionTypeId: '.jira',
-    name: 'My Jira',
-    config: {},
-    isPreconfigured: false,
-    isDeprecated: false,
-    isSystemAction: false,
-  },
-];
-jest.mock('../../containers/configure/use_get_supported_action_connectors', () => ({
-  useGetSupportedActionConnectors: () => ({ data: mockConnectors, isLoading: false }),
-}));
-
-const mockRefresh = jest.fn();
-jest.mock('./use_on_refresh_case_view_page', () => ({
-  useRefreshCaseViewPage: () => mockRefresh,
-}));
-
 const mockShowSuccessToast = jest.fn();
 const mockShowErrorToast = jest.fn();
 jest.mock('../../common/use_cases_toast', () => ({
@@ -45,6 +24,19 @@ jest.mock('../../common/use_cases_toast', () => ({
     showErrorToast: mockShowErrorToast,
   }),
 }));
+
+// The hook reloads the page on success; jsdom doesn't implement reload, so stub it.
+const originalLocation = window.location;
+const mockReload = jest.fn();
+beforeAll(() => {
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: { ...originalLocation, reload: mockReload },
+  });
+});
+afterAll(() => {
+  Object.defineProperty(window, 'location', { configurable: true, value: originalLocation });
+});
 
 const caseWithTemplate = {
   ...basicCase,
@@ -152,9 +144,12 @@ describe('useChangeAppliedTemplate', () => {
         })
       );
     });
+
+    // Applying a template must never reassign an existing case's connector.
+    expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
   });
 
-  it('resolves the template connector and applies its settings', async () => {
+  it('applies the template settings without touching the connector', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,
     });
@@ -166,11 +161,6 @@ describe('useChangeAppliedTemplate', () => {
           id: 'tmpl-2',
           version: 5,
           fields: templateFields,
-          connector: {
-            type: ConnectorTypes.jira,
-            id: 'jira-1',
-            fields: { issueType: '10006', priority: null, parent: null },
-          },
           settings: { syncAlerts: true },
         },
       });
@@ -180,97 +170,17 @@ describe('useChangeAppliedTemplate', () => {
       expect(mockPatchCase).toHaveBeenCalledWith(
         expect.objectContaining({
           updatedCase: expect.objectContaining({
-            connector: {
-              id: 'jira-1',
-              name: 'My Jira',
-              type: '.jira',
-              fields: { issueType: '10006', priority: null, parent: null },
-            },
             // declared syncAlerts kept, omitted extractObservables defaults to off
             settings: { syncAlerts: true, extractObservables: false },
           }),
         })
       );
     });
+
+    expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
   });
 
-  it('writes connectorOverride verbatim instead of resolving the template connector', async () => {
-    const { result } = renderHook(() => useChangeAppliedTemplate(), {
-      wrapper: TestProviders,
-    });
-
-    const retainedConnector = {
-      id: 'servicenow-1',
-      name: 'My SN connector',
-      type: ConnectorTypes.serviceNowITSM,
-      fields: null,
-    };
-
-    act(() => {
-      result.current.mutate({
-        caseData: caseWithTemplate,
-        newTemplate: {
-          id: 'tmpl-2',
-          version: 5,
-          fields: templateFields,
-          // Template would switch to jira, but the override must win (user chose to retain).
-          connector: {
-            type: ConnectorTypes.jira,
-            id: 'jira-1',
-            fields: { issueType: '10006', priority: null, parent: null },
-          },
-          settings: { syncAlerts: true },
-        },
-        connectorOverride: retainedConnector,
-      });
-    });
-
-    await waitFor(() => {
-      expect(mockPatchCase).toHaveBeenCalledWith(
-        expect.objectContaining({
-          updatedCase: expect.objectContaining({
-            connector: retainedConnector,
-            // settings still override regardless of the connector decision
-            settings: { syncAlerts: true, extractObservables: false },
-          }),
-        })
-      );
-    });
-  });
-
-  it('falls back to the none connector when the template connector no longer resolves', async () => {
-    const { result } = renderHook(() => useChangeAppliedTemplate(), {
-      wrapper: TestProviders,
-    });
-
-    act(() => {
-      result.current.mutate({
-        caseData: caseWithTemplate,
-        newTemplate: {
-          id: 'tmpl-2',
-          version: 5,
-          fields: templateFields,
-          connector: {
-            type: ConnectorTypes.jira,
-            id: 'deleted-connector',
-            fields: { issueType: '10006', priority: null, parent: null },
-          },
-        },
-      });
-    });
-
-    await waitFor(() => {
-      expect(mockPatchCase).toHaveBeenCalledWith(
-        expect.objectContaining({
-          updatedCase: expect.objectContaining({
-            connector: { id: 'none', name: 'none', type: '.none', fields: null },
-          }),
-        })
-      );
-    });
-  });
-
-  it('clears the connector to none and turns settings off when the template defines neither', async () => {
+  it('turns settings off when the template declares none', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,
     });
@@ -286,15 +196,16 @@ describe('useChangeAppliedTemplate', () => {
       expect(mockPatchCase).toHaveBeenCalledWith(
         expect.objectContaining({
           updatedCase: expect.objectContaining({
-            connector: { id: 'none', name: 'none', type: '.none', fields: null },
             settings: { syncAlerts: false, extractObservables: false },
           }),
         })
       );
     });
+
+    expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
   });
 
-  it('calls patchCase with template: null, empty extended_fields, and reset connector/settings when removing a template', async () => {
+  it('calls patchCase with template: null, empty extended_fields, and reset settings when removing a template', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,
     });
@@ -309,15 +220,16 @@ describe('useChangeAppliedTemplate', () => {
           updatedCase: expect.objectContaining({
             template: null,
             extended_fields: {},
-            connector: { id: 'none', name: 'none', type: '.none', fields: null },
             settings: { syncAlerts: false, extractObservables: false },
           }),
         })
       );
     });
+
+    expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
   });
 
-  it('calls refreshCaseViewPage and shows success toast on success', async () => {
+  it('reloads the page on success so all components reflect the applied template', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,
     });
@@ -327,12 +239,11 @@ describe('useChangeAppliedTemplate', () => {
     });
 
     await waitFor(() => {
-      expect(mockRefresh).toHaveBeenCalled();
-      expect(mockShowSuccessToast).toHaveBeenCalled();
+      expect(mockReload).toHaveBeenCalled();
     });
   });
 
-  it('shows error toast on failure', async () => {
+  it('shows error toast on failure and does not reload', async () => {
     mockPatchCase.mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
@@ -347,6 +258,6 @@ describe('useChangeAppliedTemplate', () => {
       expect(mockShowErrorToast).toHaveBeenCalled();
     });
 
-    expect(mockRefresh).not.toHaveBeenCalled();
+    expect(mockReload).not.toHaveBeenCalled();
   });
 });
