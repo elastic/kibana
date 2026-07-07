@@ -19,13 +19,166 @@ import {
   deserializeDataStream,
   deserializeDataStreamList,
 } from '../../../lib/data_stream_serialization';
-import type { EnhancedDataStreamFromEs } from '../../../../common/types';
+import type { EnhancedDataStreamFromEs, EsDataRetention } from '../../../../common/types';
+import { isRecord } from '../../../../common/lib';
 import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 interface MeteringStatsResponse {
   datastreams: MeteringStats[];
 }
+
+export interface ExplicitDataStreamOptions {
+  failureStore?: {
+    enabled?: boolean;
+    lifecycle?: { enabled?: boolean; data_retention?: EsDataRetention };
+  };
+  lifecycleSettings?: {
+    explicitIlmPolicyName?: string;
+    preferIlm?: boolean;
+  };
+}
+
+const parseBooleanFromEsSetting = (value: unknown): boolean | undefined => {
+  if (typeof value === 'boolean') return value;
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return undefined;
+};
+
+const getTemplateFailureStoreEnabled = async (
+  client: IScopedClusterClient,
+  templateName: string | undefined
+): Promise<boolean | undefined> => {
+  if (!templateName) return undefined;
+
+  const templateResponse = await client.asCurrentUser.transport
+    .request<unknown>({
+      method: 'GET',
+      path: `/_index_template/${encodeURIComponent(templateName)}`,
+    })
+    .catch(() => undefined);
+
+  if (!isRecord(templateResponse)) return undefined;
+
+  const indexTemplates: unknown = templateResponse.index_templates;
+  if (!Array.isArray(indexTemplates) || indexTemplates.length === 0) return undefined;
+
+  const first: unknown = indexTemplates[0];
+  if (!isRecord(first)) return undefined;
+
+  const indexTemplate: unknown = first.index_template;
+  if (!isRecord(indexTemplate)) return undefined;
+
+  const template: unknown = indexTemplate.template;
+  if (!isRecord(template)) return undefined;
+
+  const dataStreamOptions: unknown = template.data_stream_options;
+  if (!isRecord(dataStreamOptions)) return undefined;
+
+  const failureStore: unknown = dataStreamOptions.failure_store;
+  if (!isRecord(failureStore)) return undefined;
+
+  const enabled: unknown = failureStore.enabled;
+  return typeof enabled === 'boolean' ? enabled : undefined;
+};
+
+/**
+ * Returns the data stream's *explicit* options (from `GET .../_options`), if any.
+ * Unlike the regular data stream GET, this endpoint omits anything inherited from the
+ * index template, so the presence of `failure_store` here means an explicit override.
+ */
+const getExplicitDataStreamOptions = async (
+  client: IScopedClusterClient,
+  name: string
+): Promise<ExplicitDataStreamOptions> => {
+  // The `_options` endpoint may be unavailable (older ES) or fail on privileges. Degrade to "no
+  // explicit override" rather than failing the whole detail panel request.
+  const response = await client.asCurrentUser.indices
+    .getDataStreamOptions({ name })
+    .catch(() => undefined);
+  const entry = response?.data_streams?.[0];
+  const options: unknown = isRecord(entry) ? entry.options : undefined;
+  const failureStore: unknown = isRecord(options) ? options.failure_store : undefined;
+
+  if (!isRecord(failureStore)) {
+    return {};
+  }
+
+  const enabled = failureStore.enabled;
+  const lifecycle = failureStore.lifecycle;
+  const lifecycleResult: { enabled?: boolean; data_retention?: EsDataRetention } = {};
+
+  if (isRecord(lifecycle)) {
+    if (typeof lifecycle.enabled === 'boolean') {
+      lifecycleResult.enabled = lifecycle.enabled;
+    }
+    const dataRetention = lifecycle.data_retention;
+    if ((typeof dataRetention === 'string' && dataRetention.length > 0) || dataRetention === -1) {
+      lifecycleResult.data_retention = dataRetention;
+    }
+  }
+
+  return {
+    failureStore: {
+      ...(typeof enabled === 'boolean' ? { enabled } : {}),
+      ...(Object.keys(lifecycleResult).length > 0 ? { lifecycle: lifecycleResult } : {}),
+    },
+  };
+};
+
+/**
+ * Returns the data stream's *explicit* lifecycle settings (from `GET .../_settings`),
+ * if any. This mirrors the Streams ingestion API behavior, where lifecycle inheritance
+ * depends on whether there is a data stream-level override.
+ */
+const getExplicitDataStreamLifecycleSettings = async (
+  client: IScopedClusterClient,
+  name: string
+): Promise<ExplicitDataStreamOptions['lifecycleSettings']> => {
+  // The `_settings` endpoint may be unavailable (older ES) or fail on privileges. Degrade to
+  // "no explicit lifecycle settings" rather than failing the whole detail panel request.
+  const response = await client.asCurrentUser.indices
+    .getDataStreamSettings({ name })
+    .catch(() => undefined);
+  const entry = response?.data_streams?.[0];
+  const settings: unknown = isRecord(entry) ? entry.settings : undefined;
+
+  if (!isRecord(settings)) {
+    return undefined;
+  }
+
+  const index = settings.index;
+  if (!isRecord(index)) {
+    return undefined;
+  }
+
+  const lifecycle = index.lifecycle;
+  if (!isRecord(lifecycle)) {
+    return undefined;
+  }
+
+  const ilmPolicyName = lifecycle.name;
+  const preferIlm = lifecycle.prefer_ilm;
+  const preferIlmBool = parseBooleanFromEsSetting(preferIlm);
+
+  const result: NonNullable<ExplicitDataStreamOptions['lifecycleSettings']> = {
+    ...(typeof ilmPolicyName === 'string' && ilmPolicyName.length > 0
+      ? { explicitIlmPolicyName: ilmPolicyName }
+      : {}),
+    ...(preferIlmBool !== undefined ? { preferIlm: preferIlmBool } : {}),
+  };
+
+  return Object.keys(result).length > 0 ? result : undefined;
+};
+
+const extractGlobalMaxRetention = (lifecycleResponse: unknown): string | undefined => {
+  if (!isRecord(lifecycleResponse)) return undefined;
+  const globalRetention: unknown = lifecycleResponse.global_retention;
+  if (!isRecord(globalRetention)) return undefined;
+  const maxRetention: unknown = globalRetention.max_retention;
+  return typeof maxRetention === 'string' ? maxRetention : undefined;
+};
 const enhanceDataStreams = ({
   dataStreams,
   dataStreamsStats,
@@ -53,6 +206,7 @@ const enhanceDataStreams = ({
         read_failure_store: dataStreamsPrivileges
           ? dataStreamsPrivileges.index[dataStream.name].read_failure_store
           : true,
+        manage: dataStreamsPrivileges ? dataStreamsPrivileges.index[dataStream.name].manage : true,
       },
     };
 
@@ -116,7 +270,12 @@ const getDataStreamsPrivileges = (client: IScopedClusterClient, names: string[])
     index: [
       {
         names,
-        privileges: ['delete_index', 'manage_data_stream_lifecycle', 'read_failure_store'],
+        privileges: [
+          'delete_index',
+          'manage_data_stream_lifecycle',
+          'read_failure_store',
+          'manage',
+        ],
       },
     ],
   });
@@ -181,8 +340,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
 
         // Only take the lifecycle of the first data stream since all data streams have the same global retention period
         const lifecycle = await getDataStreamLifecycle(client, dataStreams[0].name);
-        // @ts-ignore - TS doesn't know about the `global_retention` property yet
-        const globalMaxRetention = lifecycle?.global_retention?.max_retention;
+        const globalMaxRetention = extractGlobalMaxRetention(lifecycle);
 
         const enhancedDataStreams = enhanceDataStreams({
           dataStreams,
@@ -231,8 +389,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
         const { data_streams: dataStreams } = await getDataStreams(client, name);
 
         const lifecycle = await getDataStreamLifecycle(client, name);
-        // @ts-ignore - TS doesn't know about the `global_retention` property yet
-        const globalMaxRetention = lifecycle?.global_retention?.max_retention;
+        const globalMaxRetention = extractGlobalMaxRetention(lifecycle);
 
         if (config.isDataStreamStatsEnabled !== false) {
           ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client, name));
@@ -273,11 +430,52 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
           const isLogsdbEnabled =
             (persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled) === 'true';
 
-          const body = deserializeDataStream(
+          // The data stream GET returns the *effective* failure store (template + override
+          // merged), so it cannot tell us whether the data stream has its own override. The
+          // `_options` endpoint returns only the explicit data stream level options, which is
+          // what lets the UI distinguish "inherited from template" from "explicit override".
+          const [explicitOptions, explicitLifecycleSettings, templateFailureStoreEnabled] =
+            await Promise.all([
+              getExplicitDataStreamOptions(client, name),
+              getExplicitDataStreamLifecycleSettings(client, name),
+              getTemplateFailureStoreEnabled(client, enhancedDataStreams[0].template),
+            ]);
+
+          const baseBody = deserializeDataStream(
             enhancedDataStreams[0],
             isLogsdbEnabled,
-            failureStoreSettings
+            failureStoreSettings,
+            {
+              ...explicitOptions,
+              ...(explicitLifecycleSettings
+                ? { lifecycleSettings: explicitLifecycleSettings }
+                : {}),
+            }
           );
+
+          // Determine the effective failure store enabled state:
+          // 1) explicit data stream override (via `_options`)
+          // 2) the effective value reported by the data stream GET (template + overrides
+          //    already merged by Elasticsearch — this is the source of truth for the
+          //    *current* state, e.g. when the stream is explicitly disabled)
+          // 3) index template defaults (what would be inherited if the GET omits it)
+          // 4) cluster setting pattern match
+          const explicitFailureStoreEnabled = explicitOptions.failureStore?.enabled;
+          const effectiveFailureStoreEnabled = enhancedDataStreams[0].failure_store?.enabled;
+          const resolvedFailureStoreEnabled =
+            typeof explicitFailureStoreEnabled === 'boolean'
+              ? explicitFailureStoreEnabled
+              : typeof effectiveFailureStoreEnabled === 'boolean'
+              ? effectiveFailureStoreEnabled
+              : typeof templateFailureStoreEnabled === 'boolean'
+              ? templateFailureStoreEnabled
+              : baseBody.matchesFailureStoreClusterPattern === true;
+
+          const body =
+            baseBody.failureStoreEnabled === resolvedFailureStoreEnabled
+              ? baseBody
+              : { ...baseBody, failureStoreEnabled: resolvedFailureStoreEnabled };
+
           return response.ok({ body });
         }
 

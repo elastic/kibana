@@ -18,7 +18,8 @@ export {
   type ToolDefinition,
   type ToolDefinitionWithSchema,
   platformCoreTools,
-  platformStreamsSigEventsTools,
+  platformCoreCasesTools,
+  platformSignificantEventsTools,
   attachmentTools,
   internalTools,
   defaultAgentToolIds,
@@ -61,6 +62,7 @@ export {
   isSkillNotFoundError,
   isAgentBuilderError,
   isAgentNotFoundError,
+  isAgentUnavailableError,
   isConversationNotFoundError,
   isPluginNotFoundError,
   isBadRequestError,
@@ -74,6 +76,7 @@ export {
   createToolNotFoundError,
   createSkillNotFoundError,
   createAgentNotFoundError,
+  createAgentUnavailableError,
   createConversationNotFoundError,
   createPluginNotFoundError,
   createBadRequestError,
@@ -85,6 +88,7 @@ export {
   type AgentBuilderToolNotFoundError,
   type AgentBuilderSkillNotFoundError,
   type AgentBuilderAgentNotFoundError,
+  type AgentBuilderAgentUnavailableError,
   type AgentBuilderConversationNotFoundError,
   type AgentBuilderPluginNotFoundError,
   type AgentBuilderBadRequestError,
@@ -282,6 +286,7 @@ export {
   type PluginDefinition,
 } from './plugins';
 export type { RendererDefinition, RendererPayloadOf } from './renderers';
+export type { WorkspaceFileContent } from './workspaces';
 export { EffortLevels, type EffortLevel } from './model_provider';
 export {
   type OAuthClient,
