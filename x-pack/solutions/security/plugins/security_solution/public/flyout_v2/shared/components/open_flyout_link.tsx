@@ -52,6 +52,12 @@ export interface OpenFlyoutLinkProps {
 }
 
 /**
+ * Wrapper that renders a preview link for supported field types (host, ip, rule). Injected by
+ * each flyout context so it controls its own navigation (e.g. `OpenFlyoutLink` in the new flyout).
+ */
+export type OpenFlyoutLinkRenderer = FC<OpenFlyoutLinkProps>;
+
+/**
  * Renders a clickable link that opens a system flyout for supported field types.
  *
  * When the field is supported, the link is rendered with `value` as the link text.
