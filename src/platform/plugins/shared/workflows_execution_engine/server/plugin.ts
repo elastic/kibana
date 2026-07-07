@@ -1316,10 +1316,11 @@ export class WorkflowsExecutionEnginePlugin
           );
         });
 
-      // Let forceRunIdleTasks be the single scheduling authority for the resume: it
-      // runs an existing idle task if one is scoped to this execution, otherwise it
-      // schedules exactly one immediate resume and nudges it.
-      await workflowTaskManager.forceRunIdleTasks(executionId, {
+      // scheduleAndRunImmediateResume uses a stable per-execution task id
+      // (removeIfExists + schedule) so only one resume task can exist at a time,
+      // then nudges Task Manager via runSoon without relying on index freshness.
+      await workflowTaskManager.scheduleAndRunImmediateResume({
+        executionId,
         spaceId,
         fakeRequest: request,
       });
