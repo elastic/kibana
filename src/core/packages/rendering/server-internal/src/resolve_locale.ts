@@ -87,11 +87,10 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
 
   const headerLocale = pickFromAcceptLanguage(
     getHeader(request, 'accept-language'),
-    configuredLocales
+    configuredLocales,
+    translationHashes
   );
-  // Match the profile/cookie paths above: only return a header-derived
-  // locale if we can actually serve translations for it.
-  if (headerLocale && translationHashes[headerLocale]) {
+  if (headerLocale) {
     return finalize(headerLocale, request, serverBasePath);
   }
 
@@ -130,15 +129,15 @@ export const readCookie = (cookieHeader: string, name: string): string | undefin
 };
 
 /**
- * Walks a weighted Accept-Language header and returns the configured locale for
- * the highest-weight entry, matched case-insensitively. Each entry is matched
- * exactly first, then falls back to the first configured locale sharing its
- * primary subtag (`fr` or `fr-CH` → `fr-FR`). Returns `undefined` if no entry
- * matches. Entries with `q=0` are ignored.
+ * Walks a weighted Accept-Language header and returns the highest-weight
+ * servable candidate, matched case-insensitively (exact, else primary-subtag
+ * fallback). Returns `undefined` if no entry yields a servable candidate.
+ * Entries with `q=0` are ignored.
  */
 export const pickFromAcceptLanguage = (
   header: string,
-  allowed: readonly string[]
+  allowed: readonly string[],
+  translationHashes: Record<string, string>
 ): string | undefined => {
   if (!header || allowed.length === 0) return undefined;
 
@@ -178,12 +177,12 @@ export const pickFromAcceptLanguage = (
 
   for (const { locale } of entries) {
     const exact = allowedByLowerCase.get(locale);
-    if (exact) return exact;
+    if (exact && translationHashes[exact]) return exact;
     // No exact match: fall back to a configured locale sharing the primary
     // subtag, regardless of region (`fr-CH` may resolve to `fr-FR`).
     const primary = locale.split('-')[0];
     const fallback = allowedByPrimarySubtag.get(primary);
-    if (fallback) return fallback;
+    if (fallback && translationHashes[fallback]) return fallback;
   }
   return undefined;
 };
