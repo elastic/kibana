@@ -166,6 +166,8 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
+import { installSecurityAlertAnalysisWorkflowAndMarkReady } from './workflows/alert_analysis_workflow/install';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
@@ -806,7 +808,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions, core, experimentalFeatures);
+      registerWorkflowSteps(plugins.workflowsExtensions, experimentalFeatures);
+      registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
 
     setupAlertsCapabilitiesSwitcher({
@@ -838,6 +841,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     ).catch(() => {});
 
     this.ruleMonitoringService.start(core, plugins);
+
+    if (plugins.workflowsExtensions) {
+      // Install once in the global space, then mark ready (install is awaited before ready inside
+      // the helper). Fire-and-forget: startup must not block on it.
+      void installSecurityAlertAnalysisWorkflowAndMarkReady({
+        workflowsExtensions: plugins.workflowsExtensions,
+        logger,
+      });
+    }
 
     const savedObjectsClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([
