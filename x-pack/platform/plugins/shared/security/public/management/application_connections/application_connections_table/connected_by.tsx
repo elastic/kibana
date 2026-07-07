@@ -19,10 +19,7 @@ export const getConnectedByDisplayName = ({
   userId,
   user,
 }: ConnectedByOptions): string | undefined => {
-  const { first_name, last_name, email } = user ?? {};
-  const fullName = [first_name, last_name].filter(Boolean).join(' ').trim();
-
-  return fullName || email || userId;
+  return user?.email || userId;
 };
 
 export interface ConnectedByProps extends ConnectedByOptions {

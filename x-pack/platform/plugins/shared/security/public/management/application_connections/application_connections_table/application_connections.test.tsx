@@ -399,7 +399,7 @@ describe('ApplicationConnections', () => {
 
     await waitFor(() => {
       expect(getByTestId('applicationConnectionConnectedBy-conn-1')).toHaveTextContent(
-        'Ada Lovelace'
+        'ada@example.com'
       );
     });
   });
@@ -527,7 +527,7 @@ describe('ApplicationConnections', () => {
     fireEvent.click(revokeLink);
     let modal = await findByTestId('applicationConnectionsRevokeModal');
     expect(within(modal).getByText('Connected by')).toBeInTheDocument();
-    expect(within(modal).getByText('Ada Lovelace')).toBeInTheDocument();
+    expect(within(modal).getByText('ada@example.com')).toBeInTheDocument();
     fireEvent.click(within(modal).getByTestId('applicationConnectionsRevokeCancelButton'));
 
     fireEvent.click(await findByTestId('revokeConnection-conn-2'));
