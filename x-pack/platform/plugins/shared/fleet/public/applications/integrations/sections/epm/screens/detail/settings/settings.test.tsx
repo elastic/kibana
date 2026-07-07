@@ -36,6 +36,7 @@ jest.mock('../../../../../hooks', () => {
       },
     }),
     useUpgradePackagePolicyDryRunQuery: jest.fn().mockReturnValue({ data: null }),
+    useUpgradeAgentlessPoliciesDryRunQuery: jest.fn().mockReturnValue({ data: null }),
     useUpdatePackageMutation: jest.fn().mockReturnValue({ mutate: jest.fn() }),
     useAuthz: jest.fn(),
     useConfirmForceInstall: jest.fn().mockReturnValue(jest.fn()),
@@ -59,6 +60,7 @@ jest.mock('../../../../../services', () => ({
   ExperimentalFeaturesService: {
     get: jest.fn().mockReturnValue({ enablePackageRollback: true }),
   },
+  isAgentlessPoliciesUIEnabled: jest.fn().mockReturnValue(true),
 }));
 
 jest.mock('../../installed_integrations/hooks/use_installed_integrations_actions', () => ({
@@ -70,7 +72,14 @@ jest.mock('../../installed_integrations/hooks/use_installed_integrations_actions
 }));
 
 // Import after mocks are defined
-import { useGetPackageInstallStatus, useAuthz } from '../../../../../hooks';
+import {
+  useGetPackageInstallStatus,
+  useAuthz,
+  useGetPackagePoliciesQuery,
+  useUpgradePackagePolicyDryRunQuery,
+  useUpgradeAgentlessPoliciesDryRunQuery,
+} from '../../../../../hooks';
+import { isAgentlessPoliciesUIEnabled } from '../../../../../services';
 
 import { SettingsPage } from './settings';
 
@@ -204,6 +213,60 @@ describe('SettingsPage', () => {
       // Should show version info instead of install section
       expect(result.getByText('Installed version')).toBeInTheDocument();
       expect(result.queryByTestId('installPermissionCallout')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('agentless upgrade partition', () => {
+    const policies = [
+      { id: 'agent-based-policy', supports_agentless: false, policy_ids: [] },
+      { id: 'agentless-policy', supports_agentless: true, policy_ids: [] },
+    ];
+
+    beforeEach(() => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.installed,
+        version: '1.3.0',
+      }));
+      mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
+        integrations: { installPackages: true, writePackageSettings: true },
+      });
+      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({
+        data: { items: policies },
+      } as any);
+    });
+
+    afterEach(() => {
+      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({ data: { items: [] } } as any);
+      jest.mocked(isAgentlessPoliciesUIEnabled).mockReturnValue(true);
+    });
+
+    const installedPackageInfo = {
+      ...basePackageInfo,
+      status: 'installed',
+    } as PackageInfo;
+
+    it('routes agentless policies to the agentless dry-run when the agentless policies UI is enabled', () => {
+      renderComponent(installedPackageInfo);
+
+      expect(jest.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][0]).toEqual([
+        'agent-based-policy',
+      ]);
+      expect(jest.mocked(useUpgradeAgentlessPoliciesDryRunQuery).mock.calls[0][0]).toEqual([
+        'agentless-policy',
+      ]);
+    });
+
+    it('routes all policies to the legacy dry-run when the agentless policies UI is disabled', () => {
+      jest.mocked(isAgentlessPoliciesUIEnabled).mockReturnValue(false);
+
+      renderComponent(installedPackageInfo);
+
+      expect(jest.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][0]).toEqual([
+        'agent-based-policy',
+        'agentless-policy',
+      ]);
+      expect(jest.mocked(useUpgradeAgentlessPoliciesDryRunQuery).mock.calls[0][0]).toEqual([]);
     });
   });
 

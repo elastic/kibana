@@ -83,7 +83,7 @@ export const transformDashboardIn = (
         : { timeRestore: false }),
       kibanaSavedObjectMeta: { searchSourceJSON },
       ...(project_routing !== undefined && { projectRouting: project_routing }),
-      ...(esql_approximation !== undefined && { isApproximate: esql_approximation }),
+      ...(esql_approximation !== undefined && { esqlApproximation: esql_approximation }),
     };
 
     return {

@@ -19,6 +19,7 @@ const ebtAction = {
   navSidebar: {
     SIDEBAR_LAYER_TRANSITION: 'sidebar_layer_transition',
     SIDEBAR_NAVIGATION_CLICK: 'sidebar_navigation_click',
+    SIDEBAR_TOGGLE: 'sidebar_toggle',
     AGENT_SWITCH: 'agent_switch',
     AGENT_SELECTOR_OPEN: 'agent_selector_open',
     MANAGE_ALL_AGENTS_CLICK: 'manage_all_agents_click',
@@ -209,6 +210,10 @@ const ebtDetail = {
   layerTransition: {
     MANAGE_CLICK: 'manage_click',
     BACK_CLICK: 'back_click',
+  },
+  sidebarToggle: {
+    EXPAND: 'expand',
+    CONDENSE: 'condense',
   },
 } as const;
 
