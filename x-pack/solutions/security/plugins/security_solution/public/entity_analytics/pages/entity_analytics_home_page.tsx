@@ -51,14 +51,14 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
-import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
-import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
+
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { TabId } from './entity_analytics_management_page';
 import { TopThreatHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads';
 import { ThreatHuntingLeadsFlyout } from '../components/threat_hunting/top_threat_hunting_leads/threat_hunting_leads_flyout';
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
 import { useLeadAttachment } from '../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment';
+import { HUNT_WITH_AI_PROMPT } from '../prompts';
 import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 import { QUERY_KEY_ENTITY_ANALYTICS } from '../components/home/entities_table/constants';
 import type { HuntingLead } from '../components/threat_hunting/top_threat_hunting_leads/types';
@@ -68,6 +68,8 @@ import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analy
 import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
 import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
 import { NoPrivileges } from '../../common/components/no_privileges';
+import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
+import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
@@ -172,7 +174,7 @@ const EntityAnalyticsHomePageContent = () => {
     toggleSchedule,
     readPermissionError: leadsReadPermissionError,
     writePermissionError: leadsWritePermissionError,
-  } = useHuntingLeads(connectorId, leadGenerationEnabled);
+  } = useHuntingLeads(connectorId, leadGenerationEnabled, resolvedSpaceId);
   const openAgentBuilderWithLead = useLeadAttachment();
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -233,8 +235,14 @@ const EntityAnalyticsHomePageContent = () => {
   );
 
   const handleHuntInChat = useCallback(() => {
-    agentBuilder?.openChat({ newConversation: true, sessionTag: 'security' });
-  }, [agentBuilder]);
+    telemetry.reportEvent(EntityEventTypes.LeadGenerationHuntWithAiClicked, {});
+    agentBuilder?.openChat({
+      newConversation: true,
+      initialMessage: HUNT_WITH_AI_PROMPT,
+      autoSendInitialMessage: false,
+      sessionTag: 'security',
+    });
+  }, [agentBuilder, telemetry]);
 
   if (dataViewLoading) {
     return <PageLoader />;
@@ -344,7 +352,11 @@ const EntityAnalyticsHomePageContent = () => {
       </EuiFlexGroup>
 
       {leadGenerationEnabled && isFlyoutOpen && (
-        <ThreatHuntingLeadsFlyout onClose={handleCloseFlyout} onSelectLead={handleOpenLeadInChat} />
+        <ThreatHuntingLeadsFlyout
+          onClose={handleCloseFlyout}
+          onSelectLead={handleOpenLeadInChat}
+          lastRunTimestamp={lastRunTimestamp}
+        />
       )}
     </>
   );
