@@ -175,7 +175,8 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const hasStatusIcon = isRunning || isSuccess || isFailed;
   // Hover actions hide when an execution-status icon is visible so they
   // don't overlap. They still show on hover/select when there's no status.
-  const showActions = (isHovered || isActive) && !isTrigger && !hasStatusIcon;
+  const showActions =
+    Boolean(canRunSteps && onStepRun) && (isHovered || isActive) && !isTrigger && !hasStatusIcon;
   const runLabel = i18n.translate('workflowsUi.graphNode.runStep', { defaultMessage: 'Run step' });
 
   // Compact icon-only render for the workflow-list hover preview. All hooks

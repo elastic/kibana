@@ -38,8 +38,16 @@ jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
 }));
 
 jest.mock('../../../risk_score_timeline', () => ({
-  RiskScoreTimeline: (props: { onPointSelect: (timestamp: string | undefined) => void }) => (
-    <div data-test-subj="mockRiskScoreTimeline">
+  RiskScoreTimeline: (props: {
+    entityId: string;
+    scoreType?: string;
+    onPointSelect: (timestamp: string | undefined) => void;
+  }) => (
+    <div
+      data-test-subj="mockRiskScoreTimeline"
+      data-entity-id={props.entityId}
+      data-score-type={props.scoreType}
+    >
       <button
         type="button"
         data-test-subj="mockSelectPoint"
@@ -1153,6 +1161,89 @@ describe('RiskInputsTab', () => {
       expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
         expect.objectContaining({ skip: true })
       );
+    });
+
+    describe('resolution view', () => {
+      const resolutionRiskScore = {
+        '@timestamp': '2021-08-19T16:00:00.000Z',
+        user: {
+          name: 'target-name',
+          risk: { ...riskScore.user.risk, score_type: 'resolution' },
+        },
+      };
+
+      const setupResolution = () => {
+        enableHistoryFlag();
+        mockUseResolutionGroup.mockReturnValue({
+          data: {
+            target: { entity: { id: 'user:target', name: 'target-name' } },
+            aliases: [{ entity: { id: 'user:entity-1', name: 'entity-1' } }],
+            group_size: 2,
+          },
+        });
+        mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
+          params?.skip
+            ? { loading: false, error: false, data: [] }
+            : isResolutionFilter(params)
+            ? { loading: false, error: false, data: [resolutionRiskScore] }
+            : { loading: false, error: false, data: [riskScore] }
+        );
+      };
+
+      it('points the timeline at the resolution series when the resolution view is active', () => {
+        setupResolution();
+
+        const { getByTestId, getByText } = renderTab();
+
+        // entity view first: the timeline tracks the base series for the opened entity
+        expect(getByTestId('mockRiskScoreTimeline')).toHaveAttribute('data-score-type', 'base');
+        expect(getByTestId('mockRiskScoreTimeline')).toHaveAttribute(
+          'data-entity-id',
+          'user:elastic'
+        );
+
+        fireEvent.click(getByText('Resolution group risk score'));
+
+        // resolution view: the timeline follows the resolution target id and score type
+        expect(getByTestId('mockRiskScoreTimeline')).toHaveAttribute(
+          'data-score-type',
+          'resolution'
+        );
+        expect(getByTestId('mockRiskScoreTimeline')).toHaveAttribute(
+          'data-entity-id',
+          'user:target'
+        );
+      });
+
+      it('fetches the PiT resolution record when a point is selected in the resolution view', () => {
+        setupResolution();
+        mockUseRiskScoreHistory.mockReturnValue({
+          data: {
+            entity_id: 'user:target',
+            entity_type: 'user',
+            entries: [{ ...pitEntry, score_type: 'resolution' }],
+          },
+          isFetching: false,
+        });
+
+        const { getByTestId, getByText } = renderTab();
+
+        fireEvent.click(getByText('Resolution group risk score'));
+        fireEvent.click(getByTestId('mockSelectPoint'));
+
+        expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            entityId: 'user:target',
+            scoreType: 'resolution',
+            from: PIT_TIMESTAMP,
+            to: PIT_TIMESTAMP,
+            includeContributions: true,
+            pageSize: 1,
+            skip: false,
+          })
+        );
+        expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+      });
     });
   });
 });
