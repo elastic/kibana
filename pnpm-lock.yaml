@@ -19,6 +19,9 @@ overrides:
   '@langchain/core': 1.1.31
   '@langchain/google-common': 2.1.24
   '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.cd77847.0
+  '@types/babel__traverse': 7.20.6
+  '@types/eslint>@types/estree': 0.0.50
+  '@types/glob-stream': 6.1.0
   '@types/hast>@types/unist': 2.0.3
   '@types/mdast@^3': 3.0.3
   '@types/mdast@^4': 4.0.4
@@ -52,6 +55,7 @@ overrides:
   socket.io-parser: 4.2.6
   typescript: 5.9.3
   util: 0.12.5
+  vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
   yauzl: 3.4.0
   zod: 4.4.3
@@ -14706,8 +14710,8 @@ packages:
   '@types/babel__template@7.4.4':
     resolution: {integrity: sha512-h/NUaSyG5EyxBIp8YRxo4RMe2/qQgvyowRwVMzhYhBCONbW8PUsg4lkFMrhgZhUe5z3L3MiLDuvyJ/CaPa2A8A==}
 
-  '@types/babel__traverse@7.28.0':
-    resolution: {integrity: sha512-8PvcXf70gTDZBgt9ptxJ8elBeBjcLOAcOtoO/mPJjtji1+CdGbHgm77om1GrsPxsiE+uXIpNSK64UYaIwQXd4Q==}
+  '@types/babel__traverse@7.20.6':
+    resolution: {integrity: sha512-r1bzfrm0tomOI8g1SzvCaQHo6Lcv6zu0EA+W2kHrt8dyrHQxGzBBL4kdkzIS+jBMV+EYcMAEAqXqYaLJq5rOZg==}
 
   '@types/body-parser@1.19.6':
     resolution: {integrity: sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g==}
@@ -14842,6 +14846,9 @@ packages:
   '@types/estree-jsx@1.0.5':
     resolution: {integrity: sha512-52CcUVNFyfb1A2ALocQw/Dd1BQFNmSdkuC3BkZ6iqhdMfQz7JWOFRuJFloOzjk+6WijU56m9oKXFAXc7o3Towg==}
 
+  '@types/estree@0.0.50':
+    resolution: {integrity: sha512-C6N5s2ZFtuZRj54k2/zyRhNDjJwwcViAM3Nbm8zjBpbqAdZ00mr0CFxvSKeO8Y/e03WVFLpQMdHYVfUd6SB+Hw==}
+
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
 
@@ -14881,8 +14888,8 @@ packages:
   '@types/getos@3.0.4':
     resolution: {integrity: sha512-OsNVsuGEBd5QoeXTgjPmA89a465hjQithLMImsiJlIi0aYP8axKWtWrsmEMfm50w6EL2oRzCz+cLkZmp9/LfZw==}
 
-  '@types/glob-stream@8.0.3':
-    resolution: {integrity: sha512-vctgrT9AH/GK3TRaIbRUU0TZn12GBU4kzelZdPyJp1Sc8L/6Wrq21UrtN4+x4saqTg6COUIUtFV6JSYcVln/EQ==}
+  '@types/glob-stream@6.1.0':
+    resolution: {integrity: sha512-RHv6ZQjcTncXo3thYZrsbAVwoy4vSKosSWhuhuQxLOTv74OJuFQxXkmUuZCr3q9uNBEVCvIzmZL/FeRNbHZGUg==}
 
   '@types/glob@7.2.0':
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
@@ -15282,9 +15289,6 @@ packages:
 
   '@types/statuses@2.0.6':
     resolution: {integrity: sha512-xMAgYwceFhRA2zY+XbEA7mxYbA093wdiW8Vu6gZPGWy9cmOyU9XesH1tNcEWsKFd5Vzrqx5T3D38PWx1FIIXkA==}
-
-  '@types/streamx@2.9.5':
-    resolution: {integrity: sha512-IHYsa6jYrck8VEdSwpY141FTTf6D7boPeMq9jy4qazNrFMA4VbRz/sw5LSsfR7jwdDcx0QKWkUexZvsWBC2eIQ==}
 
   '@types/styled-components@5.1.0':
     resolution: {integrity: sha512-ZFlLCuwF5r+4Vb7JUmd+Yr2S0UBdBGmI7ctFTgJMypIp3xOHI4LCFVn2dKMvpk6xDB2hLRykrEWMBwJEpUAUIQ==}
@@ -25939,8 +25943,8 @@ packages:
   vega-typings@2.1.0:
     resolution: {integrity: sha512-zdis4Fg4gv37yEvTTSZEVMNhp8hwyEl7GZ4X4HHddRVRKxWFsbyKvZx/YW5Z9Ox4sjxVA2qHzEbod4Fdx+SEJA==}
 
-  vega-util@2.1.1:
-    resolution: {integrity: sha512-tpNmm8bGtUa8gKfFDSjXPffxqSyPr91vaWIEBnJS/rijhoLZMwM+mgYQG6XfwdcBSN1+jkZ57P0sYSEW/jophw==}
+  vega-util@2.1.0:
+    resolution: {integrity: sha512-PGfp0m0QCufDmcxKJCWQy4Ov23FoF8DSXmoJwSezi3itQaa2hbxK0+xwsTMP2vy4PR16Pu25HMzgMwXVW1+33w==}
 
   vega-view-transforms@5.1.0:
     resolution: {integrity: sha512-fpigh/xn/32t+An1ShoY3MLeGzNdlbAp2+HvFKzPpmpMTZqJEWkk/J/wHU7Swyc28Ta7W1z3fO+8dZkOYO5TWQ==}
@@ -33519,7 +33523,7 @@ snapshots:
       '@babel/types': 7.21.2
       '@types/babel__generator': 7.27.0
       '@types/babel__template': 7.4.4
-      '@types/babel__traverse': 7.28.0
+      '@types/babel__traverse': 7.20.6
 
   '@types/babel__generator@7.27.0':
     dependencies:
@@ -33530,9 +33534,9 @@ snapshots:
       '@babel/parser': 7.24.7
       '@babel/types': 7.21.2
 
-  '@types/babel__traverse@7.28.0':
+  '@types/babel__traverse@7.20.6':
     dependencies:
-      '@babel/types': 7.29.7
+      '@babel/types': 7.21.2
 
   '@types/body-parser@1.19.6':
     dependencies:
@@ -33674,17 +33678,19 @@ snapshots:
 
   '@types/eslint@7.29.0':
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 0.0.50
       '@types/json-schema': 7.0.15
 
   '@types/eslint@8.44.2':
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 0.0.50
       '@types/json-schema': 7.0.15
 
   '@types/estree-jsx@1.0.5':
     dependencies:
       '@types/estree': 1.0.9
+
+  '@types/estree@0.0.50': {}
 
   '@types/estree@1.0.5': {}
 
@@ -33731,11 +33737,10 @@ snapshots:
 
   '@types/getos@3.0.4': {}
 
-  '@types/glob-stream@8.0.3':
+  '@types/glob-stream@6.1.0':
     dependencies:
+      '@types/glob': 7.2.0
       '@types/node': 24.10.13
-      '@types/picomatch': 4.0.2
-      '@types/streamx': 2.9.5
 
   '@types/glob@7.2.0':
     dependencies:
@@ -34182,10 +34187,6 @@ snapshots:
 
   '@types/statuses@2.0.6': {}
 
-  '@types/streamx@2.9.5':
-    dependencies:
-      '@types/node': 24.10.13
-
   '@types/styled-components@5.1.0(@babel/core@7.26.8)(react@18.2.0)':
     dependencies:
       '@types/hoist-non-react-statics': 3.3.7(@types/react@18.2.79)
@@ -34266,7 +34267,7 @@ snapshots:
 
   '@types/vinyl-fs@3.0.6':
     dependencies:
-      '@types/glob-stream': 8.0.3
+      '@types/glob-stream': 6.1.0
       '@types/node': 24.10.13
       '@types/vinyl': 2.0.12
 
@@ -35207,7 +35208,7 @@ snapshots:
       '@babel/template': 7.29.7
       '@babel/types': 7.21.2
       '@types/babel__core': 7.20.5
-      '@types/babel__traverse': 7.28.0
+      '@types/babel__traverse': 7.20.6
 
   babel-plugin-macros@3.1.0:
     dependencies:
@@ -44020,7 +44021,7 @@ snapshots:
       '@babel/traverse': 7.26.8(supports-color@5.5.0)
       '@babel/types': 7.21.2
       '@types/babel__core': 7.20.5
-      '@types/babel__traverse': 7.28.0
+      '@types/babel__traverse': 7.20.6
       '@types/doctrine': 0.0.9
       '@types/resolve': 1.20.6
       doctrine: 3.0.0
@@ -47037,13 +47038,13 @@ snapshots:
     dependencies:
       d3-array: 3.2.4
       vega-dataflow: 6.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-dataflow@6.1.0:
     dependencies:
       vega-format: 2.1.0
       vega-loader: 5.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-encode@5.1.0:
     dependencies:
@@ -47051,20 +47052,20 @@ snapshots:
       d3-interpolate: 3.0.1
       vega-dataflow: 6.1.0
       vega-scale: 8.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-event-selector@4.0.0: {}
 
   vega-expression@6.1.0:
     dependencies:
       '@types/estree': 1.0.9
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-force@5.1.0:
     dependencies:
       d3-force: 3.0.0
       vega-dataflow: 6.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-format@2.1.0:
     dependencies:
@@ -47072,7 +47073,7 @@ snapshots:
       d3-format: 3.1.2
       d3-time-format: 4.1.0
       vega-time: 3.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-functions@6.1.1:
     dependencies:
@@ -47086,7 +47087,7 @@ snapshots:
       vega-selections: 6.1.2
       vega-statistics: 2.0.0
       vega-time: 3.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-geo@5.1.0:
     dependencies:
@@ -47097,24 +47098,24 @@ snapshots:
       vega-dataflow: 6.1.0
       vega-projection: 2.1.0
       vega-statistics: 2.0.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-hierarchy@5.1.0:
     dependencies:
       d3-hierarchy: 3.1.2
       vega-dataflow: 6.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-interpreter@2.2.1:
     dependencies:
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-label@2.1.0:
     dependencies:
       vega-canvas: 2.0.0
       vega-dataflow: 6.1.0
       vega-scenegraph: 5.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-lite@6.4.1(vega@6.2.0):
     dependencies:
@@ -47123,7 +47124,7 @@ snapshots:
       vega: 6.2.0
       vega-event-selector: 4.0.0
       vega-expression: 6.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
       yargs: 18.0.0
 
   vega-loader@5.1.0:
@@ -47131,7 +47132,7 @@ snapshots:
       d3-dsv: 3.0.1
       topojson-client: 3.1.0
       vega-format: 2.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-parser@7.1.0:
     dependencies:
@@ -47139,7 +47140,7 @@ snapshots:
       vega-event-selector: 4.0.0
       vega-functions: 6.1.1
       vega-scale: 8.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-projection@2.1.0:
     dependencies:
@@ -47152,12 +47153,12 @@ snapshots:
       d3-array: 3.2.4
       vega-dataflow: 6.1.0
       vega-statistics: 2.0.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-runtime@7.1.0:
     dependencies:
       vega-dataflow: 6.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-scale@8.1.0:
     dependencies:
@@ -47166,7 +47167,7 @@ snapshots:
       d3-scale: 4.0.2
       d3-scale-chromatic: 3.1.0
       vega-time: 3.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-scenegraph@5.1.0:
     dependencies:
@@ -47175,7 +47176,7 @@ snapshots:
       vega-canvas: 2.0.0
       vega-loader: 5.1.0
       vega-scale: 8.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-schema-url-parser@3.0.2: {}
 
@@ -47183,7 +47184,7 @@ snapshots:
     dependencies:
       d3-array: 3.2.4
       vega-expression: 6.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-spec-injector@0.0.2: {}
 
@@ -47195,11 +47196,11 @@ snapshots:
     dependencies:
       d3-array: 3.2.4
       d3-time: 3.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-tooltip@1.1.0:
     dependencies:
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-transforms@5.1.0:
     dependencies:
@@ -47207,22 +47208,22 @@ snapshots:
       vega-dataflow: 6.1.0
       vega-statistics: 2.0.0
       vega-time: 3.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-typings@2.1.0:
     dependencies:
       '@types/geojson': 7946.0.16
       vega-event-selector: 4.0.0
       vega-expression: 6.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
-  vega-util@2.1.1: {}
+  vega-util@2.1.0: {}
 
   vega-view-transforms@5.1.0:
     dependencies:
       vega-dataflow: 6.1.0
       vega-scenegraph: 5.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-view@6.1.0:
     dependencies:
@@ -47233,13 +47234,13 @@ snapshots:
       vega-functions: 6.1.1
       vega-runtime: 7.1.0
       vega-scenegraph: 5.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-voronoi@5.1.0:
     dependencies:
       d3-delaunay: 6.0.4
       vega-dataflow: 6.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega-wordcloud@5.1.0:
     dependencies:
@@ -47247,7 +47248,7 @@ snapshots:
       vega-dataflow: 6.1.0
       vega-scale: 8.1.0
       vega-statistics: 2.0.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
 
   vega@6.2.0:
     dependencies:
@@ -47273,7 +47274,7 @@ snapshots:
       vega-time: 3.1.0
       vega-transforms: 5.1.0
       vega-typings: 2.1.0
-      vega-util: 2.1.1
+      vega-util: 2.1.0
       vega-view: 6.1.0
       vega-view-transforms: 5.1.0
       vega-voronoi: 5.1.0

@@ -83,9 +83,18 @@ export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0', '(MPL-2.0 OR Apache-2.0)'];
 // but can be brought in on a per-package basis
 export const PER_PACKAGE_ALLOWED_LICENSES = {
   'openpgp@5.11.3': ['LGPL-3.0+'],
+  // pnpm records sharp's prebuilt libvips binaries for every platform in the lockfile,
+  // so the license check sees all of them (yarn only pinned the current platform).
   '@img/sharp-libvips-darwin-arm64@1.2.4': ['LGPL-3.0-or-later'],
-  '@img/sharp-libvips-linuxmusl-x64@1.2.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-darwin-x64@1.2.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linux-arm64@1.2.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linux-arm@1.2.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linux-ppc64@1.2.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linux-riscv64@1.2.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linux-s390x@1.2.4': ['LGPL-3.0-or-later'],
   '@img/sharp-libvips-linux-x64@1.2.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linuxmusl-arm64@1.2.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linuxmusl-x64@1.2.4': ['LGPL-3.0-or-later'],
   'dompurify@3.4.11': ['(MPL-2.0 OR Apache-2.0)'],
   'node-liblzma@2.2.0': ['LGPL-3.0'],
 };

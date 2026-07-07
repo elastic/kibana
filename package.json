@@ -2229,6 +2229,9 @@
       "@langchain/core": "1.1.31",
       "@langchain/google-common": "2.1.24",
       "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
+      "@types/babel__traverse": "7.20.6",
+      "@types/eslint>@types/estree": "0.0.50",
+      "@types/glob-stream": "6.1.0",
       "@types/hast>@types/unist": "2.0.3",
       "@types/mdast@^3": "3.0.3",
       "@types/mdast@^4": "4.0.4",
@@ -2262,6 +2265,7 @@
       "socket.io-parser": "4.2.6",
       "typescript": "5.9.3",
       "util": "0.12.5",
+      "vega-util": "2.1.0",
       "vscode-languageserver-types": "3.17.5",
       "yauzl": "3.4.0",
       "zod": "4.4.3"
