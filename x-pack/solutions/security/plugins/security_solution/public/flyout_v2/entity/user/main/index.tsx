@@ -41,6 +41,7 @@ import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_histo
 import { RiskInputs } from '../../shared/tools/risk_inputs';
 import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
 import { AlertsInsights } from '../../shared/tools/alerts_insights';
+import { AnomalyInsights } from '../../shared/tools/anomaly_insights';
 import { OktaInsights } from '../tools/okta_insights';
 import { EntraInsights } from '../tools/entra_insights';
 import { Header } from './header';
@@ -311,6 +312,15 @@ export const User: FC<UserProps> = memo(function User({
               entityName={userName}
               entityId={entityStoreEntityId}
               onShowEntity={onOpenUser}
+            />
+          );
+        case EntityDetailsLeftPanelTab.ANOMALIES:
+          return wrap(
+            <AnomalyInsights
+              entityType={EntityType.user}
+              value={userName}
+              entityId={entityStoreEntityId}
+              onOpenEntity={onOpenUser}
             />
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
