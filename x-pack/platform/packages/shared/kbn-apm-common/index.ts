@@ -63,3 +63,5 @@ export type {
   RawSettingDefinition,
   SettingDefinition,
 } from './src/agent_configuration/setting_definitions/types';
+
+export { truncate, unit } from './src/utils/style';

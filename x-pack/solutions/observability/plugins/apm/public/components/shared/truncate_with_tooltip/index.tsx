@@ -8,7 +8,7 @@
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from '@emotion/styled';
-import { truncate } from '../../../utils/style';
+import { truncate } from '@kbn/apm-common';
 
 const tooltipAnchorClassname = '_apm_truncate_tooltip_anchor_';
 
