@@ -62,6 +62,8 @@ interface BaseLifecyclePhaseProps {
   isRemoveDisabled?: boolean;
   removeDisabledReason?: string;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
 }
 
 interface DeleteLifecyclePhaseProps extends BaseLifecyclePhaseProps {
@@ -111,6 +113,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
     isRemoveDisabled = false,
     removeDisabledReason,
     isEditLifecycleFlyoutOpen = false,
+    disableInteractions = false,
   } = props;
   const isDelete = props.isDelete === true;
   const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
@@ -125,6 +128,9 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
     ((showEnterpriseCallout && Boolean(onUpgradeEnterprise)) || showDefaultRepositoryCallout);
 
   const handleClick = () => {
+    if (disableInteractions) {
+      return;
+    }
     if (isEditLifecycleFlyoutOpen) {
       // When the flyout is open, navigate to this phase instead of showing the popover
       onEditPhase?.(phaseId);
@@ -168,10 +174,11 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
           size={size}
           testSubjPrefix={testSubjPrefix}
           isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+          disableInteractions={disableInteractions}
           showWarningIcon={showWarningIcon}
         />
       }
-      isOpen={isPopoverOpen && !isEditLifecycleFlyoutOpen}
+      isOpen={isPopoverOpen && !isEditLifecycleFlyoutOpen && !disableInteractions}
       closePopover={closePopover}
       anchorPosition="upCenter"
       aria-labelledby={popoverTitleId}
