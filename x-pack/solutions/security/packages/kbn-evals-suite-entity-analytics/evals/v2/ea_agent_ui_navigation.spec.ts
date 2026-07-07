@@ -66,13 +66,13 @@ evaluate.describe(
       });
     });
 
-    evaluate.afterAll(async ({ log, supertest, quickApiClient }) => {
+    evaluate.afterAll(async ({ log, supertest }) => {
       try {
         await deleteWatchlistsByName({ supertest, names: MANAGED_WATCHLIST_NAMES });
       } catch (err) {
         log.warning(`Watchlist cleanup failed during teardown: ${(err as Error).message}`);
       }
-      await deleteEntityEngines({ quickApiClient, log });
+      await deleteEntityEngines({ supertest, log });
     });
 
     evaluate(
