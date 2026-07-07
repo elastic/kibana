@@ -103,6 +103,30 @@ describe('LogsLocatorDefinition', () => {
       expect(delegatedParams.dataViewSpec.id).toBe(ALL_LOGS_DATA_VIEW_SPEC.id);
     });
 
+    it('does not shadow a caller-provided dataViewId with the all-logs spec', async () => {
+      const locator = createLocator(false);
+      const callerQuery = { language: 'kuery', query: 'aws.cloudwatch.namespace: AWS/EC2' };
+
+      await locator.getLocation({ dataViewId: 'metrics-*', query: callerQuery } as any);
+
+      const delegatedParams = mockGetLocation.mock.calls[0][0];
+      expect(delegatedParams).toEqual({ dataViewId: 'metrics-*', query: callerQuery });
+      expect(delegatedParams).not.toHaveProperty('dataViewSpec');
+      expect(mockGetFlattenedLogSources).not.toHaveBeenCalled();
+    });
+
+    it('does not shadow a caller-provided dataViewSpec with the all-logs spec', async () => {
+      const locator = createLocator(false);
+      const callerDataViewSpec = { title: 'logs-aws.ec2-*', timeFieldName: '@timestamp' };
+
+      await locator.getLocation({ dataViewSpec: callerDataViewSpec } as any);
+
+      const delegatedParams = mockGetLocation.mock.calls[0][0];
+      expect(delegatedParams).toEqual({ dataViewSpec: callerDataViewSpec });
+      expect(delegatedParams.dataViewSpec).not.toEqual(ALL_LOGS_DATA_VIEW_SPEC);
+      expect(mockGetFlattenedLogSources).not.toHaveBeenCalled();
+    });
+
     it('spreads consumer-provided params into the delegated call', async () => {
       const locator = createLocator(false);
       const extraParams = {

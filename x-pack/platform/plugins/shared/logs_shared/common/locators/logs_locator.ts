@@ -37,19 +37,30 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
       this.deps.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
 
     const isEsqlDefault = await this.deps.getIsEsqlDefault();
-    const logSourcesService = await this.deps.getLogSourcesService();
-    const flattenedLogSources = await logSourcesService.getFlattenedLogSources();
 
     if (isEsqlDefault && !params.query) {
+      const flattenedLogSources = await this.getFlattenedLogSources();
+
       return discoverAppLocator.getLocation({
         ...params,
         query: { esql: `FROM ${flattenedLogSources}` },
       });
     }
 
+    if (params.dataViewId || params.dataViewSpec) {
+      return discoverAppLocator.getLocation(params);
+    }
+
+    const flattenedLogSources = await this.getFlattenedLogSources();
+
     return discoverAppLocator.getLocation({
-      dataViewSpec: getAllLogsDataViewSpec({ allLogsIndexPattern: flattenedLogSources }),
       ...params,
+      dataViewSpec: getAllLogsDataViewSpec({ allLogsIndexPattern: flattenedLogSources }),
     });
   };
+
+  private async getFlattenedLogSources() {
+    const logSourcesService = await this.deps.getLogSourcesService();
+    return logSourcesService.getFlattenedLogSources();
+  }
 }
