@@ -21,7 +21,10 @@ export function DiagnosticsDataStreams() {
   return (
     <>
       <EuiText>
-        This section shows the APM data streams and their underlying index template.
+        {i18n.translate('xpack.apm.diagnosticsDataStreams.thisSectionShowsTheTextLabel', {
+          defaultMessage:
+            'This section shows the APM data streams and their underlying index template.',
+        })}
       </EuiText>
       <EuiSpacer />
       <DataStreamsTable data={diagnosticsBundle} />
@@ -44,12 +47,18 @@ function DataStreamsTable({ data }: { data?: DiagnosticsBundle }) {
         return indexTemplate?.exists && !indexTemplate?.isNonStandard ? (
           <>
             {templateName}&nbsp;
-            <EuiBadge color="green">OK</EuiBadge>
+            <EuiBadge color="green">
+              {i18n.translate('xpack.apm.columns.okBadgeLabel', { defaultMessage: 'OK' })}
+            </EuiBadge>
           </>
         ) : (
           <>
             {templateName}&nbsp;
-            <EuiBadge color="warning">Non-standard</EuiBadge>
+            <EuiBadge color="warning">
+              {i18n.translate('xpack.apm.columns.nonstandardBadgeLabel', {
+                defaultMessage: 'Non-standard',
+              })}
+            </EuiBadge>
           </>
         );
       },

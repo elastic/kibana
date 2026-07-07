@@ -510,6 +510,7 @@ run(
             errors.push(new Error('jest failed'));
           } else if (result.failed.length > 0) {
             const failCount = result.failed.length;
+            const oomDetected = result.failed.some((task) => task.failures.some((f) => f.oom));
             jestProgress.writeResult(
               line(
                 'jest',
@@ -519,6 +520,13 @@ run(
               )
             );
             writeln('');
+            if (oomDetected) {
+              writeln(
+                '    ⚠ This looks like a Jest worker ran out of memory, not a real test failure.'
+              );
+              writeln('      Try: NODE_OPTIONS=--max-old-space-size=8192 node scripts/check');
+              writeln('');
+            }
             for (const task of result.failed) {
               // Group failures by file
               const byFile = new Map<string, JestFailedTest[]>();

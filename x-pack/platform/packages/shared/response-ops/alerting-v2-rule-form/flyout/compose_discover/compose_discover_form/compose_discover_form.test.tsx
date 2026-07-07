@@ -63,7 +63,10 @@ const mockFindByIds = jest.fn(async (ids: string[]) =>
 );
 
 const mockFindDashboardsService = jest.fn(async () => ({
-  search: jest.fn(async () => ({ total: 0, dashboards: [] })),
+  search: jest.fn(async () => ({
+    data: [],
+    meta: { page: 1, per_page: 100, total: 0 },
+  })),
   findById: jest.fn(),
   findByIds: mockFindByIds,
   findByTitle: jest.fn(),
@@ -335,6 +338,36 @@ describe('step validation', () => {
         getValues: jest.fn().mockReturnValue({ workflows: [] }),
       } as unknown as UseFormReturn<FormValues>;
       expect(await notificationsStep.validate!(methods, state)).toBe(true);
+    });
+  });
+
+  describe('notifications.render', () => {
+    const renderNotificationsStep = (ruleId?: string) =>
+      render(
+        <ComposeDiscoverForm
+          state={createState({ step: 3 })}
+          dispatch={jest.fn()}
+          services={{ ...createMockServices(), dashboard: mockDashboard }}
+          onRecoveryTypeChange={jest.fn()}
+          onKindChange={jest.fn()}
+          isEditing={ruleId !== undefined}
+          ruleId={ruleId}
+        />,
+        { wrapper: createComposeFormWrapper() }
+      );
+
+    it('renders the simple action policy section in create mode', async () => {
+      renderNotificationsStep();
+      await waitFor(() => {
+        expect(screen.getByText('Simple action policy')).toBeInTheDocument();
+      });
+    });
+
+    it('renders the simple action policy section in edit mode', async () => {
+      renderNotificationsStep('rule-1');
+      await waitFor(() => {
+        expect(screen.getByText('Simple action policy')).toBeInTheDocument();
+      });
     });
   });
 

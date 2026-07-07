@@ -16,6 +16,7 @@ import {
   sampleDocument,
 } from './test_helpers';
 import { registerUpsertRoute } from './upsert';
+import { SmlPermissionsConflictError } from '../services/sml/errors';
 
 const validBody = {
   title: 'Test Viz',
@@ -307,5 +308,92 @@ describe('registerUpsertRoute', () => {
       'write failed'
     );
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('write failed'));
+  });
+
+  describe('permissions field', () => {
+    it('forwards a caller-supplied permissions object to indexAttachment', async () => {
+      mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+      mockSmlService.indexAttachment.mockResolvedValue(undefined);
+      mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
+
+      const bodyWithPermissions = {
+        ...validBody,
+        permissions: { elasticsearch: { indices: [{ name: 'my-index' }] } },
+      };
+
+      await callHandler({ params: validParams, body: bodyWithPermissions });
+
+      expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          permissions: {
+            kibana: { privileges: [] },
+            elasticsearch: { indices: [{ name: 'my-index' }] },
+          },
+        })
+      );
+    });
+
+    it('omits permissions from the indexAttachment call when the body does not supply it', async () => {
+      mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+      mockSmlService.indexAttachment.mockResolvedValue(undefined);
+      mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
+
+      await callHandler({ params: validParams, body: validBody });
+
+      const [callArgs] = mockSmlService.indexAttachment.mock.calls;
+      expect(callArgs[0]).not.toHaveProperty('permissions');
+    });
+
+    it('maps SmlPermissionsConflictError to 409 without rethrowing', async () => {
+      mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+      mockSmlService.indexAttachment.mockRejectedValue(
+        new SmlPermissionsConflictError(
+          "attachmentType 'lens' derives permissions via getPermissions()"
+        )
+      );
+
+      const bodyWithPermissions = {
+        ...validBody,
+        permissions: { elasticsearch: { indices: [{ name: 'spoofed' }] } },
+      };
+
+      const response = await callHandler({ params: validParams, body: bodyWithPermissions });
+
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: { message: "attachmentType 'lens' derives permissions via getPermissions()" },
+      });
+      expect(response.ok).not.toHaveBeenCalled();
+      // Client input error, not a server fault — logged at warn, not error,
+      // so it doesn't page anyone via serverless call logs.
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("attachmentType 'lens' derives permissions via getPermissions()")
+      );
+      expect(logger.error).not.toHaveBeenCalledWith(
+        expect.stringContaining("attachmentType 'lens' derives permissions via getPermissions()")
+      );
+    });
+
+    it('rejects permissions.elasticsearch.indices / kibana.privileges arrays over the entry-count cap', () => {
+      // Matches the length cap on the parallel contextEngine.addEntry Zod
+      // schema — an unbounded array here is public-input DoS surface.
+      const [routeConfig] = router.put.mock.calls[0];
+      const bodySchema = (routeConfig as any).validate.body;
+
+      const tooManyIndices = Array.from({ length: 101 }, (_, i) => ({ name: `index-${i}` }));
+      expect(() =>
+        bodySchema.validate({
+          ...validBody,
+          permissions: { elasticsearch: { indices: tooManyIndices } },
+        })
+      ).toThrow(/permissions/);
+
+      const tooManyPrivileges = Array.from({ length: 101 }, (_, i) => ({ name: `priv-${i}` }));
+      expect(() =>
+        bodySchema.validate({
+          ...validBody,
+          permissions: { kibana: { privileges: tooManyPrivileges } },
+        })
+      ).toThrow(/permissions/);
+    });
   });
 });

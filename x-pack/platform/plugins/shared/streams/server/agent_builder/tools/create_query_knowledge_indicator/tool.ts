@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   BuiltinToolDefinition,
@@ -24,7 +24,7 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 
 export const STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID =
-  platformStreamsSigEventsTools.createQueryKnowledgeIndicator;
+  platformSignificantEventsTools.createQueryKnowledgeIndicator;
 
 const queryInputSchema = upsertStreamQueryRequestSchema.extend({
   id: z.string().optional(),
