@@ -14,7 +14,9 @@ import { JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './tes
 import type { RightPanelPaths } from '.';
 import { JsonTab } from '../../../flyout_v2/document/main/tabs/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
-import { TableTab } from './tabs/table_tab';
+import { TableTab } from '../../../flyout_v2/document/main/tabs/table_tab';
+import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
+import { CellActions } from '../shared/components/cell_actions';
 import { useDocumentDetailsContext } from '../shared/context';
 
 export interface RightPanelTabType {
@@ -23,6 +25,38 @@ export interface RightPanelTabType {
   content: React.ReactElement;
   'data-test-subj': string;
 }
+
+/**
+ * Cell action renderer for the document details flyout Table tab. Reuses the expandable flyout's
+ * `CellActions` wrapper, which supplies the full metadata the cell actions rely on — notably
+ * `alertsTableRef` (required by `toggleColumn`), plus `scopeId`, `isObjectArray`, and the
+ * rule-preview `disabledActionTypes`. This keeps the legacy flyout's cell actions behaving exactly
+ * as they did before the table logic moved to `flyout_v2`.
+ */
+const detailsFlyoutCellActionRenderer: CellActionRenderer = ({ field, value, children }) => (
+  <CellActions field={field} value={value as string[] | string | null | undefined}>
+    {children}
+  </CellActions>
+);
+
+/**
+ * Adapter that bridges the expandable flyout's `DocumentDetailsContext` to the prop-based
+ * `TableTab` that now lives in `flyout_v2`. The table logic has a single source of truth in
+ * `flyout_v2`; this component only reads the context and forwards the values as props.
+ */
+const TableTabContent = memo(() => {
+  const { searchHit, scopeId, isRulePreview } = useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+  return (
+    <TableTab
+      hit={hit}
+      scopeId={scopeId}
+      isRulePreview={isRulePreview}
+      renderCellActions={detailsFlyoutCellActionRenderer}
+    />
+  );
+});
+TableTabContent.displayName = 'TableTabContent';
 
 /**
  * Adapter that bridges the expandable flyout's `DocumentDetailsContext` to the prop-based
@@ -56,7 +90,7 @@ export const tableTab: RightPanelTabType = {
       defaultMessage="Table"
     />
   ),
-  content: <TableTab />,
+  content: <TableTabContent />,
 };
 
 export const jsonTab: RightPanelTabType = {
