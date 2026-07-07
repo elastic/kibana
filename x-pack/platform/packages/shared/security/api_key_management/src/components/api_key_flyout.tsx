@@ -458,6 +458,10 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                               <EuiIconTip
                                 type="key"
                                 size="s"
+                                aria-label={i18n.translate(
+                                  'xpack.security.accountManagement.apiKeyFlyout.strongVerificationIconLabel',
+                                  { defaultMessage: 'Strong identity verification enabled' }
+                                )}
                                 content={i18n.translate(
                                   'xpack.security.accountManagement.apiKeyFlyout.strongVerificationTooltip',
                                   { defaultMessage: 'Strong identity verification enabled' }
