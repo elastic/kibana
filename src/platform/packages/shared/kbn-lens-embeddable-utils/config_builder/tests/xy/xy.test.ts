@@ -84,6 +84,51 @@ describe('XY', () => {
         validator.xy.fromState(barWithTwoLayersAttributes);
       });
 
+      // Regression test for https://github.com/elastic/kibana/issues/268820
+      // Column/accessor ids must be unique across the whole document, not just
+      // within a layer. Two layers of the same series type used to produce
+      // colliding column ids (e.g. both `line_x`/`line_y_0`) on the
+      // `fromAPIFormat` round trip, which corrupts multi-layer state and prevents
+      // the suggestion engine from recognizing the layer/column shape (e.g. the
+      // treemap suggestion no longer appears when transitioning a multi-layer
+      // stacked bar chart).
+      it('produces unique, layer-aligned column ids for a multi-layer chart after an API round trip', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(barWithTwoLayersAttributes);
+        const lensState = builder.fromAPIFormat(api);
+
+        const layers = lensState.state.datasourceStates.formBased?.layers ?? {};
+
+        // Column ids must be globally unique across all layers.
+        const allColumnIds = Object.values(layers).flatMap((layer) => Object.keys(layer.columns));
+        expect(new Set(allColumnIds).size).toBe(allColumnIds.length);
+
+        // Every visualization data-layer accessor must resolve to a column in its
+        // own datasource layer.
+        const visualizationLayers = (lensState.state.visualization as XYVisualizationState).layers;
+        for (const vizLayer of visualizationLayers as Array<{
+          layerId: string;
+          layerType?: string;
+          accessors?: string[];
+          xAccessor?: string;
+          splitAccessors?: string[];
+        }>) {
+          if (vizLayer.layerType && vizLayer.layerType !== 'data') {
+            continue;
+          }
+          const layerColumns = layers[vizLayer.layerId]?.columns ?? {};
+          for (const accessor of vizLayer.accessors ?? []) {
+            expect(layerColumns).toHaveProperty(accessor);
+          }
+          if (vizLayer.xAccessor) {
+            expect(layerColumns).toHaveProperty(vizLayer.xAccessor);
+          }
+          for (const splitAccessor of vizLayer.splitAccessors ?? []) {
+            expect(layerColumns).toHaveProperty(splitAccessor);
+          }
+        }
+      });
+
       it('should convert a mixed chart with 3 layers', () => {
         validator.xy.fromState(mixedChartAttributes);
       });
