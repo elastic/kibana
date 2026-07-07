@@ -60,7 +60,7 @@ const InvestigationRow = ({ investigation }: { investigation: SignificantEventIn
    */
   const { state, error, status } = useInvestigationState({
     http,
-    executionId: workflow_execution_id,
+    workflowExecutionId: workflow_execution_id,
     isRunning: isInvestigationRunning(investigation),
   });
 

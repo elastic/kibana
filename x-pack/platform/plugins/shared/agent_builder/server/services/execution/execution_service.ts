@@ -79,20 +79,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     if (providedExecutionId) {
       const existing = await executionClient.peek(providedExecutionId);
-      /**
-       * Only an *active* execution blocks id reuse. A terminal (completed/failed/aborted)
-       * execution with the same id is replaced, so callers that pin the id to a value they
-       * derive deterministically (e.g. a workflow execution id — see the ai.agent step's
-       * `execution_id` input) can retry after a failed attempt instead of erroring forever.
-       */
-      if (
-        existing &&
-        (existing.status === ExecutionStatus.scheduled ||
-          existing.status === ExecutionStatus.running)
-      ) {
-        throw createBadRequestError(
-          `Execution with id ${providedExecutionId} already exists and is still ${existing.status}`
-        );
+      if (existing) {
+        throw createBadRequestError(`Execution with id ${providedExecutionId} already exists`);
       }
     }
 

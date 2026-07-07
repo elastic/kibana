@@ -41,7 +41,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           message,
           conversation_id: conversationId,
           attachments,
-          execution_id: callerExecutionId,
+          metadata,
         } = context.input;
 
         const {
@@ -80,7 +80,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           mode: AgentExecutionMode.conversation,
           request,
           abortSignal: context.abortSignal,
-          executionId: callerExecutionId,
+          metadata,
           params: {
             agentId: effectiveAgentId,
             connectorId: effectiveConnectorId,

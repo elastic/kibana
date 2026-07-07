@@ -13,8 +13,13 @@ import { ChatEventType } from '@kbn/agent-builder-common';
 import { INVESTIGATION_PROGRESS_UI_EVENT } from '@kbn/significant-events-schema';
 import { useInvestigationState } from './use_investigation_state';
 
+const FIND_EXECUTION_PATH = '/internal/agent_builder/executions/_find';
+const RESOLVED_AGENT_EXECUTION_ID = 'agent-exec-1';
+const FOLLOW_PATH = `/internal/agent_builder/executions/${RESOLVED_AGENT_EXECUTION_ID}/follow`;
+
 let mockEvents$: Observable<unknown>;
 const mockGetExecution = jest.fn();
+const mockFindAgentExecution = jest.fn();
 
 jest.mock('@kbn/sse-utils-client', () => ({
   /**
@@ -55,14 +60,35 @@ describe('useInvestigationState', () => {
     mockSubject = new Subject();
     mockEvents$ = mockSubject;
     mockGetExecution.mockReset();
+    mockFindAgentExecution.mockReset().mockResolvedValue({
+      executionId: RESOLVED_AGENT_EXECUTION_ID,
+    });
   });
 
-  const createHttp = () => ({ get: jest.fn().mockResolvedValue({}) } as unknown as HttpSetup);
+  const createHttp = () => {
+    const get = jest.fn((path: string) => {
+      if (path === FIND_EXECUTION_PATH) {
+        return mockFindAgentExecution();
+      }
+      return Promise.resolve({});
+    });
+    return { get } as unknown as HttpSetup;
+  };
 
-  it('does nothing when executionId is undefined, deriving status from the input flag', () => {
+  /** Waits until the hook has resolved the agent execution id and attached its follow stream. */
+  const waitUntilFollowing = async (http: HttpSetup) => {
+    await waitFor(() => {
+      expect(http.get).toHaveBeenCalledWith(
+        FOLLOW_PATH,
+        expect.objectContaining({ asResponse: true, rawResponse: true })
+      );
+    });
+  };
+
+  it('does nothing when workflowExecutionId is undefined, deriving status from the input flag', () => {
     const http = createHttp();
     const { result } = renderHook(() =>
-      useInvestigationState({ http, executionId: undefined, isRunning: true })
+      useInvestigationState({ http, workflowExecutionId: undefined, isRunning: true })
     );
 
     expect(http.get).not.toHaveBeenCalled();
@@ -78,7 +104,7 @@ describe('useInvestigationState', () => {
       const http = createHttp();
 
       const { result } = renderHook(() =>
-        useInvestigationState({ http, executionId: 'exec-1', isRunning: false })
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: false })
       );
 
       expect(result.current.status).toBe('loading');
@@ -99,7 +125,7 @@ describe('useInvestigationState', () => {
       const http = createHttp();
 
       const { result } = renderHook(() =>
-        useInvestigationState({ http, executionId: 'exec-1', isRunning: false })
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: false })
       );
 
       await waitFor(() => {
@@ -114,7 +140,7 @@ describe('useInvestigationState', () => {
       const http = createHttp();
 
       const { result } = renderHook(() =>
-        useInvestigationState({ http, executionId: 'exec-1', isRunning: false })
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: false })
       );
 
       await waitFor(() => {
@@ -130,7 +156,7 @@ describe('useInvestigationState', () => {
         const http = createHttp();
 
         const { result } = renderHook(() =>
-          useInvestigationState({ http, executionId: 'exec-1', isRunning: false })
+          useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: false })
         );
 
         await act(async () => {
@@ -156,7 +182,7 @@ describe('useInvestigationState', () => {
         const http = createHttp();
 
         const { result } = renderHook(() =>
-          useInvestigationState({ http, executionId: 'exec-1', isRunning: false })
+          useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: false })
         );
 
         await act(async () => {
@@ -177,7 +203,7 @@ describe('useInvestigationState', () => {
       const http = createHttp();
 
       const { result } = renderHook(() =>
-        useInvestigationState({ http, executionId: 'exec-1', isRunning: false })
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: false })
       );
 
       await waitFor(() => {
@@ -195,7 +221,7 @@ describe('useInvestigationState', () => {
         const http = createHttp();
 
         const { result } = renderHook(() =>
-          useInvestigationState({ http, executionId: 'exec-1', isRunning: false })
+          useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: false })
         );
 
         await act(async () => {
@@ -204,7 +230,7 @@ describe('useInvestigationState', () => {
 
         expect(result.current.status).toBe('running');
         expect(http.get).toHaveBeenCalledWith(
-          '/internal/agent_builder/executions/exec-1/follow',
+          FOLLOW_PATH,
           expect.objectContaining({ asResponse: true, rawResponse: true })
         );
       } finally {
@@ -213,18 +239,64 @@ describe('useInvestigationState', () => {
     });
   });
 
-  describe('isRunning: true — follow live, settle via the workflow execution', () => {
-    it('follows the execution and applies validated investigation_progress snapshots', async () => {
+  describe('isRunning: true — resolve the agent execution id, follow live, settle via the workflow execution', () => {
+    it('resolves the agent execution id by its workflow_execution_id metadata tag before following', async () => {
       const http = createHttp();
       const { result } = renderHook(() =>
-        useInvestigationState({ http, executionId: 'exec-1', isRunning: true })
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: true })
       );
 
+      expect(result.current.status).toBe('running');
+      await waitUntilFollowing(http);
+
       expect(http.get).toHaveBeenCalledWith(
-        '/internal/agent_builder/executions/exec-1/follow',
+        FIND_EXECUTION_PATH,
+        expect.objectContaining({
+          query: { metadataKey: 'workflow_execution_id', metadataValue: 'exec-1' },
+        })
+      );
+      expect(http.get).toHaveBeenCalledWith(
+        FOLLOW_PATH,
         expect.objectContaining({ asResponse: true, rawResponse: true })
       );
-      expect(result.current.status).toBe('running');
+    });
+
+    it('polls the find-by-metadata endpoint until it resolves an id, without calling follow in between', async () => {
+      jest.useFakeTimers();
+      try {
+        mockFindAgentExecution
+          .mockResolvedValueOnce({ executionId: null })
+          .mockResolvedValue({ executionId: RESOLVED_AGENT_EXECUTION_ID });
+        const http = createHttp();
+
+        const { result } = renderHook(() =>
+          useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: true })
+        );
+
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(0);
+        });
+        expect(http.get).not.toHaveBeenCalledWith(FOLLOW_PATH, expect.anything());
+        expect(result.current.status).toBe('running');
+
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(3000);
+        });
+        expect(http.get).toHaveBeenCalledWith(
+          FOLLOW_PATH,
+          expect.objectContaining({ asResponse: true, rawResponse: true })
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('applies validated investigation_progress snapshots once following', async () => {
+      const http = createHttp();
+      const { result } = renderHook(() =>
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: true })
+      );
+      await waitUntilFollowing(http);
 
       const snapshot = { summary: 'Gathering evidence.', hypotheses: [] };
       act(() => {
@@ -239,8 +311,9 @@ describe('useInvestigationState', () => {
     it('ignores malformed progress payloads instead of rendering them', async () => {
       const http = createHttp();
       const { result } = renderHook(() =>
-        useInvestigationState({ http, executionId: 'exec-1', isRunning: true })
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: true })
       );
+      await waitUntilFollowing(http);
 
       const snapshot = { summary: 'valid', hypotheses: [] };
       act(() => {
@@ -256,8 +329,9 @@ describe('useInvestigationState', () => {
     it('replaces the previous state wholesale with each snapshot', async () => {
       const http = createHttp();
       const { result } = renderHook(() =>
-        useInvestigationState({ http, executionId: 'exec-1', isRunning: true })
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: true })
       );
+      await waitUntilFollowing(http);
 
       const hypothesisA = { candidate: 'A', confidence: 0.4, status: 'investigating' as const };
       const hypothesisB = { candidate: 'B', confidence: 0.5, status: 'investigating' as const };
@@ -282,8 +356,9 @@ describe('useInvestigationState', () => {
       const http = createHttp();
 
       const { result } = renderHook(() =>
-        useInvestigationState({ http, executionId: 'exec-1', isRunning: true })
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: true })
       );
+      await waitUntilFollowing(http);
 
       act(() => {
         mockSubject.next(progressEvent({ summary: 'live', hypotheses: [] }));
@@ -308,9 +383,12 @@ describe('useInvestigationState', () => {
         const http = createHttp();
 
         const { result } = renderHook(() =>
-          useInvestigationState({ http, executionId: 'exec-1', isRunning: true })
+          useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: true })
         );
 
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(0);
+        });
         act(() => {
           mockSubject.complete();
         });
@@ -328,12 +406,12 @@ describe('useInvestigationState', () => {
     it('re-follows instead of failing when the stream errors while the workflow still runs', async () => {
       jest.useFakeTimers();
       try {
-        mockEvents$ = throwError(() => new Error('Execution exec-1 not found'));
+        mockEvents$ = throwError(() => new Error('Execution not found'));
         mockGetExecution.mockResolvedValue({ status: 'running', stepExecutions: [] });
         const http = createHttp();
 
         const { result } = renderHook(() =>
-          useInvestigationState({ http, executionId: 'exec-1', isRunning: true })
+          useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: true })
         );
 
         await act(async () => {
@@ -342,7 +420,35 @@ describe('useInvestigationState', () => {
 
         expect(result.current.status).toBe('running');
         expect(result.current.error).toBeUndefined();
-        expect((http.get as jest.Mock).mock.calls.length).toBeGreaterThan(1);
+        expect(mockFindAgentExecution.mock.calls.length).toBeGreaterThan(1);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('re-resolves the agent execution id (not just re-follows the previous one) after a stream error', async () => {
+      jest.useFakeTimers();
+      try {
+        const SECOND_AGENT_EXECUTION_ID = 'agent-exec-2';
+        mockFindAgentExecution
+          .mockResolvedValueOnce({ executionId: RESOLVED_AGENT_EXECUTION_ID })
+          .mockResolvedValue({ executionId: SECOND_AGENT_EXECUTION_ID });
+        mockEvents$ = throwError(() => new Error('stream boom'));
+        mockGetExecution.mockResolvedValue({ status: 'running', stepExecutions: [] });
+        const http = createHttp();
+
+        renderHook(() =>
+          useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: true })
+        );
+
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(4000);
+        });
+
+        expect(http.get).toHaveBeenCalledWith(
+          `/internal/agent_builder/executions/${SECOND_AGENT_EXECUTION_ID}/follow`,
+          expect.objectContaining({ asResponse: true, rawResponse: true })
+        );
       } finally {
         jest.useRealTimers();
       }
@@ -356,7 +462,7 @@ describe('useInvestigationState', () => {
       const http = createHttp();
 
       const { result } = renderHook(() =>
-        useInvestigationState({ http, executionId: 'exec-1', isRunning: true })
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: true })
       );
 
       await waitFor(() => {

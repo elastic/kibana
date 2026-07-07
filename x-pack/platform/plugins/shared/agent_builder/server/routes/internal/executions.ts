@@ -25,6 +25,35 @@ export function registerInternalExecutionRoutes({
 
   router.get(
     {
+      path: `${internalApiPath}/executions/_find`,
+      security: {
+        authz: {
+          requiredPrivileges: [apiPrivileges.readAgentBuilder],
+        },
+      },
+      options: { access: 'internal' },
+      validate: {
+        query: schema.object({
+          metadataKey: schema.string(),
+          metadataValue: schema.string(),
+        }),
+      },
+    },
+    wrapHandler(async (context, request, response) => {
+      const { execution: executionService } = getInternalServices();
+      const { metadataKey, metadataValue } = request.query;
+
+      const executions = await executionService.findExecutions(request, {
+        filter: { metadata: { [metadataKey]: metadataValue } },
+        size: 1,
+      });
+
+      return response.ok({ body: { executionId: executions[0]?.executionId ?? null } });
+    })
+  );
+
+  router.get(
+    {
       path: `${internalApiPath}/executions/{executionId}/follow`,
       security: {
         authz: {

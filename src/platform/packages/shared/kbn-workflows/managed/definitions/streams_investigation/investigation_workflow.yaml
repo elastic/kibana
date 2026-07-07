@@ -77,10 +77,12 @@ steps:
     create-conversation: true
     with:
       timeout: 1800s
-      # Pin the agent execution id to the workflow execution id so callers that already
-      # know it (e.g. the UI, or the significant event this investigation is attached to)
-      # can follow the agent's live progress before this step returns.
-      execution_id: "{{ execution.id }}"
+      # Tag the agent execution with the workflow execution id so callers that already know
+      # it (e.g. the UI, or the significant event this investigation is attached to) can look
+      # up the agent execution's (auto-generated) id via findExecutions and follow its live
+      # progress before this step returns.
+      metadata:
+        workflow_execution_id: "{{ execution.id }}"
       message: |
         Investigate the root cause of the following issue:
 

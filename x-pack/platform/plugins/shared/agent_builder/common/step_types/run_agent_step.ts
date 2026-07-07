@@ -75,16 +75,17 @@ export const InputSchema = z.object({
     .optional()
     .describe('Optional existing conversation ID to continue a previous conversation.'),
   /**
-   * Optional caller-provided id for the underlying agent execution. Lets a caller that already
-   * knows this id (e.g. the workflow execution id) follow the agent's live event stream
-   * (tool calls, reasoning, custom UI events) via the agent execution follow API while this
-   * step is still running, instead of waiting for the step to complete.
+   * Optional arbitrary key-value tags stored with the underlying agent execution, searchable
+   * via the execution service's findExecutions. Lets a caller that doesn't yet know the
+   * execution's (auto-generated) id look it up by a tag it does know — e.g. the workflow
+   * execution id — to follow the agent's live event stream (tool calls, reasoning, custom UI
+   * events) while this step is still running, instead of waiting for the step to complete.
    */
-  execution_id: z
-    .string()
+  metadata: z
+    .record(z.string(), z.string())
     .optional()
     .describe(
-      'Optional caller-provided id for the underlying agent execution. Callers that know this id upfront can follow the agent execution live (e.g. via the execution follow API) while the step is still running.'
+      'Optional key-value tags stored with the underlying agent execution and searchable via findExecutions. Callers that need to discover the execution id before this step completes (e.g. to follow it live) can tag it with a value they already know and look it up by that tag.'
     ),
 });
 
@@ -346,17 +347,15 @@ When a schema is provided, the agent's response will be available in \`output.st
   type: ${RunAgentStepTypeId}
   agent-id: "my-custom-agent"
   with:
-    execution_id: "{{ execution.id }}"
+    metadata:
+      workflow_execution_id: "{{ execution.id }}"
     message: "Investigate the root cause of the issue."
 \`\`\`
 
-Pinning \`execution_id\` to a value the caller already knows (such as the workflow execution id)
-lets the caller follow the agent's live event stream — tool calls, reasoning, and custom UI
-events — before this step returns.
-
-Reusing an id whose previous execution has ended (completed, failed, or aborted) replaces that
-execution — so a retried step (e.g. via \`on-failure: retry\`) works with a pinned id. Only an id
-whose execution is still active is rejected.`,
+Tagging the execution with a value the caller already knows (such as the workflow execution id)
+lets the caller look up the agent execution's (auto-generated) id via the execution service's
+findExecutions, then follow its live event stream — tool calls, reasoning, and custom UI events —
+before this step returns.`,
     ],
   },
   inputSchema: InputSchema,

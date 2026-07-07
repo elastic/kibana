@@ -466,8 +466,8 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
   });
 
-  describe('execution_id', () => {
-    it('forwards input.execution_id as executionId to executeAgent', async () => {
+  describe('execution_id and metadata', () => {
+    it('forwards input.metadata to executeAgent', async () => {
       const events$ = of({
         type: ChatEventType.roundComplete,
         data: { round: { id: 'r-1', response: { message: 'ok' } } },
@@ -478,12 +478,12 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
       await step.handler(
         createContext({
-          input: { message: 'hello', execution_id: 'caller-provided-id' },
+          input: { message: 'hello', metadata: { workflow_execution_id: 'wf-exec-1' } },
         })
       );
 
       expect(execution.executeAgent).toHaveBeenCalledWith(
-        expect.objectContaining({ executionId: 'caller-provided-id' })
+        expect.objectContaining({ metadata: { workflow_execution_id: 'wf-exec-1' } })
       );
     });
 

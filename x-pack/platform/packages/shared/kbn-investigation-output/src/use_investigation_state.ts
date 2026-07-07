@@ -24,9 +24,18 @@ import {
 import type { InvestigationStatus } from './types';
 
 /**
- * How long to wait before re-following the live stream after it errored while the workflow
- * execution is still running (e.g. the agent execution doesn't exist yet at the very start of
- * a run, or the follow endpoint's idle/total timeout kicked in mid-run).
+ * Path of the internal route that resolves the agent execution tagged with a given metadata
+ * key/value pair to its (auto-generated) execution id. See `executions.ts`'s `_find` route.
+ */
+const FIND_EXECUTION_PATH = '/internal/agent_builder/executions/_find';
+/** Metadata key the investigation workflow tags its agent execution with (see the YAML). */
+const WORKFLOW_EXECUTION_ID_METADATA_KEY = 'workflow_execution_id';
+
+/**
+ * How long to wait before retrying to attach to the live agent execution — either because it
+ * hasn't been created yet (the metadata lookup found nothing) or because a stream that was
+ * attached errored while the workflow execution is still running (e.g. the follow endpoint's
+ * idle/total timeout kicked in mid-run, or a step retry replaced the agent execution).
  */
 const REFOLLOW_DELAY_MS = 3000;
 /**
@@ -77,30 +86,30 @@ export interface UseInvestigationStateResult {
  * `investigation_progress` `tool_ui` events AND the schema of the `investigate` step's final
  * structured output persisted to the workflow execution document.
  *
- * - While the investigation runs, follows the agent execution's live event stream
- *   (`GET /internal/agent_builder/executions/{executionId}/follow`); each event carries the
- *   full current state (validated).
+ * - While the investigation runs, the underlying agent execution's id isn't known upfront (it's
+ *   auto-generated) — the workflow tags it with `workflowExecutionId` as metadata instead of
+ *   pinning it (agent execution ids must stay unique; see `investigation_workflow.yaml`). This
+ *   hook resolves that tag to the live execution id via the `_find` route, then follows its
+ *   event stream (`GET /internal/agent_builder/executions/{executionId}/follow`); each event
+ *   carries the full current state (validated). If resolution finds nothing yet (the `ai.agent`
+ *   step hasn't started), or an attached stream errors while the workflow is still running (the
+ *   follow endpoint's timeout, or a step retry replacing the agent execution), it retries the
+ *   resolve-then-follow sequence from scratch.
  * - When the stream ends (or the caller already knows the run is over), reads the persisted
- *   final result via `WorkflowApi` — but only trusts it once the workflow execution itself is
- *   terminal. A stream error on a still-running execution (the agent execution may not exist
- *   yet at the very start of a run, or the follow endpoint timed out mid-run) resumes following
- *   instead of surfacing a false failure, and a just-completed execution whose output hasn't
- *   been persisted yet is retried briefly instead of being reported as unloadable.
+ *   final result via `WorkflowApi`, keyed by `workflowExecutionId` — but only trusts it once the
+ *   workflow execution itself is terminal. A just-completed execution whose output hasn't been
+ *   persisted yet is retried briefly instead of being reported as unloadable.
  * - The investigation *failing* (`failed`, with the step's error) is distinguished from its
  *   result being *unloadable* (`unavailable`, e.g. missing privileges) — see
  *   {@link InvestigationStatus}.
- *
- * `executionId` must be the id of the underlying agent execution — the investigation workflow
- * pins this to its own workflow execution id (see `investigation_workflow.yaml`), so the workflow
- * execution id can be passed directly for both the live-follow and the fetch-final path.
  */
 export function useInvestigationState({
   http,
-  executionId,
+  workflowExecutionId,
   isRunning: isRunningInput,
 }: {
   http: HttpSetup;
-  executionId: string | undefined;
+  workflowExecutionId: string | undefined;
   /** Whether the caller believes the investigation is still running. May lag reality. */
   isRunning: boolean;
 }): UseInvestigationStateResult {
@@ -112,12 +121,12 @@ export function useInvestigationState({
   const lastExecutionIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    if (!executionId) {
+    if (!workflowExecutionId) {
       return;
     }
 
-    if (lastExecutionIdRef.current !== executionId) {
-      lastExecutionIdRef.current = executionId;
+    if (lastExecutionIdRef.current !== workflowExecutionId) {
+      lastExecutionIdRef.current = workflowExecutionId;
       setState(undefined);
     }
     setSettled(undefined);
@@ -159,7 +168,9 @@ export function useInvestigationState({
       attempt?: number;
     }) => {
       try {
-        const execution = await workflowApi.getExecution(executionId, { includeOutput: true });
+        const execution = await workflowApi.getExecution(workflowExecutionId, {
+          includeOutput: true,
+        });
         if (cancelled) {
           return;
         }
@@ -215,13 +226,39 @@ export function useInvestigationState({
       }
     };
 
-    const followLive = () => {
+    /**
+     * Resolves the live agent execution's (auto-generated) id from the `workflowExecutionId`
+     * tag the workflow stamped on it as metadata — see `investigation_workflow.yaml`. Returns
+     * `null` when no execution has been tagged yet (the `ai.agent` step hasn't started).
+     */
+    const resolveAgentExecutionId = async (): Promise<string | null> => {
+      const response = await http.get<{ executionId: string | null }>(FIND_EXECUTION_PATH, {
+        query: {
+          metadataKey: WORKFLOW_EXECUTION_ID_METADATA_KEY,
+          metadataValue: workflowExecutionId,
+        },
+        signal: abortController.signal,
+      });
+      return response.executionId;
+    };
+
+    const followLive = async () => {
       if (cancelled) {
         return;
       }
       setIsFollowing(true);
+
+      const agentExecutionId = await resolveAgentExecutionId().catch(() => null);
+      if (cancelled) {
+        return;
+      }
+      if (!agentExecutionId) {
+        retryTimer = setTimeout(followLive, REFOLLOW_DELAY_MS);
+        return;
+      }
+
       subscription = defer(() =>
-        http.get(`/internal/agent_builder/executions/${executionId}/follow`, {
+        http.get(`/internal/agent_builder/executions/${agentExecutionId}/follow`, {
           signal: abortController.signal,
           asResponse: true,
           rawResponse: true,
@@ -258,7 +295,7 @@ export function useInvestigationState({
       abortController.abort();
       subscription?.unsubscribe();
     };
-  }, [http, executionId, isRunningInput]);
+  }, [http, workflowExecutionId, isRunningInput]);
 
   const status: InvestigationStatus =
     settled?.status ?? (isFollowing || isRunningInput ? 'running' : 'loading');
