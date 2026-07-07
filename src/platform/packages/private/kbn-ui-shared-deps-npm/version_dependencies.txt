@@ -28,13 +28,13 @@
 @elastic/charts@71.8.0
 @elastic/datemath@5.0.3
 @elastic/emotion-sheet@1.4.1
-@elastic/esql@4.9.0
+@elastic/esql@4.9.1
 @elastic/eui-theme-borealis@8.0.0
 @elastic/eui-theme-common@10.0.0
 @elastic/eui@116.5.0
 @elastic/numeral@2.5.1
-@elastic/pretty-printer@4.9.0
-@elastic/prismjs-esql@1.1.2
+@elastic/pretty-printer@4.9.1
+@elastic/prismjs-esql@1.1.4
 @emnapi/core@1.11.1
 @emnapi/runtime@1.11.1
 @emnapi/wasi-threads@1.2.2
@@ -197,7 +197,7 @@
 @types/istanbul-reports@3.0.4
 @types/json-schema@7.0.15
 @types/lodash@4.17.20
-@types/mdast@3.0.15
+@types/mdast@3.0.3
 @types/mime@1.3.5
 @types/minimatch@6.0.0
 @types/node@24.10.13
@@ -220,7 +220,7 @@
 @types/serve-static@1.15.10
 @types/serve-static@2.2.0
 @types/sockjs@0.3.36
-@types/unist@2.0.11
+@types/unist@2.0.3
 @types/use-sync-external-store@0.0.3
 @types/use-sync-external-store@0.0.6
 @types/ws@8.18.1
@@ -937,7 +937,7 @@ web-namespaces@1.1.4
 webpack-bundle-analyzer@4.10.2
 webpack-cli@5.1.4
 webpack-dev-middleware@7.4.5
-webpack-dev-server@5.2.5
+webpack-dev-server@5.2.6
 webpack-merge@5.10.0
 webpack-sources@3.2.3
 webpack@5.96.1

@@ -505,6 +505,14 @@
       "minimumReleaseAge": "14 days"
     },
     {
+      "groupName": "markdown AST types",
+      "matchDepNames": ["@types/mdast", "@types/unist"],
+      "reviewers": ["team:kibana-cases", "team:security-solution"],
+      "matchBaseBranches": ["main"],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
       "groupName": "use-resize-observer",
       "matchDepNames": ["use-resize-observer"],
       "reviewers": ["team:kibana-presentation", "team:security-solution"],

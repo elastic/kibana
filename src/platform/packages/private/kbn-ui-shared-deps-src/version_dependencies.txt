@@ -509,14 +509,14 @@ vary@1.1.2
 vscode-jsonrpc@9.0.0
 vscode-languageserver-protocol@3.18.1
 vscode-languageserver-textdocument@1.0.12
-vscode-languageserver-types@3.18.0
+vscode-languageserver-types@3.17.5
 vscode-uri@3.1.0
 watchpack@2.5.2
 wbuf@1.7.3
 webpack-bundle-analyzer@4.10.2
 webpack-cli@5.1.4
 webpack-dev-middleware@7.4.5
-webpack-dev-server@5.2.5
+webpack-dev-server@5.2.6
 webpack-merge@5.10.0
 webpack-sources@3.2.3
 webpack@5.96.1
