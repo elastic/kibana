@@ -32,6 +32,7 @@ import {
   useLink,
   useStartServices,
   useUpgradePackagePolicyDryRunQuery,
+  useUpgradeAgentlessPoliciesDryRunQuery,
   useUpdatePackageMutation,
   useAuthz,
 } from '../../../../../hooks';
@@ -48,7 +49,7 @@ import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_se
 import { KeepPoliciesUpToDateSwitch, NamespaceCustomizationSection } from '../components';
 import { useChangelog } from '../hooks';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
+import { ExperimentalFeaturesService, isAgentlessPoliciesUIEnabled } from '../../../../../services';
 
 import { DeprecationCallout, DeprecatedFeaturesCallout } from '../overview/deprecation_callout';
 
@@ -143,9 +144,30 @@ export const SettingsPage: React.FC<Props> = memo(
       error: changelogError,
     } = useChangelog(name, latestVersion, version);
 
+    // Agentless package policies must upgrade through the agentless API, not the
+    // (deprecated-for-agentless) package-policy API. Partition by `supports_agentless`
+    // so each set goes to its own upgrade + dry-run endpoint. When the agentless policies UI
+    // kill switch is off, everything stays on the legacy package-policy upgrade path (the
+    // agentless partition is empty, so its dry-run and upgrade calls never fire).
+    const agentlessUIEnabled = isAgentlessPoliciesUIEnabled();
+    const agentlessPolicyIds = useMemo(
+      () =>
+        agentlessUIEnabled
+          ? packagePoliciesData?.items
+              .filter((packagePolicy) => packagePolicy.supports_agentless === true)
+              .map(({ id }) => id) ?? []
+          : [],
+      [packagePoliciesData, agentlessUIEnabled]
+    );
+
     const packagePolicyIds = useMemo(
-      () => packagePoliciesData?.items.map(({ id }) => id),
-      [packagePoliciesData]
+      () =>
+        packagePoliciesData?.items
+          .filter(
+            (packagePolicy) => !agentlessUIEnabled || packagePolicy.supports_agentless !== true
+          )
+          .map(({ id }) => id) ?? [],
+      [packagePoliciesData, agentlessUIEnabled]
     );
 
     const agentPolicyIds = useMemo(
@@ -154,10 +176,18 @@ export const SettingsPage: React.FC<Props> = memo(
     );
 
     const { data: dryRunData } = useUpgradePackagePolicyDryRunQuery(
-      packagePolicyIds ?? [],
+      packagePolicyIds,
       latestVersion,
       {
-        enabled: packagePolicyIds && packagePolicyIds.length > 0,
+        enabled: packagePolicyIds.length > 0,
+      }
+    );
+
+    const { data: agentlessDryRunData } = useUpgradeAgentlessPoliciesDryRunQuery(
+      agentlessPolicyIds,
+      latestVersion,
+      {
+        enabled: agentlessPolicyIds.length > 0,
       }
     );
 
@@ -427,7 +457,9 @@ export const SettingsPage: React.FC<Props> = memo(
                           version={latestVersion}
                           agentPolicyIds={agentPolicyIds}
                           packagePolicyIds={packagePolicyIds}
+                          agentlessPolicyIds={agentlessPolicyIds}
                           dryRunData={dryRunData}
+                          agentlessDryRunData={agentlessDryRunData}
                           isUpgradingPackagePolicies={isUpgradingPackagePolicies}
                           setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
                           startServices={startServices}
