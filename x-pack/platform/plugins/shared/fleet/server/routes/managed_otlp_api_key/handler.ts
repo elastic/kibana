@@ -16,7 +16,12 @@ export const createManagedOtlpApiKeyHandler: FleetRequestHandler<
   TypeOf<typeof PostManagedOtlpAPIKeyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asCurrentUser;
+  // Mint the key as the internal (Fleet system) user, not asCurrentUser.
+  // The APM-scoped role_descriptor is fixed and not derived from the caller, so there is no
+  // need to require the caller to hold the ES `manage_own_api_key` cluster privilege —
+  // a privilege that `Fleet: All` does not confer. Route authz (`fleet-agents-all`) already
+  // controls who can call this endpoint. Mirrors how enrollment-api-key routes mint keys.
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   const key = await createManagedOtlpApiKey(esClient, request.body.name);
 

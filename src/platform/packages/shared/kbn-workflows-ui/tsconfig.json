@@ -11,6 +11,7 @@
     "@kbn/react-query",
     "@kbn/kibana-react-plugin",
     "@kbn/workflows",
+    "@kbn/workflows-library",
     "@kbn/react-kibana-context-theme",
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -23,5 +24,9 @@
     "@kbn/monaco",
     "@kbn/code-editor",
     "@kbn/use-observable",
+    "@kbn/connector-specs",
+    "@kbn/workflows-extensions",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/alerts-ui-shared",
   ]
 }
