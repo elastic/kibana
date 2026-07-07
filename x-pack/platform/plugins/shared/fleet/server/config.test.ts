@@ -240,5 +240,40 @@ describe('Config schema', () => {
 
       expect(res.messages).toMatchInlineSnapshot(`Array []`);
     });
+
+    it('should add a warning when the agentless policies UI is disabled while the agentless legacy API is disabled', () => {
+      const res = applyConfigDeprecations({
+        experimentalFeatures: {
+          enableAgentlessPoliciesUI: false,
+          disableAgentlessLegacyAPI: true,
+        },
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`
+        Array [
+          "When [enableAgentlessPoliciesUI] is disabled and [disableAgentlessLegacyAPI] is enabled, the server rejects agentless policy operations from the Fleet UI.",
+        ]
+      `);
+    });
+
+    it('should not warn when only the agentless policies UI is disabled', () => {
+      const res = applyConfigDeprecations({
+        experimentalFeatures: {
+          enableAgentlessPoliciesUI: false,
+        },
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`Array []`);
+    });
+
+    it('should not warn when only the agentless legacy API is disabled', () => {
+      const res = applyConfigDeprecations({
+        experimentalFeatures: {
+          disableAgentlessLegacyAPI: true,
+        },
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`Array []`);
+    });
   });
 });
