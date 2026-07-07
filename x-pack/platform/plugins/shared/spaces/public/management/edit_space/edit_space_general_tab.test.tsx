@@ -648,31 +648,40 @@ describe('EditSpaceSettings', () => {
     expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
   });
 
-  it('shows CustomizeCps component when project_routing.read_space_default capability is true', async () => {
+  const renderWithCapability = (
+    capability: { read_space_default?: boolean; manage_space_default?: boolean },
+    {
+      isTierEligible = false,
+      spaceForRender = space,
+    }: {
+      isTierEligible?: boolean;
+      spaceForRender?: {
+        id: string;
+        name: string;
+        disabledFeatures: string[];
+        projectRouting?: string;
+      };
+    } = {}
+  ) => {
+    const capabilities = {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      spaces: { manage: true },
+      project_routing: capability,
+    };
+
     const TestComponentWithCapability: React.FC<React.PropsWithChildren> = ({ children }) => {
       return (
         <IntlProvider locale="en">
           <KibanaContextProvider
             services={{
-              application: {
-                capabilities: {
-                  navLinks: {},
-                  management: {},
-                  catalogue: {},
-                  spaces: { manage: true },
-                  project_routing: { read_space_default: true, manage_space_default: true },
-                },
-              },
+              application: { capabilities },
+              cps: { isTierEligible },
             }}
           >
             <EditSpaceProviderRoot
-              capabilities={{
-                navLinks: {},
-                management: {},
-                catalogue: {},
-                spaces: { manage: true },
-                project_routing: { read_space_default: true, manage_space_default: true },
-              }}
+              capabilities={capabilities}
               getUrlForApp={getUrlForApp}
               navigateToUrl={navigateToUrl}
               serverBasePath=""
@@ -697,10 +706,10 @@ describe('EditSpaceSettings', () => {
       );
     };
 
-    render(
+    return render(
       <TestComponentWithCapability>
         <EditSpaceSettingsTab
-          space={space}
+          space={spaceForRender}
           history={history}
           features={[]}
           allowFeatureVisibility={false}
@@ -708,6 +717,13 @@ describe('EditSpaceSettings', () => {
           reloadWindow={reloadWindow}
         />
       </TestComponentWithCapability>
+    );
+  };
+
+  it('shows CustomizeCps component when project_routing.read_space_default capability is true and project is on a CPS-eligible tier', async () => {
+    renderWithCapability(
+      { read_space_default: true, manage_space_default: true },
+      { isTierEligible: true }
     );
 
     await waitFor(() => {
@@ -718,66 +734,56 @@ describe('EditSpaceSettings', () => {
     });
   });
 
-  it('hides CustomizeCps component when project_routing.read_space_default capability is false', async () => {
-    const TestComponentWithCapability: React.FC<React.PropsWithChildren> = ({ children }) => {
-      return (
-        <IntlProvider locale="en">
-          <KibanaContextProvider
-            services={{
-              application: {
-                capabilities: {
-                  navLinks: {},
-                  management: {},
-                  catalogue: {},
-                  spaces: { manage: true },
-                  project_routing: { read_space_default: false, manage_space_default: true },
-                },
-              },
-            }}
-          >
-            <EditSpaceProviderRoot
-              capabilities={{
-                navLinks: {},
-                management: {},
-                catalogue: {},
-                spaces: { manage: true },
-                project_routing: { read_space_default: false, manage_space_default: true },
-              }}
-              getUrlForApp={getUrlForApp}
-              navigateToUrl={navigateToUrl}
-              serverBasePath=""
-              spacesManager={spacesManager}
-              getRolesAPIClient={getRolesAPIClient}
-              http={http}
-              notifications={notifications}
-              overlays={overlays}
-              getIsRoleManagementEnabled={() => Promise.resolve(() => undefined)}
-              getPrivilegesAPIClient={getPrivilegeAPIClient}
-              getSecurityLicense={getSecurityLicenseMock}
-              userProfile={userProfile}
-              theme={theme}
-              i18n={i18n}
-              logger={logger}
-              enableSecurityLink=""
-            >
-              {children}
-            </EditSpaceProviderRoot>
-          </KibanaContextProvider>
-        </IntlProvider>
-      );
-    };
+  it('hides CustomizeCps component when project_routing.read_space_default capability is true but tier is not eligible and space has default routing', async () => {
+    renderWithCapability(
+      { read_space_default: true, manage_space_default: true },
+      { isTierEligible: false }
+    );
 
-    render(
-      <TestComponentWithCapability>
-        <EditSpaceSettingsTab
-          space={space}
-          history={history}
-          features={[]}
-          allowFeatureVisibility={false}
-          allowSolutionVisibility={false}
-          reloadWindow={reloadWindow}
-        />
-      </TestComponentWithCapability>
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
+  });
+
+  it('shows CustomizeCps component when tier is not eligible but the space already has a non-default project routing value', async () => {
+    renderWithCapability(
+      { read_space_default: true, manage_space_default: true },
+      {
+        isTierEligible: false,
+        spaceForRender: { ...space, projectRouting: '_alias:_origin' },
+      }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
+    });
+  });
+
+  it('hides CustomizeCps component when tier is not eligible and the space has the default project routing value (_alias:*)', async () => {
+    renderWithCapability(
+      { read_space_default: true, manage_space_default: true },
+      {
+        isTierEligible: false,
+        spaceForRender: { ...space, projectRouting: '_alias:*' },
+      }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
+  });
+
+  it('hides CustomizeCps component when project_routing.read_space_default capability is false even if tier is eligible', async () => {
+    renderWithCapability(
+      { read_space_default: false, manage_space_default: true },
+      { isTierEligible: true }
     );
 
     await waitFor(() => {

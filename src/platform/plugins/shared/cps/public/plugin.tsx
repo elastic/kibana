@@ -11,6 +11,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { type ICPSManager, type CPSAppAccessResolver } from '@kbn/cps-utils';
+import { CPS_TIER_ELIGIBLE_FEATURE_ID } from '@kbn/cps-common';
 import type { CPSPluginSetup, CPSPluginStart, CPSConfigType } from './types';
 import { CPSManager } from './services/cps_manager';
 
@@ -67,8 +68,11 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
       cpsManager = manager;
     }
 
+    const isTierEligible = core.pricing.isFeatureAvailable(CPS_TIER_ELIGIBLE_FEATURE_ID);
+
     return {
       cpsManager,
+      isTierEligible,
     };
   }
 
