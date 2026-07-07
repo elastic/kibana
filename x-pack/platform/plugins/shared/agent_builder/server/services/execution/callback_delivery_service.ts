@@ -16,7 +16,7 @@ import { buildChatResponseFromEvents } from './utils/chat_response';
 
 const callbackRetryOptions = {
   retries: 2,
-  minTimeout: 100,
+  minTimeout: 200,
   factor: 2.5,
   randomize: false,
 } as const;
