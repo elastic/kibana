@@ -48,3 +48,5 @@ const WrappedSearchBar = <QT extends AggregateQuery | Query = Query>(
 export const SearchBar = WrappedSearchBar;
 export type { StatefulSearchBarProps } from './create_search_bar';
 export type { SearchBarProps, SearchBarOwnProps } from './search_bar';
+export { QuerySubmitTrigger } from './query_submit_metadata';
+export type { QuerySubmitMetadata } from './query_submit_metadata';

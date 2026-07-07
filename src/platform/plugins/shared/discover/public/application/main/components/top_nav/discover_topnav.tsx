@@ -18,7 +18,11 @@ import {
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import { useESQLQueryStats } from '@kbn/esql/public';
 import { type Query, type TimeRange, type AggregateQuery } from '@kbn/es-query';
-import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
+import type {
+  DataViewPickerProps,
+  QuerySubmitMetadata,
+  UnifiedSearchDraft,
+} from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import {
@@ -108,8 +112,12 @@ export const DiscoverTopNav = ({
 
   const onQuerySubmitAction = useCurrentTabAction(internalStateActions.onQuerySubmit);
   const onQuerySubmit = useCallback(
-    (payload: { dateRange: TimeRange; query?: AggregateQuery | Query }, isUpdate?: boolean) => {
-      dispatch(onQuerySubmitAction({ payload, isUpdate }));
+    (
+      payload: { dateRange: TimeRange; query?: AggregateQuery | Query },
+      isUpdate?: boolean,
+      querySubmitMetadata?: QuerySubmitMetadata
+    ) => {
+      dispatch(onQuerySubmitAction({ payload, isUpdate, querySubmitMetadata }));
     },
     [dispatch, onQuerySubmitAction]
   );

@@ -17,7 +17,10 @@ import {
   isOfAggregateQueryType,
   isOfQueryType,
 } from '@kbn/es-query';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
+import { QuerySource } from '@kbn/esql-types';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { QuerySubmitTrigger, type QuerySubmitMetadata } from '@kbn/unified-search-plugin/public';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
@@ -335,6 +338,39 @@ export const updateESQLQuery: InternalStateThunkActionCreator<[UpdateESQLQueryAc
     dispatch(updateAppState({ tabId, appState: { query } }));
   };
 
+const getESQLQuerySourceFromSubmitMetadata = (
+  querySubmitMetadata: QuerySubmitMetadata | undefined,
+  {
+    isQueryUpdate,
+    isTimeRangeUpdate,
+  }: {
+    isQueryUpdate: boolean;
+    isTimeRangeUpdate: boolean;
+  }
+): QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER | undefined => {
+  if (!querySubmitMetadata?.trigger) {
+    return;
+  }
+
+  if (querySubmitMetadata.trigger === QuerySubmitTrigger.TEXT_BASED_EDITOR) {
+    return;
+  }
+
+  if (querySubmitMetadata.trigger === QuerySubmitTrigger.TIME_FILTER) {
+    return QuerySource.TIME_FILTER;
+  }
+
+  if (
+    querySubmitMetadata.trigger === QuerySubmitTrigger.QUERY_BAR_SUBMIT &&
+    isTimeRangeUpdate &&
+    !isQueryUpdate
+  ) {
+    return QuerySource.TIME_FILTER;
+  }
+
+  return QuerySource.SEARCH_BUTTON;
+};
+
 /**
  * Triggered when a user submits a query in the search bar
  */
@@ -343,9 +379,10 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
     TabActionPayload<{
       payload: { dateRange: TimeRange; query?: Query | AggregateQuery };
       isUpdate?: boolean;
+      querySubmitMetadata?: QuerySubmitMetadata;
     }>
   ]
-> = ({ tabId, payload, isUpdate }) =>
+> = ({ tabId, payload, isUpdate, querySubmitMetadata }) =>
   function onQuerySubmitThunkFn(
     dispatch,
     getState,
@@ -366,7 +403,34 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
       });
     };
 
+    const trackESQLQuerySubmitted = (
+      query: Query | AggregateQuery | undefined,
+      metadata: QuerySubmitMetadata | undefined
+    ) => {
+      if (!query || !isOfAggregateQueryType(query)) {
+        return;
+      }
+
+      const tabState = selectTab(getState(), tabId);
+      const isQueryUpdate = !isEqual(query, tabState.appState.query);
+      const isTimeRangeUpdate = !isEqual(payload.dateRange, tabState.globalState.timeRange);
+      const source = getESQLQuerySourceFromSubmitMetadata(metadata, {
+        isQueryUpdate,
+        isTimeRangeUpdate,
+      });
+
+      if (!source) {
+        return;
+      }
+
+      new ESQLEditorTelemetryService(services.analytics).trackQuerySubmitted({
+        source,
+        query: query.esql,
+      });
+    };
+
     trackQueryFields(payload.query);
+    trackESQLQuerySubmitted(payload.query, querySubmitMetadata);
 
     if (isUpdate === false) {
       // remove the search session if the given query is not just updated

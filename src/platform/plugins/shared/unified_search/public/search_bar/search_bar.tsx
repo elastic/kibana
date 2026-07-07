@@ -53,6 +53,7 @@ import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_ro
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { searchBarStyles } from './search_bar.styles';
+import { QuerySubmitTrigger, type QuerySubmitMetadata } from './query_submit_metadata';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
@@ -105,7 +106,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onQueryChange?: (payload: { dateRange: TimeRange; query?: QT | Query }) => void;
   onQuerySubmit?: (
     payload: { dateRange: TimeRange; query?: QT | Query },
-    isUpdate?: boolean
+    isUpdate?: boolean,
+    metadata?: QuerySubmitMetadata
   ) => void;
   // To initialize with a predefined query which has not been submitted yet (in dirty state)
   draft?: UnifiedSearchDraft;
@@ -492,14 +494,18 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
                 to: this.state.dateRangeTo,
               },
             },
-            this.isDirty()
+            this.isDirty(),
+            { trigger: QuerySubmitTrigger.TEXT_BASED_EDITOR }
           );
         }
       }
     );
   };
 
-  public onQueryBarSubmit = (queryAndDateRange: { dateRange?: TimeRange; query?: QT | Query }) => {
+  public onQueryBarSubmit = (
+    queryAndDateRange: { dateRange?: TimeRange; query?: QT | Query },
+    metadata?: QuerySubmitMetadata
+  ) => {
     this.setState(
       {
         query: queryAndDateRange.query,
@@ -519,7 +525,8 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
                 to: this.state.dateRangeTo,
               },
             },
-            this.isDirty()
+            this.isDirty(),
+            metadata
           );
         }
         this.services.usageCollection?.reportUiCounter(

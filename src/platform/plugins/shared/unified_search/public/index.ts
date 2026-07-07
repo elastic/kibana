@@ -12,7 +12,7 @@ import type { FilterManager, TimefilterContract } from '@kbn/data-plugin/public'
 import { UnifiedSearchPublicPlugin } from './plugin';
 
 export type { IndexPatternSelectProps } from './index_pattern_select';
-export type { StatefulSearchBarProps, SearchBarProps } from './search_bar';
+export type { StatefulSearchBarProps, SearchBarProps, QuerySubmitMetadata } from './search_bar';
 export type {
   UnifiedSearchPublicPluginStart,
   UnifiedSearchPluginSetup,
@@ -24,6 +24,7 @@ export type { DataViewPickerProps } from './dataview_picker';
 export type { ApplyGlobalFilterActionContext } from './actions/apply_filter_action/apply_filter_action';
 
 export { SearchBar } from './search_bar';
+export { QuerySubmitTrigger } from './search_bar';
 export { createSearchBar } from './search_bar/create_search_bar';
 export { FilterItem, FilterItems } from './filter_bar';
 export { FilterBadgeGroup } from './filter_badge';

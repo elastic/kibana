@@ -30,6 +30,7 @@ import { createMockStorage, createMockTimeHistory } from './mocks';
 import { SearchSessionState } from '@kbn/data-plugin/public';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
+import { QuerySubmitTrigger } from './query_submit_metadata';
 
 const startMock = coreMock.createStart();
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
@@ -382,7 +383,10 @@ describe('SearchBar', () => {
         dateRange: { from: 'now-15m', to: 'now' },
         query: { language: 'kuery', query: 'response:200' },
       },
-      false
+      false,
+      {
+        trigger: QuerySubmitTrigger.QUERY_BAR_SUBMIT,
+      }
     );
   });
 
@@ -411,7 +415,10 @@ describe('SearchBar', () => {
       },
       // isUpdate is true because the default value in state ({ from: 'now-15m', to: 'now' })
       // is not equal with props for dateRange which is undefined
-      true
+      true,
+      {
+        trigger: QuerySubmitTrigger.QUERY_BAR_SUBMIT,
+      }
     );
   });
 

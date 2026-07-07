@@ -14,7 +14,9 @@ import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { QuerySource } from '@kbn/esql-types';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import { QuerySubmitTrigger } from '@kbn/unified-search-plugin/public';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import { selectDataSourceProfileId } from '../runtime_state';
@@ -221,6 +223,117 @@ describe('tab_state actions', () => {
       expect(stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY)).toEqual(
         currentTab.appState
       );
+    });
+  });
+
+  describe('onQuerySubmit', () => {
+    it('should track ES|QL submissions from the top row search button', async () => {
+      const { internalState, services, tabId } = await setup();
+      const reportEvent = services.analytics.reportEvent as jest.Mock;
+      reportEvent.mockClear();
+
+      internalState.dispatch(
+        internalStateActions.onQuerySubmit({
+          tabId,
+          payload: {
+            dateRange: { from: 'now-15m', to: 'now' },
+            query: { esql: 'FROM logs-*' },
+          },
+          isUpdate: true,
+          querySubmitMetadata: {
+            trigger: QuerySubmitTrigger.QUERY_BAR_SUBMIT,
+          },
+        })
+      );
+
+      expect(reportEvent).toHaveBeenCalledWith(
+        'esql.query_submitted',
+        expect.objectContaining({
+          query_source: QuerySource.SEARCH_BUTTON,
+          source_command: 'FROM',
+          data_source_category: 'logs',
+        })
+      );
+    });
+
+    it('should track ES|QL submissions from the time filter trigger', async () => {
+      const { internalState, services, tabId } = await setup();
+      const reportEvent = services.analytics.reportEvent as jest.Mock;
+      reportEvent.mockClear();
+
+      internalState.dispatch(
+        internalStateActions.onQuerySubmit({
+          tabId,
+          payload: {
+            dateRange: { from: 'now-30m', to: 'now' },
+            query: { esql: 'FROM metrics-*' },
+          },
+          isUpdate: true,
+          querySubmitMetadata: {
+            trigger: QuerySubmitTrigger.TIME_FILTER,
+          },
+        })
+      );
+
+      expect(reportEvent).toHaveBeenCalledWith(
+        'esql.query_submitted',
+        expect.objectContaining({
+          query_source: QuerySource.TIME_FILTER,
+          source_command: 'FROM',
+          data_source_category: 'metrics',
+        })
+      );
+    });
+
+    it('should track ES|QL top row submissions as time filter when only the time range changed', async () => {
+      const { internalState, services, tabId } = await setup();
+      const reportEvent = services.analytics.reportEvent as jest.Mock;
+      reportEvent.mockClear();
+
+      internalState.dispatch(
+        internalStateActions.onQuerySubmit({
+          tabId,
+          payload: {
+            dateRange: { from: 'now-30m', to: 'now' },
+            query: { esql: 'FROM test-index' },
+          },
+          isUpdate: true,
+          querySubmitMetadata: {
+            trigger: QuerySubmitTrigger.QUERY_BAR_SUBMIT,
+          },
+        })
+      );
+
+      expect(reportEvent).toHaveBeenCalledWith(
+        'esql.query_submitted',
+        expect.objectContaining({
+          query_source: QuerySource.TIME_FILTER,
+          source_command: 'FROM',
+          data_source_category: 'unknown',
+        })
+      );
+    });
+
+    it('should not double count ES|QL editor submissions', async () => {
+      const { internalState, services, tabId } = await setup();
+      const reportEvent = services.analytics.reportEvent as jest.Mock;
+      reportEvent.mockClear();
+
+      internalState.dispatch(
+        internalStateActions.onQuerySubmit({
+          tabId,
+          payload: {
+            dateRange: { from: 'now-15m', to: 'now' },
+            query: { esql: 'FROM logs-*' },
+          },
+          isUpdate: true,
+          querySubmitMetadata: {
+            trigger: QuerySubmitTrigger.TEXT_BASED_EDITOR,
+          },
+        })
+      );
+
+      expect(reportEvent).not.toHaveBeenCalled();
     });
   });
 
