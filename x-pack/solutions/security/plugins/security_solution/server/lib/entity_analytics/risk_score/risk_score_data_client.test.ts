@@ -596,7 +596,7 @@ describe('RiskScoreDataClient', () => {
     });
   });
 
-  describe('getDailyAverageRiskScoreNormSeries', () => {
+  describe('getDailyAverageRiskScoreNormSeries (EUID query contract)', () => {
     const mockAggResponse = (
       buckets: Array<{ key: string; scores: number[] }> = []
     ): { aggregations: { by_entity: { buckets: unknown[] } } } => ({
