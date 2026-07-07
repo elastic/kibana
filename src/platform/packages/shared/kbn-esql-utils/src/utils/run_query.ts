@@ -80,6 +80,7 @@ export async function getESQLQueryColumnsRaw({
   dropNullColumns,
   timeRange,
   variables,
+  includeColumnMetadata,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -88,6 +89,7 @@ export async function getESQLQueryColumnsRaw({
   filter?: unknown;
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
+  includeColumnMetadata?: boolean;
 }): Promise<ESQLColumn[]> {
   try {
     const namedParams = getNamedParams(esqlQuery, timeRange, variables);
@@ -99,7 +101,7 @@ export async function getESQLQueryColumnsRaw({
             query: `${esqlQuery} | limit 0`,
             ...(dropNullColumns ? { dropNullColumns: true } : {}),
             ...(namedParams.length ? { params: namedParams } : {}),
-            settings: { column_metadata: true },
+            ...(includeColumnMetadata ? { settings: { column_metadata: true } } : {}),
           },
         },
         {
@@ -144,6 +146,7 @@ export async function getESQLQueryColumns({
   dropNullColumns,
   timeRange,
   variables,
+  includeColumnMetadata,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -152,6 +155,7 @@ export async function getESQLQueryColumns({
   dropNullColumns?: boolean;
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
+  includeColumnMetadata?: boolean;
 }): Promise<DatatableColumn[]> {
   try {
     const rawColumns = await getESQLQueryColumnsRaw({
@@ -162,6 +166,7 @@ export async function getESQLQueryColumns({
       signal,
       timeRange,
       variables,
+      includeColumnMetadata,
     });
     const columns = formatESQLColumns(rawColumns) ?? [];
     return columns;
@@ -189,6 +194,7 @@ export async function getESQLResults({
   executionContext,
   approximation,
   projectRouting,
+  includeColumnMetadata,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -201,6 +207,7 @@ export async function getESQLResults({
   executionContext?: KibanaExecutionContext;
   approximation?: boolean;
   projectRouting?: ProjectRouting;
+  includeColumnMetadata?: boolean;
 }): Promise<{
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
@@ -215,7 +222,7 @@ export async function getESQLResults({
           ...(dropNullColumns ? { dropNullColumns: true } : {}),
           ...(namedParams.length ? { params: namedParams } : {}),
           ...(timezone ? { time_zone: getTimeZoneFromSettings(timezone) } : {}),
-          settings: { column_metadata: true },
+          ...(includeColumnMetadata ? { settings: { column_metadata: true } } : {}),
         },
       },
       {

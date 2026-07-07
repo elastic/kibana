@@ -162,12 +162,29 @@ describe('run query helpers', () => {
       search = jest.fn();
     });
 
-    it('getESQLQueryColumnsRaw requests column_metadata', async () => {
+    it('getESQLQueryColumnsRaw does not request column_metadata by default', async () => {
       search.mockReturnValue(
         of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
       );
 
       await getESQLQueryColumnsRaw({ esqlQuery: 'FROM foo', search });
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.not.objectContaining({
+            settings: expect.anything(),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('getESQLQueryColumnsRaw requests column_metadata when includeColumnMetadata is true', async () => {
+      search.mockReturnValue(
+        of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
+      );
+
+      await getESQLQueryColumnsRaw({ esqlQuery: 'FROM foo', search, includeColumnMetadata: true });
 
       expect(search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -179,12 +196,29 @@ describe('run query helpers', () => {
       );
     });
 
-    it('getESQLResults requests column_metadata', async () => {
+    it('getESQLResults does not request column_metadata by default', async () => {
       search.mockReturnValue(
         of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
       );
 
       await getESQLResults({ esqlQuery: 'FROM foo', search });
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.not.objectContaining({
+            settings: expect.anything(),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('getESQLResults requests column_metadata when includeColumnMetadata is true', async () => {
+      search.mockReturnValue(
+        of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
+      );
+
+      await getESQLResults({ esqlQuery: 'FROM foo', search, includeColumnMetadata: true });
 
       expect(search).toHaveBeenCalledWith(
         expect.objectContaining({
