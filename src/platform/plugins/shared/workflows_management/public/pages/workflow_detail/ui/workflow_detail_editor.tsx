@@ -40,8 +40,8 @@ import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyou
 import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import {
-  selectEditorWorkflowLookup,
   selectFocusedStepId,
+  selectFocusedTriggerId,
   selectIsExecutionsTab,
   selectIsSavingYaml,
   selectIsYamlSyntaxValid,
@@ -49,7 +49,6 @@ import {
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
-  HIGHLIGHTED_STEP_TRIGGER,
   setHighlightedStepId,
   setIsTestModalOpen,
   setTestStepModalOpenStepId,
@@ -184,46 +183,25 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const { editorView, setEditorView, graphDirection, setGraphDirection } = useWorkflowUrlState();
   const showGraph = isVisualEditorEnabled && editorView === 'graph';
 
-  const workflowLookup = useSelector(selectEditorWorkflowLookup);
   const focusedStepId = useSelector(selectFocusedStepId);
+  const focusedTriggerId = useSelector(selectFocusedTriggerId);
 
   const handleEditorViewChange = useCallback(
     (next: 'yaml' | 'graph') => {
       if (!isVisualEditorEnabled) {
         return;
       }
-      // When switching from YAML to graph, focus the graph on whatever step
-      // the user's cursor is currently on. Looks up the step by the editor's
-      // current line in the workflow's lookup table.
-      if (next === 'graph' && editorRef.current && workflowLookup) {
-        const pos = editorRef.current.getPosition();
-        const line = pos?.lineNumber;
-        if (line != null) {
-          const tStart = workflowLookup.triggersLineStart;
-          // `triggersLineEnd` isn't tracked by WorkflowLookup; treat any line
-          // that falls before the first step (or at/past the trigger start)
-          // as being inside the triggers block.
-          const firstStepLine = Object.values(workflowLookup.steps).reduce<number | undefined>(
-            (min, info) => {
-              const { lineStart } = info;
-              return min == null || lineStart < min ? lineStart : min;
-            },
-            undefined
-          );
-          const tEnd = firstStepLine != null ? firstStepLine - 1 : undefined;
-          if (tStart != null && tEnd != null && line >= tStart && line <= tEnd) {
-            dispatch(setHighlightedStepId({ stepId: HIGHLIGHTED_STEP_TRIGGER }));
-          } else if (focusedStepId) {
-            // `focusedStepId` is already the canonical cursor→step derived by the
-            // setCursorPosition reducer (via findStepByLine, which also handles
-            // blank/continuation lines). No need to re-scan workflowLookup here.
-            dispatch(setHighlightedStepId({ stepId: focusedStepId }));
-          }
+      // When switching to graph, focus it on whichever step or trigger block
+      // the cursor is currently in — derived entirely from Redux state.
+      if (next === 'graph') {
+        const target = focusedTriggerId ?? focusedStepId;
+        if (target) {
+          dispatch(setHighlightedStepId({ stepId: target }));
         }
       }
       setEditorView(next);
     },
-    [dispatch, focusedStepId, isVisualEditorEnabled, setEditorView, workflowLookup]
+    [dispatch, focusedStepId, focusedTriggerId, isVisualEditorEnabled, setEditorView]
   );
 
   const openTestModal = useCallback(() => {
@@ -359,7 +337,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       setRenderGraph(true);
       return;
     }
-    const t = setTimeout(() => setRenderGraph(false), 260);
+    const t = setTimeout(() => setRenderGraph(false), GRAPH_FADE_DURATION_MS + 40);
     return () => clearTimeout(t);
   }, [showGraph]);
 
@@ -368,34 +346,44 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
         <EuiFlexItem css={styles.yamlEditor}>
           {/*
-           * The YAML editor is always mounted so its validation pipeline keeps
-           * running. When in graph view, the editor swaps Monaco out for the
-           * visual editor in the same flex column. The validation accordion
-           * is hidden in graph view.
+           * Two peer layers, both absolutely positioned inside the
+           * position:relative yamlEditor flex item:
+           *  - Layer 1 (YAML): always mounted so validation keeps running.
+           *  - Layer 2 (Graph): mounted while renderGraph is true; kept alive
+           *    for GRAPH_FADE_DURATION_MS + 40ms after switching back to YAML so the cross-fade plays out.
+           * The bottom bar floats (position:absolute) and overlays both layers.
            */}
-          <React.Suspense fallback={<EuiLoadingSpinner />}>
-            <WorkflowYAMLEditor
-              highlightDiff={highlightDiff}
-              onStepRun={handleStepRun}
-              editorRef={editorRef}
-              hideEditorBody={showGraph}
-              hideEditorTools={isVisualEditorEnabled}
-              openActionsRef={openActionsRef}
-              onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
-              bodyOverride={
-                isVisualEditorEnabled && renderGraph ? (
-                  <React.Suspense fallback={<EuiLoadingSpinner />}>
-                    <WorkflowVisualEditor
-                      onStepRun={handleStepRun}
-                      direction={graphDirection}
-                      defaultViewport={graphViewportRef.current}
-                      onViewportChange={handleGraphViewportChange}
-                    />
-                  </React.Suspense>
-                ) : null
-              }
-            />
-          </React.Suspense>
+          <div
+            css={[styles.editorLayer, showGraph ? styles.layerHidden : styles.layerVisible]}
+            {...(showGraph ? { inert: '' } : {})}
+          >
+            <React.Suspense fallback={<EuiLoadingSpinner />}>
+              <WorkflowYAMLEditor
+                highlightDiff={highlightDiff}
+                onStepRun={handleStepRun}
+                editorRef={editorRef}
+                isActive={!showGraph}
+                hideEditorTools={isVisualEditorEnabled}
+                openActionsRef={openActionsRef}
+                onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
+              />
+            </React.Suspense>
+          </div>
+          {isVisualEditorEnabled && renderGraph && (
+            <div
+              css={[styles.editorLayer, showGraph ? styles.layerVisible : styles.layerHidden]}
+              {...(showGraph ? {} : { inert: '' })}
+            >
+              <React.Suspense fallback={<EuiLoadingSpinner />}>
+                <WorkflowVisualEditor
+                  onStepRun={handleStepRun}
+                  direction={graphDirection}
+                  defaultViewport={graphViewportRef.current}
+                  onViewportChange={handleGraphViewportChange}
+                />
+              </React.Suspense>
+            </div>
+          )}
           {isVisualEditorEnabled && (
             <WorkflowDetailBottomBar
               editorView={editorView}
@@ -424,11 +412,33 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
 });
 WorkflowDetailEditor.displayName = 'WorkflowDetailEditor';
 
+/** Duration of the YAML↔graph cross-fade. Keep in sync with the setTimeout in renderGraph. */
+const GRAPH_FADE_DURATION_MS = 220;
+
 const componentStyles = {
   yamlEditor: css({
     flex: 1,
     overflow: 'hidden',
     position: 'relative',
+  }),
+  /** Absolutely-positioned peer layer shared by both the YAML and graph editors. */
+  editorLayer: css({
+    position: 'absolute',
+    inset: 0,
+    // display:flex so the YAML editor's internal flex:1 root stretches to fill
+    display: 'flex',
+    flexDirection: 'column',
+    transition: `opacity ${GRAPH_FADE_DURATION_MS}ms ease, transform ${GRAPH_FADE_DURATION_MS}ms ease`,
+  }),
+  layerVisible: css({
+    opacity: 1,
+    transform: 'scale(1)',
+    pointerEvents: 'auto',
+  }),
+  layerHidden: css({
+    opacity: 0,
+    transform: 'scale(0.985)',
+    pointerEvents: 'none',
   }),
   visualEditor: ({ euiTheme }: UseEuiTheme) =>
     css({

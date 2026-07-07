@@ -7,9 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-
-import { useUiSetting } from '../../../../common/lib/kibana';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { HostDetails } from '../../../document_details/left/components/host_details';
 import { UserDetails } from '../../../document_details/left/components/user_details';
@@ -20,7 +18,7 @@ import {
   resolveUserNameForEntityInsightsWithFallback,
   type IdentityFields,
 } from '../../../document_details/shared/utils';
-import type { AttackEntityListEntry } from '../../hooks/use_attack_entities_lists';
+import type { AttackEntityListEntry } from '../../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists';
 
 const resolveUserDisplayForEntities = (
   identityFields: IdentityFields | undefined,
@@ -31,16 +29,21 @@ const resolveUserDisplayForEntities = (
 const resolveHostDisplayForEntities = (
   identityFields: IdentityFields | undefined,
   getFieldsData: GetFieldsData,
-  entityStoreV2Enabled: boolean,
   hostNameFromStore: string | undefined
 ): string | undefined => {
   const fromDocument = resolveHostNameForEntityInsightsWithFallback(identityFields, getFieldsData);
-  return entityStoreV2Enabled ? fromDocument ?? hostNameFromStore : fromDocument;
+  return fromDocument ?? hostNameFromStore;
 };
 
 export interface AttackInsightsRowBaseProps extends AttackEntityListEntry {
   timestamp: string;
   scopeId: string;
+  /**
+   * Optional renderer for the host.ip value shown in the entity overview. Forwarded to
+   * `HostDetails`/`UserDetails` so the attack Entities tool can open the network flyout as a
+   * child via the new flyout system, instead of the (unavailable) expandable-flyout API.
+   */
+  renderIpLink?: (ip: string) => React.ReactNode;
 }
 
 /**
@@ -48,9 +51,8 @@ export interface AttackInsightsRowBaseProps extends AttackEntityListEntry {
  * (document fields + entity store) so headers use host.name, not raw EUID / entity.id.
  */
 export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
-  ({ identityFields, sampleSource, timestamp, scopeId }) => {
+  ({ identityFields, sampleSource, timestamp, scopeId, renderIpLink }) => {
     const euidApi = useEntityStoreEuidApi();
-    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
     const getFieldsData = useMemo(
       () => createGetFieldsDataFromAlertSource(sampleSource),
@@ -64,7 +66,7 @@ export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
       entityId: hostEntityId,
       identityFields: identityFields ?? undefined,
       entityType: 'host',
-      skip: !identityFields || !entityStoreV2Enabled,
+      skip: !identityFields,
     });
 
     const hostRecord = hostEntityFromStore.entityRecord;
@@ -74,7 +76,6 @@ export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
     const resolvedHostName = resolveHostDisplayForEntities(
       identityFields,
       getFieldsData,
-      entityStoreV2Enabled,
       hostNameFromStore
     );
 
@@ -92,7 +93,8 @@ export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
         scopeId={scopeId}
         expandedOnFirstRender={false}
         isAttackDetails={true}
-        hostEntityFromStoreResult={entityStoreV2Enabled ? hostEntityFromStore : undefined}
+        renderIpLink={renderIpLink}
+        hostEntityFromStoreResult={hostEntityFromStore}
       />
     );
   }
@@ -104,9 +106,8 @@ AttackHostInsightsRow.displayName = 'AttackHostInsightsRow';
  * One user row for Attack Details entities tab: mirrors {@link EntitiesDetails} user resolution.
  */
 export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
-  ({ identityFields, sampleSource, timestamp, scopeId }) => {
+  ({ identityFields, sampleSource, timestamp, scopeId, renderIpLink }) => {
     const euidApi = useEntityStoreEuidApi();
-    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
     const getFieldsData = useMemo(
       () => createGetFieldsDataFromAlertSource(sampleSource),
@@ -126,7 +127,7 @@ export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
       entityId: userEntityId,
       identityFields: identityFields ?? legacyUserIdentityForStore,
       entityType: 'user',
-      skip: !entityStoreV2Enabled || (identityFields == null && legacyUserIdentityForStore == null),
+      skip: identityFields == null && legacyUserIdentityForStore == null,
     });
 
     const userDisplayName = userEntityFromStore.entityRecord?.entity?.name ?? resolvedUserName;
@@ -143,6 +144,7 @@ export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
         scopeId={scopeId}
         expandedOnFirstRender={false}
         isAttackDetails={true}
+        renderIpLink={renderIpLink}
       />
     );
   }
