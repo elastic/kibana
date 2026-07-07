@@ -72,7 +72,6 @@ import {
   API_VERSIONS,
   ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
-  ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
   ASSET_CRITICALITY_PUBLIC_URL,
   ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
@@ -87,13 +86,8 @@ import {
   PRIVMON_PRIVILEGE_CHECK_API,
   RISK_ENGINE_CLEANUP_URL,
   RISK_ENGINE_CONFIGURE_SO_URL,
-  RISK_ENGINE_DISABLE_URL,
-  RISK_ENGINE_ENABLE_URL,
-  RISK_ENGINE_INIT_URL,
   RISK_ENGINE_PRIVILEGES_URL,
-  RISK_ENGINE_SCHEDULE_NOW_URL,
   RISK_ENGINE_SETTINGS_URL,
-  RISK_ENGINE_STATUS_URL,
   RISK_SCORE_ENTITY_CALCULATION_URL,
   RISK_SCORE_ENTITY_CALCULATION_V2_URL,
   RISK_SCORE_PREVIEW_URL,
@@ -127,7 +121,6 @@ import type {
 } from '../../../common/entity_analytics/lead_generation/types';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;

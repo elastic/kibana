@@ -16,7 +16,6 @@ import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
-import type { ExperimentalFeatures } from '../../../../../../common';
 
 jest.mock('./search_enrichments', () => ({
   searchEnrichments: jest.fn(),

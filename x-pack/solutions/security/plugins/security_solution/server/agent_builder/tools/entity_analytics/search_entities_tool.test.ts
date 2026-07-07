@@ -21,7 +21,6 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../../__mocks__/test_helpers';
-import type { ExperimentalFeatures } from '../../../../common';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import {
