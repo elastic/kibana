@@ -37,7 +37,13 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
   error,
 }) => {
   const hypotheses = state?.hypotheses ?? [];
-  const finalResultsMarkdown = state ? buildFinalResultsMarkdown(state) : undefined;
+  /**
+   * Only shown once the investigation has actually finished — a mid-run `conclusion` is
+   * still a draft (and occasionally arrives with markdown mangled by the model over-escaping
+   * newlines in its tool-call JSON), so it's never rendered before `status` is `complete`.
+   */
+  const finalResultsMarkdown =
+    status === 'complete' && state ? buildFinalResultsMarkdown(state) : undefined;
   const header = buildHeader(status, state);
   const { euiTheme } = useEuiTheme();
 

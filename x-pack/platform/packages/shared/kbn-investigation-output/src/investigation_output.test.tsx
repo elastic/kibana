@@ -91,6 +91,12 @@ describe('InvestigationOutput', () => {
     expect(screen.getByText('No reasoning recorded yet.')).toBeInTheDocument();
   });
 
+  it('does not render final results for a mid-run conclusion (still a draft, possibly mangled markdown)', () => {
+    renderWithI18n(<InvestigationOutput status="running" state={finalState} />);
+
+    expect(screen.queryByTestId('investigationOutputFinalResults')).not.toBeInTheDocument();
+  });
+
   it('renders the final state with the confirmed hypothesis and the final results appended, always visible', () => {
     renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
 

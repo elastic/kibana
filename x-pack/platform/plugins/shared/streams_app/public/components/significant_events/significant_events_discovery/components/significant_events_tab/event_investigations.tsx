@@ -7,7 +7,15 @@
 
 import React from 'react';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   SignificantEvent,
@@ -45,12 +53,19 @@ const formatDuration = (startedAt: string, completedAt?: string): string => {
   return moment.duration(diffMs).humanize();
 };
 
-const InvestigationRow = ({ investigation }: { investigation: SignificantEventInvestigation }) => {
+const InvestigationRow = ({
+  investigation,
+  initialIsOpen,
+}: {
+  investigation: SignificantEventInvestigation;
+  initialIsOpen: boolean;
+}) => {
   const {
     core: { http },
   } = useKibana();
   const { started_at: startedAt, completed_at: completedAt, workflow_execution_id } = investigation;
   const duration = formatDuration(startedAt, completedAt);
+  const accordionId = useGeneratedHtmlId({ prefix: 'sigEventInvestigation' });
 
   /**
    * The hook's `status` is authoritative over the doc-derived flag — it settles as soon as the
@@ -65,12 +80,12 @@ const InvestigationRow = ({ investigation }: { investigation: SignificantEventIn
   });
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <InvestigationOutput status={status} state={state} error={error} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued" textAlign="right">
+    <EuiAccordion
+      id={accordionId}
+      initialIsOpen={initialIsOpen}
+      data-test-subj="sigEventInvestigationRow"
+      buttonContent={
+        <EuiText size="xs" color="subdued">
           {formatTimestamp(startedAt)}
           {status === 'running'
             ? ` · ${getRunningDurationText(duration)}`
@@ -78,8 +93,11 @@ const InvestigationRow = ({ investigation }: { investigation: SignificantEventIn
             ? ` · ${duration}`
             : null}
         </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      }
+    >
+      <EuiSpacer size="s" />
+      <InvestigationOutput status={status} state={state} error={error} />
+    </EuiAccordion>
   );
 };
 
@@ -104,9 +122,12 @@ export const EventInvestigations = ({ event }: EventInvestigationsProps) => {
           </EuiText>
         </EuiFlexItem>
       ) : (
-        investigations.map((investigation) => (
+        investigations.map((investigation, index) => (
           <EuiFlexItem key={investigation.workflow_execution_id} grow={false}>
-            <InvestigationRow investigation={investigation} />
+            <InvestigationRow
+              investigation={investigation}
+              initialIsOpen={index === investigations.length - 1}
+            />
           </EuiFlexItem>
         ))
       )}
