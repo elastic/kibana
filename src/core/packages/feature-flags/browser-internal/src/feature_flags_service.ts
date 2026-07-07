@@ -44,11 +44,24 @@ export interface FeatureFlagsSetupDeps {
  * @internal
  */
 type FeatureFlagValue = boolean | string | number;
+type FeatureFlagValueType = 'boolean' | 'string' | 'number';
 
 interface ReportedFlagValue {
-  type: 'boolean' | 'string' | 'number';
+  type: FeatureFlagValueType;
   value: FeatureFlagValue;
 }
+
+const getFeatureFlagValueType = (value: FeatureFlagValue): FeatureFlagValueType => {
+  if (typeof value === 'boolean') {
+    return 'boolean';
+  }
+
+  if (typeof value === 'number') {
+    return 'number';
+  }
+
+  return 'string';
+};
 
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
@@ -243,7 +256,7 @@ export class FeatureFlagsService {
   }
 
   private shouldReportValue(flagName: string, value: FeatureFlagValue): boolean {
-    const type = typeof value;
+    const type = getFeatureFlagValueType(value);
     const lastReportedValue = this.lastReportedValues.get(flagName);
     if (lastReportedValue?.type === type && Object.is(lastReportedValue.value, value)) {
       return false;
