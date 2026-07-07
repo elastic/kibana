@@ -413,9 +413,11 @@ export class SignificantEventsPlugin
         isMemoryEnabled,
       })
         .then(({ onMemoryEnabled }) => {
-          memoryEnabled$.subscribe(() => {
-            void onMemoryEnabled();
-          });
+          this.subscriptions.push(
+            memoryEnabled$.subscribe(() => {
+              void onMemoryEnabled();
+            })
+          );
         })
         .catch((err) => {
           this.logger.error(`Failed to register significant events memory skills: ${err.message}`);

@@ -24,7 +24,7 @@ import {
   SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
   validateSignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
-import type { StreamsPluginStartDependencies } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 import { DEFAULT_EXTRACTION_INTERVAL_HOURS } from '../common/constants';
 
@@ -44,7 +44,7 @@ const sigEventsTuningConfigSchema = schema.object(
 );
 
 export function registerFeatureFlags(
-  core: CoreSetup<StreamsPluginStartDependencies>,
+  core: CoreSetup<SignificantEventsPluginStartDependencies>,
   logger: Logger,
   { isAlertingV2PluginAvailable }: { isAlertingV2PluginAvailable: boolean }
 ) {
