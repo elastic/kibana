@@ -20,7 +20,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { SUBSCRIPTION_FEATURES_URL } from '@kbn/data-lifecycle-phases';
+import {
+  CLOUD_SUBSCRIPTION_FEATURES_URL,
+  CONTACT_US_URL,
+  SUBSCRIPTION_FEATURES_URL,
+} from '@kbn/data-lifecycle-phases';
 
 import { DlmPhasesSelector } from '../../data_lifecycle';
 import type { DlmPhasesSelectorProps, SerializedDlmPhases } from '../../data_lifecycle';
@@ -110,7 +114,12 @@ const useDlmEnterpriseConfig = (): DlmPhasesSelectorProps['enterprise'] => {
     isCloudEnabled: Boolean(cloud?.isCloudEnabled),
     canManageLicense: Boolean(application?.capabilities?.management?.stack?.license_management),
     trialDaysLeft: cloud?.trialDaysLeft?.(),
-    subscriptionFeaturesUrl: SUBSCRIPTION_FEATURES_URL,
+    subscriptionFeaturesUrl: cloud?.isCloudEnabled
+      ? CLOUD_SUBSCRIPTION_FEATURES_URL
+      : SUBSCRIPTION_FEATURES_URL,
+    onUpgrade: cloud?.isCloudEnabled
+      ? undefined
+      : () => window.open(CONTACT_US_URL, '_blank', 'noopener'),
   };
 };
 

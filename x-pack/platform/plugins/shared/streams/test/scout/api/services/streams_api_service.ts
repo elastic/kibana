@@ -16,7 +16,7 @@ import {
 } from '@kbn/management-settings-ids';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
-import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../../../../common/feature_flags';
+import { SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../../../../common/feature_flags';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
 
 export interface StreamsTestApiService {
@@ -326,7 +326,7 @@ export function getStreamsTestApiService({
           headers: COMMON_API_HEADERS,
           body: {
             'feature_flags.overrides': {
-              [STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: true,
+              [SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: true,
             },
           },
         });
@@ -341,7 +341,7 @@ export function getStreamsTestApiService({
           headers: COMMON_API_HEADERS,
           body: {
             'feature_flags.overrides': {
-              [STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: false,
+              [SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: false,
             },
           },
         });
