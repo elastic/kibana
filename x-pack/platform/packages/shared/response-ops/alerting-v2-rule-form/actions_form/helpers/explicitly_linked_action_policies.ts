@@ -10,14 +10,6 @@ import { fromKueryExpression, type KueryNode } from '@kbn/es-query';
 
 const RULE_ID_FIELD = 'rule.id';
 
-const normalizeKueryValue = (raw: string): string => {
-  const trimmed = raw.trim();
-  if (trimmed.startsWith('"') && trimmed.endsWith('"') && trimmed.length >= 2) {
-    return trimmed.slice(1, -1);
-  }
-  return trimmed;
-};
-
 const getIsFieldAndValue = (node: KueryNode): { field: string; value: string } | null => {
   if (node.type !== 'function' || node.function !== 'is') {
     return null;
@@ -39,7 +31,7 @@ const getIsFieldAndValue = (node: KueryNode): { field: string; value: string } |
 
   return {
     field: fieldArg.value,
-    value: normalizeKueryValue(valueArg.value),
+    value: valueArg.value,
   };
 };
 
