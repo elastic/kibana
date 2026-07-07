@@ -109,7 +109,7 @@ export class DetectDataPresenceStep implements RuleExecutionStep {
     });
 
     try {
-      const esqlResponse = await this.scopedQueryService.executeQuery({
+      const esqlResponse = await this.scopedQueryService.executeQueryRows({
         query: noDataQuery,
         filter: queryPayload.filter,
         params: queryPayload.params,
