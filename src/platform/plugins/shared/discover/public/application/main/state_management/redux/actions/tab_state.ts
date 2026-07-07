@@ -32,6 +32,7 @@ import { getProfileUrlState } from '../../utils/profile_state_url';
 import {
   internalStateSlice,
   type InternalStateThunkActionCreator,
+  type InternalStateThunkAction,
   type TabActionPayload,
   transitionedFromEsqlToDataView,
   transitionedFromDataViewToEsql,
@@ -214,13 +215,18 @@ export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayloa
     }
   };
 
-type ProfileStatePayload = TabActionPayload<{
-  profileStateDefinition: ProfileStateDefinition<object>;
-  profileState: object;
+type ProfileStatePayload<TState extends object> = TabActionPayload<{
+  profileStateDefinition: ProfileStateDefinition<TState>;
+  profileState: TState;
   historyMethod?: 'push' | 'replace';
 }>;
 
-export const setProfileState: InternalStateThunkActionCreator<[ProfileStatePayload]> = (payload) =>
+/**
+ * Updates tab profile state for provided definition, and optionally pushes to URL history
+ */
+export const setProfileState = <TState extends object>(
+  payload: ProfileStatePayload<TState>
+): InternalStateThunkAction =>
   function setProfileStateThunkFn(
     dispatch,
     getState,

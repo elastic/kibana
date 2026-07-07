@@ -241,7 +241,11 @@ describe('tabs actions', () => {
         internalStateActions.setProfileState({
           tabId: currentTab.id,
           profileStateDefinition: TEST_PROFILE_STATE_DEF,
-          profileState: { uiValue: 'ui', persistentValue: 'persistent' },
+          profileState: {
+            ...TEST_PROFILE_STATE_DEF.defaultState,
+            uiValue: 'ui',
+            persistentValue: 'persistent',
+          },
         })
       );
       internalState.dispatch(
