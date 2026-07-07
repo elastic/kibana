@@ -9,6 +9,7 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { SkipUnsavedRunConfirmationStorageKey } from './use_run_workflow_with_confirmation';
@@ -70,9 +71,6 @@ jest.mock('@kbn/css-utils/public/use_memo_css', () => ({
 }));
 jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
   useWorkflowsExperimentalUiSetting: jest.fn().mockReturnValue(false),
-}));
-jest.mock('./workflow_detail_actions_menu', () => ({
-  WorkflowDetailActionsMenu: () => <div data-test-subj="workflowChangeHistoryEmbed" />,
 }));
 
 // The run action renders inline in the app menu.
@@ -538,13 +536,28 @@ describe('WorkflowDetailHeader', () => {
     });
   });
 
-  it('renders change history embed on workflow tab when workflow id is present', () => {
-    const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+  it('exposes the change history entry point on the workflow tab when a workflow id is present', () => {
+    const changeHistoryModal = {
+      isOpen: false,
+      openModal: jest.fn(),
+      closeModal: jest.fn(),
+    };
+    const { getByTestId } = renderWithProviders(
+      <ChangeHistoryModalContext.Provider value={changeHistoryModal}>
+        <WorkflowDetailHeader {...defaultProps} />
+      </ChangeHistoryModalContext.Provider>
+    );
 
-    expect(getByTestId('workflowChangeHistoryEmbed')).toBeInTheDocument();
+    // The History action lives in the app menu's overflow popover; open it and confirm.
+    fireEvent.click(getByTestId('app-menu-overflow-button'));
+    const historyItem = getByTestId('workflowDetailHistoryButton');
+    expect(historyItem).toBeInTheDocument();
+
+    fireEvent.click(historyItem);
+    expect(changeHistoryModal.openModal).toHaveBeenCalledTimes(1);
   });
 
-  it('does not render change history embed on executions tab', () => {
+  it('does not expose the change history entry point on the executions tab', () => {
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'executions',
       setActiveTab: jest.fn(),
@@ -555,10 +568,23 @@ describe('WorkflowDetailHeader', () => {
     store.dispatch(setYamlString(mockWorkflow.yaml));
     store.dispatch(setActiveTab('executions'));
 
-    const { queryByTestId } = render(<WorkflowDetailHeader {...defaultProps} />, {
-      wrapper: ({ children }) => <TestWrapper store={store}>{children}</TestWrapper>,
-    });
+    const changeHistoryModal = {
+      isOpen: false,
+      openModal: jest.fn(),
+      closeModal: jest.fn(),
+    };
+    const { queryByTestId, getByTestId } = render(
+      <ChangeHistoryModalContext.Provider value={changeHistoryModal}>
+        <WorkflowDetailHeader {...defaultProps} />
+      </ChangeHistoryModalContext.Provider>,
+      {
+        wrapper: ({ children }) => <TestWrapper store={store}>{children}</TestWrapper>,
+      }
+    );
 
-    expect(queryByTestId('workflowChangeHistoryEmbed')).not.toBeInTheDocument();
+    // The overflow trigger still exists for the standard header entries (docs, etc.),
+    // but History should not be inside it on the executions tab.
+    fireEvent.click(getByTestId('app-menu-overflow-button'));
+    expect(queryByTestId('workflowDetailHistoryButton')).not.toBeInTheDocument();
   });
 });

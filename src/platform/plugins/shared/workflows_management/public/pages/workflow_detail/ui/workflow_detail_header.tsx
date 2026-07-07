@@ -243,7 +243,7 @@ export const WorkflowDetailHeader = React.memo(
     const changeHistoryModal = useContext(ChangeHistoryModalContext);
     const openHistoryModal = changeHistoryModal?.openModal;
     const historyItem = useMemo<AppMenuItemType | undefined>(() => {
-      if (!canReadWorkflow || !openHistoryModal) {
+      if (!canReadWorkflow || !openHistoryModal || isExecutionsTab) {
         return undefined;
       }
       return {
@@ -257,7 +257,7 @@ export const WorkflowDetailHeader = React.memo(
         run: openHistoryModal,
         testId: 'workflowDetailHistoryButton',
       };
-    }, [canReadWorkflow, openHistoryModal]);
+    }, [canReadWorkflow, openHistoryModal, isExecutionsTab]);
 
     const { handleRunClick, runConfirmationModal } = useRunWorkflowWithConfirmation(openTestModal);
 
