@@ -74,6 +74,7 @@ steps:
     env:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
       SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+      SCOUT_TEST_CHANNELS: ci-on-commit
       SELECTIVE_TESTING_ENABLED: 'false'
     retry:
       automatic:

@@ -76,6 +76,7 @@ steps:
           - build
         env:
           SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
+          SCOUT_TEST_CHANNELS: ci-on-commit
           SERVERLESS_TESTS_ONLY: 'true'
         retry:
           automatic:
