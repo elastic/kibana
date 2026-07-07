@@ -12,6 +12,7 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { i18n } from '@kbn/i18n';
 import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import { ParallelIcon } from '@kbn/workflows-ui';
 import { buildBuiltInTriggerOptions, buildRegisteredTriggerOptions } from './build_trigger_options';
 import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
 import { triggerSchemas } from '../../../trigger_schemas';
@@ -198,7 +199,7 @@ export function getActionOptions(
         description: i18n.translate('workflows.actionsMenu.parallelDescription', {
           defaultMessage: 'Run branches concurrently and collect their results',
         }),
-        iconType: 'branch',
+        iconType: ParallelIcon,
         iconColor: euiTheme.colors.vis.euiColorVis0,
         stability: getBuiltInStepDefinition('parallel')?.stability,
       },
