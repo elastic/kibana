@@ -82,12 +82,17 @@ export class CallbackDeliveryService {
 
     this.validateCallbackUrl(callbackUrl);
 
+    const { timeout } = this.actions.getActionsConfigurationUtilities().getResponseSettings();
+
     const body = JSON.stringify(payload);
     const headers = {
       'Content-Type': 'application/json',
     };
 
     await pRetry(async () => {
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), timeout);
+
       let response: Response;
       try {
         response = await fetch(callbackUrl, {
@@ -95,9 +100,12 @@ export class CallbackDeliveryService {
           headers,
           body,
           redirect: 'error',
+          signal: abortController.signal,
         });
       } catch (error) {
         throw error instanceof Error ? error : new Error(String(error));
+      } finally {
+        clearTimeout(timeoutId);
       }
 
       if (response.status >= 200 && response.status < 300) {

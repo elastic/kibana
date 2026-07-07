@@ -19,10 +19,17 @@ import { buildChatResponseFromEvents } from './utils/chat_response';
 import { CallbackDeliveryService } from './callback_delivery_service';
 
 const callbackUrl = 'https://relay.example.com/events?token=abc';
+const responseTimeout = 60000;
 const createCallbackDeliveryService = (ensureUriAllowed = jest.fn()) =>
   new CallbackDeliveryService({
     actions: {
-      getActionsConfigurationUtilities: jest.fn().mockReturnValue({ ensureUriAllowed }),
+      getActionsConfigurationUtilities: jest.fn().mockReturnValue({
+        ensureUriAllowed,
+        getResponseSettings: jest.fn().mockReturnValue({
+          maxContentLength: 1048576,
+          timeout: responseTimeout,
+        }),
+      }),
     },
   } as never);
 
@@ -71,7 +78,30 @@ describe('callback request delivery', () => {
       },
       body,
       redirect: 'error',
+      signal: expect.any(AbortSignal),
     });
+  });
+
+  it('aborts and retries requests that exceed the Actions response timeout', async () => {
+    jest.useFakeTimers();
+    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(
+      (_url, options) =>
+        new Promise((_resolve, reject) => {
+          const { signal } = options as RequestInit;
+          signal?.addEventListener('abort', () => reject(new Error('The operation was aborted')));
+        })
+    );
+
+    const delivery = createCallbackDeliveryService().makeFailureCallbackRequestIfConfigured({
+      callbackUrl,
+      payload,
+    });
+    const deliveryExpectation = expect(delivery).rejects.toThrow('The operation was aborted');
+
+    await jest.advanceTimersByTimeAsync(responseTimeout * 4);
+
+    await deliveryExpectation;
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it('does not post when the callback URL is not allowlisted', async () => {
