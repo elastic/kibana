@@ -16,17 +16,17 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { asDuration } from '@kbn/apm-common';
 import { AgentIcon } from '@kbn/custom-icons';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { asDuration } from '../../../../common/utils/formatters';
-import { TruncateWithTooltip } from '../truncate_with_tooltip';
-import { SpanLinksBadge, SyncBadge, ColdStartBadge } from './badges';
+import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
+import { ColdStartBadge, SpanLinksBadge, SyncBadge } from './badges';
 import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
-import { isFailureOrError } from './utils/is_failure_or_error';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
+import { isFailureOrError } from './utils/is_failure_or_error';
 
 const ORPHAN_TITLE = i18n.translate('xpack.apm.trace.barDetails.euiIconTip.orphanTitleLabel', {
   defaultMessage: 'Orphan',

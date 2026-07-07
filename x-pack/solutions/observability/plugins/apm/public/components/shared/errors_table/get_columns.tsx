@@ -14,12 +14,12 @@ import styled from '@emotion/styled';
 import { Timestamp } from '@kbn/apm-ui-shared';
 import type { APIReturnType } from '@kbn/apm-api-shared';
 import { truncate } from '@kbn/apm-common';
+import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { asInteger } from '../../../../common/utils/formatters';
 import { SparkPlot } from '../charts/spark_plot';
 import { ErrorDetailLink } from '../links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../links/apm/error_overview_link';
-import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import type { ApmRoutes } from '../../routing/apm_route_config';
 

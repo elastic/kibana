@@ -16,5 +16,5 @@ export * from './span_icon';
 export * from './sparkline';
 export * from './timestamp';
 export * from './transactions_table';
-
+export * from './truncate_with_tooltip';
 export { getSpanIcon } from './span_icon/get_span_icon';
