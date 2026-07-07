@@ -60,7 +60,10 @@ const collectResetSnapshot = async (kiClient: KnowledgeIndicatorClient): Promise
 
   for (const streamName of streamNames) {
     const streamCounts = emptySignificantEventsResetDeletedCounts();
-    const { [streamName]: queryLinks = [] } = await kiClient.getStreamToQueryLinksMap([streamName]);
+    const { [streamName]: queryLinks = [] } = await kiClient.getStreamToQueryLinksMap(
+      [streamName],
+      { includeExpired: true }
+    );
     streamCounts.queries = queryLinks.length;
     for (const link of queryLinks) {
       if (link.rule_backed && link.rule_id) {
