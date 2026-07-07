@@ -81,6 +81,18 @@ export function getActionOptions(
     options: [],
   };
 
+  const kibanaEntityStoreGroup: ActionGroup = {
+    iconType: 'securityApp',
+    id: 'kibana.entityStore',
+    label: i18n.translate('workflows.actionsMenu.kibanaEntityStore', {
+      defaultMessage: 'Entity Store',
+    }),
+    description: i18n.translate('workflows.actionsMenu.kibanaEntityStoreDescription', {
+      defaultMessage: 'Work with Entity Store data and features directly from your workflow',
+    }),
+    options: [],
+  };
+
   const kibanaSecurityGroup: ActionGroup = {
     iconType: 'securityApp',
     id: 'kibana.security',
@@ -103,7 +115,7 @@ export function getActionOptions(
       defaultMessage: 'Work with Kibana data and features directly from your workflow',
     }),
     options: [],
-    nestedGroups: [kibanaCasesGroup, kibanaSecurityGroup],
+    nestedGroups: [kibanaCasesGroup, kibanaEntityStoreGroup, kibanaSecurityGroup],
   };
   const externalGroup: ActionOptionData = {
     iconType: 'plugs',
@@ -262,6 +274,7 @@ export function getActionOptions(
     [StepCategory.Ai]: aiGroup,
     [StepCategory.Kibana]: kibanaGroup,
     [StepCategory.KibanaCases]: kibanaCasesGroup,
+    [StepCategory.KibanaEntityStore]: kibanaEntityStoreGroup,
     [StepCategory.KibanaSecurity]: kibanaSecurityGroup,
     [StepCategory.Data]: dataTransformationGroup,
     [StepCategory.FlowControl]: flowControlGroup,

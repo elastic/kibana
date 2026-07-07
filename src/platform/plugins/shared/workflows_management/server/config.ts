@@ -84,7 +84,4 @@ export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsManagementConfig> = {
   schema: configSchema,
-  exposeToBrowser: {
-    globalExecutionsView: true,
-  },
 };

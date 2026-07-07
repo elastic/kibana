@@ -88120,13 +88120,36 @@ components:
       description: Duration format between time units.
       properties:
         from:
-          description: Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.
+          description: Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.
+          enum:
+            - ps
+            - ns
+            - us
+            - ms
+            - s
+            - min
+            - h
+            - d
+            - w
+            - mo
+            - 'y'
           type: string
         suffix:
           description: Suffix appended to the formatted value.
           type: string
         to:
-          description: Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.
+          description: 'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.'
+          enum:
+            - auto
+            - auto-approximate
+            - ms
+            - s
+            - min
+            - h
+            - d
+            - w
+            - mo
+            - 'y'
           type: string
         type:
           enum:
@@ -88848,6 +88871,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_numericFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_byteFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_durationFormat'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyDurationFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_customFormat'
       description: Number display format for the dimension value.
       title: Format Type
@@ -96211,6 +96235,29 @@ components:
         - palette
         - shift
       title: Legacy color by value (absolute)
+      type: object
+    Kibana_HTTP_APIs_legacyDurationFormat:
+      additionalProperties: false
+      description: Legacy duration format used when the `asCode.useGASchemas` feature flag is disabled. Accepts free-form unit strings (no enum validation) to preserve pre-GA behavior.
+      properties:
+        from:
+          description: Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.
+          type: string
+        suffix:
+          description: Suffix appended to the formatted value.
+          type: string
+        to:
+          description: Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.
+          type: string
+        type:
+          enum:
+            - duration
+          type: string
+      required:
+        - type
+        - from
+        - to
+      title: Duration Format (Legacy)
       type: object
     Kibana_HTTP_APIs_legacyMetricCountMetric:
       additionalProperties: false
@@ -139559,6 +139606,11 @@ components:
         - from
       type: object
       properties:
+        allowHtml:
+          description: |
+            When `true`, the connector can send emails with HTML-formatted content in the body. Defaults to `false`. This option is unavailable when `service` is `elastic_cloud`.
+          default: false
+          type: boolean
         clientId:
           description: |
             The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format. If `service` is `exchange_server`, this property is required.
