@@ -16,7 +16,7 @@ import type { ObservabilityOnboardingRequestHandlerContext } from '../../types';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 
 const createContext = (
-  user: { username?: string } | null
+  user: { username?: string; api_key?: { id: string } } | null
 ): ObservabilityOnboardingRequestHandlerContext =>
   ({
     core: Promise.resolve({
@@ -28,11 +28,12 @@ const createContext = (
     }),
   } as unknown as ObservabilityOnboardingRequestHandlerContext);
 
-const createFlow = (createdBy?: string): SavedObservabilityOnboardingFlow => ({
+const createFlow = (createdBy?: string, apiKeyId?: string): SavedObservabilityOnboardingFlow => ({
   id: 'flow-id',
   updatedAt: 1,
   type: 'autoDetect',
   createdBy,
+  apiKeyId,
   state: undefined,
   progress: {},
 });
@@ -75,6 +76,33 @@ describe('assertFlowOwnership', () => {
   it('hides legacy flows without createdBy', async () => {
     await expect(
       assertFlowOwnership({ context: createContext({ username: 'alice' }), flow: createFlow() })
+    ).rejects.toMatchObject({ output: { statusCode: 404 } });
+  });
+
+  it('allows a request whose api key id matches the flow', async () => {
+    await expect(
+      assertFlowOwnership({
+        context: createContext({ username: 'terminal', api_key: { id: 'key-1' } }),
+        flow: createFlow('alice', 'key-1'),
+      })
+    ).resolves.toBeUndefined();
+  });
+
+  it('hides a flow from a request with a different api key id', async () => {
+    await expect(
+      assertFlowOwnership({
+        context: createContext({ username: 'terminal', api_key: { id: 'key-2' } }),
+        flow: createFlow('alice', 'key-1'),
+      })
+    ).rejects.toMatchObject({ output: { statusCode: 404 } });
+  });
+
+  it('does not treat an unset flow api key id as a match', async () => {
+    await expect(
+      assertFlowOwnership({
+        context: createContext({ api_key: { id: 'key-1' } }),
+        flow: createFlow('alice'),
+      })
     ).rejects.toMatchObject({ output: { statusCode: 404 } });
   });
 });
