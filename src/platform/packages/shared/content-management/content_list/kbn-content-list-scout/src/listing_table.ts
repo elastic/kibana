@@ -25,6 +25,7 @@ const CONTENT_LIST_TABLE_SKELETON = CONTENT_LIST_TEST_SUBJECTS.tableSkeleton;
 const CONTENT_LIST_ITEM_LINK = CONTENT_LIST_TEST_SUBJECTS.itemLink;
 const CONTENT_LIST_SEARCH_BOX = getContentListToolbarSubjects().searchBox;
 const CONTENT_LIST_TAGS_FILTER_BUTTON = CONTENT_LIST_TEST_SUBJECTS.tagsFilter;
+const DEFAULT_TABLE_LOAD_TIMEOUT = 20_000;
 
 /**
  * Page object for a listing page rendered by *either* the legacy
@@ -70,7 +71,7 @@ export class ListingTable {
   }
 
   async waitUntilTableIsLoaded(options?: { timeout?: number }) {
-    const { timeout } = options ?? {};
+    const { timeout = DEFAULT_TABLE_LOAD_TIMEOUT } = options ?? {};
     await this.page.waitForSelector(this.tableReadySelector, { state: 'visible', timeout });
     // Content List keeps the table container mounted behind a loading skeleton;
     // wait for that skeleton to clear before interacting. Legacy has no skeleton.
