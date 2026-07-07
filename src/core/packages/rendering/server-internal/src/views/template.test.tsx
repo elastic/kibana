@@ -23,7 +23,6 @@ const baseMetadata = {
   themeVersion: 'v9',
   darkMode: false,
   stylesheetPaths: [],
-  scriptPaths: [],
   injectedMetadata: { theme: { name: 'borealis' } },
   customBranding: {},
 } as unknown as RenderingMetadata;
@@ -76,5 +75,26 @@ describe('Template (boot splash)', () => {
     const wrap = $('#kbn_loading_message .kbnLoaderWrap');
     expect(wrap.attr('role')).toBe('progressbar');
     expect(wrap.attr('aria-label')).toBe('Loading Elastic');
+  });
+
+  describe('splash color mode', () => {
+    it('inlines a single set of splash colors for an explicit dark mode', () => {
+      const $ = render({ ...baseMetadata, darkMode: true });
+      const css = $('head style').text();
+      expect(css).toContain('#07101F'); // borealis dark page background
+      expect(css).not.toContain('#F6F9FC'); // no light background
+      expect(css).not.toContain('@media (prefers-color-scheme');
+    });
+
+    it('inlines both variants behind a media query for system mode so the splash has no flash', () => {
+      const $ = render({ ...baseMetadata, darkMode: 'system' });
+      const css = $('head style').text();
+      // light defaults applied at first paint, dark applied via the CSS engine (no JS, no flash)
+      expect(css).toContain('#F6F9FC'); // light default page background
+      expect(css).toContain('@media (prefers-color-scheme: dark)');
+      expect(css).toContain('#07101F'); // dark override page background
+      // the old JS-based system theme bootstrap must no longer be injected
+      expect($('head script[src*="bootstrap_system_theme"]')).toHaveLength(0);
+    });
   });
 });
