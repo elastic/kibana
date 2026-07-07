@@ -338,7 +338,7 @@ describe('ConversationClient', () => {
     });
   });
 
-  describe('findBySource', () => {
+  describe('getBySource', () => {
     it('finds a conversation by first-class source in the current space', async () => {
       const document = createConversationDocument();
       mockEsClient.search
@@ -353,7 +353,7 @@ describe('ConversationClient', () => {
           },
         });
 
-      const result = await client.findBySource({
+      const result = await client.getBySource({
         type: ConversationSourceType.Slack,
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       });

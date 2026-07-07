@@ -43,7 +43,7 @@ import {
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
   exists(conversationId: string): Promise<boolean>;
-  findBySource(source: ConversationSource): Promise<Conversation | undefined>;
+  getBySource(source: ConversationSource): Promise<Conversation | undefined>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(
     conversation: ConversationUpdateRequest,
@@ -149,7 +149,7 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  async findBySource(source: ConversationSource): Promise<Conversation | undefined> {
+  async getBySource(source: ConversationSource): Promise<Conversation | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1,

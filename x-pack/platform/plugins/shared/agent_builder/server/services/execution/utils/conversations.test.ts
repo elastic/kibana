@@ -44,7 +44,7 @@ describe('conversations utils', () => {
           id: 'existing-conversation',
           source,
         });
-        conversationClient.findBySource.mockResolvedValue(existingConversation);
+        conversationClient.getBySource.mockResolvedValue(existingConversation);
 
         const result = await getConversation({
           agentId: 'test-agent',
@@ -55,7 +55,7 @@ describe('conversations utils', () => {
 
         expect(result.operation).toBe('UPDATE');
         expect(result.id).toBe('existing-conversation');
-        expect(conversationClient.findBySource).toHaveBeenCalledWith(source);
+        expect(conversationClient.getBySource).toHaveBeenCalledWith(source);
       });
 
       it('defaults access control to private for new conversation placeholders', async () => {

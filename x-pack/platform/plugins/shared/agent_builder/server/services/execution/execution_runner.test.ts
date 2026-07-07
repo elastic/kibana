@@ -59,7 +59,7 @@ describe('handleAgentExecution', () => {
       source,
     });
     const conversationClient = createConversationClientMock();
-    conversationClient.findBySource.mockResolvedValue(conversation);
+    conversationClient.getBySource.mockResolvedValue(conversation);
     conversationClient.update.mockResolvedValue(conversation);
 
     const roundCompleteEvent: ChatEvent = {

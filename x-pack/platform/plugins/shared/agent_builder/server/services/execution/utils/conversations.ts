@@ -160,7 +160,7 @@ export const getConversation = async ({
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
-    const conversation = source ? await conversationClient.findBySource(source) : undefined;
+    const conversation = source ? await conversationClient.getBySource(source) : undefined;
 
     if (conversation) {
       return {
