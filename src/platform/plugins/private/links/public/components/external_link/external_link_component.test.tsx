@@ -21,7 +21,7 @@ describe('external link component', () => {
   const defaultLinkInfo: ResolvedLink = {
     destination: 'https://example.com',
     id: 'foo',
-    type: 'external_link' as const,
+    type: 'externalLink' as const,
     title: 'https://example.com',
     options: DEFAULT_EXTERNAL_LINK_OPTIONS,
   };

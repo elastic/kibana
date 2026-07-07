@@ -28,7 +28,7 @@ describe('LinksEditor', () => {
   const defaultProps = {
     link: {
       id: 'foo',
-      type: 'dashboard_link' as const,
+      type: 'dashboardLink' as const,
       destination: '123',
       title: 'dashboard 01',
       options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
