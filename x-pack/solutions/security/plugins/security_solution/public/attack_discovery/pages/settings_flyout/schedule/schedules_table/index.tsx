@@ -143,15 +143,9 @@ export const SchedulesTable: React.FC = React.memo(() => {
     },
     [disableAttackDiscoverySchedule]
   );
-  const requestDeleteSchedules = useCallback((ids: string[], isBulk = false) => {
-    if (ids.length) {
-      setPendingDelete({ ids, isBulk });
-    }
-  }, []);
-
   const requestDeleteSchedule = useCallback(
-    (id: string) => requestDeleteSchedules([id]),
-    [requestDeleteSchedules]
+    (id: string) => setPendingDelete({ ids: [id], isBulk: false }),
+    []
   );
 
   const selection: EuiTableSelectionType<AttackDiscoverySchedule> = useMemo(
@@ -267,10 +261,10 @@ export const SchedulesTable: React.FC = React.memo(() => {
             key="delete"
             onClick={() => {
               closePopover();
-              requestDeleteSchedules(
-                selectedSchedules.map(({ id }) => id),
-                true
-              );
+              setPendingDelete({
+                ids: selectedSchedules.map(({ id }) => id),
+                isBulk: true,
+              });
             }}
           >
             {i18n.BULK_DELETE_ACTION}
@@ -278,7 +272,7 @@ export const SchedulesTable: React.FC = React.memo(() => {
         ]}
       />
     ),
-    [bulkDisableSchedules, bulkEnableSchedules, requestDeleteSchedules, selectedSchedules]
+    [bulkDisableSchedules, bulkEnableSchedules, selectedSchedules]
   );
 
   const rulesColumns = useColumns({
