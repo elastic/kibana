@@ -10,21 +10,32 @@ import React from 'react';
 import deepEqual from 'fast-deep-equal';
 import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants';
 import {
+  isLensPersistableData,
   LensAttachmentPayloadSchema,
+  type LensPersistableAttachmentData,
+  type LensSavedObjectAttachmentData,
+  type LensSavedObjectAttachmentMetadata,
   type LensAttachmentData,
 } from '../../../../common/types/domain_zod/attachment/lens/v2';
+import { LENS_SO_TYPE } from '../../../../common/constants/attachments';
 import * as i18n from './translations';
 
 import {
   AttachmentActionType,
   defineAttachment,
-  type UnifiedValueAttachmentViewProps,
+  type UnifiedHybridAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 import type { LensProps } from './types';
 import { OpenLensButton } from './open_lens_button';
 import { LensRenderer } from './lens_renderer';
+import { SavedObjectAddedEvent } from '../common/saved_object/saved_object_added_event';
+import { createSavedObjectAttachmentsTab } from '../common/saved_object/saved_object_attachments_tab';
 
-type LensViewProps = UnifiedValueAttachmentViewProps<LensAttachmentData>;
+type LensViewProps = UnifiedHybridAttachmentViewProps<
+  LensPersistableAttachmentData | LensSavedObjectAttachmentData,
+  LensSavedObjectAttachmentMetadata,
+  string
+>;
 
 function getOpenLensButton(savedObjectId: string, props: LensProps) {
   return (
@@ -45,14 +56,22 @@ const getVisualizationAttachmentActions = (savedObjectId: string, props: LensPro
   },
 ];
 
+const toLensProps = (data: LensAttachmentData) => {
+  if (isLensPersistableData(data)) {
+    return data.state as LensProps;
+  }
+  return { attributes: data.attributes, timeRange: data.timeRange } as unknown as LensProps;
+};
+
 const LensAttachment = React.memo(
-  (props: LensViewProps) => {
-    // `data.state` is `Record<string, unknown>` in the schema; the concrete
-    // shape (`LensProps`) is owned by the lens plugin and asserted here.
-    const { attributes, timeRange, metadata } = props.data.state as LensProps;
+  ({ data }: LensViewProps) => {
+    if (!data) {
+      return null;
+    }
+    const { attributes, timeRange, metadata } = toLensProps(data);
     return <LensRenderer attributes={attributes} timeRange={timeRange} metadata={metadata} />;
   },
-  (prevProps, nextProps) => deepEqual(prevProps.data.state, nextProps.data.state)
+  (prevProps, nextProps) => deepEqual(prevProps.data, nextProps.data)
 );
 
 LensAttachment.displayName = 'LensAttachment';
@@ -61,19 +80,39 @@ const LensAttachmentRendererLazyComponent = React.lazy(async () => ({
   default: LensAttachment,
 }));
 
-const getVisualizationAttachmentViewObject = ({ savedObjectId, data }: LensViewProps) => {
-  const { attributes: lensAttributes, timeRange: lensTimeRange } = data.state as LensProps;
+const LensAttachmentsTab = createSavedObjectAttachmentsTab({
+  attachmentTypeId: LENS_ATTACHMENT_TYPE,
+  soType: LENS_SO_TYPE,
+});
 
+const getVisualizationAttachmentViewObject = ({
+  savedObjectId,
+  data,
+  attachmentId,
+  metadata,
+}: LensViewProps) => {
+  const openLensId = attachmentId ?? savedObjectId;
+  const event =
+    attachmentId != null ? (
+      <SavedObjectAddedEvent
+        soType={LENS_SO_TYPE}
+        attachmentId={attachmentId}
+        title={metadata?.title}
+        label={i18n.ADDED_VISUALIZATION}
+        data-test-subj="cases-lens-event-link"
+      />
+    ) : (
+      i18n.ADDED_VISUALIZATION
+    );
+  const lensProps = data ? toLensProps(data) : undefined;
   return {
-    event: i18n.ADDED_VISUALIZATION,
+    event,
     timelineAvatar: 'lensApp',
-    getActions: () =>
-      getVisualizationAttachmentActions(savedObjectId, {
-        attributes: lensAttributes,
-        timeRange: lensTimeRange,
-      }),
+    ...(lensProps
+      ? { getActions: () => getVisualizationAttachmentActions(openLensId, lensProps) }
+      : {}),
     hideDefaultActions: false,
-    children: LensAttachmentRendererLazyComponent,
+    ...(data ? { children: LensAttachmentRendererLazyComponent } : {}),
   };
 };
 
@@ -84,5 +123,6 @@ export const getVisualizationAttachmentType = () =>
     displayName: i18n.VISUALIZATIONS,
     getAttachmentViewObject: getVisualizationAttachmentViewObject,
     getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_VISUALIZATION }),
+    getAttachmentTabViewObject: () => ({ children: LensAttachmentsTab }),
     schema: LensAttachmentPayloadSchema,
   });

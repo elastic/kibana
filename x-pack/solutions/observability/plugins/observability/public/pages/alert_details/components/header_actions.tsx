@@ -72,15 +72,11 @@ export function HeaderActions({
     notifications,
   } = services;
 
-  const authorizedToReadRuleType = useAuthorizedToReadRuleType();
+  const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
-  // Rule read is authorized per rule type (and consumer), so gate the "Go to rule
-  // details" action on the specific rule behind this alert rather than a coarse
-  // "any rules" flag.
-  const alertRuleTypeId = alert?.fields[ALERT_RULE_TYPE_ID];
-  const alertConsumer = alert?.fields[ALERT_RULE_CONSUMER];
-  const canReadAlertRule = Boolean(
-    alertRuleTypeId && authorizedToReadRuleType(alertRuleTypeId, alertConsumer)
+  const canReadAlertRule = authorizedToReadRuleType(
+    alert?.fields[ALERT_RULE_TYPE_ID],
+    alert?.fields[ALERT_RULE_CONSUMER]
   );
 
   // Attaching an alert to a case requires both reading cases and adding comments

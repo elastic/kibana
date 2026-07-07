@@ -112,6 +112,281 @@ describe('DataSourcesClient', () => {
     });
   });
 
+  describe('update', () => {
+    it('throws when name is empty/whitespace', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      const data: DataSourceWithSecrets = {
+        type: 's3',
+        name: '   ',
+        description: '',
+        settings: {},
+      };
+
+      await expect(client.update(data)).rejects.toThrow('Name is required.');
+      expect(http.put).not.toHaveBeenCalled();
+    });
+
+    it('omits an untouched redacted secret field so the stored value is preserved', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      const data: DataSourceWithSecrets = {
+        type: 's3',
+        name: 'ds1',
+        description: '',
+        settings: {
+          endpoint: 'https://s3.example',
+          access_key: '::es_redacted::',
+          secret_key: '::es_redacted::',
+        },
+      };
+
+      (http.put as jest.Mock).mockResolvedValue(undefined);
+
+      await expect(client.update(data)).resolves.toBeUndefined();
+
+      const expectedBody = {
+        type: 's3',
+        description: '',
+        settings: {
+          endpoint: 'https://s3.example',
+        },
+      };
+
+      expect(http.put).toHaveBeenCalledWith(getDataSourceByIdApiPath('ds1'), {
+        body: JSON.stringify(expectedBody),
+      });
+    });
+
+    it('sends a changed secret value to replace it', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      const data: DataSourceWithSecrets = {
+        type: 's3',
+        name: 'ds1',
+        description: '',
+        settings: {
+          access_key: '::es_redacted::',
+          secret_key: 'NEW_SECRET',
+        },
+      };
+
+      (http.put as jest.Mock).mockResolvedValue(undefined);
+
+      await client.update(data);
+
+      const expectedBody = {
+        type: 's3',
+        description: '',
+        settings: {
+          secret_key: 'NEW_SECRET',
+        },
+      };
+
+      expect(http.put).toHaveBeenCalledWith(getDataSourceByIdApiPath('ds1'), {
+        body: JSON.stringify(expectedBody),
+      });
+    });
+
+    it('sends an explicit null to clear a secret the user emptied', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      const data: DataSourceWithSecrets = {
+        type: 's3',
+        name: 'ds1',
+        description: '',
+        settings: {
+          access_key: '::es_redacted::',
+          secret_key: '',
+        },
+      };
+
+      (http.put as jest.Mock).mockResolvedValue(undefined);
+
+      await client.update(data);
+
+      const expectedBody = {
+        type: 's3',
+        description: '',
+        settings: {
+          secret_key: null,
+        },
+      };
+
+      expect(http.put).toHaveBeenCalledWith(getDataSourceByIdApiPath('ds1'), {
+        body: JSON.stringify(expectedBody),
+      });
+    });
+
+    it('sends an explicit null for a secret field dropped by an auth-mode switch', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      // Switching away from access-and-secret-key auth drops access_key/secret_key from
+      // settings entirely (see applyAuthenticationModeToDataSource) rather than sending
+      // them as empty strings.
+      const data: DataSourceWithSecrets = {
+        type: 's3',
+        name: 'ds1',
+        description: '',
+        settings: {
+          auth: 'anonymous',
+        },
+      };
+
+      (http.put as jest.Mock).mockResolvedValue(undefined);
+
+      await client.update(data);
+
+      const expectedBody = {
+        type: 's3',
+        description: '',
+        settings: {
+          auth: 'anonymous',
+          access_key: null,
+          secret_key: null,
+        },
+      };
+
+      expect(http.put).toHaveBeenCalledWith(getDataSourceByIdApiPath('ds1'), {
+        body: JSON.stringify(expectedBody),
+      });
+    });
+
+    it('still omits empty plaintext fields', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      const data: DataSourceWithSecrets = {
+        type: 's3',
+        name: 'ds1',
+        description: '',
+        settings: {
+          region: '',
+          endpoint: 'https://s3.example',
+          role_arn: undefined,
+          access_key: '::es_redacted::',
+          secret_key: '::es_redacted::',
+        },
+      };
+
+      (http.put as jest.Mock).mockResolvedValue(undefined);
+
+      await client.update(data);
+
+      const expectedBody = {
+        type: 's3',
+        description: '',
+        settings: {
+          endpoint: 'https://s3.example',
+        },
+      };
+
+      expect(http.put).toHaveBeenCalledWith(getDataSourceByIdApiPath('ds1'), {
+        body: JSON.stringify(expectedBody),
+      });
+    });
+
+    it('omits an untouched redacted secret for a GCS data source', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      const data: DataSourceWithSecrets = {
+        type: 'gcs',
+        name: 'ds1',
+        description: '',
+        settings: {
+          endpoint: 'https://gcs.example',
+          credentials: '::es_redacted::',
+        },
+      };
+
+      (http.put as jest.Mock).mockResolvedValue(undefined);
+
+      await client.update(data);
+
+      const expectedBody = {
+        type: 'gcs',
+        description: '',
+        settings: {
+          endpoint: 'https://gcs.example',
+        },
+      };
+
+      expect(http.put).toHaveBeenCalledWith(getDataSourceByIdApiPath('ds1'), {
+        body: JSON.stringify(expectedBody),
+      });
+    });
+
+    it('never nulls Azure connection_string/sas_token, which the flyout does not manage', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      // The Azure flyout only ever submits `key` for credentials auth, so `settings`
+      // here never contains connection_string/sas_token even when the stored data
+      // source (e.g. created via the API) authenticates with one of those instead.
+      const data: DataSourceWithSecrets = {
+        type: 'azure',
+        name: 'ds1',
+        description: '',
+        settings: {
+          endpoint: 'https://azure.example',
+          key: '::es_redacted::',
+        },
+      };
+
+      (http.put as jest.Mock).mockResolvedValue(undefined);
+
+      await client.update(data);
+
+      const expectedBody = {
+        type: 'azure',
+        description: '',
+        settings: {
+          endpoint: 'https://azure.example',
+        },
+      };
+
+      expect(http.put).toHaveBeenCalledWith(getDataSourceByIdApiPath('ds1'), {
+        body: JSON.stringify(expectedBody),
+      });
+    });
+
+    it('sends an explicit null to clear an Azure key the user emptied', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      const data: DataSourceWithSecrets = {
+        type: 'azure',
+        name: 'ds1',
+        description: '',
+        settings: {
+          key: '',
+        },
+      };
+
+      (http.put as jest.Mock).mockResolvedValue(undefined);
+
+      await client.update(data);
+
+      const expectedBody = {
+        type: 'azure',
+        description: '',
+        settings: {
+          key: null,
+        },
+      };
+
+      expect(http.put).toHaveBeenCalledWith(getDataSourceByIdApiPath('ds1'), {
+        body: JSON.stringify(expectedBody),
+      });
+    });
+  });
+
   describe('delete', () => {
     it('deletes a single name', async () => {
       const http = createHttpMock();
