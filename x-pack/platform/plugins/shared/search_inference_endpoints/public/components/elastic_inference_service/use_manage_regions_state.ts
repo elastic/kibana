@@ -35,7 +35,8 @@ export const useManageRegionsState = (onClose: () => void) => {
     if (!isPolicyLoading && !isEndpointsLoading && !syncedFromPolicy) {
       const existing = policy?.region_policy?.allowed_regions ?? [];
       if (existing.length > 0) {
-        setCheckedKeys(new Set(existing.map(regionKey)));
+        const availableKeys = new Set(availableRegions.map(regionKey));
+        setCheckedKeys(new Set(existing.map(regionKey).filter((k) => availableKeys.has(k))));
       } else {
         setCheckedKeys(new Set(availableRegions.map(regionKey)));
       }
