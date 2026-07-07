@@ -521,6 +521,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   ): Promise<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>> {
     const responseDocs = await fetchEndpointActionResponses<TOutputContent, TMeta>({
       esClient: this.options.esClient,
+      endpointService: this.options.endpointService,
       actionIds: [actionId],
       agentIds,
     });
@@ -861,6 +862,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         if (actionRequests.length > 0) {
           const actionResults = await fetchActionResponses({
             esClient,
+            endpointService: this.options.endpointService,
             actionIds: actionRequests.map((action) => action.EndpointActions.action_id),
           });
           const responsesByActionId = mapResponsesByActionId(actionResults);
