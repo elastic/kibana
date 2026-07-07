@@ -233,6 +233,42 @@ describe('esql query helpers', () => {
       );
     });
 
+    it.each([
+      [
+        'stats and sort grouping',
+        'FROM kibana_sample_data_ecommerce | WHERE taxful_total_price > 50 AND total_quantity >= 1 AND (customer_gender == "FEMALE" OR customer_gender == "MALE") AND (`geoip.country_iso_code` == "US" OR `geoip.country_iso_code` == "GB") | STATS total_revenue = SUM((taxful_total_price)), avg_order = AVG((taxful_total_price)) BY day = DATE_TRUNC(1 day, order_date), country = (`geoip.country_iso_code`), gender = (customer_gender) | SORT (day) DESC',
+        [
+          'SUM((taxful_total_price))',
+          'AVG((taxful_total_price))',
+          'country = (`geoip.country_iso_code`)',
+          'gender = (customer_gender)',
+          'SORT (day) DESC',
+        ],
+      ],
+      [
+        'nested eval and where grouping',
+        'FROM kibana_sample_data_ecommerce | EVAL revenue_bucket = ROUND(((taxful_total_price + taxless_total_price) / 2)) | WHERE ((revenue_bucket > 50) AND (total_quantity >= 1)) | STATS count = COUNT(*) BY bucket = (revenue_bucket) | SORT (bucket) ASC',
+        [
+          'ROUND(((taxful_total_price + taxless_total_price) / 2))',
+          'WHERE ((revenue_bucket > 50) AND (total_quantity >= 1))',
+          'bucket = (revenue_bucket)',
+          'SORT (bucket) ASC',
+        ],
+      ],
+    ])('should preserve redundant expression parentheses for %s', function (_, query, fragments) {
+      const code = prettifyQuery(query);
+
+      for (const fragment of fragments) {
+        expect(code).toContain(fragment);
+      }
+    });
+
+    it('should preserve final own-line comments', function () {
+      expect(prettifyQuery('FROM logs* | WHERE KQL("term")\n// KEEP meow')).toEqual(
+        'FROM logs*\n  | WHERE KQL("term")\n  // KEEP meow'
+      );
+    });
+
     it('should respect custom lineWidth when provided', function () {
       const query =
         'FROM kibana_sample_data_logs | STATS count = COUNT(*), avg = AVG(bytes), p95 = PERCENTILE(bytes, 95), ext = VALUES(tags.keyword) BY ip | EVAL newField = CASE(count < 100, "groupA", count > 100 AND count < 500, "groupB", "Other") | KEEP newField';

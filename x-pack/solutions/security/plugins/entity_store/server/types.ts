@@ -16,6 +16,10 @@ import type {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
+import type {
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
 } from '@kbn/core-http-request-handler-context-server';
@@ -38,11 +42,13 @@ import type { CRUDClient } from './domain/crud';
 import type { EntityMetadataClient } from './domain/entity_metadata';
 import type { ResolutionClient } from './domain/resolution';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+import type { TelemetryReporter } from './telemetry/events';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
   spaces: SpacesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface EntityStoreStartPlugins {
@@ -52,6 +58,7 @@ export interface EntityStoreStartPlugins {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
 export interface EntityStoreApiRequestHandlerContext {
@@ -68,6 +75,7 @@ export interface EntityStoreApiRequestHandlerContext {
   historySnapshotClient: HistorySnapshotClient;
   security: SecurityPluginStart;
   namespace: string;
+  analytics: TelemetryReporter;
 }
 
 export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{
@@ -82,7 +90,13 @@ export type RegisterEntityMaintainer = (config: RegisterEntityMaintainerConfig) 
 export type EntityStoreCRUDClient = Omit<CRUDClient, 'createEntity'>;
 
 export interface EntityStoreStartContract {
-  createCRUDClient: (esClient: ElasticsearchClient, namespace: string) => EntityStoreCRUDClient;
+  createCRUDClient: (
+    esClient: ElasticsearchClient,
+    namespace: string,
+    getWorkflowsClient?: () => Promise<{
+      emitEvent: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
+    }>
+  ) => EntityStoreCRUDClient;
   createEntityMetadataClient: (
     esClient: ElasticsearchClient,
     namespace: string
