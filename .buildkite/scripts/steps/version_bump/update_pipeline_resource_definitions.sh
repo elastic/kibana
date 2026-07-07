@@ -13,7 +13,6 @@ FILES=(
   ".buildkite/pipeline-resource-definitions/kibana-console-definitions-sync.yml"
   ".buildkite/pipeline-resource-definitions/kibana-es-snapshots.yml"
   ".buildkite/pipeline-resource-definitions/kibana-on-merge.yml"
-  ".buildkite/pipeline-resource-definitions/kibana-on-merge-unsupported-ftrs.yml"
 )
 
 for file in "${FILES[@]}"; do
