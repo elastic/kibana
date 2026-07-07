@@ -39,7 +39,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { ESQLQueryStats } from '@kbn/esql-types';
+import { QuerySource, type ESQLQueryStats } from '@kbn/esql-types';
+import { ESQLEditorTelemetryService } from '@kbn/esql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
@@ -106,8 +107,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onQueryChange?: (payload: { dateRange: TimeRange; query?: QT | Query }) => void;
   onQuerySubmit?: (
     payload: { dateRange: TimeRange; query?: QT | Query },
-    isUpdate?: boolean,
-    metadata?: QuerySubmitMetadata
+    isUpdate?: boolean
   ) => void;
   // To initialize with a predefined query which has not been submitted yet (in dirty state)
   draft?: UnifiedSearchDraft;
@@ -211,6 +211,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
 
   private services = this.props.kibana.services;
   private savedQueryService = this.services.data.query.savedQueries;
+  private esqlTelemetryService = new ESQLEditorTelemetryService(this.services.analytics);
   private queryBarMenuRef = createRef<EuiContextMenuClass>();
 
   public static getDerivedStateFromProps(
@@ -494,13 +495,44 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
                 to: this.state.dateRangeTo,
               },
             },
-            this.isDirty(),
-            { trigger: QuerySubmitTrigger.TEXT_BASED_EDITOR }
+            this.isDirty()
           );
         }
       }
     );
   };
+
+  private getESQLSubmitSource(
+    metadata?: QuerySubmitMetadata
+  ): QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER | undefined {
+    switch (metadata?.trigger) {
+      case QuerySubmitTrigger.QUERY_BAR_SUBMIT:
+        return QuerySource.SEARCH_BUTTON;
+      case QuerySubmitTrigger.TIME_FILTER:
+        return QuerySource.TIME_FILTER;
+      default:
+        return;
+    }
+  }
+
+  private trackESQLQuerySubmitted(
+    query: Query | AggregateQuery | undefined,
+    metadata?: QuerySubmitMetadata
+  ) {
+    if (!query || !isOfAggregateQueryType(query)) {
+      return;
+    }
+
+    const source = this.getESQLSubmitSource(metadata);
+    if (!source) {
+      return;
+    }
+
+    this.esqlTelemetryService.trackQuerySubmitted({
+      source,
+      query: query.esql,
+    });
+  }
 
   public onQueryBarSubmit = (
     queryAndDateRange: { dateRange?: TimeRange; query?: QT | Query },
@@ -525,10 +557,10 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
                 to: this.state.dateRangeTo,
               },
             },
-            this.isDirty(),
-            metadata
+            this.isDirty()
           );
         }
+        this.trackESQLQuerySubmitted(this.state.query, metadata);
         this.services.usageCollection?.reportUiCounter(
           this.services.appName,
           METRIC_TYPE.CLICK,
