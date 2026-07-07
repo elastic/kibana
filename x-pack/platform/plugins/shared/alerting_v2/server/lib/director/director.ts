@@ -121,7 +121,7 @@ export class DirectorService {
     // the user hits `deactivate` (which flips the lifecycle marker
     // back and lets the strategy own transitions again). We preserve
     // the incoming event's `status` (e.g. `recovered`) so downstream
-    // analytics keep the raw engine signal — only `episode.status` is
+    // analytics keep the raw engine signal. Only `episode.status` is
     // forced. `episode.status_count` is dropped to mirror how the
     // strategies emit any → active transitions.
     if (this.isUserLocked(previousAlertEvent)) {
@@ -171,8 +171,8 @@ export class DirectorService {
    * The audit stream is the source of truth for whether a group is
    * user-owned: if the most recent lifecycle action (`activate` or
    * `deactivate`) for this group is `activate`, the director must
-   * hold the episode in `active`. `deactivate` — or the absence of
-   * any lifecycle action — releases the strategy to decide.
+   * hold the episode in `active`. `deactivate` or the absence of
+   * any lifecycle action releases the strategy to decide.
    *
    * We require `last_episode_id` to be present so the forced-active
    * emit has an episode to pin to. In practice this is always true

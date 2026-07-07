@@ -487,10 +487,8 @@ describe('DirectorService', () => {
     describe('user lock (last_lifecycle_action_type === activate)', () => {
       it('forces episode.status to active on a recovery event, preserving the raw event status', async () => {
         // The engine emitted a recovery for a user-activated episode.
-        // The director must NOT flip the episode to `recovering` — the
-        // user has taken ownership. But we keep `status: 'recovered'`
-        // on the emitted doc so downstream analytics still see the raw
-        // engine signal.
+        // The director must NOT flip the episode to `recovering`. The
+        // user has taken ownership.
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'recovered',
@@ -527,8 +525,8 @@ describe('DirectorService', () => {
 
       it('forces episode.status to active on a breach event (no double-flip)', async () => {
         // A subsequent breach on a user-activated episode is a no-op at
-        // the episode level — we're already active. Same forced-active
-        // emit; the raw event status is preserved as-is.
+        // the episode level. We're already active. Same forced-active
+        // emit. The raw event status is preserved as-is.
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'breached',
