@@ -66,6 +66,24 @@ describe('getTransformOut', () => {
     expect(result.data_source).toEqual(expect.objectContaining({ ref_id: remappedDataViewId }));
   });
 
+  it('keeps legacy metric panels without density on compact density in apiFormat', () => {
+    const builder = new LensConfigBuilder(undefined, true);
+    const transformOut = getTransformOut(builder, transformDrilldownsOut, true);
+
+    const storedState: LensByValueSerializedState = {
+      title: 'Metric',
+      attributes: {
+        ...simpleMetricAttributes,
+      },
+      references: [],
+    };
+
+    const result = transformOut(storedState, []) as { styling?: { density?: string } };
+
+    expect(simpleMetricAttributes.state.visualization).not.toHaveProperty('density');
+    expect(result.styling?.density).toEqual('compact');
+  });
+
   // When the panel has no title (key absent or `undefined`), fall back to the attributes
   // title so legacy by-value panels keep their title through the apiFormat round-trip.
   // See https://github.com/elastic/kibana/issues/268821

@@ -347,6 +347,53 @@ describe('getEuidDslFilterBasedOnDocument', () => {
         })
       ).toMatchSnapshot();
     });
+
+    it('generates distinct DSL filters for user:alice@aws vs user:alice@gcp (cloud.provider disambiguation)', () => {
+      const awsDoc = {
+        user: { name: 'alice' },
+        event: { kind: 'asset', module: 'asset_discovery' },
+        cloud: { provider: 'aws' },
+      };
+      const gcpDoc = {
+        user: { name: 'alice' },
+        event: { kind: 'asset', module: 'asset_discovery' },
+        cloud: { provider: 'gcp' },
+      };
+
+      const awsFilter = getEuidDslFilterBasedOnDocument('user', awsDoc);
+      const gcpFilter = getEuidDslFilterBasedOnDocument('user', gcpDoc);
+
+      expect(awsFilter).toBeDefined();
+      expect(gcpFilter).toBeDefined();
+
+      // Full-object snapshots: verify the exact DSL shape including the compound condition
+      // (event.kind=asset AND event.module=asset_discovery AND cloud.provider==<value>).
+      expect(awsFilter).toMatchSnapshot('aws filter');
+      expect(gcpFilter).toMatchSnapshot('gcp filter');
+
+      const awsJson = JSON.stringify(awsFilter);
+      const gcpJson = JSON.stringify(gcpFilter);
+
+      // No cross-contamination: the aws filter must not reference gcp and vice versa.
+      expect(awsJson).not.toContain('"gcp"');
+      expect(gcpJson).not.toContain('"aws"');
+
+      // The two filters are entirely different.
+      expect(awsJson).not.toEqual(gcpJson);
+    });
+
+    it('does not include cloud.provider filter when event.module is not asset_discovery', () => {
+      // Other integrations sending event.kind=asset must NOT be routed via cloud.provider.
+      const result = getEuidDslFilterBasedOnDocument('user', {
+        user: { name: 'alice' },
+        event: { kind: 'asset', module: 'other_integration' },
+        cloud: { provider: 'aws' },
+      });
+
+      expect(result).toBeDefined();
+      // cloud.provider must NOT appear in the filter — namespace is determined by event.module.
+      expect(JSON.stringify(result)).not.toContain('cloud.provider');
+    });
   });
 
   describe('service', () => {
