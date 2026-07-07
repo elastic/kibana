@@ -7,26 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execSync } from 'child_process';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-import * as acorn from 'acorn';
-
-const KIBANA_OPS_REPO = 'elastic/kibana-operations';
-const TEAMS_FILE_PATH = 'triage/teams.js';
-const CODEOWNERS_PATH = resolve(__dirname, '../../../../.github/CODEOWNERS');
+import { getCodeOwnersEntries, getTeams } from '@kbn/code-owners';
 
 /**
- * Teams that are valid GitHub teams used in CODEOWNERS but are not tracked.
+ * Teams that are allowed to be untracked in the public team registry (`@kbn/code-owners` `teams.jsonc`).
  */
-const KNOWN_VALID_TEAMS = new Set([
-  'elastic/apm-ui',
+const ALLOWED_UNTRACKED_TEAMS = new Set([
   'elastic/cloud-services',
   'elastic/contextual-security',
   'elastic/docs',
   'elastic/eui',
   'elastic/eui-team',
-  'elastic/experience-docs',
   'elastic/jinastic',
   'elastic/kibana-accessibility',
   'elastic/kibana-performance-testing',
@@ -50,105 +41,40 @@ const KNOWN_VALID_TEAMS = new Set([
   'elastic/security-ml',
   'elastic/security-pds-deployment',
   'elastic/ski-docs',
+  'elastic/streams-ui',
 ]);
 
-function extractValue(node: acorn.Expression): unknown {
-  if (!node) return undefined;
-
-  switch (node.type) {
-    case 'Literal':
-      return node.value;
-    case 'ArrayExpression':
-      return node.elements.map((el) => (el ? extractValue(el as acorn.Expression) : undefined));
-    case 'ObjectExpression': {
-      const obj: Record<string, unknown> = {};
-      for (const prop of node.properties) {
-        if (prop.type === 'Property') {
-          const key =
-            prop.key.type === 'Identifier'
-              ? prop.key.name
-              : extractValue(prop.key as acorn.Expression);
-          obj[key as string] = extractValue(prop.value as acorn.Expression);
-        }
-      }
-      return obj;
-    }
-    case 'Identifier':
-      return node.name === 'undefined' ? undefined : node.name;
-    default:
-      return undefined;
-  }
-}
-
 /**
- * Parse teams.js content and extract all github.team values.
+ * Collect the GitHub team handles tracked in the public team registry.
  */
-function extractGithubTeamsFromJs(content: string): Set<string> {
-  const ast = acorn.parse(content, {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-  });
-
-  let teamsArray: Array<acorn.Expression | acorn.SpreadElement | null> | null = null;
-
-  for (const node of ast.body) {
-    if (node.type === 'VariableDeclaration') {
-      for (const declaration of node.declarations) {
-        if (
-          declaration.id?.type === 'Identifier' &&
-          declaration.id.name === 'teams' &&
-          declaration.init?.type === 'ArrayExpression'
-        ) {
-          teamsArray = declaration.init.elements;
-          break;
-        }
-      }
-    }
-    if (teamsArray) break;
-  }
-
-  if (!teamsArray) {
-    throw new Error('Could not find teams array in teams.js content');
-  }
-
-  const githubTeams = new Set<string>();
-
-  for (const element of teamsArray) {
-    if (element?.type !== 'ObjectExpression') continue;
-
-    const teamObj = extractValue(element) as Record<string, unknown>;
-    const github = teamObj?.github as Record<string, unknown> | undefined;
-    const team = github?.team as string | undefined;
-
-    if (team) {
-      githubTeams.add(team);
-    }
-  }
-
-  return githubTeams;
-}
-
-/**
- * Fetch teams.js from the kibana-operations repo via `gh api`.
- */
-function fetchTeamsFile(): string {
-  const cmd = `gh api repos/${KIBANA_OPS_REPO}/contents/${TEAMS_FILE_PATH} --jq .content`;
-
-  const base64Content = execSync(cmd, { encoding: 'utf-8' }).trim();
-  return Buffer.from(base64Content, 'base64').toString('utf-8');
-}
-
-/**
- * Extract all @elastic/<team> references from CODEOWNERS.
- */
-function extractCodeownersTeams(): Set<string> {
-  const content = readFileSync(CODEOWNERS_PATH, 'utf-8');
+function getRegistryGithubTeams(): Set<string> {
   const teams = new Set<string>();
-  const teamPattern = /@(elastic\/[\w-]+)/g;
 
-  let match: RegExpExecArray | null;
-  while ((match = teamPattern.exec(content)) !== null) {
-    teams.add(match[1]);
+  for (const team of getTeams()) {
+    if (team.github.team) {
+      teams.add(team.github.team);
+    }
+  }
+
+  return teams;
+}
+
+/**
+ * Extract all `@elastic/<team>` references from CODEOWNERS.
+ *
+ * Only `elastic/`-scoped GitHub teams are validated; individual GitHub users
+ * that appear as code owners are intentionally ignored. Handles are returned
+ * without the leading `@`, matching the registry format.
+ */
+function getCodeownersTeams(): Set<string> {
+  const teams = new Set<string>();
+
+  for (const entry of getCodeOwnersEntries()) {
+    for (const team of entry.teams) {
+      if (team.startsWith('elastic/')) {
+        teams.add(team);
+      }
+    }
   }
 
   // Exclude the bot account used for backport branch overrides
@@ -157,55 +83,60 @@ function extractCodeownersTeams(): Set<string> {
   return teams;
 }
 
-async function main(): Promise<void> {
-  console.log('Fetching teams.js from elastic/kibana-operations...');
-
-  let teamsJsContent: string;
-  try {
-    teamsJsContent = fetchTeamsFile();
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.warn(
-      `WARNING: Could not fetch teams.js from GitHub, skipping team validation: ${message}`
-    );
-    process.exit(0);
-  }
-
-  console.log('Parsing teams from teams.js...');
-  const teamsJsTeams = extractGithubTeamsFromJs(teamsJsContent);
-  console.log(`Found ${teamsJsTeams.size} teams in teams.js`);
+function main(): void {
+  console.log('Loading teams from the @kbn/code-owners registry...');
+  const registryTeams = getRegistryGithubTeams();
+  console.log(`Found ${registryTeams.size} teams in teams.jsonc`);
 
   console.log('Extracting teams from CODEOWNERS...');
-  const codeownersTeams = extractCodeownersTeams();
+  const codeownersTeams = getCodeownersTeams();
   console.log(`Found ${codeownersTeams.size} unique teams in CODEOWNERS`);
 
-  const invalidTeams: string[] = [];
+  let hasErrors = false;
 
-  for (const team of codeownersTeams) {
-    if (!teamsJsTeams.has(team) && !KNOWN_VALID_TEAMS.has(team)) {
-      invalidTeams.push(team);
-    }
-  }
+  const invalidTeams = [...codeownersTeams].filter(
+    (team) => !registryTeams.has(team) && !ALLOWED_UNTRACKED_TEAMS.has(team)
+  );
 
   if (invalidTeams.length > 0) {
+    hasErrors = true;
     console.error('\nERROR: The following teams in CODEOWNERS are not recognized:');
-    console.error('They are not present in kibana-operations/triage/teams.js');
+    console.error('They are not present in the @kbn/code-owners registry (teams.jsonc)');
     console.error('and are not in the known-valid allowlist.\n');
     for (const team of invalidTeams.sort()) {
       console.error(`  - ${team}`);
     }
     console.error(
-      '\nTo fix: either add the team to teams.js in elastic/kibana-operations,\n' +
-        'or add it to KNOWN_VALID_TEAMS in verify_codeowners_teams.ts\n' +
+      '\nTo fix: either add the team to teams.jsonc in\n' +
+        'src/platform/packages/private/kbn-code-owners,\n' +
+        'or add it to ALLOWED_UNTRACKED_TEAMS in verify_codeowners_teams.ts\n' +
         '(requires approval from @elastic/kibana-security).\n'
     );
+  }
+
+  // Reverse check: every allowlisted team must still be referenced in CODEOWNERS,
+  // otherwise the allowlist has accumulated stale entries that should be removed.
+  const staleAllowlistTeams = [...ALLOWED_UNTRACKED_TEAMS].filter(
+    (team) => !codeownersTeams.has(team)
+  );
+
+  if (staleAllowlistTeams.length > 0) {
+    hasErrors = true;
+    console.error('\nERROR: The following ALLOWED_UNTRACKED_TEAMS entries are no longer used:');
+    console.error('They are not referenced anywhere in CODEOWNERS.\n');
+    for (const team of staleAllowlistTeams.sort()) {
+      console.error(`  - ${team}`);
+    }
+    console.error(
+      '\nTo fix: remove these teams from ALLOWED_UNTRACKED_TEAMS in\nverify_codeowners_teams.ts\n'
+    );
+  }
+
+  if (hasErrors) {
     process.exit(1);
   }
 
   console.log('All CODEOWNERS teams are valid.');
 }
 
-main().catch((error) => {
-  console.error('Unexpected error:', error);
-  process.exit(1);
-});
+main();
