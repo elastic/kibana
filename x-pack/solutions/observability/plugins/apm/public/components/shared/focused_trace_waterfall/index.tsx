@@ -7,9 +7,8 @@
 import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { APIReturnType } from '@kbn/apm-api-shared';
-import { TraceWaterfall } from '../trace_waterfall';
-import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
-import type { WaterfallGetServiceBadgeHref } from '../../../../common/waterfall/typings';
+import { TraceWaterfall } from '@kbn/apm-ui-shared';
+import type { TraceItem, WaterfallGetServiceBadgeHref } from '@kbn/apm-types';
 import { TraceSummary } from './trace_summary';
 
 type FocusedTrace = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/summary'>;

@@ -68,3 +68,4 @@ export { truncate, unit } from './src/utils/style';
 export { NOT_AVAILABLE_LABEL } from './src/utils/i18n';
 export * from './src/utils/formatters';
 export { isFiniteNumber } from './src/utils/is_finite_number';
+export { getTimestampUs } from './src/utils/get_timestamp_us';

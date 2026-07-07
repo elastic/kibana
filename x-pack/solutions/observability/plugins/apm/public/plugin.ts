@@ -103,7 +103,6 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
 import { createLazyFocusedTraceWaterfallRenderer } from './components/shared/focused_trace_waterfall/lazy_create_focused_trace_waterfall_renderer';
-import { createLazyFullTraceWaterfallRenderer } from './components/shared/trace_waterfall/lazy_create_full_trace_waterfall_renderer';
 import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
 import { registerEmbeddables } from './embeddable/register_embeddables';
 import { registerServiceMapAttachment } from './agent_builder/attachment_types';
@@ -573,11 +572,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     discoverShared.features.registry.register({
       id: 'observability-focused-trace-waterfall',
       render: createLazyFocusedTraceWaterfallRenderer({ core }),
-    });
-
-    discoverShared.features.registry.register({
-      id: 'observability-full-trace-waterfall',
-      render: createLazyFullTraceWaterfallRenderer({ core }),
     });
 
     if (fleet) {

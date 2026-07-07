@@ -6,16 +6,15 @@
  */
 
 import type { Error } from '@kbn/apm-types';
+import { TRACE_WATERFALL_EBT_ELEMENTS, TraceWaterfall } from '@kbn/apm-ui-shared';
 import type { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
-import { TraceWaterfall } from '../../../../shared/trace_waterfall';
-import { TRACE_WATERFALL_EBT_ELEMENTS } from '../../../../shared/trace_waterfall/ebt_constants';
-import { useErrorClickHandler } from '../../../../shared/trace_waterfall/use_error_click_handler';
-import { useGetServiceBadgeHrefFromRouter } from '../../../../shared/trace_waterfall/use_get_service_badge_href_from_router';
 import { UnifiedWaterfallFlyout } from './unified_waterfall_flyout';
+import { useErrorClickHandler } from './use_error_click_handler';
+import { useGetServiceBadgeHrefFromRouter } from './use_get_service_badge_href_from_router';
 
 interface Props {
   traceItems: TraceItem[];

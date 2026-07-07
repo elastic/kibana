@@ -18,9 +18,26 @@ export * from './timestamp';
 export * from './transactions_table';
 export * from './truncate_with_tooltip';
 export { getSpanIcon } from './span_icon/get_span_icon';
-// Timeline
 export { TimelineAxisContainer, VerticalLinesContainer } from './timeline';
 export { Legend } from './timeline/legend';
 export type { AgentMark } from './timeline/marker/agent_marker';
 export type { ErrorMark } from './timeline/marker/error_marker';
 export { getAgentMarks } from './timeline/marker/get_agent_marks';
+export { TraceWaterfall } from './trace_waterfall';
+export {
+  getTraceParentChildrenMap,
+  getRootItemOrFallback,
+  getSubtreeIds,
+} from './trace_waterfall/use_trace_waterfall';
+export {
+  TRACE_WATERFALL_EBT_CLICK_ACTIONS,
+  TRACE_WATERFALL_EBT_ELEMENTS,
+} from './trace_waterfall/ebt_constants';
+export { TraceWaterfallWithFetching } from './trace_waterfall/trace_waterfall_with_fetching';
+export {
+  type OnErrorClick,
+  useTraceWaterfallContext,
+} from './trace_waterfall/trace_waterfall_context';
+export { Loading } from './trace_waterfall/loading';
+export { useGetServiceBadgeHrefFromCore } from './trace_waterfall/use_get_service_badge_href_from_core';
+export { ColdStartBadge } from './trace_waterfall/badges/cold_start_badge';
