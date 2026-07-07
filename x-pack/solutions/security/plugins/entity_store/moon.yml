@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/es-errors'
   - '@kbn/workflows-extensions'
   - '@kbn/i18n'
+  - '@kbn/workflows'
 tags:
   - plugin
   - prod
