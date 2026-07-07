@@ -18,10 +18,16 @@ import {
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import type { PreservedTimeUnit, TimeUnit } from '../types';
-import { getBoundsHelpTextValues, getUnitSelectOptions } from '../../../shared';
+import {
+  formatDuration,
+  getIntervalBoundHelpText,
+  getMultipleStepAttributes,
+  getUnitSelectOptions,
+} from '../../../shared';
 import { getStepIndexFromArrayItemPath, toMilliseconds } from '../utils';
 import { MAX_DOWNSAMPLE_STEPS } from '../constants';
 import {
+  fixedIntervalBeforeExitBoundary,
   fixedIntervalMultipleOfPreviousStep,
   fixedIntervalMustBeGreaterThanZero,
   fixedIntervalMustBeAtLeastFiveMinutes,
@@ -34,6 +40,12 @@ export interface FixedIntervalFieldProps {
   item: ArrayItem;
   dataTestSubj: string;
   timeUnitOptions: ReadonlyArray<{ value: TimeUnit; text: string }>;
+  /** Delete phase (data retention) — the interval's upper bound when no frozen phase is set. */
+  dataRetentionMs?: number;
+  dataRetentionEsFormat?: string;
+  /** Frozen phase transition — takes over as the interval's upper bound when configured. */
+  frozenAfterMs?: number;
+  frozenAfterEsFormat?: string;
 }
 
 const FIXED_INTERVAL_FIELDS_TO_VALIDATE_ON_CHANGE = Array.from(
@@ -47,12 +59,16 @@ const FixedIntervalFieldControl = ({
   timeUnitOptions,
   valueField,
   unitField,
+  dataRetentionEsFormat,
+  frozenAfterEsFormat,
 }: {
   stepIndex: number;
   dataTestSubj: string;
   timeUnitOptions: ReadonlyArray<{ value: TimeUnit; text: string }>;
   valueField: FieldHook<string>;
   unitField: FieldHook<PreservedTimeUnit>;
+  dataRetentionEsFormat?: string;
+  frozenAfterEsFormat?: string;
 }) => {
   const form = useFormContext();
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(valueField);
@@ -79,49 +95,51 @@ const FixedIntervalFieldControl = ({
     return Number.isFinite(ms) && ms > 0 ? ms : undefined;
   };
 
+  const getFixedIntervalDurationAt = (index: number): string | undefined => {
+    const value = String(
+      form.getFields()[`_meta.downsampleSteps[${index}].fixedIntervalValue`]?.value ?? ''
+    ).trim();
+    const unit = String(
+      form.getFields()[`_meta.downsampleSteps[${index}].fixedIntervalUnit`]?.value ?? 'd'
+    );
+    // An interval must be a positive integer; skip the label for invalid values so we don't render
+    // things like "NaNd" or "0d" for a half-typed previous step.
+    return formatDuration(value, unit, { integerOnly: true, minExclusive: 0 });
+  };
+
   const lowerBoundMs = stepIndex > 0 ? getFixedIntervalMsAt(stepIndex - 1) ?? 0 : 0;
-  const upperBoundMs =
-    stepIndex < MAX_DOWNSAMPLE_STEPS - 1 ? getFixedIntervalMsAt(stepIndex + 1) : undefined;
-  const { min, max } = getBoundsHelpTextValues({
-    lowerBoundMs,
-    upperBoundMs,
+  const previousIntervalValue =
+    stepIndex > 0 ? getFixedIntervalDurationAt(stepIndex - 1) : undefined;
+
+  // The interval must be a multiple of the previous step's interval (referenced by step number) and
+  // stay smaller than the frozen phase if one is configured, otherwise the delete phase.
+  const multipleOf =
+    previousIntervalValue !== undefined
+      ? {
+          neighbor: { type: 'stepInterval' as const, stepNumber: stepIndex },
+          value: previousIntervalValue,
+        }
+      : undefined;
+  const upper = frozenAfterEsFormat
+    ? { neighbor: { type: 'phase' as const, phase: 'frozen' as const }, value: frozenAfterEsFormat }
+    : dataRetentionEsFormat
+    ? {
+        neighbor: { type: 'phase' as const, phase: 'delete' as const },
+        value: dataRetentionEsFormat,
+      }
+    : undefined;
+
+  const helpText = getIntervalBoundHelpText({ multipleOf, upper });
+
+  // The interval must be a multiple of the previous step's interval, so step the
+  // increment/decrement buttons by that multiple (expressed in the current unit) whenever the
+  // current value already sits on a valid multiple; otherwise fall back to stepping by 1.
+  const { min, step } = getMultipleStepAttributes({
+    currentValue: draftValue,
     unit: currentUnit,
+    multipleOfMs: lowerBoundMs,
+    baseMin: 1,
   });
-
-  const showMultipleOfPreviousStep = stepIndex > 0 && lowerBoundMs > 0;
-  const helpText = (() => {
-    if (upperBoundMs === undefined) {
-      return showMultipleOfPreviousStep
-        ? i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpLowerBoundMultiple', {
-            defaultMessage:
-              'Must be larger than {min} and a multiple of {multipleOf} based on current configuration.',
-            values: { min, multipleOf: min },
-          })
-        : i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpLowerBound', {
-            defaultMessage: 'Must be larger than {min} based on current configuration.',
-            values: { min },
-          });
-    }
-
-    return showMultipleOfPreviousStep
-      ? i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpRangeMultiple', {
-          defaultMessage:
-            'Must be larger than {min}, smaller than {max}, and a multiple of {multipleOf} based on current configuration.',
-          values: {
-            min,
-            max,
-            multipleOf: min,
-          },
-        })
-      : i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpRange', {
-          defaultMessage:
-            'Must be larger than {min} and smaller than {max} based on current configuration.',
-          values: {
-            min,
-            max,
-          },
-        });
-  })();
 
   return (
     <EuiFormRow
@@ -137,7 +155,8 @@ const FixedIntervalFieldControl = ({
           <EuiFieldNumber
             compressed
             fullWidth
-            min={1}
+            min={min}
+            step={step}
             aria-label={i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalAriaLabel', {
               defaultMessage: 'Downsample interval value',
             })}
@@ -192,6 +211,10 @@ export const FixedIntervalField = ({
   item,
   dataTestSubj,
   timeUnitOptions,
+  dataRetentionMs,
+  dataRetentionEsFormat,
+  frozenAfterMs,
+  frozenAfterEsFormat,
 }: FixedIntervalFieldProps) => {
   const form = useFormContext();
   const valuePath = `${item.path}.fixedIntervalValue`;
@@ -219,16 +242,33 @@ export const FixedIntervalField = ({
     [item.path, onStepFieldErrorsChange]
   );
 
-  const fixedIntervalValueValidations = useMemo(
-    () => [
+  const fixedIntervalValueValidations = useMemo(() => {
+    // The interval must stay smaller than the window where downsampling can happen: before the
+    // frozen phase if configured, otherwise before deletion (data retention).
+    const exitBoundary =
+      frozenAfterMs !== undefined && frozenAfterEsFormat
+        ? {
+            boundaryMs: frozenAfterMs,
+            boundaryEsFormat: frozenAfterEsFormat,
+            phase: 'frozen' as const,
+          }
+        : dataRetentionMs !== undefined && dataRetentionEsFormat
+        ? {
+            boundaryMs: dataRetentionMs,
+            boundaryEsFormat: dataRetentionEsFormat,
+            phase: 'delete' as const,
+          }
+        : undefined;
+
+    return [
       { validator: requiredFixedIntervalValue },
       { validator: fixedIntervalMustBeGreaterThanZero },
       { validator: fixedIntervalMustBeInteger },
       { validator: fixedIntervalMustBeAtLeastFiveMinutes },
       { validator: fixedIntervalMultipleOfPreviousStep },
-    ],
-    []
-  );
+      ...(exitBoundary ? [{ validator: fixedIntervalBeforeExitBoundary(exitBoundary) }] : []),
+    ];
+  }, [dataRetentionEsFormat, dataRetentionMs, frozenAfterEsFormat, frozenAfterMs]);
 
   const fixedIntervalValueConfig = useMemo(
     () => ({
@@ -267,6 +307,8 @@ export const FixedIntervalField = ({
               timeUnitOptions={timeUnitOptions}
               valueField={valueField as FieldHook<string>}
               unitField={unitField as FieldHook<PreservedTimeUnit>}
+              dataRetentionEsFormat={dataRetentionEsFormat}
+              frozenAfterEsFormat={frozenAfterEsFormat}
             />
           )}
         </UseField>
