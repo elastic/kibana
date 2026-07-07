@@ -10,23 +10,13 @@ import { act, renderHook } from '@testing-library/react';
 import { CaseStatuses } from '@kbn/cases-components';
 
 import { useCaseViewActivity } from './use_case_view_activity';
-import { basicCase, getCaseUsersMockResponse } from '../../../../../../containers/mock';
+import { basicCase } from '../../../../../../containers/mock';
 import { TestProviders } from '../../../../../../common/mock';
-import { useGetCaseConfiguration } from '../../../../../../containers/configure/use_get_case_configuration';
-import { useGetCaseUsers } from '../../../../../../containers/use_get_case_users';
-import { useGetCaseConnectors } from '../../../../../../containers/use_get_case_connectors';
-import { useGetCurrentUserProfile } from '../../../../../../containers/user_profiles/use_get_current_user_profile';
-import { useGetCaseUserActionsStats } from '../../../../../../containers/use_get_case_user_actions_stats';
 import { useOnUpdateField } from '../../../../../case_view/use_on_update_field';
 import { useStatusAction } from '../../../../../actions/status/use_status_action';
 import type { CaseUI } from '../../../../../../../common';
 
 jest.mock('../../../../../../common/navigation/hooks');
-jest.mock('../../../../../../containers/configure/use_get_case_configuration');
-jest.mock('../../../../../../containers/use_get_case_users');
-jest.mock('../../../../../../containers/use_get_case_connectors');
-jest.mock('../../../../../../containers/use_get_case_user_actions_stats');
-jest.mock('../../../../../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../../../../case_view/use_on_update_field');
 jest.mock('../../../../../case_view/use_on_refresh_case_view_page');
 jest.mock('../../../../../actions/status/use_status_action');
@@ -34,11 +24,6 @@ jest.mock('../../../../../actions/status/use_status_action');
 const onUpdateField = jest.fn();
 const handleUpdateCaseStatus = jest.fn();
 
-const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
-const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
-const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
-const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
-const useGetCaseUserActionsStatsMock = useGetCaseUserActionsStats as jest.Mock;
 const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 const useStatusActionMock = useStatusAction as jest.Mock;
 
@@ -50,11 +35,6 @@ const caseData: CaseUI = basicCase;
 describe('useCaseViewActivity', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useGetCaseConfigurationMock.mockReturnValue({ data: { customFields: [] } });
-    useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: getCaseUsersMockResponse() });
-    useGetCaseConnectorsMock.mockReturnValue({ isLoading: false, data: {} });
-    useGetCurrentUserProfileMock.mockReturnValue({ data: {} });
-    useGetCaseUserActionsStatsMock.mockReturnValue({ isLoading: false, data: {} });
     useOnUpdateFieldMock.mockReturnValue({ onUpdateField, isLoading: false, loadingKey: null });
     useStatusActionMock.mockReturnValue({
       isUpdatingStatus: false,
@@ -141,5 +121,14 @@ describe('useCaseViewActivity', () => {
       perPage: 10,
       authors: ['elastic'],
     });
+  });
+
+  it('returns a memoized object reference across re-renders when nothing changes', () => {
+    const { result, rerender } = renderHook(() => useCaseViewActivity({ caseData }), { wrapper });
+
+    const firstResult = result.current;
+    rerender();
+
+    expect(result.current).toBe(firstResult);
   });
 });

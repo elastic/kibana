@@ -15,26 +15,31 @@ import { UserActionsFilterBar } from '../user_actions_filter_bar';
 import { SidebarToggleButton } from '../sidebar/sidebar_toggle_button';
 import { Description } from '../../../description';
 import { useCaseViewActivity } from './hooks/use_case_view_activity';
+import { useCasesContext } from '../../../../cases_context/use_cases_context';
+import { useGetCaseConnectors } from '../../../../../containers/use_get_case_connectors';
+import { useGetCaseUsers } from '../../../../../containers/use_get_case_users';
+import { useGetCaseUserActionsStats } from '../../../../../containers/use_get_case_user_actions_stats';
 
 export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
   const {
-    permissions,
     userActivityQueryParams,
     onUpdateField,
-    isLoadingUserActionsStats,
-    isLoadingCaseConnectors,
-    isLoadingCaseUsers,
-    caseConnectors,
-    caseUsers,
-    userActionsStats,
-    userProfiles,
-    currentUserProfile,
-    casesConfiguration,
     isLoadingDescription,
     isStatusLoading,
     changeStatus,
     handleUserActivityParamsChanged,
   } = useCaseViewActivity({ caseData });
+
+  const { permissions } = useCasesContext();
+  // Fetched here only to gate rendering of `UserActions` on loaded state;
+  // `UserActions` fetches its own copy (served from the same query cache) of
+  // this and other cases-level data where it's actually needed.
+  const { data: caseConnectors, isLoading: isLoadingCaseConnectors } = useGetCaseConnectors(
+    caseData.id
+  );
+  const { data: caseUsers, isLoading: isLoadingCaseUsers } = useGetCaseUsers(caseData.id);
+  const { data: userActionsStats, isLoading: isLoadingUserActionsStats } =
+    useGetCaseUserActionsStats(caseData.id);
 
   const showUserActions =
     !isLoadingUserActionsStats &&
@@ -76,11 +81,7 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
         <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
           <EuiFlexItem>
             <UserActions
-              userProfiles={userProfiles}
-              currentUserProfile={currentUserProfile}
-              caseConnectors={caseConnectors}
               data={caseData}
-              casesConfiguration={casesConfiguration}
               onUpdateField={onUpdateField}
               statusActionButton={
                 permissions.update ? (
