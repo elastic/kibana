@@ -20,6 +20,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLoadConnectors } from '@kbn/inference-connectors';
+import { useQueryClient } from '@kbn/react-query';
+import { useOnAssetCriticalityToolEvent } from '../hooks/use_on_asset_criticality_tool_event';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
@@ -49,8 +51,7 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
-import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
-import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
+
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { TabId } from './entity_analytics_management_page';
 import { TopThreatHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads';
@@ -58,6 +59,7 @@ import { ThreatHuntingLeadsFlyout } from '../components/threat_hunting/top_threa
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
 import { useLeadAttachment } from '../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment';
 import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
+import { QUERY_KEY_ENTITY_ANALYTICS } from '../components/home/entities_table/constants';
 import type { HuntingLead } from '../components/threat_hunting/top_threat_hunting_leads/types';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
@@ -65,6 +67,8 @@ import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analy
 import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
 import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
 import { NoPrivileges } from '../../common/components/no_privileges';
+import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
+import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
@@ -132,6 +136,12 @@ export const EntityAnalyticsHomePage = () => {
 const EntityAnalyticsHomePageContent = () => {
   const { telemetry, agentBuilder, http } = useKibana().services;
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const queryClient = useQueryClient();
+
+  useOnAssetCriticalityToolEvent(() => {
+    queryClient.invalidateQueries([QUERY_KEY_ENTITY_ANALYTICS]);
+  });
+
   const { data: availableConnectors } = useLoadConnectors({ http, featureId: 'lead_generation' });
   const isEnterprise = useLicense().isEnterprise();
   const leadGenerationEnabled =

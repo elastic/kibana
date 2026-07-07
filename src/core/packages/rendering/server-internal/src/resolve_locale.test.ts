@@ -40,7 +40,6 @@ const baseArgs = (overrides: Partial<ResolveLocaleArgs> = {}): ResolveLocaleArgs
   configLocale: 'en',
   configuredLocales: ['en', 'fr-FR', 'ja-JP'],
   translationHashes: { en: 'h1', 'fr-FR': 'h2', 'ja-JP': 'h3' },
-  isServerless: false,
   serverBasePath: '',
   allowLocaleCookie: true,
   ...overrides,
@@ -53,7 +52,6 @@ describe('resolveLocale', () => {
         baseArgs({
           userSettingLocale: 'ja-JP',
           request: buildRequest({ cookie: `${KBN_LOCALE_COOKIE_NAME}=fr-FR` }),
-          isServerless: true,
         })
       );
       expect(result.locale).toBe('ja-JP');
@@ -84,30 +82,71 @@ describe('resolveLocale', () => {
       expect(result.locale).toBe('en');
     });
 
-    it('uses Accept-Language on serverless when profile and cookie are absent', () => {
+    it('uses Accept-Language when profile and cookie are absent', () => {
       const result = resolveLocale(
         baseArgs({
-          isServerless: true,
           request: buildRequest({ acceptLanguage: 'ja-JP,en;q=0.5' }),
         })
       );
       expect(result.locale).toBe('ja-JP');
     });
 
-    it('ignores Accept-Language when not serverless', () => {
+    it('prefers the user profile over a matching Accept-Language header', () => {
       const result = resolveLocale(
         baseArgs({
-          isServerless: false,
+          userSettingLocale: 'ja-JP',
+          request: buildRequest({ acceptLanguage: 'fr-FR,en;q=0.5' }),
+        })
+      );
+      expect(result.locale).toBe('ja-JP');
+    });
+
+    it('prefers the KBN_LOCALE cookie over a matching Accept-Language header', () => {
+      const result = resolveLocale(
+        baseArgs({
+          request: buildRequest({
+            cookie: `${KBN_LOCALE_COOKIE_NAME}=fr-FR`,
+            acceptLanguage: 'ja-JP,en;q=0.5',
+          }),
+        })
+      );
+      expect(result.locale).toBe('fr-FR');
+    });
+
+    it('prefers an explicitly-configured non-default configLocale over a matching Accept-Language header', () => {
+      const result = resolveLocale(
+        baseArgs({
+          configLocale: 'fr-FR',
           request: buildRequest({ acceptLanguage: 'ja-JP,en;q=0.5' }),
         })
       );
-      expect(result.locale).toBe('en');
+      expect(result.locale).toBe('fr-FR');
+    });
+
+    it('still prefers the user profile over an explicitly-configured non-default configLocale', () => {
+      const result = resolveLocale(
+        baseArgs({
+          configLocale: 'fr-FR',
+          userSettingLocale: 'ja-JP',
+          request: buildRequest({ acceptLanguage: 'fr-FR,en;q=0.5' }),
+        })
+      );
+      expect(result.locale).toBe('ja-JP');
+    });
+
+    it('still prefers the KBN_LOCALE cookie over an explicitly-configured non-default configLocale', () => {
+      const result = resolveLocale(
+        baseArgs({
+          configLocale: 'fr-FR',
+          request: buildRequest({ cookie: `${KBN_LOCALE_COOKIE_NAME}=ja-JP` }),
+        })
+      );
+      expect(result.locale).toBe('ja-JP');
     });
 
     it('falls through to configLocale when no Accept-Language entry matches the configured allow-list', () => {
       const result = resolveLocale(
         baseArgs({
-          isServerless: true,
           configuredLocales: ['en', 'fr-FR'],
           translationHashes: { en: 'h1', 'fr-FR': 'h2' },
           request: buildRequest({ acceptLanguage: 'fr-CH;q=1,it-IT;q=0.5' }),
@@ -120,7 +159,6 @@ describe('resolveLocale', () => {
     it('walks the Accept-Language list and picks the first allowed entry', () => {
       const result = resolveLocale(
         baseArgs({
-          isServerless: true,
           request: buildRequest({ acceptLanguage: 'fr-CH;q=1,fr-FR;q=0.9,en;q=0.5' }),
         })
       );
@@ -134,7 +172,6 @@ describe('resolveLocale', () => {
       // the same way the profile and cookie paths do.
       const result = resolveLocale(
         baseArgs({
-          isServerless: true,
           configuredLocales: ['en', 'fr-FR'],
           translationHashes: { en: 'h1' }, // 'fr-FR' missing on purpose
           configLocale: 'en',
@@ -166,10 +203,23 @@ describe('resolveLocale', () => {
       expect(result.locale).toBe('fr-FR');
     });
 
+    it('still resolves from Accept-Language when allowLocaleCookie is false', () => {
+      // The Accept-Language step is independent of the cookie toggle: disabling
+      // the cookie only stops Kibana from reading/writing KBN_LOCALE, it does
+      // not disable browser-language detection. This is what makes anonymous /
+      // signed-out pages render in the browser's language when cookies are off.
+      const result = resolveLocale(
+        baseArgs({
+          allowLocaleCookie: false,
+          request: buildRequest({ acceptLanguage: 'ja-JP,en;q=0.5' }),
+        })
+      );
+      expect(result.locale).toBe('ja-JP');
+    });
+
     it('falls through to configLocale when picker is disabled (i18n.locales is empty)', () => {
       const result = resolveLocale(
         baseArgs({
-          isServerless: true,
           configuredLocales: [],
           translationHashes: { en: 'h1' },
           configLocale: 'en',
