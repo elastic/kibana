@@ -120,4 +120,13 @@ describe('resolveInstalledProductDocInferenceId', () => {
       })
     ).resolves.toBe(defaultInferenceEndpoints.ELSER);
   });
+
+  it('returns undefined when no candidate has installed documentation', async () => {
+    await expect(
+      resolveInstalledProductDocInferenceId({
+        getDefaultInferenceId: async () => defaultInferenceEndpoints.JINAv5,
+        isDocumentationAvailable: async () => false,
+      })
+    ).resolves.toBeUndefined();
+  });
 });
