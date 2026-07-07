@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
@@ -37,7 +37,6 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
     const { dataViews } = useKibana().services;
     const spaceId = useSpaceId();
     const history = useHistory();
-    const location = useLocation();
 
     const urlStorage = useMemo(
       () =>
@@ -49,12 +48,24 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
       [history]
     );
 
-    const persisted = urlStorage.get<FilterControlConfig[] | undefined>(
-      EXECUTION_FILTERS_URL_PARAM_KEY
+    // Read from the URL only when the storage instance changes (effectively once). The control group
+    // owns the filter state afterwards and syncs it back to the URL via `setControlsUrlState`.
+    // Re-reading on every render (or remounting on URL change) causes the control group to blink on
+    // each edit.
+    const controlsUrlState = useMemo(() => {
+      const persisted = urlStorage.get<FilterControlConfig[] | undefined>(
+        EXECUTION_FILTERS_URL_PARAM_KEY
+      );
+      return persisted ? persisted.map(convertCamelCasedKeysToSnakeCase) : undefined;
+    }, [urlStorage]);
+
+    const dataViewSpec = useMemo(
+      () => ({
+        ...WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
+        id: WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
+      }),
+      []
     );
-    const controlsUrlState = persisted
-      ? persisted.map(convertCamelCasedKeysToSnakeCase)
-      : undefined;
 
     const setControlsUrlState = useCallback(
       (next: FilterControlConfig[]) => {
@@ -76,13 +87,10 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
     }
 
     return (
-      <div data-test-subj="workflowExecutionsFilters" key={location.search}>
+      <div data-test-subj="workflowExecutionsFilters">
         <FilterControls
           controlsUrlState={controlsUrlState}
-          dataViewSpec={{
-            ...WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
-            id: WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
-          }}
+          dataViewSpec={dataViewSpec}
           defaultControls={DEFAULT_EXECUTION_PAGE_FILTERS}
           filters={filters}
           maxControls={4}
