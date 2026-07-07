@@ -38,6 +38,11 @@ jest.mock('../../containers/configure/use_get_supported_action_connectors', () =
   useGetSupportedActionConnectors: () => mockUseGetSupportedActionConnectors(),
 }));
 
+const mockShowInfoToast = jest.fn();
+jest.mock('../../common/use_cases_toast', () => ({
+  useCasesToast: () => ({ showInfoToast: mockShowInfoToast }),
+}));
+
 const jiraConnector = { id: 'jira-1', actionTypeId: '.jira', name: 'My Jira' };
 
 const mockTemplate = {
@@ -813,23 +818,26 @@ describe('useTemplateFormSync', () => {
       expect(mockSetFieldValue).not.toHaveBeenCalledWith('extractObservables', expect.anything());
     });
 
-    it('reverts settings to defaults when a settings-bearing template is cleared', () => {
+    it('reverts settings to off (the template default) when a settings-bearing template is cleared', () => {
       mockUseFormData.mockReturnValue([{ templateId: 'template-settings' }]);
       mockUseGetTemplate.mockReturnValue({ data: templateWithSettings, isLoading: false });
 
       const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
       mockSetFieldValue.mockClear();
+      mockShowInfoToast.mockClear();
       mockUseFormData.mockReturnValue([{ templateId: '' }]);
       mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
 
       rerender();
 
-      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', true);
-      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+      // Clearing the selection is the user's own explicit action, so it stays silent.
+      expect(mockShowInfoToast).not.toHaveBeenCalled();
     });
 
-    it('reverts settings to defaults when switching to a template that declares no settings', () => {
+    it('reverts settings to off and notifies when switching to a template that declares no settings', () => {
       // Direct A -> B switch: templateId goes straight from A's id to B's id (never through '').
       mockUseFormData.mockReturnValue([{ templateId: 'template-settings' }]);
       mockUseGetTemplate.mockReturnValue({ data: templateWithSettings, isLoading: false });
@@ -837,6 +845,7 @@ describe('useTemplateFormSync', () => {
       const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
       mockSetFieldValue.mockClear();
+      mockShowInfoToast.mockClear();
       mockUseFormData.mockReturnValue([{ templateId: 'template-plain' }]);
       mockUseGetTemplate.mockReturnValue({
         data: {
@@ -849,8 +858,9 @@ describe('useTemplateFormSync', () => {
 
       rerender();
 
-      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', true);
-      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+      expect(mockShowInfoToast).toHaveBeenCalledTimes(1);
     });
   });
 });

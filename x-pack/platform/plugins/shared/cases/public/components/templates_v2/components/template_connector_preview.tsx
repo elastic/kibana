@@ -22,13 +22,9 @@ interface Props {
 }
 
 /**
- * Read-only preview of a template's default connector.
- *
- * The template stores only `type` + `id` + raw `fields`. Rendering the connector's dynamic fields
- * (e.g. Jira issue types resolved to their labels, ServiceNow categories, additional fields) is
- * delegated to the shared `ConnectorFieldsPreviewForm`, which looks up the connector-type's preview
- * component and lets it fetch whatever it needs from the external service. We only resolve the slim
- * template connector against the configured connectors to obtain the full `CaseActionConnector`.
+ * Read-only preview of a template's default connector. The template stores only `type` + `id` +
+ * raw `fields`, so we resolve it against the configured connectors and delegate rendering of the
+ * dynamic fields to the shared `ConnectorFieldsPreviewForm`.
  */
 export const TemplateConnectorPreview: FC<Props> = ({ connector }) => {
   const { data: connectors = [], isLoading } = useGetSupportedActionConnectors();

@@ -22,15 +22,10 @@ interface Props {
 }
 
 /**
- * Reads the inner hook_form_lib form data and lifts it up as a template connector
- * (`{ type, id, fields }`). `type` is resolved from the selected connector's `actionTypeId`; the
- * `.none` connector carries `null` fields.
- *
- * We subscribe to the whole form (no `watch` filter) because the connector's dynamic fields are
- * registered at nested paths (`fields.issueType`, `fields.priority`, …) that vary by connector
- * type — watching the `fields` parent path alone never reacts to those nested changes, which would
- * drop the additional fields on save. A serialized guard keeps `onChange` from firing on renders
- * that don't actually change the lifted connector.
+ * Lifts the inner hook_form_lib form data up as a template connector (`{ type, id, fields }`; `.none`
+ * carries `null` fields). Subscribes to the whole form (no `watch` filter) because dynamic fields
+ * live at nested paths (`fields.issueType`, …) that a `fields`-only watch wouldn't react to. A
+ * serialized guard stops `onChange` firing when the lifted connector hasn't actually changed.
  */
 const ConnectorFormSync: React.FC<{
   connectors: ActionConnector[];
@@ -67,10 +62,9 @@ const ConnectorFormSync: React.FC<{
 ConnectorFormSync.displayName = 'ConnectorFormSync';
 
 /**
- * Editable connector picker + the connector's native dynamic fields form, reused from the
- * create-case flow. It runs inside its own hook_form_lib form (a different form library than the
- * template editor's react-hook-form); changes are lifted to the parent via `onChange` and the
- * template editor serializes them into the definition YAML at submit time.
+ * Editable connector picker + native dynamic fields form, reused from the create-case flow. Runs in
+ * its own hook_form_lib form (separate from the editor's react-hook-form); changes are lifted via
+ * `onChange` and serialized into the definition YAML on submit.
  */
 export const TemplateConnectorForm: React.FC<Props> = ({ connector, onChange }) => {
   const { data: connectors = [], isLoading: isLoadingConnectors } =

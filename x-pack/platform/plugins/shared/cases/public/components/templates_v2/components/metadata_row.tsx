@@ -12,9 +12,8 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { componentStyles } from './template_metadata_preview.styles';
 
 /**
- * A single label/value row used by the template preview metadata list (`<dl>`).
- * Extracted to its own module so both `TemplateMetadataPreview` and
- * `TemplateConnectorPreview` can reuse it without a circular import.
+ * A single label/value row for the template preview metadata list (`<dl>`). Its own module so both
+ * `TemplateMetadataPreview` and `TemplateConnectorPreview` can reuse it without a circular import.
  */
 export const MetadataRow: FC<{ label: string; children: React.ReactNode }> = ({
   label,

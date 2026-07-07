@@ -24,14 +24,16 @@ import {
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { useCasesToast } from '../../common/use_cases_toast';
+import * as i18n from './translations';
 
 /**
- * Default form values restored when a template that had set the connector / settings is cleared.
- * These mirror the create form schema defaults (`case_form_fields/schema.tsx`).
+ * Values a template applies by default and reverts to when it stops applying them. Sync alerts and
+ * extract observables default to off for templates — a template only turns them on if it says so.
  */
 const NONE_CONNECTOR_ID = 'none';
-const DEFAULT_SYNC_ALERTS = true;
-const DEFAULT_EXTRACT_OBSERVABLES = true;
+const DEFAULT_SYNC_ALERTS = false;
+const DEFAULT_EXTRACT_OBSERVABLES = false;
 
 type SetFieldValue = (path: string, value: unknown) => void;
 
@@ -46,10 +48,8 @@ const revertConnectorToDefault = (setFieldValue: SetFieldValue): void => {
 };
 
 /**
- * Writes a template's default connector into the create-case form (`connectorId` + per-type
- * `fields`). Resolves the connector `id` against the supported connectors and, when it cannot be
- * resolved to a connector of the same type (deleted, unauthorized, or space-scoped away), falls
- * back to the `.none` connector without erroring.
+ * Writes a template's default connector into the create-case form. Falls back to `.none` (no error)
+ * when the `id` no longer resolves to a connector of the same type (deleted/unauthorized/other space).
  */
 const applyTemplateConnector = (
   connector: CaseConnectorWithoutName,
@@ -65,13 +65,11 @@ const applyTemplateConnector = (
     connectors.some((c) => c.id === connector.id && c.actionTypeId === connector.type);
 
   if (resolved) {
-    // The per-type connector inputs are nested `fields.*` UseFields that remount when the connector
-    // changes (`key={connector.id}`) and initialize from the form's default-value object — a plain
-    // `setFieldValue('fields', …)` on the parent never reaches them, and setting them after mount
-    // races the connector's async option loading. `updateFieldValues` merges into the form default
-    // AND sets registered fields, so the inputs pick up the template's values on (re)mount.
-    // `runDeserializer: false` because these values are already in the form (deserialized) shape —
-    // the create form's deserializer expects a `connector` object and would throw on `connector.id`.
+    // The per-type connector inputs remount on connector change and initialize from the form's
+    // default-value object, so a plain `setFieldValue('fields', …)` never reaches them.
+    // `updateFieldValues` merges into that default, so the inputs pick up the template's values on
+    // (re)mount. `runDeserializer: false` because these values are already in form (deserialized)
+    // shape — the create form's deserializer expects a `connector` object, not `connector.id`.
     updateFieldValues(
       { connectorId: connector.id, fields: connector.fields ?? {} },
       { runDeserializer: false }
@@ -103,6 +101,7 @@ export const useTemplateFormSync = (
   globalFieldKeys: ReadonlySet<string>
 ): UseTemplateFormSyncReturn => {
   const { setFieldValue, updateFieldValues } = useFormContext();
+  const { showInfoToast } = useCasesToast();
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
   const { data: template, isLoading: isTemplateLoading } = useGetTemplate(templateId || undefined);
   // A disabled query (no templateId) can sit in "loading" state indefinitely in react-query v4;
@@ -116,7 +115,7 @@ export const useTemplateFormSync = (
   const { data: connectors = [], isLoading: isLoadingConnectors } =
     useGetSupportedActionConnectors();
   const appliedRef = useRef<string | undefined>(undefined);
-  // Track whether the applied template set the connector / settings, so clearing the template only
+  // Track whether the applied template set the connector / settings, so switching or clearing only
   // reverts what a template actually changed (preserving the configuration's default connector).
   const didApplyConnectorRef = useRef(false);
   const didApplySettingsRef = useRef(false);
@@ -178,10 +177,13 @@ export const useTemplateFormSync = (
       }
     }
 
-    // Apply the template's default case settings. Each setting is independent — only the ones the
-    // template declares are applied; the rest keep the form's current value. When switching to a
-    // template that declares no settings, revert to defaults so a previous template's settings
-    // don't outlive it (the `!templateId` clear branch above only handles clearing the selection).
+    // A previous template's connector/settings that this template doesn't re-declare get reverted
+    // below; track that so we can let the user know (the `!templateId` clear branch is the user's
+    // own explicit action, so it stays silent).
+    let clearedPreviousTemplateConfig = false;
+
+    // Apply the settings the template declares (each is independent). When switching to a template
+    // that declares none, revert to defaults so a previous template's settings don't outlive it.
     if (definition.settings) {
       if (definition.settings.syncAlerts !== undefined) {
         setFieldValue('syncAlerts', definition.settings.syncAlerts);
@@ -193,6 +195,7 @@ export const useTemplateFormSync = (
     } else if (didApplySettingsRef.current) {
       revertSettingsToDefault(setFieldValue);
       didApplySettingsRef.current = false;
+      clearedPreviousTemplateConfig = true;
     }
 
     // Wait for field definitions AND supported connectors to load before finishing. Connectors are
@@ -200,17 +203,22 @@ export const useTemplateFormSync = (
     // Do NOT set appliedRef.current yet — the effect must re-run once both are available.
     if (isLoadingFieldDefs || isLoadingConnectors) return;
 
-    // Apply the template's default connector. If the connector id no longer resolves to a supported
-    // connector of the same type, fall back to the `.none` connector (no error) — mirroring the
-    // form serializer's fallback and the legacy template system's resilience. When switching to a
-    // template that declares no connector, revert to `.none` so a previous template's connector
-    // doesn't outlive it.
+    // Apply the template's default connector (falling back to `.none` if it no longer resolves).
+    // When switching to a template that declares none, revert to `.none` so a previous template's
+    // connector doesn't outlive it.
     if (definition.connector) {
       applyTemplateConnector(definition.connector, connectors, setFieldValue, updateFieldValues);
       didApplyConnectorRef.current = true;
     } else if (didApplyConnectorRef.current) {
       revertConnectorToDefault(setFieldValue);
       didApplyConnectorRef.current = false;
+      clearedPreviousTemplateConfig = true;
+    }
+
+    // Switching templates silently dropped the previous template's connector/settings — let the
+    // user know so a case isn't created against a stale connector or sync setting unnoticed.
+    if (clearedPreviousTemplateConfig) {
+      showInfoToast(i18n.TEMPLATE_SWITCH_CLEARED_CONFIG);
     }
 
     // Resolve all fields — inline fields pass through, ref fields are looked up in the library
@@ -260,6 +268,7 @@ export const useTemplateFormSync = (
     globalFieldKeys,
     connectors,
     isLoadingConnectors,
+    showInfoToast,
   ]);
 
   return { template, isLoading };

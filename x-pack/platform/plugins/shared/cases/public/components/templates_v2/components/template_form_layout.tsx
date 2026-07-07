@@ -84,18 +84,16 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
   const [isEnabled, setIsEnabled] = useState(initialIsEnabled);
 
-  // The `connector` and `settings` blocks are edited in the Settings tab form, not the YAML buffer.
-  // Split them out of the initial definition so the editor only ever shows fields; they are merged
-  // back into the definition on save.
+  // `connector` / `settings` are edited in the Settings tab, not the YAML buffer, so split them out
+  // of the initial definition (the editor shows fields only) and merge them back on save.
   const {
     fieldsYaml: initialFieldsYaml,
     connector: initialConnector,
     settings: initialSettings,
   } = useMemo(() => splitTemplateDefinition(initialValue), [initialValue]);
 
-  // The Settings tab (connector + case settings) is form state, not part of the YAML buffer. Persist
-  // it alongside the YAML draft — keyed to the template — so edits there survive a reload and count
-  // as unsaved changes, mirroring how the YAML buffer is persisted.
+  // Settings-tab state isn't in the YAML buffer, so persist it alongside the YAML draft (keyed to
+  // the template) so edits survive a reload and count as unsaved changes.
   const initialFormState = useMemo<SettingsConnectorDraft>(
     () => ({ templateId, settings: initialSettings, connector: initialConnector }),
     [templateId, initialSettings, initialConnector]

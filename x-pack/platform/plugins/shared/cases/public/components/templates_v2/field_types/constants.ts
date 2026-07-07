@@ -22,11 +22,8 @@ category: General
 # tags are optional
 tags:
   - example
-# Case settings (sync alerts, auto-extract observables) and the default connector are configured
-# in the Settings tab of the preview panel — not in this YAML.
-settings:
-  syncAlerts: true
-  extractObservables: true
+# Case settings (sync alerts, extract observables) and the default connector are configured in the
+# Settings tab of the preview panel, not here.
 fields:
   - name: start_date
     control: DATE_PICKER

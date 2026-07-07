@@ -97,3 +97,11 @@ export const TEMPLATE_NOT_SELECTED_DESCRIPTION = i18n.translate(
 export const EXTENDED_FIELDS_TITLE = i18n.translate('xpack.cases.create.extendedFieldsTitle', {
   defaultMessage: 'Extended fields',
 });
+
+export const TEMPLATE_SWITCH_CLEARED_CONFIG = i18n.translate(
+  'xpack.cases.create.templateSwitchClearedConfig',
+  {
+    defaultMessage:
+      "The connector and case settings from the previous template were reset because the selected template doesn't define them.",
+  }
+);

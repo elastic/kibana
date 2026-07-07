@@ -62,8 +62,8 @@ export const buildTemplateYaml = (
     templateDef.category = caseFields.category;
   }
 
-  // Carry the default connector across, dropping the redundant `name` (resolved from `id` at
-  // create time). The `.none` connector is the implicit default, so we omit it to keep the YAML clean.
+  // Carry the default connector across, dropping the redundant `name` (resolved from `id`) and the
+  // `.none` connector (the implicit default) to keep the YAML clean.
   if (caseFields?.connector && caseFields.connector.type !== ConnectorTypes.none) {
     const { id, type, fields: connectorFields } = caseFields.connector;
     templateDef.connector = { type, id, fields: connectorFields };

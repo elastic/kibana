@@ -140,21 +140,19 @@ export const CaseUserActionConnectorSchema = z.discriminatedUnion('type', [
 const IdSchema = z.object({ id: z.string() });
 
 /**
- * Connector shape for template definitions: `type` + `id` + per-type `fields`, without `name`.
- *
- * `name` is intentionally omitted — in a template it is redundant because it can be resolved
- * from the connector `id` at case-creation time. This reuses the same per-type field building
- * blocks as `CaseConnectorSchema` so there is a single source of truth for connector shape.
+ * Connector shape for template definitions: `type` + `id` + per-type `fields`, without `name`
+ * (resolved from `id` at create time). Reuses the per-type field blocks so connector shape has a
+ * single source of truth.
  */
 export const CaseConnectorWithoutNameSchema = z.discriminatedUnion('type', [
-  ConnectorCasesWebhookTypeFieldsSchema.merge(IdSchema),
-  ConnectorJiraTypeFieldsSchema.merge(IdSchema),
-  ConnectorNoneTypeFieldsSchema.merge(IdSchema),
-  ConnectorResilientTypeFieldsSchema.merge(IdSchema),
-  ConnectorServiceNowITSMTypeFieldsSchema.merge(IdSchema),
-  ConnectorServiceNowSIRTypeFieldsSchema.merge(IdSchema),
-  ConnectorSwimlaneTypeFieldsSchema.merge(IdSchema),
-  ConnectorTheHiveTypeFieldsSchema.merge(IdSchema),
+  ConnectorCasesWebhookTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorJiraTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorNoneTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorResilientTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorServiceNowITSMTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorServiceNowSIRTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorSwimlaneTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorTheHiveTypeFieldsSchema.extend(IdSchema.shape),
 ]);
 
 export const CaseConnectorSchema = z.discriminatedUnion('type', [

@@ -25,10 +25,9 @@ interface TemplateRenderPanelProps {
 }
 
 /**
- * Right-hand render panel with two tabs. "Fields" shows the live preview of the fields authored in
- * the YAML editor. "Settings" is an editable form for the template's case settings and default
- * connector — these are managed here (not in the YAML buffer) and merged into the definition on
- * save. The YAML editor on the left is unaffected by the tab selection.
+ * Right-hand render panel with two tabs: "Fields" previews the YAML-authored fields; "Settings"
+ * edits the template's case settings and default connector, which are managed here (not in the YAML
+ * buffer) and merged into the definition on save.
  */
 export const TemplateRenderPanel: React.FC<TemplateRenderPanelProps> = ({
   settings,
