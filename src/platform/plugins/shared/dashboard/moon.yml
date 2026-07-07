@@ -90,7 +90,6 @@ dependsOn:
   - '@kbn/ui-actions-browser'
   - '@kbn/esql-types'
   - '@kbn/saved-objects-tagging-plugin'
-  - '@kbn/react-kibana-context-theme'
   - '@kbn/std'
   - '@kbn/css-utils'
   - '@kbn/es-query-server'
