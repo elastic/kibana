@@ -56,11 +56,11 @@ test.describe('APM Onboarding', { tag: tags.stateful.classic }, () => {
         await onboardingPage.selectAgent(agent);
 
         if (role === 'text') {
-          await expect(page.getByText(snippet, { exact: exact })).toBeVisible({
+          await expect(page.getByText(snippet, { exact })).toBeVisible({
             timeout: EXTENDED_TIMEOUT,
           });
         } else {
-          await expect(page.getByRole(role as any, { name: snippet, exact: exact })).toBeVisible({
+          await expect(page.getByRole(role as any, { name: snippet, exact })).toBeVisible({
             timeout: EXTENDED_TIMEOUT,
           });
         }
